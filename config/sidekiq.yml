@@ -1,0 +1,8 @@
+---
+:verbose: true
+:pidfile: ./tmp/pids/sidekiq.pid
+:concurrency: 12
+:queues:
+  - [high, 10]
+  - [low, 1]
+:namespace: shuttle

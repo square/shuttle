@@ -1,0 +1,4 @@
+-o doc/js
+--title "Shuttle Front-End JavaScript Documentation"
+
+lib/assets/javascripts

@@ -1,0 +1,2850 @@
+---
+- - one hundred twenty-eighth note
+  - semihemidemisemiquaver
+  - :auto
+- - one hundred twenty-eighth rest
+  - semihemidemisemiquaver rest
+  - :auto
+- - two hundred fifty-sixth rest
+  - demisemihemidemisemiquaver rest
+  - :auto
+- - two hundred fifty-sixth note
+  - demisemihemidemisemiquaver
+  - :auto
+- - certified public accountant
+  - chartered accountant
+  - :auto
+- - driving under the influence
+  - drunk in charge
+  - :auto
+- - Operation Enduring Freedom
+  - Operation Veritas
+  - :auto
+- - driving while intoxicated
+  - drunk in charge
+  - :auto
+- - internationalizational
+  - internationalisational
+  - :auto
+- - garbage disposal unit
+  - waste-disposal unit
+  - :auto
+- - internationalization
+  - internationalisation
+  - :auto
+- - uninitializational
+  - uninitialisational
+  - :auto
+- - thirty-second rest
+  - demisemiquaver rest
+  - :auto
+- - thirty-second note
+  - demisemiquaver
+  - :auto
+- - double whole rest
+  - breve rest
+  - :auto
+- - synchronizational
+  - synchronisational
+  - :auto
+- - trackless trolley
+  - trolleybus
+  - :auto
+- - counter-clockwise
+  - anti-clockwise
+  - :auto
+- - answering machine
+  - answerphone
+  - :auto
+- - sixty-fourth rest
+  - hemidemisemiquaver rest
+  - :auto
+- - sixty-fourth note
+  - hemidemisemiquaver
+  - :auto
+- - industrialization
+  - industrialisation
+  - :auto
+- - double whole note
+  - breve
+  - :auto
+- - follow-the-leader
+  - follow-my-leader
+  - :auto
+- - case insensitive
+  - case-insensitive
+  - :auto
+- - court-martialing
+  - court-martialling
+  - :auto
+- - uninitialization
+  - uninitialisation
+  - :auto
+- - installment plan
+  - hire purchase
+  - :auto
+- - templatizational
+  - templatisational
+  - :auto
+- - institutionalize
+  - institutionalise
+  - :auto
+- - counterclockwise
+  - anti-clockwise
+  - :auto
+- - anesthesiologist
+  - anaesthetist
+  - :auto
+- - learner's permit
+  - provisional licence
+  - :auto
+- - specializational
+  - specialisational
+  - :auto
+- - initializational
+  - initialisational
+  - :auto
+- - driver's license
+  - driving licence
+  - :auto
+- - checking account
+  - current account
+  - :auto
+- - bumper to bumper
+  - tailback
+  - :prompt
+  - e.g., “there’s a two-mile tailback”
+- - internationalize
+  - internationalise
+  - :auto
+- - inheritance tax
+  - death duty
+  - :auto
+- - globalizational
+  - globalisational
+  - :auto
+- - familiarization
+  - familiarisation
+  - :auto
+- - Sincerely yours
+  - Yours sincerely
+  - :prompt
+  - salutation
+- - divided highway
+  - dual carriageway
+  - :auto
+- - cattle rustling
+  - cattlelifting
+  - :auto
+- - miniaturization
+  - miniaturisation
+  - :auto
+- - battle stations
+  - action stations
+  - :auto
+- - merchant marine
+  - merchant navy, merchant seaman
+  - :prompt
+  - depending on whether one is referring to the corps or an individual sailor
+- - savings account
+  - deposit account
+  - :auto
+- - nearsightedness
+  - short-sightedness
+  - :auto
+- - Merry Christmas
+  - Happy Christmas
+  - :auto
+- - serializational
+  - serialisational
+  - :auto
+- - vectorizational
+  - vectorisational
+  - :auto
+- - training wheels
+  - stabilisers
+  - :auto
+- - symbolizational
+  - symbolisational
+  - :auto
+- - synchronization
+  - synchronisation
+  - :auto
+- - fire department
+  - fire brigade
+  - :auto
+- - court-martialed
+  - court-martialled
+  - :auto
+- - drivers license
+  - driving licence
+  - :auto
+- - crystallization
+  - crystallisation
+  - :auto
+- - summarizational
+  - summarisational
+  - :auto
+- - authorizational
+  - authorisational
+  - :auto
+- - caramelization
+  - caramelisation
+  - :auto
+- - course catalog
+  - course calendar
+  - :auto
+- - unrecognizable
+  - unrecognisable
+  - :auto
+- - initialization
+  - initialisation
+  - :auto
+- - templatization
+  - templatisation
+  - :auto
+- - sixteenth rest
+  - semiquaver rest
+  - :auto
+- - capitalization
+  - capitalisation
+  - :auto
+- - sixteenth note
+  - semiquaver
+  - :auto
+- - farsightedness
+  - long-sightedness
+  - :auto
+- - organizational
+  - organisational
+  - :auto
+- - optimizational
+  - optimisational
+  - :auto
+- - case sensitive
+  - case-sensitive
+  - :auto
+- - specialization
+  - specialisation
+  - :auto
+- - paved shoulder
+  - hard shoulder
+  - :auto
+- - categorization
+  - categorisation
+  - :auto
+- - operating room
+  - operating theatre
+  - :auto
+- - mineral spirit
+  - white spirit
+  - :auto
+- - emergency room
+  - casualty
+  - :prompt
+  - e.g., “take the injured to casualty”
+- - transportation
+  - transport
+  - :auto
+- - mineralization
+  - mineralisation
+  - :auto
+- - sensationalize
+  - sensationalise
+  - :auto
+- - acknowledgment
+  - acknowledgement
+  - :auto
+- - virtualization
+  - virtualisation
+  - :auto
+- - cattle rustler
+  - cattlelifter
+  - :auto
+- - traffic circle
+  - roundabout
+  - :auto
+- - prioritization
+  - prioritisation
+  - :auto
+- - crossing guard
+  - lollipop man
+  - :prompt
+- - localizational
+  - localisational
+  - :auto
+- - centralization
+  - centralisation
+  - :auto
+- - Canadian bacon
+  - back bacon
+  - :auto
+- - the Big Dipper
+  - the Plough
+  - :auto
+- - authorization
+  - authorisation
+  - :auto
+- - normalization
+  - normalisation
+  - :auto
+- - tick-tack-toe
+  - noughts and crosses
+  - :auto
+- - station wagon
+  - estate car
+  - :auto
+- - nitroglycerin
+  - nitroglycerine
+  - :auto
+- - customization
+  - customisation
+  - :auto
+- - transistorize
+  - transistorise
+  - :auto
+- - license plate
+  - number plate
+  - :auto
+- - soccer player
+  - footballer
+  - :auto
+- - uncategorized
+  - uncategorised
+  - :auto
+- - court-martial
+  - court martial
+  - :prompt
+  - applies to the noun only
+- - industrialize
+  - industrialise
+  - :auto
+- - movie theater
+  - cinema
+  - :auto
+- - parking light
+  - side lamp
+  - :auto
+- - shopping cart
+  - shopping trolley
+  - :auto
+- - baby carriage
+  - pram
+  - :auto
+- - hyperglycemic
+  - hyperglycaemic
+  - :auto
+- - hyperglycemia
+  - hyperglycaemia
+  - :auto
+- - serialization
+  - serialisation
+  - :auto
+- - visualization
+  - visualisation
+  - :auto
+- - phenobarbital
+  - phenobarbitone
+  - :auto
+- - summarization
+  - summarisation
+  - :auto
+- - commercialize
+  - commercialise
+  - :auto
+- - forward slash
+  - slash
+  - :auto
+  - redundant: a slash is “forward” by definition
+- - groundskeeper
+  - groundsman
+  - :auto
+- - randomization
+  - randomisation
+  - :auto
+- - globalization
+  - globalisation
+  - :auto
+- - symbolization
+  - symbolisation
+  - :auto
+- - vectorization
+  - vectorisation
+  - :auto
+- - checkerboard
+  - chequerboard
+  - :auto
+- - reinitialize
+  - reinitialise
+  - :auto
+- - recognizable
+  - recognisable
+  - :auto
+- - Mother's Day
+  - Mothering Sunday
+  - :prompt
+- - civilization
+  - civilisation
+  - :auto
+- - characterize
+  - characterise
+  - :auto
+- - disorganized
+  - disorganised
+  - :auto
+- - full-fledged
+  - fully-fledged
+  - :auto
+- - digitization
+  - digitisation
+  - :auto
+- - raisin bread
+  - currant bread
+  - :auto
+- - deposit slip
+  - paying-in slip
+  - :auto
+- - teleprompter
+  - autocue
+  - :auto
+- - french fries
+  - hot chips
+  - :auto
+- - quarter rest
+  - crotchet rest
+  - :auto
+- - quarter note
+  - crotchet
+  - :auto
+- - sanitization
+  - sanitisation
+  - :auto
+- - drunk driver
+  - drink-driver
+  - :auto
+- - neighborhood
+  - neighbourhood
+  - :auto
+- - maneuverable
+  - manoeuvrable
+  - :auto
+- - hematologist
+  - haematologist
+  - :auto
+- - polyethylene
+  - polythene
+  - :auto
+- - mail carrier
+  - postman
+  - :auto
+- - philosophize
+  - philosophise
+  - :auto
+- - cattle guard
+  - cattle grid
+  - :auto
+- - customizable
+  - customisable
+  - :auto
+- - veterinarian
+  - veterinary surgeon
+  - :auto
+- - breathalyzer
+  - breathalyser
+  - :auto
+- - baked potato
+  - jacket potato
+  - :auto
+- - cotton candy
+  - candy floss
+  - :auto
+- - localization
+  - localisation
+  - :auto
+- - cotton candy
+  - candyfloss
+  - :auto
+- - hypoglycemia
+  - hypoglycaemia
+  - :auto
+- - tranquilizer
+  - tranquilliser
+  - :auto
+- - encyclopedia
+  - encyclopaedia
+  - :auto
+- - enthrallment
+  - enthralment
+  - :auto
+- - equalization
+  - equalisation
+  - :auto
+- - optimization
+  - optimisation
+  - :auto
+- - jumper cable
+  - jump lead
+  - :auto
+- - hypoglycemic
+  - hypoglycaemic
+  - :auto
+- - organization
+  - organisation
+  - :auto
+- - vaporization
+  - vaporisation
+  - :auto
+- - signal light
+  - indicator
+  - :auto
+- - intersection
+  - junction
+  - :auto
+- - unauthorized
+  - unauthorised
+  - :auto
+- - parenthesize
+  - bracket
+  - :auto
+- - uninitialize
+  - uninitialise
+  - :auto
+- - immunization
+  - immunisation
+  - :auto
+- - fire starter
+  - firelighter
+  - :auto
+- - amphitheater
+  - amphitheatre
+  - :auto
+- - unrecognized
+  - unrecognised
+  - :auto
+- - paleoecology
+  - palaeoecology
+  - :auto
+- - persnickety
+  - pernickety
+  - :auto
+- - paleography
+  - palaeography
+  - :auto
+- - paleobotany
+  - palaeobotany
+  - :auto
+- - initializer
+  - initialiser
+  - :auto
+- - paper towel
+  - kitchen paper
+  - :auto
+- - parentheses
+  - brackets
+  - :auto
+- - parenthesis
+  - bracket
+  - :auto
+- - utilization
+  - utilisation
+  - :auto
+- - unorganized
+  - unorganised
+  - :auto
+- - vacuum tube
+  - vacuum valve
+  - :auto
+- - oxidization
+  - oxidisation
+  - :auto
+- - simultanous
+  - simultaneous
+  - :auto
+- - immortalize
+  - immortalise
+  - :auto
+- - installment
+  - instalment
+  - :auto
+- - trundle bed
+  - truckle bed
+  - :auto
+- - hypothesize
+  - hypothesise
+  - :auto
+- - vaporizable
+  - vaporisable
+  - :auto
+- - parking lot
+  - car park
+  - :auto
+- - familiarize
+  - familiarise
+  - :auto
+- - busy signal
+  - engaged tone
+  - :auto
+- - tranquilize
+  - tranquillise
+  - :auto
+- - tranquility
+  - tranquillity
+  - :auto
+- - eighth rest
+  - quaver rest
+  - :auto
+- - crystallize
+  - crystallise
+  - :auto
+- - hospitalize
+  - hospitalise
+  - :auto
+- - curriculums
+  - curricula
+  - :auto
+- - eighth note
+  - quaver
+  - :auto
+- - homeopathic
+  - homoeopathic
+  - :auto
+- - sleep apnea
+  - sleep apnoea
+  - :auto
+- - school zone
+  - patrol
+  - :auto
+- - personalize
+  - personalise
+  - :auto
+- - hemophiliac
+  - haemophiliac
+  - :auto
+- - Santa Claus
+  - Father Christmas
+  - :auto
+- - breathalyze
+  - breathalyse
+  - :auto
+- - photo radar
+  - speed camera
+  - :auto
+- - standardize
+  - standardise
+  - :auto
+- - tic-tac-toe
+  - noughts and crosses
+  - :auto
+- - waxed paper
+  - silicone paper
+  - :auto
+- - computerize
+  - computerise
+  - :auto
+- - stockholder
+  - shareholder
+  - :auto
+- - heavy cream
+  - double cream
+  - :auto
+- - nearsighted
+  - short-sighted
+  - :auto
+- - binder clip
+  - bulldog clip
+  - :auto
+- - mutual fund
+  - unit trust
+  - :auto
+- - memorialize
+  - memorialise
+  - :auto
+- - mom-and-pop
+  - mum-and-dad
+  - :auto
+- - coffee shop
+  - café
+  - :auto
+- - willfulness
+  - wilfulness
+  - :auto
+- - baggage car
+  - luggage van
+  - :auto
+- - miniaturize
+  - miniaturise
+  - :auto
+- - synchronize
+  - synchronise
+  - :auto
+- - realization
+  - realisation
+  - :auto
+- - misdemeanor
+  - misdemeanour
+  - :auto
+- - switchblade
+  - flick-knife
+  - :auto
+- - corned beef
+  - salt beef
+  - :auto
+- - generalize
+  - generalise
+  - :auto
+- - archeology
+  - archaeology
+  - :auto
+- - enrollment
+  - enrolment
+  - :auto
+- - automobile
+  - motorcar
+  - :auto
+- - dump truck
+  - dumper truck
+  - :auto
+- - windshield
+  - windscreen
+  - :auto
+- - check card
+  - debit card
+  - :auto
+- - baby buggy
+  - pram
+  - :auto
+- - templatize
+  - templatise
+  - :auto
+- - expressway
+  - motorway
+  - :auto
+- - roundhouse
+  - running shed
+  - :auto
+- - eyeglasses
+  - spectacles
+  - :auto
+- - antialiase
+  - anti-aliase
+  - :auto
+- - microliter
+  - microlitre
+  - :auto
+- - micrometer
+  - micrometre
+  - :prompt
+  - micrometre is a measurement, micrometer is a measuring device
+- - centralize
+  - centralise
+  - :auto
+- - whole rest
+  - semibreve rest
+  - :auto
+- - whole note
+  - semibreve
+  - :auto
+- - gynecology
+  - gynaecology
+  - :auto
+- - militarize
+  - militarise
+  - :auto
+- - milliliter
+  - millilitre
+  - :auto
+- - millimeter
+  - millimetre
+  - :auto
+- - journalize
+  - journalise
+  - :auto
+- - colorspace
+  - colour-space
+  - :auto
+- - sanitarium
+  - sanatorium
+  - :auto
+- - half-staff
+  - half-mast
+  - :auto
+- - tail light
+  - tail lamp
+  - :auto
+- - mineralize
+  - mineralise
+  - :auto
+- - prioritize
+  - prioritise
+  - :auto
+- - centimeter
+  - centimetre
+  - :auto
+- - synthesize
+  - synthesise
+  - :auto
+- - journaling
+  - journalling
+  - :auto
+- - misspelled
+  - misspelt
+  - :auto
+- - hematology
+  - haematology
+  - :auto
+- - power cord
+  - flex/mains lead, mains wire/wiring
+  - :prompt
+- - pound sign
+  - hash
+  - :prompt
+  - are we referring to the symbol for pound stering, or a number sign?
+- - hemoglobin
+  - haemoglobin
+  - :auto
+- - fanny pack
+  - bum bag
+  - :auto
+- - hemophilia
+  - haemophilia
+  - :auto
+- - coordinate
+  - co-ordinate
+  - :auto
+- - suspenders
+  - braces
+  - :auto
+- - farsighted
+  - long-sighted
+  - :auto
+- - disheveled
+  - dishevelled
+  - :auto
+- - hemorrhage
+  - haemorrhage
+  - :auto
+- - plagiarize
+  - plagiarise
+  - :auto
+- - truck stop
+  - transport café
+  - :auto
+- - virtualize
+  - virtualise
+  - :auto
+- - fiberglass
+  - fibreglass
+  - :auto
+- - homeopathy
+  - homoeopathy
+  - :auto
+- - vectorizer
+  - vectoriser
+  - :auto
+- - scrutinize
+  - scrutinise
+  - :auto
+- - fiberoptic
+  - fibreoptic
+  - :auto
+- - ionization
+  - ionisation
+  - :auto
+- - turtleneck
+  - polo neck
+  - :prompt
+  - A type of neck on a sweater.
+- - categorize
+  - categorise
+  - :auto
+- - cough drop
+  - cough sweet
+  - :auto
+- - anesthetic
+  - anaesthetic
+  - :auto
+- - stickshift
+  - gear stick
+  - :auto
+- - stewardess
+  - air hostess
+  - :auto
+- - honorarium
+  - honorarium
+  - :auto
+- - decoration
+  - piping
+  - :prompt
+  - only when used in the context of lining a cake with icing
+- - pasteurize
+  - pasteurise
+  - :auto
+- - neutralize
+  - neutralise
+  - :auto
+- - newsdealer
+  - newsagent
+  - :auto
+- - undershirt
+  - singlet
+  - :auto
+- - flashlight
+  - torch
+  - :auto
+- - fish stick
+  - fish finger
+  - :auto
+- - initialize
+  - initialise
+  - :auto
+- - anesthesia
+  - anaesthesia
+  - :auto
+- - infeasible
+  - unfeasible
+  - :auto
+- - spelunking
+  - potholing
+  - :auto
+- - oftentimes
+  - often
+  - :auto
+- - skepticism
+  - scepticism
+  - :auto
+- - bumper car
+  - dodgem car
+  - :auto
+- - carburetor
+  - carburettor
+  - :auto
+- - specialize
+  - specialise
+  - :auto
+- - spark plug
+  - sparking plug
+  - :auto
+- - vacationer
+  - holidaymaker
+  - :auto
+- - caramelize
+  - caramelise
+  - :auto
+- - orthopedic
+  - orthopaedic
+  - :auto
+- - capitalize
+  - capitalise
+  - :auto
+- - cauterize
+  - cauterise
+  - :auto
+- - hypoxemia
+  - hypoxaemia
+  - :auto
+- - snorkeler
+  - snorkeller
+  - :auto
+- - coveralls
+  - overalls
+  - :auto
+- - organizer
+  - organiser
+  - :auto
+- - firehouse
+  - fire station
+  - :auto
+- - candy bar
+  - chocolate bar
+  - :prompt
+- - solitaire
+  - patience
+  - :prompt
+  - the card game
+- - vaporizer
+  - vaporiser
+  - :auto
+- - southward
+  - southwards
+  - :prompt
+  - use “southward” only as an adjective
+- - hypnotize
+  - hypnotise
+  - :auto
+- - carbonzie
+  - carbonise
+  - :auto
+- - criticize
+  - criticise
+  - :auto
+- - specialty
+  - speciality
+  - :auto
+- - adrenalin
+  - adrenaline
+  - :auto
+- - spelunker
+  - potholer
+  - :auto
+- - skeptical
+  - sceptical
+  - :auto
+- - pantyhose
+  - tights
+  - :auto
+- - caregiver
+  - carer
+  - :auto
+- - hydrolyze
+  - hydrolyse
+  - :auto
+- - spiraling
+  - spiralling
+  - :auto
+- - counselor
+  - counsellor
+  - :auto
+- - northward
+  - northwards
+  - :prompt
+  - use “northward” only as an adjective
+- - normalize
+  - normalise
+  - :auto
+- - stabilize
+  - stabilise
+  - :auto
+- - vectorize
+  - vectorise
+  - :auto
+- - sterilize
+  - sterilise
+  - :auto
+- - customize
+  - customise
+  - :auto
+- - flophouse
+  - dosshouse
+  - :auto
+- - councilor
+  - councillor
+  - :auto
+- - honorific
+  - honorific
+  - :auto
+- - pay check
+  - pay packet
+  - :auto
+- - underpass
+  - subway
+  - :auto
+- - pay raise
+  - pay rise
+  - :auto
+- - bird band
+  - bird ring
+  - :auto
+- - nanometer
+  - nanometre
+  - :auto
+- - streetcar
+  - tram
+  - :auto
+- - honorably
+  - honourably
+  - :auto
+- - music box
+  - musical box
+  - :auto
+- - defroster
+  - demister
+  - :auto
+- - serialize
+  - serialise
+  - :auto
+- - antialias
+  - anti-alias
+  - :auto
+- - pediatric
+  - paediatric
+  - :auto
+- - dial tone
+  - dialling tone
+  - :auto
+- - honorable
+  - honourable
+  - :auto
+- - hypoxemic
+  - hypoxaemic
+  - :auto
+- - generator
+  - dynamo
+  - :auto
+- - picometer
+  - picometre
+  - :auto
+- - digitizer
+  - digitiser
+  - :auto
+- - visualize
+  - visualise
+  - :auto
+- - dishtowel
+  - tea towel
+  - :auto
+- - sulfurize
+  - sulphurise
+  - :auto
+- - sulfurous
+  - sulphurous
+  - :auto
+- - centering
+  - centring
+  - :auto
+- - summarize
+  - summarise
+  - :auto
+- - rest stop
+  - lay-by
+  - :auto
+- - cooperate
+  - co-operate
+  - :auto
+- - downspout
+  - drainpipe
+  - :auto
+- - wax paper
+  - silicone paper
+  - :auto
+- - symbolize
+  - symbolise
+  - :auto
+- - harmonize
+  - harmonise
+  - :auto
+- - Paleocene
+  - Palaeocene
+  - :auto
+- - systemize
+  - systemise
+  - :auto
+- - privatize
+  - privatise
+  - :auto
+- - comradery
+  - camaraderie
+  - :auto
+- - pulverize
+  - pulverise
+  - :auto
+- - half rest
+  - minim rest
+  - :auto
+- - half note
+  - minim
+  - :auto
+- - saltpeter
+  - saltpetre
+  - :auto
+- - chapstick
+  - lip balm
+  - :auto
+- - galvanize
+  - galvanise
+  - :auto
+- - row house
+  - terraced house
+  - :auto
+- - mesmerize
+  - mesmerise
+  - :auto
+- - kiloliter
+  - kilolitre
+  - :auto
+- - kilometer
+  - kilometre
+  - :auto
+- - talk show
+  - chat show
+  - :auto
+- - megameter
+  - megametre
+  - :auto
+- - megaliter
+  - megalitre
+  - :auto
+- - randomize
+  - randomise
+  - :auto
+- - willfully
+  - wilfully
+  - :auto
+- - ring toss
+  - hoopla
+  - :auto
+- - esthetics
+  - aesthetics
+  - :auto
+- - esophagus
+  - oesophagus
+  - :auto
+- - drugstore
+  - pharmacy
+  - :auto
+- - marvelous
+  - marvellous
+  - :auto
+- - globalize
+  - globalise
+  - :auto
+- - equalizer
+  - equaliser
+  - :auto
+- - thumbtack
+  - drawing pin
+  - :auto
+- - landslide
+  - landslip
+  - :prompt
+  - a mass of earth that has slid down a mountainside
+- - checkbook
+  - chequebook
+  - :auto
+- - apologize
+  - apologise
+  - :auto
+- - mail slot
+  - letterbox
+  - :auto
+- - recognize
+  - recognise
+  - :auto
+- - last name
+  - surname
+  - :auto
+- - epicenter
+  - epicentre
+  - :auto
+- - authorize
+  - authorise
+  - :auto
+- - appetizer
+  - appetiser
+  - :auto
+- - Labor Day
+  - Labour Day
+  - :auto
+- - logorrhea
+  - logorrhoea
+  - :auto
+- - repellent
+  - repellant
+  - :auto
+- - emphasize
+  - emphasise
+  - :auto
+- - area code
+  - dialling code
+  - :auto
+- - trapezoid
+  - trapezium
+  - :prompt
+  - A quadrilateral with two non-adjacent parallel sides.
+- - empathize
+  - empathise
+  - :auto
+- - trapezium
+  - trapezoid
+  - :prompt
+  - A quadrilateral with no two sides parallel and no equal sides.
+- - leukemia
+  - leukaemia
+  - :auto
+- - licorice
+  - liquorice
+  - :auto
+- - loaf pan
+  - loaf tin
+  - :auto
+- - totaling
+  - totalling
+  - :auto
+- - libelous
+  - libellous
+  - :auto
+- - localize
+  - localise
+  - :auto
+- - endeavor
+  - endeavour
+  - :auto
+- - enlisted
+  - other ranks
+  - :prompt
+  - referring to the category of military ranks
+- - elevator
+  - lift
+  - :prompt
+  - the person carriage, not the airplane control surface
+- - legalize
+  - legalise
+  - :auto
+- - artifact
+  - artefact
+  - :auto
+- - traveler
+  - traveller
+  - :auto
+- - enthrall
+  - enthral
+  - :auto
+- - louvered
+  - louvred
+  - :auto
+- - eggplant
+  - aubergine
+  - :auto
+- - equaling
+  - equalling
+  - :auto
+- - eastward
+  - eastwards
+  - :prompt
+  - use “eastward” only as an adjective
+- - dumpster
+  - skip
+  - :auto
+- - maneuver
+  - manoeuvre
+  - :auto
+- - equalize
+  - equalise
+  - :auto
+- - marveler
+  - marveller
+  - :auto
+- - druggist
+  - dispensing chemist
+  - :auto
+- - maximize
+  - maximise
+  - :auto
+- - estrogen
+  - oestrogen
+  - :auto
+- - taxpayer
+  - ratepayer
+  - :auto
+- - medieval
+  - mediaeval
+  - :auto
+- - memorize
+  - memorise
+  - :auto
+- - backward
+  - backwards
+  - :prompt
+  - use “backward” only as an adjective
+- - trialing
+  - trialling
+  - :auto
+- - tricolor
+  - tricolour
+  - :auto
+- - judgment
+  - judgement
+  - :auto
+- - downward
+  - downwards
+  - :prompt
+  - use “downward” only as an adjective
+- - tailpipe
+  - exhaust pipe
+  - :auto
+- - minimize
+  - minimise
+  - :auto
+- - mobilize
+  - mobilise
+  - :auto
+- - jewelery
+  - jewellery
+  - :auto
+- - molasses
+  - treacle
+  - :auto
+- - barnyard
+  - farmyard
+  - :auto
+- - favorite
+  - favourite
+  - :auto
+- - feldspar
+  - felspar
+  - :auto
+- - bathroom
+  - toilet
+  - :prompt
+  - when referring to a WC, not a room with a bath
+- - diarrhea
+  - diarrhoea
+  - :auto
+- - ischemia
+  - ischaemia
+  - :auto
+- - fill out
+  - fill in
+  - :auto
+- - behavior
+  - behaviour
+  - :auto
+- - stroller
+  - pram
+  - :auto
+- - internet
+  - Internet
+  - :prompt
+  - internet with a small i refers to an internetwork, a connection of two or more
+    distinct computer networks. The Internet with a capital I is the largest such
+    internetwork.
+- - antennas
+  - antennae
+  - :auto
+- - tunneler
+  - tunneller
+  - :auto
+- - turnpike
+  - toll road
+  - :auto
+- - finalize
+  - finalise
+  - :auto
+- - demeanor
+  - demeanour
+  - :auto
+- - mustache
+  - moustache
+  - :auto
+- - neighbor
+  - neighbour
+  - :auto
+- - normalcy
+  - normality
+  - :auto
+- - unionize
+  - unionise
+  - :auto
+- - upcoming
+  - forthcoming
+  - :auto
+- - splendor
+  - splendour
+  - :auto
+- - spiraled
+  - spiralled
+  - :auto
+- - analyzer
+  - analyser
+  - :auto
+- - vacation
+  - holiday
+  - :auto
+- - bullhorn
+  - megaphone
+  - :auto
+- - optimize
+  - optimise
+  - :auto
+- - amortize
+  - amortise
+  - :auto
+- - immunize
+  - immunise
+  - :auto
+- - aluminum
+  - aluminium
+  - :auto
+  - en-US usage is based on the brand Aluminum; en-GB is based on the element
+- - airplane
+  - aeroplane
+  - :auto
+- - organize
+  - organise
+  - :auto
+- - snow pea
+  - mangetout
+  - :auto
+- - overpass
+  - flyover
+  - :auto
+- - vaporish
+  - vapourish
+  - :auto
+- - vaporize
+  - vaporise
+  - :auto
+- - pacifier
+  - dummy
+  - :auto
+- - sneakers
+  - trainers
+  - :auto
+- - vaporous
+  - vaporous
+  - :auto
+- - skillful
+  - skilful
+  - :auto
+- - paralyze
+  - paralyse
+  - :auto
+- - carousel
+  - roundabout
+  - :auto
+- - signaler
+  - signaller
+  - :auto
+- - flatware
+  - cutlery
+  - :auto
+- - sidewalk
+  - pavement
+  - :auto
+- - catalyze
+  - catalyse
+  - :auto
+- - shivaree
+  - charivari
+  - :auto
+- - pavement
+  - roadway
+  - :auto
+- - paycheck
+  - pay packet
+  - :auto
+- - costumer
+  - costumier
+  - :auto
+- - schedule
+  - timetable
+  - :prompt
+  - a “schedule” is a list of planned activities or things to be done showing the
+    times or dates when they are intended to happen or be done ; a “timetable” is
+    a list of the times when events are planned to happen, especially the times when
+    buses, trains and planes leave and arrive
+- - scalawag
+  - scallywag
+  - :auto
+- - centered
+  - centred
+  - :auto
+- - fontanel
+  - fontanelle
+  - :auto
+- - football
+  - American football
+  - :prompt
+- - cornsilk
+  - maize silk
+  - :auto
+- - polarize
+  - polarise
+  - :auto
+- - popsicle
+  - ice lolly
+  - :auto
+- - postpend
+  - suffix
+  - :auto
+- - hematoma
+  - haematoma
+  - :auto
+- - practice
+  - practise
+  - :prompt
+  - “practise” is a verb, “practice” is a noun
+- - premiere
+  - première
+  - :auto
+- - hematite
+  - haematite
+  - :auto
+- - waxpaper
+  - silicone paper
+  - :auto
+- - for rent
+  - to let
+  - :prompt
+- - cookbook
+  - cookery book
+  - :auto
+- - formulas
+  - formulae
+  - :auto
+- - pretense
+  - pretence
+  - :auto
+- - sanitize
+  - sanitise
+  - :auto
+- - colorkey
+  - colour-key
+  - :auto
+- - colorful
+  - colourful
+  - :auto
+- - sailboat
+  - sailing boat
+  - :auto
+- - guerilla
+  - guerrilla
+  - :auto
+- - grueling
+  - gruelling
+  - :auto
+- - westward
+  - westwards
+  - :prompt
+  - use “westward” only as an adjective
+- - colonize
+  - colonise
+  - :auto
+- - graylist
+  - greylist
+  - :auto
+- - freshman
+  - fresher
+  - :auto
+- - railroad
+  - railway
+  - :auto
+- - civilize
+  - civilise
+  - :auto
+- - glycerin
+  - glycerine
+  - :auto
+- - cilantro
+  - coriander
+  - :auto
+- - realator
+  - real estate agent
+  - :auto
+- - checkers
+  - draughts
+  - :auto
+- - checkbox
+  - tickbox
+  - :auto
+- - gasoline
+  - petrol
+  - :auto
+- - zucchini
+  - courgette
+  - :prompt
+- - digitize
+  - digitise
+  - :auto
+- - glasses
+  - specs
+  - :prompt
+  - referring to eyeglasses
+- - checker
+  - chequer
+  - :auto
+- - globaly
+  - globally
+  - :auto
+- - garbage
+  - rubbish
+  - :auto
+- - realize
+  - realise
+  - :auto
+- - English
+  - Imperial
+  - :prompt
+  - referring to the imperial system of measurement
+- - raveler
+  - raveller
+  - :auto
+- - rumored
+  - rumoured
+  - :auto
+- - clangor
+  - clangour
+  - :auto
+- - fulfill
+  - fulfil
+  - :auto
+- - scepter
+  - sceptre
+  - :auto
+- - willful
+  - wilful
+  - :auto
+- - acronym
+  - initialism
+  - :prompt
+  - acronyms are pronounced as words (e.g. NATO); initialisms consist of initial letters
+    pronounced separately (e.g. BBC)
+- - colorer
+  - colourer
+  - :auto
+- - freeway
+  - motorway
+  - :auto
+- - push-up
+  - press-up
+  - :auto
+- - program
+  - programme
+  - :prompt
+  - Use “program” in computing contexts, and “programme” everywhere else (e.g. a computer
+    program, a television programme)
+- - forward
+  - forwards
+  - :prompt
+  - use “forward” only as an adjective
+- - prepend
+  - prefix
+  - :auto
+- - sherbet
+  - sorbet
+  - :prompt
+  - when referring to the frozen dessert, not the powdered candy
+- - forever
+  - for ever
+  - :prompt
+  - In en_GB, “for ever” means for eternity (or a very long time), as in “I have been
+    waiting for you for ever.” “Forever” means continually, always, as in “They are
+    forever arguing.”
+- - shrivel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - highway
+  - motorway
+  - :auto
+- - adapter
+  - adaptor
+  - :auto
+- - catalog
+  - catalogue, calendar
+  - :prompt
+  - use “catalogue” when referring to a product brochure, and “calendar” when referring
+    to a university course listing
+- - flutist
+  - flautist
+  - :auto
+- - pedagog
+  - pedagogue
+  - :auto
+- - peanuts
+  - washers
+  - :prompt
+  - e.g., “working for peanuts”
+- - vaporer
+  - vapourer
+  - :auto
+- - flatcar
+  - truck
+  - :auto
+- - utilize
+  - utilise
+  - :auto
+- - counsel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - idolize
+  - idolise
+  - :auto
+- - inquire
+  - enquire
+  - :prompt
+  - enquire is to be used for general senses of “ask”, while inquire is reserved for
+    uses meaning “make a formal investigation”.
+- - inquiry
+  - enquiry
+  - :prompt
+  - enquire is to be used for general senses of “ask”, while inquire is reserved for
+    uses meaning “make a formal investigation”.
+- - skeeter
+  - mozzie
+  - :auto
+- - skeptic
+  - sceptic
+  - :auto
+- - analyze
+  - analyse
+  - :auto
+- - useable
+  - usable
+  - :auto
+- - smolder
+  - smoulder
+  - :auto
+- - snicker
+  - snigger
+  - :auto
+- - oxidize
+  - oxidise
+  - :auto
+- - snorkel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - offense
+  - offence
+  - :auto
+- - soapbox
+  - podium
+  - :auto
+- - obelize
+  - obelise
+  - :auto
+- - defense
+  - defence
+  - :auto
+- - upscale
+  - upmarket
+  - :auto
+- - muffler
+  - silencer
+  - :auto
+- - caliber
+  - calibre
+  - :auto
+- - dialing
+  - dialling
+  - :auto
+- - jeweler
+  - jeweller
+  - :auto
+- - jewelry
+  - jewellery
+  - :auto
+- - anymore
+  - any more
+  - :auto
+- - trialed
+  - trialled
+  - :auto
+- - ketchup
+  - tomato sauce
+  - :auto
+- - dialyze
+  - dialyse
+  - :auto
+- - monolog
+  - monologue
+  - :auto
+- - caldron
+  - cauldron
+  - :auto
+- - kneeled
+  - knelt
+  - :auto
+- - specter
+  - spectre
+  - :auto
+- - labeler
+  - labeller
+  - :auto
+- - totaler
+  - totaller
+  - :auto
+- - totaled
+  - totalled
+  - :auto
+- - laborer
+  - labourer
+  - :auto
+- - ladybug
+  - ladybird
+  - :auto
+- - lasagna
+  - lasagne
+  - :auto
+- - layaway
+  - lay-by
+  - :auto
+- - equaled
+  - equalled
+  - :auto
+- - dishrag
+  - dish cloth
+  - :auto
+- - mollusk
+  - mollusc
+  - :auto
+- - spelled
+  - spelt
+  - :auto
+- - distill
+  - distil
+  - :auto
+- - learned
+  - learnt
+  - :auto
+- - theater
+  - theatre
+  - :auto
+- - spilled
+  - spilt
+  - :auto
+- - enology
+  - oenology
+  - :auto
+- - taliban
+  - taleban
+  - :auto
+  - latinisation used by the UK press
+- - libeler
+  - libeller
+  - :auto
+- - takeout
+  - take-away
+  - :prompt
+  - takeout food
+- - spoiled
+  - spoilt
+  - :auto
+- - license
+  - licence
+  - :prompt
+  - “license” is a verb, “licence” is a noun
+- - lighted
+  - lit
+  - :auto
+- - sweater
+  - jumper
+  - :prompt
+- - embassy
+  - high commission
+  - :auto
+- - reveler
+  - reveller
+  - :auto
+- - bandana
+  - bandanna
+  - :auto
+- - baptize
+  - baptise
+  - :auto
+- - modeler
+  - modeller
+  - :auto
+- - bobsled
+  - bobsleigh
+  - :auto
+- - belabor
+  - belabour
+  - :auto
+- - dreamed
+  - dreamt
+  - :auto
+- - behoove
+  - behove
+  - :auto
+- - basicly
+  - basically
+  - :auto
+- - e-mails
+  - e-mail
+  - :auto
+- - mailbox
+  - letterbox
+  - :auto
+- - mailman
+  - postman
+  - :auto
+- - stylize
+  - stylise
+  - :auto
+- - duelist
+  - duellist
+  - :auto
+- - tuxedo
+  - dinner jacket
+  - :auto
+- - dueler
+  - dueller
+  - :auto
+- - marvel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - succor
+  - succour
+  - :auto
+- - barrel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - meager
+  - meagre
+  - :auto
+- - median
+  - central reservation
+  - :prompt
+  - referring to the center of a road
+- - eggnog
+  - egg flip
+  - :auto
+- - sulfur
+  - sulphur
+  - :auto
+- - luster
+  - lustre
+  - :auto
+- - boogey
+  - bogey
+  - :auto
+- - louver
+  - louvre
+  - :auto
+- - braked
+  - broke
+  - :auto
+- - enamor
+  - enamour
+  - :auto
+- - enroll
+  - enrol
+  - :auto
+- - spider
+  - spyder
+  - :prompt
+  - For a two-seat convertible car.
+- - leaped
+  - lept
+  - :auto
+- - dispel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - molder
+  - moulder
+  - :auto
+- - tidbit
+  - titbit
+  - :auto
+- - leaned
+  - leant
+  - :auto
+- - epilog
+  - epilogue
+  - :auto
+- - armory
+  - armoury
+  - :auto
+- - burned
+  - burnt
+  - :auto
+- - somber
+  - sombre
+  - :auto
+- - toward
+  - towards
+  - :prompt
+  - use “toward” only as an adjective
+- - travel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - diaper
+  - nappy
+  - :auto
+- - appall
+  - appal
+  - :auto
+- - dialog
+  - dialogue
+  - :auto
+- - tunnel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - dialer
+  - dialler
+  - :auto
+- - dialed
+  - dialled
+  - :auto
+- - faucet
+  - tap
+  - :auto
+- - detour
+  - diversion
+  - :auto
+- - cancel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - movies
+  - films, cinema
+  - :prompt
+  - “films” should be used when referring to the plural of “movie”; “cinema” should
+    be used when referring to the theater
+- - subway
+  - underground, tube
+  - :prompt
+- - upward
+  - upwards
+  - :prompt
+  - use “upward” only as an adjective
+- - neuron
+  - neurone
+  - :auto
+- - dealed
+  - dealt
+  - :auto
+- - candor
+  - candour
+  - :auto
+- - felony
+  - indictable offence
+  - :prompt
+- - canned
+  - tinned
+  - :prompt
+- - soccer
+  - football
+  - :auto
+- - fender
+  - wing
+  - :prompt
+- - off of
+  - 'off'
+  - :auto
+- - fervor
+  - fervour
+  - :auto
+- - omelet
+  - omelette
+  - :auto
+- - onward
+  - onwards
+  - :prompt
+  - use “onward” only as an adjective
+- - anemic
+  - anaemic
+  - :auto
+- - ornery
+  - irritable
+  - :auto
+- - ouster
+  - ousting
+  - :auto
+- - outlet
+  - power point
+  - :prompt
+  - electrical outlet
+- - anemia
+  - anaemia
+  - :auto
+- - pajama
+  - pyjama
+  - :auto
+- - anchor
+  - newsreader
+  - :prompt
+  - someone who reads the news on television/radio
+- - jell-o
+  - jelly
+  - :auto
+- - ionize
+  - ionise
+  - :auto
+- - insure
+  - ensure
+  - :prompt
+  - use “ensure” unless talking about insurance
+- - analog
+  - analogue
+  - :auto
+- - parlor
+  - parlour
+  - :auto
+- - signale
+  -
+  - :stemmed
+  - 42: "%{root:0..-2}l%{suffix}"
+- - signal
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - flavor
+  - flavour
+  - :auto
+- - agenda
+  - agendum
+  - :prompt
+  - “agendum” is the singular form; “agenda” is the plural
+- - period
+  - full stop, full point
+  - :prompt
+  - “full stop” referring to periods at the end of sentences; “full point” referring
+    to those in abbreviations
+- - signal
+  - indicate
+  - :prompt
+  - using one’s turn signal when driving
+- - pommel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - caster
+  - castor
+  - :auto
+- - vapory
+  - vapoury
+  - :auto
+- - hauler
+  - haulier
+  - :auto
+- - harbor
+  - harbour
+  - :auto
+- - cookie
+  - biscuit
+  - :prompt
+  - the tasty treat, not the Web browser concept
+- - forums
+  - fora
+  - :auto
+- - hanged
+  - hung
+  - :prompt
+- - catsup
+  - tomato sauce
+  - :auto
+- - proved
+  - proven
+  - :prompt
+- - season
+  - series
+  - :prompt
+  - a set of television or radio broadcasts on the same subject or using the same
+    characters but in different situations
+- - pummel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - fourth
+  - quarter
+  - :auto
+  - fourths are quarters
+- - ground
+  - earth
+  - :prompt
+  - The term “ground” and “grounding” are used in US electrical engineering to represent
+    electrical equipment that is securely bonded to the ground (i.e. that on which
+    we stand) for safety reasons. In the UK the equivalent terms are “earth” and “earthing”.
+- - woolen
+  - woollen
+  - :auto
+- - savory
+  - savoury
+  - :auto
+- - center
+  - centre
+  - :auto
+- - savior
+  - saviour
+  - :auto
+- - gotten
+  - got
+  - :prompt
+  - Use “got” unless using the humorously-intended phrase “ill-gotten”.
+- - clamor
+  - clamour
+  - :auto
+- - rancor
+  - rancour
+  - :auto
+- - rappel
+  - abseil
+  - :auto
+- - cipher
+  - cypher
+  - :auto
+- - résumé
+  - CV
+  - :prompt
+  - curriculum vitae
+- - funnel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - cesium
+  - caesium
+  - :auto
+- - yogurt
+  - yoghurt
+  - :auto
+- - goiter
+  - goitre
+  - :auto
+- - resume
+  - CV
+  - :prompt
+  - common misspelling of résumé => curriculum vitae
+- - zipper
+  - zip
+  - :auto
+- - glamor
+  - glamour
+  - :auto
+- - emails
+  - e-mail
+  - :auto
+- - revel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - rigor
+  - rigour
+  - :auto
+- - check
+  - cheque, tick
+  - :prompt
+  - “check” refers to a written payment order to a bank; “tick” refers to a mark made
+    in a box to indicate a selection
+- - route
+  - round
+  - :prompt
+  - a set of regular visits that you make to a number of places or people, especially
+    in order to deliver products as part of your job
+- - rumor
+  - rumour
+  - :auto
+- - chili
+  - chilli
+  - :auto
+- - chips
+  - crisps
+  - :prompt
+  - the snack, not the electronic component
+- - ravel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - saber
+  - sabre
+  - :auto
+- - sapor
+  - sapour
+  - :auto
+- - furor
+  - furore
+  - :auto
+- - savor
+  - savour
+  - :auto
+- - yodel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - quint
+  - quin
+  - :auto
+- - color
+  - colour
+  - :auto
+- - fries
+  - chips
+  - :prompt
+  - French fries
+- - vigor
+  - vigour
+  - :auto
+- - sedan
+  - saloon car
+  - :auto
+- - prong
+  - pin
+  - :auto
+- - share
+  - ordinary share, preference share
+  - :prompt
+  - “ordinary share” refers to common stock; “preference share” refers to preferred
+    stock
+- - porch
+  - veranda
+  - :prompt
+  - a “porch” is  a covered structure in front of the entrance to a building, but
+    not a veranda
+- - honor
+  - honour
+  - :auto
+- - vapor
+  - vapour
+  - :auto
+- - valor
+  - valour
+  - :auto
+- - hovel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - humor
+  - humour
+  - :auto
+- - filet
+  - fillet
+  - :auto
+- - paren
+  - bracket
+  - :auto
+- - pants
+  - trousers
+  - :prompt
+  - in reference to the outerwear, not the undergarment
+- - fiber
+  - fibre
+  - :auto
+- - panel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - coupe
+  - coupé
+  - :auto
+- - fetus
+  - foetus
+  - :auto
+- - fetid
+  - foetid
+  - :auto
+- - jello
+  - jelly
+  - :auto
+- - ocher
+  - ochre
+  - :auto
+- - jelly
+  - jam
+  - :prompt
+  - in US English, “jelly” can mean “jam”
+- - candy
+  - sweet
+  - :prompt
+- - niter
+  - nitre
+  - :auto
+- - movie
+  - film
+  - :auto
+- - favor
+  - favour
+  - :auto
+- - annex
+  - annexe
+  - :prompt
+  - “annex” is the verb; “annexe” is the noun
+- - mommy
+  - mummy
+  - :auto
+- - jewel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - momma
+  - mumma
+  - :auto
+- - tumor
+  - tumour
+  - :auto
+- - buret
+  - burette
+  - :auto
+- - trunk
+  - boot
+  - :prompt
+  - The luggage compartment of a car.
+- - truck
+  - lorry
+  - :prompt
+- - fanny
+  - buttocks
+  - :prompt
+  - “fanny” is a vulgar word
+- - apnea
+  - apnoea
+  - :auto
+- - buddy
+  - mate
+  - :auto
+- - broil
+  - grill
+  - :auto
+- - dolor
+  - dolour
+  - :auto
+- - donut
+  - doughnut
+  - :auto
+- - model
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - brace
+  - curly bracket
+  - :prompt
+  - in reference to the typographical symbol
+- - miter
+  - mitre
+  - :auto
+- - meter
+  - metre
+  - :prompt
+  - are we referring to the measurement unit or a measuring device?
+- - story
+  - storey
+  - :prompt
+  - Level of a building.
+- - stove
+  - cooker
+  - :auto
+- - arbor
+  - arbour
+  - :auto
+- - draft
+  - draught
+  - :auto
+- - matte
+  - matt
+  - :auto
+- - trash
+  - rubbish, Rubbish Bin
+  - :prompt
+  - When referring to generic waste, use “rubbish”. When referring to the place where
+    deleted files go, use “Rubbish Bin”
+- - ardor
+  - ardour
+  - :auto
+- - armor
+  - armour
+  - :auto
+- - ether
+  - aether
+  - :prompt
+  - referring to the sky, or the defunct concept in physics
+- - label
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - edema
+  - oedema
+  - :auto
+- - labor
+  - labour
+  - :auto
+- - liter
+  - litre
+  - :auto
+- - level
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - titer
+  - titre
+  - :auto
+- - leash
+  - lead
+  - :prompt
+  - device used to control an animal
+- - taffy
+  - toffee
+  - :auto
+- - libel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - email
+  - e-mail
+  - :auto
+  - The e in e-mail is pronounced as a distinct letter rather than as part of the
+    following word. If it were the latter, the pronunciation would be merged with
+    the following letter, in this case the letter m. The first syllable is pronounced
+    ee, not em.
+- - line
+  - mains
+  - :prompt
+  - mains power - the primary electrical power supply wires entering a building, connected
+    to the Main fuses or breakers ; or mains lead - the flexible electric cable from
+    plug to appliance
+- - zero
+  - nought
+  - :auto
+- - gage
+  - gauge
+  - :auto
+- - tire
+  - tyre
+  - :prompt
+  - Rubber part of a wheel.
+- - balk
+  - baulk
+  - :auto
+- - ramp
+  - slip road
+  - :prompt
+  - referring to a road entering or leaving a highway, motorway, or carriageway
+- - M.S.
+  - M.Sc.
+  - :prompt
+  - Masters of Science
+- - mail
+  - post
+  - :prompt
+- - duet
+  - 
+  - :stemmed
+  - 22:
+    - t
+    - tt
+    48.4:
+    - t
+    - tt
+- - duel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - kiwi
+  - kiwifruit
+  - :prompt
+  - in reference to the fruit
+- - beet
+  - beetroot
+  - :auto
+- - math
+  - maths
+  - :auto
+- - bill
+  - note
+  - :prompt
+  - “a £100 note”
+- - cold
+  - neutral
+  - :prompt
+  - the connection in an electrical circuit that returns current to the source
+- - fall
+  - autumn
+  - :prompt
+  - referring to the season
+- - fuel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - mold
+  - mould
+  - :auto
+- - Mrs.
+  - Mrs
+  - :prompt
+  - Only use a full stop if the final letter of the abbreviation is not the final
+    letter of the word it is abbreviating. So, “Missus” = “Mrs”.
+- - disk
+  - disc
+  - :prompt
+  - If describing a round object (e.g. a CD or DVD), use “disc”. Otherwise, use “disk”.
+- - molt
+  - moult
+  - :auto
+- - take
+  - sit
+  - :prompt
+  - in the context of “take an examination”
+- - cafe
+  - café
+  - :auto
+- - most
+  - almost
+  - :prompt
+  - some en-US speakers erroneously use “most” to mean “almost”
+- - calk
+  - caulk
+  - :auto
+- - soda
+  - soft drink
+  - :prompt
+- - odor
+  - odour
+  - :auto
+- - curb
+  - kerb
+  - :prompt
+  - a kerb is the edge of the pavement, to curb is to limit something
+- - cozy
+  - cosy
+  - :auto
+- - sled
+  - sleigh
+  - :auto
+- - jail
+  - gaol
+  - :auto
+- - cart
+  - trolley
+  - :prompt
+  - “a shopping trolley”
+- - pean
+  - paean
+  - :auto
+- - plow
+  - plough
+  - :auto
+- - corn
+  - maize
+  - :auto
+- - cord
+  - flex
+  - :auto
+- - Pvt.
+  - Pte.
+  - :prompt
+  - abbreviation for the rank of Private
+- - hood
+  - bonnet
+  - :prompt
+  - The lid of the engine compartment of a car.
+- - vise
+  - vice
+  - :auto
+- - hobo
+  - homeless person
+  - :auto
+- - gray
+  - grey
+  - :auto
+- - B.S.
+  - B.Sc.
+  - :prompt
+  - Bachelors of Science
+- - pry
+  - prise
+  - :prompt
+  - To open/lift something. “Pry” means to ask questions.
+- - St.
+  - St
+  - :prompt
+  - Only when referring to “Saint”
+- - CCW
+  - ACW
+  - :prompt
+  - CCW as in Counter-clockwise
+- - So.
+  - S.
+  - :prompt
+  - British does not use “So.” as an abbreviation for “south”
+- - pop
+  - dad
+  - :prompt
+- - vs.
+  - vs
+  - :prompt
+  - abbreviation of versus
+- - hot
+  - live, active
+  - :prompt
+  - Phase (“active”) electrical connection
+- - web
+  - Web
+  - :prompt
+  - Capitalised when referring to the World Wide Web (e.g. a Web browser).
+- - mom
+  - mum
+  - :auto
+- - No.
+  - N.
+  - :prompt
+  - British does not use “No.” as an abbreviation for “north”
+- - Ms.
+  - Ms
+  - :prompt
+  - The title, “Ms”, is not an abbreviation.
+- - bum
+  - tramp
+  - :prompt
+  - in reference to a homeless person
+- - DUI
+  - drunk in charge
+  - :auto
+- - jr.
+  - jnr
+  - :auto
+- - fag
+  - homosexual
+  - :prompt
+  - “fag” means “cigarette” in en-GB
+- - ass
+  - arse
+  - :prompt
+  - “ass” means “donkey”; “arse” is a vulgar word for the buttocks
+- - mad
+  - angry
+  - :prompt
+  - “mad” in British means “insane”
+- - eon
+  - aeon
+  - :auto
+- - Dr.
+  - Dr
+  - :prompt
+  - Only use a full stop if the final letter of the abbreviation is not the final
+    letter of the word it is abbreviating. So, “Doctor” = “Dr” but “Drive” = “Dr.”
+- - zee
+  - zed
+  - :prompt
+  - Phonetic spelling of the 26th letter of the English alphabet.
+- - gas
+  - petrol
+  - :prompt
+  - a commonly-used (and imprecise) abbreviation for “gasoline” is “gas”
+- - DWI
+  - drunk in charge
+  - :auto
+- - Mr.
+  - Mr
+  - :prompt
+  - Only use a full stop if the final letter of the abbreviation is not the final
+    letter of the word it is abbreviating. So, “Mister” = “Mr”.
+- - ax
+  - axe
+  - :auto
+- - St
+  - St.
+  - :prompt
+  - Only when referring to “street”
+- - TV
+  - tele
+  - :auto

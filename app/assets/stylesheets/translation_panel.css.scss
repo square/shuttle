@@ -1,0 +1,76 @@
+.translation-panel {
+  #filter {
+    border: 2px solid gray;
+    margin: 1em 0;
+    margin-bottom: 0;
+    padding: 0.5em;
+    background-color: #d3d3d3;
+  }
+
+  label.checkbox { margin-right: 10px; }
+
+  #strings {
+    border: 2px solid gray;
+    border-top: none;
+    margin: 0;
+    height: 600px;
+    overflow-y: scroll;
+
+    .text {
+      padding: 5px 0;
+
+      &.alternate { background-color: rgba(black, 0.05); }
+      &>div { padding: 5px; }
+      h6 { margin-bottom: 0; }
+
+      p.context {
+        border: 1px solid gray;
+        border-radius: 5px;
+        padding: 2px 5px;
+        margin-right: 5px;
+      }
+
+      &.approved   textarea { background-color: #dfd; }
+      &.rejected   textarea { background-color: #fdd; }
+      &.translated textarea { background-color: #ddf; }
+      &.unsaved    textarea { background-color: white; }
+
+      p.alert {
+        font-size: 10px;
+        padding: 3px;
+        margin: 3px;
+      }
+
+      p.stats {
+        font-size: 11px;
+        color: #555;
+      }
+
+      .large-view {
+        background-color: #ccc;
+        border-radius: 4px;
+        padding: 2px 4px;
+
+        a:hover { text-decoration: none; }
+
+        .span {
+          font-size: 10px;
+          font-weight: bold;
+          color: gray;
+        }
+      }
+
+      .token-parity-warning {
+        -webkit-transition: all 0.2s;
+        -webkit-transform: scale(1.0);
+
+        &.bulge { -webkit-transform: scale(1.2); }
+      }
+    }
+
+    p.fenced-copy span.fenced {
+      color: #d30;
+      font-weight: normal;
+    }
+  }
+}

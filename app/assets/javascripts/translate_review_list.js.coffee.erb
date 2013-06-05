@@ -1,0 +1,90 @@
+# Copyright 2013 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+root = exports ? this
+
+# Manages a view that allows a translator or reviewer to enter (or choose) a
+# locale and view projects available for translation or review in that
+# locale.
+
+class root.TranslateReviewList
+  # Creates a new object that will manage a translation/review list.
+  #
+  # @param [jQuery object] form The form containing the locale field.
+  # @param [jQuery object] list The div to contain the project list.
+  # @param [String] URL The URL template for the translation panel URL, with
+  #   "REPLACEME" where the locale RFC 5646 code should go.
+  # @param [String] action Either "translation" or "review"; affects display
+  #   of projects.
+  # @param [String, Array<String>] An array of RFC 5646 locale codes
+  #   indicating what locales the translator/reviewer has permissions for,
+  #  or "admin" if the user is an administrator.
+  #
+  constructor: (@form, @list, @url, @action, @available_locales_or_admin) ->
+    @form.submit =>
+      locale = @form.serializeObject().locale
+      this.setLocale locale
+      return false
+
+  # Displays an error message in place of the project list.
+  #
+  # @param [String] message The error message.
+  #
+  error: (message) ->
+    @list.empty()
+    flash = $('<p/>').addClass('alert alert-error').text(message).appendTo($('#flashes'))
+    $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
+
+  # Loads the project list for a locale.
+  #
+  # @param [String] locale The RFC 5646 code for a locale.
+  #
+  setLocale: (locale) ->
+    if @available_locales_or_admin != 'admin' && $.inArray(locale, @available_locales_or_admin) == -1
+      this.error("Locale is unavailable.")
+      return
+
+    $('<i/>').addClass('icon-refresh spinning').appendTo @form
+    $.ajax @url.replace('REPLACEME', locale),
+         complete: =>
+           @form.find('i').remove()
+         success: (projects) =>
+           @list.empty()
+           if projects.length == 0
+             $('<p/>').addClass('big-status').text("No projects need localization in that locale.").appendTo(@list)
+             return
+           for project in projects
+             do (project) => this.buildProject(project)
+         error: => this.error("Couldn’t load project list.")
+
+  # @private
+  buildProject: (project) ->
+    div = $('<div/>').addClass('project').appendTo(@list)
+    h1 = $('<h1/>').text(' ' + project.name).appendTo(div)
+    $('<label/>').addClass('badge').text(numberWithDelimiter(project["pending_#{@action}_count"])).prependTo h1
+    if (project.due_date)
+      segments = (parseInt(segment) for segment in project.due_date.split(/-/))
+      date = new Date(segments[0], segments[1], segments[2])
+      $('<span/>').addClass('due-date pull-right').text('due ' + date.toLocaleDateString()).appendTo h1
+
+    table = $('<table/>').addClass('table table-condensed pending-counts').appendTo div
+    tr = $('<tr/>').appendTo table
+    $('<th/>').text(numberWithDelimiter(project.pending_translation_count)).appendTo tr
+    $('<td/>').text("strings pending translation").appendTo tr
+    tr = $('<tr/>').appendTo(table)
+    $('<th/>').text(numberWithDelimiter(project.pending_review_count)).appendTo tr
+    $('<td/>').text("strings pending review").appendTo tr
+
+    buttons = $('<p/>').addClass('buttons').appendTo(div)
+    $('<button/>').addClass('btn').text(if @action == 'translation' then "Translate" else "Review").attr('href', project.url + "?mode=#{@action}").buttonize().appendTo buttons

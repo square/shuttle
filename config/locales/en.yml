@@ -1,0 +1,203 @@
+en:
+  activerecord:
+    errors:
+      models:
+        project:
+          attributes:
+            repository_url:
+              unreachable: could not be accessed
+        translation:
+          attributes:
+            approved:
+              not_translated: cannot be set when translation is pending
+    attributes:
+      project:
+        name: name
+        repository_url: repository URL
+        base_rfc5646_locale: source locale
+        webhook_url: webhook URL
+        targeted_rfc5646_locales: targeted localizations
+        skip_imports: don’t use these importers
+        only_importer_paths: only search for strings under these paths using these importers
+        skip_importer_paths: don’t search for strings under these paths using these importers
+        skip_paths: don’t search for strings under these paths
+        only_paths: only search for strings under these paths
+        key_exclusions: don’t translate keys containing these substrings
+        key_inclusions: only translate keys containing these substrings
+        key_locale_exclusions: don’t translate keys containing these substrings to these locales
+        key_locale_inclusions: only translate keys containing these substrings to these locales
+        cache_localization: precompile and cache localizer output
+        cache_manifest_formats: precompile and cache manifests for these exporters
+        watched_branches: watched branches
+      commit:
+        revision: revision
+        revision_raw: revision
+      translation:
+        source_rfc5646_locale: from locale
+        rfc5646_locale: to locale
+        source_copy: text
+        copy: translated text
+      user:
+        first_name: first name
+        approved_rfc5646_locales: locale access privileges
+        last_name: last name
+        password: password
+        role: role
+  errors:
+    messages:
+      accepted: must be accepted
+      blank: can’t be blank
+      confirmation: doesn’t match confirmation
+      empty: can’t be empty
+      equal_to: must be equal to %{count}
+      even: must be even
+      exclusion: reserved
+      greater_than: must be greater than %{count}
+      greater_than_or_equal_to: must be greater than or equal to %{count}
+      inclusion: not acceptable
+      incorrect_type: incorrect type
+      invalid: invalid
+      invalid_email: not a valid email address
+      less_than: must be less than %{count}
+      less_than_or_equal_to: must be less than or equal to %{count}
+      not_a_number: not a number
+      not_an_integer: not an integer
+      odd: must be odd
+      taken: already taken
+      too_long: must be %{count} characters or shorter
+      too_short: must be %{count} characters or longer
+      wrong_length: must be be %{count} characters long
+      invalid_date: not a valid date
+      invalid_time: not a valid time
+      invalid_datetime: not a valid date and time
+      is_at: must be at %{restriction}
+      before: must be before %{restriction}
+      on_or_before: must be on or before %{restriction}
+      after: must be after %{restriction}
+      on_or_after: must be on or after %{restriction}
+      invalid_sha: is not a valid SHA2 digest
+      unknown_sha: does not exist in the Git repository
+      wrong_sha_type: is not the correct Git object type
+  helpers:
+    submit:
+      project:
+        create: Create Project
+        update: Save Changes
+      translation:
+        create: Submit
+        update: Save Changes
+      user:
+        create: Sign Up
+        update: Save Changes
+  time:
+    formats:
+      short_date: "%B %-m, %Y"
+      trados: "%d%m%Y, %H:%M:%S"
+      full: "%A, %B %-d, %Y %-I:%M:%S %P"
+  controllers:
+    application:
+      mass_assignment_security: You tried to modify something you weren’t allowed to!
+      monitor_required: You must be a monitor to do that.
+      translator_required: You must be a translator to do that.
+      reviewer_required: You must be a reviewer to do that.
+      admin_required: You must be an administrator to do that.
+    commits:
+      export:
+        invalid_format: Not a valid export format.
+      base:
+        unknown_locale: You must specify a known locale to import.
+      import:
+        done: Import completed.
+      destroy:
+        deleted: Commit %{sha} has been removed.
+      create:
+        success: "Your commit %{revision} has been received and is being processed."
+    locale:
+      projects:
+        locale_access_required: You don't have permission to access that locale.
+    projects:
+      sync:
+        success: The latest revision (%{revision}) is being loaded and parsed.
+        up_to_date: "%{project} is already up to date."
+      destroy:
+        gone: "%{project} has been removed."
+    translations:
+      update:
+        success: Translation updated.
+    users:
+      destroy:
+        success: "%{user}’s account was deleted."
+        not_allowed: Can’t delete that user.
+      update:
+        success: "%{user}’s account was updated."
+      become:
+        success: You are now using Shuttle as %{user}. To return to your account, you must log out and log in again.
+        admin: You cannot become another administrator.
+  models:
+    user:
+      name: "%{first} %{last}"
+      role:
+        monitor: monitor
+        translator: translator
+        reviewer: reviewer
+        admin: administrator
+  fencer:
+    Erb: "<%= ERb %>"
+    Html: "<HTML>"
+    Mustache: "{{Mustache}}"
+    Printf: "printf() [%s]"
+    RubyI18n: "%{Ruby i18n}"
+    Strftime: "strftime() [%Y]"
+  importer:
+    android:
+      name: Android XML
+    ember:
+      name: Ember.js
+    erb:
+      name: ERb file
+    properties:
+      name: Java .properties file
+    ruby:
+      name: Rails i18n (Ruby)
+    storyboard:
+      name: Apple Storyboard file
+      automatic_context: "%{key} %{text_class}"
+      automatic_context_index: "%{text_class} of %{text_node} %{index}"
+      automatic_context_suffix: " (for %{object_class} in %{view_controller} in %{file})"
+      automatic_context_suffix_no_vc: " (for %{object_class} in %{file})"
+    strings:
+      name: .strings (Cocoa)
+    svg:
+      name: SVG file
+    xib:
+      automatic_context: "%{text_class} for %{object_class} in %{file}"
+      automatic_context_item: "%{text_class} for item %{index} in %{object_class} in %{file}"
+      name: Apple XIB file
+    yaml:
+      name: Rails i18n (YAML)
+  exporter:
+    android:
+      name: Android XML files (tarball)
+    ember:
+      name: Ember.js i18n file
+    erb:
+      name: ERb file
+    ios:
+      name: Cocoa .strings files (tarball)
+    properties:
+      name: Java .properties file
+    ruby:
+      name: Ruby file (Ruby I18n)
+    strings:
+      name: Cocoa .strings file
+    trados:
+      name: Trados TM file
+    yaml:
+      name: YAML file (Ruby I18n)
+  localizer:
+    storyboard:
+      name: Apple Storyboard file
+    svg:
+      name: SVG file
+    xib:
+      name: Apple XIB file

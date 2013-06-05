@@ -1,0 +1,13 @@
+---
+- - waterfall
+  - force
+  - :auto
+- - borough
+  - burgh
+  - :auto
+- - grease
+  - creesh
+  - :auto
+- - baby
+  - bairn
+  - :auto

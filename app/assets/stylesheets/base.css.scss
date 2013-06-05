@@ -1,0 +1,73 @@
+span.checkbox-checked { color: #090; }
+span.checkbox-exed { color: #900; }
+span.checkbox-empty { color: #999; }
+
+body { margin-top: 60px; }
+
+ul.search-results {
+  margin-left: 0;
+
+  li {
+    list-style-type: none;
+    border-bottom: 1px solid gray;
+    padding-top: 9px;
+    padding-bottom: 9px;
+
+    p:last-child { margin-bottom: 0; }
+  }
+
+  li:last-child { border-bottom: none; }
+}
+
+span.pending { color: gray; font-style: italic; }
+
+pre.translation-base {
+  background-color: rgba(0, 111, 219, 0.25);
+  border: 1px solid rgba(0, 111, 219, 0.5);
+}
+
+p.aux {
+  font-style: italic;
+  color: gray;
+}
+
+.big-status, tr#error>td {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  color: #d3d3d3;
+  padding: 1em 0;
+}
+
+td.loading {
+  color: gray;
+  font-size: 24px;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+// font awesome improvements
+@-webkit-keyframes spin {
+  from { -webkit-transform: rotate(0deg); }
+  to { -webkit-transform: rotate(360deg); }
+}
+@-moz-keyframes spin {
+  0% { -moz-transform: rotate(0deg); }
+  100% { -moz-transform: rotate(360deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinning {
+  display: block;
+  -webkit-animation: spin 1s infinite linear;
+  -moz-animation: spin 1s infinite linear;
+  animation: spin 1s infinite linear;
+}
+
+.icon-refresh.spinning {
+  display: inline-block;
+}

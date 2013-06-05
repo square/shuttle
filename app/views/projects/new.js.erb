@@ -1,0 +1,87 @@
+// Copyright 2013 Square Inc.
+//
+//    Licensed under the Apache License, Version 2.0 (the "License");
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+
+$(document).ready(function() {
+  var setupHashField = function() {
+    $('#project_key_locale_exclusions, #project_key_locale_inclusions').addClass('hash-field').hashField({
+      renderer: function(container, key, value) {
+        container.addClass('row-fluid');
+        var left = $('<div/>').addClass('span4').appendTo(container);
+        var right = $('<div/>').addClass('span7').appendTo(container);
+
+        new LocaleField(
+            $('<input/>').attr({rel: 'key', placeholder: 'locale'}).val(key).addClass('locale-field').appendTo(left)
+        );
+
+        var valueField = $('<div/>').attr({rel: 'value', 'data-value': JSON.stringify(value)}).addClass('array-field').appendTo(right);
+        valueField.arrayField({
+          renderer: function(container, name, value) {
+            $('<input/>').attr({name: name, placeholder: 'key or glob'}).val(value).appendTo(container)
+          }
+        });
+      }
+    });
+
+    $('#project_targeted_rfc5646_locales').addClass('hash-field').hashField({
+      renderer: function(container, key, value) {
+        container.addClass('row-fluid');
+        var left = $('<div/>').addClass('span4').appendTo(container);
+        var right = $('<div/>').addClass('span7').appendTo(container);
+
+        new LocaleField(
+            $('<input/>').attr({rel: 'key', placeholder: 'locale'}).val(key).addClass('locale-field').appendTo(left)
+        );
+
+        /* So the problem here is that just having a checkbox will mean that the
+         * hash sent to the server will not include the locale keys whose
+         * "required" fields are unchecked, because unchecked checkboxes are not
+         * serialized when a form is submitted. To get around this, the actual
+         * value is stored in a hidden field, whose value is toggled by the
+         * checkbox.
+         */
+        var realValue = $('<input/>').attr({type: 'hidden', rel: 'value', value: (value ? 'true' : 'false')}).appendTo(right);
+        var label = $('<label/>').addClass('checkbox').appendTo(right);
+        $('<input/>').
+            attr({type: 'checkbox', checked: (value ? 'checked' : null)}).
+            appendTo(label).change(function() {
+               realValue.attr('value', (this.checked ? 'true' : 'false'));
+            });
+        label.append(" required");
+      }
+    });
+
+    $('#project_skip_importer_paths, #project_only_importer_paths').addClass('hash-field').hashField({
+      renderer: function(container, key, value) {
+        container.addClass('row-fluid');
+          var left = $('<div/>').addClass('span4').appendTo(container);
+          var right = $('<div/>').addClass('span7').appendTo(container);
+
+          var select = $('<select/>').attr({rel: 'key'}).appendTo(left);
+          <% Importer::Base.implementations.each do |importer| %>
+            $('<option/>').
+                    text("<%= escape_javascript importer.human_name %>").
+                    attr({value: "<%= escape_javascript importer.to_s %>", selected: key == "<%= escape_javascript importer.to_s %>" ? 'selected' : ''}).
+                    appendTo(select);
+          <% end %>
+          select.val(key);
+
+          var valueField = $('<div/>').attr({rel: 'value', 'data-value': JSON.stringify(value)}).addClass('array-field').appendTo(right);
+          valueField.arrayField();
+        }
+      });
+  };
+
+  if (window.localesLoaded) setupHashField();
+  else $(document).bind('locales_loaded', setupHashField);
+});

@@ -1,0 +1,881 @@
+---
+- - certified public accountant
+  - certified accountant, certified general accountant, certified management accountant
+  - :prompt
+  - “certified public accountant” becomes either “certified accountant”, “certified
+    general accountant”, or “certified management accountant”
+- - driving under the influence
+  - impaired driving
+  - :auto
+- - driving while intoxicated
+  - impaired driving
+  - :auto
+- - certificate of deposit
+  - guaranteed investment certificate
+  - :auto
+- - garbage disposal unit
+  - garburator
+  - :auto
+- - checking account
+  - chequing account
+  - :auto
+- - court-martialing
+  - court-martialling
+  - :auto
+- - Adirondack chair
+  - Muskoka chair
+  - :auto
+- - counterclockwise
+  - counter-clockwise
+  - :auto
+- - nearsightedness
+  - near-sightedness
+  - :auto
+- - merchant marine
+  - merchant navy, merchant seaman
+  - :prompt
+  - depending on whether one is referring to the corps or an individual sailor
+- - Sincerely yours
+  - Yours sincerely
+  - :prompt
+  - salutation
+- - court-martialed
+  - court-martialled
+  - :auto
+- - battle station
+  - action station
+  - :auto
+- - parking garage
+  - parkade
+  - :auto
+- - Canadian bacon
+  - back bacon
+  - :auto
+- - farsightedness
+  - far-sightedness
+  - :auto
+- - acknowledgment
+  - acknowledgement
+  - :auto
+- - tick-tack-toe
+  - tic-tac-toe
+  - :auto
+- - air fare sale
+  - seat sale
+  - :auto
+- - court-martial
+  - court martial
+  - :prompt
+  - when referring to the noun only
+- - nitroglycerin
+  - nitroglycerine
+  - :auto
+- - tranquilizer
+  - tranquillizer
+  - :auto
+- - neighborhood
+  - neighbourhood
+  - :auto
+- - maneuverable
+  - manoeuvrable
+  - :auto
+- - mail carrier
+  - letter carrier
+  - :auto
+- - amphitheater
+  - amphitheatre
+  - :auto
+- - fiber optics
+  - fibre optics
+  - :auto
+- - stockholder
+  - shareholder
+  - :auto
+- - nearsighted
+  - near-sighted
+  - :auto
+- - reservation
+  - reserve
+  - :prompt
+  - when referring to land set aside for aborigonals
+- - tranquilize
+  - tranquillize
+  - :auto
+- - tranquility
+  - tranquillity
+  - :auto
+- - installment
+  - instalment
+  - :auto
+- - willfulness
+  - wilfulness
+  - :auto
+- - misdemeanor
+  - summary conviction offence, misdemeanour
+  - :prompt
+  - “summary conviction offense” is the legal term; “misdemeanour” refers to a misdeed
+- - micrometer
+  - micrometre
+  - :prompt
+  - only applies to the unit of measurement, not the instrument
+- - archeology
+  - archaeology
+  - :auto
+- - fiberglass
+  - fibreglass
+  - :auto
+- - fiberoptic
+  - fibreoptic
+  - :auto
+- - farsighted
+  - far-sighted
+  - :auto
+- - racketball
+  - racquetball
+  - :auto
+- - centimeter
+  - centimetre
+  - :auto
+- - check card
+  - debit card
+  - :auto
+- - soccer mom
+  - hockey mom
+  - :auto
+- - enrollment
+  - enrolment
+  - :auto
+- - metric ton
+  - metric tonne
+  - :auto
+- - anesthesia
+  - anaesthesia
+  - :auto
+- - half-staff
+  - half-mast
+  - :auto
+- - anesthetic
+  - anaesthetic
+  - :auto
+- - microliter
+  - microlitre
+  - :auto
+- - milliliter
+  - millilitre
+  - :auto
+- - millimeter
+  - millimetre
+  - :auto
+- - willfully
+  - wilfully
+  - :auto
+- - honorably
+  - honourably
+  - :auto
+- - comradery
+  - camaraderie
+  - :auto
+- - counselor
+  - counsellor
+  - :auto
+- - megameter
+  - megametre
+  - :auto
+- - saltpeter
+  - saltpetre
+  - :auto
+- - honorable
+  - honourable
+  - :auto
+- - signaling
+  - signalling
+  - :auto
+- - drugstore
+  - pharmacy
+  - :auto
+- - kiloliter
+  - kilolitre
+  - :auto
+- - advertize
+  - advertise
+  - :auto
+- - rest stop
+  - rest area
+  - :auto
+- - snorkeler
+  - snorkeller
+  - :auto
+- - checkbook
+  - chequebook
+  - :auto
+- - epicenter
+  - epicentre
+  - :auto
+- - fisherman
+  - fisher
+  - :auto
+- - firehouse
+  - fire hall
+  - :auto
+- - kilometer
+  - kilometre
+  - :auto
+- - spiraling
+  - spiralling
+  - :auto
+- - megaliter
+  - megalitre
+  - :auto
+- - sulfurize
+  - sulphurize
+  - :auto
+- - marvelous
+  - marvellous
+  - :auto
+- - candy bar
+  - chocolate bar
+  - :auto
+- - centering
+  - centring
+  - :auto
+- - esthetic
+  - aesthetic
+  - :auto
+- - paycheck
+  - paycheque
+  - :auto
+- - practise
+  - practice
+  - :prompt
+  - applies to the noun only
+- - pretense
+  - pretence
+  - :auto
+- - fatigues
+  - combat uniform
+  - :prompt
+- - railroad
+  - railway
+  - :auto
+- - equaling
+  - equalling
+  - :auto
+- - fontanel
+  - fontanelle
+  - :auto
+- - enlisted
+  - other members
+  - :prompt
+  - referring to the category of military ranks
+- - grueling
+  - gruelling
+  - :auto
+- - endeavor
+  - endeavour
+  - :auto
+- - dishevel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - demeanor
+  - demeanour
+  - :auto
+- - vaporish
+  - vapourish
+  - :auto
+- - neighbor
+  - neighbour
+  - :auto
+- - U. of T.
+  - University of Texas
+  - :prompt
+  - “U. of T.” means “University of Toronto” in Canada
+- - consomme
+  - consommé
+  - :auto
+- - mustache
+  - moustache
+  - :auto
+- - signaled
+  - signalled
+  - :auto
+- - signaler
+  - signaller
+  - :auto
+- - skillful
+  - skilful
+  - :auto
+- - spiraled
+  - spiralled
+  - :auto
+- - libelous
+  - libellous
+  - :auto
+- - louvered
+  - louvred
+  - :auto
+- - splendor
+  - splendour
+  - :auto
+- - favorite
+  - favourite
+  - :auto
+- - centered
+  - centred
+  - :auto
+- - behavior
+  - behaviour
+  - :auto
+- - bandanna
+  - bandana
+  - :auto
+- - antennas
+  - antennae
+  - :auto
+- - maneuver
+  - manoeuvre
+  - :auto
+- - totaling
+  - totalling
+  - :auto
+- - traveler
+  - traveller
+  - :auto
+- - trialing
+  - trialling
+  - :auto
+- - tricolor
+  - tricolour
+  - :auto
+- - tunneler
+  - tunneller
+  - :auto
+- - marveler
+  - marveller
+  - :auto
+- - libeler
+  - libeller
+  - :auto
+- - demagog
+  - demagogue
+  - :auto
+- - yoghurt
+  - yogurt
+  - :auto
+- - mailman
+  - letter carrier
+  - :auto
+- - defense
+  - defence
+  - :auto
+- - scepter
+  - sceptre
+  - :auto
+- - willful
+  - wilful
+  - :auto
+- - counsel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - shrivel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - vaporer
+  - vapourer
+  - :auto
+- - clangor
+  - clangour
+  - :auto
+- - reveler
+  - reveller
+  - :auto
+- - enology
+  - oenology
+  - :auto
+- - trialed
+  - trialled
+  - :auto
+- - raveler
+  - raveller
+  - :auto
+- - license
+  - licence
+  - :prompt
+  - only applies to the noun
+- - totaled
+  - totalled
+  - :auto
+- - equaled
+  - equalled
+  - :auto
+- - smolder
+  - smoulder
+  - :auto
+- - snorkel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - laborer
+  - labourer
+  - :auto
+- - pedagog
+  - pedagogue
+  - :auto
+- - theater
+  - theatre
+  - :auto
+- - belabor
+  - belabour
+  - :auto
+- - specter
+  - spectre
+  - :auto
+- - mollusk
+  - mollusc
+  - :auto
+- - offense
+  - offence
+  - :auto
+- - jewelry
+  - jewellery
+  - :auto
+- - bobsled
+  - bobsleigh
+  - :auto
+- - jeweler
+  - jeweller
+  - :auto
+- - bureaus
+  - bureaux
+  - :auto
+- - caldron
+  - cauldron
+  - :auto
+- - caliber
+  - calibre
+  - :auto
+- - monolog
+  - monologue
+  - :auto
+- - catalog
+  - catalogue, calendar
+  - :prompt
+  - use “catalogue” when referring to a product brochure, and “calendar” when referring
+    to a university course listing
+- - racket
+  - racquet
+  - :prompt
+  - the bat used e.g. for tennis
+- - harbor
+  - harbour
+  - :auto
+- - candor
+  - candour
+  - :auto
+- - sulfur
+  - sulphur
+  - :auto
+- - tabour
+  - tabor
+  - :auto
+- - goiter
+  - goitre
+  - :auto
+- - glamor
+  - glamour
+  - :auto
+- - center
+  - centre
+  - :auto
+- - catsup
+  - ketchup
+  - :auto
+- - funnel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - succor
+  - succour
+  - :auto
+- - omelet
+  - omelette
+  - :auto
+- - flavor
+  - flavour
+  - :auto
+- - molder
+  - moulder
+  - :auto
+- - pajama
+  - pyjama
+  - :auto
+- - somber
+  - sombre
+  - :auto
+- - parlor
+  - parlour
+  - :auto
+- - barrel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - timber
+  - timbre
+  - :auto
+- - fervor
+  - fervour
+  - :auto
+- - felony
+  - indictable offence
+  - :prompt
+- - pommel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - armory
+  - armoury
+  - :auto
+- - prolog
+  - prologue
+  - :auto
+- - pummel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - cancel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - rancor
+  - rancour
+  - :auto
+- - marvel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - epilog
+  - epilogue
+  - :auto
+- - travel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - clamor
+  - clamour
+  - :auto
+- - enroll
+  - enrol
+  - :auto
+- - analog
+  - analogue
+  - :prompt
+  - only when refering to a comparison, and not the counterpart to “digital”
+- - treble
+  - triple
+  - :auto
+- - tunnel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - enamor
+  - enamour
+  - :auto
+- - vapory
+  - vapoury
+  - :auto
+- - dueler
+  - dueller
+  - :auto
+- - louver
+  - louvre
+  - :auto
+- - luster
+  - lustre
+  - :auto
+- - savory
+  - savoury
+  - :auto
+- - dispel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - savior
+  - saviour
+  - :auto
+- - dialog
+  - dialogue
+  - :auto
+- - woolen
+  - woollen
+  - :auto
+- - meager
+  - meagre
+  - :auto
+- - ocher
+  - ochre
+  - :auto
+- - sapor
+  - sapour
+  - :auto
+- - rumor
+  - rumour
+  - :auto
+- - savor
+  - savour
+  - :auto
+- - dolor
+  - dolour
+  - :auto
+- - rigor
+  - rigour
+  - :auto
+- - meter
+  - metre
+  - :prompt
+  - only applies to the unit of measurement, not the instrument
+- - yodel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - colorful
+  - colourful
+  - :auto
+- - color
+  - colour
+  - :auto
+- - revel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - ravel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - favor
+  - favour
+  - :auto
+- - fiber
+  - fibre
+  - :auto
+- - panel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - check
+  - cheque
+  - :prompt
+  - when referring to the payment order given to a bank
+- - miter
+  - mitre
+  - :auto
+- - story
+  - storey
+  - :prompt
+  - when referring to a level of a building
+- - model
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - vigor
+  - vigour
+  - :auto
+- - liter
+  - litre
+  - :auto
+- - vapor
+  - vapour
+  - :auto
+- - valor
+  - valour
+  - :auto
+- - saber
+  - sabre
+  - :auto
+- - honor
+  - honour
+  - :auto
+- - niter
+  - nitre
+  - :auto
+- - hovel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - humor
+  - humour
+  - :auto
+- - buret
+  - burette
+  - :auto
+- - tumor
+  - tumour
+  - :auto
+- - jewel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - ameba
+  - amoeba
+  - :auto
+- - arbor
+  - arbour
+  - :auto
+- - label
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - labor
+  - labour
+  - :auto
+- - level
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - titer
+  - titre
+  - :auto
+- - libel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - armor
+  - armour
+  - :auto
+- - ardor
+  - ardour
+  - :auto
+- - gage
+  - gauge
+  - :auto
+- - take
+  - write
+  - :prompt
+  - in the context of “take an examination”
+- - mold
+  - mould
+  - :auto
+- - duel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - B.S.
+  - B.Sc.
+  - :prompt
+  - Bachelors of Science
+- - C.D.
+  - G.I.C.
+  - :prompt
+  - Certificate of Deposit
+- - duet
+  - 
+  - :stemmed
+  - 22: "%{root}t%{suffix}"
+    48.4: "%{root}t%{suffix}"
+- - pean
+  - paean
+  - :auto
+- - molt
+  - moult
+  - :auto
+- - fuel
+  - 
+  - :stemmed
+  - 12.2: "%{root}l%{suffix}"
+    42.1: "%{root}l%{suffix}"
+- - odor
+  - odour
+  - :auto
+- - gray
+  - grey
+  - :auto
+- - calk
+  - caulk
+  - :auto
+- - M.S.
+  - M.Sc.
+  - :prompt
+  - Masters of Science
+- - Pvt.
+  - Pte.
+  - :prompt
+  - abbreviation for the military rank of “Private”
+- - No.
+  - N.
+  - :prompt
+  - Canadian English does not use “No.” as an abbreviation for “north”
+- - So.
+  - S.
+  - :prompt
+  - Canadian English does not use “So.” as an abbreviation for “south”
+- - CPA
+  - CA, CGA, or CMA
+  - :prompt
+  - “certified public accountant” becomes either “certified accountant”, “certified
+    general accountant”, or “certified management accountant”
+- - kph
+  - km/h
+  - :prompt
+  - kilometers per hour
+- - DWI
+  - impaired driving
+  - :auto
+- - DUI
+  - impaired driving
+  - :auto
+- - zee
+  - zed
+  - :prompt
+  - pronunciation of the letter “z”
+- - ax
+  - axe
+  - :auto
+- - nL
+  - nℓ
+  - :prompt
+  - abbreviation for “nanoliter”
+- - ML
+  - Mℓ
+  - :prompt
+  - abbreviation for “megaliter”
+- - µL
+  - µℓ
+  - :prompt
+  - abbreviation for “microliter”
+- - KL
+  - Kℓ
+  - :prompt
+  - abbreviation for “kiloliter”
+- - mL
+  - mℓ
+  - :prompt
+  - abbreviation for “milliliter”
+- - L
+  - ℓ
+  - :prompt
+  - abbreviation for “liter”

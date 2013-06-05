@@ -1,0 +1,81 @@
+.status-panel {
+  .buttons {
+    text-align: right;
+    font-size: 20px;
+
+    a {
+      margin-left: 4px;
+      margin-right: 4px;
+      text-shadow: white 0 1px;
+      color: gray;
+      &:visited { color: gray; }
+
+      &:hover, &:active {
+        cursor: pointer;
+        color: black;
+        text-decoration: none;
+      }
+    }
+  }
+
+  &>div {
+    margin: 10px;
+    padding: 5px 10px;
+  }
+
+  .project-cell {
+    background-color: rgba(black, 0.1);
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+
+    &>* { margin-left: 10px; margin-right: 10px; }
+
+    h1 {
+      font-size: 18px;
+      margin: 0;
+      &.project-details { margin-bottom: 10px; }
+    }
+
+    .commit {
+      margin-top: 10px;
+      margin-bottom: 20px;
+
+      .commit-details {
+        background-color: rgba(black, 0.1);
+        padding: 10px;
+      }
+
+      .badge.ready {
+        background-color: #58ab58;
+      }
+
+      h3 {
+        font-size: 14px;
+        line-height: 18px;
+        margin-top: 0;
+        font-weight: normal;
+      }
+    }
+
+    pre {
+      font-size: 11px;
+      padding: 2px 5px;
+    }
+
+    .progress {
+      position: relative;
+
+      span.text-progress {
+        font-size: 10px;
+        color: rgba(white, 0.7);
+        position: absolute;
+        left: 10px;
+        top: 0;
+        text-shadow: rgba(black, 0.5) 0 -1px 0;
+      }
+    }
+  }
+}
