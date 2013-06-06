@@ -81,7 +81,7 @@ Shuttle::Application.configure do
 
   config.action_mailer.default_url_options = {
       protocol: 'https',
-      host:     'YOUR_HOST'
+      host:     'shuttle.squareup.com'
   }
 
   config.use_ssl = true

@@ -12,6 +12,19 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+module Squash
+  class Sidekiq
+    def call(_worker, msg, queue)
+      begin
+        yield
+      rescue Exception => ex
+        Squash::Ruby.notify ex, sidekiq: msg, queue: queue
+        raise
+      end
+    end
+  end
+end
+
 configure_sidekiq = -> do
   Sidekiq.configure_client do |config|
     config.redis = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
@@ -20,6 +33,10 @@ configure_sidekiq = -> do
   Sidekiq.configure_server do |config|
     config.redis = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
         merge(url: Shuttle::Redis.client.id)
+    config.server_middleware do |chain|
+      chain.add ::Squash::Sidekiq
+    end
+
   end
 end
 

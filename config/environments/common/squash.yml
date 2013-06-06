@@ -1,0 +1,13 @@
+transmit_timeout: 60
+ignored_exception_classes:
+- ActionController::RoutingError
+- ActionController::MethodNotAllowed
+- ActionController::ActionNotFound
+- Sidekiq::Shutdown
+ignored_exception_messages:
+  SignalException:
+  - SIGTERM
+  NoMethodError:
+  - !ruby/regexp '/undefined method `.+?'' for #<Sidekiq::Shutdown.+?>/'
+disabled: true
+api_key: fa0509c3-9af0-4002-a47c-b37543c72d15

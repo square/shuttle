@@ -1,0 +1,10 @@
+language: ruby
+ruby:
+ - ruby-1.9.3-p392
+targets:
+- type: specs
+  glob: spec/**/*_spec.rb
+  workers: 4
+- type: jasmine
+  glob: "spec/**/*.{js,coffee}"
+  workers: 1

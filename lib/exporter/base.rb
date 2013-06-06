@@ -203,6 +203,7 @@ module Exporter
           # or an array index (previous if did run)
           this_object[last] = translation.copy
         rescue => err
+          Squash::Ruby.notify err, translation_id: translation.id
           raise if Rails.env.test?
         end
       end

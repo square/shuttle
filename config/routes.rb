@@ -13,6 +13,10 @@
 #    limitations under the License.
 
 Shuttle::Application.routes.draw do
+  constraints(host: 'shuttle.corp.squareup.com') do
+    match '*glob' => redirect('https://shuttle.squareup.com')
+  end
+
   # AUTHENTICATION
   devise_for :users, controllers: {registrations: 'registrations'}
 

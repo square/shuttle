@@ -26,6 +26,7 @@ class CommitCreator
   def perform(project_id, sha)
     Project.find(project_id).commit!(sha)
   rescue Timeout::Error => err
+    Squash::Ruby.notify err, project_id: project_id, sha: sha
     self.class.perform_in 2.minutes, project_id, sha
   end
 

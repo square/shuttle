@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+bundler_version="1.3.5"
+source "$HOME/.rvm/scripts/rvm"
+RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
+
+ensure_dependency() {
+    brew update && brew install $1 || die "failed to install $1 with homebrew, please do it yourself."
+}
+
+
+function install_bundler_if_needed() {
+    echo "Checking for Bundler ${bundler_version}..."
+    if ! gem list --installed bundler --version "${bundler_version}" > /dev/null; then
+        gem install bundler --version "${bundler_version}"
+    fi
+}
+
+function update_gems_if_needed() {
+    echo "Installing gems..."
+    bundle
+}
+
+function prepare_database() {
+    dropdb shuttle_test || true
+    dropuser shuttle || true
+    createuser -D -R -S shuttle || true
+    createdb -O squash shuttle_test
+    psql -U shuttle -f db/structure.sql shuttle_test
+}
+
+function run_specs() {
+    bundle exec rspec ${RUN_LIST} || exit 1
+}
+
+function run_jasmine() {
+    bundle exec rake guard:jasmine -t || exit 1
+}
+
+function prepare() {
+    ensure_dependency "phantomjs" &&
+    ensure_dependency "libarchive" &&
+    install_bundler_if_needed &&
+    update_gems_if_needed &&
+    prepare_database
+}
+
+prepare
+
+case "${TEST_RUNNER}" in
+    jasmine)
+        run_jasmine
+    ;;
+
+    specs)
+        run_specs
+    ;;
+    *)
+        echo "unknown test runner: ${TEST_RUNNER}"
+        exit 127
+    ;;
+esac

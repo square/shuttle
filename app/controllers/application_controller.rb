@@ -125,6 +125,9 @@ class ApplicationController < ActionController::Base
   clear_helpers # see application.html.rb
   self.responder = JsonDetailResponder
 
+  include Squash::Ruby::ControllerMethods
+  enable_squash_client
+
   rescue_from(ActiveRecord::RecordNotFound) do
     respond_to do |format|
       format.html { render file: Rails.root.join('public/404.html'), status: :not_found }
