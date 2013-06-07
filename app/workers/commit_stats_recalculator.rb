@@ -31,6 +31,7 @@ class CommitStatsRecalculator
     commit.translations_done!
     commit.translations_total!
     commit.strings_total!
+    commit.keys.find_each(&:recalculate_ready!)
     commit.recalculate_ready!
     commit.save!
   end

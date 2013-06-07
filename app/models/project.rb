@@ -294,7 +294,7 @@ class Project < ActiveRecord::Base
 
     options[:methods] = Array.wrap(options[:methods])
     options[:methods] << :base_locale
-    options[:methods] << :locale_requirements
+    options[:methods] << :targeted_rfc5646_locales
     options[:methods] << :slug
 
     super options
