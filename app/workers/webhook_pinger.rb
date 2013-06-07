@@ -12,8 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# After a {Commit}'s has been marked as "ready", we need to let external services know.
-# Looks up the webhook URL for the {Project} and perform an HTTP post with the commt information.
+# After a {Commit}'s has been marked as "ready", we need to let external
+# services know. Looks up the webhook URL for the {Project} and perform an HTTP
+# post with the commit information.
 
 class WebhookPinger
   include Sidekiq::Worker

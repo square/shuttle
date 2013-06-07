@@ -235,7 +235,7 @@ class Commit < ActiveRecord::Base
     loading_was = self.loading
 
     Shuttle::Redis.srem "import:#{revision}", jid
-    loading = (Shuttle::Redis.scard > 0)
+    loading = (Shuttle::Redis.scard("import:#{revision}") > 0)
     update_column :loading, loading
 
     update_stats_at_end_of_loading if loading_was && !loading
