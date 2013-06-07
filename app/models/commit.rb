@@ -129,6 +129,8 @@ class Commit < ActiveRecord::Base
   #   written in (by default it's the Project's base locale).
   # @option options [true, false] inline (false) If `true`, does not spawn
   #   Sidekiq workers to perform the import in parallel.
+  # @option options [true, false] force (false) If `true`, blobs will be
+  #   re-scanned for keys even if they have already been scanned.
   # @raise [CommitNotFoundError] If the commit could not be found in the Git
   #   repository.
 
@@ -275,6 +277,9 @@ class Commit < ActiveRecord::Base
   def import_tree(tree, path, options={})
     tree.blobs.each do |name, blob|
       blob_path = "#{path}/#{name}"
+
+      Shuttle::Redis.del("keys_for_blob:#{@blob.sha}") if options[:force]
+
       if options[:inline]
         BlobImporter.new.perform project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646)
       else

@@ -107,7 +107,7 @@ module Importer
       @commit.keys += @keys if @commit
 
       # cache the list of keys we know to be in this blob for later use
-      Shuttle::Redis.set "keys_for_blob:#{@blob.id}", @keys.map(&:id).join(',')
+      Shuttle::Redis.set "keys_for_blob:#{@blob.sha}", @keys.map(&:id).join(',')
     end
 
     # Scans the blob for localizable strings, assumes their values are of a
@@ -340,7 +340,7 @@ module Importer
 
     def process_blob_for_string_extraction
       if processed_blob?
-        keys = Shuttle::Redis.get("keys_for_blob:#{@blob.id}")
+        keys = Shuttle::Redis.get("keys_for_blob:#{@blob.sha}")
         if keys
           @keys = Key.where(id: keys.split(',').map(&:to_i))
           return
