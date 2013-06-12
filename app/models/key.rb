@@ -138,6 +138,7 @@ class Key < ActiveRecord::Base
 
     options[:methods] = Array.wrap(options[:methods])
     options[:methods] << :source_fences << :fences << :original_key << :key
+    options[:methods] << :importer_name
 
     options[:except] = Array.wrap(options[:except])
     options[:except] << :key_sha_raw << :searchable_key << :metadata
@@ -149,6 +150,12 @@ class Key < ActiveRecord::Base
 
   # @private
   def to_param() slug end
+
+  # @return [Class] The {Importer::Base} subclass that performed the import.
+  def importer_class() Importer::Base.find_by_ident(importer) end
+
+  # @return [String] The human-readable name for the importer.
+  def importer_name() importer_class.human_name end
 
   # Scans all of the base Translations under this Key and adds Translations for
   # each of the Project's required locales where such a Translation does not

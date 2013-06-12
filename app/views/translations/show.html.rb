@@ -56,7 +56,7 @@ module Views
 
           if @translation.key.importer.present?
             dt "Importer"
-            dd Importer::Base.find_by_ident(@translation.key.importer).human_name
+            dd @translation.key.importer_name
           end
 
           if @translation.key.fencers.present?

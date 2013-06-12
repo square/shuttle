@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'find'
+require 'set'
 
 # Container module for {Importer::Base} and its subclasses.
 
@@ -100,14 +100,14 @@ module Importer
     def import
       load_contents
 
-      @keys = []
+      @keys = Set.new
       Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
         process_blob_for_string_extraction
       end
-      @commit.keys += @keys if @commit
+      @commit.keys += @keys.to_a if @commit
 
       # cache the list of keys we know to be in this blob for later use
-      Shuttle::Redis.set "keys_for_blob:#{@blob.id}", @keys.map(&:id).join(',')
+      Shuttle::Redis.set "keys_for_blob:#{self.class.ident}:#{@blob.sha}", @keys.map(&:id).join(',')
     end
 
     # Scans the blob for localizable strings, assumes their values are of a
@@ -116,6 +116,8 @@ module Importer
     # as its key, since the value changes with each locale.
 
     def import_locale(locale)
+      raise "Can't perform a locale import without an associated commit" unless @commit
+
       load_contents
       Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
         process_blob_for_translation_extraction locale
@@ -202,12 +204,12 @@ module Importer
           options.reverse_merge(
               key:                      key,
               source_copy:              value,
-              importer:                 self.class.to_s.demodulize,
+              importer:                 self.class.ident,
               fencers:                  self.class.fencers,
               skip_readiness_hooks:     true
           ), as: :system
       )
-      @keys << key unless @keys.include?(key)
+      @keys << key
 
       key.translations.in_locale(@blob.project.base_locale).create_or_update!({
               source_copy:              value,
@@ -225,26 +227,24 @@ module Importer
 
     # @private
     def add_translation(key, value, locale)
-      raise "Can't do a translation import without a commit" unless @commit
-
       if @blob.project.skip_key?(key, locale)
         log_skip key, "skip_key? returned true for #{locale.inspect}"
         return
       end
 
-      key = @commit.keys.for_key(key).first
-      unless key
+      key_obj = @commit.keys.for_key(key).first
+      unless key_obj
         log_skip key, "Couldn't find key"
         return
       end
 
-      base = key.translations.base.first
+      base = key_obj.translations.base.first
       unless base
         log_skip key, "Couldn't find base translation"
         return
       end
 
-      key.translations.in_locale(locale).create_or_update!({
+      key_obj.translations.in_locale(locale).create_or_update!({
               source_copy:              base.copy,
               copy:                     value,
               approved:                 true,
@@ -339,12 +339,10 @@ module Importer
     end
 
     def process_blob_for_string_extraction
-      if processed_blob?
-        keys = Shuttle::Redis.get("keys_for_blob:#{@blob.id}")
-        if keys
-          @keys = Key.where(id: keys.split(',').map(&:to_i))
-          return
-        end
+      keys = Shuttle::Redis.get("keys_for_blob:#{self.class.ident}:#{@blob.sha}")
+      if keys.present?
+        @keys = Key.where(id: keys.split(',').map(&:to_i))
+        return
       end
 
       file.locale = nil
@@ -394,17 +392,6 @@ module Importer
       end
 
       raise NoEncodingFound, "Couldn't find valid encoding among #{self.class.encoding.join(', ')}"
-    end
-
-    def processed_blob?
-      processed = false
-      Blob.transaction do
-        unless (processed = @blob.importers.include?(self.class.to_s))
-          @blob.importers += [self.class.to_s]
-          @blob.save!
-        end
-      end
-      return processed
     end
 
     def log_skip(key, reason)

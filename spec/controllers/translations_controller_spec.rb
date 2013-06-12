@@ -20,7 +20,7 @@ describe TranslationsController do
   describe "#show" do
     before :all do
       Project.delete_all
-      @project     = FactoryGirl.create(:project, repository_url: 'git://github.com/RISCfuture/better_caller.git')
+      @project     = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @key         = FactoryGirl.create(:key, project: @project)
       @translation = FactoryGirl.create(:translation, copy: 'some copy here', key: @key)
       @user        = FactoryGirl.create(:user, role: 'monitor')

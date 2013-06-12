@@ -19,10 +19,5 @@ FactoryGirl.define do
     base_rfc5646_locale 'en-US'
     targeted_rfc5646_locales 'en-US' => true, 'de-DE' => true
     validate_repo_connectivity false
-
-    after(:create) do |project, _|
-      # there's a uniqueness constraint on repo URLs, but we need a real repo with real commits
-      project.instance_variable_set :@repo, Project.new { |pp| pp.repository_url = 'git://github.com/RISCfuture/better_caller.git' }.repo
-    end
   end
 end

@@ -67,7 +67,7 @@ module Views
           dt "Context"
           dd(@translation.key.context || "none")
           dt "Importer"
-          dd Importer::Base.find_by_ident(@translation.key.importer).human_name
+          dd @translation.key.importer_name
           dt "Fencers"
           dd @translation.key.fencers.map { |f| I18n.t("fencer.#{f}") }.to_sentence
           dt "Source"

@@ -23,13 +23,11 @@ describe Commit do
 
   describe "#recalculate_ready!" do
     before :all do
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
-      @project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
-    before :each do
-      @commit = FactoryGirl.create(:commit, project: @project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc')
-    end
+    before(:each) { @commit = @project.commit!('HEAD') }
 
     it "should set ready to false for commits with unready keys" do
       @commit.keys << FactoryGirl.create(:key, ready: false)
@@ -91,7 +89,7 @@ describe Commit do
     it "should import strings" do
       Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
       project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
-      commit  = FactoryGirl.create(:commit, project: project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc', skip_import: false)
+      FactoryGirl.create :commit, project: project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc', skip_import: false
       project.blobs.size.should eql(36) # should import all blobs
     end
 
@@ -177,6 +175,31 @@ describe Commit do
       @commit.translations_total.should eql(4)
       @commit.translations_done.should eql(2)
       @commit.strings_total.should eql(2)
+    end
+  end
+
+  describe "#import_strings" do
+    before :each do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+    end
+
+    it "should call #import on all importer subclasses" do
+      @project.commit! 'HEAD'
+      @project.keys.map(&:importer).uniq.sort.should eql(Importer::Base.implementations.map(&:ident).sort)
+    end
+
+    it "should not call #import on any disabled importer subclasses" do
+      @project.update_attribute :skip_imports, %w(ruby yaml)
+      @project.commit! 'HEAD'
+      @project.keys.map(&:importer).uniq.sort.should eql(Importer::Base.implementations.map(&:ident).sort - %w(ruby yaml))
+      @project.update_attribute :skip_imports, []
+    end
+
+    it "should skip any importers for which #skip? returns true" do
+      Importer::Yaml.any_instance.stub(:skip?).and_return(true)
+      @project.commit! 'HEAD'
+      @project.keys.map(&:importer).uniq.sort.should eql(Importer::Base.implementations.map(&:ident).sort - %w(yaml))
     end
   end
 end

@@ -25,7 +25,7 @@ module Importer
     protected
 
     def import_file?(locale=nil)
-      ["#{locale_to_use(locale).rfc5646}.js", "#{locale_to_use(locale).rfc5646}.coffee"].include?(::File.basename(file.path))
+      %W(#{locale_to_use(locale).rfc5646}.js #{locale_to_use(locale).rfc5646}.coffee).include?(::File.basename(file.path))
     end
 
     def import_strings(receiver)

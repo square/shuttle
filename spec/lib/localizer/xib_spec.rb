@@ -19,46 +19,48 @@
 require 'spec_helper'
 
 describe Localizer::Xib do
-  before :all do
-    @project = FactoryGirl.create(:project)
-    @en      = Locale.from_rfc5646('en-US')
-    @de      = Locale.from_rfc5646('de-DE')
-    @commit  = FactoryGirl.create(:commit, project: @project)
+  before :each do
+    Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    @project = FactoryGirl.create(:project,
+                                  repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                  only_paths:     %w(apple/),
+                                  skip_imports:   Importer::Base.implementations.map(&:ident) - %w(xib))
+    @commit  = @project.commit!('HEAD')
 
     {
-        'Resources/en-US.lproj/test.xib:3.IBUIText'                                              => 'text field text',
-        'Resources/en-US.lproj/test.xib:8.IBUISelectedTitle'                                     => 'selected title',
-        'Resources/en-US.lproj/test.xib:3.IBUIPlaceholder'                                       => 'placeholder text',
-        'Resources/en-US.lproj/test.xib:8.IBUINormalTitle'                                       => 'button title',
-        'Resources/en-US.lproj/test.xib:8.IBUIHighlightedTitle'                                  => 'highlighted title',
-        'Resources/en-US.lproj/test.xib:8.IBUIDisabledTitle'                                     => 'disabled title',
-        'Resources/en-US.lproj/test.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityLabel' => 'accessibility label',
-        'Resources/en-US.lproj/test.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityHint'  => 'accessibility hint',
-        'Resources/en-US.lproj/test.xib:12.IBSegmentTitles[0]'                                   => 'segment 1',
-        'Resources/en-US.lproj/test.xib:12.IBSegmentTitles[1]'                                   => 'segment 2'
+        '/apple/en-US.lproj/example.xib:3.IBUIText'                                              => 'text field text',
+        '/apple/en-US.lproj/example.xib:8.IBUISelectedTitle'                                     => 'selected title',
+        '/apple/en-US.lproj/example.xib:3.IBUIPlaceholder'                                       => 'placeholder text',
+        '/apple/en-US.lproj/example.xib:8.IBUINormalTitle'                                       => 'button title',
+        '/apple/en-US.lproj/example.xib:8.IBUIHighlightedTitle'                                  => 'highlighted title',
+        '/apple/en-US.lproj/example.xib:8.IBUIDisabledTitle'                                     => 'disabled title',
+        '/apple/en-US.lproj/example.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityLabel' => 'accessibility label',
+        '/apple/en-US.lproj/example.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityHint'  => 'accessibility hint',
+        '/apple/en-US.lproj/example.xib:12.IBSegmentTitles[0]'                                   => 'segment 1',
+        '/apple/en-US.lproj/example.xib:12.IBSegmentTitles[1]'                                   => 'segment 2'
     }.each do |key, string|
-      key = FactoryGirl.create(:key,
-                               project:      @project,
-                               key:          "/Resources/en-US.lproj/example.xib:#{key}",
-                               original_key: key,
-                               source:       '/Resources/en-US.lproj/example.xib')
-      FactoryGirl.create :translation,
-                         key:           key,
-                         source_locale: @en,
-                         locale:        @de,
-                         source_copy:   string,
-                         copy:          "#{string} (de)"
-      @commit.keys << key
+      key = @project.keys.for_key(key).source_copy_matches(string).first!
+      key.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes({
+          copy:     "#{string} (de)",
+          approved: true
+      }, as: :system)
     end
   end
 
   it "should localize a Xib file" do
-    input_file  = Localizer::File.new("Resources/en-US.lproj/example.xib", File.read(Rails.root.join('spec', 'fixtures', 'example.xib')))
-    output_file = Localizer::File.new
+    compiler = Compiler.new(@commit)
+    file     = compiler.localize
 
-    Localizer::Xib.new(@project, @commit.translations).localize input_file, output_file, @de
+    entries = Hash.new
+    Archive.read_open_memory(file.io.read, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
+      while (entry = archive.next_header)
+        entry.should be_regular
+        entries[entry.pathname] = archive.read_data.force_encoding('UTF-8')
+      end
+    end
 
-    output_file.path.should eql('Resources/de-DE.lproj/example.xib')
-    output_file.content.should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.xib')))
+    entries.size.should eql(1)
+    entries.keys.first.should eql('apple/de-DE.lproj/example.xib')
+    entries.values.first.should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.xib')))
   end
 end

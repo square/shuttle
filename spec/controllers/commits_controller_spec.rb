@@ -22,13 +22,13 @@ require 'fileutils'
 describe CommitsController do
   describe "#manifest" do
     before :all do
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project      = FactoryGirl.create(:project,
                                          base_rfc5646_locale:      'en-US',
                                          targeted_rfc5646_locales: {'en-US' => true, 'en' => true, 'fr' => true, 'de' => false},
-                                         repository_url:           "git://github.com/RISCfuture/better_caller.git")
-      @commit       = FactoryGirl.create(:commit, project: @project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc')
-      @newer_commit = FactoryGirl.create(:commit, project: @project, revision: '1dc20c984283bede1f45863b8f3b4dd9b5b554cc', committed_at: @commit.committed_at + 1.hour)
+                                         repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @commit       = @project.commit!('HEAD^', skip_import: true)
+      @newer_commit = @project.commit!('HEAD', skip_import: true)
 
       key1 = FactoryGirl.create(:key,
                                 project: @project,
@@ -295,12 +295,12 @@ de:
 
   describe '#localize' do
     before :all do
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     base_rfc5646_locale:      'en',
                                     targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true, 'zh' => false},
-                                    repository_url:           "git://github.com/RISCfuture/better_caller.git")
-      @commit  = FactoryGirl.create(:commit, project: @project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc')
+                                    repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @commit  = @project.commit!('HEAD', skip_import: true)
 
       key1 = FactoryGirl.create(:key,
                                 project:      @project,
@@ -522,9 +522,9 @@ de:
   describe '#create' do
     before :all do
       @user = FactoryGirl.create(:user, role: 'monitor')
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
-                                    repository_url: "git://github.com/RISCfuture/better_caller.git")
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
     before :each do
@@ -533,7 +533,7 @@ de:
     end
 
     it "should strip the commit revision of whitespace" do
-      post :create, project_id: @project.to_param, commit: {revision: "  2dc20c984283bede1f45863b8f3b4dd9b5b554cc     "}, format: 'json'
+      post :create, project_id: @project.to_param, commit: {revision: "  HEAD     "}, format: 'json'
       response.status.should eql(200)
     end
   end
@@ -541,9 +541,9 @@ de:
   describe '#destroy' do
     before :all do
       @user = FactoryGirl.create(:user, role: 'admin')
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
-                                    repository_url: "git://github.com/RISCfuture/better_caller.git")
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
     before :each do

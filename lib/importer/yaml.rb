@@ -30,7 +30,7 @@ module Importer
       begin
         yml = YAML.load(file.contents)
       rescue Exception => err
-        log_skip nil, "Invalid YAML file"
+        log_skip nil, "Invalid YAML file: #{err}"
         return
       end
 

@@ -117,7 +117,7 @@ module Views
                 hidden_field_tag 'project[skip_imports][]', ''
                 Importer::Base.implementations.each_with_index do |importer, index|
                   label_tag "project_skip_imports_#{index}", class: 'checkbox' do
-                    check_box_tag "project[skip_imports][]", importer.to_s, @project.skip_imports.include?(importer.to_s), id: "project_skip_imports_#{index}"
+                    check_box_tag "project[skip_imports][]", importer.ident, @project.skip_imports.include?(importer.ident), id: "project_skip_imports_#{index}"
                     text importer.human_name
                   end
                 end

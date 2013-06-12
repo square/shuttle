@@ -29,23 +29,11 @@
 # |       |                                  |
 # |:------|:---------------------------------|
 # | `sha` | The Git identifier for the blob. |
-#
-# Metadata
-# ========
-#
-# |             |                                                                                      |
-# |:------------|:-------------------------------------------------------------------------------------|
-# | `importers` | An array of {Importer::Base} subclass names that have already operated on this blob. |
 
 class Blob < ActiveRecord::Base
   self.primary_keys = :project_id, :sha_raw
 
   belongs_to :project, inverse_of: :blobs
-
-  include HasMetadataColumn
-  has_metadata_column(
-      importers: {type: Array, default: []}
-  )
 
   extend GitObjectField
   git_object_field :sha,
@@ -67,6 +55,7 @@ class Blob < ActiveRecord::Base
   # for the Project's other locales are also created (and filled with 100%
   # matches if possible).
   #
+  # @param [Class] importer The Importer::Base subclass to process this blob.
   # @param [String] path The path to this blob under the commit currently being
   #   imported.
   # @param [Hash] options Additional options.
@@ -75,16 +64,9 @@ class Blob < ActiveRecord::Base
   # @option options [Commit, nil] commit If given, new Keys will be added to
   #   this Commit's `keys` association.
 
-  def import_strings(path, options={})
-    imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.to_s) }
-    imps.each do |importer|
-      importer = importer.new(self, path, options[:commit])
-      if importer.skip?(options[:locale])
-        #Importer::SKIP_LOG.info "commit=#{options[:commit].try(:revision)} blob=#{sha} path=#{path} importer=#{importer.class} #skip? returned false for #{options[:locale].inspect}"
-        next
-      end
-      options[:locale] ? importer.import_locale(options[:locale]) : importer.import
-    end
+  def import_strings(importer, path, options={})
+    importer = importer.new(self, path, options[:commit])
+    options[:locale] ? importer.import_locale(options[:locale]) : importer.import
   end
 
   # @return [Git::Object::Blob] The Git blob this Blob represents.

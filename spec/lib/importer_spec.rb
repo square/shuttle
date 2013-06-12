@@ -13,59 +13,127 @@
 #    limitations under the License.
 
 require 'spec_helper'
+require 'sidekiq/testing/inline'
 
 describe Importer::Base do
-  include ImporterTesting
-
   describe "[importing strings]" do
     before :each do
+
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
+                                    repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     targeted_rfc5646_locales: {'en-US' => true, 'de-DE' => true})
-
-      @blob = FactoryGirl.create(:fake_blob, project: @project)
-      yaml  = {'en-US' => {'foo' => 'bar'}}.to_yaml
-      @blob.stub!(:blob).and_return(mock('Git::Object::Blob', contents: yaml))
-
-      @commit   = FactoryGirl.create(:commit, project: @project)
-      @importer = Importer::Yaml.new(@blob, 'some/path', @commit)
+      @commit  = @project.commit!('HEAD', skip_import: true)
     end
 
-    it "should only process a blob once" do
-      @importer.should_receive(:import_strings).once.and_call_original
-      @importer.import
+    it "should not import keys under skipped paths" do
+      @project.update_attribute :skip_paths, %w(config/locales/ruby_also/)
+      @commit.import_strings
+      @commit.keys.for_key('root').should_not be_empty
+      @commit.keys.for_key('importer_path_skipped').should be_empty
+    end
 
-      commit2   = FactoryGirl.create(:commit, project: @project)
-      importer2 = Importer::Yaml.new(@blob, 'some/path', commit2)
-      importer2.should_not_receive(:import_strings)
-      importer2.import
+    it "should not import keys under importer-specific skipped paths" do
+      @project.update_attribute :skip_importer_paths, 'ruby' => %w(config/locales/ruby_also/)
+      @commit.import_strings
+      @commit.keys.for_key('root').should_not be_empty
+      @commit.keys.for_key('rootrb').should_not be_empty
+      @commit.keys.for_key('importer_path_skipped').should_not be_empty
+      @commit.keys.for_key('importer_path_skippedrb').should be_empty
+    end
 
-      @commit.keys.pluck(:id).should eql(commit2.keys.pluck(:id))
+    it "should not import keys not under whitelisted paths" do
+      @project.update_attribute :only_paths, %w(config/locales/ruby/)
+      @commit.import_strings
+      @commit.keys.for_key('root').should_not be_empty
+      @commit.keys.for_key('importer_path_skipped').should be_empty
+    end
+
+    it "should not import keys not under importer-specific whitelisted paths" do
+      @project.update_attribute :only_importer_paths, 'ruby' => %w(config/locales/ruby/)
+      @commit.import_strings
+      @commit.keys.for_key('root').should_not be_empty
+      @commit.keys.for_key('rootrb').should_not be_empty
+      @commit.keys.for_key('importer_path_skipped').should_not be_empty
+      @commit.keys.for_key('importer_path_skippedrb').should be_empty
     end
   end
 
   describe "[importing translations]" do
-    before(:each) do
-      @project  = FactoryGirl.create(:project,
-                                     targeted_rfc5646_locales: {'en-US' => true, 'de-DE' => true})
-      @blob     = FactoryGirl.create(:fake_blob, project: @project)
-      @commit   = FactoryGirl.create(:commit, project: @project)
-      @importer = Importer::Yaml.new(@blob, 'some/path', @commit)
+    before :each do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    targeted_rfc5646_locales: {'en-US' => true, 'de-DE' => true})
+      @commit  = @project.commit!('HEAD', skip_import: true)
     end
 
-    it "should not import translations under skipped paths"
-    it "should not import translations under importer-specific skipped paths"
+    it "should not import translations under skipped paths" do
+      @project.update_attribute :skip_paths, %w(config/locales/ruby_also/)
 
-    it "should not reset the reviewed state for approved translations that are updated" do
-      key = FactoryGirl.create(:key, project: @project, key: 'key')
-      @commit.keys << key
-      FactoryGirl.create :translation, key: key, rfc5646_locale: 'en-US'
-      translation = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'de-DE', translated: true, approved: true)
-      test_importer @importer, <<-YAML, nil, Locale.from_rfc5646('de-DE')
-de-DE:
-  key: new copy
-      YAML
-      translation.reload.should be_approved
-      translation.copy.should eql('new copy')
+      root_key    = FactoryGirl.create(:key, key: 'root', source_copy: 'root-de')
+      skipped_key = FactoryGirl.create(:key, key: 'importer_path_skipped', source_copy: 'skipped-de')
+      FactoryGirl.create :translation, key: root_key, copy: 'old', rfc5646_locale: 'en-US'
+      FactoryGirl.create :translation, key: skipped_key, copy: 'old', rfc5646_locale: 'en-US'
+      root_trans    = FactoryGirl.create(:translation, key: root_key, copy: 'old', rfc5646_locale: 'de-DE')
+      skipped_trans = FactoryGirl.create(:translation, key: skipped_key, copy: 'old', rfc5646_locale: 'de-DE')
+      @commit.keys << root_key << skipped_key
+
+      @commit.import_strings locale: Locale.from_rfc5646('de-DE')
+
+      root_trans.reload.copy.should eql('root-de')
+      skipped_trans.reload.copy.should eql('old')
+    end
+
+    it "should not import translations under importer-specific skipped paths" do
+      @project.update_attribute :skip_importer_paths, 'ruby' => %w(config/locales/ruby_also/)
+
+      skipped_key     = FactoryGirl.create(:key, key: 'importer_path_skippedrb', source_copy: 'skipped-de')
+      not_skipped_key = FactoryGirl.create(:key, key: 'importer_path_skipped', source_copy: 'skipped-de')
+      FactoryGirl.create :translation, key: skipped_key, copy: 'old', rfc5646_locale: 'en-US'
+      FactoryGirl.create :translation, key: not_skipped_key, copy: 'old', rfc5646_locale: 'en-US'
+      skipped_trans     = FactoryGirl.create(:translation, key: skipped_key, copy: 'old', rfc5646_locale: 'de-DE')
+      not_skipped_trans = FactoryGirl.create(:translation, key: not_skipped_key, copy: 'old', rfc5646_locale: 'de-DE')
+      @commit.keys << not_skipped_key << skipped_key
+
+      @commit.import_strings locale: Locale.from_rfc5646('de-DE')
+
+      not_skipped_trans.reload.copy.should eql('skipped-de')
+      skipped_trans.reload.copy.should eql('old')
+    end
+
+    it "should not import translations not under whitelisted paths" do
+      @project.update_attribute :only_paths, %w(config/locales/ruby/)
+
+      root_key    = FactoryGirl.create(:key, key: 'root', source_copy: 'root-de')
+      skipped_key = FactoryGirl.create(:key, key: 'importer_path_skipped', source_copy: 'skipped-de')
+      FactoryGirl.create :translation, key: root_key, copy: 'old', rfc5646_locale: 'en-US'
+      FactoryGirl.create :translation, key: skipped_key, copy: 'old', rfc5646_locale: 'en-US'
+      root_trans    = FactoryGirl.create(:translation, key: root_key, copy: 'old', rfc5646_locale: 'de-DE')
+      skipped_trans = FactoryGirl.create(:translation, key: skipped_key, copy: 'old', rfc5646_locale: 'de-DE')
+      @commit.keys << root_key << skipped_key
+
+      @commit.import_strings locale: Locale.from_rfc5646('de-DE')
+
+      root_trans.reload.copy.should eql('root-de')
+      skipped_trans.reload.copy.should eql('old')
+    end
+
+    it "should not import translations not under importer-specific whitelisted paths" do
+      @project.update_attribute :only_importer_paths, 'ruby' => %w(config/locales/ruby/)
+
+      skipped_key     = FactoryGirl.create(:key, key: 'importer_path_skippedrb', source_copy: 'skipped-de')
+      not_skipped_key = FactoryGirl.create(:key, key: 'importer_path_skipped', source_copy: 'skipped-de')
+      FactoryGirl.create :translation, key: skipped_key, copy: 'old', rfc5646_locale: 'en-US'
+      FactoryGirl.create :translation, key: not_skipped_key, copy: 'old', rfc5646_locale: 'en-US'
+      skipped_trans     = FactoryGirl.create(:translation, key: skipped_key, copy: 'old', rfc5646_locale: 'de-DE')
+      not_skipped_trans = FactoryGirl.create(:translation, key: not_skipped_key, copy: 'old', rfc5646_locale: 'de-DE')
+      @commit.keys << not_skipped_key << skipped_key
+
+      @commit.import_strings locale: Locale.from_rfc5646('de-DE')
+
+      not_skipped_trans.reload.copy.should eql('skipped-de')
+      skipped_trans.reload.copy.should eql('old')
     end
 
     it "should only import translations from included keys" do
@@ -73,19 +141,15 @@ de-DE:
 
       included_key = FactoryGirl.create(:key, key: 'included', project: @project)
       excluded_key = FactoryGirl.create(:key, key: 'excluded', project: @project)
-      @commit.keys << included_key << excluded_key
-      FactoryGirl.create :translation, key: included_key, rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: excluded_key, rfc5646_locale: 'en-US'
+      FactoryGirl.create :translation, key: included_key, rfc5646_locale: 'en-US', copy: 'old copy'
+      FactoryGirl.create :translation, key: excluded_key, rfc5646_locale: 'en-US', copy: 'old copy'
       included = FactoryGirl.create(:translation, key: included_key, rfc5646_locale: 'de-DE', copy: 'old copy')
       excluded = FactoryGirl.create(:translation, key: excluded_key, rfc5646_locale: 'de-DE', copy: 'old copy')
+      @commit.keys << included_key << excluded_key
 
-      test_importer @importer, <<-YAML, nil, Locale.from_rfc5646('de-DE')
-de-DE:
-  included: new copy
-  excluded: new copy
-      YAML
+      @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      included.reload.copy.should eql('new copy')
+      included.reload.copy.should eql('included-de')
       excluded.reload.copy.should eql('old copy')
     end
 
@@ -93,14 +157,11 @@ de-DE:
       @project.update_attribute :key_exclusions, %w(*cl*)
 
       key = FactoryGirl.create(:key, key: 'excluded', project: @project)
-      @commit.keys << key
-      FactoryGirl.create :translation, key: key, rfc5646_locale: 'en-US'
+      FactoryGirl.create :translation, key: key, rfc5646_locale: 'en-US', copy: 'old copy'
       translation = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'de-DE', copy: 'old copy')
+      @commit.keys << key
 
-      test_importer @importer, <<-YAML, nil, Locale.from_rfc5646('de-DE')
-de-DE:
-  excluded: new copy
-      YAML
+      @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
       translation.reload.copy.should eql('old copy')
     end
@@ -109,14 +170,11 @@ de-DE:
       @project.update_attribute :key_locale_exclusions, 'de-DE' => %w(*cl*)
 
       key = FactoryGirl.create(:key, key: 'excluded', project: @project)
-      @commit.keys << key
-      FactoryGirl.create :translation, key: key, rfc5646_locale: 'en-US'
+      FactoryGirl.create :translation, key: key, rfc5646_locale: 'en-US', copy: 'old copy'
       translation = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'de-DE', copy: 'old copy')
+      @commit.keys << key
 
-      test_importer @importer, <<-YAML, nil, Locale.from_rfc5646('de-DE')
-de-DE:
-  excluded: new copy
-      YAML
+      @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
       translation.reload.copy.should eql('old copy')
     end
@@ -126,19 +184,15 @@ de-DE:
 
       included_key = FactoryGirl.create(:key, key: 'included', project: @project)
       excluded_key = FactoryGirl.create(:key, key: 'excluded', project: @project)
-      @commit.keys << included_key << excluded_key
-      FactoryGirl.create :translation, key: included_key, rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: excluded_key, rfc5646_locale: 'en-US'
+      FactoryGirl.create :translation, key: included_key, rfc5646_locale: 'en-US', copy: 'old copy'
+      FactoryGirl.create :translation, key: excluded_key, rfc5646_locale: 'en-US', copy: 'old copy'
       included = FactoryGirl.create(:translation, key: included_key, rfc5646_locale: 'de-DE', copy: 'old copy')
       excluded = FactoryGirl.create(:translation, key: excluded_key, rfc5646_locale: 'de-DE', copy: 'old copy')
+      @commit.keys << included_key << excluded_key
 
-      test_importer @importer, <<-YAML, nil, Locale.from_rfc5646('de-DE')
-de-DE:
-  included: new copy
-  excluded: new copy
-      YAML
+      @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      included.reload.copy.should eql('new copy')
+      included.reload.copy.should eql('included-de')
       excluded.reload.copy.should eql('old copy')
     end
   end

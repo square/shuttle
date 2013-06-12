@@ -19,52 +19,54 @@
 require 'spec_helper'
 
 describe Localizer::Storyboard do
-  before :all do
-    @project = FactoryGirl.create(:project)
-    @en      = Locale.from_rfc5646('en-US')
-    @de      = Locale.from_rfc5646('de-DE')
-    @commit  = FactoryGirl.create(:commit, project: @project)
+  before :each do
+    Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    @project = FactoryGirl.create(:project,
+                                  repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                  only_paths:     %w(apple/),
+                                  skip_imports:   Importer::Base.implementations.map(&:ident) - %w(storyboard))
+    @commit  = @project.commit!('HEAD')
 
     {
-        'Uku-Po-7eL.text'                                            => 'text field text',
-        'Uku-Po-7eL.placeholder'                                     => 'text field placeholder',
-        'TfH-0c-wqN.headerTitle'                                     => 'table section header',
-        'TfH-0c-wqN.footerTitle'                                     => 'table section footer',
-        'XtV-Di-hKk.title'                                           => 'nav bar title 1',
-        'kDj-4K-brs.title'                                           => 'nav bar title 2',
-        'f3V-y0-8XT.state[selected].title'                           => 'selected title',
-        'f3V-y0-8XT.state[normal].title'                             => 'button title',
-        'f3V-y0-8XT.state[highlighted].title'                        => 'highlighted title',
-        'f3V-y0-8XT.state[disabled].title'                           => 'disabled title',
-        'wQO-PX-mfF.segments.segment[1].title'                       => 'segment 2',
-        'wQO-PX-mfF.segments.segment[0].title'                       => 'segment 1',
-        'Uku-Po-7eL.accessibility[accessibilityConfiguration].label' => 'accessibility label',
-        'Uku-Po-7eL.accessibility[accessibilityConfiguration].hint'  => 'accessibility hint',
-        'beo-Nd-8Qm.title'                                           => 'view controller title',
-        'NN0-LQ-6Cj.text'                                            => "has\nnewline"
+        '/apple/en-US.lproj/example.storyboard:Uku-Po-7eL.text'                                            => 'text field text',
+        '/apple/en-US.lproj/example.storyboard:Uku-Po-7eL.placeholder'                                     => 'text field placeholder',
+        '/apple/en-US.lproj/example.storyboard:TfH-0c-wqN.headerTitle'                                     => 'table section header',
+        '/apple/en-US.lproj/example.storyboard:TfH-0c-wqN.footerTitle'                                     => 'table section footer',
+        '/apple/en-US.lproj/example.storyboard:XtV-Di-hKk.title'                                           => 'nav bar title 1',
+        '/apple/en-US.lproj/example.storyboard:kDj-4K-brs.title'                                           => 'nav bar title 2',
+        '/apple/en-US.lproj/example.storyboard:f3V-y0-8XT.state[selected].title'                           => 'selected title',
+        '/apple/en-US.lproj/example.storyboard:f3V-y0-8XT.state[normal].title'                             => 'button title',
+        '/apple/en-US.lproj/example.storyboard:f3V-y0-8XT.state[highlighted].title'                        => 'highlighted title',
+        '/apple/en-US.lproj/example.storyboard:f3V-y0-8XT.state[disabled].title'                           => 'disabled title',
+        '/apple/en-US.lproj/example.storyboard:wQO-PX-mfF.segments.segment[1].title'                       => 'segment 2',
+        '/apple/en-US.lproj/example.storyboard:wQO-PX-mfF.segments.segment[0].title'                       => 'segment 1',
+        '/apple/en-US.lproj/example.storyboard:Uku-Po-7eL.accessibility[accessibilityConfiguration].label' => 'accessibility label',
+        '/apple/en-US.lproj/example.storyboard:Uku-Po-7eL.accessibility[accessibilityConfiguration].hint'  => 'accessibility hint',
+        '/apple/en-US.lproj/example.storyboard:beo-Nd-8Qm.title'                                           => 'view controller title',
+        '/apple/en-US.lproj/example.storyboard:NN0-LQ-6Cj.text'                                            => "has\nnewline"
     }.each do |key, string|
-      key = FactoryGirl.create(:key,
-                               project:      @project,
-                               key:          "/Resources/en-US.lproj/example.storyboard:#{key}",
-                               original_key: key,
-                               source:       '/Resources/en-US.lproj/example.storyboard')
-      @commit.keys << key
-      FactoryGirl.create :translation,
-                         key:           key,
-                         source_locale: @en,
-                         locale:        @de,
-                         source_copy:   string,
-                         copy:          "#{string} (de)"
+      key = @project.keys.for_key(key).source_copy_matches(string).first!
+      key.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes({
+          copy:     "#{string} (de)",
+          approved: true
+      }, as: :system)
     end
   end
 
   it "should localize a Storyboard file" do
-    input_file  = Localizer::File.new("Resources/en-US.lproj/example.storyboard", File.read(Rails.root.join('spec', 'fixtures', 'example.storyboard')))
-    output_file = Localizer::File.new
+    compiler = Compiler.new(@commit)
+    file     = compiler.localize
 
-    Localizer::Storyboard.new(@project, @commit.translations).localize input_file, output_file, @de
+    entries = Hash.new
+    Archive.read_open_memory(file.io.read, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
+      while (entry = archive.next_header)
+        entry.should be_regular
+        entries[entry.pathname] = archive.read_data.force_encoding('UTF-8')
+      end
+    end
 
-    output_file.path.should eql('Resources/de-DE.lproj/example.storyboard')
-    output_file.content.should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.storyboard')))
+    entries.size.should eql(1)
+    entries.keys.first.should eql('apple/de-DE.lproj/example.storyboard')
+    entries.values.first.should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.storyboard')))
   end
 end

@@ -29,9 +29,6 @@ ActiveRecord::Base.subclasses.each do |model|
   model.connection.execute "TRUNCATE #{model.table_name} CASCADE"
 end
 
-# Clear out Redis
-Shuttle::Redis.flushdb
-
 # Clear manifest and localize caches
 require 'fileutils'
 FileUtils.rm_rf Rails.root.join('tmp', 'cache', 'manifest', Rails.env.to_s)
@@ -65,8 +62,10 @@ RSpec.configure do |config|
 
   config.include Devise::TestHelpers, type: :controller
 
-  config.before(:each) do
+  config.before :each do
+    # Clear out Redis
     Redis::Mutex.sweep
+    Shuttle::Redis.flushdb
   end
 end
 

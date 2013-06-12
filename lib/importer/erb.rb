@@ -22,13 +22,21 @@ module Importer
     protected
 
     def import_file?(locale=nil)
-      ::File.basename(file.path) =~ /\.#{Regexp.escape locale_to_use(locale).rfc5646}\.+?\.erb$/
+      ::File.basename(file.path) =~ /\.#{Regexp.escape locale_to_use(locale).rfc5646}\..+?\.erb$/
     end
 
     def import_strings(receiver)
+      # build a key that's the file name less the locale
+      path       = ::File.dirname(file.path)
+      name_parts = ::File.basename(file.path).split('.')
+      ext        = name_parts.pop
+      output_ext = name_parts.pop
+      _locale    = name_parts.pop
+      key        = "#{path}/#{name_parts.join('.')}.#{output_ext}.#{ext}"
+
       fencers = self.class.fencers
       fencers << 'Html' if ::File.basename(file.path) =~ /\.html\.erb$/
-      receiver.add_string file.path, file.contents, fencers: fencers
+      receiver.add_string key, file.contents, fencers: fencers
     end
   end
 end

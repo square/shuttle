@@ -129,13 +129,20 @@ class Commit < ActiveRecord::Base
   #   written in (by default it's the Project's base locale).
   # @option options [true, false] inline (false) If `true`, does not spawn
   #   Sidekiq workers to perform the import in parallel.
+  # @option options [true, false] force (false) If `true`, blobs will be
+  #   re-scanned for keys even if they have already been scanned.
   # @raise [CommitNotFoundError] If the commit could not be found in the Git
   #   repository.
 
   def import_strings(options={})
     raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
-    keys.clear
+
+    # clear out existing keys so that we can import all new keys
+    keys.clear unless options[:locale]
+    # perform the recursive import
     import_tree commit!.gtree, '', options
+    # normally this is performed once the last worker is removed from the list,
+    # but if we're not using workers, we need to do it here
     update_stats_at_end_of_loading if options[:inline]
   end
 
@@ -241,6 +248,18 @@ class Commit < ActiveRecord::Base
     update_stats_at_end_of_loading if loading_was && !loading
   end
 
+  # Removes all workers from the loading list, marks the Commit as not loading,
+  # and recalculates Commit statistics if the Commit was previously loading.
+  # This method should be used to fix "stuck" Commits.
+
+  def clear_workers!
+    Shuttle::Redis.del "import:#{revision}"
+    if loading?
+      update_column :loading, false
+      update_stats_at_end_of_loading if loading_was && !loading
+    end
+  end
+
   def all_translations_entered_for_locale?(locale)
     translations.not_base.where(rfc5646_locale: locale.rfc5646, translated: false).count == 0
   end
@@ -277,11 +296,25 @@ class Commit < ActiveRecord::Base
 
   def import_tree(tree, path, options={})
     tree.blobs.each do |name, blob|
-      blob_path = "#{path}/#{name}"
-      if options[:inline]
-        BlobImporter.new.perform project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646)
-      else
-        add_worker! BlobImporter.perform_once(project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646))
+      blob_path   = "#{path}/#{name}"
+      blob_object = project.blobs.with_sha(blob.sha).find_or_create!({sha: blob.sha}, as: :system)
+
+      imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
+      imps.each do |importer|
+        importer = importer.new(blob_object, blob_path, self)
+
+        Shuttle::Redis.del("keys_for_blob:#{importer.class.ident}:#{blob.sha}") if options[:force]
+
+        if importer.skip?(options[:locale])
+          #Importer::SKIP_LOG.info "commit=#{revision} blob=#{blob.sha} path=#{blob_path} importer=#{importer.class.ident} #skip? returned true for #{options[:locale].inspect}"
+          next
+        end
+
+        if options[:inline]
+          BlobImporter.new.perform importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646)
+        else
+          add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646))
+        end
       end
     end
 

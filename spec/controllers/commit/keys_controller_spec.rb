@@ -17,13 +17,13 @@ require 'spec_helper'
 describe Commit::KeysController do
   describe '#index' do
     before :all do
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     base_rfc5646_locale:      'en',
                                     targeted_rfc5646_locales: {'en' => true, 'fr' => true},
-                                    repository_url:           "git://github.com/RISCfuture/better_caller.git")
+                                    repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
 
-      @commit       = FactoryGirl.create(:commit, project: @project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc')
+      @commit       = @project.commit!('HEAD', skip_import: true)
       @keys         = FactoryGirl.create_list(:key, 51, project: @project).sort_by(&:key)
       @translations = @keys.map do |key|
         FactoryGirl.create :translation,
