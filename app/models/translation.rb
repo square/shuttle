@@ -93,11 +93,11 @@ class Translation < ActiveRecord::Base
 
   after_destroy :recalculate_readiness
 
-  attr_accessible :copy, :rfc5646_locale, :locale, as: :translator
+  attr_accessible :copy, as: :translator
   attr_accessible :copy, :rfc5646_locale, :locale, :source_copy,
                   :source_rfc5646_locale, :source_locale, :approved,
                   :preserve_reviewed_status, :skip_readiness_hooks, as: :system
-  attr_accessible :approved, as: :reviewer
+  attr_accessible :copy, :approved, as: :reviewer
   attr_readonly :rfc5646_locale, :locale
 
   # @return [true, false] If `true`, the after-save hooks that recalculate
