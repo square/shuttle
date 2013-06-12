@@ -27,18 +27,17 @@ class HomeController < ApplicationController
   # * `GET /`
 
   def index
-    flash_options = {
-        flash: {
-            alert:   flash[:alert],
-            warning: flash[:warning],
-            notice:  flash[:notice],
-            success: flash[:success]
-        }
-    }
+    @commits = Commit.
+        includes(:project).
+        where(ready: false).
+        order('priority DESC, due_date DESC')
 
-    return redirect_to(administrators_url, flash_options) if current_user.admin? || current_user.monitor?
-    return redirect_to(translators_url, flash_options) if current_user.translator?
-    return redirect_to(reviewers_url, flash_options) if current_user.reviewer?
+    if current_user.approved_locales.present?
+      projects = Project.all.select do |project|
+        (project.targeted_locales & current_user.approved_locales).any?
+      end
+      @commits = @commits.where(project_id: projects.map(&:id))
+    end
   end
 
   # Displays a landing page appropriate to translators: They can choose the

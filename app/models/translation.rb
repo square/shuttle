@@ -82,6 +82,7 @@ class Translation < ActiveRecord::Base
 
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
   before_validation :approve_translation_made_by_reviewer, on: :update
+  before_validation :count_words
 
   before_save { |obj| obj.translated = obj.copy.to_bool; true } # in case validation was skipped
   before_update :reset_reviewed, unless: :preserve_reviewed_status
@@ -196,5 +197,9 @@ class Translation < ActiveRecord::Base
 
   def update_translation_memory
     TranslationUnit.store self
+  end
+
+  def count_words
+    self.words_count = source_copy.split(/\s+/).size
   end
 end

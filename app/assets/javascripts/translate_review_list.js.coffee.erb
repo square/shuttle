@@ -73,10 +73,6 @@ class root.TranslateReviewList
     div = $('<div/>').addClass('project').appendTo(@list)
     h1 = $('<h1/>').text(' ' + project.name).appendTo(div)
     $('<label/>').addClass('badge').text(numberWithDelimiter(project["pending_#{@action}_count"])).prependTo h1
-    if (project.due_date)
-      segments = (parseInt(segment) for segment in project.due_date.split(/-/))
-      date = new Date(segments[0], segments[1], segments[2])
-      $('<span/>').addClass('due-date pull-right').text('due ' + date.toLocaleDateString()).appendTo h1
 
     table = $('<table/>').addClass('table table-condensed pending-counts').appendTo div
     tr = $('<tr/>').appendTo table

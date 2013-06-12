@@ -47,7 +47,6 @@ require 'file_mutex'
 # | `base_locale`            | The locale the Project is initially localized in.                                                                                                                                            |
 # | `locale_requirements`    | An hash mapping locales this Project can be localized to, to whether those locales are required.                                                                                             |
 # | `skip_imports`           | An array of classes under the {Importer} module that are _not_ used to search for Translations.                                                                                              |
-# | `due_date`               | A date displayed to translators and reviewers informing them of when the Project must be fully localized.                                                                                    |
 # | `key_exclusions`         | An array of globs that describe keys that should be ignored.                                                                                                                                 |
 # | `key_inclusions`         | An array of globs that describe keys that should be included. Other keys are ignored.                                                                                                        |
 # | `key_locale_exclusions`  | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that should be ignored in that locale.                                                                      |
@@ -80,7 +79,6 @@ class Project < ActiveRecord::Base
       targeted_rfc5646_locales: {presence: true, type: Hash, default: {'en' => true}},
 
       skip_imports:             {type: Array, default: []},
-      due_date:                 {type: Date, allow_nil: true},
 
       key_exclusions:           {type: Array, default: [], allow_nil: false},
       key_inclusions:           {type: Array, default: [], allow_nil: false},
@@ -101,7 +99,7 @@ class Project < ActiveRecord::Base
   )
 
   extend SetNilIfBlank
-  set_nil_if_blank :due_date, :webhook_url
+  set_nil_if_blank :webhook_url
 
   include Slugalicious
   slugged :name

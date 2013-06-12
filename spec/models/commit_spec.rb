@@ -160,7 +160,7 @@ describe Commit do
       FactoryGirl.create :translation, key: key1, rfc5646_locale: 'de', source_rfc5646_locale: 'en', approved: true
       FactoryGirl.create :translation, key: key2, rfc5646_locale: 'de', source_rfc5646_locale: 'en', approved: true
       FactoryGirl.create :translation, key: key1, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: true
-      FactoryGirl.create :translation, key: key2, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: nil
+      FactoryGirl.create :translation, key: key2, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: nil, copy: nil
 
       @commit.keys = [key1, key2]
     end
@@ -170,11 +170,19 @@ describe Commit do
 
       @commit.translations_total!
       @commit.translations_done!
+      @commit.translations_pending!
+      @commit.translations_new!
       @commit.strings_total!
+      @commit.words_pending!
+      @commit.words_new!
 
       @commit.translations_total.should eql(4)
       @commit.translations_done.should eql(2)
+      @commit.translations_pending.should eql(1)
+      @commit.translations_new.should eql(1)
       @commit.strings_total.should eql(2)
+      @commit.words_pending.should eql(19)
+      @commit.words_new.should eql(19)
     end
   end
 

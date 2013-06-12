@@ -94,6 +94,7 @@ en:
       short_date: "%B %-m, %Y"
       trados: "%d%m%Y, %H:%M:%S"
       full: "%A, %B %-d, %Y %-I:%M:%S %P"
+      mon_day: "%b %-d"
   controllers:
     application:
       mass_assignment_security: You tried to modify something you weren’t allowed to!
@@ -141,6 +142,12 @@ en:
         translator: translator
         reviewer: reviewer
         admin: administrator
+    commit:
+      priority:
+        0: P0
+        1: P1
+        2: P2
+        3: P3
   fencer:
     Erb: "<%= ERb %>"
     Html: "<HTML>"
