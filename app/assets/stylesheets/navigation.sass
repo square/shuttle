@@ -1,0 +1,11 @@
+$logo-image: "shuttle.png"
+$logo-image2x: "shuttle@2x.png"
+
+.navbar
+  .brand
+    a
+      background: image-url($logo-image) no-repeat left center
+      padding-left: 30px + 10px  //image-width($logo-image)
+      @media (-webkit-min-device-pixel-ratio: 1.75), (min-resolution: 168dpi)
+        background-image: image-url($logo-image2x)
+        background-size: auto 100%

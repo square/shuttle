@@ -108,7 +108,6 @@ module Views
                 span class: 'icon-bar'
               end
               div(class: 'brand') do
-                image_tag "shuttle.png", width: '20', height: '20'
                 a "Shuttle", href: root_url
               end
               div(class: 'nav-collapse') do
