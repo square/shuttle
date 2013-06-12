@@ -16,7 +16,7 @@ development:
   adapter: postgresql
   encoding: unicode
   database: shuttle_development
-  pool: 10
+  pool: 30
   username: shuttle
   password:
   host: localhost
