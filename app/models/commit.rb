@@ -240,6 +240,18 @@ class Commit < ActiveRecord::Base
     update_stats_at_end_of_loading if loading_was && !loading
   end
 
+  # Removes all workers from the loading list, marks the Commit as not loading,
+  # and recalculates Commit statistics if the Commit was previously loading.
+  # This method should be used to fix "stuck" Commits.
+
+  def clear_workers!
+    Shuttle::Redis.del "import:#{revision}"
+    if loading?
+      update_column :loading, false
+      update_stats_at_end_of_loading if loading_was && !loading
+    end
+  end
+
   def all_translations_entered_for_locale?(locale)
     translations.not_base.where(rfc5646_locale: locale.rfc5646, translated: false).count == 0
   end
