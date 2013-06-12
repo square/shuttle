@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'find'
+require 'set'
 
 # Container module for {Importer::Base} and its subclasses.
 
@@ -100,11 +100,11 @@ module Importer
     def import
       load_contents
 
-      @keys = []
+      @keys = Set.new
       Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
         process_blob_for_string_extraction
       end
-      @commit.keys += @keys if @commit
+      @commit.keys += @keys.to_a if @commit
 
       # cache the list of keys we know to be in this blob for later use
       Shuttle::Redis.set "keys_for_blob:#{@blob.sha}", @keys.map(&:id).join(',')
@@ -207,7 +207,7 @@ module Importer
               skip_readiness_hooks:     true
           ), as: :system
       )
-      @keys << key unless @keys.include?(key)
+      @keys << key
 
       key.translations.in_locale(@blob.project.base_locale).create_or_update!({
               source_copy:              value,
@@ -225,26 +225,24 @@ module Importer
 
     # @private
     def add_translation(key, value, locale)
-      raise "Can't do a translation import without a commit" unless @commit
-
       if @blob.project.skip_key?(key, locale)
         log_skip key, "skip_key? returned true for #{locale.inspect}"
         return
       end
 
-      key = @commit.keys.for_key(key).first
-      unless key
+      key_obj = @commit.keys.for_key(key).first
+      unless key_obj
         log_skip key, "Couldn't find key"
         return
       end
 
-      base = key.translations.base.first
+      base = key_obj.translations.base.first
       unless base
         log_skip key, "Couldn't find base translation"
         return
       end
 
-      key.translations.in_locale(locale).create_or_update!({
+      key_obj.translations.in_locale(locale).create_or_update!({
               source_copy:              base.copy,
               copy:                     value,
               approved:                 true,
