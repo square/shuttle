@@ -117,7 +117,7 @@ module Importer
         $1
       else
         string.gsub("\\'", "'")
-      end.gsub(/\\u(\d{4})/) { $1.to_i.chr(Encoding::UTF_8) }
+      end.gsub(/\\u([0-9a-f]{4})/) { $1.to_i(16).chr(Encoding::UTF_8) }
     end
 
     def find_comment(tag)
