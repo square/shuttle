@@ -114,14 +114,14 @@ module Views
                 if current_user
                   ul(class: 'nav') do
                     tab "Translate", 'translate', translators_url if current_user.translator?
-                    tab "Glossary", 'glossary', glossary_url if current_user.translator?
                     tab "Review", 'review', reviewers_url if current_user.reviewer?
-                    tab "Status", 'admin', administrators_url if current_user
                     tab "Search", 'search', search_url
-                    tab "Users", 'users', users_url if current_user.admin?
                   end
                   ul(class: 'nav pull-right') do
-                    #tab "My Account", 'account', account_url
+                    #tab "Settings", 'account', account_url
+                    tab "Projects", 'admin', administrators_url if current_user
+                    tab "Glossary", 'glossary', glossary_url if current_user.translator?
+                    tab "Users", 'users', users_url if current_user.admin?
                     tab "Log Out", 'logout', destroy_user_session_url, :'data-method' => 'delete'
                   end
                 else
