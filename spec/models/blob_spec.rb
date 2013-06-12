@@ -21,58 +21,21 @@ describe Blob do
       @blob    = FactoryGirl.create(:blob, project: @project)
     end
 
-    it "should call #import on all importer subclasses" do
-      Importer::Base.implementations.each do |imp|
-        instance = mock(imp.to_s, :skip? => false)
-        imp.should_receive(:new).once.with(@blob, 'some/path', nil).and_return(instance)
-        instance.should_receive(:import).once
-      end
-      @blob.import_strings 'some/path'
-    end
-
-    it "should not call #import on any disabled importer subclasses" do
-      @project.update_attribute :skip_imports, %w(Importer::Ruby Importer::Yaml)
-      Importer::Base.implementations.each do |imp|
-        if imp == Importer::Ruby || imp == Importer::Yaml
-          imp.should_not_receive(:new)
-        else
-          instance = mock(imp.to_s, :skip? => false)
-          imp.should_receive(:new).once.with(@blob, 'some/path', nil).and_return(instance)
-          instance.should_receive(:import).once
-        end
-      end
-      @blob.import_strings 'some/path'
-      @project.update_attribute :skip_imports, []
-    end
-
-    it "should call import_locale if :locale is given" do
-      locale = Locale.from_rfc5646('de')
-      Importer::Base.implementations.each do |imp|
-        instance = mock(imp.to_s, :skip? => false)
-        imp.should_receive(:new).once.with(@blob, 'some/path', nil).and_return(instance)
-        instance.should_receive(:import_locale).once.with(locale)
-      end
-      @blob.import_strings 'some/path', locale: locale
+    it "should call #import on an importer subclass" do
+      imp = Importer::Base.implementations
+      instance = mock(imp.to_s, :skip? => false)
+      imp.should_receive(:new).once.with(@blob, 'some/path', nil).and_return(instance)
+      instance.should_receive(:import).once
+      @blob.import_strings imp, 'some/path'
     end
 
     it "should pass a commit if given using :commit" do
       commit = FactoryGirl.create(:commit, project: @project)
-      Importer::Base.implementations.each do |imp|
-        instance = mock(imp.to_s, :skip? => false)
-        imp.should_receive(:new).once.with(@blob, 'some/path', commit).and_return(instance)
-        instance.should_receive(:import).once
-      end
-      @blob.import_strings 'some/path', commit: commit
-    end
-
-    it "should skip any importers for which #skip? returns true" do
-      Importer::Base.implementations.each do |imp|
-        instance = mock(imp.to_s)
-        imp.should_receive(:new).once.with(@blob, 'some/path', nil).and_return(instance)
-        instance.should_receive(:skip?).once.with(nil).and_return(true)
-        instance.should_not_receive(:import)
-      end
-      @blob.import_strings 'some/path'
+      imp = Importer::Base.implementations.first
+      instance = mock(imp.to_s, :skip? => false)
+      imp.should_receive(:new).once.with(@blob, 'some/path', commit).and_return(instance)
+      instance.should_receive(:import).once
+      @blob.import_strings imp, 'some/path', commit: commit
     end
   end
 end

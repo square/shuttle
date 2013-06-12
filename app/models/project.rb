@@ -185,12 +185,15 @@ class Project < ActiveRecord::Base
   # fetch and attempts to create a Commit. If _that_ fails, raises an exception.
   #
   # @param [String] sha A SHA or ref resolvable to a SHA.
-  # @param [true, false] skip_creation If `true`, does not create a new Commit
-  #   object if one is not found.
+  # @param [Hash] options Additional options.
+  # @option options [true, false] skip_import If `true`, does not perform an
+  #   import after creating the Commit, if one was created.
+  # @option options [true, false] skip_create If `true`, does not create a new
+  #   Commit object if one is not found.
   # @return [Commit] The Commit for that SHA.
   # @raise [ActiveRecord::RecordNotFound] If an unknown SHA is given.
 
-  def commit!(sha, skip_creation=false)
+  def commit!(sha, options={})
     commit_object = repo { |repo| repo.object(sha) }
     commit_object ||= begin
       repo(&:fetch)
@@ -198,14 +201,15 @@ class Project < ActiveRecord::Base
     end
     raise ActiveRecord::RecordNotFound, "No such commit #{sha}" unless commit_object
 
-    if skip_creation
+    if options[:skip_create]
       commits.for_revision(commit_object.sha).first!
     else
       commits.for_revision(commit_object.sha).
           find_or_create!({
                               revision:     commit_object.sha,
                               message:      commit_object.message,
-                              committed_at: commit_object.author.date
+                              committed_at: commit_object.author.date,
+                              skip_import:  options[:skip_import]
                           }, as: :system)
     end
   end
@@ -275,9 +279,9 @@ class Project < ActiveRecord::Base
 
     return true if skip_paths.any? { |sp| path.start_with?(sp) }
     return true if only_paths.present? && only_paths.none? { |op| path.start_with?(op) }
-    return true if (skip_importer_paths[importer.to_s] || []).any? { |sp| path.start_with?(sp) }
-    if only_importer_paths[importer.to_s].present?
-      return true if only_importer_paths[importer.to_s].none? { |op| path.start_with?(op) }
+    return true if (skip_importer_paths[importer.ident] || []).any? { |sp| path.start_with?(sp) }
+    if only_importer_paths[importer.ident].present?
+      return true if only_importer_paths[importer.ident].none? { |op| path.start_with?(op) }
     end
 
     return false

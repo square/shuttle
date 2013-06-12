@@ -15,33 +15,24 @@
 require 'spec_helper'
 
 describe Importer::Erb do
-  include ImporterTesting
-
   context "[importing]" do
-    before(:each) do
-      @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
-      @blob     = FactoryGirl.create(:fake_blob, project: @project)
-      @importer = Importer::Erb.new(@blob, 'some/path')
+    before :all do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    only_paths:     %w(ruby/),
+                                    skip_imports:   Importer::Base.implementations.map(&:ident) - %w(erb))
+      @commit  = @project.commit!('HEAD')
     end
 
     it "should import one big string from an ERb file" do
-      file = <<-ERB
-some text here <%= something %>.
-      ERB
-      test_importer @importer, file, 'foo/bar.text.erb'
-
-      @project.keys.count.should eql(1)
-      @project.keys.for_key('foo/bar.text.erb').first.translations.find_by_rfc5646_locale('en-US').copy.should eql(file)
+      file = @project.repo.object('HEAD^{tree}:ruby/example.en-US.text.erb').contents
+      @project.keys.for_key('/ruby/example.text.erb').first.translations.find_by_rfc5646_locale('en-US').copy.should eql(file)
     end
 
     it "should fence HTML tags in HTML ERB files" do
-      file = <<-ERB
-some <b>text</b> here <%= something %>.
-      ERB
-      test_importer @importer, file, 'foo/bar.html.erb'
-
-      @project.keys.count.should eql(1)
-      translation = @project.keys.for_key('foo/bar.html.erb').first.translations.find_by_rfc5646_locale('en-US')
+      file        = @project.repo.object('HEAD^{tree}:ruby/example.en-US.html.erb').contents
+      translation = @project.keys.for_key('/ruby/example.html.erb').first.translations.find_by_rfc5646_locale('en-US')
       translation.copy.should eql(file)
       translation.fences.should eql(
                                     '<%= something %>' => [22..37],

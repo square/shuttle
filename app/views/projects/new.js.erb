@@ -71,7 +71,7 @@ $(document).ready(function() {
           <% Importer::Base.implementations.each do |importer| %>
             $('<option/>').
                     text("<%= escape_javascript importer.human_name %>").
-                    attr({value: "<%= escape_javascript importer.to_s %>", selected: key == "<%= escape_javascript importer.to_s %>" ? 'selected' : ''}).
+                    attr({value: "<%= escape_javascript importer.ident %>", selected: key == "<%= escape_javascript importer.ident %>" ? 'selected' : ''}).
                     appendTo(select);
           <% end %>
           select.val(key);

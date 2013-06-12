@@ -15,84 +15,58 @@
 require 'spec_helper'
 
 describe Importer::Ember do
-  include ImporterTesting
-
-  let(:base_rfc5646_locale) { 'en-US' }
-
-  before(:each) do
-    @project  = FactoryGirl.create(:project, base_rfc5646_locale: base_rfc5646_locale)
-    @blob     = FactoryGirl.create(:fake_blob, project: @project)
-    @importer = Importer::Ember.new(@blob, 'some/path')
-  end
-
   context "[importing]" do
-    it "should import strings from JS files" do
-      test_importer @importer, <<-JS
-Ember.I18n.locales.translations["en-US"] = {
-  CLDRDefaultLanguage: "en",
-  root: "root",
-  nested: {
-    one: "one",
-    2: "two"
-  }
-};
-      JS
+    before :all do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    only_paths:     %w(js/),
+                                    skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
+      @commit  = @project.commit!('HEAD')
+    end
 
-      @project.keys.count.should eql(3)
-      @project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
-      @project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
-      @project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
+    it "should import strings from JS files" do
+      @project.keys.for_key('root_key').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
+      @project.keys.for_key('nested_key.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
+      @project.keys.for_key('nested_key.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
     end
 
     it "should import strings from CoffeeScript files" do
-      test_importer @importer, <<-COFFEE, "foo/bar.coffee"
-Ember.I18n.locales.translations["en-US"] =
-  CLDRDefaultLanguage: "en"
-  root: "root"
-  nested:
-    one: "one"
-    2: "two"
-      COFFEE
-
-      @project.keys.count.should eql(3)
-      @project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
-      @project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
-      @project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
+      @project.keys.for_key('root_key_coffee').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
+      @project.keys.for_key('nested_key_coffee.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
+      @project.keys.for_key('nested_key_coffee.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
     end
 
     it "should only import strings under the correct localization" do
-      test_importer @importer, <<-JS
-Ember.I18n.locales.translations["en-US"] = { english: "English" };
-Ember.I18n.locales.translations["de-DE"] = { english: "Englisch" };
-var fr_FR = { english: 'Anglais' };
-      JS
-
-      @project.keys.count.should eql(1)
-      @project.keys.for_key('english').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('English')
+      @project.keys.for_key('appears_in_two_locales').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('English')
     end
+  end
 
+  context "[importing with dot notation]" do
+    it "should properly import keys" do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    base_rfc5646_locale: 'en',
+                                    only_paths:          %w(js/),
+                                    skip_imports:        Importer::Base.implementations.map(&:ident) - %w(ember))
+      @commit  = @project.commit!('HEAD')
+
+      @project.keys.for_key('dot_notation').first.translations.find_by_rfc5646_locale('en').copy.should eql('foo')
+    end
+  end
+
+  context "[robust implementation" do
     it "should be more robust than just a JSON parser" do
-      test_importer @importer, <<-JS
-var translations = new Object();
-translations['foo'] = 'bar' + (10*10);
-Ember.I18n.locales.translations["en-US"] = translations;
-      JS
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    base_rfc5646_locale: 'en-GB',
+                                    only_paths:          %w(js/),
+                                    skip_imports:        Importer::Base.implementations.map(&:ident) - %w(ember))
+      @commit  = @project.commit!('HEAD')
 
-      @project.keys.count.should eql(1)
-      @project.keys.for_key('foo').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('bar100')
-    end
-
-    context "when the translations are set using dot notation" do
-      let(:base_rfc5646_locale) { 'en' }
-
-      it "should still find the translations" do
-        test_importer @importer, <<-JS
-Ember.I18n.locales.translations.en = { foo: "bar" };
-        JS
-
-        @project.keys.count.should eql(1)
-        @project.keys.for_key('foo').first.translations.find_by_rfc5646_locale('en').copy.should eql('bar')
-      end
+      @project.keys.for_key('complex').first.translations.find_by_rfc5646_locale('en-GB').copy.should eql('bar100')
     end
   end
 end

@@ -16,76 +16,25 @@
 require 'spec_helper'
 
 describe Importer::Yaml do
-  include ImporterTesting
-
   context "[importing]" do
-    before(:each) do
-      @project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
-      @blob     = FactoryGirl.create(:fake_blob, project: @project)
-      @importer = Importer::Yaml.new(@blob, 'some/path')
+    before :all do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    only_paths:     %w(config/locales/),
+                                    skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
+      @commit  = @project.commit!('HEAD')
     end
 
     it "should import strings from YAML files" do
-      test_importer @importer, <<-YAML
-en-US:
-  root: root
-  nested:
-    one: one
-    "2": two
-      YAML
-
-      @project.keys.count.should eql(3)
       @project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
       @project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
       @project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
     end
 
-    it "should only import strings under the correct localization" do
-      test_importer @importer, <<-YAML
-en-US:
-  root: root
-en:
-  root: enroot
-      YAML
-
-      @project.keys.count.should eql(1)
-      @project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
-    end
-
-    it "should not fail if the correct localization is not in the file" do
-      test_importer @importer, <<-YAML
-jp:
-  root: root
-      YAML
-
-      @project.keys.count.should eql(0)
-    end
-
     it "should import string arrays" do
-      test_importer @importer, <<-YAML
-en-US:
-  date:
-    abbr_month_names:
-    -
-    - Jan
-    - Feb
-    - Mar
-    - Apr
-    - May
-    - Jun
-    - Jul
-    - Aug
-    - Sep
-    - Oct
-    - Nov
-    - Dec
-  helicopter:
-    rofl
-      YAML
-
-      @project.keys.count.should eql(13)
-      @project.keys.for_key('date.abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Feb')
-      @project.keys.for_key('date.abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Dec')
+      @project.keys.for_key('abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Feb')
+      @project.keys.for_key('abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Dec')
     end
   end
 end

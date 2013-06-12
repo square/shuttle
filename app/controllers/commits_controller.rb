@@ -216,7 +216,7 @@ class CommitsController < ApplicationController
   # 404 Not Found is returned with no body.
 
   def manifest
-    @commit = @project.commit!(params[:id], true)
+    @commit = @project.commit!(params[:id], skip_create: true)
 
     compiler = Compiler.new(@commit)
     file = compiler.manifest(request.format,
@@ -278,7 +278,7 @@ class CommitsController < ApplicationController
   # 404 Not Found is returned with no body.
 
   def localize
-    @commit = @project.commit!(params[:id], true)
+    @commit = @project.commit!(params[:id], skip_create: true)
 
     compiler = Compiler.new(@commit)
     file     = compiler.localize(locale:  params[:locale].presence,

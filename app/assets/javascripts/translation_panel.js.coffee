@@ -203,8 +203,8 @@ class TranslationItem
     $('<strong/>').text("Source: ").appendTo stats
     if @translation.key.source?
       stats.appendText @translation.key.source
-      if @translation.key.importer
-        stats.appendText " (imported by #{@translation.key.importer})"
+      if @translation.key.importer_name?
+        stats.appendText " (imported by #{@translation.key.importer_name})"
     else
       stats.append " (by request)"
     $('<br/>').appendTo stats

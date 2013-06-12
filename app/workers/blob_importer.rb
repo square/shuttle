@@ -20,6 +20,7 @@ class BlobImporter
 
   # Executes this worker.
   #
+  # @param [String] importer The ident of an importer.
   # @param [Fixnum] project_id The ID of a Project.
   # @param [Fixnum] sha The SHA of a blob in the Project's repository.
   # @param [String] path The path to the blob being imported, in the repository.
@@ -28,14 +29,16 @@ class BlobImporter
   #   existing translations from. If `nil`, the base locale is imported as
   #   base translations.
 
-  def perform(project_id, sha, path, commit_id, rfc5646_locale)
+  def perform(importer, project_id, sha, path, commit_id, rfc5646_locale)
     begin
-      commit  = Commit.find_by_id(commit_id)
-      locale  = rfc5646_locale ? Locale.from_rfc5646(options[:locale]) : nil
-      project = Project.find(project_id)
-      blob    = project.blobs.with_sha(sha).find_or_create!({sha: sha}, as: :system)
+      commit   = Commit.find_by_id(commit_id)
+      locale   = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
+      project  = Project.find(project_id)
+      blob     = project.blobs.with_sha(sha).first!
+      importer = Importer::Base.find_by_ident(importer)
 
-      blob.import_strings path,
+      blob.import_strings importer,
+                          path,
                           commit: commit,
                           locale: locale
 

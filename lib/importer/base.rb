@@ -107,7 +107,7 @@ module Importer
       @commit.keys += @keys.to_a if @commit
 
       # cache the list of keys we know to be in this blob for later use
-      Shuttle::Redis.set "keys_for_blob:#{@blob.sha}", @keys.map(&:id).join(',')
+      Shuttle::Redis.set "keys_for_blob:#{self.class.ident}:#{@blob.sha}", @keys.map(&:id).join(',')
     end
 
     # Scans the blob for localizable strings, assumes their values are of a
@@ -116,6 +116,8 @@ module Importer
     # as its key, since the value changes with each locale.
 
     def import_locale(locale)
+      raise "Can't perform a locale import without an associated commit" unless @commit
+
       load_contents
       Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
         process_blob_for_translation_extraction locale
@@ -202,7 +204,7 @@ module Importer
           options.reverse_merge(
               key:                      key,
               source_copy:              value,
-              importer:                 self.class.to_s.demodulize,
+              importer:                 self.class.ident,
               fencers:                  self.class.fencers,
               skip_readiness_hooks:     true
           ), as: :system
@@ -337,12 +339,10 @@ module Importer
     end
 
     def process_blob_for_string_extraction
-      if processed_blob?
-        keys = Shuttle::Redis.get("keys_for_blob:#{@blob.sha}")
-        if keys
-          @keys = Key.where(id: keys.split(',').map(&:to_i))
-          return
-        end
+      keys = Shuttle::Redis.get("keys_for_blob:#{self.class.ident}:#{@blob.sha}")
+      if keys.present?
+        @keys = Key.where(id: keys.split(',').map(&:to_i))
+        return
       end
 
       file.locale = nil
@@ -392,17 +392,6 @@ module Importer
       end
 
       raise NoEncodingFound, "Couldn't find valid encoding among #{self.class.encoding.join(', ')}"
-    end
-
-    def processed_blob?
-      processed = false
-      Blob.transaction do
-        unless (processed = @blob.importers.include?(self.class.to_s))
-          @blob.importers += [self.class.to_s]
-          @blob.save!
-        end
-      end
-      return processed
     end
 
     def log_skip(key, reason)

@@ -15,24 +15,17 @@
 require 'spec_helper'
 
 describe Importer::Properties do
-  include ImporterTesting
-
   context "[importing]" do
-    before(:each) do
-      @project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
-      @blob     = FactoryGirl.create(:fake_blob, project: @project)
-      @importer = Importer::Properties.new(@blob, 'some/path')
+    before :all do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    only_paths:     %w(js/),
+                                    skip_imports:   Importer::Base.implementations.map(&:ident) - %w(properties))
+      @commit  = @project.commit!('HEAD')
     end
 
     it "should import strings from .properties files" do
-      test_importer @importer, <<-PROPERTIES
-user.does.not.have.permission.to.accept.this.payment=User does not have permission to accept this payment.
-# Comment
-user.does.not.have.permission.to.accept.payment.to.requested.user=User does not have permission to accept this payment to the requested user.
-app.not.found=App not found.
-      PROPERTIES
-
-      @project.keys.count.should eql(3)
       @project.keys.for_key('user.does.not.have.permission.to.accept.this.payment').first.translations.find_by_rfc5646_locale('en-US').
           copy.should eql('User does not have permission to accept this payment.')
       @project.keys.for_key('user.does.not.have.permission.to.accept.payment.to.requested.user').first.translations.find_by_rfc5646_locale('en-US').

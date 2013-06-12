@@ -244,7 +244,7 @@ describe Project do
     it "should return true if there is an importer path exclusion for the given importer" do
       @project.update_attributes({skip_paths:          [],
                                   only_paths:          [],
-                                  skip_importer_paths: {'Importer::Yaml' => %w(foo/)},
+                                  skip_importer_paths: {'yaml' => %w(foo/)},
                                   only_importer_paths: {}}, as: :user)
 
       @project.skip_path?('foo/bar.txt', Importer::Yaml).should be_true
@@ -254,7 +254,7 @@ describe Project do
       @project.update_attributes({skip_paths:          [],
                                   only_paths:          [],
                                   only_importer_paths: {},
-                                  skip_importer_paths: {'Importer::Yaml' => %w(foo/)}}, as: :user)
+                                  skip_importer_paths: {'yaml' => %w(foo/)}}, as: :user)
 
       @project.skip_path?('foo/bar.txt', Importer::Ruby).should be_false
     end
@@ -262,7 +262,7 @@ describe Project do
     it "should return true if there no matching importer path inclusion for the given importer" do
       @project.update_attributes({skip_paths:          [],
                                   only_paths:          [],
-                                  only_importer_paths: {'Importer::Yaml' => %w(foo/)},
+                                  only_importer_paths: {'yaml' => %w(foo/)},
                                   skip_importer_paths: {}}, as: :user)
 
       @project.skip_path?('bar/foo.txt', Importer::Yaml).should be_true
@@ -272,7 +272,7 @@ describe Project do
       @project.update_attributes({skip_paths:          [],
                                   only_paths:          [],
                                   skip_importer_paths: {},
-                                  only_importer_paths: {'Importer::Yaml' => %w(foo/)}}, as: :user)
+                                  only_importer_paths: {'yaml' => %w(foo/)}}, as: :user)
 
       @project.skip_path?('bar/foo.txt', Importer::Ruby).should be_false
     end

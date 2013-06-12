@@ -293,14 +293,25 @@ class Commit < ActiveRecord::Base
 
   def import_tree(tree, path, options={})
     tree.blobs.each do |name, blob|
-      blob_path = "#{path}/#{name}"
+      blob_path   = "#{path}/#{name}"
+      blob_object = project.blobs.with_sha(blob.sha).find_or_create!({sha: blob.sha}, as: :system)
 
-      Shuttle::Redis.del("keys_for_blob:#{@blob.sha}") if options[:force]
+      imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
+      imps.each do |importer|
+        importer = importer.new(blob_object, blob_path, self)
 
-      if options[:inline]
-        BlobImporter.new.perform project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646)
-      else
-        add_worker! BlobImporter.perform_once(project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646))
+        Shuttle::Redis.del("keys_for_blob:#{importer.class.ident}:#{blob.sha}") if options[:force]
+
+        if importer.skip?(options[:locale])
+          #Importer::SKIP_LOG.info "commit=#{revision} blob=#{blob.sha} path=#{blob_path} importer=#{importer.class.ident} #skip? returned true for #{options[:locale].inspect}"
+          next
+        end
+
+        if options[:inline]
+          BlobImporter.new.perform importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646)
+        else
+          add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646))
+        end
       end
     end
 

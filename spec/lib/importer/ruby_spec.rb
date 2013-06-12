@@ -15,96 +15,33 @@
 require 'spec_helper'
 
 describe Importer::Ruby do
-  include ImporterTesting
-
-  context "[importing]" do
-    before(:each) do
-      @project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
-      @blob     = FactoryGirl.create(:fake_blob, project: @project)
-      @importer = Importer::Ruby.new(@blob, 'some/path')
-    end
-
-    it "should import strings from .rb files" do
-      test_importer @importer, <<-RUBY
-{
-  :'en-US' => {
-    root: 'root',
-    nested: {
-      one:    'one',
-      :'2' => 'two'
-    }
-  }
-}
-      RUBY
-
-      @project.keys.count.should eql(3)
-      @project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
-      @project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
-      @project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
-    end
-
-    it "should only import strings under the correct localization" do
-      test_importer @importer, <<-RUBY
-{
-  :'en-US' => {
-    root: 'root'
-  },
-  en: {
-    root: 'enroot'
-  }
-}
-      RUBY
-
-      @project.keys.count.should eql(1)
-      @project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
-    end
-
+  describe "#import_file?" do
     it "should only import from Ruby files under config/locales" do
+      @project = FactoryGirl.create(:project)
       Importer::Ruby.new(FactoryGirl.create(:fake_blob, project: @project), '/config/locales/en-US.rb').send(:import_file?).should be_true
       Importer::Ruby.new(FactoryGirl.create(:fake_blob, project: @project), '/config/languages/en-US.rb').send(:import_file?).should be_false
     end
+  end
 
-    it "should not fail if the correct localization is not in the file" do
-      test_importer @importer, <<-RUBY
-{
-  jp: {
-    root: 'root'
-  }
-}
-      RUBY
+  context "[importing]" do
+    before :all do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    only_paths:     %w(config/locales/),
+                                    skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ruby))
+      @commit  = @project.commit!('HEAD')
+    end
 
-      @project.keys.count.should eql(0)
+    it "should import strings from .rb files" do
+      @project.keys.for_key('rootrb').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
+      @project.keys.for_key('nestedrb.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
+      @project.keys.for_key('nestedrb.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
     end
 
     it "should import string arrays" do
-      test_importer @importer, <<-RUBY
-{
-  :'en-US' => {
-    date: {
-      abbr_month_names: [
-        nil,
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec"
-      ],
-    },
-    helicopter: 'rofl'
-  }
-}
-      RUBY
-
-      @project.keys.count.should eql(13)
-      @project.keys.for_key('date.abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Feb')
-      @project.keys.for_key('date.abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Dec')
+      @project.keys.for_key('abbr_month_namesrb[2]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Feb')
+      @project.keys.for_key('abbr_month_namesrb[12]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Dec')
     end
   end
 end

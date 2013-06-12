@@ -15,31 +15,29 @@
 require 'spec_helper'
 
 describe Importer::Xib do
-  include ImporterTesting
-
   context "[importing]" do
-    before(:each) do
-      @project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
-      @blob     = FactoryGirl.create(:fake_blob, project: @project)
-      @importer = Importer::Xib.new(@blob, 'some/path')
+    before :all do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    only_paths:     %w(apple/),
+                                    skip_imports:   Importer::Base.implementations.map(&:ident) - %w(xib))
+      @commit  = @project.commit!('HEAD')
     end
 
     it "should import strings from SVG files" do
-      test_importer @importer, File.read(Rails.root.join('spec', 'fixtures', 'example.xib')), 'Resources/en-US.lproj/test.xib'
-
-      @project.keys.count.should eql(10)
-      trans = @project.keys.for_key('Resources/en-US.lproj/test.xib:3.IBUIText').first.translations.find_by_rfc5646_locale('en-US')
+      trans = @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIText').first.translations.find_by_rfc5646_locale('en-US')
       trans.copy.should eql('text field text')
       trans.key.context.should start_with('text field notes')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:8.IBUISelectedTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('selected title')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:3.IBUIPlaceholder').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('placeholder text')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:8.IBUINormalTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('button title')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:8.IBUIHighlightedTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('highlighted title')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:8.IBUIDisabledTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('disabled title')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityLabel').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('accessibility label')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityHint').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('accessibility hint')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:12.IBSegmentTitles[0]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('segment 1')
-      @project.keys.for_key('Resources/en-US.lproj/test.xib:12.IBSegmentTitles[1]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('segment 2')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUISelectedTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('selected title')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIPlaceholder').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('placeholder text')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUINormalTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('button title')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUIHighlightedTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('highlighted title')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUIDisabledTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('disabled title')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityLabel').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('accessibility label')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityHint').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('accessibility hint')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:12.IBSegmentTitles[0]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('segment 1')
+      @project.keys.for_key('/apple/en-US.lproj/example.xib:12.IBSegmentTitles[1]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('segment 2')
     end
   end
 end

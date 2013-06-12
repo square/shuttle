@@ -17,5 +17,6 @@ FactoryGirl.define do
     association :project
     sequence(:key) { |i| "key-#{i}" }
     source_copy "Hello, world"
+    importer 'yaml'
   end
 end
