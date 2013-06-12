@@ -18,4 +18,4 @@
 # If you change this key, all old signed cookies will become invalid!
 # Make sure the secret is at least 30 characters and all random,
 # no regular words or you'll be exposed to dictionary attacks.
-Shuttle::Application.config.secret_token = 'YOUR_TOKEN'
+Shuttle::Application.config.secret_token = 'YOUR_TOKEN:994835e8731f1e95f5e1586cb81f7c40'
