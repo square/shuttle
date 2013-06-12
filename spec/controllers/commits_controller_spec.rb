@@ -541,6 +541,13 @@ de:
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
       @project.commits.first.user.should eql(@user)
     end
+
+    it "should allow the description, due date, and pull request URL to be set" do
+      post :create, project_id: @project.to_param, commit: {revision: 'HEAD', description: 'desc', pull_request_url: 'url', due_date: Date.today.tomorrow}, format: 'json'
+      @project.commits.first.description.should eql('desc')
+      @project.commits.first.pull_request_url.should eql('url')
+      @project.commits.first.due_date.should eql(Date.today.tomorrow)
+    end
   end
 
   describe '#destroy' do

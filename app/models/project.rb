@@ -188,8 +188,8 @@ class Project < ActiveRecord::Base
   #   import after creating the Commit, if one was created.
   # @option options [true, false] skip_create If `true`, does not create a new
   #   Commit object if one is not found.
-  # @option options [Integer] user_id The ID of a User to associate with the
-  #   Commit.
+  # @option options [Hash] other_fields Additional model fields to set. Must
+  #   have already been filtered for accessible attributes.
   # @return [Commit] The Commit for that SHA.
   # @raise [ActiveRecord::RecordNotFound] If an unknown SHA is given.
 
@@ -210,8 +210,11 @@ class Project < ActiveRecord::Base
                               message:      commit_object.message,
                               committed_at: commit_object.author.date,
                               skip_import:  options[:skip_import],
-                              user_id:      options[:user_id]
-                          }, as: :system)
+                          }, as: :system) do |c|
+        options[:other_fields].each do |field, value|
+          c.send :"#{field}=", value
+        end
+      end
     end
   end
 

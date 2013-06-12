@@ -62,9 +62,10 @@ require 'fileutils'
 # Metadata
 # ========
 #
-# |               |                                                                    |
-# |:--------------|:-------------------------------------------------------------------|
-# | `description` | A user-submitted description of why we are localizing this commit. |
+# |                    |                                                                    |
+# |:-------------------|:-------------------------------------------------------------------|
+# | `description`      | A user-submitted description of why we are localizing this commit. |
+# | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
 
 class Commit < ActiveRecord::Base
   # @return [true, false] If `true`, does not perform an import after creating
@@ -79,7 +80,8 @@ class Commit < ActiveRecord::Base
 
   include HasMetadataColumn
   has_metadata_column(
-      description: {allow_nil: true}
+      description:      {allow_nil: true},
+      pull_request_url: {allow_nil: true}
   )
 
   validates :project,
@@ -96,6 +98,9 @@ class Commit < ActiveRecord::Base
   validates :priority,
             numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3},
             allow_nil:    true
+  validates :due_date,
+            timeliness: {type: :date},
+            allow_nil:  true
 
   extend GitObjectField
   git_object_field :revision,
@@ -119,7 +124,8 @@ class Commit < ActiveRecord::Base
 
   attr_accessible :revision, :message, :committed_at, :skip_import,
                   :skip_sha_check, :user_id, as: :system
-  attr_accessible :revision, :description, :due_date, as: :monitor
+  attr_accessible :revision, :description, :due_date, :pull_request_url,
+                  as: :monitor
   attr_accessible :due_date, :priority, as: :admin
   attr_readonly :revision, :message
 

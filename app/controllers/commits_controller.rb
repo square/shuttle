@@ -73,15 +73,16 @@ class CommitsController < ApplicationController
   # Body Parameters
   # ---------------
   #
-  # |                    |                                  |
-  # |:-------------------|:---------------------------------|
-  # | `commit[revision]` | The SHA of a commit to localize. |
+  # |          |                                                            |
+  # |:---------|:-----------------------------------------------------------|
+  # | `commit` | Parameterized hash of Commit fields, including `revision`. |
 
   def create
     revision = params[:commit][:revision].strip
     respond_to do |format|
       format.json do
-        CommitCreator.perform_once @project.id, revision, user_id: current_user.id
+        other_fields = params[:commit].stringify_keys.slice(*Commit._accessible_attributes[:monitor].to_a).except('revision')
+        CommitCreator.perform_once @project.id, revision, other_fields: other_fields
         render json: {message: t('controllers.commits.create.success', revision: revision)}
       end
     end

@@ -23,8 +23,8 @@ class CommitCreator
   # @param [Fixnum] project_id The ID of a Project.
   # @param [String] sha The SHA of the commit to create
   # @param [Hash] options Additional options.
-  # @option options [Integer] user_id The ID of a User to associate with the
-  #   Commit.
+  # @option options [Hash] other_fields Additional model fields to set. Must
+  #   have already been filtered for accessible attributes.
 
   def perform(project_id, sha, options={})
     Project.find(project_id).commit!(sha, options.symbolize_keys)
