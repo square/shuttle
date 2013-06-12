@@ -36,6 +36,7 @@ module Views
               tr do
                 th "project"
                 th "description"
+                th "requester"
                 th "pull"
                 th "translate"
                 th "review"
@@ -52,6 +53,13 @@ module Views
                   tr do
                     td commit.project.name
                     td(commit.description || '-')
+                    td do
+                      if commit.user
+                        text! mail_to(commit.user.email_address)
+                      else
+                        text '-'
+                      end
+                    end
                     td { link_to "code", commit.github_url }
                     td "#{commit.translations_new}s (#{commit.words_new}w)"
                     td "#{commit.translations_pending}s (#{commit.words_pending}w)"

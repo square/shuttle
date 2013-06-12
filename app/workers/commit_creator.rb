@@ -22,9 +22,12 @@ class CommitCreator
   #
   # @param [Fixnum] project_id The ID of a Project.
   # @param [String] sha The SHA of the commit to create
+  # @param [Hash] options Additional options.
+  # @option options [Integer] user_id The ID of a User to associate with the
+  #   Commit.
 
-  def perform(project_id, sha)
-    Project.find(project_id).commit!(sha)
+  def perform(project_id, sha, options={})
+    Project.find(project_id).commit!(sha, options.symbolize_keys)
   rescue Timeout::Error => err
     self.class.perform_in 2.minutes, project_id, sha
   end

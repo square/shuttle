@@ -81,7 +81,7 @@ class CommitsController < ApplicationController
     revision = params[:commit][:revision].strip
     respond_to do |format|
       format.json do
-        CommitCreator.perform_once @project.id, revision
+        CommitCreator.perform_once @project.id, revision, user_id: current_user.id
         render json: {message: t('controllers.commits.create.success', revision: revision)}
       end
     end

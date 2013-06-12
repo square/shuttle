@@ -28,15 +28,21 @@ class HomeController < ApplicationController
 
   def index
     @commits = Commit.
-        includes(:project).
+        includes(:project, :user).
         where(ready: false).
         order('priority DESC, due_date DESC')
 
-    if current_user.approved_locales.present?
-      projects = Project.all.select do |project|
-        (project.targeted_locales & current_user.approved_locales).any?
+    unless params[:all].present?
+      if current_user.approved_locales.present?
+        projects = Project.all.select do |project|
+          (project.targeted_locales & current_user.approved_locales).any?
+        end
+        @commits = @commits.where(project_id: projects.map(&:id))
+      elsif current_user.admin?
+        # unfiltered
+      else
+        @commits = @commits.where(user_id: current_user.id)
       end
-      @commits = @commits.where(project_id: projects.map(&:id))
     end
   end
 

@@ -62,6 +62,7 @@ CREATE TABLE commits (
     created_at timestamp without time zone,
     due_date date,
     priority integer,
+    user_id integer,
     CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0)),
     CONSTRAINT commits_priority_check CHECK (((priority >= 0) AND (priority <= 3))),
     CONSTRAINT commits_translations_new_check CHECK ((translations_new >= 0)),
@@ -699,6 +700,14 @@ ALTER TABLE ONLY commits
 
 
 --
+-- Name: commits_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY commits
+    ADD CONSTRAINT commits_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
 -- Name: glossary_entries_new_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -765,3 +774,5 @@ INSERT INTO schema_migrations (version) VALUES ('20130612204200');
 INSERT INTO schema_migrations (version) VALUES ('20130612204433');
 
 INSERT INTO schema_migrations (version) VALUES ('20130612204434');
+
+INSERT INTO schema_migrations (version) VALUES ('20130612213313');

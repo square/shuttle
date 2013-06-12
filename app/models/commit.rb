@@ -39,11 +39,12 @@ require 'fileutils'
 # Associations
 # ============
 #
-# |                |                                                      |
-# |:---------------|:-----------------------------------------------------|
-# | `project`      | The {Project} this is a Commit under.                |
-# | `keys`         | All the {Key Keys} found in this Commit.             |
-# | `translations` | The {Translation Translations} found in this Commit. |
+# |                |                                                        |
+# |:---------------|:-------------------------------------------------------|
+# | `project`      | The {Project} this is a Commit under.                  |
+# | `user`         | The {User} that submitted this Commit for translation. |
+# | `keys`         | All the {Key Keys} found in this Commit.               |
+# | `translations` | The {Translation Translations} found in this Commit.   |
 #
 # Properties
 # ==========
@@ -72,6 +73,7 @@ class Commit < ActiveRecord::Base
   attr_accessor :skip_import
 
   belongs_to :project, inverse_of: :commits
+  belongs_to :user, inverse_of: :commits
   has_and_belongs_to_many :keys, uniq: true
   has_many :translations, through: :keys
 
@@ -116,7 +118,7 @@ class Commit < ActiveRecord::Base
   after_commit :compile_and_cache_or_clear, on: :update
 
   attr_accessible :revision, :message, :committed_at, :skip_import,
-                  :skip_sha_check, as: :system
+                  :skip_sha_check, :user_id, as: :system
   attr_accessible :revision, :description, :due_date, as: :monitor
   attr_accessible :due_date, :priority, as: :admin
   attr_readonly :revision, :message

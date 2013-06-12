@@ -536,6 +536,11 @@ de:
       post :create, project_id: @project.to_param, commit: {revision: "  HEAD     "}, format: 'json'
       response.status.should eql(200)
     end
+
+    it "should associate the commit with the current user" do
+      post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
+      @project.commits.first.user.should eql(@user)
+    end
   end
 
   describe '#destroy' do
