@@ -136,8 +136,13 @@ class Commit < ActiveRecord::Base
 
   def import_strings(options={})
     raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
-    keys.clear
+
+    # clear out existing keys so that we can import all new keys
+    keys.clear unless options[:locale]
+    # perform the recursive import
     import_tree commit!.gtree, '', options
+    # normally this is performed once the last worker is removed from the list,
+    # but if we're not using workers, we need to do it here
     update_stats_at_end_of_loading if options[:inline]
   end
 
