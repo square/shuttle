@@ -1,7 +1,7 @@
 class AddCreatedAtToCommits < ActiveRecord::Migration
   def up
     execute "ALTER TABLE commits ADD COLUMN created_at TIMESTAMP WITHOUT TIME ZONE"
-    execute "UPDATE commits SET created_at = CURRENT_TIME"
+    execute "UPDATE commits SET created_at = CURRENT_TIMESTAMP"
   end
 
   def down
