@@ -19,30 +19,80 @@ class HomeController < ApplicationController
   before_filter :translator_required, only: [:translators, :glossary]
   before_filter :reviewer_required, only: :reviewers
 
-  # Redirects to a specific landing page depending on the current User's role.
+  # Displays a landing page depending on the current User's role.
   #
   # Routes
   # ------
   #
   # * `GET /`
+  #
+  # Query Parameters
+  # ----------------
+  #
+  # |              |                                                                                                          |
+  # |:-------------|:---------------------------------------------------------------------------------------------------------|
+  # | `start_date` | The earliest date of a window to display Commits within (default 2 weeks ago).                           |
+  # | `end_date`   | The latest date of a window to display Commits within (default today).                                   |
+  # | `status`     | The readiness status of Commits to show: "completed", "uncompleted", or "all" (default depends on role). |
+  # | `project_id` | A Project ID to filter by (default all Projects).                                                        |
 
   def index
+    @start_date = if params[:start_date].present?
+                   Date.parse(params[:start_date])
+                 else
+                   Date.today - 2.weeks
+                 end
+    @end_date   = if params[:end_date].present?
+                   Date.parse(params[:end_date])
+                 else
+                   Date.today
+                 end
+
+    @status = params[:status]
+    unless %w(uncompleted completed all).include?(@status)
+      @status = case current_user.role
+                 when 'translator', 'reviewer' then 'uncompleted'
+                 else 'all'
+               end
+    end
+
+    # Load commits
+
     @commits = Commit.
-        includes(:project, :user).
-        where(ready: false).
+        includes(:user, project: :slugs).
+        where(created_at: @start_date..@end_date).
         order('priority DESC, due_date DESC')
 
-    unless params[:all].present?
-      if current_user.approved_locales.present?
-        projects = Project.all.select do |project|
-          (project.targeted_locales & current_user.approved_locales).any?
-        end
-        @commits = @commits.where(project_id: projects.map(&:id))
-      elsif current_user.admin?
-        # unfiltered
-      else
-        @commits = @commits.where(user_id: current_user.id)
+    # Filter by project
+
+    params[:project_id] ||= 'my-locales' if current_user.approved_locales.any?
+    if params[:project_id] == 'my-locales'
+      projects = Project.all.select do |project|
+        (project.targeted_locales & current_user.approved_locales).any?
       end
+      @commits = @commits.where(project_id: projects.map(&:id))
+    else
+      project_id = params[:project_id].to_i
+      if project_id > 0
+        @commits = @commits.where(project_id: project_id)
+      end
+    end
+
+    # Filter by status
+
+    case @status
+      when 'uncompleted' then
+        @commits = @commits.where(ready: false)
+      when 'completed' then
+        @commits = @commits.where(ready: true)
+    end
+
+    # Filter by user
+
+    params[:email] ||= current_user.email if current_user.monitor? && !current_user.admin?
+    if params[:email].present?
+      user = User.find_by_email(params[:email])
+      @commits = @commits.where(user_id: user.id)
     end
   end
 

@@ -21,17 +21,38 @@ require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
 module Views
   module Home
     class Index < Views::Layouts::Application
-      needs :commits
+      needs :commits, :start_date, :end_date, :status
 
       protected
 
       def body_content
-        # p "You are not a reviewer, translator, or administrator", class: 'flash-alert alert-info'
-
         article(class: 'container') do
-          page_header "Dashboard"
-          div id: 'translation-requests', class: 'task-list'
-          table(class: 'table') do
+          form_tag({}, class: 'form-inline', id: 'filter', method: 'get') do
+            select_tag 'status', options_for_select(
+                %w(all uncompleted completed).map { |n| ["#{n} translations", n] },
+                @status
+            )
+
+            text ' in '
+
+            project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+            project_list.unshift ['projects in my locales', 'my-locales'] if current_user.approved_locales.any?
+            project_list.unshift ['all projects', nil]
+            select_tag 'project_id', options_for_select(project_list, params[:project_id])
+
+            if current_user.monitor?
+              text ' '
+              check_box_tag 'email', current_user.email, params[:email] == current_user.email
+              text ' '
+              label_tag 'email', 'Only commits submitted by me'
+            end
+
+            text ' '
+
+            submit_tag 'Filter', class: 'btn btn-primary'
+          end
+
+          table(class: 'table', id: 'commits') do
             thead do
               tr do
                 th "project"
@@ -44,6 +65,7 @@ module Views
                 th "due"
                 th "priority"
                 th "id"
+                th "translate" if current_user.translator?
               end
             end
 
@@ -55,12 +77,18 @@ module Views
                     td(commit.description || '-')
                     td do
                       if commit.user
-                        text! mail_to(commit.user.email_address)
+                        text! mail_to(commit.user.email)
                       else
                         text '-'
                       end
                     end
-                    td { link_to "code", commit.github_url }
+                    td do
+                      if commit.github_url.present?
+                        link_to "code", commit.github_url
+                      else
+                        text '-'
+                      end
+                    end
                     td "#{commit.translations_new}s (#{commit.words_new}w)"
                     td "#{commit.translations_pending}s (#{commit.words_pending}w)"
                     td l(commit.created_at, format: :mon_day)
@@ -79,9 +107,37 @@ module Views
                       end
                     end
                     td { link_to commit.revision[0, 6], project_commit_url(commit.project, commit) }
+                    if current_user.translator?
+                      if current_user.approved_locales.any?
+                        td do
+                          current_user.approved_locales.each do |locale|
+                            link_to "#{locale.rfc5646} »", locale_project_url(locale, commit.project, commit: commit.revision)
+                          end
+                        end
+                      else
+                        td do
+                          input type: 'text', placeholder: 'locale', class: 'locale-field', id: "translate-link-locale-#{commit.revision}"
+                          br
+                          link_to "translate »", '#',
+                                  class:         'translate-link',
+                                  'data-sha'     => commit.revision,
+                                  'data-project' => commit.project.to_param
+                        end
+                      end
+                    end
                   end
                 end
               end
+            end
+          end
+
+          p do
+            if Commit.where('created_at < ?', @start_date - 2.weeks).exists?
+              link_to "« older", url_for(start_date: @start_date - 2.weeks, end_date: @end_date - 2.weeks)
+            end
+            text ' '
+            if @start_date + 2.weeks < Date.today
+              link_to "newer »", url_for(start_date: @start_date + 2.weeks, end_date: @end_date + 2.weeks)
             end
           end
         end

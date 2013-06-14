@@ -113,8 +113,6 @@ module Views
               div(class: 'nav-collapse') do
                 if current_user
                   ul(class: 'nav') do
-                    tab "Translate", 'translate', translators_url if current_user.translator?
-                    tab "Review", 'review', reviewers_url if current_user.reviewer?
                     tab "Search", 'search', search_url
                   end
                   ul(class: 'nav pull-right') do
