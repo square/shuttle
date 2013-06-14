@@ -16,4 +16,10 @@ $(window).ready(function() {
     var project = $(this).val();
     $('#new_commit').attr('action', '/projects/' + project + '/commits.json');
   });
+
+  $('.show-request-translation-form-link').click(function(e){
+    $(this).hide();
+    $('.request-translation-form').slideDown()
+    e.preventDefault();
+  })
 });

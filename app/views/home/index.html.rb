@@ -26,7 +26,7 @@ module Views
       protected
 
       def body_content
-        article(class: 'container') do
+        article(class: 'container home-container') do
           translation_request_form if current_user.monitor? && Project.count > 0
           filter_form
           commits_table
@@ -35,24 +35,61 @@ module Views
       end
 
       def translation_request_form
+        a(href: '#request-translation', class: "show-request-translation-form-link btn btn-success") do
+          i class: "icon-plus-sign"
+          text " Request New Translation"
+        end
+
         projects = Project.order('LOWER(name) ASC')
-        form_for(Commit.new, url: project_commits_path(projects.first, format: 'json')) do |f|
-          label_tag 'new_commit_project_id', Commit.human_attribute_name(:project_id)
-          select_tag 'new_commit_project_id', options_for_select(projects.map { |pr| [pr.name, pr.to_param] }), required: true
+        form_for(Commit.new, url: project_commits_path(projects.first, format: 'json'), html: {class: "well form-horizontal request-translation-form"}) do |f|
 
-          f.label :revision
-          f.text_field :revision, required: true
+          div(class: 'control-group') do
+            div(class: 'controls') do
+              h2 "Request New Translation"
+            end
+          end
 
-          f.label :due_date
-          f.date_select :due_date, include_blank: true
+          div(class: 'control-group') do
+            label_tag 'new_commit_project_id', Commit.human_attribute_name(:project_id), class: "control-label"
+            div(class: 'controls') do
+              select_tag 'new_commit_project_id', options_for_select(projects.map { |pr| [pr.name, pr.to_param] }), required: true, class: "input-xxlarge"
+            end
+          end
 
-          f.label :pull_request_url
-          f.text_field :pull_request_url
+          div(class: 'control-group') do
+            f.label :revision, class: "control-label"
+            div(class: 'controls') do
+              f.text_field :revision, required: true, class: "input-xxlarge"
+            end
+          end
 
-          f.label :description
-          f.text_area :description
+          div(class: 'control-group') do
+            f.label :due_date, class: "control-label"
+            div(class: 'controls') do
+              input type: 'date', name: 'commit[due_date]', id: 'commit_due_date', class: "input-xxlarge"
+            end
+          end
 
-          f.submit class: 'btn btn-primary'
+          div(class: 'control-group') do
+            f.label :pull_request_url, class: "control-label"
+            div(class: 'controls') do
+              f.text_field :pull_request_url, class: "input-xxlarge"
+            end
+          end
+
+          div(class: 'control-group') do
+            f.label :description, class: "control-label"
+            div(class: 'controls') do
+              f.text_area :description, class: "input-xxlarge", rows: 3
+            end
+          end
+
+          div(class: 'control-group') do
+            div(class: 'controls') do
+              f.submit class: 'btn btn-primary'
+            end
+          end
+
         end
       end
 
