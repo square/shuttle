@@ -82,6 +82,7 @@ class CommitsController < ApplicationController
     respond_to do |format|
       format.json do
         other_fields = params[:commit].stringify_keys.slice(*Commit._accessible_attributes[:monitor].to_a).except('revision')
+        other_fields[:user_id] = current_user.id
         CommitCreator.perform_once @project.id, revision, other_fields: other_fields
         render json: {message: t('controllers.commits.create.success', revision: revision)}
       end
