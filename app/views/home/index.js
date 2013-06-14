@@ -10,4 +10,10 @@ $(window).ready(function() {
 
     return false;
   });
+
+  new SmartForm($('#new_commit'), function() { window.location.reload(); });
+  $('#new_commit_project_id').change(function() {
+    var project = $(this).val();
+    $('#new_commit').attr('action', '/projects/' + project + '/commits.json');
+  });
 });

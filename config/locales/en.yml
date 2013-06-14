@@ -32,6 +32,11 @@ en:
       commit:
         revision: revision
         revision_raw: revision
+        description: description
+        due_date: due date
+        project_id: project
+        priority: priority
+        pull_request_url: pull request URL
       translation:
         source_rfc5646_locale: from locale
         rfc5646_locale: to locale
@@ -80,6 +85,8 @@ en:
       wrong_sha_type: is not the correct Git object type
   helpers:
     submit:
+      commit:
+        create: Submit Request
       project:
         create: Create Project
         update: Save Changes
