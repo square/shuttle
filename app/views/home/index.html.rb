@@ -27,7 +27,7 @@ module Views
 
       def body_content
         article(class: 'container') do
-          translation_request_form
+          translation_request_form if current_user.monitor? && Project.count > 0
           filter_form
           commits_table
           pagination_links
