@@ -19,7 +19,28 @@ $(window).ready(function() {
 
   $('.show-request-translation-form-link').click(function(e){
     $(this).hide();
-    $('.request-translation-form').slideDown()
+    $('.request-translation-form').slideDown();
     e.preventDefault();
-  })
+  });
+
+  $('.edit_commit select').change(function() {
+    var select = $(this);
+    var form = select.closest('form');
+    var authParam = $('meta[name=csrf-param]').attr('content');
+    var authToken = $('meta[name=csrf-token]').attr('content');
+    var data = form.serializeObject();
+    data[authParam] = authToken;
+
+    $.ajax(form.attr('action'), {
+      data: data,
+      type: 'PUT',
+      success: function() {
+        var checkmark = $('<i/>').addClass('icon-ok priority-change-success').insertAfter(select);
+        checkmark.oneTime(3000, function() { checkmark.fadeOut(); });
+      },
+      error: function() {
+        alert("Couldn't change commit priority.");
+      }
+    });
+  });
 });

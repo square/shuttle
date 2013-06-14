@@ -126,7 +126,14 @@ module Views
           tbody do
             @commits.each do |commit|
               tbody do
-                tr do
+                row_class = if commit.loading?
+                              'commit-loading'
+                            elsif commit.ready?
+                              'commit-ready'
+                            else
+                              'commit-translating'
+                            end
+                tr(class: row_class) do
                   td commit.project.name
                   td(commit.description || '-')
                   td do
@@ -148,16 +155,27 @@ module Views
                   td l(commit.created_at, format: :mon_day)
                   td do
                     if commit.due_date
-                      text l(commit.due_date, format: :mon_day)
+                      date_class = if commit.due_date < 2.days.from_now.to_date
+                                     'due-date-very-soon'
+                                   elsif commit.due_date < 5.days.from_now.to_date
+                                     'due-date-soon'
+                                   else nil end
+                      span l(commit.due_date, format: :mon_day), class: date_class
                     else
                       text '-'
                     end
                   end
                   td do
-                    if commit.priority
-                      t("models.commit.priority.#{commit.priority}")
+                    if current_user.admin?
+                      form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
+                        f.select :priority, t('models.commit.priority').to_a.map(&:reverse).unshift(['-', nil])
+                      end
                     else
-                      text '-'
+                      if commit.priority
+                        span t("models.commit.priority.#{commit.priority}"), class: "commit-priority-#{commit.priority}"
+                      else
+                        text '-'
+                      end
                     end
                   end
                   td { link_to commit.revision[0, 6], project_commit_url(commit.project, commit) }

@@ -129,6 +129,8 @@ class Commit < ActiveRecord::Base
   attr_accessible :due_date, :priority, as: :admin
   attr_readonly :revision, :message
 
+  scope :by_priority_and_due_date, order('priority ASC, due_date ASC')
+
   # @private
   def to_param() revision end
 

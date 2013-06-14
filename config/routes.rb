@@ -21,7 +21,7 @@ Shuttle::Application.routes.draw do
 
   # REST
   resources :projects do
-    resources :commits, only: [:show, :create, :destroy] do
+    resources :commits, only: [:show, :create, :update, :destroy] do
       member do
         post :import, :sync, :redo
         get :manifest, :localize

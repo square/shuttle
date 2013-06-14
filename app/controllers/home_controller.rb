@@ -60,8 +60,8 @@ class HomeController < ApplicationController
 
     @commits = Commit.
         includes(:user, project: :slugs).
-        where(created_at: @start_date..@end_date).
-        order('priority DESC, due_date DESC')
+        where(created_at: @start_date.to_time.beginning_of_day..@end_date.to_time.end_of_day).
+        by_priority_and_due_date
 
     # Filter by project
 
@@ -82,9 +82,9 @@ class HomeController < ApplicationController
 
     case @status
       when 'uncompleted' then
-        @commits = @commits.where(ready: false)
+        @commits = @commits.where("ready IS FALSE OR loading IS TRUE")
       when 'completed' then
-        @commits = @commits.where(ready: true)
+        @commits = @commits.where("ready IS TRUE OR loading IS TRUE")
     end
 
     # Filter by user
