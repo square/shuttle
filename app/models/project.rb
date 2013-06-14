@@ -213,7 +213,7 @@ class Project < ActiveRecord::Base
                           }, as: :system) do |c|
         options[:other_fields].each do |field, value|
           c.send :"#{field}=", value
-        end
+        end if options[:other_fields]
       end
     end
   end
