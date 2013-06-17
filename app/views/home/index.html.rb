@@ -184,6 +184,7 @@ module Views
                       td do
                         current_user.approved_locales.each do |locale|
                           link_to "#{locale.rfc5646} »", locale_project_url(locale, commit.project, commit: commit.revision)
+                          br
                         end
                       end
                     else
