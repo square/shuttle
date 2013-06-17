@@ -54,7 +54,21 @@ CREATE TABLE commits (
     translations_total integer DEFAULT 0 NOT NULL,
     strings_total integer DEFAULT 0 NOT NULL,
     loading boolean DEFAULT false NOT NULL,
-    CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0))
+    metadata text,
+    translations_new integer DEFAULT 0 NOT NULL,
+    translations_pending integer DEFAULT 0 NOT NULL,
+    words_new integer DEFAULT 0 NOT NULL,
+    words_pending integer DEFAULT 0 NOT NULL,
+    created_at timestamp without time zone,
+    due_date date,
+    priority integer,
+    user_id integer,
+    CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0)),
+    CONSTRAINT commits_priority_check CHECK (((priority >= 0) AND (priority <= 3))),
+    CONSTRAINT commits_translations_new_check CHECK ((translations_new >= 0)),
+    CONSTRAINT commits_translations_pending_check CHECK ((translations_pending >= 0)),
+    CONSTRAINT commits_words_new_check CHECK ((words_new >= 0)),
+    CONSTRAINT commits_words_pending_check CHECK ((words_pending >= 0))
 );
 
 
@@ -297,7 +311,8 @@ CREATE TABLE translations (
     translated boolean DEFAULT false NOT NULL,
     approved boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    words_count integer DEFAULT 0 NOT NULL
 );
 
 
@@ -512,6 +527,13 @@ CREATE INDEX commits_date ON commits USING btree (project_id, committed_at);
 
 
 --
+-- Name: commits_priority; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX commits_priority ON commits USING btree (priority, due_date);
+
+
+--
 -- Name: commits_ready_date; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -558,6 +580,13 @@ CREATE INDEX keys_sorted ON keys USING btree (project_id, key_prefix);
 --
 
 CREATE UNIQUE INDEX keys_unique ON keys USING btree (project_id, key_sha_raw, source_copy_sha_raw);
+
+
+--
+-- Name: projects_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX projects_name ON projects USING btree (lower((name)::text));
 
 
 --
@@ -670,6 +699,14 @@ ALTER TABLE ONLY commits
 
 
 --
+-- Name: commits_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY commits
+    ADD CONSTRAINT commits_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
 -- Name: glossary_entries_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -724,3 +761,19 @@ ALTER TABLE ONLY translations
 INSERT INTO schema_migrations (version) VALUES ('20130605211557');
 
 INSERT INTO schema_migrations (version) VALUES ('20130611035759');
+
+INSERT INTO schema_migrations (version) VALUES ('20130612201509');
+
+INSERT INTO schema_migrations (version) VALUES ('20130612202700');
+
+INSERT INTO schema_migrations (version) VALUES ('20130612203159');
+
+INSERT INTO schema_migrations (version) VALUES ('20130612204200');
+
+INSERT INTO schema_migrations (version) VALUES ('20130612204433');
+
+INSERT INTO schema_migrations (version) VALUES ('20130612204434');
+
+INSERT INTO schema_migrations (version) VALUES ('20130612213313');
+
+INSERT INTO schema_migrations (version) VALUES ('20130614052719');

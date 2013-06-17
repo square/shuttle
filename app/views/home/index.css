@@ -1,0 +1,15 @@
+#commits .locale-field {
+    width: 100px;
+}
+.request-translation-form {
+  display: none;
+  margin-bottom: 4em;
+}
+
+.home-container  {
+  position: relative;
+}
+.show-request-translation-form-link {
+  position: absolute;
+  right: 0;
+}

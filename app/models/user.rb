@@ -36,6 +36,7 @@
 # |:------------------------|:-------------------------------------------------------------------|
 # | `authored_translations` | The {Translation Translations} this User has contributed.          |
 # | `reviewed_translations` | The {Translation Translations} this User has approved or rejected. |
+# | `commits`               | All {Commit Commits} submitted by this User for translation.       |
 #
 # Properties
 # ==========
@@ -71,6 +72,8 @@ class User < ActiveRecord::Base
 
   has_many :authored_glossary_entries, class_name: 'GlossaryEntry', foreign_key: 'translator_id', inverse_of: :translator, dependent: :nullify
   has_many :reviewed_glossary_entries, class_name: 'GlossaryEntry', foreign_key: 'reviewer_id', inverse_of: :reviewer, dependent: :nullify
+
+  has_many :commits, inverse_of: :user, dependent: :nullify
 
   include HasMetadataColumn
   has_metadata_column(

@@ -22,7 +22,7 @@ class CommitsController < ApplicationController
   before_filter :find_project
   before_filter :find_commit, except: [:create, :manifest, :localize]
 
-  respond_to :html, :json, only: [:show, :create, :destroy, :import, :sync, :match, :redo]
+  respond_to :html, :json, only: [:show, :create, :update, :destroy, :import, :sync, :match, :redo]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -73,18 +73,47 @@ class CommitsController < ApplicationController
   # Body Parameters
   # ---------------
   #
-  # |                    |                                  |
-  # |:-------------------|:---------------------------------|
-  # | `commit[revision]` | The SHA of a commit to localize. |
+  # |          |                                                            |
+  # |:---------|:-----------------------------------------------------------|
+  # | `commit` | Parameterized hash of Commit fields, including `revision`. |
 
   def create
     revision = params[:commit][:revision].strip
     respond_to do |format|
       format.json do
-        CommitCreator.perform_once @project.id, revision
+        other_fields = params[:commit].stringify_keys.slice(*Commit._accessible_attributes[:monitor].to_a).except('revision')
+        other_fields[:user_id] = current_user.id
+        CommitCreator.perform_once @project.id, revision, other_fields: other_fields
         render json: {message: t('controllers.commits.create.success', revision: revision)}
       end
     end
+  end
+
+  # Updates Commit metadata.
+  #
+  # Routes
+  # ------
+  #
+  # * `PUT /projects/:project_id/commits/:commit_id`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `commit_id`  | The SHA of a Commit.   |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |          |                                      |
+  # |:---------|:-------------------------------------|
+  # | `commit` | Parameterized hash of Commit fields. |
+
+  def update
+    @commit.update_attributes params[:commit], as: current_user.role.to_sym
+    respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
   # Removes a Commit.

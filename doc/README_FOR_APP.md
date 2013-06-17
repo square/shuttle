@@ -7,14 +7,14 @@ translators and reviewers optimized for the efficient processing of many
 strings. Finally, for project managers, it provides a dashboard allowing them to
 view and manage the progress of a localization effort.
 
-The typical Shuttle workflow is as follows:
+The typical **Shuttle workflow** is as follows:
 
 1. An engineer makes a commit to a Project, and marks that commit as requiring
    localization in Shuttle.
 2. Shuttle scans the commit for any localizable strings using its {Importer}s.
 3. New or modified localizable strings are marked as pending translation. They
-   appear on the translators' dashboard.
-4. Translators translate all these strings. They then appear on the reviewers'
+   appear on the translators’ dashboard.
+4. Translators translate all these strings. They then appear on the reviewers’
    dashboard.
 5. Reviewers review and approve translations.
 6. Once all translations applying to a commit are approved for all of a
@@ -39,20 +39,36 @@ Getting Started
 Developing for Shuttle requires Ruby 1.9.3, PostgreSQL, Redis, and a modern
 version of libarchive. To run Shuttle for the first time:
 
-1. Install a modern version of libarchive, one that supports the GNU tar format.
-   (The version that comes with Mac OS X does not.) On OS X, you can run `brew
-   install libarchive && brew link libarchive`. (If you'd rather not link over
-   the OSX version of libarchive, then you'll need to compile the libarchive
-   gem against the Homebrew version.) If you have an out-of-date libarchive
-   version, you will see missing constant errors in the multifile exporters.
-2. Create a PostgreSQL user called "shuttle", and make it the owner of two
-   PostgreSQL databases, "shuttle_development" and "shuttle_test".
-3. Run `rake db:migrate db:seed`.
-4. Verify that all specs pass with `rspec spec`.
-5. To run the server, use `rails server`. Additionally, run `bundle exec sidekiq
-   -C config/sidekiq.yml` to run the Sidekiq development server.
-6. Visit http://localhost:3000 and log in with the credentials
-   "admin@example.com" / "password123".
+1. Clone this project.
+2. Install a modern version of libarchive, one that supports the GNU tar format.
+   (The version that comes with Mac OS X does not.) On OS X, you can run
+
+        brew install libarchive && brew link --force libarchive
+
+   If you'd rather not link over the OSX version of libarchive, then you'll need
+   to compile the libarchive gem against the Homebrew version.) If you have an
+   out-of-date libarchive version, you will see missing constant errors in the
+   multifile exporters.
+3. Create a PostgreSQL user called `shuttle`, and make it the owner of two
+   PostgreSQL databases, `shuttle_development` and `shuttle_test`:
+
+        brew install postgresql
+        createuser shuttle
+        createdb -O shuttle shuttle_development
+        createdb -O shuttle shuttle_test
+
+4. You’ll need to run Bundler: `bundle install`
+5. Run `rake db:migrate db:seed` to seed the database.
+6. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
+6. Verify that all specs pass with `rspec spec`
+7. To run the server, use `rails server`
+8. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
+to run the Sidekiq development server.
+9. Visit [http://localhost:3000](http://localhost:3000) and log in with the
+   credentials:
+
+   username: **admin@example.com**<br>
+   password: **password123**
 
 ### Adding your first project
 

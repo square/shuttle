@@ -47,7 +47,6 @@ require 'file_mutex'
 # | `base_locale`            | The locale the Project is initially localized in.                                                                                                                                            |
 # | `locale_requirements`    | An hash mapping locales this Project can be localized to, to whether those locales are required.                                                                                             |
 # | `skip_imports`           | An array of classes under the {Importer} module that are _not_ used to search for Translations.                                                                                              |
-# | `due_date`               | A date displayed to translators and reviewers informing them of when the Project must be fully localized.                                                                                    |
 # | `key_exclusions`         | An array of globs that describe keys that should be ignored.                                                                                                                                 |
 # | `key_inclusions`         | An array of globs that describe keys that should be included. Other keys are ignored.                                                                                                        |
 # | `key_locale_exclusions`  | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that should be ignored in that locale.                                                                      |
@@ -80,7 +79,6 @@ class Project < ActiveRecord::Base
       targeted_rfc5646_locales: {presence: true, type: Hash, default: {'en' => true}},
 
       skip_imports:             {type: Array, default: []},
-      due_date:                 {type: Date, allow_nil: true},
 
       key_exclusions:           {type: Array, default: [], allow_nil: false},
       key_inclusions:           {type: Array, default: [], allow_nil: false},
@@ -101,7 +99,7 @@ class Project < ActiveRecord::Base
   )
 
   extend SetNilIfBlank
-  set_nil_if_blank :due_date, :webhook_url
+  set_nil_if_blank :webhook_url
 
   include Slugalicious
   slugged :name
@@ -190,6 +188,8 @@ class Project < ActiveRecord::Base
   #   import after creating the Commit, if one was created.
   # @option options [true, false] skip_create If `true`, does not create a new
   #   Commit object if one is not found.
+  # @option options [Hash] other_fields Additional model fields to set. Must
+  #   have already been filtered for accessible attributes.
   # @return [Commit] The Commit for that SHA.
   # @raise [ActiveRecord::RecordNotFound] If an unknown SHA is given.
 
@@ -209,8 +209,12 @@ class Project < ActiveRecord::Base
                               revision:     commit_object.sha,
                               message:      commit_object.message,
                               committed_at: commit_object.author.date,
-                              skip_import:  options[:skip_import]
-                          }, as: :system)
+                              skip_import:  options[:skip_import],
+                          }, as: :system) do |c|
+        options[:other_fields].each do |field, value|
+          c.send :"#{field}=", value
+        end if options[:other_fields]
+      end
     end
   end
 

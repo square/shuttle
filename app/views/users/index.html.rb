@@ -40,22 +40,31 @@ module Views
         table(class: 'table') do
           thead do
             tr do
-              th "Email"
               th "Name"
+              th "Email"
               th "Role"
+              th
             end
           end
 
           tbody do
             @users.each do |user|
               tr do
-                td { link_to user.email, user_url(user) }
-                td user.name
+                td { link_to user.name, user_url(user) }
+                td user.email
                 td do
                   if user.role?
                     text t("models.user.role.#{user.role}")
                   else
                     span "unauthorized", class: 'label label-info'
+                  end
+                end
+                td do
+                  unless user.admin? || user == current_user
+                    button "Impersonate",
+                           class:        'btn btn-warning btn-small',
+                           href:         become_user_url(user),
+                           'data-method' => 'POST'
                   end
                 end
               end

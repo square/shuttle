@@ -32,6 +32,11 @@ en:
       commit:
         revision: revision
         revision_raw: revision
+        description: description
+        due_date: due date
+        project_id: project
+        priority: priority
+        pull_request_url: pull request URL
       translation:
         source_rfc5646_locale: from locale
         rfc5646_locale: to locale
@@ -80,6 +85,8 @@ en:
       wrong_sha_type: is not the correct Git object type
   helpers:
     submit:
+      commit:
+        create: Submit Request
       project:
         create: Create Project
         update: Save Changes
@@ -89,11 +96,15 @@ en:
       user:
         create: Sign Up
         update: Save Changes
+  date:
+    formats:
+      mon_day: "%b %-d"
   time:
     formats:
       short_date: "%B %-m, %Y"
       trados: "%d%m%Y, %H:%M:%S"
       full: "%A, %B %-d, %Y %-I:%M:%S %P"
+      mon_day: "%b %-d"
   controllers:
     application:
       mass_assignment_security: You tried to modify something you weren’t allowed to!
@@ -133,6 +144,7 @@ en:
       become:
         success: You are now using Shuttle as %{user}. To return to your account, you must log out and log in again.
         admin: You cannot become another administrator.
+        admin: You cannot become another administrator.
   models:
     user:
       name: "%{first} %{last}"
@@ -141,6 +153,12 @@ en:
         translator: translator
         reviewer: reviewer
         admin: administrator
+    commit:
+      priority:
+        0: P0
+        1: P1
+        2: P2
+        3: P3
   fencer:
     Erb: "<%= ERb %>"
     Html: "<HTML>"

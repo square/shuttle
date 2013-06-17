@@ -25,6 +25,11 @@ module Views
         protected
 
         def body_content
+          @mode = params[:mode] || case current_user.role
+                                    when 'translator' then 'translation'
+                                    else 'review'
+                                   end
+
           article(class: 'container translation-panel') do
             page_header @project.name
             status_line
@@ -34,7 +39,7 @@ module Views
         end
 
         def active_tab
-          case params[:mode]
+          case @mode
             when 'translate' then 'translate'
             when 'review' then 'review'
             else nil
@@ -67,16 +72,17 @@ module Views
                                                                  [@project.base_locale.name, 'source']
                                                              ]), class: 'span2 pull-right'
 
+              preselected_commit = params[:commit].present? ? @project.commits.for_revision(params[:commit]).first : nil
               select_tag 'commit',
                          options_for_select(@project.commits.
                                                 order('committed_at DESC').
                                                 map { |c| ["#{c.revision[0, 6]}: #{truncate c.message}", c.id] }.
-                         unshift([nil, nil]))
+                         unshift(['all commits', nil]), preselected_commit.try(:id))
             end
             div(class: 'row-fluid') do
               div(class: 'form-inline span11') do
                 label(class: 'checkbox') do
-                  input type: 'checkbox', name: 'include_translated', value: 'true', checked: (params[:mode] == 'review' ? 'checked' : nil)
+                  input type: 'checkbox', name: 'include_translated', value: 'true', checked: (@mode == 'review' ? 'checked' : nil)
                   text ' Translated'
                 end
                 label(class: 'checkbox') do
@@ -84,7 +90,7 @@ module Views
                   text ' Approved'
                 end
                 label(class: 'checkbox') do
-                  input type: 'checkbox', name: 'include_new', value: 'true', checked: (params[:mode] == 'translation' ? 'checked' : nil)
+                  input type: 'checkbox', name: 'include_new', value: 'true', checked: (@mode == 'translation' ? 'checked' : nil)
                   text ' New'
                 end
               end
@@ -98,7 +104,7 @@ module Views
         end
 
         def completed_sha?(commit)
-          if params[:mode] == 'review'
+          if @mode == 'review'
             commit.all_translations_approved_for_locale?(@locale)
           else
             commit.all_translations_entered_for_locale?(@locale)

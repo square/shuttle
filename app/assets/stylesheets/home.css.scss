@@ -51,3 +51,36 @@ body#home-reviewers, body#home-translators {
     padding: 15px;
   }
 }
+
+table#commits {
+  tr[class] td:first-of-type:before {
+    content: "";
+    display: inline-block;
+    width: .75em;
+    height: .75em;
+    margin-right: 5px;
+    border-radius: 100%;
+  }
+
+  tr.commit-loading td:first-of-type:before { background: orange; }
+  tr.commit-ready td:first-of-type:before { background: green; }
+  tr.commit-translating td:first-of-type:before { background: cadetblue; }
+}
+
+.edit_commit {
+  position: relative;
+}
+.priority-change-success {
+  position: absolute;
+  line-height: 2em;
+  right: -.25em;
+  color: green;
+}
+
+.commit-priority-0 { color: red; font-weight: bold; }
+.commit-priority-1 { color: darkred; }
+.commit-priority-2 { color: darkorange; }
+.commit-priority-3 { color: darkcyan; }
+
+.due-date-very-soon { color: red; font-weight: bold; }
+.due-date-soon { color: darkorange; }

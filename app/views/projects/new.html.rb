@@ -63,14 +63,6 @@ module Views
             end
 
             div(class: 'control-group') do
-              f.label :due_date, class: 'control-label'
-              div(class: 'controls') do
-                f.date_select :due_date, include_blank: true
-                p "This date has no effect on anything; it’s just displayed to the translators and reviewers.", class: 'help-block'
-              end
-            end
-
-            div(class: 'control-group') do
               f.label :webhook_url, class: 'control-label'
               div(class: 'controls') do
                 f.text_field :webhook_url

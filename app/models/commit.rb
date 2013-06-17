@@ -39,22 +39,33 @@ require 'fileutils'
 # Associations
 # ============
 #
-# |                |                                                      |
-# |:---------------|:-----------------------------------------------------|
-# | `project`      | The {Project} this is a Commit under.                |
-# | `keys`         | All the {Key Keys} found in this Commit.             |
-# | `translations` | The {Translation Translations} found in this Commit. |
+# |                |                                                        |
+# |:---------------|:-------------------------------------------------------|
+# | `project`      | The {Project} this is a Commit under.                  |
+# | `user`         | The {User} that submitted this Commit for translation. |
+# | `keys`         | All the {Key Keys} found in this Commit.               |
+# | `translations` | The {Translation Translations} found in this Commit.   |
 #
 # Properties
 # ==========
 #
-# |                |                                                                                                                            |
-# |:---------------|:---------------------------------------------------------------------------------------------------------------------------|
-# | `committed_at` | The time this commit was made.                                                                                             |
-# | `message`      | The commit message.                                                                                                        |
-# | `ready`        | If `true`, all Keys under this Commit are marked as ready.                                                                 |
-# | `revision`     | The SHA1 for this commit.                                                                                                  |
-# | `loading`      | If `true`, there is at least one {BlobImporter} processing this Commit. |
+# |                |                                                                                                          |
+# |:---------------|:---------------------------------------------------------------------------------------------------------|
+# | `committed_at` | The time this commit was made.                                                                           |
+# | `message`      | The commit message.                                                                                      |
+# | `ready`        | If `true`, all Keys under this Commit are marked as ready.                                               |
+# | `revision`     | The SHA1 for this commit.                                                                                |
+# | `loading`      | If `true`, there is at least one {BlobImporter} processing this Commit.                                  |
+# | `priority`     | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
+# | `due_date`     | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
+#
+# Metadata
+# ========
+#
+# |                    |                                                                    |
+# |:-------------------|:-------------------------------------------------------------------|
+# | `description`      | A user-submitted description of why we are localizing this commit. |
+# | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
 
 class Commit < ActiveRecord::Base
   # @return [true, false] If `true`, does not perform an import after creating
@@ -63,8 +74,15 @@ class Commit < ActiveRecord::Base
   attr_accessor :skip_import
 
   belongs_to :project, inverse_of: :commits
+  belongs_to :user, inverse_of: :commits
   has_and_belongs_to_many :keys, uniq: true
   has_many :translations, through: :keys
+
+  include HasMetadataColumn
+  has_metadata_column(
+      description:      {allow_nil: true},
+      pull_request_url: {allow_nil: true}
+  )
 
   validates :project,
             presence: true
@@ -77,6 +95,12 @@ class Commit < ActiveRecord::Base
   validates :committed_at,
             presence:   true,
             timeliness: {type: :time}
+  validates :priority,
+            numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3},
+            allow_nil:    true
+  validates :due_date,
+            timeliness: {type: :date},
+            allow_nil:  true
 
   extend GitObjectField
   git_object_field :revision,
@@ -84,6 +108,9 @@ class Commit < ActiveRecord::Base
                    repo:            ->(c) { c.project.try(:repo) },
                    repo_must_exist: true,
                    scope:           :for_revision
+
+  extend SetNilIfBlank
+  set_nil_if_blank :description, :due_date
 
   before_validation :load_message, on: :create
   before_validation(on: :create) do |obj|
@@ -96,9 +123,13 @@ class Commit < ActiveRecord::Base
   after_commit :compile_and_cache_or_clear, on: :update
 
   attr_accessible :revision, :message, :committed_at, :skip_import,
-                  :skip_sha_check, as: :system
-  attr_accessible :revision, as: :admin
+                  :skip_sha_check, :user_id, as: :system
+  attr_accessible :revision, :description, :due_date, :pull_request_url,
+                  as: :monitor
+  attr_accessible :due_date, :priority, as: :admin
   attr_readonly :revision, :message
+
+  scope :by_priority_and_due_date, order('due_date ASC, priority ASC')
 
   # @private
   def to_param() revision end
@@ -218,6 +249,40 @@ class Commit < ActiveRecord::Base
 
   def strings_total!
     self.strings_total = keys.count
+  end
+
+  # Recalculates the total number of Translations across all required locales
+  # that have not yet been translated. Normally this is done using hooks, but
+  # can be forced here.
+
+  def translations_new!
+    self.translations_new = translations.not_base.where(translated: false, rfc5646_locale: project.required_locales.map(&:rfc5646)).count
+  end
+
+  # Recalculates the total number of Translations across all required locales
+  # that have not yet been approved. Normally this is done using hooks, but can
+  # be forced here.
+
+  def translations_pending!
+    self.translations_pending = translations.not_base.where('approved IS NOT TRUE').
+        where(translated: true, rfc5646_locale: project.required_locales.map(&:rfc5646)).count
+  end
+
+  # Recalculates the total number of words across all Translations across all
+  # required locales that have not yet been approved. Normally this is done
+  # using hooks, but can be forced here.
+
+  def words_pending!
+    self.words_pending = translations.not_base.where('approved IS NOT TRUE').
+        where(translated: true, rfc5646_locale: project.required_locales.map(&:rfc5646)).sum(:words_count)
+  end
+
+  # Recalculates the total number of words across all Translations across all
+  # required locales that have not yet been translated. Normally this is done
+  # using hooks, but can be forced here.
+
+  def words_new!
+    self.words_new = translations.not_base.where(translated: false, rfc5646_locale: project.required_locales.map(&:rfc5646)).sum(:words_count)
   end
 
   # Adds a worker to the loading list. This commit, if not already loading,
