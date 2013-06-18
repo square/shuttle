@@ -92,7 +92,7 @@ class HomeController < ApplicationController
     params[:email] ||= current_user.email if current_user.monitor? && !current_user.admin?
     if params[:email].present?
       user = User.find_by_email(params[:email])
-      @commits = @commits.where(user_id: user.id)
+      @commits = @commits.where(user_id: user.id) if user
     end
   end
 
