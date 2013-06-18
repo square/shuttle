@@ -106,11 +106,13 @@ module Views
       end
 
       def commits_table
-        table(class: 'table', id: 'commits') do
+        table(class: 'table commits-table', id: 'commits') do
           thead do
             tr do
               th "project"
-              th "description"
+              th(class: "description") do
+                text "description"
+              end
               th "requester"
               th "pull"
               th "translate"
@@ -125,77 +127,75 @@ module Views
 
           tbody do
             @commits.each do |commit|
-              tbody do
-                row_class = if commit.loading?
-                              'commit-loading'
-                            elsif commit.ready?
-                              'commit-ready'
-                            else
-                              'commit-translating'
-                            end
-                tr(class: row_class) do
-                  td commit.project.name
-                  td(commit.description || '-')
-                  td do
-                    if commit.user
-                      text! mail_to(commit.user.email)
+              row_class = if commit.loading?
+                            'commit-loading'
+                          elsif commit.ready?
+                            'commit-ready'
+                          else
+                            'commit-translating'
+                          end
+              tr(class: row_class) do
+                td commit.project.name
+                td commit.description || '-', class: "description"
+                td do
+                  if commit.user
+                    text! mail_to(commit.user.email)
+                  else
+                    text '-'
+                  end
+                end
+                td do
+                  if commit.github_url.present?
+                    link_to "code", commit.github_url
+                  else
+                    text '-'
+                  end
+                end
+                td "#{commit.translations_new}s (#{commit.words_new}w)"
+                td "#{commit.translations_pending}s (#{commit.words_pending}w)"
+                td l(commit.created_at, format: :mon_day)
+                td do
+                  if commit.due_date
+                    date_class = if commit.due_date < 2.days.from_now.to_date
+                                   'due-date-very-soon'
+                                 elsif commit.due_date < 5.days.from_now.to_date
+                                   'due-date-soon'
+                                 else nil end
+                    span l(commit.due_date, format: :mon_day), class: date_class
+                  else
+                    text '-'
+                  end
+                end
+                td do
+                  if current_user.admin?
+                    form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
+                      f.select :priority, t('models.commit.priority').to_a.map(&:reverse).unshift(['-', nil])
+                    end
+                  else
+                    if commit.priority
+                      span t("models.commit.priority.#{commit.priority}"), class: "commit-priority-#{commit.priority}"
                     else
                       text '-'
                     end
                   end
-                  td do
-                    if commit.github_url.present?
-                      link_to "code", commit.github_url
-                    else
-                      text '-'
-                    end
-                  end
-                  td "#{commit.translations_new}s (#{commit.words_new}w)"
-                  td "#{commit.translations_pending}s (#{commit.words_pending}w)"
-                  td l(commit.created_at, format: :mon_day)
-                  td do
-                    if commit.due_date
-                      date_class = if commit.due_date < 2.days.from_now.to_date
-                                     'due-date-very-soon'
-                                   elsif commit.due_date < 5.days.from_now.to_date
-                                     'due-date-soon'
-                                   else nil end
-                      span l(commit.due_date, format: :mon_day), class: date_class
-                    else
-                      text '-'
-                    end
-                  end
-                  td do
-                    if current_user.admin?
-                      form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
-                        f.select :priority, t('models.commit.priority').to_a.map(&:reverse).unshift(['-', nil])
-                      end
-                    else
-                      if commit.priority
-                        span t("models.commit.priority.#{commit.priority}"), class: "commit-priority-#{commit.priority}"
-                      else
-                        text '-'
-                      end
-                    end
-                  end
-                  td { link_to commit.revision[0, 6], project_commit_url(commit.project, commit) }
-                  if current_user.translator?
-                    if current_user.approved_locales.any?
-                      td do
-                        current_user.approved_locales.each do |locale|
-                          link_to "#{locale.rfc5646} »", locale_project_url(locale, commit.project, commit: commit.revision)
-                          br
-                        end
-                      end
-                    else
-                      td do
-                        input type: 'text', placeholder: 'locale', class: 'locale-field', id: "translate-link-locale-#{commit.revision}"
+                end
+                td { link_to commit.revision[0, 6], project_commit_url(commit.project, commit) }
+                if current_user.translator?
+                  if current_user.approved_locales.any?
+                    td do
+                      current_user.approved_locales.each do |locale|
+                        link_to "#{locale.rfc5646} »", locale_project_url(locale, commit.project, commit: commit.revision)
                         br
-                        link_to "translate »", '#',
-                                class:         'translate-link',
-                                'data-sha'     => commit.revision,
-                                'data-project' => commit.project.to_param
                       end
+                    end
+                  else
+                    td do
+                      input type: 'text', placeholder: 'locale', class: 'locale-field', id: "translate-link-locale-#{commit.revision}"
+                      br
+                      link_to "translate »", '#',
+                              class:         'translate-link',
+                              'data-sha'     => commit.revision,
+                              'data-project' => commit.project.to_param
                     end
                   end
                 end
@@ -232,9 +232,11 @@ module Views
               # wants to view all commits. Whew!
               hidden_field_tag 'email', ''
             end
-            check_box_tag 'email', current_user.email, params[:email] == current_user.email
+            label_tag({}, class: 'checkbox') do
+              check_box_tag 'email', current_user.email, params[:email] == current_user.email
+              text 'Only commits submitted by me'
+            end
             text ' '
-            label_tag 'email', 'Only commits submitted by me'
           end
 
           text ' '
