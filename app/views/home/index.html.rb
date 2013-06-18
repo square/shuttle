@@ -184,6 +184,7 @@ module Views
                       td do
                         current_user.approved_locales.each do |locale|
                           link_to "#{locale.rfc5646} »", locale_project_url(locale, commit.project, commit: commit.revision)
+                          br
                         end
                       end
                     else
@@ -220,6 +221,17 @@ module Views
 
           if current_user.monitor?
             text ' '
+            unless current_user.admin?
+              # So, if you're a monitor, the default filter is by your email,
+              # which means the checkbox below is checked. If you uncheck that
+              # box, the email param disappears ... so it resets to the default
+              # email ... which means the box is checked. There would be no way
+              # to uncheck the checkbox if it weren't for this hidden field,
+              # which sets the unchecked default to an empty string. That way,
+              # if the parameter is present but not set, we know the monitor
+              # wants to view all commits. Whew!
+              hidden_field_tag 'email', ''
+            end
             check_box_tag 'email', current_user.email, params[:email] == current_user.email
             text ' '
             label_tag 'email', 'Only commits submitted by me'
