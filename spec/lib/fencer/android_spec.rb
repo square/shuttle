@@ -12,24 +12,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Adds the {#set_nil_if_blank} method to models.
-#
-# @example
-#   class Model < ActiveRecord::Base
-#     extend SetNilIfBlank
-#     set_nil_if_blank :my_field
-#   end
+require 'spec_helper'
 
-module SetNilIfBlank
+describe Fencer::Android do
+  describe ".fence" do
+    it "should fence a string with handlebars" do
+      Fencer::Android.fence("String with {two} {tokens}.").
+          should eql('{two}' => [12..16], '{tokens}' => [18..25])
+    end
 
-  # @overload set_nil_if_blank(field, ...)
-  #   Specifies that the given field(s) should be set to nil if their values are
-  #   `#blank?`.
-  #   @param [Symbol] field The name of a field to set nil if blank.
-
-  def set_nil_if_blank(*fields)
-    fields.each do |field|
-      before_validation { |obj| obj.send :"#{field}=", nil if obj.send(field).blank? }
+    it "should fence a string with double handlebars" do
+      Fencer::Android.fence("String with {{two}} {{tokens}}.").
+          should eql('{{two}}' => [12..18], '{{tokens}}' => [20..29])
     end
   end
 end

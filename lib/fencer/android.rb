@@ -12,24 +12,30 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Adds the {#set_nil_if_blank} method to models.
-#
-# @example
-#   class Model < ActiveRecord::Base
-#     extend SetNilIfBlank
-#     set_nil_if_blank :my_field
-#   end
+module Fencer
 
-module SetNilIfBlank
+  # Fences out tokens in Android strings. See {Fencer}.
 
-  # @overload set_nil_if_blank(field, ...)
-  #   Specifies that the given field(s) should be set to nil if their values are
-  #   `#blank?`.
-  #   @param [Symbol] field The name of a field to set nil if blank.
+  module Android
+    extend self
 
-  def set_nil_if_blank(*fields)
-    fields.each do |field|
-      before_validation { |obj| obj.send :"#{field}=", nil if obj.send(field).blank? }
+    def fence(string)
+      scanner = UnicodeScanner.new(string)
+
+      tokens = Hash.new { |hsh, k| hsh[k] = [] }
+      until scanner.eos?
+        match = scanner.scan_until(/\{/)
+        break unless match
+
+        start = scanner.pos - 1 # less the brace
+        token = scanner.scan_until(/\}\}?/)
+        next unless token
+
+        stop = scanner.pos - 1  # ranges are inclusive
+        tokens['{' + token] << (start..stop)
+      end
+
+      return tokens
     end
   end
 end

@@ -22,7 +22,7 @@
 
 module LocaleField
 
-  # @override locale_field(field, ..., options={})
+  # @overload locale_field(field, ..., options={})
   #   Defines one or more fields that should be accessed as {Locale} objects and
   #   serialized in RFC 5646 format. When passed a field name such as `:locale`,
   #   this method will create a getter and setter that work with {Locale}s, and
