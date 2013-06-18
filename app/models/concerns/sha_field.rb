@@ -24,7 +24,7 @@ require 'digest/sha2'
 
 module ShaField
 
-  # @override sha_field(field, ..., options={})
+  # @overload sha_field(field, ..., options={})
   #   Specifies that the field(s) are accessible as digested SHA2 values. The
   #   corresponding columns should be of `BYTEA` format so that the SHA2 value
   #   can be stored in as few bytes as possible. The method will create a

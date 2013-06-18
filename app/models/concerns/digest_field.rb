@@ -23,7 +23,7 @@
 module DigestField
   include ShaField
 
-  # @override digest_field(field, ..., options={})
+  # @overload digest_field(field, ..., options={})
   #   Specifies that the field(s) save their digested SHA2 values to a different
   #   field automatically. See the {ShaField} module for more information about
   #   how SHA2 values are stored and accessed, and additional options that can

@@ -22,7 +22,7 @@
 
 module SearchableField
 
-  # @override searchable_field(field, ..., options={})
+  # @overload searchable_field(field, ..., options={})
   #   Defines one or more columns that have corresponding columns in the model
   #   table of type `TSVECTOR`, used to perform textual searches on those
   #   fields. When these fields are modified, the corresponding TSVECTOR will be

@@ -46,7 +46,7 @@ version of libarchive. To run Shuttle for the first time:
         brew install libarchive && brew link --force libarchive
 
    If you'd rather not link over the OSX version of libarchive, then you'll need
-   to compile the libarchive gem against the Homebrew version.) If you have an
+   to compile the libarchive gem against the Homebrew version. If you have an
    out-of-date libarchive version, you will see missing constant errors in the
    multifile exporters.
 3. Create a PostgreSQL user called `shuttle`, and make it the owner of two

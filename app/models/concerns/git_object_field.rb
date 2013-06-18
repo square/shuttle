@@ -23,7 +23,7 @@
 module GitObjectField
   include ShaField
 
-  # @override git_object_field(field, ..., options={})
+  # @overload git_object_field(field, ..., options={})
   #   Specifies that the field(s) represent the SHA2 identifiers of objects in a
   #   Git repository. See the {ShaField} module for more information about how
   #   SHA2 values are stored and accessed, and additional options that can be

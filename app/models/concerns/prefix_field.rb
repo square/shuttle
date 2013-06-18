@@ -22,7 +22,7 @@
 
 module PrefixField
 
-  # @override prefix_field(field, ..., options={})
+  # @overload prefix_field(field, ..., options={})
   #   Specifies that one or more fields should have the initial parts of their
   #   values to set corresponding prefix fields. This allows larger fields to be
   #   sortable while only requiring that smaller fields be indexed.

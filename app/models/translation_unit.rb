@@ -73,7 +73,7 @@ class TranslationUnit < ActiveRecord::Base
   # translation memory. Does nothing if given a base translation or an
   # unapproved translation.
   #
-  # @param [Translation] A Translation to store.
+  # @param [Translation] translation A Translation to store.
 
   def self.store(translation)
     return unless translation.approved? && !translation.base_translation?
