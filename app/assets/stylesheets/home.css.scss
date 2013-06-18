@@ -56,15 +56,22 @@ table#commits {
   tr[class] td:first-of-type:before {
     content: "";
     display: inline-block;
-    width: .75em;
-    height: .75em;
+    width: 10px;
+    height: 10px;
     margin-right: 5px;
     border-radius: 100%;
   }
 
-  tr.commit-loading td:first-of-type:before { background: orange; }
-  tr.commit-ready td:first-of-type:before { background: green; }
-  tr.commit-translating td:first-of-type:before { background: cadetblue; }
+  tr.commit-loading td:first-of-type:before {
+    border: 2px solid darken(#dadafb, 10%);
+    width: 8px;
+    height: 8px;
+  }
+  tr.commit-translating td:first-of-type:before {
+    background: darken(#dadafb, 10%);
+  }
+  tr.commit-ready td:first-of-type:before { background: darken(#dfd, 50%); }
+  }
 }
 
 .edit_commit {
