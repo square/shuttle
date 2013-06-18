@@ -53,7 +53,7 @@ body#home-translators {
   }
 }
 
-table#commits {
+.commits-table {
   tr[class] td:first-of-type:before {
     content: "";
     display: inline-block;
@@ -72,6 +72,8 @@ table#commits {
     background: darken(#dadafb, 10%);
   }
   tr.commit-ready td:first-of-type:before { background: darken(#dfd, 50%); }
+  td.description {
+    word-break: break-all;
   }
 }
 
