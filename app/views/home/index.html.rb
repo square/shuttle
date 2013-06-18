@@ -232,9 +232,11 @@ module Views
               # wants to view all commits. Whew!
               hidden_field_tag 'email', ''
             end
-            check_box_tag 'email', current_user.email, params[:email] == current_user.email
+            label_tag({}, class: 'checkbox') do
+              check_box_tag 'email', current_user.email, params[:email] == current_user.email
+              text 'Only commits submitted by me'
+            end
             text ' '
-            label_tag 'email', 'Only commits submitted by me'
           end
 
           text ' '
