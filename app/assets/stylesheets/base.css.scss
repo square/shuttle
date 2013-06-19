@@ -20,6 +20,10 @@ ul.search-results {
 }
 
 span.pending { color: gray; font-style: italic; }
+a.disabled, a.disabled:hover, a.disabled:active, a.disabled:visited {
+  color: #999999;
+  text-decoration: none;
+}
 
 pre.translation-base {
   background-color: rgba(0, 111, 219, 0.25);

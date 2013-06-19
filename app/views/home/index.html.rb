@@ -110,16 +110,14 @@ module Views
           thead do
             tr do
               th "project"
-              th(class: "description") do
-                text "description"
-              end
+              th "requested"
+              th "due"
+              th "priority"
+              th "description", class: "description"
               th "requester"
               th "pull"
               th "translate"
               th "review"
-              th "requested"
-              th "due"
-              th "priority"
               th "id"
               th "translate" if current_user.translator?
             end
@@ -136,6 +134,45 @@ module Views
                           end
               tr(class: row_class) do
                 td commit.project.name
+                td l(commit.created_at, format: :mon_day)
+                td do
+                  if current_user.admin?
+                    form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
+                      f.date_select :due_date,
+                                    {use_short_month: true,
+                                     start_year:      Date.today.year,
+                                     end_year:        Date.today.year + 1,
+                                     include_blank:   true},
+                                    class: 'span1'
+                    end
+                  else
+                    if commit.due_date
+                      date_class = if commit.due_date < 2.days.from_now.to_date
+                                     'due-date-very-soon'
+                                   elsif commit.due_date < 5.days.from_now.to_date
+                                     'due-date-soon'
+                                   else
+                                     nil
+                                   end
+                      span l(commit.due_date, format: :mon_day), class: date_class
+                    else
+                      text '-'
+                    end
+                  end
+                end
+                td do
+                  if current_user.admin?
+                    form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
+                      f.select :priority, t('models.commit.priority').to_a.map(&:reverse).unshift(['-', nil]), {}, class: 'span1'
+                    end
+                  else
+                    if commit.priority
+                      span t("models.commit.priority.#{commit.priority}"), class: "commit-priority-#{commit.priority}"
+                    else
+                      text '-'
+                    end
+                  end
+                end
                 td commit.description || '-', class: "description"
                 td do
                   if commit.user
@@ -153,32 +190,6 @@ module Views
                 end
                 td "#{commit.translations_new}s (#{commit.words_new}w)"
                 td "#{commit.translations_pending}s (#{commit.words_pending}w)"
-                td l(commit.created_at, format: :mon_day)
-                td do
-                  if commit.due_date
-                    date_class = if commit.due_date < 2.days.from_now.to_date
-                                   'due-date-very-soon'
-                                 elsif commit.due_date < 5.days.from_now.to_date
-                                   'due-date-soon'
-                                 else nil end
-                    span l(commit.due_date, format: :mon_day), class: date_class
-                  else
-                    text '-'
-                  end
-                end
-                td do
-                  if current_user.admin?
-                    form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
-                      f.select :priority, t('models.commit.priority').to_a.map(&:reverse).unshift(['-', nil])
-                    end
-                  else
-                    if commit.priority
-                      span t("models.commit.priority.#{commit.priority}"), class: "commit-priority-#{commit.priority}"
-                    else
-                      text '-'
-                    end
-                  end
-                end
                 td { link_to commit.revision[0, 6], project_commit_url(commit.project, commit) }
                 if current_user.translator?
                   if current_user.approved_locales.any?
@@ -190,12 +201,17 @@ module Views
                     end
                   else
                     td do
-                      input type: 'text', placeholder: 'locale', class: 'locale-field', id: "translate-link-locale-#{commit.revision}"
+                      input type:         'text',
+                            placeholder:  'locale',
+                            class:        'locale-field translate-link-locale',
+                            id:           "translate-link-locale-#{commit.revision}",
+                            'data-target' => "#translate-link-#{commit.revision}"
                       br
                       link_to "translate »", '#',
-                              class:         'translate-link',
+                              class:         'translate-link disabled',
                               'data-sha'     => commit.revision,
-                              'data-project' => commit.project.to_param
+                              'data-project' => commit.project.to_param,
+                              id:            "translate-link-#{commit.revision}"
                     end
                   end
                 end

@@ -54,7 +54,8 @@ class Locale::TranslationsController < ApplicationController
                     end
 
     @translations = @translations.in_locale(@locale).
-        order('created_at DESC').offset(params[:offset].to_i).limit(50)
+        order('created_at DESC').offset(params[:offset].to_i).limit(50).
+        includes(key: :project)
     if include_translated && include_approved && include_new
       # include everything
     elsif include_translated && include_approved
