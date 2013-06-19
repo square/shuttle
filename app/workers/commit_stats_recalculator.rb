@@ -25,18 +25,19 @@ class CommitStatsRecalculator
   #
   # @param [Fixnum] commit_id The ID of a Commit to process.
 
-  def perform(commit_id, stop_loading=false)
+  def perform(commit_id)
     commit = Commit.find(commit_id)
+    Commit.flush_memoizations(commit)
 
-    commit.translations_done!
-    commit.translations_total!
-    commit.translations_new!
-    commit.translations_pending!
+    commit.translations_done
+    commit.translations_total
+    commit.translations_new
+    commit.translations_pending
 
-    commit.strings_total!
+    commit.strings_total
 
-    commit.words_new!
-    commit.words_pending!
+    commit.words_new
+    commit.words_pending
 
     commit.keys.find_each(&:recalculate_ready!)
     commit.recalculate_ready!
