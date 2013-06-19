@@ -136,15 +136,28 @@ module Views
                 td commit.project.name
                 td l(commit.created_at, format: :mon_day)
                 td do
-                  if commit.due_date
-                    date_class = if commit.due_date < 2.days.from_now.to_date
-                                   'due-date-very-soon'
-                                 elsif commit.due_date < 5.days.from_now.to_date
-                                   'due-date-soon'
-                                 else nil end
-                    span l(commit.due_date, format: :mon_day), class: date_class
+                  if current_user.admin?
+                    form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
+                      f.date_select :due_date,
+                                    {use_short_month: true,
+                                     start_year:      Date.today.year,
+                                     end_year:        Date.today.year + 1,
+                                     include_blank:   true},
+                                    class: 'span1'
+                    end
                   else
-                    text '-'
+                    if commit.due_date
+                      date_class = if commit.due_date < 2.days.from_now.to_date
+                                     'due-date-very-soon'
+                                   elsif commit.due_date < 5.days.from_now.to_date
+                                     'due-date-soon'
+                                   else
+                                     nil
+                                   end
+                      span l(commit.due_date, format: :mon_day), class: date_class
+                    else
+                      text '-'
+                    end
                   end
                 end
                 td do
