@@ -21,7 +21,7 @@ require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
 module Views
   module Home
     class Index < Views::Layouts::Application
-      needs :commits, :start_date, :end_date, :status
+      needs :commits, :start_date, :end_date, :status, :locales
 
       protected
 
@@ -188,8 +188,8 @@ module Views
                     text '-'
                   end
                 end
-                td "#{commit.translations_new}s (#{commit.words_new}w)"
-                td "#{commit.translations_pending}s (#{commit.words_pending}w)"
+                td "#{number_with_delimiter commit.translations_new(*@locales)}s (#{number_with_delimiter commit.words_new(*@locales)}w)"
+                td "#{number_with_delimiter commit.translations_pending(*@locales)}s (#{number_with_delimiter commit.words_pending(*@locales)}w)"
                 td { link_to commit.revision[0, 6], project_commit_url(commit.project, commit) }
                 if current_user.translator?
                   if current_user.approved_locales.any?
@@ -222,42 +222,54 @@ module Views
       end
 
       def filter_form
-        form_tag({}, class: 'form-inline', id: 'filter', method: 'get') do
-          select_tag 'status', options_for_select(
-              %w(all uncompleted completed).map { |n| ["#{n} translations", n] },
-              @status
-          )
+        form_tag({}, id: 'filter', method: 'get') do
+          p(class: 'form-inline') do
+            select_tag 'status', options_for_select(
+                %w(all uncompleted completed).map { |n| ["#{n} translations", n] },
+                @status
+            )
 
-          text ' in '
+            text ' in '
 
-          project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-          project_list.unshift ['projects in my locales', 'my-locales'] if current_user.approved_locales.any?
-          project_list.unshift ['all projects', nil]
-          select_tag 'project_id', options_for_select(project_list, params[:project_id])
+            project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+            project_list.unshift ['projects in my locales', 'my-locales'] if current_user.approved_locales.any?
+            project_list.unshift ['all projects', nil]
+            select_tag 'project_id', options_for_select(project_list, params[:project_id])
 
-          if current_user.monitor?
-            text ' '
-            unless current_user.admin?
-              # So, if you're a monitor, the default filter is by your email,
-              # which means the checkbox below is checked. If you uncheck that
-              # box, the email param disappears ... so it resets to the default
-              # email ... which means the box is checked. There would be no way
-              # to uncheck the checkbox if it weren't for this hidden field,
-              # which sets the unchecked default to an empty string. That way,
-              # if the parameter is present but not set, we know the monitor
-              # wants to view all commits. Whew!
-              hidden_field_tag 'email', ''
+            if current_user.monitor?
+              text ' '
+              unless current_user.admin?
+                # So, if you're a monitor, the default filter is by your email,
+                # which means the checkbox below is checked. If you uncheck that
+                # box, the email param disappears ... so it resets to the default
+                # email ... which means the box is checked. There would be no way
+                # to uncheck the checkbox if it weren't for this hidden field,
+                # which sets the unchecked default to an empty string. That way,
+                # if the parameter is present but not set, we know the monitor
+                # wants to view all commits. Whew!
+                hidden_field_tag 'email', ''
+              end
+              label_tag({}, class: 'checkbox') do
+                check_box_tag 'email', current_user.email, params[:email] == current_user.email
+                text 'Only commits submitted by me'
+              end
+              text ' '
             end
-            label_tag({}, class: 'checkbox') do
-              check_box_tag 'email', current_user.email, params[:email] == current_user.email
-              text 'Only commits submitted by me'
-            end
-            text ' '
           end
 
-          text ' '
+          p(class: 'form-inline') do
+            text "Display string and word counts for "
+            if current_user.approved_locales.any?
+              locales = current_user.approved_locales.map { |locale| [locale.name, locale.rfc5646] }
+              locales.unshift ['my locales', current_user.approved_locales.map(&:rfc5646).join(',')]
+              locales.unshift ['all locales', nil]
+              select_tag 'locales', options_for_select(locales, @locales.map(&:rfc5646).join(','))
+            else
+              text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: "all locales", class: 'locale-field locale-field-list'
+            end
+          end
 
-          submit_tag 'Filter', class: 'btn btn-primary'
+          p { submit_tag 'Filter', class: 'btn btn-primary' }
         end
       end
     end

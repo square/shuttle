@@ -166,15 +166,7 @@ describe Commit do
     end
 
     it "should recalculate commit statistics correctly" do
-      Commit.update_all({translations_total: 0, translations_done: 0, strings_total: 0}, id: @commit.id)
-
-      @commit.translations_total!
-      @commit.translations_done!
-      @commit.translations_pending!
-      @commit.translations_new!
-      @commit.strings_total!
-      @commit.words_pending!
-      @commit.words_new!
+      Commit.flush_memoizations @commit
 
       @commit.translations_total.should eql(4)
       @commit.translations_done.should eql(2)

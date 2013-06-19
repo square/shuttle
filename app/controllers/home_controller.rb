@@ -94,6 +94,12 @@ class HomeController < ApplicationController
       user = User.find_by_email(params[:email])
       @commits = @commits.where(user_id: user.id) if user
     end
+
+    @locales = if params[:locales].present?
+                 params[:locales].split(',').map { |l| Locale.from_rfc5646 l }
+               else
+                 []
+               end
   end
 
   # Displays a landing page appropriate to translators: They can choose the

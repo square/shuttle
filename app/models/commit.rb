@@ -68,6 +68,8 @@ require 'fileutils'
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
 
 class Commit < ActiveRecord::Base
+  extend RedisMemoize
+
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
   #   spawning a worker for situations where Commits are being added in bulk.
@@ -223,19 +225,21 @@ class Commit < ActiveRecord::Base
     super options
   end
 
-  # Recalculates the number of approved Translations across all required under
-  # this Commit. Normally this is done using hooks, but can be forced here.
+  # @return [Fixnum] The number of approved Translations across all required
+  #   under this Commit.
 
-  def translations_done!
-    self.translations_done = translations.not_base.where(approved: true, rfc5646_locale: project.required_locales.map(&:rfc5646)).count
+  def translations_done
+    translations.not_base.where(approved: true, rfc5646_locale: project.required_locales.map(&:rfc5646)).count
   end
+  redis_memoize :translations_done
 
-  # Recalculates the number of Translations across all required locales under
-  # this Commit. Normally this is done using hooks, but can be forced here.
+  # @return [Fixnum] The number of Translations across all required locales
+  #   under this Commit.
 
-  def translations_total!
-    self.translations_total = translations.not_base.where(rfc5646_locale: project.required_locales.map(&:rfc5646)).count
+  def translations_total
+    translations.not_base.where(rfc5646_locale: project.required_locales.map(&:rfc5646)).count
   end
+  redis_memoize :translations_total
 
   # @return [Float] The fraction of Translations under this Commit that are
   #   approved, across all required locales.
@@ -244,46 +248,66 @@ class Commit < ActiveRecord::Base
     translations_done/translations_total.to_f
   end
 
-  # Recalculates the total number of translatable base strings applying to this
-  # Commit. Normally this is done using hooks, but can be forced here.
+  # @return [Fixnum] The total number of translatable base strings applying to
+  #   this Commit.
 
-  def strings_total!
-    self.strings_total = keys.count
+  def strings_total
+    keys.count
   end
+  redis_memoize :strings_total
 
-  # Recalculates the total number of Translations across all required locales
-  # that have not yet been translated. Normally this is done using hooks, but
-  # can be forced here.
+  # Calculates the total number of Translations that have not yet been
+  # translated.
+  #
+  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
+  #   Defaults to all required locales.
+  # @return [Fixnum] The total number of Translations.
 
-  def translations_new!
-    self.translations_new = translations.not_base.where(translated: false, rfc5646_locale: project.required_locales.map(&:rfc5646)).count
+  def translations_new(*locales)
+    locales = project.required_locales if locales.empty?
+    translations.not_base.where(translated: false, rfc5646_locale: locales.map(&:rfc5646)).count
   end
+  redis_memoize :translations_new
 
-  # Recalculates the total number of Translations across all required locales
-  # that have not yet been approved. Normally this is done using hooks, but can
-  # be forced here.
+  # Calculates the total number of Translations that have not yet been approved.
+  #
+  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
+  #   Defaults to all required locales.
+  # @return [Fixnum] The total number of Translations.
 
-  def translations_pending!
-    self.translations_pending = translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: project.required_locales.map(&:rfc5646)).count
+  def translations_pending(*locales)
+    locales = project.required_locales if locales.empty?
+    translations.not_base.where('approved IS NOT TRUE').
+        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
   end
+  redis_memoize :translations_pending
 
-  # Recalculates the total number of words across all Translations across all
-  # required locales that have not yet been approved. Normally this is done
-  # using hooks, but can be forced here.
+  # Calculates the total number of words across all Translations that have not
+  # yet been approved.
+  #
+  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
+  #   Defaults to all required locales.
+  # @return [Fixnum] The total number of words in the Translations' source copy.
 
-  def words_pending!
-    self.words_pending = translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: project.required_locales.map(&:rfc5646)).sum(:words_count)
+  def words_pending(*locales)
+    locales = project.required_locales if locales.empty?
+    translations.not_base.where('approved IS NOT TRUE').
+        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
   end
+  redis_memoize :words_pending
 
-  # Recalculates the total number of words across all Translations across all
-  # required locales that have not yet been translated. Normally this is done
-  # using hooks, but can be forced here.
+  # Calculates the total number of words across all Translations that have not
+  # yet been translations.
+  #
+  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
+  #   Defaults to all required locales.
+  # @return [Fixnum] The total number of words in the Translations' source copy.
 
-  def words_new!
-    self.words_new = translations.not_base.where(translated: false, rfc5646_locale: project.required_locales.map(&:rfc5646)).sum(:words_count)
+  def words_new(*locales)
+    locales = project.required_locales if locales.empty?
+    translations.not_base.where(translated: false, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
   end
+  redis_memoize :words_new
 
   # Adds a worker to the loading list. This commit, if not already loading,
   # will be marked as loading until this and all other added workers call
@@ -332,6 +356,9 @@ class Commit < ActiveRecord::Base
   def all_translations_approved_for_locale?(locale)
     translations.not_base.where(rfc5646_locale: locale.rfc5646, approved: false).count == 0
   end
+
+  # @private
+  def redis_memoize_key() to_param end
 
   private
 
