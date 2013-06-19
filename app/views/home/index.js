@@ -1,5 +1,7 @@
 $(window).ready(function() {
   $('.translate-link').click(function() {
+    if ($(this).hasClass('disabled')) return false;
+
     var sha = $(this).data('sha');
     var project = $(this).data('project');
     var localeField =  $('#translate-link-locale-' + sha);
@@ -9,6 +11,12 @@ $(window).ready(function() {
     window.location = url;
 
     return false;
+  });
+
+  $('.translate-link-locale').keydown(function() {
+    if (($(this).val()).length > 0) $($(this).data('target')).removeClass('disabled');
+    else $($(this).data('target')).addClass('disabled');
+    return true;
   });
 
   new SmartForm($('#new_commit'), function() { window.location.reload(); });

@@ -188,12 +188,17 @@ module Views
                     end
                   else
                     td do
-                      input type: 'text', placeholder: 'locale', class: 'locale-field', id: "translate-link-locale-#{commit.revision}"
+                      input type:         'text',
+                            placeholder:  'locale',
+                            class:        'locale-field translate-link-locale',
+                            id:           "translate-link-locale-#{commit.revision}",
+                            'data-target' => "#translate-link-#{commit.revision}"
                       br
                       link_to "translate »", '#',
-                              class:         'translate-link',
+                              class:         'translate-link disabled',
                               'data-sha'     => commit.revision,
-                              'data-project' => commit.project.to_param
+                              'data-project' => commit.project.to_param,
+                              id:            "translate-link-#{commit.revision}"
                     end
                   end
                 end
