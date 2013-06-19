@@ -43,8 +43,10 @@ $(window).ready(function() {
       data: data,
       type: 'PUT',
       success: function() {
-        var checkmark = $('<i/>').addClass('icon-ok priority-change-success').insertAfter(select);
-        checkmark.oneTime(3000, function() { checkmark.fadeOut(); });
+        var checkmark = $('<i/>').addClass('icon-ok priority-change-success').appendTo(form);
+        checkmark.oneTime(3000, function() {
+          checkmark.fadeOut(function() { checkmark.remove(); });
+        });
       },
       error: function() {
         alert("Couldn't change commit priority.");
