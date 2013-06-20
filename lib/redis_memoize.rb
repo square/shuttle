@@ -19,8 +19,6 @@
 #   end
 
 module RedisMemoize
-  # The time-to-live of memoized values.
-  TTL = 2.weeks
 
   # Specifies that the given method should have its return values memoized in
   # Redis. Arbitrary arguments are supported, so long as they can be uniquely
@@ -36,7 +34,7 @@ module RedisMemoize
         YAML.load Shuttle::Redis.get(key)
       else
         value = send(:"#{method}_without_memoize", *args)
-        Shuttle::Redis.setex key, TTL, value.to_yaml
+        Shuttle::Redis.set key, value.to_yaml
         value
       end
     end
