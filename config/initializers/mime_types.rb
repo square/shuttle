@@ -26,7 +26,6 @@ require 'mime/types'
 
 # Mime::Type does not have the gzip assignment; MIME::Type does
 Mime::Type.register 'application/x-gzip', :gz, [], %w(tgz)
-Mime::Type.register_alias 'application/x-gzip', :android
 Mime::Type.register_alias 'application/x-gzip', :ios
 
 Mime::Type.register_alias 'text/plain', :strings
