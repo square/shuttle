@@ -123,6 +123,7 @@ class Commit < ActiveRecord::Base
     CommitImporter.perform_once(commit.id) unless commit.skip_import
   end
   after_commit :compile_and_cache_or_clear, on: :update
+  after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_accessible :revision, :message, :committed_at, :skip_import,
                   :skip_sha_check, :user_id, as: :system
