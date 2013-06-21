@@ -72,6 +72,15 @@ body#home-translators {
     background: darken(#dadafb, 10%);
   }
   tr.commit-ready td:first-of-type:before { background: darken(#dfd, 50%); }
+  td.description {
+    word-break: break-all;
+  }
+  td.due-date {
+    white-space: nowrap;
+    select {
+      width: auto !important
+    }
+  }
 }
 
 .edit_commit {
