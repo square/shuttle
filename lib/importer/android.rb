@@ -29,7 +29,9 @@ module Importer
     # XML files that could contain localizable resources.
     FILENAMES = %w(strings.xml arrays.xml plurals.xml titles.xml)
 
-    def self.fencers() %w(Android) end
+    def self.fencers()
+      %w(Android)
+    end
 
     protected
 
@@ -44,62 +46,50 @@ module Importer
     end
 
     def import_strings(receiver)
-      name, qualifiers = parse_qualifiers(::File.basename(::File.dirname(file.path)))
-      key              = serialize_qualifiers(name, qualifiers.except('language', 'region'))
-      # leave out language and region because that's handled by Translation
-
-      xml              = Nokogiri::XML(file.contents)
+      xml = Nokogiri::XML(file.contents)
 
       xml.xpath('/resources/string').each do |tag|
-        string_key = "string:#{key}:#{tag['name']}"
-
         if tag['translatable'] == 'false'
-          log_skip key, 'marked as translatable=false'
+          log_skip tag.path, 'marked as translatable=false'
           next
         end
 
-        context    = find_comment(tag).try(:content)
-        attributes = attributes_from_tag(tag, 'name')
-        receiver.add_string string_key,
+        context = find_comment(tag).try(:content)
+        receiver.add_string "#{file.path}:#{tag.path}",
                             unescape(tag.content),
                             context:      clean_comment(context),
-                            original_key: tag['name'],
-                            other_data:   {'attributes' => attributes}
+                            original_key: tag['name']
       end
 
       xml.xpath('/resources/string-array').each do |tag|
         if tag.attributes['translatable'] == 'false'
-          log_skip "#{key}:#{tag['name']}", 'marked as translatable=false'
+          log_skip tag.path, 'marked as translatable=false'
           next
         end
 
         global_context = find_comment(tag).try(:content)
-        tag.xpath('item').each_with_index do |item_tag, index|
-          context    = find_comment(item_tag).try(:content)
-          attributes = attributes_from_tag(item_tag)
-          receiver.add_string "array:#{key}:#{tag['name']}:#{index}",
+        tag.xpath('item').each do |item_tag|
+          context = find_comment(item_tag).try(:content)
+          receiver.add_string "#{file.path}:#{item_tag.path}",
                               unescape(item_tag.content),
                               context:      clean_comment(context || global_context),
-                              original_key: tag['name'],
-                              other_data:   {'attributes' => attributes}
+                              original_key: tag['name']
         end
       end
 
       xml.xpath('/resources/plurals').each do |tag|
         if tag['translatable'] == 'false'
-          log_skip "#{key}:#{tag['name']}", 'marked as translatable=false'
+          log_skip tag.path, 'marked as translatable=false'
           next
         end
 
         global_context = find_comment(tag).try(:content)
         tag.xpath('item').each do |subtag|
-          context    = find_comment(subtag).try(:content)
-          attributes = attributes_from_tag(subtag, 'quantity')
-          receiver.add_string "plural:#{key}:#{tag['name']}:#{subtag['quantity']}",
+          context = find_comment(subtag).try(:content)
+          receiver.add_string "#{file.path}:#{subtag.path}",
                               unescape(subtag.content),
                               context:      clean_comment(context || global_context),
-                              original_key: tag['name'],
-                              other_data:   {'attributes' => attributes}
+                              original_key: tag['name']
         end
       end
     end

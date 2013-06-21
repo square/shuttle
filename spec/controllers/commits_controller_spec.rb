@@ -175,13 +175,6 @@ key2=Tu avec carté {count} itém has
         # check body?
       end
 
-      it "should export an Android tarball manifest" do
-        get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'android'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="manifest.tar.gz"')
-        # check body?
-      end
-
       it "should export a Ruby file in one locale" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'rb'
         response.status.should eql(200)

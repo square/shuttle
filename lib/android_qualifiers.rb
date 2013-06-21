@@ -16,6 +16,8 @@
 # with a string that indicates on what devices that string applies.
 
 module AndroidQualifiers
+  extend self
+
   # Android resource qualifiers.
   QUALIFIERS = [
       ['mcc', /^mcc\d{3}$/],
@@ -39,8 +41,6 @@ module AndroidQualifiers
       ['primary_nontouch_navigation_method', %w(nonav dpad trackball wheel)],
       ['platform_version', /^v\d+$/]
   ]
-
-  protected
 
   # Convert a directory name into a hash of qualifier values.
   #

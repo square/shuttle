@@ -53,38 +53,32 @@ describe Importer::Android do
     end
 
     it "should import strings from XML files" do
-      @project.keys.for_key('string:basic-hdpi:string').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Hello!')
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[1]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Hello!')
     end
 
     it "should import string arrays" do
-      @project.keys.for_key('array:basic-hdpi:array:0').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Hello')
-      @project.keys.for_key('array:basic-hdpi:array:1').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('World')
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string-array[1]/item[1]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Hello')
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string-array[1]/item[2]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('World')
     end
 
     it "should import plurals" do
-      @project.keys.for_key('plural:basic-hdpi:plural:one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('world')
-      @project.keys.for_key('plural:basic-hdpi:plural:other').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('worlds')
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/plurals/item[1]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('world')
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/plurals/item[2]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('worlds')
     end
 
     it "should not import strings marked as untranslatable" do
-      @project.keys.for_key('string:basic-hdpi:excluded').should be_empty
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[2]').should be_empty
     end
 
     it "should properly escape strings" do
-      @project.keys.for_key('string:basic-hdpi:special_chars').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Êtes-vous sûr ?')
-      @project.keys.for_key('string:basic-hdpi:quoted_escaped').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello \\'world\\'")
-      @project.keys.for_key('string:basic-hdpi:unquoted_escaped').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello 'world'")
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[3]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Êtes-vous sûr ?')
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[4]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello \\'world\\'")
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[5]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello 'world'")
     end
 
     it "should add comments as context" do
-      k = @project.keys.for_key('string:basic-hdpi:with_context').first
+      k = @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[6]').first
       k.context.should eql("This is not a date format string. Rather, it is hint text in a field, presented to the merchant.")
-    end
-
-    it "should preserve tag attributes" do
-      @project.keys.for_key('string:basic-hdpi:attributed_string').first.other_data['attributes'].should eql([%w(formatted false)])
-      @project.keys.for_key('array:basic-hdpi:attributed_array:0').first.other_data['attributes'].should be_blank
-      @project.keys.for_key('array:basic-hdpi:attributed_array:1').first.other_data['attributes'].should eql([%w(formatted false)])
     end
   end
 end
