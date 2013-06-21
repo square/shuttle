@@ -18,16 +18,15 @@ class SearchController < ApplicationController
   def index
   end
 
-  def search
+  def translations
     @results = Translation.order('translations.id DESC').
         offset(params[:offset].to_i).
         limit(params.fetch(:limit, 50)).
-        includes(key: :project)
+        includes(key: [:slugs, :project])
 
-    if params[:source_locale].present?
-      @source_locale = Locale.from_rfc5646(params[:source_locale])
-      return head(:unprocessable_entity) unless @source_locale
-      @results     = @results.where(source_rfc5646_locale: @source_locale.rfc5646)
+    project_id = params[:project_id].to_i
+    if project_id > 0
+      @results = @results.joins(:keys).where(keys: {project_id: params[:project_id]})
     end
 
     if params[:target_locales].present?
@@ -50,13 +49,35 @@ class SearchController < ApplicationController
                end
 
     respond_to do |format|
-      format.json { render json: decorate(@results).to_json }
+      format.json { render json: decorate_translations(@results).to_json }
+    end
+  end
+
+  def keys
+    @results = Key.by_key.
+        offset(params[:offset].to_i).
+        limit(params.fetch(:limit, 50)).
+        includes(:translations)
+
+    project_id = params[:project_id].to_i
+    if project_id > 0
+      @results = @results.joins(:keys).where(keys: {project_id: params[:project_id]})
+    end
+
+    @results = if params[:query].present?
+                 @results.key_query(params[:query])
+               else
+                 @results.where('FALSE')
+               end
+
+    respond_to do |format|
+      format.json { render json: decorate_keys(@results).to_json }
     end
   end
 
   private
 
-  def decorate(translations)
+  def decorate_translations(translations)
     translations.map do |translation|
       translation.as_json.merge(
           locale:        translation.locale.as_json,
@@ -67,6 +88,22 @@ class SearchController < ApplicationController
                            project_key_translation_url(translation.key.project, translation.key, translation)
                          end),
           project:       translation.key.project.as_json
+      )
+    end
+  end
+
+  def decorate_keys(keys)
+    keys.map do |key|
+      key.as_json.merge(
+          translations: key.translations.map do |translation|
+            translation.as_json.merge(
+                url: if current_user.translator?
+                       edit_project_key_translation_url(@project, translation.key, translation)
+                     else
+                       project_key_translation_url(@project, translation.key, translation)
+                     end
+            )
+          end
       )
     end
   end

@@ -33,7 +33,7 @@ class root.GlobalSearch
 
   refresh: (params) ->
     $.ajax @url,
-      type: 'POST'
+      type: 'GET'
       data: params
       success: (translations) =>
         this.setMessage()
@@ -53,9 +53,9 @@ class root.GlobalSearch
     $('<td/>').text(translation.project.name).appendTo tr
     id = $('<td/>').appendTo tr
     $('<a/>').text(translation.id).attr('href', translation.url).appendTo(id)
-    $('<td/>').text(translation.source_locale.name).appendTo tr
+    $('<td/>').text(translation.source_locale.rfc5646).appendTo tr
     $('<td/>').text(translation.source_copy).appendTo tr
-    $('<td/>').text(translation.locale.name).appendTo tr
+    $('<td/>').text(translation.locale.rfc5646).appendTo tr
     if translation.translated
       class_name = if translation.approved == true
           'text-success'
@@ -86,9 +86,9 @@ class root.GlobalSearch
 
     $('<th/>').text("Project").appendTo tr
     $('<th/>').text("ID").appendTo tr
-    $('<th/>').text("From Locale").appendTo tr
-    $('<th/>').text("From Copy").appendTo tr
-    $('<th/>').text("To Locale").appendTo tr
-    $('<th/>').text("To Copy").appendTo tr
+    $('<th/>').text("From").appendTo tr
+    $('<th/>').text("Source").appendTo tr
+    $('<th/>').text("To").appendTo tr
+    $('<th/>').text("Translation").appendTo tr
 
     @body = $('<tbody/>').appendTo(@element)
