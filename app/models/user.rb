@@ -114,6 +114,9 @@ class User < ActiveRecord::Base
 
   # @return [String] The User's full name.
   def name() I18n.t 'models.user.name', first: first_name, last: last_name end
+  # @return [String] An abbreviated name for the user.
+  def abbreviated_name() I18n.t('models.user.name', first: first_name, last: last_name[0, 1]) end
+
 
   ROLES.each do |role|
     define_method(:"#{role}?") { self.role == role || self.role == 'admin' }

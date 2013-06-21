@@ -72,20 +72,21 @@ body#home-translators {
     background: darken(#dadafb, 10%);
   }
   tr.commit-ready td:first-of-type:before { background: darken(#dfd, 50%); }
-  td.description {
-    word-break: break-all;
-  }
 }
 
 .edit_commit {
   position: relative;
 }
+
 .priority-change-success {
   position: absolute;
   line-height: 2em;
   right: -.25em;
   color: green;
 }
+
+.more-link { display: none; }
+tr:hover .more-link { display: inherit; }
 
 .commit-priority-0 { color: red; font-weight: bold; }
 .commit-priority-1 { color: darkred; }

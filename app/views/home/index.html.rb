@@ -115,7 +115,6 @@ module Views
               th "priority"
               th "description", class: "description"
               th "requester"
-              th "pull"
               th "translate"
               th "review"
               th "id"
@@ -173,17 +172,25 @@ module Views
                     end
                   end
                 end
-                td commit.description || '-', class: "description"
-                td do
-                  if commit.user
-                    text! mail_to(commit.user.email)
-                  else
-                    text '-'
+                td(class: 'description') do
+                  div do
+                    text truncate(commit.description || '-'), class: 'description-toggle'
+                    if commit.description && commit.description.length > 25
+                      a(" (more…)", href: '#', class: 'more-link', 'data-description' => commit.description)
+                    end
+                  end
+                  if commit.github_url
+                    text ' '
+                    link_to "(code)", commit.github_url
+                  end
+                  if commit.pull_request_url
+                    text ' '
+                    link_to '(PR)', commit.pull_request_url
                   end
                 end
                 td do
-                  if commit.github_url.present?
-                    link_to "code", commit.github_url
+                  if commit.user
+                    text! mail_to(commit.user.email, commit.user.abbreviated_name)
                   else
                     text '-'
                   end
