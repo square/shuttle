@@ -111,7 +111,7 @@ module Views
             tr do
               th "project"
               th "requested"
-              th "due"
+              th "due", class: "due-date"
               th "priority"
               th "description", class: "description"
               th "requester"
@@ -135,7 +135,7 @@ module Views
               tr(class: row_class) do
                 td commit.project.name
                 td l(commit.created_at, format: :mon_day)
-                td do
+                td(class: "due-date") do
                   if current_user.admin?
                     form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
                       f.date_select :due_date,
@@ -143,7 +143,7 @@ module Views
                                      start_year:      Date.today.year,
                                      end_year:        Date.today.year + 1,
                                      include_blank:   true},
-                                    class: 'span1'
+                                    class: 'no-width'
                     end
                   else
                     if commit.due_date

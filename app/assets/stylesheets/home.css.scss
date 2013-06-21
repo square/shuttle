@@ -75,6 +75,12 @@ body#home-translators {
   td.description {
     word-break: break-all;
   }
+  td.due-date {
+    white-space: nowrap;
+    select {
+      width: auto !important
+    }
+  }
 }
 
 .edit_commit {
