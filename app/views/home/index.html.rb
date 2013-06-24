@@ -21,7 +21,7 @@ require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
 module Views
   module Home
     class Index < Views::Layouts::Application
-      needs :commits, :start_date, :end_date, :status, :locales
+      needs :commits, :offset, :older, :newer, :status, :locales
 
       protected
 
@@ -95,12 +95,12 @@ module Views
 
       def pagination_links
         p do
-          if Commit.where('created_at < ?', @start_date - 2.weeks).exists?
-            link_to "« older", url_for(start_date: @start_date - 2.weeks, end_date: @end_date - 2.weeks)
+          if @older
+            link_to "« older", url_for(request.query_parameters.merge('offset' => @offset + 30))
           end
           text ' '
-          if @start_date + 2.weeks < Date.today
-            link_to "newer »", url_for(start_date: @start_date + 2.weeks, end_date: @end_date + 2.weeks)
+          if @newer
+            link_to "newer »", url_for(request.query_parameters.merge('offset' => @offset - 30))
           end
         end
       end

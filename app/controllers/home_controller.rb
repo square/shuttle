@@ -37,16 +37,7 @@ class HomeController < ApplicationController
   # | `project_id` | A Project ID to filter by (default all Projects).                                                        |
 
   def index
-    @start_date = if params[:start_date].present?
-                   Date.parse(params[:start_date])
-                 else
-                   Date.today - 2.weeks
-                 end
-    @end_date   = if params[:end_date].present?
-                   Date.parse(params[:end_date])
-                 else
-                   Date.today
-                 end
+    @offset = params[:offset].to_i
 
     @status = params[:status]
     unless %w(uncompleted completed all).include?(@status)
@@ -60,8 +51,9 @@ class HomeController < ApplicationController
 
     @commits = Commit.
         includes(:user, project: :slugs).
-        where(created_at: @start_date.to_time.beginning_of_day..@end_date.to_time.end_of_day).
-        by_priority_and_due_date
+        by_priority_and_due_date.
+        offset(@offset).
+        limit(30)
 
     # Filter by project
 
@@ -100,6 +92,9 @@ class HomeController < ApplicationController
                else
                  []
                end
+
+    @newer = @offset >= 30
+    @older = @commits.offset(@offset + 30).exists?
   end
 
   # Displays a landing page appropriate to translators: They can choose the
