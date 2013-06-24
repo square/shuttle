@@ -75,17 +75,27 @@ body#home-translators {
   td.description {
     word-break: break-all;
   }
+  td.due-date {
+    white-space: nowrap;
+    select {
+      width: auto !important
+    }
+  }
 }
 
 .edit_commit {
   position: relative;
 }
+
 .priority-change-success {
   position: absolute;
   line-height: 2em;
   right: -.25em;
   color: green;
 }
+
+.more-link { display: none; }
+tr:hover .more-link { display: inherit; }
 
 .commit-priority-0 { color: red; font-weight: bold; }
 .commit-priority-1 { color: darkred; }

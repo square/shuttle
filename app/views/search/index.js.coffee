@@ -13,20 +13,72 @@
 #    limitations under the License.
 
 $(window).ready ->
-  searchForm = $('#search-form')
+  translationSearchForm = $('#translation-search-form')
   table = $('#translations')
 
   sr = new GlobalSearch(table, table.data('url'))
 
-  makeURL = -> "#{table.data('url')}?#{$('#search-form').serialize()}"
+  makeURL = -> "#{table.data('url')}?#{translationSearchForm.serialize()}"
   scroll = table.infiniteScroll makeURL,
     windowScroll: true
     renderer: (translations) =>
       for translation in translations
         do (translation) -> sr.addTranslation(translation)
-    dataSourceOptions: {type: 'POST'}
+    dataSourceOptions: {type: 'GET'}
 
-  $('#search-form').submit ->
+  translationSearchForm.submit ->
     scroll.reset()
-    sr.refresh($('#search-form').serialize())
+    sr.refresh(translationSearchForm.serialize())
     return false
+
+
+  element = $('#keys')
+  baseLocale = element.attr('data-locale')
+  filterField = $('#key-filter-field')
+
+  keyDataSource = new DataSourceBuilder()
+    .url(element.attr('data-url'))
+    .cache(yes)
+    .filter(yes)
+    .build()
+
+  keyList = new KeyList(
+      element,
+      keyDataSource,
+      JSON.parse(element.attr('data-locales')),
+      baseLocale
+  )
+
+  $('#key-search-form').submit ->
+    keyFilter = filterField.val()
+    keyDataSource.applyFilter 'key', (key) ->
+      key.original_key.indexOf(keyFilter) > -1
+    keyList.reload()
+    return false
+
+  $('#key-filter-select').change ->
+    selection = $(this).val()
+
+    switch selection
+      when null, ''
+        filter = -> true
+
+      when 'untranslated'
+        filter = (key) ->
+          key.translations.some (t) ->
+            t.locale.rfc5646 isnt baseLocale and not t.translated
+
+      when 'unapproved'
+        filter = (key) ->
+          key.translations.some (t) ->
+            t.locale.rfc5646 isnt baseLocale and t.translated and not t.approved
+
+      when 'approved'
+        filter = (key) ->
+          key.translations.every (t) ->
+            t.locale.rfc5646 is baseLocale or t.approved
+
+      else
+        throw new Error("unknown filter value '#{selection}'")
+
+    keyDataSource.applyFilter 'state', filter

@@ -21,7 +21,7 @@ require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
 module Views
   module Home
     class Index < Views::Layouts::Application
-      needs :commits, :start_date, :end_date, :status, :locales
+      needs :commits, :offset, :older, :newer, :status, :locales
 
       protected
 
@@ -95,12 +95,12 @@ module Views
 
       def pagination_links
         p do
-          if Commit.where('created_at < ?', @start_date - 2.weeks).exists?
-            link_to "« older", url_for(start_date: @start_date - 2.weeks, end_date: @end_date - 2.weeks)
+          if @older
+            link_to "« older", url_for(request.query_parameters.merge('offset' => @offset + 30))
           end
           text ' '
-          if @start_date + 2.weeks < Date.today
-            link_to "newer »", url_for(start_date: @start_date + 2.weeks, end_date: @end_date + 2.weeks)
+          if @newer
+            link_to "newer »", url_for(request.query_parameters.merge('offset' => @offset - 30))
           end
         end
       end
@@ -111,11 +111,10 @@ module Views
             tr do
               th "project"
               th "requested"
-              th "due"
+              th "due", class: "due-date"
               th "priority"
               th "description", class: "description"
               th "requester"
-              th "pull"
               th "translate"
               th "review"
               th "id"
@@ -135,7 +134,7 @@ module Views
               tr(class: row_class) do
                 td commit.project.name
                 td l(commit.created_at, format: :mon_day)
-                td do
+                td(class: "due-date") do
                   if current_user.admin?
                     form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
                       f.date_select :due_date,
@@ -143,7 +142,7 @@ module Views
                                      start_year:      Date.today.year,
                                      end_year:        Date.today.year + 1,
                                      include_blank:   true},
-                                    class: 'span1'
+                                    class: 'no-width'
                     end
                   else
                     if commit.due_date
@@ -173,17 +172,25 @@ module Views
                     end
                   end
                 end
-                td commit.description || '-', class: "description"
-                td do
-                  if commit.user
-                    text! mail_to(commit.user.email)
-                  else
-                    text '-'
+                td(class: 'description') do
+                  div do
+                    text truncate(commit.description || '-'), class: 'description-toggle'
+                    if commit.description && commit.description.length > 25
+                      a(" (more…)", href: '#', class: 'more-link', 'data-description' => commit.description)
+                    end
+                  end
+                  if commit.github_url
+                    text ' '
+                    link_to "(code)", commit.github_url
+                  end
+                  if commit.pull_request_url
+                    text ' '
+                    link_to '(PR)', commit.pull_request_url
                   end
                 end
                 td do
-                  if commit.github_url.present?
-                    link_to "code", commit.github_url
+                  if commit.user
+                    text! mail_to(commit.user.email, commit.user.abbreviated_name)
                   else
                     text '-'
                   end

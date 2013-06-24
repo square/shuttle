@@ -25,9 +25,20 @@ module Views
 
       def body_content
         article(class: 'container') do
-          page_header "Global Search"
-          search_bar
-          translation_grid
+          ul(class: 'nav nav-tabs') do
+            li(class: 'active') { a "Translations", href: '#translation_search', 'data-toggle' => 'tab' }
+            li { a "Keys", href: '#key_search', 'data-toggle' => 'tab' }
+          end
+          div(class: 'tab-content') do
+            div(id: 'translation_search', class: 'tab-pane fade active in') do
+              translation_search_bar
+              translation_grid
+            end
+            div(id: 'key_search', class: 'tab-pane fade') do
+              key_search_bar
+              key_grid
+            end
+          end
         end
       end
 
@@ -35,19 +46,25 @@ module Views
 
       private
 
-      def search_bar
-        form_tag(nil, method: 'GET', id: 'search-form', class: 'filter form-inline') do
-          text "Find translations whose "
+      def translation_search_bar
+        form_tag(search_translations_url, method: 'GET', id: 'translation-search-form', class: 'filter form-inline') do
+          text 'Find '
+          text_field_tag 'query', '', id: 'search-field', placeholder: 'query'
+          text ' in '
           select_tag 'field', options_for_select([
-                                                     ['source copy', 'searchable_source_copy'],
-                                                     ['translated copy', 'searchable_copy']
+                                                     %w(source searchable_source_copy),
+                                                     %w(translation searchable_copy),
                                                  ]), id: 'field-select', class: 'span2'
-          text " contains "
-          text_field_tag 'query', '', id: 'search-field'
-          text " translated from "
-          text_field_tag 'source_locale', 'en', class: 'locale-field span2', id: 'locale-field', placeholder: "any source locale"
-          text " to "
-          text_field_tag 'target_locales', '', class: 'locale-field locale-field-list span2', id: 'locale-field', placeholder: "any target locale"
+          text ' with translation in '
+          if current_user.approved_locales.any?
+            select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
+          else
+            text_field_tag 'target_locales', '', class: 'locale-field locale-field-list span2', id: 'locale-field', placeholder: "any target locale"
+          end
+          text ' for '
+          project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+          project_list.unshift ['all', nil]
+          select_tag 'project_id', options_for_select(project_list)
           text ' '
           submit_tag "Search", class: 'btn btn-primary'
         end
@@ -56,7 +73,39 @@ module Views
       def translation_grid
         table class:         'table table-striped',
               id:            'translations',
-              'data-url'     => search_url(format: 'json')
+              'data-url'     => search_translations_url(format: 'json')
+      end
+
+      def key_search_bar
+        form_tag(nil, method: 'GET', id: 'key-search-form', class: 'filter form-inline') do
+          text "Show me "
+          select_tag 'filter', options_for_select(
+              [
+                  ['all', nil],
+                  ['untranslated', 'untranslated'],
+                  ['translated but not approved', 'unapproved'],
+                  ['approved', 'approved']
+              ]
+          ),         id: 'key-filter-select'
+
+          text " translations in project "
+          project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+          select_tag 'project_id', options_for_select(project_list)
+
+          text " with key substring "
+          text_field_tag 'filter', '', placeholder: 'filter by key', id: 'key-filter-field'
+          text ' '
+          submit_tag "Filter", class: 'btn btn-primary'
+        end
+      end
+
+      def key_grid
+        table class:         'table table-striped',
+              id:            'keys',
+              'data-url'     => search_keys_url(format: 'json'),
+              'data-locales' => (current_user.approved_locales.any? ? current_user.approved_locales : [Locale.from_rfc5646('en')]).to_json,
+              'data-locale'  => 'en'
+        #TODO better locale list
       end
     end
   end
