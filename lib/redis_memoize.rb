@@ -30,8 +30,8 @@ module RedisMemoize
     define_method(:"#{method}_with_memoize") do |*args|
       key = RedisMemoize.redis_memoize_key(self, method, args)
 
-      if Shuttle::Redis.exists(key)
-        YAML.load Shuttle::Redis.get(key)
+      if (yml = Shuttle::Redis.get(key))
+        YAML.load yml
       else
         value = send(:"#{method}_without_memoize", *args)
         Shuttle::Redis.set key, value.to_yaml
