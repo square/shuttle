@@ -57,18 +57,16 @@ class SearchController < ApplicationController
     @results = Key.by_key.
         offset(params[:offset].to_i).
         limit(params.fetch(:limit, 50)).
-        includes(:translations)
+        includes(:translations, :project, :slugs)
 
     project_id = params[:project_id].to_i
     if project_id > 0
       @results = @results.joins(:keys).where(keys: {project_id: params[:project_id]})
+    else
+      @results = @results.where('FALSE')
     end
 
-    @results = if params[:query].present?
-                 @results.key_query(params[:query])
-               else
-                 @results.where('FALSE')
-               end
+    @results = @results.key_query(params[:query]) if params[:query].present?
 
     respond_to do |format|
       format.json { render json: decorate_keys(@results).to_json }
@@ -98,9 +96,9 @@ class SearchController < ApplicationController
           translations: key.translations.map do |translation|
             translation.as_json.merge(
                 url: if current_user.translator?
-                       edit_project_key_translation_url(@project, translation.key, translation)
+                       edit_project_key_translation_url(translation.key.project, translation.key, translation)
                      else
-                       project_key_translation_url(@project, translation.key, translation)
+                       project_key_translation_url(translation.key.project, translation.key, translation)
                      end
             )
           end
