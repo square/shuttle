@@ -26,7 +26,7 @@ class SearchController < ApplicationController
 
     project_id = params[:project_id].to_i
     if project_id > 0
-      @results = @results.joins(:keys).where(keys: {project_id: params[:project_id]})
+      @results = @results.joins(:key).where(keys: {project_id: params[:project_id]})
     end
 
     if params[:target_locales].present?
@@ -61,7 +61,7 @@ class SearchController < ApplicationController
 
     project_id = params[:project_id].to_i
     if project_id > 0
-      @results = @results.joins(:keys).where(keys: {project_id: params[:project_id]})
+      @results = @results.joins(:key).where(keys: {project_id: params[:project_id]})
     else
       @results = @results.where('FALSE')
     end
