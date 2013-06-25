@@ -106,7 +106,7 @@ module Views
       end
 
       def commits_table
-        table(class: 'table commits-table', id: 'commits') do
+        table(class: 'table table-striped commits-table', id: 'commits') do
           thead do
             tr do
               th "project"

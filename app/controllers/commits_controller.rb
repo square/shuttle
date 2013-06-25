@@ -340,7 +340,7 @@ class CommitsController < ApplicationController
   def find_commit
     if params[:id] == 'latest'
       if (latest_commit = @project.latest_commit)
-        return redirect_to params.merge(id: latest_commit)
+        return redirect_to params.merge(id: latest_commit, only_path: true)
       else
         raise ActiveRecord::RecordNotFound, "No latest commit for project"
       end
