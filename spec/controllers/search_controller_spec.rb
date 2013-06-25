@@ -44,13 +44,13 @@ describe SearchController do
 
   describe '#search' do
     it "should return an empty result list if no query is given" do
-      post :search, query: ' ', format: 'json'
+      get :translations, query: ' ', format: 'json'
       response.status.should eql(200)
       response.body.should eql('[]')
     end
 
     it "should search the copy field by default" do
-      post :search, query: 'term1', format: 'json'
+      get :translations, query: 'term1', format: 'json'
       response.status.should eql(200)
       results = JSON.parse(response.body)
       results.size.should eql(2)
@@ -58,24 +58,15 @@ describe SearchController do
     end
 
     it "should search the source_copy field" do
-      post :search, query: 'term1', field: 'searchable_source_copy', format: 'json'
+      get :translations, query: 'term1', field: 'searchable_source_copy', format: 'json'
       response.status.should eql(200)
       results = JSON.parse(response.body)
       results.size.should eql(2)
       results.each { |r| r['source_copy'].should eql('foo term1 bar') }
     end
 
-    it "should filter by source locale" do
-      post :search, query: 'term1', source_locale: 'fr', format: 'json'
-      response.status.should eql(200)
-      results = JSON.parse(response.body)
-      results.size.should eql(1)
-      results.first['copy'].should eql('foo term1 bar')
-      results.first['source_locale']['rfc5646'].should eql('fr')
-    end
-
     it "should filter by target locale" do
-      post :search, query: 'term1', target_locales: 'fr', format: 'json'
+      get :translations, query: 'term1', target_locales: 'fr', format: 'json'
       response.status.should eql(200)
       results = JSON.parse(response.body)
       results.size.should eql(1)
@@ -84,22 +75,18 @@ describe SearchController do
     end
 
     it "should respond with a 422 if the locale is unknown" do
-      post :search, query: 'term1', source_locale: 'foobar?', format: 'json'
-      response.status.should eql(422)
-      response.body.should be_blank
-
-      post :search, query: 'term1', target_locales: 'fr, foobar?', format: 'json'
+      get :translations, query: 'term1', target_locales: 'fr, foobar?', format: 'json'
       response.status.should eql(422)
       response.body.should be_blank
     end
 
     it "should accept a limit and offset" do
-      post :search, query: 'term1', offset: 0, limit: 1, format: 'json'
+      get :translations, query: 'term1', offset: 0, limit: 1, format: 'json'
       response.status.should eql(200)
       results1 = JSON.parse(response.body)
       results1.size.should eql(1)
 
-      post :search, query: 'term1', offset: 1, limit: 1, format: 'json'
+      get :translations, query: 'term1', offset: 1, limit: 1, format: 'json'
       response.status.should eql(200)
       results2 = JSON.parse(response.body)
       results2.size.should eql(1)
