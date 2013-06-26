@@ -46,7 +46,13 @@ class FileMutex
     File.open(@path, File::CREAT|File::EXCL|File::WRONLY, 0644) do |f|
       f.puts contents
       f.flush
-      Timeout.timeout(timeout_duration) { result = yield }
+      Timeout.timeout(timeout_duration) do
+        begin
+          result = yield
+        ensure
+          unlock!
+        end
+      end
     end
     return result
   rescue Errno::EEXIST
@@ -67,6 +73,6 @@ class FileMutex
   private
 
   def contents
-    "pid=#{Process.pid}, thread=#{Thread.current.object_id}\n\n" + caller.join("\n")
+    "created=#{Time.now.to_s}, pid=#{Process.pid}, thread=#{Thread.current.object_id}\n\n" + caller.join("\n")
   end
 end
