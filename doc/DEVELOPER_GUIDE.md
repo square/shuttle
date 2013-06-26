@@ -141,6 +141,9 @@ use one or both of them.
 
 ### Downloading manifest files
 
+If you're using the Shuttle Gem, it adds the `rake shuttle:complete[git_sha]`
+and `rake shuttle:preview[git_sha]` commands.
+
 For localization libraries that store their translated strings in one file (this
 is most libraries, including Rails i18n, Ember.js, and others), you can download
 a manifest file. This file will contain solely translated strings for one or
