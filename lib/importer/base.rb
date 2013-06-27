@@ -104,7 +104,12 @@ module Importer
       Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
         process_blob_for_string_extraction
       end
-      @commit.keys += @keys.to_a if @commit
+      if @commit
+        Commit.transaction do
+          @keys -= @commit.keys
+          @commit.keys += @keys.to_a
+        end
+      end
 
       # cache the list of keys we know to be in this blob for later use
       Shuttle::Redis.set "keys_for_blob:#{self.class.ident}:#{@blob.sha}", @keys.map(&:id).join(',')

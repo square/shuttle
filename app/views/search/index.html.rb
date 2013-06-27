@@ -103,7 +103,7 @@ module Views
         table class:         'table table-striped',
               id:            'keys',
               'data-url'     => search_keys_url(format: 'json'),
-              'data-locales' => (current_user.approved_locales.any? ? current_user.approved_locales : [Locale.from_rfc5646('en')]).to_json,
+              'data-locales' => (current_user.approved_locales.any? ? current_user.approved_locales : [::Locale.from_rfc5646('en')]).to_json,
               'data-locale'  => 'en'
         #TODO better locale list
       end
