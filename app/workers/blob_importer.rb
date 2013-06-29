@@ -31,6 +31,7 @@ class BlobImporter
 
   def perform(importer, project_id, sha, path, commit_id, rfc5646_locale)
     begin
+      Rails.logger.info "#[BlobImporter:#{jid}] starting"
       commit   = Commit.find_by_id(commit_id)
       locale   = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
       project  = Project.find(project_id)
@@ -42,7 +43,12 @@ class BlobImporter
                           commit: commit,
                           locale: locale
 
+      Rails.logger.info "#[BlobImporter:#{jid}] completed"
+    rescue Exception => err
+      Rails.logger.info "#[BlobImporter:#{jid}] error: #{err}"
+      raise err
     ensure
+      Rails.logger.info "#[BlobImporter:#{jid}] removed"
       commit.try :remove_worker!, jid
     end
   end
