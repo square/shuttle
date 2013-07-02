@@ -194,6 +194,8 @@ en:
       name: Ember.js
     erb:
       name: ERb file
+    ns_localized_string:
+      name: NSLocalizedString routine calls
     properties:
       name: Java .properties file
     ruby:

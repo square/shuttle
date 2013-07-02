@@ -66,6 +66,8 @@ end
 
 # no idea why this is necessary
 require 'errors'
+require Rails.root.join('lib', 'c_strings')
+require Rails.root.join('lib', 'printf_tokenizer')
 require Rails.root.join('lib', 'importer', 'base')
 Dir.glob(Rails.root.join('lib', 'importer', '*.rb')).each { |f| require f }
 require Rails.root.join('lib', 'exporter', 'base')

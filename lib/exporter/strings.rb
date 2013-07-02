@@ -36,7 +36,7 @@ module Exporter
       io.putc 0xFF
       io.putc 0xFE
 
-      translations = Translation.in_commit(@commit).where(rfc5646_locale: locale.rfc5646).
+      translations = Translation.in_commit(@commit).where(rfc5646_locale: locale.rfc5646, translated: true).
           sort_by { |t| t.key.key }
       translations.each { |translation| export_translation io, translation }
     end
@@ -63,7 +63,7 @@ module Exporter
     private
 
     def escape(str)
-      result = ""
+      result = ''
       scanner = UnicodeScanner.new(str)
 
       until scanner.eos?

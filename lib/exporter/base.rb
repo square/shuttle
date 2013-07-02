@@ -107,9 +107,7 @@ module Exporter
     # @return [Class, nil] an exporter subclass.
 
     def self.find_by_ident(ident)
-      "Exporter::#{ident.camelize}".constantize
-    rescue NameError
-      nil
+      implementations.detect { |i| i.ident == ident }
     end
 
     # Locates an exporter that can handle a given request format.

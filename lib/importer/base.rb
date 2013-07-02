@@ -72,9 +72,7 @@ module Importer
     # @return [Class, nil] an importer subclass.
 
     def self.find_by_ident(ident)
-      "Importer::#{ident.camelize}".constantize
-    rescue NameError
-      nil
+      implementations.detect { |i| i.ident == ident }
     end
 
     # @return [Importer::Base::File] Data about the file being imported.

@@ -261,6 +261,7 @@ DEPENDENCIES
   slugalicious
   sprockets-rails
   therubyracer
+  treetop
   twitter-bootstrap-rails
   uea-stemmer
   uglifier

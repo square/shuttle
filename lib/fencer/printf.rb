@@ -20,56 +20,11 @@ module Fencer
   module Printf
     extend self
 
-    POSITION            = /\d+\$/                                              # "%2$i"
-    FORMAT              = /[\-+ #0]/                                           # "%-i"
-    PRECISION_SPECIFIER = /(\d+|\*(\d+\$)?)/                                   # "2" or "*" or "*2$"
-    PRECISION           = /#{PRECISION_SPECIFIER}?(\.#{PRECISION_SPECIFIER})?/ # "%*.3f"
-    WIDTH               = /([Lhjlqtz]|hh|ll)/                                  # "%ld"
-    TYPE                = /[@ACDEFGOSUXacdefgionpsux]/                         # "%d"
-
     def fence(string)
-      scanner = UnicodeScanner.new(string)
-
       tokens  = Hash.new { |hsh, k| hsh[k] = [] }
-      counter = 0
-      until scanner.eos?
-        match = scanner.scan_until(/(^%|[^%]%)/)
-        break unless match
-
-        if scanner.peek(1) == '%'
-          scanner.pos = scanner.pos + 1 # advance past the other %; we'll deal with it below
-          next
-        end
-        scanner.pos = scanner.pos - 1 # rewind back to percent
-
-        start = scanner.pos
-        token = scanner.scan(/%#{POSITION}?#{FORMAT}?#{PRECISION}#{WIDTH}?#{TYPE}/)
-        unless token
-          # advance past the % again, so as not to catch it next time around
-          scanner.pos = scanner.pos + 1
-          next
-        end
-        stop = scanner.pos - 1
-
-        token.match /^%(\d+\$)?(.+)$/
-        if (position = $1)
-          tokens['%' + position + $2] = [start..stop]
-          # keep the counter at the highest visited position, so that when we
-          # tokenize the %%'s below, we don't use any taken position values
-          intpos                = position[0..-2].to_i
-          counter = intpos if intpos > counter
-        else
-          counter                         += 1
-          tokens['%' + counter.to_s + '$' + $2] << (start..stop)
-        end
-      end
-
-      scanner.reset
-      until scanner.eos?
-        match = scanner.scan_until(/%%/)
-        break unless match
-        counter                     += 1
-        tokens['%' + counter.to_s + '$%'] = [(scanner.pos - 2)..(scanner.pos - 1)]
+      PrintfTokenizer.tokenize(string) do |type, value, range|
+        next unless type == :token
+        tokens[value] << range
       end
 
       return tokens

@@ -12,30 +12,28 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'strscan'
-
 module Importer
 
-  # Parses translatable strings from Cocoa/Objective-C .strings files.
+  # Parses translatable strings from `NSLocalizedString` routine calls (and
+  # others in the family of routines) in C/Objective-C source files.
 
-  class Strings < Base
-    include ::CStrings
-
+  class NSLocalizedString < Base
     def self.fencers() %w(Printf) end
 
     protected
 
     def import_file?(locale=nil)
-      file.path =~ /#{Regexp.escape(locale_to_use(locale).rfc5646)}\.lproj\/[^\/]+\.strings$/
+      return false if locale # custom locale imports are not supported
+      file.path =~ /\.mm?$/
     end
 
-    def self.encoding() %w(UTF-8 UTF-16BE UTF-16LE) end
-
     def import_strings(receiver)
-      file.contents.scan(/(?:\/*\*\s*(.+?)\s*\*\/)?\s*"(.+?)"\s*=\s*"(.+?)";/um).each do |(context, key, value)|
-        receiver.add_string "#{file.path}:#{unescape(key)}", unescape(value),
-                            context:      context,
-                            original_key: unescape(key)
+      Genstrings.new.search(file.contents) do |entry|
+        key   = entry[:key]
+        value = entry[:value] || entry[:key]
+        receiver.add_string "#{file.path}:#{key}:#{entry[:comment]}", value,
+                            context:      entry[:comment],
+                            original_key: key
       end
     end
   end
