@@ -208,17 +208,17 @@ key2=Tu avec carté {count} itém has
 
     it "should use a cached manifest if available" do
       mime = Mime::Type.lookup('application/javascript')
-      File.open(ManifestPrecompiler.new.path(@commit, mime), 'w') { |f| f.puts "hello, world!" }
+      Shuttle::Redis.set ManifestPrecompiler.new.key(@commit, mime), "hello, world!"
       get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js'
       response.status.should eql(200)
       response.headers['Content-Disposition'].should eql('attachment; filename="manifest.js"')
-      response.body.should eql("hello, world!\n")
-      FileUtils.rm_f ManifestPrecompiler.new.path(@commit, mime)
+      response.body.should eql("hello, world!")
+      Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, mime)
     end
 
     it "should not use a cached manifest if force=true" do
       mime = Mime::Type.lookup('application/javascript')
-      File.open(ManifestPrecompiler.new.path(@commit, mime), 'w') { |f| f.puts "hello, world!" }
+      Shuttle::Redis.set ManifestPrecompiler.new.key(@commit, mime), "hello, world!"
       get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js', force: 'true'
       response.status.should eql(200)
       response.headers['Content-Disposition'].should eql('attachment; filename="manifest.js"')
@@ -232,7 +232,7 @@ Ember.I18n.locales.translations.fr = {
   "key2": "Tu avec carté {count} itém has"
 };
       JS
-      FileUtils.rm_f ManifestPrecompiler.new.path(@commit, mime)
+      Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, mime)
     end
 
     it "should 400 if an unknown locale is provided" do
@@ -461,18 +461,18 @@ de:
     end
 
     it "should use a cached localization if available" do
-      File.open(LocalizePrecompiler.new.path(@commit), 'w') { |f| f.puts "hello, world!" }
+      Shuttle::Redis.set LocalizePrecompiler.new.key(@commit), "hello, world!"
 
       get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz'
       response.status.should eql(200)
       response.headers['Content-Disposition'].should eql('attachment; filename="localized.tar.gz"')
-      response.body.should eql("hello, world!\n")
+      response.body.should eql("hello, world!")
 
-      FileUtils.rm LocalizePrecompiler.new.path(@commit)
+      Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
     end
 
     it "should not use a cached localization if force=true" do
-      File.open(LocalizePrecompiler.new.path(@commit), 'w') { |f| f.puts "hello, world!" }
+      Shuttle::Redis.set LocalizePrecompiler.new.key(@commit), "hello, world!"
 
       get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz', force: 'true'
       response.status.should eql(200)
@@ -508,7 +508,7 @@ de:
 </svg>
       XML
 
-      FileUtils.rm LocalizePrecompiler.new.path(@commit)
+      Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
     end
   end
 

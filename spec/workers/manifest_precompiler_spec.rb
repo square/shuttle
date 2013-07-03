@@ -20,28 +20,28 @@ describe ManifestPrecompiler do
       @format = 'yaml'
       @key = FactoryGirl.create(:key, project: @commit.project)
       @translation = FactoryGirl.create(:translation, key: @key, translated: true, approved: true, copy: "Foo", source_copy: "Bar")
-      FileUtils.rm_f(ManifestPrecompiler.new.path(@commit, @format))
+      Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, @format)
       @commit.keys << @key
       @translation.should be_present
       @commit.recalculate_ready!
       @commit.should be_ready
-      @path = ManifestPrecompiler.new.path(@commit, @format)
+      @cache_key = ManifestPrecompiler.new.key(@commit, @format)
     end
 
     it "compiles a given commit and stores the files on disk" do
-      File.exists?(@path).should be_false
+      Shuttle::Redis.exists(@cache_key).should be_false
       ManifestPrecompiler.new.perform(@commit.id, @format)
-      File.exists?(@path).should be_true
-      File.read(@path).should include(@translation.copy)
+      Shuttle::Redis.exists(@cache_key).should be_true
+      Shuttle::Redis.get(@cache_key).should include(@translation.copy)
     end
 
     context "if an exception is thrown" do
       it "does not write an empty file" do
         precompiler = ManifestPrecompiler.new
-        File.any_instance.stub(:putc).and_raise(RuntimeError)
-        File.exists?(@path).should be_false
+        Shuttle::Redis.stub(:set).and_raise(RuntimeError)
+        Shuttle::Redis.exists(@cache_key).should be_false
         expect { precompiler.perform(@commit.id, @format) }.to raise_error(RuntimeError)
-        File.exists?(@path).should be_false
+        Shuttle::Redis.exists(@cache_key).should be_false
       end
     end
 

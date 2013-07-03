@@ -22,8 +22,6 @@ class ManifestPrecompiler
   include Sidekiq::Worker
   sidekiq_options queue: :low
 
-  include Precompiler
-
   # Executes this worker.
   #
   # @param [Fixnum] commit_id The ID of a Commit to manifest.
@@ -31,10 +29,8 @@ class ManifestPrecompiler
 
   def perform(commit_id, format)
     commit = Commit.find(commit_id)
-    file_path = path(commit, format)
-    write_precompiled_file(file_path) do
-      Compiler.new(commit).manifest(format, force: true)
-    end
+    file_key = key(commit, format)
+    Shuttle::Redis.set file_key, Compiler.new(commit).manifest(format, force: true).io.read
   rescue Compiler::CommitNotReadyError
     # the commit was probably "downgraded" from ready between when the job was
     # queued and when it was started. ignore.
@@ -42,21 +38,13 @@ class ManifestPrecompiler
 
   include SidekiqLocking
 
-  # Returns the path to a cached manifest.
+  # Returns the Redis key to a cached manifest.
   #
   # @param [Commit] commit A commit that was manifested.
   # @param [Symbol] format A manifest format (such as `:yaml`).
-  # @return [Pathname] The path to the cached manifest, if it exists.
+  # @return [Pathname] The key for the cached manifest, if it exists.
 
-  def path(commit, format)
-    dir = directory(commit)
-    FileUtils.mkdir_p dir
-    dir.join "manifest.#{format.to_sym}"
-  end
-
-  private
-
-  def directory(commit)
-    Rails.root.join 'tmp', 'cache', 'manifest', Rails.env.to_s, commit.id.to_s
+  def key(commit, format)
+    "manifest:#{commit.id}:#{format.to_sym}"
   end
 end

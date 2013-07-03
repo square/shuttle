@@ -371,9 +371,9 @@ class Commit < ActiveRecord::Base
 
     # clear out existing cache entries if present
     Exporter::Base.implementations.each do |exporter|
-      FileUtils.rm_f ManifestPrecompiler.new.path(self, exporter.request_mime)
+      Shuttle::Redis.del ManifestPrecompiler.new.key(self, exporter.request_mime)
     end
-    FileUtils.rm_f LocalizePrecompiler.new.path(self)
+    Shuttle::Redis.del LocalizePrecompiler.new.key(self)
 
     # if ready, generate new cache entries
     if ready?
