@@ -317,6 +317,9 @@ class Commit < ActiveRecord::Base
   # @param [String] jid A unique identifier for this worker.
 
   def add_worker!(jid)
+    Rails.logger.info "#{Time.now} [Commit #{revision}] #add_worker! jid=#{jid}"
+    Rails.logger.info caller.map { |l| " -- #{l}" }
+
     update_column :loading, true
     Shuttle::Redis.sadd "import:#{revision}", jid
   end
@@ -329,6 +332,9 @@ class Commit < ActiveRecord::Base
   # @see #add_worker!
 
   def remove_worker!(jid)
+    Rails.logger.info "#{Time.now} [Commit #{revision}] #remove_worker! jid=#{jid}"
+    Rails.logger.info caller.map { |l| " -- #{l}" }
+
     loading_was = self.loading
 
     Shuttle::Redis.srem "import:#{revision}", jid
