@@ -12,11 +12,5 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-db = case Rails.env
-       when 'production'  then 0
-       when 'test'        then 1
-       when 'development' then 2
-       else                    3
-     end
-Shuttle::Redis = Redis::Namespace.new(:shuttle, redis: Redis.new(db: db))
+Shuttle::Redis = Redis::Namespace.new(:shuttle, redis: Redis.new(Shuttle::Configuration.redis.symbolize_keys))
 Redis::Classy.db = Shuttle::Redis

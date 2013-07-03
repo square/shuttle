@@ -55,3 +55,4 @@ production:
   pool: 30
   username: shuttle
   password:
+  host: ironweed.corp.squareup.com

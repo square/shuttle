@@ -1,13 +1,13 @@
-set :application, "shuttle"
-set :repository, "git@git.squareup.com:intl/shuttle.git"
-set :rvm_ruby_string, '1.9.3-p429@shuttle'
+set :application, 'shuttle'
+set :repository, 'git@git.squareup.com:intl/shuttle.git'
+set :rvm_ruby_string, '1.9.3-p448@shuttle'
 set :rvm_type, :system
 
 set :scm, :git
 
-role :web, "ironweed.corp.squareup.com"
-role :app, "ironweed.corp.squareup.com"
-role :db, "ironweed.corp.squareup.com", primary: true
+role :web, 'ironweed.corp.squareup.com'
+role :app, 'ironweed.corp.squareup.com', 'ginger.corp.squareup.com'
+role :db, 'ironweed.corp.squareup.com', primary: true
 
 set :user, 'square'
 set :runner, 'square'
@@ -20,7 +20,7 @@ default_run_options[:pty] = true
 
 require 'bundler/capistrano'
 gem 'rvm-capistrano'
-require "rvm/capistrano"
+require 'rvm/capistrano'
 load 'deploy/assets'
 set :whenever_command, 'bundle exec whenever'
 require 'whenever/capistrano'
