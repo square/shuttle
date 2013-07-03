@@ -108,11 +108,11 @@ describe Commit do
       commit.keys = [key1, key2]
       commit.recalculate_ready!
       commit.should_not be_ready
-      File.exist?(LocalizePrecompiler.new.path(commit)).should be_false
+      Shuttle::Redis.exists(LocalizePrecompiler.new.key(commit)).should be_false
 
       trans2.update_attribute :approved, true
       commit.reload.should be_ready
-      File.exist?(LocalizePrecompiler.new.path(commit)).should be_true
+      Shuttle::Redis.exists(LocalizePrecompiler.new.key(commit)).should be_true
     end
 
     it "should cache manifests when ready" do
@@ -133,13 +133,13 @@ describe Commit do
       commit.keys = [key1, key2]
       commit.recalculate_ready!
       commit.should_not be_ready
-      File.exist?(ManifestPrecompiler.new.path(commit, rb)).should be_false
-      File.exist?(ManifestPrecompiler.new.path(commit, yml)).should be_false
+      Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, rb)).should be_false
+      Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, yml)).should be_false
 
       trans2.update_attribute :approved, true
       commit.reload.should be_ready
-      File.exist?(ManifestPrecompiler.new.path(commit, rb)).should be_true
-      File.exist?(ManifestPrecompiler.new.path(commit, yml)).should be_true
+      Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, rb)).should be_true
+      Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, yml)).should be_true
     end
   end
 

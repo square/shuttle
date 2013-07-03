@@ -58,9 +58,9 @@ class Compiler
     exporter = Exporter::Base.find_by_format(format)
     raise UnknownExporterError unless exporter
 
-    if !options[:force] && locale.nil? && (path = cached_manifest(format))
+    if !options[:force] && locale.nil? && (data = cached_manifest(format))
       return File.new(
-          ::File.open(path),
+          StringIO.new(data),
           exporter.character_encoding,
           "#{locale.try(:rfc5646) || 'manifest'}.#{exporter.file_extension}",
           exporter.mime_type
@@ -106,9 +106,9 @@ class Compiler
     end
 
     filename = "#{locale.try(:rfc5646) || 'localized'}.tar.gz"
-    if !options[:force] && locale.nil? && (path = cached_localization)
+    if !options[:force] && locale.nil? && (data = cached_localization)
       return File.new(
-          ::File.open(path),
+          StringIO.new(data),
           nil,
           filename,
           'application/x-gzip'
@@ -136,13 +136,11 @@ class Compiler
   end
 
   def cached_manifest(format)
-    path = ManifestPrecompiler.new.path(@commit, format)
-    ::File.exist?(path) ? path : nil
+    Shuttle::Redis.get ManifestPrecompiler.new.key(@commit, format)
   end
 
   def cached_localization
-    path = LocalizePrecompiler.new.path(@commit)
-    ::File.exist?(path) ? path : nil
+    Shuttle::Redis.get LocalizePrecompiler.new.key(@commit)
   end
 
   # The output of a manifest or localize operation. Stores the output data and

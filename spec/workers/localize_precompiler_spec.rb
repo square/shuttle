@@ -17,7 +17,7 @@ require 'spec_helper'
 describe LocalizePrecompiler do
   before(:each) do
     @commit = FactoryGirl.create(:commit)
-    FileUtils.rm_f(LocalizePrecompiler.new.path(@commit))
+    Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
   end
 
   describe "#perform" do
@@ -29,20 +29,18 @@ describe LocalizePrecompiler do
       translation  = FactoryGirl.create(:translation, key: key, translated: true, approved: true)
       @commit.recalculate_ready!
       @commit.should be_ready
-      path = subject.path(@commit)
-      File.exists?(path).should be_false
+      Shuttle::Redis.exists(subject.key(@commit)).should be_false
       subject.perform(@commit.id)
-      File.exists?(path).should be_true
+      Shuttle::Redis.exists(subject.key(@commit)).should be_true
       # TODO (zb) : actually extract the tarball returned here and check its contents like the ios exporter spec
     end
 
     context "if an exception is thrown" do
       it "does not write an empty file" do
-        path = subject.path(@commit)
-        File.any_instance.stub(:putc).and_raise(RuntimeError)
-        File.exists?(path).should be_false
+        Shuttle::Redis.stub(:set).and_raise(RuntimeError)
+        Shuttle::Redis.exists(subject.key(@commit)).should be_false
         expect { subject.perform(@commit.id) }.to raise_error(RuntimeError)
-        File.exists?(path).should be_false
+        Shuttle::Redis.exists(subject.key(@commit)).should be_false
       end
     end
 

@@ -22,17 +22,13 @@ class LocalizePrecompiler
   include Sidekiq::Worker
   sidekiq_options queue: :low
 
-  include Precompiler
-
   # Executes this worker.
   #
   # @param [Fixnum] commit_id The ID of a Commit to localize.
 
   def perform(commit_id)
     commit = Commit.find(commit_id)
-    write_precompiled_file(path(commit)) do
-      Compiler.new(commit).localize(force: true)
-    end
+    Shuttle::Redis.set key(commit), Compiler.new(commit).localize(force: true).io.read
   rescue Compiler::CommitNotReadyError
     # the commit was probably "downgraded" from ready between when the job was
     # queued and when it was started. ignore.
@@ -40,20 +36,12 @@ class LocalizePrecompiler
 
   include SidekiqLocking
 
-  # Returns the path to a cached localized tarball.
+  # Returns the Redis key for a cached localized tarball.
   #
   # @param [Commit] commit A commit that was localized.
-  # @return [Pathname] The path to the cached localization, if it exists.
+  # @return [Pathname] The key for the cached localization, if it exists.
 
-  def path(commit)
-    dir = directory(commit)
-    FileUtils.mkdir_p dir
-    dir.join 'localized.tgz'
-  end
-
-  private
-
-  def directory(commit)
-    Rails.root.join 'tmp', 'cache', 'localize', Rails.env.to_s, commit.id.to_s
+  def key(commit)
+    "localize:#{commit.id}"
   end
 end

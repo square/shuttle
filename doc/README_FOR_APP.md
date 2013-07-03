@@ -43,12 +43,10 @@ version of libarchive. To run Shuttle for the first time:
 2. Install a modern version of libarchive, one that supports the GNU tar format.
    (The version that comes with Mac OS X does not.) On OS X, you can run
 
-        brew install libarchive && brew link --force libarchive
+        brew install libarchive
 
-   If you'd rather not link over the OSX version of libarchive, then you'll need
-   to compile the libarchive gem against the Homebrew version. If you have an
-   out-of-date libarchive version, you will see missing constant errors in the
-   multifile exporters.
+   If you have an out-of-date libarchive version, you will see missing constant
+   errors in the multifile exporters.
 3. Create a PostgreSQL user called `shuttle`, and make it the owner of two
    PostgreSQL databases, `shuttle_development` and `shuttle_test`:
 
@@ -57,14 +55,19 @@ version of libarchive. To run Shuttle for the first time:
         createdb -O shuttle shuttle_development
         createdb -O shuttle shuttle_test
 
-4. You’ll need to run Bundler: `bundle install`
-5. Run `rake db:migrate db:seed` to seed the database.
-6. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
-6. Verify that all specs pass with `rspec spec`
-7. To run the server, use `rails server`
-8. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
+4. Install the libarchive gem using a modern version of libarchive.
+   For Homebrew, run
+
+        gem install libarchive -- --with-opt-dir=/usr/local/Cellar/libarchive/3.1.2
+
+5. You’ll need to run Bundler: `bundle install`
+6. Run `rake db:migrate db:seed` to seed the database.
+7. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
+8. Verify that all specs pass with `rspec spec`
+9. To run the server, use `rails server`
+10. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
 to run the Sidekiq development server.
-9. Visit [http://localhost:3000](http://localhost:3000) and log in with the
+11. Visit [http://localhost:3000](http://localhost:3000) and log in with the
    credentials:
 
    username: **admin@example.com**<br>
