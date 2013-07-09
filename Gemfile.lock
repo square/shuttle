@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/RISCfuture/composite_primary_keys.git
-  revision: 60eaa9e35f63c8bf1776803bade8bfd2e41b2fe6
+  revision: 945af0abd971381800f621634ad5b5a8361ddde7
   specs:
     composite_primary_keys (5.0.13)
       activerecord (>= 4.0)
