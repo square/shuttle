@@ -21,7 +21,7 @@ FactoryGirl.define do
 
   factory :fake_blob, parent: :blob do
     after(:create) do |blob, evaluator|
-      blob.stub!(:blob).and_return(OpenStruct.new(contents: 'hello, world', sha: evaluator.sha))
+      blob.stub(:blob).and_return(OpenStruct.new(contents: 'hello, world', sha: evaluator.sha))
     end
   end
 end
