@@ -132,13 +132,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  rescue_from(ActiveModel::MassAssignmentSecurity::Error) do
-    respond_to do |format|
-      format.html { redirect_to root_url, alert: t('controllers.application.mass_assignment_security') }
-      format.any { head :bad_request }
-    end
-  end
-
   protected
 
   # `before_filter` that requires that a user be logged in and have the role of

@@ -59,7 +59,7 @@ class HomeController < ApplicationController
 
     params[:project_id] ||= 'my-locales' if current_user.approved_locales.any?
     if params[:project_id] == 'my-locales'
-      projects = Project.all.select do |project|
+      projects = Project.to_a.select do |project|
         (project.targeted_locales & current_user.approved_locales).any?
       end
       @commits = @commits.where(project_id: projects.map(&:id))

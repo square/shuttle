@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # FRAMEWORK
-gem 'rails'
+gem 'rails', '>= 4.0'
 
 # AUTHENTICATION
 gem 'devise'
@@ -11,12 +11,13 @@ gem 'pg', '< 0.14'
 gem 'slugalicious'
 gem 'validates_timeliness'
 gem 'has_metadata_column'
-gem 'find_or_create_on_scopes', github: 'RISCfuture/find_or_create_on_scopes'
+gem 'find_or_create_on_scopes'
 gem 'composite_primary_keys', github: 'RISCfuture/composite_primary_keys'
+gem 'rails-observers'
 
 # VIEWS
 gem 'jquery-rails'
-gem 'erector'
+gem 'erector', github: 'RISCfuture/erector'
 gem 'font-awesome-rails'
 
 # UTILITIES
@@ -48,13 +49,13 @@ gem 'whenever', require: nil
 gem 'redis-mutex'
 gem 'redis-namespace'
 
-group :assets do
-  gem 'sass-rails'
-  gem 'coffee-rails'
-  gem 'uglifier'
-  gem 'less-rails'
-  gem 'twitter-bootstrap-rails'
-end
+# ASSETS
+gem 'sprockets-rails'
+gem 'sass-rails'
+gem 'coffee-rails'
+gem 'uglifier'
+gem 'less-rails'
+gem 'twitter-bootstrap-rails'
 
 group :development do
   gem 'redcarpet', require: nil
@@ -66,7 +67,8 @@ group :test do
   gem 'factory_girl_rails'
 end
 
+# Doesn't work in Rails 4
 group :development, :test do
-  gem 'jasminerice'
-  gem 'guard-jasmine'
+  #gem 'jasminerice'
+  #gem 'guard-jasmine'
 end

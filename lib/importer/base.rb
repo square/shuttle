@@ -207,24 +207,22 @@ module Importer
 
       key = @blob.project.keys.for_key(key).source_copy_matches(value).create_or_update!(
           options.reverse_merge(
-              key:                      key,
-              source_copy:              value,
-              importer:                 self.class.ident,
-              fencers:                  self.class.fencers,
-              skip_readiness_hooks:     true
-          ), as: :system
+              key:                  key,
+              source_copy:          value,
+              importer:             self.class.ident,
+              fencers:              self.class.fencers,
+              skip_readiness_hooks: true)
       )
       @keys << key
 
-      key.translations.in_locale(@blob.project.base_locale).create_or_update!({
-              source_copy:              value,
-              copy:                     value,
-              approved:                 true,
-              source_rfc5646_locale:    @blob.project.base_rfc5646_locale,
-              rfc5646_locale:           @blob.project.base_rfc5646_locale,
-              skip_readiness_hooks:     true,
-              preserve_reviewed_status: true
-          }, as: :system)
+      key.translations.in_locale(@blob.project.base_locale).create_or_update!(
+          source_copy:              value,
+          copy:                     value,
+          approved:                 true,
+          source_rfc5646_locale:    @blob.project.base_rfc5646_locale,
+          rfc5646_locale:           @blob.project.base_rfc5646_locale,
+          skip_readiness_hooks:     true,
+          preserve_reviewed_status: true)
 
       # add additional pending translations if necessary
       key.add_pending_translations
@@ -249,15 +247,14 @@ module Importer
         return
       end
 
-      key_obj.translations.in_locale(locale).create_or_update!({
-              source_copy:              base.copy,
-              copy:                     value,
-              approved:                 true,
-              source_rfc5646_locale:    base.rfc5646_locale,
-              rfc5646_locale:           locale.rfc5646,
-              skip_readiness_hooks:     true,
-              preserve_reviewed_status: true,
-          }, as: :system)
+      key_obj.translations.in_locale(locale).create_or_update!(
+          source_copy:              base.copy,
+          copy:                     value,
+          approved:                 true,
+          source_rfc5646_locale:    base.rfc5646_locale,
+          rfc5646_locale:           locale.rfc5646,
+          skip_readiness_hooks:     true,
+          preserve_reviewed_status: true)
     end
 
     protected
@@ -400,7 +397,7 @@ module Importer
     end
 
     def log_skip(key, reason)
-      Importer::SKIP_LOG.info "commit=#{@commit.try(:revision)} blob=#{@blob.sha} file=#{file.path} key=#{key} #{reason}"
+      Importer::SKIP_LOG.info "commit=#{@commit.try!(:revision)} blob=#{@blob.sha} file=#{file.path} key=#{key} #{reason}"
     end
 
     File = Struct.new(:path, :contents, :locale)
@@ -428,5 +425,5 @@ module Importer
   end
 
   # A log of skipped files and keys.
-  SKIP_LOG = ActiveSupport::BufferedLogger.new(Rails.root.join('log', "skip-#{Rails.env}.log"))
+  SKIP_LOG = ActiveSupport::Logger.new(Rails.root.join('log', "skip-#{Rails.env}.log"))
 end

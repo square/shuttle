@@ -25,7 +25,7 @@ module ActionView::Helpers::FormHelper
   # @param [Hash] options Additional options to pass to the tag generator.
 
   def content_tag_field(tag_name, object_name, method, options)
-    ActionView::Helpers::InstanceTag.new(object_name, method, self, options.delete(:object)).to_content_tag(tag_name, options)
+    ActionView::Helpers::Tags::ContentField.new(object_name, method, self, options.merge(tag_name: tag_name)).render
   end
 end
 
@@ -47,13 +47,13 @@ end
 
 # Multifield additions for form rendering.
 
-class ActionView::Helpers::InstanceTag
+class ActionView::Helpers::Tags::ContentField < ActionView::Helpers::Tags::Base
 
-  # Rewrites `to_content_tag` to add the default `name` and `id` options.
-
-  def to_content_tag(tag_name, options = {})
-    options = options.stringify_keys
+  def render
+    options = @options.stringify_keys
+    options['value'] = options.fetch('value'){ value_before_type_cast(object) }
+    options['value'] &&= ERB::Util.html_escape(options['value'])
     add_default_name_and_id(options)
-    content_tag(tag_name, value(object), options)
+    tag(options['tag_name'].to_s, options, true) + "</#{options['tag_name']}>".html_safe
   end
 end

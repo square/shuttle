@@ -60,7 +60,7 @@ class UsersController < ApplicationController
   # Routes
   # ------
   #
-  # * `PUT /users/:id`
+  # * `PATCH /users/:id`
   #
   # Path Parameters
   # ---------------
@@ -74,7 +74,7 @@ class UsersController < ApplicationController
       params[:user].delete('password')
       params[:user].delete('password_confirmation')
     end
-    @user.update_attributes params[:user], as: :admin
+    @user.update_attributes user_params
 
     respond_with @user do |format|
       format.html do
@@ -142,5 +142,10 @@ class UsersController < ApplicationController
 
   def find_user
     @user = User.find(params[:id])
+  end
+
+  def user_params
+    params.require(:user).permit(:first_name, :last_name, :role, :password,
+                                 :password_confirmation, :approved_rfc5646_locales)
   end
 end

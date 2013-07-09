@@ -77,7 +77,7 @@ class Commit < ActiveRecord::Base
 
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
-  has_and_belongs_to_many :keys, uniq: true
+  has_and_belongs_to_many :keys, -> { uniq }
   has_many :translations, through: :keys
 
   include HasMetadataColumn
@@ -107,7 +107,7 @@ class Commit < ActiveRecord::Base
   extend GitObjectField
   git_object_field :revision,
                    git_type:        :commit,
-                   repo:            ->(c) { c.project.try(:repo) },
+                   repo:            ->(c) { c.project.try!(:repo) },
                    repo_must_exist: true,
                    scope:           :for_revision
 
@@ -125,14 +125,9 @@ class Commit < ActiveRecord::Base
   after_commit :compile_and_cache_or_clear, on: :update
   after_destroy { |c| Commit.flush_memoizations c.id }
 
-  attr_accessible :revision, :message, :committed_at, :skip_import,
-                  :skip_sha_check, :user_id, as: :system
-  attr_accessible :revision, :description, :due_date, :pull_request_url,
-                  as: :monitor
-  attr_accessible :due_date, :priority, as: :admin
   attr_readonly :revision, :message
 
-  scope :by_priority_and_due_date, order('due_date ASC, priority ASC')
+  scope :by_priority_and_due_date, -> { order('due_date ASC, priority ASC') }
 
   # @private
   def to_param() revision end
@@ -387,7 +382,7 @@ class Commit < ActiveRecord::Base
   def import_tree(tree, path, options={})
     tree.blobs.each do |name, blob|
       blob_path   = "#{path}/#{name}"
-      blob_object = project.blobs.with_sha(blob.sha).find_or_create!({sha: blob.sha}, as: :system)
+      blob_object = project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
 
       imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
       imps.each do |importer|
@@ -401,9 +396,9 @@ class Commit < ActiveRecord::Base
         end
 
         if options[:inline]
-          BlobImporter.new.perform importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646)
+          BlobImporter.new.perform importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try!(:rfc5646)
         else
-          add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try(:rfc5646))
+          add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try!(:rfc5646))
         end
       end
     end

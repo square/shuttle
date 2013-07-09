@@ -82,11 +82,11 @@ module SearchableField
       commands = []
       until object._searchable_field_operations.empty?
         column, language, value = object._searchable_field_operations.pop
-        commands << "#{connection.quote_column_name column} = TO_TSVECTOR(#{connection.quote language}, #{connection.quote value})"
+        commands << "#{self.class.connection.quote_column_name column} = TO_TSVECTOR(#{self.class.connection.quote language}, #{self.class.connection.quote value})"
       end
       pkey_hash = Array.wrap(object.class.primary_key).inject({}) { |hsh, key| hsh[key] = object[key]; hsh }
 
-      self.class.update_all commands.join(', '), pkey_hash
+      self.class.where(pkey_hash).update_all commands.join(', ')
 
       true
     end

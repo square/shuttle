@@ -12,13 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class AddCreatedAtToCommits < ActiveRecord::Migration
-  def up
-    execute "ALTER TABLE commits ADD COLUMN created_at TIMESTAMP WITHOUT TIME ZONE"
-    execute "UPDATE commits SET created_at = CURRENT_TIMESTAMP"
-  end
+# Be sure to restart your server when you modify this file.
 
-  def down
-    execute "ALTER TABLE commits DROP COLUMN created_at"
-  end
-end
+# Configure sensitive parameters which will be filtered from the log file.
+Rails.application.config.filter_parameters += [:password]

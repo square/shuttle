@@ -64,10 +64,10 @@ module Exporter
 
     def entry(translation)
       translation_date = I18n.l(translation.updated_at, format: :trados) if translation
-      translator       = translation.try(:translator).try(:first_name).try(:upcase)
+      translator       = translation.try!(:translator).try!(:first_name).try!(:upcase)
       base_copy        = translation.source_copy
-      translated_copy  = translation.try(:copy)
-      target_locale  = (translation.try(:locale) || locale).rfc5646
+      translated_copy  = translation.try!(:copy)
+      target_locale  = (translation.try!(:locale) || locale).rfc5646
 
       fence_copy! translation.key.fencers, base_copy
       fence_copy! translation.key.fencers, translated_copy if translated_copy

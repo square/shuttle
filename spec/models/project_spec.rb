@@ -155,65 +155,65 @@ describe Project do
     before(:all) { @project = FactoryGirl.create(:project) }
 
     it "should return true if there is no matching key inclusion" do
-      @project.update_attributes({key_exclusions:        [],
-                                  key_inclusions:        %w(in*),
-                                  key_locale_inclusions: {},
-                                  key_locale_exclusions: {}}, as: :user)
+      @project.update_attributes(key_exclusions:        [],
+                                 key_inclusions:        %w(in*),
+                                 key_locale_inclusions: {},
+                                 key_locale_exclusions: {})
 
       @project.skip_key?('excluded', Locale.from_rfc5646('en-US')).should be_true
       @project.skip_key?('included', Locale.from_rfc5646('en-US')).should be_false
     end
 
     it "should return true if there is a key exclusion" do
-      @project.update_attributes({key_exclusions:        %w(*cl*),
-                                  key_inclusions:        [],
-                                  key_locale_inclusions: {},
-                                  key_locale_exclusions: {}}, as: :user)
+      @project.update_attributes(key_exclusions:        %w(*cl*),
+                                 key_inclusions:        [],
+                                 key_locale_inclusions: {},
+                                 key_locale_exclusions: {})
 
       @project.skip_key?('excluded', Locale.from_rfc5646('en-US')).should be_true
     end
 
     it "should return true if there is a locale key exclusion in the given locale" do
-      @project.update_attributes({key_exclusions:        [],
-                                  key_inclusions:        [],
-                                  key_locale_exclusions: {'en-US' => %w(*cl*)},
-                                  key_locale_inclusions: {}}, as: :user)
+      @project.update_attributes(key_exclusions:        [],
+                                 key_inclusions:        [],
+                                 key_locale_exclusions: {'en-US' => %w(*cl*)},
+                                 key_locale_inclusions: {})
 
       @project.skip_key?('excluded', Locale.from_rfc5646('en-US')).should be_true
     end
 
     it "should return false if there is a locale key exclusion in a different locale" do
-      @project.update_attributes({key_exclusions:        [],
-                                  key_inclusions:        [],
-                                  key_locale_inclusions: {},
-                                  key_locale_exclusions: {'fr-FR' => %w(*cl*)}}, as: :user)
+      @project.update_attributes(key_exclusions:        [],
+                                 key_inclusions:        [],
+                                 key_locale_inclusions: {},
+                                 key_locale_exclusions: {'fr-FR' => %w(*cl*)})
 
       @project.skip_key?('excluded', Locale.from_rfc5646('en-US')).should be_false
     end
 
     it "should return true if there no matching locale key inclusion in the given locale" do
-      @project.update_attributes({key_exclusions:        [],
-                                  key_inclusions:        [],
-                                  key_locale_inclusions: {'en-US' => %w(in*)},
-                                  key_locale_exclusions: {}}, as: :user)
+      @project.update_attributes(key_exclusions:        [],
+                                 key_inclusions:        [],
+                                 key_locale_inclusions: {'en-US' => %w(in*)},
+                                 key_locale_exclusions: {})
 
       @project.skip_key?('excluded', Locale.from_rfc5646('en-US')).should be_true
     end
 
     it "should return false if there is no matching locale key inclusion in a different locale" do
-      @project.update_attributes({key_exclusions:        [],
-                                  key_inclusions:        [],
-                                  key_locale_exclusions: {},
-                                  key_locale_inclusions: {'fr-FR' => %w(in*)}}, as: :user)
+      @project.update_attributes(key_exclusions:        [],
+                                 key_inclusions:        [],
+                                 key_locale_exclusions: {},
+                                 key_locale_inclusions: {'fr-FR' => %w(in*)})
 
       @project.skip_key?('excluded', Locale.from_rfc5646('en-US')).should be_false
     end
 
     it "should return false if there is no exclusion" do
-      @project.update_attributes({key_exclusions:        %w(*cb*),
-                                  key_inclusions:        [],
-                                  key_locale_inclusions: {},
-                                  key_locale_exclusions: {}}, as: :user)
+      @project.update_attributes(key_exclusions:        %w(*cb*),
+                                 key_inclusions:        [],
+                                 key_locale_inclusions: {},
+                                 key_locale_exclusions: {})
 
       @project.skip_key?('excluded', Locale.from_rfc5646('en-US')).should be_false
     end
@@ -223,65 +223,65 @@ describe Project do
     before(:all) { @project = FactoryGirl.create(:project) }
 
     it "should return true if there is no matching path inclusion" do
-      @project.update_attributes({skip_paths:          [],
-                                  only_paths:          %w(foo/),
-                                  only_importer_paths: {},
-                                  skip_importer_paths: {}}, as: :user)
+      @project.update_attributes(skip_paths:          [],
+                                 only_paths:          %w(foo/),
+                                 only_importer_paths: {},
+                                 skip_importer_paths: {})
 
       @project.skip_path?('bar/foo.txt', Importer::Ruby).should be_true
       @project.skip_path?('foo/bar.txt', Importer::Ruby).should be_false
     end
 
     it "should return true if there is a path exclusion" do
-      @project.update_attributes({skip_paths:          %w(foo/),
-                                  only_paths:          [],
-                                  only_importer_paths: {},
-                                  skip_importer_paths: {}}, as: :user)
+      @project.update_attributes(skip_paths:          %w(foo/),
+                                 only_paths:          [],
+                                 only_importer_paths: {},
+                                 skip_importer_paths: {})
 
       @project.skip_path?('foo/bar.txt', Importer::Ruby).should be_true
     end
 
     it "should return true if there is an importer path exclusion for the given importer" do
-      @project.update_attributes({skip_paths:          [],
-                                  only_paths:          [],
-                                  skip_importer_paths: {'yaml' => %w(foo/)},
-                                  only_importer_paths: {}}, as: :user)
+      @project.update_attributes(skip_paths:          [],
+                                 only_paths:          [],
+                                 skip_importer_paths: {'yaml' => %w(foo/)},
+                                 only_importer_paths: {})
 
       @project.skip_path?('foo/bar.txt', Importer::Yaml).should be_true
     end
 
     it "should return false if there is an importer path exclusion for a different importer" do
-      @project.update_attributes({skip_paths:          [],
-                                  only_paths:          [],
-                                  only_importer_paths: {},
-                                  skip_importer_paths: {'yaml' => %w(foo/)}}, as: :user)
+      @project.update_attributes(skip_paths:          [],
+                                 only_paths:          [],
+                                 only_importer_paths: {},
+                                 skip_importer_paths: {'yaml' => %w(foo/)})
 
       @project.skip_path?('foo/bar.txt', Importer::Ruby).should be_false
     end
 
     it "should return true if there no matching importer path inclusion for the given importer" do
-      @project.update_attributes({skip_paths:          [],
-                                  only_paths:          [],
-                                  only_importer_paths: {'yaml' => %w(foo/)},
-                                  skip_importer_paths: {}}, as: :user)
+      @project.update_attributes(skip_paths:          [],
+                                 only_paths:          [],
+                                 only_importer_paths: {'yaml' => %w(foo/)},
+                                 skip_importer_paths: {})
 
       @project.skip_path?('bar/foo.txt', Importer::Yaml).should be_true
     end
 
     it "should return false if there is no matching importer path inclusion for a different importer" do
-      @project.update_attributes({skip_paths:          [],
-                                  only_paths:          [],
-                                  skip_importer_paths: {},
-                                  only_importer_paths: {'yaml' => %w(foo/)}}, as: :user)
+      @project.update_attributes(skip_paths:          [],
+                                 only_paths:          [],
+                                 skip_importer_paths: {},
+                                 only_importer_paths: {'yaml' => %w(foo/)})
 
       @project.skip_path?('bar/foo.txt', Importer::Ruby).should be_false
     end
 
     it "should return false if there is no exclusion" do
-      @project.update_attributes({skip_paths:          %w(foo/),
-                                  only_paths:          [],
-                                  only_importer_paths: {},
-                                  skip_importer_paths: {}}, as: :user)
+      @project.update_attributes(skip_paths:          %w(foo/),
+                                 only_paths:          [],
+                                 only_importer_paths: {},
+                                 skip_importer_paths: {})
 
       @project.skip_path?('bar/foo.txt', Importer::Ruby).should be_false
     end

@@ -62,7 +62,7 @@ class Compiler
       return File.new(
           StringIO.new(data),
           exporter.character_encoding,
-          "#{locale.try(:rfc5646) || 'manifest'}.#{exporter.file_extension}",
+          "#{locale.try!(:rfc5646) || 'manifest'}.#{exporter.file_extension}",
           exporter.mime_type
       )
     end
@@ -75,7 +75,7 @@ class Compiler
     return File.new(
         io,
         exporter.class.character_encoding,
-        "#{locale.try(:rfc5646) || 'manifest'}.#{exporter.class.file_extension}",
+        "#{locale.try!(:rfc5646) || 'manifest'}.#{exporter.class.file_extension}",
         exporter.class.mime_type
     )
   end
@@ -105,7 +105,7 @@ class Compiler
       locale = nil
     end
 
-    filename = "#{locale.try(:rfc5646) || 'localized'}.tar.gz"
+    filename = "#{locale.try!(:rfc5646) || 'localized'}.tar.gz"
     if !options[:force] && locale.nil? && (data = cached_localization)
       return File.new(
           StringIO.new(data),

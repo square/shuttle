@@ -56,7 +56,7 @@ describe Translation do
 
       it "should not reset the reviewed state if the reviewed state is changed along with the copy" do
         trans = FactoryGirl.create(:translation, approved: false, reviewer: FactoryGirl.create(:user))
-        trans.update_attributes({copy: "New copy", approved: true}, as: :system)
+        trans.update_attributes(copy: "New copy", approved: true)
         trans.reviewer_id.should_not be_nil
         trans.approved.should eql(true)
       end
@@ -131,7 +131,7 @@ describe Translation do
 
       it "should update the translation memory when pre-approved" do
         translation = FactoryGirl.create(:translation, approved: true)
-        tu = TranslationUnit.exact_matches(translation).first
+        tu          = TranslationUnit.exact_matches(translation).first
         tu.copy.should eql(translation.copy)
         tu.locale.should eql(translation.locale)
       end
