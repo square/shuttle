@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 gem 'rails', '>= 4.0'
 
 # AUTHENTICATION
-gem 'devise'
+gem 'devise', github: 'plataformatec/devise'
 
 # MODELS
 gem 'pg', '< 0.14'
