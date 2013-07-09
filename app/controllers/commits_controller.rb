@@ -17,7 +17,7 @@
 
 class CommitsController < ApplicationController
   # @private
-  COMMIT_ATTRIBUTES = [:revision, :description, :due_date, :pull_request_url]
+  COMMIT_ATTRIBUTES = [:revision, :description, :due_date, :pull_request_url, :priority]
 
   before_filter :authenticate_user!, except: [:manifest, :localize]
   before_filter :monitor_required, except: [:manifest, :localize]
