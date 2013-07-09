@@ -28,7 +28,7 @@ module Views
           article(class: 'container') do
             page_header "Edit #{resource_name.to_s.humanize}"
             rawtext devise_error_messages!
-            form_for(resource, as: resource_name, url: registration_path(resource_name), html: {method: :put, class: 'form-horizontal'}) do |f|
+            form_for(resource, as: resource_name, url: registration_path(resource_name), html: {method: :patch, class: 'form-horizontal'}) do |f|
               div(class: 'control-group') do
                 f.label :email, class: 'control-label'
                 div(class: 'controls') do

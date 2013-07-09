@@ -40,10 +40,9 @@ describe Localizer::Xib do
         '/apple/en-US.lproj/example.xib:12.IBSegmentTitles[1]'                                   => 'segment 2'
     }.each do |key, string|
       key = @project.keys.for_key(key).source_copy_matches(string).first!
-      key.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes({
+      key.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes(
           copy:     "#{string} (de)",
-          approved: true
-      }, as: :system)
+          approved: true)
     end
   end
 

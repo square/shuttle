@@ -25,21 +25,23 @@ describe SearchableField do
   it "should not set the TSVECTOR field if the value is not changed" do
     t = FactoryGirl.create(:translation, copy: "Searchable copy")
     t.reload.searchable_copy.should eql("'copy':2 'searchabl':1")
-    Translation.connection.should_not_receive(:update_all).with(/TO_TSVECTOR/, anything)
+    Translation.connection.should_not_receive(:exec_update).with(/TO_TSVECTOR/, anything, anything)
     #TODO implementation detail in spec
     t.update_attribute :approved, false
   end
 
   it "should use a custom :language option" do
     k = FactoryGirl.create(:key, key: "Some key")
-    Key.should_receive(:update_all).once.with(/TO_TSVECTOR\('simple', /, anything).and_call_original
+    Key.connection.should_receive(:exec_update).once.with(/TO_TSVECTOR\('simple', /, anything, anything).and_call_original
+    Key.connection.should_receive(:exec_update).any_number_of_times.and_call_original
     #TODO implementation detail in spec
     k.reload.update_attribute :original_key, "New key"
   end
 
   it "should use a custom :language_from option" do
     t = FactoryGirl.create(:translation, rfc5646_locale: 'de-DE', copy: "Searchable copy")
-    Translation.should_receive(:update_all).once.with(/TO_TSVECTOR\('french', /, anything).and_call_original
+    Translation.connection.should_receive(:exec_update).once.with(/TO_TSVECTOR\('french', /, anything, anything).and_call_original
+    Key.connection.should_receive(:exec_update).any_number_of_times.and_call_original
     #TODO implementation detail in spec
     t.copy = "New copy"
     t.rfc5646_locale = 'fr-CA'

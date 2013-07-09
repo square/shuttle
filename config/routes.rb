@@ -14,7 +14,7 @@
 
 Shuttle::Application.routes.draw do
   constraints(host: 'shuttle.corp.squareup.com') do
-    match '*glob' => redirect('https://shuttle.squareup.com')
+    match '*glob' => redirect('https://shuttle.squareup.com'), via: [:get, :post, :put, :patch, :delete]
   end
 
   # AUTHENTICATION

@@ -42,7 +42,7 @@ class root.GlossaryList
             existingEntryForm = $('<form/>').append($('<input/>').val(entry.copy)).submit ->
               $.ajax @updateEntryUrl.replace('REPLACEME_LOCALE', locale).replace("REPLACEME_ID", entry.id),
                 data: {review: false, copy: $(this).find('input').val()},
-                type: "PUT"
+                type: "PATCH"
                 success: (data) ->
                   # on success, reload
                   this.loadLocale(locale)
@@ -62,7 +62,7 @@ class root.GlossaryList
               btn1.click =>
                 $.ajax @updateEntryUrl.replace('REPLACEME_LOCALE', locale).replace("REPLACEME_ID", entry.id),
                   data: {review: true, approved: true, copy: existingEntryForm.find('input').val()},
-                  type: "PUT"
+                  type: "PATCH"
                   success: (data) =>
                     # on success, reload
                     this.loadLocale(locale)
@@ -72,7 +72,7 @@ class root.GlossaryList
               btn2.click =>
                 $.ajax @updateEntryUrl.replace('REPLACEME_LOCALE', locale).replace("REPLACEME_ID", entry.id),
                   data: {review: true, approved: false, copy: existingEntryForm.find('input').val()},
-                  type: "PUT"
+                  type: "PATCH"
                   success: (data) =>
                     # on success, reload
                     this.loadLocale(locale)

@@ -33,7 +33,7 @@ class TranslationsController < ApplicationController
   # Routes
   # ------
   #
-  # * `PUT /projects/:project_id/keys/:key_id/translations/:id`
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:id`
   #
   # Path Parameters
   # ---------------
@@ -55,7 +55,7 @@ class TranslationsController < ApplicationController
   # Routes
   # ------
   #
-  # * `PUT /projects/:project_id/keys/:key_id/translations/:id/edit`
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:id/edit`
   #
   # Path Parameters
   # ---------------
@@ -79,7 +79,7 @@ class TranslationsController < ApplicationController
   # Routes
   # ------
   #
-  # * `PUT /projects/:project_id/keys/:key_id/translations/:id`
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:id`
   #
   # Path Parameters
   # ---------------
@@ -108,7 +108,7 @@ class TranslationsController < ApplicationController
     # translators cannot modify approved copy
     return head(:forbidden) if @translation.approved? && current_user.role == 'translator'
 
-    @translation.assign_attributes params[:translation], as: :translator
+    @translation.assign_attributes translation_params
 
     @translation.translator = current_user if @translation.copy_was != @translation.copy
 
@@ -266,5 +266,9 @@ class TranslationsController < ApplicationController
 
   def find_translation
     @translation = @key.translations.where(rfc5646_locale: params[:id]).first!
+  end
+
+  def translation_params
+    params.require(:translation).permit(:copy)
   end
 end

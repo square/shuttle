@@ -47,8 +47,8 @@ class Slug < ActiveRecord::Base
   scope :from_slug, ->(klass, scope, slug) {
     where(sluggable_type: klass.to_s, slug: slug, scope: scope)
   }
-  scope :active, where(active: true)
-  scope :inactive, where(active: false)
+  scope :active, -> { where(active: true) }
+  scope :inactive, -> { where(active: false) }
 
   validates :sluggable_type,
             presence: true
@@ -63,11 +63,9 @@ class Slug < ActiveRecord::Base
             length: { maximum: 126 },
             allow_nil: true
   validate :one_active_slug_per_object
-  
+
   after_save :invalidate_cache
   after_destroy :invalidate_cache
-
-  attr_accessible :sluggable, :slug, :active, :scope
 
   # Marks a slug as active and deactivates all other slugs assigned to the
   # record.
@@ -85,7 +83,7 @@ class Slug < ActiveRecord::Base
     return unless new_record? or (active? and active_changed?)
     errors.add(:active, :one_per_sluggable) if active? and Slug.active.for(sluggable_type, sluggable_id).count > 0
   end
-  
+
   def invalidate_cache
     Rails.cache.delete "Slug/#{sluggable_type}/#{sluggable_id}/slug"
     Rails.cache.delete "Slug/#{sluggable_type}/#{sluggable_id}/slug_with_path"

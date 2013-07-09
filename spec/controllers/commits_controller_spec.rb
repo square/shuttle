@@ -301,6 +301,7 @@ de:
                                 original_key: '/*/*[1]',
                                 source:       'file-en.svg')
       key2 = FactoryGirl.create(:key,
+                                project:      @project,
                                 key:          'file-en.svg:/*/*[2]/*',
                                 original_key: '/*/*[2]/*',
                                 source:       'file-en.svg')

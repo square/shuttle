@@ -156,7 +156,7 @@ module Importer
                                      index:      array_index_path[-1])
         elsif text_node_path.present?
           generated_comment = I18n.t('importer.storyboard.automatic_context',
-                                     key:        node['key'].try(:capitalize) || '(null)',
+                                     key:        node['key'].try!(:capitalize) || '(null)',
                                      text_class: display_name_for_class(text_class))
         else
           generated_comment = display_name_for_class(text_class).capitalize

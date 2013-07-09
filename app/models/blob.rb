@@ -38,7 +38,7 @@ class Blob < ActiveRecord::Base
   extend GitObjectField
   git_object_field :sha,
                    git_type:        :blob,
-                   repo:            ->(t) { t.project.try(:repo) },
+                   repo:            ->(t) { t.project.try!(:repo) },
                    repo_must_exist: true,
                    scope:           :with_sha
 
@@ -46,8 +46,6 @@ class Blob < ActiveRecord::Base
             presence: true
   validates :sha,
             presence: true
-
-  attr_accessible :sha, as: :system
 
   # Searches the blob for translatable strings, creates or updates Translations,
   # and associates them with this Blob. Imported strings are approved by

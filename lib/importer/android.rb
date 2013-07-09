@@ -40,7 +40,7 @@ module Importer
       file_locale   = Locale.new(qualifiers['language'] || @blob.project.base_locale.iso639,
                                  nil,
                                  nil,
-                                 qualifiers['region'].try(:[], 1, 2) || @blob.project.base_locale.region)
+                                 qualifiers['region'].try!(:[], 1, 2) || @blob.project.base_locale.region)
 
       file_locale == locale_to_use(locale) && FILENAMES.include?(::File.basename(file.path))
     end
@@ -54,7 +54,7 @@ module Importer
           next
         end
 
-        context = find_comment(tag).try(:content)
+        context = find_comment(tag).try!(:content)
         receiver.add_string "#{file.path}:#{tag.path}",
                             unescape(tag.content),
                             context:      clean_comment(context),
@@ -67,9 +67,9 @@ module Importer
           next
         end
 
-        global_context = find_comment(tag).try(:content)
+        global_context = find_comment(tag).try!(:content)
         tag.xpath('item').each do |item_tag|
-          context = find_comment(item_tag).try(:content)
+          context = find_comment(item_tag).try!(:content)
           receiver.add_string "#{file.path}:#{item_tag.path}",
                               unescape(item_tag.content),
                               context:      clean_comment(context || global_context),
@@ -83,9 +83,9 @@ module Importer
           next
         end
 
-        global_context = find_comment(tag).try(:content)
+        global_context = find_comment(tag).try!(:content)
         tag.xpath('item').each do |subtag|
-          context = find_comment(subtag).try(:content)
+          context = find_comment(subtag).try!(:content)
           receiver.add_string "#{file.path}:#{subtag.path}",
                               unescape(subtag.content),
                               context:      clean_comment(context || global_context),
@@ -112,8 +112,8 @@ module Importer
 
     def find_comment(tag)
       tag = tag.previous
-      tag = tag.previous while tag.try(:text?)
-      tag.try(:comment?) ? tag : nil
+      tag = tag.previous while tag.try!(:text?)
+      tag.try!(:comment?) ? tag : nil
     end
 
     def clean_comment(comment)

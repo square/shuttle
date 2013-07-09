@@ -121,7 +121,7 @@ class ProjectsController < ApplicationController
   # | `project` | Parameterized hash of Project information. |
 
   def create
-    @project = Project.create(params[:project], as: :user)
+    @project = Project.create(project_params)
     respond_with @project, location: administrators_url
   end
 
@@ -148,7 +148,7 @@ class ProjectsController < ApplicationController
   # Routes
   # ------
   #
-  # * `PUT /projects/:id`
+  # * `PATCH /projects/:id`
   #
   # Path Parameters
   # ---------------
@@ -165,7 +165,7 @@ class ProjectsController < ApplicationController
   # | `project` | Parameterized hash of Project information. |
 
   def update
-    @project.update_attributes params[:project], as: :user
+    @project.update_attributes project_params
     respond_with @project, location: administrators_url
   end
 
@@ -184,5 +184,22 @@ class ProjectsController < ApplicationController
           edit_url:    edit_project_url(project)
       )
     end
+  end
+
+  def project_params
+    params.require(:project).permit(:name, :repository_url, :base_rfc5646_locale,
+                                    :due_date, :cache_localization, :webhook_url,
+                                    skip_imports:             [],
+                                    cache_manifest_formats:   [],
+                                    key_exclusions:           [],
+                                    key_inclusions:           [],
+                                    skip_paths:               [],
+                                    only_paths:               [],
+                                    watched_branches:         [],
+                                    targeted_rfc5646_locales: {},
+                                    key_locale_exclusions:    {},
+                                    key_locale_inclusions:    {},
+                                    only_importer_paths:      {},
+                                    skip_importer_paths:      {})
   end
 end

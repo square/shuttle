@@ -59,7 +59,7 @@ class WordSubstitutor
       route = self.class.graph.route(@from, @to)
       raise NoDictionaryError, "Cannot find word substitution dictionary for #{@from.rfc5646} -> #{@to.rfc5646}" unless route
       @dictionaries = route.map.with_index do |_, i|
-        "#{route[i].rfc5646},#{route[i+1].try :rfc5646}.yml"
+        "#{route[i].rfc5646},#{route[i+1].try! :rfc5646}.yml"
       end.slice(0..-2).map { |name| YAML.load_file(Rails.root.join('data', 'spelling', name)) }
     else
       @dictionaries = [dictionary_or_from_locale]

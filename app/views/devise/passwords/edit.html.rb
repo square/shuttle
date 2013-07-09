@@ -28,7 +28,7 @@ module Views
           article(class: 'container') do
             page_header "Change your password"
             rawtext devise_error_messages!
-            form_for(resource, as: resource_name, url: password_path(resource_name), html: {method: :put, class: 'form-horizontal'}) do |f|
+            form_for(resource, as: resource_name, url: password_path(resource_name), html: {method: :patch, class: 'form-horizontal'}) do |f|
               f.hidden_field :reset_password_token
               div(class: 'control-group') do
                 f.label :password, "New password", class: 'control-label'

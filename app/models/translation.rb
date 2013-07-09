@@ -94,11 +94,6 @@ class Translation < ActiveRecord::Base
 
   after_destroy :recalculate_readiness
 
-  attr_accessible :copy, as: :translator
-  attr_accessible :copy, :rfc5646_locale, :locale, :source_copy,
-                  :source_rfc5646_locale, :source_locale, :approved,
-                  :preserve_reviewed_status, :skip_readiness_hooks, as: :system
-  attr_accessible :copy, :approved, as: :reviewer
   attr_readonly :rfc5646_locale, :locale
 
   # @return [true, false] If `true`, the after-save hooks that recalculate
@@ -120,8 +115,8 @@ class Translation < ActiveRecord::Base
       where(rfc5646_locale: langs.map(&:rfc5646))
     end
   }
-  scope :base, where('source_rfc5646_locale = rfc5646_locale')
-  scope :not_base, where('source_rfc5646_locale != rfc5646_locale')
+  scope :base, -> { where('source_rfc5646_locale = rfc5646_locale') }
+  scope :not_base, -> { where('source_rfc5646_locale != rfc5646_locale') }
   scope :in_commit, ->(commit) {
     commit_id = commit.kind_of?(Commit) ? commit.id : commit
     joins("INNER JOIN commits_keys ON translations.key_id = commits_keys.key_id").

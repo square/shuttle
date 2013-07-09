@@ -43,7 +43,7 @@ class BlobImporter
                           locale: locale
 
     ensure
-      commit.try :remove_worker!, jid
+      commit.try! :remove_worker!, jid
     end
   end
 

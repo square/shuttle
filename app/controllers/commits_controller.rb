@@ -16,6 +16,9 @@
 # the status of these Commits.
 
 class CommitsController < ApplicationController
+  # @private
+  COMMIT_ATTRIBUTES = [:revision, :description, :due_date, :pull_request_url]
+
   before_filter :authenticate_user!, except: [:manifest, :localize]
   before_filter :monitor_required, except: [:manifest, :localize]
   before_filter :admin_required, only: :destroy
@@ -81,7 +84,7 @@ class CommitsController < ApplicationController
     revision = params[:commit][:revision].strip
     respond_to do |format|
       format.json do
-        other_fields = params[:commit].stringify_keys.slice(*Commit._accessible_attributes[:monitor].to_a).except('revision')
+        other_fields = params[:commit].stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
         other_fields[:user_id] = current_user.id
         CommitCreator.perform_once @project.id, revision, other_fields: other_fields
         render json: {message: t('controllers.commits.create.success', revision: revision)}
@@ -94,7 +97,7 @@ class CommitsController < ApplicationController
   # Routes
   # ------
   #
-  # * `PUT /projects/:project_id/commits/:commit_id`
+  # * `PATCH /projects/:project_id/commits/:commit_id`
   #
   # Path Parameters
   # ---------------
@@ -112,7 +115,7 @@ class CommitsController < ApplicationController
   # | `commit` | Parameterized hash of Commit fields. |
 
   def update
-    @commit.update_attributes params[:commit], as: current_user.role.to_sym
+    @commit.update_attributes commit_params
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
@@ -370,5 +373,9 @@ class CommitsController < ApplicationController
     end
     return str.force_encoding(file.encoding) if file.encoding
     str
+  end
+
+  def commit_params
+    params.require(:commit).permit(*COMMIT_ATTRIBUTES)
   end
 end

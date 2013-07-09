@@ -77,7 +77,7 @@ module Views
                          options_for_select(@project.commits.
                                                 order('committed_at DESC').
                                                 map { |c| ["#{c.revision[0, 6]}: #{truncate c.message}", c.id] }.
-                         unshift(['all commits', nil]), preselected_commit.try(:id))
+                         unshift(['all commits', nil]), preselected_commit.try!(:id))
             end
             div(class: 'row-fluid') do
               div(class: 'form-inline span11') do

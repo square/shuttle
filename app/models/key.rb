@@ -75,7 +75,7 @@
 class Key < ActiveRecord::Base
   belongs_to :project, inverse_of: :keys
   has_many :translations, inverse_of: :key, dependent: :delete_all
-  has_and_belongs_to_many :commits, uniq: true
+  has_and_belongs_to_many :commits, -> { uniq }
 
   include HasMetadataColumn
   has_metadata_column(
@@ -125,12 +125,8 @@ class Key < ActiveRecord::Base
 
   before_validation(on: :create) { |obj| obj.original_key ||= obj.key }
 
-  attr_accessible :importer, :fencers, :source, :key, :original_key, :context,
-                  :other_data, :skip_readiness_hooks, :skip_sha_check,
-                  :source_copy, as: :system
-
   scope :in_blob, ->(blob) { where(project_id: blob.project_id, sha_raw: blob.sha_raw) }
-  scope :by_key, order('key_prefix ASC')
+  scope :by_key, -> { order('key_prefix ASC') }
 
   # @private
   def as_json(options=nil)

@@ -131,14 +131,6 @@ class Project < ActiveRecord::Base
   after_update :add_or_remove_pending_translations
   after_update :recalculate_commit_readiness
 
-  attr_accessible :name, :repository_url, :base_rfc5646_locale, :skip_imports,
-                  :due_date, :key_exclusions, :key_inclusions,
-                  :targeted_rfc5646_locales, :key_locale_exclusions,
-                  :key_locale_inclusions, :skip_paths, :only_paths,
-                  :only_importer_paths, :skip_importer_paths,
-                  :cache_localization, :cache_manifest_formats,
-                  :watched_branches, :webhook_url, as: :user
-
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
@@ -205,12 +197,10 @@ class Project < ActiveRecord::Base
       commits.for_revision(commit_object.sha).first!
     else
       commits.for_revision(commit_object.sha).
-          find_or_create!({
-                              revision:     commit_object.sha,
-                              message:      commit_object.message,
-                              committed_at: commit_object.author.date,
-                              skip_import:  options[:skip_import],
-                          }, as: :system) do |c|
+          find_or_create!(revision:     commit_object.sha,
+                          message:      commit_object.message,
+                          committed_at: commit_object.author.date,
+                          skip_import:  options[:skip_import]) do |c|
         options[:other_fields].each do |field, value|
           c.send :"#{field}=", value
         end if options[:other_fields]

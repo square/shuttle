@@ -73,13 +73,13 @@ describe GlossaryEntriesController do
       ge
     end
     it "should only update reviewer_id if that was approved was passed as a param." do
-      put(:update, id: entry.id, copy: "goodbye", locale_id: 'fr')
+      patch :update, id: entry.id, copy: "goodbye", locale_id: 'fr'
       entry.reload
       entry.copy.should == "goodbye"
       entry.approved.should == nil
       entry.reviewer_id.should == nil
 
-      put(:update, id: entry.id, copy: "goodbye", approved: "true", review: true, locale_id: 'fr')
+      patch :update, id: entry.id, copy: "goodbye", approved: "true", review: true, locale_id: 'fr'
       entry.reload
       entry.approved.should == true
       entry.reviewer_id.should == @user.id

@@ -50,12 +50,12 @@ describe TranslationsController do
     end
 
     it "should update the translation and set the translator" do
-      put :update,
-          project_id:  @translation.key.project.to_param,
-          key_id:      @translation.key.to_param,
-          id:          @translation.to_param,
-          translation: {copy: 'hello!'},
-          format:      'json'
+      patch :update,
+            project_id:  @translation.key.project.to_param,
+            key_id:      @translation.key.to_param,
+            id:          @translation.to_param,
+            translation: {copy: 'hello!'},
+            format:      'json'
       response.status.should eql(200)
       @translation.reload.copy.should eql('hello!')
       @translation.should be_translated
@@ -68,12 +68,12 @@ describe TranslationsController do
         @translation.translator = @user
         @translation.save!
 
-        put :update,
-            project_id:  @translation.key.project.to_param,
-            key_id:      @translation.key.to_param,
-            id:          @translation.to_param,
-            translation: {copy: ''},
-            format:      'json'
+        patch :update,
+              project_id:  @translation.key.project.to_param,
+              key_id:      @translation.key.to_param,
+              id:          @translation.to_param,
+              translation: {copy: ''},
+              format:      'json'
         response.status.should eql(200)
         @translation.reload.copy.should be_nil
         @translation.should_not be_translated
@@ -86,13 +86,13 @@ describe TranslationsController do
         @translation.copy = 'hello!'
         @translation.save!
 
-        put :update,
-            project_id:   @translation.key.project.to_param,
-            key_id:       @translation.key.to_param,
-            id:           @translation.to_param,
-            translation:  {copy: ''},
-            blank_string: '1',
-            format:       'json'
+        patch :update,
+              project_id:   @translation.key.project.to_param,
+              key_id:       @translation.key.to_param,
+              id:           @translation.to_param,
+              translation:  {copy: ''},
+              blank_string: '1',
+              format:       'json'
         response.status.should eql(200)
         @translation.reload.copy.should eql('')
         @translation.should be_translated
@@ -109,12 +109,12 @@ describe TranslationsController do
         @translation.approved   = true
         @translation.save!
 
-        put :update,
-            project_id:  @translation.key.project.to_param,
-            key_id:      @translation.key.to_param,
-            id:          @translation.to_param,
-            translation: {copy: 'bye!'},
-            format:      'json'
+        patch :update,
+              project_id:  @translation.key.project.to_param,
+              key_id:      @translation.key.to_param,
+              id:          @translation.to_param,
+              translation: {copy: 'bye!'},
+              format:      'json'
 
         response.status.should eql(200)
         @translation.reload.copy.should eql('bye!')
@@ -124,12 +124,12 @@ describe TranslationsController do
       end
 
       it "should automatically approve reviewer changes to an untranslated string" do
-        put :update,
-            project_id:  @translation.key.project.to_param,
-            key_id:      @translation.key.to_param,
-            id:          @translation.to_param,
-            translation: {copy: 'bye!'},
-            format:      'json'
+        patch :update,
+              project_id:  @translation.key.project.to_param,
+              key_id:      @translation.key.to_param,
+              id:          @translation.to_param,
+              translation: {copy: 'bye!'},
+              format:      'json'
 
         response.status.should eql(200)
         @translation.reload.copy.should eql('bye!')
@@ -143,12 +143,12 @@ describe TranslationsController do
         @translation.translator = translator = FactoryGirl.create(:user, role: 'translator')
         @translation.save!
 
-        put :update,
-            project_id:  @translation.key.project.to_param,
-            key_id:      @translation.key.to_param,
-            id:          @translation.to_param,
-            translation: {copy: 'hello!'},
-            format:      'json'
+        patch :update,
+              project_id:  @translation.key.project.to_param,
+              key_id:      @translation.key.to_param,
+              id:          @translation.to_param,
+              translation: {copy: 'hello!'},
+              format:      'json'
 
         response.status.should eql(200)
         @translation.reload.copy.should eql('hello!')
@@ -165,12 +165,12 @@ describe TranslationsController do
         @translation.approved = true
         @translation.save!
 
-        put :update,
-            project_id:  @translation.key.project.to_param,
-            key_id:      @translation.key.to_param,
-            id:          @translation.to_param,
-            translation: {copy: 'bar'},
-            format:      'json'
+        patch :update,
+              project_id:  @translation.key.project.to_param,
+              key_id:      @translation.key.to_param,
+              id:          @translation.to_param,
+              translation: {copy: 'bar'},
+              format:      'json'
 
         response.status.should eql(403)
         @translation.reload.copy.should eql('foo')
@@ -183,12 +183,12 @@ describe TranslationsController do
         @translation.approved = true
         @translation.save!
 
-        put :update,
-            project_id:  @translation.key.project.to_param,
-            key_id:      @translation.key.to_param,
-            id:          @translation.to_param,
-            translation: {copy: 'bar'},
-            format:      'json'
+        patch :update,
+              project_id:  @translation.key.project.to_param,
+              key_id:      @translation.key.to_param,
+              id:          @translation.to_param,
+              translation: {copy: 'bar'},
+              format:      'json'
 
         response.status.should eql(200)
         @translation.reload.copy.should eql('bar')
@@ -201,12 +201,12 @@ describe TranslationsController do
         @translation.approved = true
         @translation.save!
 
-        put :update,
-            project_id:  @translation.key.project.to_param,
-            key_id:      @translation.key.to_param,
-            id:          @translation.to_param,
-            translation: {copy: 'bar'},
-            format:      'json'
+        patch :update,
+              project_id:  @translation.key.project.to_param,
+              key_id:      @translation.key.to_param,
+              id:          @translation.to_param,
+              translation: {copy: 'bar'},
+              format:      'json'
 
         response.status.should eql(200)
         @translation.reload.copy.should eql('bar')
@@ -227,10 +227,10 @@ describe TranslationsController do
     end
 
     it "should approve the translation and set the reviewer" do
-      put :approve,
-          project_id: @translation.key.project.to_param,
-          key_id:     @translation.key.to_param,
-          id:         @translation.to_param
+      patch :approve,
+            project_id: @translation.key.project.to_param,
+            key_id:     @translation.key.to_param,
+            id:         @translation.to_param
 
       @translation.reload.approved.should eql(true)
       @translation.reviewer.should eql(@user)
@@ -249,10 +249,10 @@ describe TranslationsController do
     end
 
     it "should reject the translation and set the reviewer" do
-      put :reject,
-          project_id: @translation.key.project.to_param,
-          key_id:     @translation.key.to_param,
-          id:         @translation.to_param
+      patch :reject,
+            project_id: @translation.key.project.to_param,
+            key_id:     @translation.key.to_param,
+            id:         @translation.to_param
 
       @translation.reload.approved.should eql(false)
       @translation.reviewer.should eql(@user)

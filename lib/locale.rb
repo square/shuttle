@@ -40,7 +40,7 @@ class Locale
   # @private
   RFC5646_PRIVATE   = /x(?<privates>(-[a-zA-Z0-9]{1,8}){1,})/
   # @private
-  RFC5646_FORMAT    = /^#{RFC5646_LANGUAGE.source}(-#{RFC5646_SCRIPT.source})?(-#{RFC5646_REGION.source})?(?<variants>(-#{RFC5646_VARIANT.source})*)(?<extensions>(-#{RFC5646_EXTENSION.source})*)(-#{RFC5646_PRIVATE.source})?$/
+  RFC5646_FORMAT    = /\A#{RFC5646_LANGUAGE.source}(-#{RFC5646_SCRIPT.source})?(-#{RFC5646_REGION.source})?(?<variants>(-#{RFC5646_VARIANT.source})*)(?<extensions>(-#{RFC5646_EXTENSION.source})*)(-#{RFC5646_PRIVATE.source})?\z/
 
   # @return [String] The ISO 639 code for the base language (e.g., "de" for
   #   German).
@@ -149,10 +149,10 @@ class Locale
 
   # @private
   def initialize(iso639, script=nil, extlang=nil, region=nil, variants=[], extensions=[])
-    @iso639            = iso639.try(:downcase)
-    @region            = region.try(:upcase)
+    @iso639            = iso639.try!(:downcase)
+    @region            = region.try!(:upcase)
     @variants          = variants.map(&:downcase)
-    @extended_language = extlang.try(:downcase)
+    @extended_language = extlang.try!(:downcase)
     @extensions        = extensions
     @script            = script
   end

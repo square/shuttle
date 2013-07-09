@@ -27,7 +27,7 @@ module Localizer
       file_locale   = Locale.new(qualifiers['language'] || project.base_locale.iso639,
                                  nil,
                                  nil,
-                                 qualifiers['region'].try(:[], 1, 2) || project.base_locale.region)
+                                 qualifiers['region'].try!(:[], 1, 2) || project.base_locale.region)
 
       file_locale == project.base_locale && FILENAMES.include?(::File.basename(path))
     end

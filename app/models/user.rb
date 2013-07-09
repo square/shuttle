@@ -102,13 +102,6 @@ class User < ActiveRecord::Base
             inclusion: {in: ROLES},
             allow_nil: true
 
-  attr_accessible :email, :password, :password_confirmation, :remember_me,
-                  :first_name, :last_name, as: :user
-  attr_accessible :email, :password, :password_confirmation, :remember_me,
-                  :first_name, :last_name
-  attr_accessible :first_name, :last_name, :role, :password,
-                  :password_confirmation, :approved_rfc5646_locales, as: :admin
-
   # @private Used by Devise.
   def active_for_authentication?() super && role? end
 
