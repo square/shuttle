@@ -29,27 +29,27 @@ describe Project do
     before(:all) { @project = FactoryGirl.create(:project) }
 
     before :each do
-      @repo = mock('Git::Repo')
+      @repo = double('Git::Repo')
       # for GitObjectField checking
-      Project.any_instance.stub(:repo).and_return(mock('Git::Repo', object: mock('Git::Object::Commit', :commit? => true)))
+      Project.any_instance.stub(:repo).and_return(double('Git::Repo', object: double('Git::Object::Commit', :commit? => true)))
       # for commit! creation
-      @project.stub!(:repo).and_yield(@repo)
-      @commit_obj = mock('Git::Object::Commit',
+      @project.stub(:repo).and_yield(@repo)
+      @commit_obj = double('Git::Object::Commit',
                          sha:     'a4b6dd88498817d4947730c7964a1a14c8f13d91',
                          message: 'foo',
-                         author:  mock('Git::Author', date: Time.now))
+                         author:  double('Git::Author', date: Time.now))
       Commit.any_instance.stub(:import_strings)
     end
 
     it "should return an existing commit" do
       commit = FactoryGirl.create(:commit, project: @project, revision: 'a4b6dd88498817d4947730c7964a1a14c8f13d91')
-      @repo.stub!(:fetch)
+      @repo.stub(:fetch)
       @repo.should_receive(:object).with('abc123').and_return(@commit_obj)
       @project.commit!('abc123').should eql(commit)
     end
 
     it "should create a new commit" do
-      @repo.stub!(:fetch)
+      @repo.stub(:fetch)
       @repo.should_receive(:object).with('abc123').and_return(@commit_obj)
       commit = @project.commit!('abc123')
       commit.should be_kind_of(Commit)

@@ -23,7 +23,7 @@ describe Blob do
 
     it "should call #import on an importer subclass" do
       imp = Importer::Base.implementations
-      instance = mock(imp.to_s, :skip? => false)
+      instance = double(imp.to_s, :skip? => false)
       imp.should_receive(:new).once.with(@blob, 'some/path', nil).and_return(instance)
       instance.should_receive(:import).once
       @blob.import_strings imp, 'some/path'
@@ -32,7 +32,7 @@ describe Blob do
     it "should pass a commit if given using :commit" do
       commit = FactoryGirl.create(:commit, project: @project)
       imp = Importer::Base.implementations.first
-      instance = mock(imp.to_s, :skip? => false)
+      instance = double(imp.to_s, :skip? => false)
       imp.should_receive(:new).once.with(@blob, 'some/path', commit).and_return(instance)
       instance.should_receive(:import).once
       @blob.import_strings imp, 'some/path', commit: commit

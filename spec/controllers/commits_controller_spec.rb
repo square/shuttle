@@ -370,7 +370,7 @@ de:
 
       Git::Base.any_instance.stub(:object).and_call_original
       Git::Base.any_instance.stub(:object).with('2dc20c984283bede1f45863b8f3b4dd9b5b554cc^{tree}:file-en.svg').
-          and_return(mock('Git::Object::Blob', contents: @svg))
+          and_return(double('Git::Object::Blob', contents: @svg))
     end
 
     it "should create a tarball of localized files" do
