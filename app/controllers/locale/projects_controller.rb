@@ -40,7 +40,7 @@ class Locale::ProjectsController < ApplicationController
   # | `locale_id` | The RFC 5646 code for a locale. |
 
   def index
-    respond_with(@projects = Project.to_a.select { |p| p.targeted_rfc5646_locales.include? @locale.rfc5646 }) do |format|
+    respond_with(@projects = Project.scoped.to_a.select { |p| p.targeted_rfc5646_locales.include? @locale.rfc5646 }) do |format|
       format.json { render json: decorate(@projects).to_json }
     end
   end
