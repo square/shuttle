@@ -562,7 +562,7 @@ de:
       @user.update_attribute :role, 'monitor'
       delete :destroy, project_id: @commit.project.to_param, id: @commit.to_param, format: 'json'
       response.status.should eql(403)
-      -> { @commit.reload }.should_not raise_error(ActiveRecord::RecordNotFound)
+      -> { @commit.reload }.should_not raise_error
     end
 
     it "should delete a commit" do
