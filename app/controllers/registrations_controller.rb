@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 # Overrides Devise's registrations controller to redirect to the login page
-# after a user signs up.
+# after a user signs up, and work with strong parameters.
 
 class RegistrationsController < Devise::RegistrationsController
   protected
@@ -21,5 +21,17 @@ class RegistrationsController < Devise::RegistrationsController
   # @private
   def after_inactive_sign_up_path_for(resource)
     new_user_session_url
+  end
+
+  # @private
+  def sign_up_params
+    params.require(:user).permit(:email, :first_name, :last_name, :password,
+                                 :password_confirmation)
+  end
+
+  # @private
+  def account_update_params
+    params.require(:user).permit(:first_name, :last_name, :password,
+                                 :password_confirmation)
   end
 end
