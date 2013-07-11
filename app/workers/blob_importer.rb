@@ -35,6 +35,14 @@ class BlobImporter
       locale   = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
       project  = Project.find(project_id)
       blob     = project.blobs.with_sha(sha).first!
+
+      if blob.blob.nil?
+        # for whatever reason sometimes the blob is not accessible; try again in
+        # 5 minutes
+        commit.add_worker! BlobImporter.perform_in(5.minutes, importer, project_id, sha, path, commit_id, rfc5646_locale)
+        return
+      end
+
       importer = Importer::Base.find_by_ident(importer)
 
       blob.import_strings importer,
