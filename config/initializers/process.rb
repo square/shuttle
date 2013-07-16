@@ -12,10 +12,21 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-set :output, '/app/shuttle/shared/log/whenever.log'
+# Adds additional helpers to Process.
 
-every(30.minutes) { runner 'AutoImporter.perform_once' }
+module Process
 
-# god damn it why must it come to this
-every(1.hour) { rake 'maintenance:fix_hung_commits' }
-every(1.hour) { rake 'maintenance:clear_stale_lockfiles' }
+  # Checks if a PID refers to a running process.
+  #
+  # @param [Fixnum] pid A process ID.
+  # @return [true, false] Whether a process with that PID is running.
+
+  def self.exist?(pid)
+    begin
+      Process.getpgid pid
+      true
+    rescue Errno::ESRCH
+      false
+    end
+  end
+end
