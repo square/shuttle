@@ -12,6 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+module Sidekiq::Util
+
+  # Restore the presence of the process ID in the Sidekiq worker string. We need
+  # this to find and kill dead lockfiles.
+  def process_id() Process.pid end
+end
+
 configure_sidekiq = -> do
   Sidekiq.configure_client do |config|
     config.redis = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).

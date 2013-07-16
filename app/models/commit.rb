@@ -353,6 +353,26 @@ class Commit < ActiveRecord::Base
   # @private
   def redis_memoize_key() to_param end
 
+  # @return [true, false] True if there are cached Sidekiq job IDs of
+  #   in-progress BlobImporters that do not actually exist anymore.
+
+  def broken?
+    cached_jids = Shuttle::Redis.smembers("import:#{revision}")
+    return false if cached_jids.empty?
+    actual_jids = self.class.workers.map { |w| w['jid'] }
+    (cached_jids & actual_jids).empty? # none of the cached JIDs actually exist anymore
+  end
+
+  # @private Shanghai'd from Sidekiq::Web
+  def self.workers
+    Sidekiq.redis do |conn|
+      conn.smembers('workers').map do |w|
+        msg = conn.get("worker:#{w}")
+        msg ? Sidekiq.load_json(msg) : nil
+      end.compact
+    end
+  end
+
   private
 
   def load_message
