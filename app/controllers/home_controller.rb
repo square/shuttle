@@ -88,7 +88,7 @@ class HomeController < ApplicationController
     end
 
     @locales = if params[:locales].present?
-                 params[:locales].split(',').map { |l| Locale.from_rfc5646 l }
+                 params[:locales].split(',').map { |l| Locale.from_rfc5646 l }.compact
                else
                  []
                end
