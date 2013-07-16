@@ -145,7 +145,10 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :role, :password,
-                                 :password_confirmation, :approved_rfc5646_locales)
+    # too hard to do this with strong parameters :(
+    params[:user].to_hash.slice(*%w(
+        first_name last_name role password password_confirmation
+        approved_rfc5646_locales
+    ))
   end
 end
