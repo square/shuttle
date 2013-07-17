@@ -12,7 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Set up gems listed in the Gemfile.
-ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)
+require 'securerandom'
 
-require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
+# Create a default admin user
+
+password  = 'password123'
+user      = User.new(email:                 'admin@example.com',
+                     first_name:            "Admin",
+                     last_name:             "User",
+                     password:              password,
+                     password_confirmation: password)
+user.role = 'admin'
+user.save!
+puts "Admin login is #{user.email} / #{password}"
