@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 # FRAMEWORK
 gem 'rails', '>= 4.0'
+gem 'configoro'
 
 # AUTHENTICATION
 gem 'devise', github: 'plataformatec/devise'
@@ -74,7 +75,6 @@ group :development, :test do
 end
 
 # SQUARE
-gem 'configoro'
 gem 'squash_ruby', require: 'squash/ruby'
 gem 'squash_logcreate', git: 'https://git.squareup.com/square/squash_logcreate.git'
 gem 'squash_rails', require: 'squash/rails'

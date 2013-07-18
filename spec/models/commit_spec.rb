@@ -86,6 +86,22 @@ describe Commit do
       end
     end
 
+    context "[mail hooks]" do
+      before { @commit = FactoryGirl.create(:commit) }
+
+      it "sends email when loading changes to false from true" do
+        @commit.update_attribute :loading, true
+        ActionMailer::Base.deliveries.clear
+        @commit.loading = false
+        @commit.save!
+        ActionMailer::Base.deliveries.size.should eql(1)
+        email = ActionMailer::Base.deliveries.first
+        email.to.should eql([Shuttle::Configuration.mailer.translators_list])
+        email.subject.should eql('[Shuttle] New commit ready for translation')
+        email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
+      end
+    end
+
     it "should import strings" do
       Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
       project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
