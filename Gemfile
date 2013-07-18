@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 # FRAMEWORK
 gem 'rails', '>= 4.0'
+gem 'configoro'
 
 # AUTHENTICATION
 gem 'devise', github: 'plataformatec/devise'

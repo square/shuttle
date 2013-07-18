@@ -240,3 +240,7 @@ en:
       name: SVG file
     xib:
       name: Apple XIB file
+  mailer:
+    commit:
+      notify_translators:
+        subject: "[Shuttle] New commit ready for translation"
