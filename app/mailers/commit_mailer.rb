@@ -29,4 +29,18 @@ class CommitMailer < ActionMailer::Base
     @commit = commit
     mail to: Shuttle::Configuration.mailer.translators_list, subject: t('mailer.commit.notify_translators.subject')
   end
+
+  # Notifies the user who submitted the Commit that the translators have
+  # finished translating. An email will only be sent if the Commit has a User
+  # associated with it.
+  #
+  # @param [Commit] commit The Commit that has been translated.
+  # @return [Mail::Message] The email to be delivered.
+
+  def notify_translation_finished(commit)
+    @commit = commit
+    if @commit.user.try!(:email)
+      mail to: @commit.user.email, subject: t('mailer.commit.notify_translation_finished.subject')
+    end
+  end
 end
