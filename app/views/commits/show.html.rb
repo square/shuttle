@@ -27,7 +27,14 @@ module Views
 
       def body_content
         article(class: 'container') do
-          page_header "Status of commit #{@commit.revision}"
+          page_header do
+            h1 "Status of commit #{@commit.revision}"
+            button_to 'Delete', project_commit_url(@project, @commit),
+                      'data-method' => :delete,
+                      id: 'delete_button',
+                      'data-confirm' => 'Do you really want to delete this commit?',
+                      class: 'btn btn-danger pull-right'
+          end
           filter_bar
           translation_grid
         end

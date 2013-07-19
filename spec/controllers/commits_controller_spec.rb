@@ -558,8 +558,8 @@ de:
       sign_in @user
     end
 
-    it "should require an administrator" do
-      @user.update_attribute :role, 'monitor'
+    it "should require a monitor" do
+      @user.update_attribute :role, 'translator'
       delete :destroy, project_id: @commit.project.to_param, id: @commit.to_param, format: 'json'
       response.status.should eql(403)
       -> { @commit.reload }.should_not raise_error
