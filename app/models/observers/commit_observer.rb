@@ -32,7 +32,8 @@ class CommitObserver < ActiveRecord::Observer
   def send_email(commit)
     if commit.loading_was == true && commit.loading == false
       CommitMailer.notify_translators(commit).deliver
-    elsif commit.ready_was == false && commit.ready == true
+    end
+    if commit.ready_was == false && commit.ready == true && commit.loading == false
       CommitMailer.notify_translation_finished(commit).deliver
     end
   end

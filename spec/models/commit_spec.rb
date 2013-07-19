@@ -113,12 +113,12 @@ describe Commit do
         email.body.to_s.should include(@commit.revision.to_s)
       end
 
-      it "no email is sent when ready changes to true from false if the commit has no user or the user has no email" do
+      it "should not send an email when ready changes to true from false if the commit has no user or the user has no email" do
         @commit = FactoryGirl.create(:commit, ready: false)
         ActionMailer::Base.deliveries.clear
         @commit.ready = true
         @commit.save!
-        ActionMailer::Base.deliveries.size.should eql(0)
+        ActionMailer::Base.deliveries.should be_empty
       end
     end
 
