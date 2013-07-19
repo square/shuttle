@@ -244,3 +244,5 @@ en:
     commit:
       notify_translators:
         subject: "[Shuttle] New commit ready for translation"
+      notify_translation_finished:
+        subject: "[Shuttle] Finished translation of commit"

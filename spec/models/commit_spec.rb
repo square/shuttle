@@ -87,10 +87,10 @@ describe Commit do
     end
 
     context "[mail hooks]" do
-      before { @commit = FactoryGirl.create(:commit) }
+
 
       it "sends email when loading changes to false from true" do
-        @commit.update_attribute :loading, true
+        @commit = FactoryGirl.create(:commit, loading: true)
         ActionMailer::Base.deliveries.clear
         @commit.loading = false
         @commit.save!
@@ -99,6 +99,26 @@ describe Commit do
         email.to.should eql([Shuttle::Configuration.mailer.translators_list])
         email.subject.should eql('[Shuttle] New commit ready for translation')
         email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
+      end
+
+      it "sends email when ready changes to true from false" do
+        @commit = FactoryGirl.create(:commit, ready: false, user: FactoryGirl.create(:user))
+        ActionMailer::Base.deliveries.clear
+        @commit.ready = true
+        @commit.save!
+        ActionMailer::Base.deliveries.size.should eql(1)
+        email = ActionMailer::Base.deliveries.first
+        email.to.should eql([@commit.user.email])
+        email.subject.should eql('[Shuttle] Finished translation of commit')
+        email.body.to_s.should include(@commit.revision.to_s)
+      end
+
+      it "should not send an email when ready changes to true from false if the commit has no user or the user has no email" do
+        @commit = FactoryGirl.create(:commit, ready: false)
+        ActionMailer::Base.deliveries.clear
+        @commit.ready = true
+        @commit.save!
+        ActionMailer::Base.deliveries.should be_empty
       end
     end
 
