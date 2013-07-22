@@ -20,14 +20,17 @@ class CommitMailer < ActionMailer::Base
   default from: Shuttle::Configuration.mailer.from
 
   # Notifies all of the translators on the translators' mailing list that there is a new commit
-  # that has finished loading.
+  # that has finished loading. CC's the creator of the commit.
   #
   # @param [Commit] commit The commit that has finished loading.
   # @return [Mail::Message] The email to be delivered.
 
   def notify_translators(commit)
     @commit = commit
-    mail to: Shuttle::Configuration.mailer.translators_list, subject: t('mailer.commit.notify_translators.subject')
+
+    mail to:      Shuttle::Configuration.mailer.translators_list,
+         subject: t('mailer.commit.notify_translators.subject'),
+         cc:      @commit.user.try!(:email)
   end
 
   # Notifies the user who submitted the Commit that the translators have
