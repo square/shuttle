@@ -89,23 +89,30 @@ describe Commit do
     context "[mail hooks]" do
 
 
-      it "sends two emails when loading changes to false from true" do
+      it "sends an email to the translators and cc's the user when loading changes to false from true" do
         @commit = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user))
         ActionMailer::Base.deliveries.clear
         @commit.loading = false
         @commit.save!
-        ActionMailer::Base.deliveries.size.should eql(2)
+        ActionMailer::Base.deliveries.size.should eql(1)
         email = ActionMailer::Base.deliveries.first
         email.to.should eql([Shuttle::Configuration.mailer.translators_list])
-        email.subject.should eql('[Shuttle] New commit ready for translation')
-        email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
-        email = ActionMailer::Base.deliveries.last
-        email.to.should eql([@commit.user.email])
+        email.cc.should eql([@commit.user.email])
         email.subject.should eql('[Shuttle] New commit ready for translation')
         email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
       end
 
-      it "sends one email to the translators when loading changes to false if the commit has no user"
+      it "sends one email to the translators when loading changes to false if the commit has no user" do
+        @commit = FactoryGirl.create(:commit, loading: true)
+        ActionMailer::Base.deliveries.clear
+        @commit.loading = false
+        @commit.save!
+        ActionMailer::Base.deliveries.size.should eql(1)
+        email = ActionMailer::Base.deliveries.first
+        email.to.should eql([Shuttle::Configuration.mailer.translators_list])
+        email.subject.should eql('[Shuttle] New commit ready for translation')
+        email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
+      end
 
       it "sends email when ready changes to true from false" do
         @commit = FactoryGirl.create(:commit, ready: false, user: FactoryGirl.create(:user))
