@@ -20,7 +20,7 @@ class CommitMailer < ActionMailer::Base
   default from: Shuttle::Configuration.mailer.from
 
   # Notifies all of the translators on the translators' mailing list that there is a new commit
-  # that has finished loading.
+  # that has finished loading. CC's the creator of the commit.
   #
   # @param [Commit] commit The commit that has finished loading.
   # @return [Mail::Message] The email to be delivered.
@@ -34,7 +34,7 @@ class CommitMailer < ActionMailer::Base
   end
 
   # Notifies the user who sent the commit that the translators have finished translating the commit.
-  # An email will only be sent if the commit has a user associated with it, and if that user has an email address stored.
+  # An email will only be sent if the commit has a user associated with it.
   #
   # @param [Commit] commit The commit that has been translated.
   # @return [Mail::Message] The email to be delivered.
