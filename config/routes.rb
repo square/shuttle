@@ -52,6 +52,9 @@ Shuttle::Application.routes.draw do
     member { post :become }
   end
 
+  resources :translation_units, only: [:index, :edit, :update, :destroy] do
+  end
+
   get 'substitute' => 'substitution#convert'
 
   get 'search' => 'search#index', as: :search

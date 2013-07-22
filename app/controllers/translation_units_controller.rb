@@ -1,0 +1,2 @@
+class TranslationUnitsController < ApplicationController
+end
