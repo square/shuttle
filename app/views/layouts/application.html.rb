@@ -120,6 +120,7 @@ module Views
                     tab "Projects", 'admin', administrators_url if current_user
                     tab "Glossary", 'glossary', glossary_url if current_user.translator?
                     tab "Users", 'users', users_url if current_user.admin?
+                    tab "Translations Memory", 'translation_units', translation_units_url if current_user.translator?
                     tab "Log Out", 'logout', destroy_user_session_url, :'data-method' => 'delete'
                   end
                 else
