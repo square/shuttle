@@ -32,7 +32,7 @@ gem 'httparty'
 gem 'therubyracer', platform: :mri, require: 'v8'
 gem 'nokogiri'
 gem 'CFPropertyList', require: 'cfpropertylist'
-gem 'treetop'
+gem 'parslet'
 
 # EXPORTING
 gem 'libarchive'
