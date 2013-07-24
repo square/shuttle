@@ -16,4 +16,27 @@ require 'spec_helper'
 
 describe ProjectsController do
   pending "Write specs" #TODO
+
+  describe '#github_webhook' do
+    before :all do
+      @user = FactoryGirl.create(:user, role: 'monitor')
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    watched_branches: [ 'master' ])
+    end
+
+    before :each do
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in @user
+      @request.accept = "application/json"
+      post :github_webhook, { id: @project.to_param, payload: "{\"ref\":\"refs/head/master\",\"after\":\"HEAD\"}" }
+    end
+
+    it "should return 200 and create a github commit for the current user" do
+      response.status.should eql(200)
+      @project.commits.first.user.should eql(@user)
+      @project.commits.first.description.should eql('github webhook')
+    end
+  end
 end
