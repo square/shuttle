@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Copyright 2013 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +39,7 @@ module Localizer
 
       @translations.each do |translation|
         xpath                             = translation.key.key.sub(/^#{Regexp.escape translation.key.source}:/, '')
-        xml.xpath(xpath).first.inner_html = translation.copy
+        xml.xpath(xpath).first.inner_html = process_copy(translation.copy)
       end
 
       # build a path, replacing the parent directory with the correct qualifiers
@@ -49,6 +51,13 @@ module Localizer
       output_file.path = path.join('/')
 
       output_file.content = xml.to_xml
+    end
+
+    private
+
+    def process_copy(copy)
+      # fix bug with smart quotes in Roboto font
+      copy.gsub('’', "'")
     end
   end
 end
