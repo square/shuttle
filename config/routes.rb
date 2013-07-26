@@ -38,6 +38,10 @@ Shuttle::Application.routes.draw do
         end
       end
     end
+
+    member do
+      post 'pull-request-builder' => 'projects#github_webhook'
+    end
   end
 
   resources :locales, only: :index do

@@ -169,6 +169,42 @@ class ProjectsController < ApplicationController
     respond_with @project, location: administrators_url
   end
 
+  # Receives a github webhook and triggers a new import for the latest commit.
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:id/pull-request-builder`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                   |
+  # |:-----|:------------------|
+  # | `id` | A Project's slug. |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |           |                                                          |
+  # |:----------|----------------------------------------------------------|
+  # | `payload` | See: https://help.github.com/articles/post-receive-hooks |
+
+  def github_webhook
+    payload = JSON.parse(params[:payload])
+    requested_branch = payload['ref'].split('/').last
+    branch_is_valid = @project.watched_branches.include? requested_branch
+    if branch_is_valid
+      revision = payload['after']
+      other_fields = { description: 'github webhook', user_id: current_user.id }
+      CommitCreator.perform_once @project.id, revision, other_fields: other_fields
+    end
+    respond_to do |format|
+      format.json do
+        render status: :ok, json: { success: branch_is_valid }
+      end
+    end
+  end
 
   private
 
