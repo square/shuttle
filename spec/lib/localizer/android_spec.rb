@@ -31,12 +31,13 @@ describe Localizer::Android do
         '/java/basic-hdpi/strings.xml:/resources/string[5]'               => "Hallo 'Welt'",
         '/java/basic-hdpi/strings.xml:/resources/string[6]'               => 'dd/MM/yyyy',
         '/java/basic-hdpi/strings.xml:/resources/string[7]'               => 'Hallo!',
+        '/java/basic-hdpi/strings.xml:/resources/string[8]'               => '‘guillemets’',
         '/java/basic-hdpi/strings.xml:/resources/string-array[1]/item[1]' => 'Hallo',
         '/java/basic-hdpi/strings.xml:/resources/string-array[1]/item[2]' => 'Welt',
         '/java/basic-hdpi/strings.xml:/resources/string-array[2]/item[1]' => 'Hallo',
         '/java/basic-hdpi/strings.xml:/resources/string-array[2]/item[2]' => 'Welt',
         '/java/basic-hdpi/strings.xml:/resources/plurals/item[1]'         => 'Welt',
-        '/java/basic-hdpi/strings.xml:/resources/plurals/item[2]'         => 'Welten',
+        '/java/basic-hdpi/strings.xml:/resources/plurals/item[2]'         => 'Welten'
     }.each do |key, value|
       key_obj = FactoryGirl.create(:key, key: key, project: @project, source: '/java/basic-hdpi/strings.xml')
       FactoryGirl.create :translation, key: key_obj, copy: value, source_locale: @en, locale: @de
@@ -67,6 +68,7 @@ describe Localizer::Android do
 	-->
   <string name="with_context">MM/dd/yyyy</string>
   <string name="attributed_string" formatted="false">Hello!</string>
+  <string name="smart_quotes">‘smart’ quotes</string>
   <string-array name="attributed_array">
 	<item>Hello</item>
 	<item formatted="false">World</item>
@@ -100,6 +102,7 @@ describe Localizer::Android do
 	-->
   <string name="with_context">dd/MM/yyyy</string>
   <string name="attributed_string" formatted="false">Hallo!</string>
+  <string name="smart_quotes">‘guillemets'</string>
   <string-array name="attributed_array">
 	<item>Hallo</item>
 	<item formatted="false">Welt</item>
