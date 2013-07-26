@@ -33,7 +33,7 @@ describe SearchableField do
   it "should use a custom :language option" do
     k = FactoryGirl.create(:key, key: "Some key")
     Key.connection.should_receive(:exec_update).once.with(/TO_TSVECTOR\('simple', /, anything, anything).and_call_original
-    Key.connection.should_receive(:exec_update).any_number_of_times.and_call_original
+    Key.connection.stub(:exec_update).and_call_original
     #TODO implementation detail in spec
     k.reload.update_attribute :original_key, "New key"
   end
@@ -41,7 +41,7 @@ describe SearchableField do
   it "should use a custom :language_from option" do
     t = FactoryGirl.create(:translation, rfc5646_locale: 'de-DE', copy: "Searchable copy")
     Translation.connection.should_receive(:exec_update).once.with(/TO_TSVECTOR\('french', /, anything, anything).and_call_original
-    Key.connection.should_receive(:exec_update).any_number_of_times.and_call_original
+    Key.connection.stub(:exec_update).and_call_original
     #TODO implementation detail in spec
     t.copy = "New copy"
     t.rfc5646_locale = 'fr-CA'
