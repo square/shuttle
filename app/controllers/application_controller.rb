@@ -141,7 +141,7 @@ class ApplicationController < ActionController::Base
   # translator.
 
   def translator_required
-    if current_user.translator?
+    if current_user.try!(:translator?)
       return true
     else
       respond_to do |format|
@@ -156,7 +156,7 @@ class ApplicationController < ActionController::Base
   # monitor.
 
   def monitor_required
-    if current_user.monitor?
+    if current_user.try!(:monitor?)
       return true
     else
       respond_to do |format|
@@ -171,7 +171,7 @@ class ApplicationController < ActionController::Base
   # reviewer.
 
   def reviewer_required
-    if current_user.reviewer?
+    if current_user.try!(:reviewer?)
       return true
     else
       respond_to do |format|
@@ -186,7 +186,7 @@ class ApplicationController < ActionController::Base
   # administrator.
 
   def admin_required
-    if current_user.admin?
+    if current_user.try!(:admin?)
       return true
     else
       respond_to do |format|

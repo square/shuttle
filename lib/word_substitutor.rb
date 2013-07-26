@@ -14,8 +14,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# encoding: utf-8
-
 # A library that converts spelling and phraseology between dialects of a
 # language using automated dictionaries. These dictionaries are stored in
 # `data/spelling`.

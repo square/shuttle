@@ -101,7 +101,7 @@ GEM
       activerecord (>= 3.1)
     font-awesome-rails (3.2.1.2)
       railties (>= 3.2, < 5.0)
-    has_metadata_column (1.1.0)
+    has_metadata_column (1.1.1)
       boolean
       rails (>= 4.0)
     highline (1.6.19)
@@ -225,7 +225,7 @@ GEM
       libv8 (~> 3.11.8.12)
       ref
     thor (0.18.1)
-    thread_safe (0.1.0)
+    thread_safe (0.1.2)
       atomic
     tilt (1.4.1)
     timeliness (0.3.7)

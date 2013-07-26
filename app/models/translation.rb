@@ -89,6 +89,7 @@ class Translation < ActiveRecord::Base
 
   after_save :recalculate_readiness, if: :apply_readiness_hooks?
   after_save :recalculate_commit_stats, if: :apply_readiness_hooks?
+  after_save :expire_affected_cached_manifests
 
   after_commit :update_translation_memory, if: :apply_readiness_hooks?
 
@@ -196,5 +197,15 @@ class Translation < ActiveRecord::Base
 
   def count_words
     self.words_count = source_copy.split(/\s+/).size
+  end
+
+  # if the translation was updated post-approval, no associated commits will
+  # have their readiness state changed (since the translation was and is still
+  # approved), and therefore, manifests that should now be stale would not be,
+  # were it not for this handy hook
+  def expire_affected_cached_manifests
+    return unless copy_changed? && approved? && !approved_changed?
+    # clear out existing cache entries if present
+    TranslationCachedManifestExpirer.perform_once self.id
   end
 end

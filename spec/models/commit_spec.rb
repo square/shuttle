@@ -87,7 +87,20 @@ describe Commit do
     end
 
     context "[mail hooks]" do
-      it "sends an email when loading changes to false from true" do
+      it "sends an email to the translators and cc's the user when loading changes to false from true" do
+        @commit = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user))
+        ActionMailer::Base.deliveries.clear
+        @commit.loading = false
+        @commit.save!
+        ActionMailer::Base.deliveries.size.should eql(1)
+        email = ActionMailer::Base.deliveries.first
+        email.to.should eql([Shuttle::Configuration.mailer.translators_list])
+        email.cc.should eql([@commit.user.email])
+        email.subject.should eql('[Shuttle] New commit ready for translation')
+        email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
+      end
+
+      it "sends one email to the translators when loading changes to false if the commit has no user" do
         @commit = FactoryGirl.create(:commit, loading: true)
         ActionMailer::Base.deliveries.clear
         @commit.loading = false

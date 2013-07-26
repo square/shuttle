@@ -14,8 +14,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# encoding: utf-8
-
 FactoryGirl.define do
   factory :translation_unit do
     sequence(:source_copy) { |i| "#{i} men came to kill me one time. The best of 'em carried this. It's a Callahan full-bore autolock." }

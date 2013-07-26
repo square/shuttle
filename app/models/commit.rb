@@ -385,7 +385,6 @@ class Commit < ActiveRecord::Base
     true
   end
 
-  #TODO this does not cache across servers; would need to use S3 or something
   def compile_and_cache_or_clear(force=false)
     return unless force || ready_changed?
 
