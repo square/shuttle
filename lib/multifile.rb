@@ -50,9 +50,14 @@ module Multifile
     def add_file(path, data)
       @archive.new_entry do |entry|
         entry.pathname = path
-        entry.filetype = 0100000 # normal file
+        entry.filetype = 0100000    # normal file
         entry.size     = data.bytesize
-        entry.mode     = 0100644 # rw-r--r--
+        entry.mode     = 0100644    # rw-r--r--
+
+        entry.atime      = Time.now
+        entry.ctime      = Time.now
+        entry.mtime      = Time.now
+
         @archive.write_header entry
         @archive.write_data data
       end
