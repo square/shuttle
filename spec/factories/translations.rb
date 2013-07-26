@@ -14,8 +14,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# encoding: utf-8
-
 FactoryGirl.define do
   factory :translation do
     association :key
