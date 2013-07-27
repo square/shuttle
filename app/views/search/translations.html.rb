@@ -18,24 +18,18 @@ require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
 
 module Views
   module Search
-    class Index < Views::Layouts::Application
+    class Translations < Views::Layouts::Application
       protected
 
       def body_content
         article(class: 'container') do
           ul(class: 'nav nav-tabs') do
-            li(class: 'active') { a "Translations", href: '#translation_search', 'data-toggle' => 'tab' }
-            li { a "Keys", href: '#key_search', 'data-toggle' => 'tab' }
+            li(class: 'active') { a "Translations", href: search_translations_url }
+            li { a "Keys", href: search_keys_url }
           end
           div(class: 'tab-content') do
-            div(id: 'translation_search', class: 'tab-pane fade active in') do
-              translation_search_bar
-              translation_grid
-            end
-            div(id: 'key_search', class: 'tab-pane fade') do
-              key_search_bar
-              key_grid
-            end
+            translation_search_bar
+            translation_grid
           end
         end
       end
@@ -72,38 +66,6 @@ module Views
         table class:         'table table-striped',
               id:            'translations',
               'data-url'     => search_translations_url(format: 'json')
-      end
-
-      def key_search_bar
-        form_tag(nil, method: 'GET', id: 'key-search-form', class: 'filter form-inline') do
-          text "Show me "
-          select_tag 'filter', options_for_select(
-              [
-                  ['all', nil],
-                  ['untranslated', 'untranslated'],
-                  ['translated but not approved', 'unapproved'],
-                  ['approved', 'approved']
-              ]
-          ),         id: 'key-filter-select'
-
-          text " translations in project "
-          project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-          select_tag 'project_id', options_for_select(project_list)
-
-          text " with key substring "
-          text_field_tag 'filter', '', placeholder: 'filter by key', id: 'key-filter-field'
-          text ' '
-          submit_tag "Filter", class: 'btn btn-primary'
-        end
-      end
-
-      def key_grid
-        table class:         'table table-striped',
-              id:            'keys',
-              'data-url'     => search_keys_url(format: 'json'),
-              'data-locales' => (current_user.approved_locales.any? ? current_user.approved_locales : [::Locale.from_rfc5646('en')]).to_json,
-              'data-locale'  => 'en'
-        #TODO better locale list
       end
     end
   end

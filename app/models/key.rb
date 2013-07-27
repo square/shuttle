@@ -138,7 +138,7 @@ class Key < ActiveRecord::Base
 
     options[:except] = Array.wrap(options[:except])
     options[:except] << :key_sha_raw << :searchable_key << :metadata
-    options[:except] << :key_prefx << :project_id
+    options[:except] << :key_prefix << :project_id
     options[:except] << :source_copy_sha_raw
 
     super options
