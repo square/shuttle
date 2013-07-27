@@ -23,26 +23,19 @@ class root.GlobalSearch
   # @param [jQuery element] element A `TABLE` element to store search results
   #   in.
   # @param [String] url A URL to fetch search results from.
+  # @param [InfiniteScroll] scroll An infinite scroll manager.
 
-  constructor: (@element, @url) ->
+  constructor: (@element, @url, @scroll=null) ->
     this.setupTable()
 
   # Clears the table and fetches new search results.
   #
   # @param [String] params Query parameters to include with the URL.
 
-  refresh: (params) ->
-    $.ajax @url,
-      type: 'GET'
-      data: params
-      success: (translations) =>
-        this.setMessage()
-        if translations.length == 0
-          this.setMessage "No translations found."
-        else
-          for translation in translations
-            do (translation) => this.addTranslation(translation)
-      error: => this.setMessage("Couldn’t load translations")
+  refresh: ->
+    this.setupTable()
+    @scroll.reset()
+    @scroll.loadNextPage()
 
   # Appends a translation to the results list.
   #
