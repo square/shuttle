@@ -49,6 +49,7 @@ class InfiniteScroll
 
   reset: ->
     @end_of_scroll = false
+    @dataSource.reset()
 
   # @private
   isAtEnd: ->

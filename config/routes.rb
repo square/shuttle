@@ -58,7 +58,7 @@ Shuttle::Application.routes.draw do
 
   get 'substitute' => 'substitution#convert'
 
-  get 'search' => 'search#index', as: :search
+  get 'search' => redirect('/search/translations')
   get 'search/translations' => 'search#translations', as: :search_translations
   get 'search/keys' => 'search#keys', as: :search_keys
 
