@@ -26,7 +26,8 @@ $(window).ready ->
         do (translation) -> sr.addTranslation(translation)
     dataSourceOptions: {type: 'GET'}
 
+  sr.scroll = scroll
+
   translationSearchForm.submit ->
-    scroll.reset()
-    sr.refresh(translationSearchForm.serialize())
-    return false
+    sr.refresh()
+    false
