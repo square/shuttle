@@ -60,8 +60,8 @@ describe Localizer::Android do
   </plurals>
   <string name="excluded" translatable="false">World!</string>
   <string name="special_chars">Êtes-vous sûr\u00a0?</string>
-  <string name="quoted_escaped">"Hello \'world\'"</string>
-  <string name="unquoted_escaped">Hello \'world\'</string>
+  <string name="quoted_escaped">"Hello \\'world\\'"</string>
+  <string name="unquoted_escaped">Hello \\'world\\'</string>
   <!--
 	- This is not a date format string. Rather, it is hint text in a field,
 	- presented to the merchant.
@@ -94,15 +94,15 @@ describe Localizer::Android do
   </plurals>
   <string name="excluded" translatable="false">Welt!</string>
   <string name="special_chars">(de) Êtes-vous sûr ?</string>
-  <string name="quoted_escaped">Hallo \\'Welt\\'</string>
-  <string name="unquoted_escaped">Hallo \'Welt\'</string>
+  <string name="quoted_escaped">Hallo \\\\\\'Welt\\\\\\'</string>
+  <string name="unquoted_escaped">Hallo \\'Welt\\'</string>
   <!--
 	- This is not a date format string. Rather, it is hint text in a field,
 	- presented to the merchant.
 	-->
   <string name="with_context">dd/MM/yyyy</string>
   <string name="attributed_string" formatted="false">Hallo!</string>
-  <string name="smart_quotes">‘guillemets'</string>
+  <string name="smart_quotes">‘guillemets\\'</string>
   <string-array name="attributed_array">
 	<item>Hallo</item>
 	<item formatted="false">Welt</item>
