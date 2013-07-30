@@ -26,6 +26,7 @@ module Views
           ul(class: 'nav nav-tabs') do
             li { a "Translations", href: search_translations_url }
             li(class: 'active') { a "Keys", href: search_keys_url }
+            li { a "Translation Memory", href: translation_units_url } if current_user.reviewer?
           end
           div(class: 'tab-content') do
             key_search_bar
@@ -39,7 +40,7 @@ module Views
       private
 
       def key_search_bar
-        form_tag(search_keys_url(format: 'json'), method: 'GET', id: 'key-search-form', class: 'filter form-inline') do
+        form_tag(search_keys_url(format: 'json'), method: :get, id: 'key-search-form', class: 'filter form-inline') do
           text "Show me "
           select_tag 'filter', options_for_select(
               [

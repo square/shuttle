@@ -59,10 +59,15 @@ en:
         priority: priority
         pull_request_url: pull request URL
       translation:
-        source_rfc5646_locale: from locale
-        rfc5646_locale: to locale
-        source_copy: text
-        copy: translated text
+        source_rfc5646_locale: source locale
+        rfc5646_locale: target locale
+        source_copy: source copy
+        copy: target copy
+      translation_unit:
+        source_rfc5646_locale: source locale
+        rfc5646_locale: target locale
+        source_copy: source copy
+        copy: target text
       user:
         first_name: first name
         approved_rfc5646_locales: locale access privileges
@@ -113,6 +118,8 @@ en:
         update: Save Changes
       translation:
         create: Submit
+        update: Save Changes
+      translation_unit:
         update: Save Changes
       user:
         create: Sign Up
@@ -166,6 +173,11 @@ en:
         success: You are now using Shuttle as %{user}. To return to your account, you must log out and log in again.
         admin: You cannot become another administrator.
         admin: You cannot become another administrator.
+    translation_units:
+      destroy:
+        success: The translation memory entry was deleted.
+      update:
+        success: The translation memory entry was updated.
   models:
     user:
       name: "%{first} %{last}"

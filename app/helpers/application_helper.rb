@@ -17,6 +17,7 @@
 # Helper methods that apply to all views.
 
 module ApplicationHelper
+  LANGUAGES_FOR_COUNTRIES_HASH = YAML.load_file(Rails.root.join('data', 'locale_countries.yml').to_s)
 
   # A composition of `pluralize` and `number_with_delimiter.`
   #
@@ -27,5 +28,18 @@ module ApplicationHelper
 
   def pluralize_with_delimiter(count, singular, plural=nil)
     "#{number_with_delimiter(count) || 0} " + ((count == 1 || count =~ /^1(\.0+)?$/) ? singular : (plural || singular.pluralize))
+  end
+
+  # Given a locale, returns a path to the image that is that country's flag
+  #
+  # @param [Locale] locale The locale relating to the country we want the flag image of.
+  # @return [String, nil] The path to the flag image.
+  def locale_image_path(locale)
+    country = locale.region || LANGUAGES_FOR_COUNTRIES_HASH[locale.iso639]
+
+    return nil unless country
+    return nil unless Rails.root.join('app', 'assets', 'images', 'country-flags', country.downcase + '.png')
+
+    image_path "country-flags/#{country.downcase}.png"
   end
 end

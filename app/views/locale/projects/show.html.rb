@@ -62,7 +62,7 @@ module Views
         end
 
         def filter_bar
-          form(id: 'filter') do
+          form(id: 'filter', class: 'filter') do
             div(class: 'row-fluid') do
               input type: 'text', name: 'filter', placeholder: 'filter', class: 'span8'
               select_tag 'filter_source', options_for_select([
