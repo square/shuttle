@@ -142,5 +142,25 @@ describe SearchController do
 
       results1.first['id'].should_not eql(results2.first['id'])
     end
+
+    context "[?metadata=true]" do
+      it "should return search metadata" do
+        project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: {'en-US' => true, 'aa' => true, 'ja' => false})
+        get :keys, project_id: project.id, metadata: 'true', format: 'json'
+        response.status.should eql(200)
+        JSON.parse(response.body).
+            should eql('locales' => %w(en-US aa ja).map { |l| Locale.from_rfc5646(l).as_json.recursively(&:stringify_keys!) })
+      end
+
+      it "should respond with 404 if the project is not found" do
+        get :keys, project_id: Project.maximum(:id) + 1, metadata: 'true', format: 'json'
+        response.status.should eql(404)
+      end
+
+      it "should respond with 422 if the project is not given" do
+        get :keys, metadata: 'true', format: 'json'
+        response.status.should eql(422)
+      end
+    end
   end
 end
