@@ -30,15 +30,6 @@ ActiveRecord::Base.subclasses.each do |model|
   model.connection.execute "TRUNCATE #{model.table_name} CASCADE"
 end
 
-# Clear manifest and localize caches
-require 'fileutils'
-FileUtils.rm_rf Rails.root.join('tmp', 'cache', 'manifest', Rails.env.to_s)
-FileUtils.rm_rf Rails.root.join('tmp', 'cache', 'localize', Rails.env.to_s)
-
-                # Requires supporting ruby files with custom matchers and macros, etc,
-# in spec/support/ and its subdirectories.
-Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
-
 RSpec.configure do |config|
   # ## Mock Framework
   #
