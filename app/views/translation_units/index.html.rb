@@ -9,13 +9,19 @@ module Views
 
       def body_content
         article(class: 'container') do
-          page_header "All Translations"
-          filter_bar
-          translation_grid
+          ul(class: 'nav nav-tabs') do
+            li { a "Translations", href: search_translations_url }
+            li { a "Keys", href: search_keys_url }
+            li(class: 'active') { a "Translation Memory", href: translation_units_url }
+          end
+          div(class: 'tab-content') do
+            filter_bar
+            translation_grid
+          end
         end
       end
 
-      def active_tab() 'translation_units' end
+      def active_tab() 'search' end
 
       private
 

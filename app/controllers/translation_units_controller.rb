@@ -44,7 +44,7 @@ class TranslationUnitsController < ApplicationController
         @previous = @offset > 0
 
         @translation_units = TranslationUnit.
-            order('source_copy').
+            order('id DESC').
             offset(@offset).
             limit(TRANSLATION_UNITS_PER_PAGE)
 
@@ -62,20 +62,11 @@ class TranslationUnitsController < ApplicationController
                      :copy_query
                  end
 
-        tsc = @locale ? SearchableField::text_search_configuration(@locale) : 'english'
-
         @translation_units = if params[:keyword].present?
-                               @translation_units.send(method, params[:keyword], tsc)
+                               @translation_units.send(method, params[:keyword])
                              else
                                @translation_units.where('FALSE')
                              end
-
-        @next    = (@translation_units.count == TRANSLATION_UNITS_PER_PAGE)
-        @locales = if params[:locales].present?
-                     params[:locales].split(',').map { |l| Locale.from_rfc5646 l }.compact
-                   else
-                     []
-                   end
 
         render json: decorate(@translation_units)
       end

@@ -12,15 +12,21 @@ module Views
 
       def body_content
         article(class: 'container') do
-          page_header "Translation Unit #{@translation_unit.id}"
-          div(class: 'row-fluid') do
-            div(class: 'span6') { translation_side }
-            div(class: 'span6') { information_side }
+          ul(class: 'nav nav-tabs') do
+            li { a "Translations", href: search_translations_url }
+            li { a "Keys", href: search_keys_url }
+            li(class: 'active') { a "Translation Memory", href: translation_units_url }
+          end
+          div(class: 'tab-content') do
+            div(class: 'row-fluid') do
+              div(class: 'span6') { translation_side }
+              div(class: 'span6') { information_side }
+            end
           end
         end
       end
 
-      def active_tab() 'translation_units' end
+      def active_tab() 'search' end
 
       private
 

@@ -26,6 +26,7 @@ module Views
           ul(class: 'nav nav-tabs') do
             li(class: 'active') { a "Translations", href: search_translations_url }
             li { a "Keys", href: search_keys_url }
+            li { a "Translation Memory", href: translation_units_url } if current_user.reviewer?
           end
           div(class: 'tab-content') do
             translation_search_bar
