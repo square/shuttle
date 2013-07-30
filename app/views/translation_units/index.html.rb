@@ -6,7 +6,7 @@ module Views
   module TranslationUnits
     class Index <Views::Layouts::Application
 
-      needs :translation_units, :offset, :previous, :next#, :locales
+      needs :translation_units, :offset, :previous, :next, :locales
 
       protected
 
@@ -15,7 +15,7 @@ module Views
           page_header do
             h1 "All Translations"
           end
-          #filter_bar
+          filter_bar
           translation_grid
           pagination_links
         end
@@ -25,50 +25,28 @@ module Views
 
       private
 
-=begin
       def filter_bar
-        form_tag(nil, method: 'GET', id: 'filter-form', class: 'filter form-inline') do
-          text "Show me "
-          select_tag 'filter', options_for_select(
-              [
-                  ['all', nil],
-                  ['untranslated', 'untranslated'],
-                  ['translated but not approved', 'unapproved'],
-                  ['approved', 'approved']
-              ]
-          ),         id: 'filter-select'
-          text " translations with key substring "
-          text_field_tag 'filter', '', placeholder: 'filter by key', id: 'filter-field'
+        form_tag(translation_units_url, method: 'GET', id: 'translation-units-search-form', class: 'filter form-inline') do
+          text 'Find '
+          text_field_tag 'keyword', '', id: 'search-field', placeholder: 'keyword'
+          text ' in '
+          select_tag 'field', options_for_select([
+                                                     %w(source searchable_source_copy),
+                                                     %w(translation searchable_copy),
+                                                 ]), id: 'field-select', class: 'span2'
+          text ' with translation in '
+          if current_user.approved_locales.any?
+            select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
+          else
+            text_field_tag 'target_locales', '', class: 'locale-field locale-field-list span2', id: 'locale-field', placeholder: "any target locale"
+          end
           text ' '
-          submit_tag "Filter", class: 'btn btn-primary'
+          submit_tag "Search", class: 'btn btn-primary'
         end
       end
-=end
-
-
 
       def translation_grid
-        table(class:'table table-striped', id:'translation_units') do
-          thead do
-            tr do
-              th "Source", colspan: 3
-              th "Target", colspan: 3
-            end
-          end
-
-          tbody do
-            @translation_units.each do |trans_unit|
-              tr do
-                td trans_unit.source_locale.rfc5646
-                td { image_tag(locale_image_path(trans_unit.source_locale), style: 'max-width: inherit') }
-                td trans_unit.source_copy
-                td trans_unit.locale.rfc5646
-                td { image_tag(locale_image_path(trans_unit.locale), style: 'max-width: inherit') }
-                td trans_unit.copy
-              end
-            end
-          end
-        end
+        table(class:'table table-striped table-hover', id:'translation_units', 'data-url' => translation_units_url(format: 'json'))
       end
 
       def pagination_links
