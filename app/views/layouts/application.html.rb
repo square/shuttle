@@ -162,6 +162,9 @@ module Views
 
         file = Rails.root.join('app', self.class.to_s.underscore + '.js.erb')
         script(raw(ERB.new(File.read(file)).result(binding)), type: 'text/javascript') if File.exist?(file)
+
+        file = Rails.root.join('app', self.class.to_s.underscore + '.js.coffee.erb')
+        script(raw(CoffeeScript.compile(ERB.new(File.read(file)).result(binding))), type: 'text/javascript') if File.exist?(file)
       end
 
       def inline_css
