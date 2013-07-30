@@ -16,6 +16,7 @@ $(window).ready ->
   keyTable = $('#keys')
   keySearchForm = $('#key-search-form')
   makeKeyURL = -> "#{keyTable.data('url')}?#{keySearchForm.serialize()}"
+  localeOrder = []
 
   keyScroll = keyTable.infiniteScroll makeKeyURL,
     windowScroll: true
@@ -26,17 +27,20 @@ $(window).ready ->
   keySearchForm.submit ->
     keyScroll.reset()
     $.ajax keyTable.data('url'),
-      data: keySearchForm.serialize()
-      success: (keys) ->
+      data: keySearchForm.serialize() + '&metadata=true'
+      success: (metadata) ->
         keyTable.empty()
         header = $('<tr/>').appendTo(keyTable)
         $('<th/>').appendTo header
-        for locale_translation in keys[0].translations
-          do (locale_translation) ->
-            $('<th/>').text(locale_translation.locale.rfc5646).appendTo header
+
+        # record the order of locales for consistency
+        localeOrder = (locale.rfc5646 for locale in metadata.locales)
+        for locale in metadata.locales
+          do (locale) ->
+            $('<th/>').text(locale.rfc5646).appendTo header
 
         #TODO this essentially loads the same page twice; we can do better
-        keyScroll.loadNextPage(keys)
+        keyScroll.loadNextPage()
 
       error: ->
         $('<div/>').addClass('alert alert-error').text("Couldn't load search results").appendTo($('flashes'))
@@ -48,8 +52,9 @@ $(window).ready ->
     $('<br/>').appendTo(keyTD)
     $('<small/>').addClass('muted').text(key.source).appendTo(keyTD)
 
-    for translation in key.translations
-      do (translation) ->
+    for locale in localeOrder
+      do (locale) ->
+        translation = (trans for trans in key.translations when trans.locale.rfc5646 == locale)[0]
         klass = if translation.translated && translation.approved
           'text-success'
         else if translation.translated

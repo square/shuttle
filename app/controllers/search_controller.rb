@@ -60,15 +60,22 @@ class SearchController < ApplicationController
       format.json do
         return head(:unprocessable_entity) if params[:project_id].to_i <= 0
 
-        @results = Key.by_key.
-            offset(params[:offset].to_i).
-            limit(params.fetch(:limit, 50)).
-            includes(:translations, :project, :slugs).
-            where(keys: {project_id: params[:project_id]}).
-            original_key_query(params[:filter]).
-            order('key_prefix ASC')
+        if params[:metadata] # return metadata about the search only
+          @project = Project.find(params[:project_id])
+          render json: {
+              locales: ([@project.base_locale] + @project.targeted_locales.sort_by(&:rfc5646)).uniq
+          }.to_json
+        else
+          @results = Key.by_key.
+              offset(params[:offset].to_i).
+              limit(params.fetch(:limit, 50)).
+              includes(:translations, :project, :slugs).
+              where(keys: {project_id: params[:project_id]}).
+              original_key_query(params[:filter]).
+              order('key_prefix ASC')
 
-        render json: decorate_keys(@results).to_json
+          render json: decorate_keys(@results).to_json
+        end
       end
     end
   end
