@@ -40,5 +40,18 @@ module Exporter
 
     def self.request_format() :properties end
     def self.multilingual?() false end
+
+    # @private
+    STRING_ESCAPED_EQ_NO_NL = /(?:[^\n=]|\\=)+/m
+    # @private
+    SPACE_NO_NL = /[ \t]*/m
+    # @private
+    PAIR = /#{STRING_ESCAPED_EQ_NO_NL}#{SPACE_NO_NL}=#{SPACE_NO_NL}#{STRING_ESCAPED_EQ_NO_NL}/m
+    # @private
+    PAIR_PRECEDED_BY_NEWLINE = /#{SPACE_NO_NL}\n+#{SPACE_NO_NL}#{PAIR}/m
+
+    def self.valid?(contents)
+      contents =~ /\A\s*#{PAIR}(#{PAIR_PRECEDED_BY_NEWLINE})*\s*\z/m
+    end
   end
 end

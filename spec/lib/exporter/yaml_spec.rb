@@ -201,4 +201,34 @@ ja-JP:
       YAML
     end
   end
+
+  describe ".valid?" do
+    it "should return true for a syntactically valid YAML hash" do
+      expect(Exporter::Yaml.valid?(<<-YAML)).to be_true
+---
+ja-JP:
+  different: Different (ja-JP)
+  same: Same (ja)
+      YAML
+    end
+
+    it "should return false for a different YAML object" do
+      expect(Exporter::Yaml.valid?(<<-YAML)).to be_false
+---
+- 1
+- 2
+      YAML
+    end
+
+    it "should return false for a syntactically invalid YANL file" do
+      expect(Exporter::Yaml.valid?(<<-YAML)).to be_false
+---
+foo: foo: foo
+      YAML
+    end
+
+    it "should return false for an empty file" do
+      expect(Exporter::Yaml.valid?('')).to be_false
+    end
+  end
 end

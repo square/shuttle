@@ -136,11 +136,34 @@ class Compiler
   end
 
   def cached_manifest(format)
-    Shuttle::Redis.get ManifestPrecompiler.new.key(@commit, format)
+    contents = Shuttle::Redis.get(ManifestPrecompiler.new.key(@commit, format))
+    if contents && valid_manifest?(contents, format)
+      return contents
+    else
+      Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, format)
+      return nil
+    end
   end
 
   def cached_localization
-    Shuttle::Redis.get LocalizePrecompiler.new.key(@commit)
+    contents = Shuttle::Redis.get(LocalizePrecompiler.new.key(@commit))
+    if contents && valid_manifest?(contents, 'tgz')
+      return contents
+    else
+      Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
+      return nil
+    end
+  end
+
+  def valid_manifest?(contents, format)
+    case format
+      when 'tgz'
+        Exporter::Multifile::ClassMethods.valid?(contents)
+      else
+        exporter = Exporter::Base.find_by_format(format)
+        return true unless format # considered valid unless proven otherwise
+        exporter.valid?(contents)
+    end
   end
 
   # The output of a manifest or localize operation. Stores the output data and

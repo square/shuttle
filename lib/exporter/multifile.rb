@@ -49,6 +49,15 @@ module Exporter
 
     module ClassMethods
       def file_extension() 'tar.gz' end
+
+      def valid?(contents)
+        Archive.read_open_memory(contents, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR)
+        return true
+      rescue Archive::Error
+        return false
+      end
+
+      extend self # so others can use valid?
     end
   end
 end

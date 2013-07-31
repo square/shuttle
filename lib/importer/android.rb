@@ -29,9 +29,7 @@ module Importer
     # XML files that could contain localizable resources.
     FILENAMES = %w(strings.xml arrays.xml plurals.xml titles.xml)
 
-    def self.fencers()
-      %w(Android)
-    end
+    def self.fencers() %w(Android) end
 
     protected
 

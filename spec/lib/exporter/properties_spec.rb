@@ -67,17 +67,40 @@ describe Exporter::Properties do
     io = StringIO.new
     Exporter::Properties.new(@commit).export(io, @target_locale)
 
-    io.string.should include(<<-C)
+    io.string.should include(<<-EOS)
 dialogue.gob[2]=Toll. Jetzt bin ich spät zur Arbeit.
-    C
-    io.string.should include(<<-C)
+    EOS
+    io.string.should include(<<-EOS)
 dialogue.marta[2]=Ich liebe dich.
-    C
-    io.string.should include(<<-C)
+    EOS
+    io.string.should include(<<-EOS)
 dialogue.gob[1]=Deutsch, bitte.
-    C
-    io.string.should include(<<-C)
+    EOS
+    io.string.should include(<<-EOS)
 dialogue.marta[1]=Te Quiero.
-    C
+    EOS
+  end
+
+  describe ".valid?" do
+    it "should return true for a syntactically valid properties file" do
+      expect(Exporter::Properties.valid?(<<-EOS)).to be_true
+foo=bar
+foo[1]=bar two.
+      EOS
+      expect(Exporter::Properties.valid?('a=b')).to be_true
+      expect(Exporter::Properties.valid?('a\\=b=b\\=a')).to be_true
+    end
+
+    it "should return false for a syntactically invalid properties file" do
+      expect(Exporter::Properties.valid?('foo=')).to be_false
+      expect(Exporter::Properties.valid?('foo=foo=foo')).to be_false
+      expect(Exporter::Properties.valid?('=foo')).to be_false
+      expect(Exporter::Properties.valid?('hi!')).to be_false
+      expect(Exporter::Properties.valid?("foo=\n=foo")).to be_false
+    end
+
+    it "should return false for an empty properties file" do
+      expect(Exporter::Properties.valid?('')).to be_false
+    end
   end
 end
