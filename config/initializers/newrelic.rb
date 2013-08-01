@@ -24,3 +24,27 @@ Importer::Base.implementations.each do |klass|
     add_method_tracer :import_locale
   end
 end
+
+Localizer::Base.implementations.each do |klass|
+  klass.class_eval do
+    include ::NewRelic::Agent::MethodTracer
+    add_method_tracer :localize
+  end
+
+  class << klass
+    include ::NewRelic::Agent::MethodTracer
+    add_method_tracer :localize
+  end
+end
+
+class NewRelic::SidekiqInstrumentation
+  def call(worker, msg, queue)
+    perform_action_with_newrelic_trace(
+        :name       => 'perform',
+        :class_name => msg['class'],
+        :category   => 'OtherTransaction/SidekiqJob',
+        :params     => {:args => msg['args']}) do
+      yield
+    end
+  end
+end
