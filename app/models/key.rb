@@ -191,12 +191,18 @@ class Key < ActiveRecord::Base
 
   def recalculate_ready!
     ready_was = ready?
-    ready = !translations.in_locale(*project.required_locales).where('approved IS NOT TRUE').exists?
+    ready = should_become_ready?
     update_column :ready, ready
 
     # update_column doesn't run hooks and doesn't change the changes array so
     # we need to force-update update_commit_readiness
     update_commit_readiness(true) if !skip_readiness_hooks && ready != ready_was
+  end
+
+  # @ereturn [true, false] `true` if this Commit should now be marked as ready.
+
+  def should_become_ready?
+    !translations.in_locale(*project.required_locales).where('approved IS NOT TRUE').exists?
   end
 
   private
