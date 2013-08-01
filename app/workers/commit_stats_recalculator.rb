@@ -24,8 +24,13 @@ class CommitStatsRecalculator
   # Executes this worker.
   #
   # @param [Fixnum] commit_id The ID of a Commit to process.
+  # @param [true, false] should_recalculate_affected_commits If `true`, also
+  #   invokes {KeyReadinessRecalculator} for each key to recalculate the
+  #   readiness of _other_ commits that could also be affected. This is only
+  #   used for locale imports, that would cause keys to become ready as
+  #   translations are imported.
 
-  def perform(commit_id)
+  def perform(commit_id, should_recalculate_affected_commits=false)
     commit = Commit.find(commit_id)
     Commit.flush_memoizations(commit)
 
@@ -39,7 +44,10 @@ class CommitStatsRecalculator
     commit.words_new
     commit.words_pending
 
-    commit.keys.find_each(&:recalculate_ready!)
+    keys_now_ready = commit.keys(includes: [:project, :translations]).select(&:should_become_ready?)
+    Key.where(id: keys_now_ready.map(&:id)).update_all(ready: true)
+    keys_now_ready.each { |k| KeyReadinessRecalculator.perform_once k.id } if should_recalculate_affected_commits
+
     commit.recalculate_ready!
     commit.save!
   end

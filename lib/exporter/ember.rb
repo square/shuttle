@@ -36,5 +36,16 @@ class Ember < Base
     end
 
     def self.request_format() :js end
+
+    def self.valid?(contents)
+      return false if contents.blank?
+
+      context  = V8::Context.new
+      context['Ember'] = {'I18n' => {'locales' => {'translations' => {}}}}
+      context.eval contents
+      return true
+    rescue V8::Error
+      return false
+    end
   end
 end

@@ -116,4 +116,28 @@ describe Exporter::Strings do
 "Lots of special characters." = "Lots\\n of \\"special\\" \\t characters.\\r";
     C
   end
+
+  describe ".valid?" do
+    it "should return true for a syntactically valid strings file" do
+      expect(Exporter::Strings.valid?(<<-EOS)).to be_true
+"foo" = "bar";
+"foo[1]" = "bar two.";
+      EOS
+      expect(Exporter::Strings.valid?('"a"="b";')).to be_true
+      expect(Exporter::Strings.valid?('"a\\""="b\\"";')).to be_true
+    end
+
+    it "should return false for a syntactically invalid strings file" do
+      expect(Exporter::Strings.valid?('"foo"=;')).to be_false
+      expect(Exporter::Strings.valid?('"foo"=""foo";')).to be_false
+      expect(Exporter::Strings.valid?('="foo";')).to be_false
+      expect(Exporter::Strings.valid?('"foo"="foo"')).to be_false
+      expect(Exporter::Strings.valid?('hi!')).to be_false
+      expect(Exporter::Strings.valid?("\"foo\"=\n=\"foo\"")).to be_false
+    end
+
+    it "should return false for an empty strings file" do
+      expect(Exporter::Strings.valid?('')).to be_false
+    end
+  end
 end

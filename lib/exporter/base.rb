@@ -121,6 +121,21 @@ module Exporter
       implementations.detect { |exp| exp.request_format == format.to_sym }
     end
 
+    # @abstract
+    #
+    # Tests the validity of an exported file. This can be as simple is ensuring
+    # that the file is not empty, or can involve running lint tests or syntax
+    # checks.
+    #
+    # The default implementation ensures the file is not empty.
+    #
+    # @param [String] contents The contents of an exported file.
+    # @return [true, false] Whether or not the contents are syntactically valid.
+
+    def self.valid?(contents)
+      !contents.blank?
+    end
+
     protected
 
     # This method builds a hash mapping keys to their translated values. The

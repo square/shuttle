@@ -36,5 +36,15 @@ module Exporter
     end
 
     def self.request_format() :rb end
+
+    def self.valid?(contents)
+      value = Thread.start do
+        $SAFE  = 4
+        eval contents
+      end.value
+      value.kind_of?(Hash)
+    rescue Object
+      return false
+    end
   end
 end

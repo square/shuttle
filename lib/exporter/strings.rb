@@ -91,5 +91,18 @@ module Exporter
 
       return result
     end
+
+    # @private
+    STRING_WITH_ESCAPES_NO_NL = /"([^\n"]|\\")*"/m
+    # @private
+    SPACE_NO_NL = /[ \t]*/m
+    # @private
+    PAIR = /#{STRING_WITH_ESCAPES_NO_NL}#{SPACE_NO_NL}=#{SPACE_NO_NL}#{STRING_WITH_ESCAPES_NO_NL}#{SPACE_NO_NL};/m
+    # @private
+    PAIR_PRECEDED_BY_NEWLINE = /#{SPACE_NO_NL}\n+#{SPACE_NO_NL}#{PAIR}/m
+
+    def self.valid?(contents)
+      contents =~ /\A\s*#{PAIR}(#{PAIR_PRECEDED_BY_NEWLINE})*\s*\z/m
+    end
   end
 end

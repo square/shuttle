@@ -172,7 +172,7 @@ class Commit < ActiveRecord::Base
     import_tree commit!.gtree, '', options
     # normally this is performed once the last worker is removed from the list,
     # but if we're not using workers, we need to do it here
-    update_stats_at_end_of_loading if options[:inline]
+    update_stats_at_end_of_loading(options[:locale]) if options[:inline]
   end
 
   # Returns a commit object used to interact with Git.
@@ -432,7 +432,7 @@ class Commit < ActiveRecord::Base
     end
   end
 
-  def update_stats_at_end_of_loading
+  def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats. since we could have altered the readiness
     # of other commits associated with translations we just imported, we need to
@@ -444,7 +444,7 @@ class Commit < ActiveRecord::Base
     # then we do it for everyone else
     project.commits.find_each do |commit|
       next if commit.id == id
-      CommitStatsRecalculator.perform_once commit.id
+      CommitStatsRecalculator.perform_once commit.id, should_recalculate_affected_commits
     end
   end
 end

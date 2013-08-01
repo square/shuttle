@@ -37,5 +37,11 @@ module Exporter
     end
 
     def self.request_format() :yaml end
+
+    def self.valid?(contents)
+      YAML.load(contents).kind_of?(Hash)
+    rescue Psych::SyntaxError
+      return false
+    end
   end
 end
