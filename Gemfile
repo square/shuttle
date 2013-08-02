@@ -64,8 +64,11 @@ group :development do
 end
 
 group :test do
+  gem 'sql_origin'
   gem 'rspec-rails'
   gem 'factory_girl_rails'
+  gem 'pry'
+  gem 'pry-nav'
 end
 
 # Doesn't work in Rails 4
