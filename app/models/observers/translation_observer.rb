@@ -14,7 +14,7 @@
 
 # This observer on the {Translation} model...
 #
-# 1. Checks if a webhook should be fired, and enqueues the appropriate job if so.
+# 1. Creates a {TranslationChange} if a {Translation} is changed
 
 class TranslationObserver < ActiveRecord::Observer
   def after_update(translation)
