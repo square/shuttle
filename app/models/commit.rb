@@ -136,7 +136,8 @@ class Commit < ActiveRecord::Base
 
   def recalculate_ready!
     ready = !keys.where(ready: false).exists?
-    update_column :ready, ready
+    self.ready = ready
+    save!
     compile_and_cache_or_clear(ready)
   end
 
@@ -312,7 +313,8 @@ class Commit < ActiveRecord::Base
   # @param [String] jid A unique identifier for this worker.
 
   def add_worker!(jid)
-    update_column :loading, true
+    self.loading = true
+    save!
     Shuttle::Redis.sadd "import:#{revision}", jid
   end
 
@@ -330,7 +332,8 @@ class Commit < ActiveRecord::Base
       Squash::Ruby.record "Failed to remove worker", revision: revision, commit: self, jid: jid
     end
     loading = (Shuttle::Redis.scard("import:#{revision}") > 0)
-    update_column :loading, loading
+    self.loading = loading
+    save!
 
     update_stats_at_end_of_loading if loading_was && !loading
   end
@@ -342,7 +345,8 @@ class Commit < ActiveRecord::Base
   def clear_workers!
     Shuttle::Redis.del "import:#{revision}"
     if loading?
-      update_column :loading, false
+      self.loading = false
+      save!
       update_stats_at_end_of_loading if loading_was && !loading
     end
   end
