@@ -247,6 +247,38 @@ ALTER SEQUENCE slugs_id_seq OWNED BY slugs.id;
 
 
 --
+-- Name: translation_changes; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE translation_changes (
+    id integer NOT NULL,
+    translation_id integer NOT NULL,
+    metadata text,
+    created_at timestamp without time zone,
+    user_id integer
+);
+
+
+--
+-- Name: translation_changes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE translation_changes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: translation_changes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE translation_changes_id_seq OWNED BY translation_changes.id;
+
+
+--
 -- Name: translation_units; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -403,6 +435,13 @@ ALTER TABLE ONLY slugs ALTER COLUMN id SET DEFAULT nextval('slugs_id_seq'::regcl
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY translation_changes ALTER COLUMN id SET DEFAULT nextval('translation_changes_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY translation_units ALTER COLUMN id SET DEFAULT nextval('translation_units_id_seq'::regclass);
 
 
@@ -482,6 +521,14 @@ ALTER TABLE ONLY projects
 
 ALTER TABLE ONLY slugs
     ADD CONSTRAINT slugs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: translation_changes_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY translation_changes
+    ADD CONSTRAINT translation_changes_pkey PRIMARY KEY (id);
 
 
 --
@@ -720,6 +767,22 @@ ALTER TABLE ONLY keys
 
 
 --
+-- Name: translation_changes_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY translation_changes
+    ADD CONSTRAINT translation_changes_translation_id_fkey FOREIGN KEY (translation_id) REFERENCES translations(id) ON DELETE CASCADE;
+
+
+--
+-- Name: translation_changes_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY translation_changes
+    ADD CONSTRAINT translation_changes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
 -- Name: translations_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -770,3 +833,5 @@ INSERT INTO schema_migrations (version) VALUES ('20130612213313');
 INSERT INTO schema_migrations (version) VALUES ('20130614052719');
 
 INSERT INTO schema_migrations (version) VALUES ('20130619195215');
+
+INSERT INTO schema_migrations (version) VALUES ('20130801190316');

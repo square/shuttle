@@ -53,6 +53,7 @@ class Translation < ActiveRecord::Base
   belongs_to :key, inverse_of: :translations
   belongs_to :translator, class_name: 'User', foreign_key: 'translator_id', inverse_of: :authored_translations
   belongs_to :reviewer, class_name: 'User', foreign_key: 'reviewer_id', inverse_of: :reviewed_translations
+  has_many :translation_changes, inverse_of: :translation, dependent: :delete_all
 
   include HasMetadataColumn
   has_metadata_column(
@@ -108,6 +109,13 @@ class Translation < ActiveRecord::Base
   # @return [true, false] If `true`, the value of `reviewed` will not be reset
   #   even if the copy has changed.
   attr_accessor :preserve_reviewed_status
+
+  # @return [User] The person who changed this Translation
+  attr_accessor :modifier
+
+  # A hack to get around assign_attributes call in TranslationController
+  # @return [String] The true previous value of copy
+  attr_accessor :copy_actually_was
 
   scope :in_locale, ->(*langs) {
     if langs.size == 1

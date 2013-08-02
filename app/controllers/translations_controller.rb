@@ -108,9 +108,12 @@ class TranslationsController < ApplicationController
     # translators cannot modify approved copy
     return head(:forbidden) if @translation.approved? && current_user.role == 'translator'
 
+    # Need to save true copy_was because assign_attributes will push back the cache
+    @translation.copy_actually_was = @translation.copy
     @translation.assign_attributes translation_params
 
     @translation.translator = current_user if @translation.copy_was != @translation.copy
+    @translation.modifier = current_user
 
     # de-translate translation if empty
     unless params[:blank_string].parse_bool
@@ -170,6 +173,7 @@ class TranslationsController < ApplicationController
   def approve
     @translation.approved = true
     @translation.reviewer = current_user
+    @translation.modifier = current_user
     @translation.save
 
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
@@ -197,6 +201,7 @@ class TranslationsController < ApplicationController
   def reject
     @translation.approved = false
     @translation.reviewer = current_user
+    @translation.modifier = current_user
     @translation.save
 
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
