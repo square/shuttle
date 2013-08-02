@@ -9,4 +9,8 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-Shuttle::Application.config.secret_key_base = '4d65f0b15c31d7cf3e57541c275a45c1d078634c28c1c5e54b75fae340a872f3e9f92a89e71c9f6015fa71a20337e02bafc0146043c2202b54628319417f98fa'
+Shuttle::Application.config.secret_key_base = if Rails.env.production?
+                                                File.read(Rails.root.join('data', 'secret_token')).chomp
+                                              else
+                                                '4d65f0b15c31d7cf3e57541c275a45c1d078634c28c1c5e54b75fae340a872f3e9f92a89e71c9f6015fa71a20337e02bafc0146043c2202b54628319417f98fa'
+                                              end

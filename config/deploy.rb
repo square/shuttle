@@ -63,3 +63,10 @@ namespace :squash do
   end
 end
 after 'deploy:restart', 'squash:notify'
+
+namespace :secret do
+  task :symlink do
+    run "ln -s #{shared_path}/secret_token #{release_path}/data/secret_token"
+  end
+end
+before 'deploy:assets:precompile', 'secret:symlink'
