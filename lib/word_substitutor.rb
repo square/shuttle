@@ -362,7 +362,7 @@ class WordSubstitutor
     private
 
     # @private
-    Move = Struct.new(:cost, :move)
+    Move = Struct.new(:cost, :move, :one, :two)
 
     # finds the amount to offset ran
     # ges within s1 as it changes to s2
@@ -397,17 +397,21 @@ class WordSubstitutor
       if (memo = EDITS_MEMO[s1][s2])
         return memo
       end
+      if String === s1 && String === s2
+        s1 = s1.split("")
+        s2 = s2.split("")
+      end
 
       # BASE CASES
 
       # if they're both empty, create an "initial" node
-      return memoize_edit(s1, s2, [Move.new(0, :start)]) if s1.empty? && s2.empty?
+      return memoize_edit(s1, s2, [Move.new(0, :start, "", "")]) if s1.empty? && s2.empty?
       # if they're equal, only zero-cost substitutions are required
-      return memoize_edit(s1, s2, [Move.new(0, :replace)]*s1.length) if s1 == s2
+      return memoize_edit(s1, s2, s1.map { |l| Move.new(0, :replace, l, l) }.reverse) if s1 == s2
       # if s1 is empty, the operations to get to s2 is to just insert every character from s2 into s1
-      return memoize_edit(s1, s2, s2.length.times.map { |i| Move.new(s2.length - i, :insert) }) if s1.empty?
+      return memoize_edit(s1, s2, s2.length.times.map { |i| Move.new(s2.length - i, :insert, "", s2[s2.length - i - 1]) }) if s1.empty?
       # if s2 is empty, the operations to get to s2 is to just delete every character in s1
-      return memoize_edit(s1, s2, s1.length.times.map { |i| Move.new(s1.length - i, :delete) }) if s2.empty?
+      return memoize_edit(s1, s2, s1.length.times.map { |i| Move.new(s1.length - i, :delete, s1[s1.length - i - 1], "") }) if s2.empty?
 
       # RECURSIVE CASE
       # apply the levenshtein algorithm to the last character
@@ -416,9 +420,9 @@ class WordSubstitutor
       substitution_cost = s1[-1] == s2[-1] ? 0 : 1
 
       # build 3 potential moves
-      insert            = Move.new(1, :insert)
-      delete            = Move.new(1, :delete)
-      replace           = Move.new(substitution_cost, :replace)
+      insert            = Move.new(1, :insert, "", s2[-1])
+      delete            = Move.new(1, :delete, s1[-1], "")
+      replace           = Move.new(substitution_cost, :replace, s1[-1], s2[-1])
       # for each move, find the chain of moves that precedes it
       insert_moves      = edits(s1, s2[0..-2]).dup
       delete_moves      = edits(s1[0..-2], s2).dup
