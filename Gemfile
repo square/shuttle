@@ -5,7 +5,7 @@ gem 'rails', '>= 4.0'
 gem 'configoro'
 
 # AUTHENTICATION
-gem 'devise', github: 'plataformatec/devise'
+gem 'devise'
 
 # MODELS
 gem 'pg', '< 0.14'
