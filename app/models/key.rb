@@ -202,7 +202,11 @@ class Key < ActiveRecord::Base
   # @ereturn [true, false] `true` if this Commit should now be marked as ready.
 
   def should_become_ready?
-    !translations.in_locale(*project.required_locales).where('approved IS NOT TRUE').exists?
+    if translations.loaded?
+      translations.select { |t| project.required_locales.include?(t.locale) }.all?(&:approved?)
+    else
+      !translations.in_locale(*project.required_locales).where('approved IS NOT TRUE').exists?
+    end
   end
 
   private
