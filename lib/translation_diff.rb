@@ -61,8 +61,9 @@ class TranslationDiff
     # Add context
     changes = chunks.map { |c| c.one != c.two }
     ranges = context_ranges(changes, 1)
+    stripped_chunks = chunks.map { |c| Chunk.new(c.one.strip, c.two.strip) }
     consolidated = ranges.map do |range|
-      chunks.slice(range).reduce(:append)
+      stripped_chunks.slice(range).reduce(:append)
     end
     if consolidated.size == 0
       return ["", ""]
