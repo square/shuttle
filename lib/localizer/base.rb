@@ -75,9 +75,10 @@ module Localizer
       build_archive do |receiver|
         organized_translations.each do |localizer, translations_by_source|
           translations_by_source.each do |source, translations_by_locale|
-            self.class.trace_execution_scoped(['Custom/Localizer/load_file_contents']) do
-              file_contents = commit.project.repo.object("#{commit.revision}^{tree}:#{source}").try!(:contents)
-            end
+            file_contents =
+                self.class.trace_execution_scoped(['Custom/Localizer/load_file_contents']) do
+                  commit.project.repo.object("#{commit.revision}^{tree}:#{source}").try!(:contents)
+                end
             next unless file_contents
             input_file = Localizer::File.new(source, file_contents)
 
