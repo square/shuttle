@@ -1,0 +1,30 @@
+ul.translation-change-history {
+  list-style-type: none;
+  padding: 5px 0px;
+  margin: 10px 0px;
+  li:nth-child(even) {
+    background:#fff;
+  }
+  li:nth-child(odd) {
+    background:#eee;
+  }
+  li.translation-change-entry {
+    padding: 0px 20px;
+  }
+  div.translation-change-timestamp {
+    margin: 14px 0px;
+  }
+  dd.copy-collapsed, dd.copy-full {
+    background:#bbb;
+    padding:5px;
+  }
+  dd.copy-collapsed {
+    display: block;
+  }
+  dd.copy-full {
+    display: none;
+    pre {
+      margin: 8px 0px;
+    }
+  }
+}
