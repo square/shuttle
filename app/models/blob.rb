@@ -47,6 +47,8 @@ class Blob < ActiveRecord::Base
   validates :sha,
             presence: true
 
+  attr_readonly :project_id, :sha_raw
+
   # Searches the blob for translatable strings, creates or updates Translations,
   # and associates them with this Blob. Imported strings are approved by
   # default. If the base locale is provided (or no locale), pending Translations

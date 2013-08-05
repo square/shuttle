@@ -90,7 +90,7 @@ class Commit < ActiveRecord::Base
             presence: true
   validates :revision_raw,
             presence:   true,
-            uniqueness: {scope: :project_id}
+            uniqueness: {scope: :project_id, on: :create}
   validates :message,
             presence: true,
             length:   {maximum: 256}
@@ -103,6 +103,8 @@ class Commit < ActiveRecord::Base
   validates :due_date,
             timeliness: {type: :date},
             allow_nil:  true
+
+  attr_readonly :project_id, :revision_raw, :message, :committed_at
 
   extend GitObjectField
   git_object_field :revision,

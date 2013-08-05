@@ -31,11 +31,10 @@ describe SearchableField do
   end
 
   it "should use a custom :language option" do
-    k = FactoryGirl.create(:key, key: "Some key")
     Key.connection.should_receive(:exec_update).once.with(/TO_TSVECTOR\('simple', /, anything, anything).and_call_original
     Key.connection.stub(:exec_update).and_call_original
     #TODO implementation detail in spec
-    k.reload.update_attribute :original_key, "New key"
+    FactoryGirl.create :key, key: "New key"
   end
 
   it "should use a custom :language_from option" do

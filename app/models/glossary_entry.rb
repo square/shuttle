@@ -72,6 +72,8 @@ class GlossaryEntry < ActiveRecord::Base
   validates :source_copy_sha,
             presence: true
 
+  attr_readonly :source_rfc5646_locale, :rfc5646_locale
+
   extend DigestField
   digest_field :source_copy
 
