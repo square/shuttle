@@ -60,6 +60,12 @@ describe TranslationsController do
       @translation.reload.copy.should eql('hello!')
       @translation.should be_translated
       @translation.translator.should eql(@user)
+
+      expect(@translation.translation_changes.count).to eq(1)
+      change = @translation.translation_changes.first
+      expect(change.translation).to eq(@translation)
+      expect(change.diff).to eq({"copy" => [nil, 'hello!']})
+      expect(change.user).to eq(@user)
     end
 
     context "[empty copy]" do
@@ -67,6 +73,7 @@ describe TranslationsController do
         @translation.copy       = 'hello!'
         @translation.translator = @user
         @translation.save!
+        @translation.translation_changes.delete_all
 
         patch :update,
               project_id:  @translation.key.project.to_param,
@@ -80,11 +87,18 @@ describe TranslationsController do
         @translation.approved.should be_nil
         @translation.translator.should be_nil
         @translation.reviewer.should be_nil
+
+        expect(@translation.translation_changes.count).to eq(1)
+        change = @translation.translation_changes.last.reload
+        expect(change.translation).to eq(@translation)
+        expect(change.diff).to eq({"copy" => ['hello!', nil]})
+        expect(change.user).to eq(@user)
       end
 
       it "should update the translation normally if given empty copy and blank_string=true" do
         @translation.copy = 'hello!'
         @translation.save!
+        @translation.translation_changes.delete_all
 
         patch :update,
               project_id:   @translation.key.project.to_param,
@@ -97,6 +111,12 @@ describe TranslationsController do
         @translation.reload.copy.should eql('')
         @translation.should be_translated
         @translation.translator.should eql(@user)
+
+        expect(@translation.translation_changes.count).to eq(1)
+        change = @translation.translation_changes.last
+        expect(change.translation).to eq(@translation)
+        expect(change.diff).to eq({"copy" => ['hello!', '']})
+        expect(change.user).to eq(@user)
       end
     end
 
@@ -108,6 +128,7 @@ describe TranslationsController do
         @translation.translator = translator = FactoryGirl.create(:user, role: 'translator')
         @translation.approved   = true
         @translation.save!
+        @translation.translation_changes.delete_all
 
         patch :update,
               project_id:  @translation.key.project.to_param,
@@ -121,6 +142,12 @@ describe TranslationsController do
         @translation.should be_approved
         @translation.translator.should eql(@user)
         @translation.reviewer.should eql(@user)
+
+        expect(@translation.translation_changes.count).to eq(1)
+        change = @translation.translation_changes.last
+        expect(change.translation).to eq(@translation)
+        expect(change.diff).to eq({"copy" => ['hello!', 'bye!']})
+        expect(change.user).to eq(@user)
       end
 
       it "should automatically approve reviewer changes to an untranslated string" do
@@ -136,12 +163,19 @@ describe TranslationsController do
         @translation.should be_approved
         @translation.translator.should eql(@user)
         @translation.reviewer.should eql(@user)
+
+        expect(@translation.translation_changes.count).to eq(1)
+        change = @translation.translation_changes.last
+        expect(change.translation).to eq(@translation)
+        expect(change.diff).to eq({"copy" => [nil, 'bye!'], "approved" => [nil, true]})
+        expect(change.user).to eq(@user)
       end
 
       it "should automatically approve reviewer non-changes to a translated string" do
         @translation.copy       = 'hello!'
         @translation.translator = translator = FactoryGirl.create(:user, role: 'translator')
         @translation.save!
+        @translation.translation_changes.delete_all
 
         patch :update,
               project_id:  @translation.key.project.to_param,
@@ -155,6 +189,11 @@ describe TranslationsController do
         @translation.should be_approved
         @translation.translator.should eql(translator)
         @translation.reviewer.should eql(@user)
+
+        expect(@translation.translation_changes.count).to eq(1)
+        change = @translation.translation_changes.last
+        expect(change.diff).to eq({"approved" => [nil, true]})
+        expect(change.user).to eq(@user)
       end
     end
 
@@ -164,6 +203,7 @@ describe TranslationsController do
         @translation.copy     = 'foo'
         @translation.approved = true
         @translation.save!
+        @translation.translation_changes.delete_all
 
         patch :update,
               project_id:  @translation.key.project.to_param,
@@ -175,6 +215,7 @@ describe TranslationsController do
         response.status.should eql(403)
         @translation.reload.copy.should eql('foo')
         @translation.should be_approved
+        expect(@translation.translation_changes.count).to eq(0)
       end
 
       it "should allow a reviewer to update approved copy" do
@@ -182,6 +223,7 @@ describe TranslationsController do
         @translation.copy     = 'foo'
         @translation.approved = true
         @translation.save!
+        @translation.translation_changes.delete_all
 
         patch :update,
               project_id:  @translation.key.project.to_param,
@@ -193,6 +235,12 @@ describe TranslationsController do
         response.status.should eql(200)
         @translation.reload.copy.should eql('bar')
         @translation.should be_approved
+
+        expect(@translation.translation_changes.count).to eq(1)
+        change = @translation.translation_changes.last
+        expect(change.diff).to eq({"copy" => ['foo', 'bar']})
+        expect(change.translation).to eq(@translation)
+        expect(change.user).to eq(@user)
       end
 
       it "should allow an admin to update approved copy" do
@@ -200,6 +248,7 @@ describe TranslationsController do
         @translation.copy     = 'foo'
         @translation.approved = true
         @translation.save!
+        @translation.translation_changes.delete_all
 
         patch :update,
               project_id:  @translation.key.project.to_param,
@@ -211,6 +260,12 @@ describe TranslationsController do
         response.status.should eql(200)
         @translation.reload.copy.should eql('bar')
         @translation.should be_approved
+
+        expect(@translation.translation_changes.count).to eq(1)
+        change = @translation.translation_changes.last
+        expect(change.diff).to eq({"copy" => ['foo', 'bar']})
+        expect(change.translation).to eq(@translation)
+        expect(change.user).to eq(@user)
       end
     end
   end
@@ -234,6 +289,12 @@ describe TranslationsController do
 
       @translation.reload.approved.should eql(true)
       @translation.reviewer.should eql(@user)
+
+      expect(@translation.translation_changes.count).to eq(1)
+      change = @translation.translation_changes.last
+      expect(change.diff).to eq({"approved" => [nil, true]})
+      expect(change.translation).to eq(@translation)
+      expect(change.user).to eq(@user)
     end
   end
 
@@ -256,6 +317,12 @@ describe TranslationsController do
 
       @translation.reload.approved.should eql(false)
       @translation.reviewer.should eql(@user)
+
+      expect(@translation.translation_changes.count).to eq(1)
+      change = @translation.translation_changes.last
+      expect(change.diff).to eq({"approved" => [nil, false]})
+      expect(change.translation).to eq(@translation)
+      expect(change.user).to eq(@user)
     end
   end
 

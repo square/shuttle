@@ -15,11 +15,14 @@
 #    limitations under the License.
 
 require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
+require Rails.root.join('app', 'helpers', 'history.html.rb')
 
 module Views
   module Translations
     class Edit < Views::Layouts::Application
       needs :project, :key, :translation
+
+      include Views::Translations::History
 
       protected
 
@@ -51,6 +54,7 @@ module Views
             f.submit class: 'btn btn-primary'
           end
         end
+        history_info
       end
 
       def information_side
