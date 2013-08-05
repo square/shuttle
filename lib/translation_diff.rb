@@ -23,32 +23,40 @@
 
 class TranslationDiff
 
-  # Determines the differences between two strings and gives a nice
-  # compact representation of the differences with context. Ignores excess
-  # white-spaces.
-  #
-  # @return [Array<String>] The original parameters formatted to highlight
-  #   the differences.
-  def self.diff(str1, str2, joiner="...")
-    # Base cases
-    return ["", ""] if str1 == "" && str2 == ""
+  # Creates an object that will perform diffs on two Strings
+  def initialize(str1, str2)
+    @str1 = str1 && str1.dup
+    @str2 = str2 && str2.dup
+  end
 
-    words1 = str1.gsub(/\s+/m, " ").split(" ")
-    words2 = str2.gsub(/\s+/m, " ").split(" ")
-
+  # @private
+  # Centered version of all edits required to substitute
+  def chunks
+    return @chunks if @chunks
+    words1 = (@str1 || "").gsub(/\s+/m, " ").split(" ")
+    words2 = (@str2 || "").gsub(/\s+/m, " ").split(" ")
     diff = WordSubstitutor::Levenshtein.new.edits(words1, words2).reverse
-    diff = diff.select { |m| m.one.present? || m.two.present? } # Remove empty differences
+    diff = diff.select { |m| m.one.present? || m.two.present? }
     chunks = diff.map { |m| Chunk.new(m.one, m.two) }
-    first_is_change = chunks.first.one != chunks.first.two
-    last_is_change = chunks.last.one != chunks.last.two
-
-    # Make all chunk strings equal length to partner
-    chunks = chunks.map do |chunk|
+    @chunks = chunks.map do |chunk|
       len = chunk.one.length > chunk.two.length ? chunk.one.length : chunk.two.length
       chunk.one = chunk.one.center(len)
       chunk.two = chunk.two.center(len)
       chunk
     end
+  end
+  private :chunks
+
+  # Determines the differences between the two strings being compared and gives
+  # a nice compact representation of the differences with context. Ignores
+  # excess white-spaces.
+  #
+  # @return [Array<String>] The two strings being compared, formatted to
+  #   highlight the differences.
+  def diff(joiner="...")
+    # Base cases
+    return [@str1, @str2] unless @str1.present? || @str2.present?
+    return @diff if @diff
 
     # Add context
     changes = chunks.map { |c| c.one != c.two }
@@ -56,20 +64,25 @@ class TranslationDiff
     consolidated = ranges.map do |range|
       chunks.slice(range).reduce(:append)
     end
-
-    # No changes!
     if consolidated.size == 0
       return ["", ""]
     end
 
     # Formatting to add leading and trailing ellipses
-    unless first_is_change
+    if chunks.first.one == chunks.first.two
       consolidated.unshift(Chunk.new("", ""))
     end
-    unless last_is_change
+    if chunks.last.one == chunks.last.two
       consolidated.push(Chunk.new("", ""))
     end
-    [consolidated.map { |m| m.one }.join(joiner), consolidated.map { |m| m.two }.join(joiner)]
+    @diff ||= [consolidated.map { |m| m.one }.join(joiner), consolidated.map { |m| m.two }.join(joiner)]
+  end
+
+  # @returns [Array<String>] The two strings being compared, padded to
+  #   visually align words that are matched according to minimal Levenshtein
+  #   distance
+  def aligned
+    @aligned ||= [chunks.map { |m| m.one }.join(" "), chunks.map { |m| m.two }.join(" ")]
   end
 
   Chunk = Struct.new(:one, :two) do
@@ -87,7 +100,7 @@ class TranslationDiff
   # @param [Integer] The amount of context on either side to include.
   # @returns [Array<Range>] An Array of Ranges from the first parameter that have
   #   context-sensitive runs of truths.
-  def self.context_ranges(changes, context)
+  def context_ranges(changes, context)
     # Convert to searchable string
     changes_string = changes.each_with_index.map { |c, i| c ? "[#{i}]" : "-" }.join("")
 

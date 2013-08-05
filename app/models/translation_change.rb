@@ -58,4 +58,42 @@ class TranslationChange < ActiveRecord::Base
     change.save!
     change.freeze
   end
+
+  def differ
+    @differ ||= TranslationDiff.new(diff["copy"][0], diff["copy"][1])
+  end
+
+  def compact_copy
+    @compact_copy ||= differ.diff
+  end
+  def compact_copy_from
+    diff["copy"].nil? || diff["copy"][0].nil? ? nil : compact_copy[0].strip
+  end
+  def compact_copy_to
+    diff["copy"].nil? || diff["copy"][1].nil? ? nil : compact_copy[1].strip
+  end
+
+  def full_copy
+    @full_copy ||= differ.aligned
+  end
+  def full_copy_from
+    diff["copy"].nil? || diff["copy"][0].nil? ? nil : full_copy[0]
+  end
+  def full_copy_to
+    diff["copy"].nil? || diff["copy"][1].nil? ? nil : full_copy[1]
+  end
+
+  def approval_transition
+    "#{self.class.status(diff["approved"][0])} to #{self.class.status(diff["approved"][1])}"
+  end
+
+  def self.status(approval_status)
+    if approval_status.nil?
+      "Pending"
+    elsif approval_status
+      "Approved"
+    else
+      "Rejected"
+    end
+  end
 end

@@ -16,12 +16,8 @@
 require 'spec_helper'
 
 describe TranslationDiff do
-  let(:one) { "" }
-  let(:two) { "" }
-  let(:differ) { o = TranslationDiff }
-
   describe "#context_ranges" do
-    subject { differ.context_ranges(changes, @context) }
+    subject { TranslationDiff.new("", "").context_ranges(changes, @context) }
 
     context "should give nothing with empty changes" do
       let(:changes) { [] }
@@ -121,7 +117,7 @@ describe TranslationDiff do
   end
 
   describe "#diff" do
-    subject { differ.diff(one, two) }
+    subject { TranslationDiff.new(one, two).diff }
 
     context "with empty strings" do
       let(:one) { "" }
