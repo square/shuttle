@@ -110,9 +110,11 @@ class Translation < ActiveRecord::Base
   #   even if the copy has changed.
   attr_accessor :preserve_reviewed_status
 
+  # @private
   # @return [User] The person who changed this Translation
   attr_accessor :modifier
 
+  # @private
   # A hack to get around assign_attributes call in TranslationController
   # @return [String] The true previous value of copy
   attr_accessor :copy_actually_was
