@@ -44,7 +44,7 @@ Shuttle::Application.configure do
   config.assets.debug                        = true
 
   # Add stack traces to SQL logs
-  config.after_initialize { SQLOrigin.append_to_log }
+  #config.after_initialize { SQLOrigin.append_to_log }
 end
 
 Erector::Widget.prettyprint_default = true
