@@ -361,13 +361,10 @@ class WordSubstitutor
 
     private
 
-    # @private
-    Move = Struct.new(:cost, :move, :one, :two)
-
     # finds the amount to offset ran
     # ges within s1 as it changes to s2
     def offsets(s1, s2)
-      operations = edits(s1, s2)
+      operations = Levenshtein.new.edits(s1, s2)
       offsets    = []
       counter    = 0
       operations.reverse.each do |operation|
@@ -388,11 +385,29 @@ class WordSubstitutor
     def shift_range(range, from_index, delta)
       (from_index <= range.min ? range.min + delta : range.min)..(from_index <= range.max ? range.max + delta : range.max)
     end
+  end
 
+  # A change performed to transform one Array or String to another. Returned
+  # by Levenshtein#edits. Contains the following fields:
+  #
+  # |        |                                                 |
+  # |:-------|:------------------------------------------------|
+  # | `cost` | The cost associated with this change.           |
+  # | `move` | The type of move performed. eg insert, replace. |
+  # | `one`  | The string or character transformed from.       |
+  # | `two`  | The string or character transformed to.         |
+  class Move < Struct.new(:cost, :move, :one, :two)
+  end
+
+  # Class that computes the Levenshtein distance
+  class Levenshtein
     EDITS_MEMO = Hash.new { |h, k| h[k] = Hash.new }
 
     # finds the series of edits necessary to transform s1 into s2. uses the
     # recursive levenshtein algorithm.
+    #
+    # @param [Array,String] Object to compare. Must be of same type as other parameter
+    # @returns [Array<Move>] The full history of edits required to transform s1 to s2
     def edits(s1, s2)
       if (memo = EDITS_MEMO[s1][s2])
         return memo
@@ -439,6 +454,8 @@ class WordSubstitutor
       # return the lowest-cost move
       return memoize_edit(s1, s2, [insert_moves, delete_moves, replace_moves].min_by { |chain| chain.first.cost })
     end
+
+    private
 
     def memoize_edit(s1, s2, value)
       EDITS_MEMO[s1][s2] = value if value

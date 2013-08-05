@@ -1,4 +1,18 @@
-# This library provides a single method #diff that formats two strings to
+# Copyright 2013 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+# This library provides a single method {::diff} that formats two strings to
 # highlight the differences between the two in a compact fashion.
 #
 # @example
@@ -7,22 +21,22 @@
 #   result = TranslationDiff.diff(one, two)
 #   result = ["...nice simple  string", "...nice complex string"]
 
-module TranslationDiff
+class TranslationDiff
 
   # Determines the differences between two strings and gives a nice
   # compact representation of the differences with context. Ignores excess
   # white-spaces.
   #
-  # @return [[String, String]] The original parameters formatted to hgihlight
+  # @return [Array<String>] The original parameters formatted to highlight
   #   the differences.
-  def diff(str1, str2)
-    # Some base cases
+  def self.diff(str1, str2, joiner="...")
+    # Base cases
     return ["", ""] if str1 == "" && str2 == ""
 
     words1 = str1.gsub(/\s+/m, " ").split(" ")
     words2 = str2.gsub(/\s+/m, " ").split(" ")
 
-    diff = WordSubstitutor::Result.new.send(:edits, words1, words2).reverse
+    diff = WordSubstitutor::Levenshtein.new.edits(words1, words2).reverse
     diff = diff.select { |m| m.one.present? || m.two.present? } # Remove empty differences
     chunks = diff.map { |m| Chunk.new(m.one, m.two) }
     first_is_change = chunks.first.one != chunks.first.two
@@ -55,7 +69,7 @@ module TranslationDiff
     unless last_is_change
       consolidated.push(Chunk.new("", ""))
     end
-    [consolidated.map { |m| m.one }.join("..."), consolidated.map { |m| m.two }.join("...")]
+    [consolidated.map { |m| m.one }.join(joiner), consolidated.map { |m| m.two }.join(joiner)]
   end
 
   Chunk = Struct.new(:one, :two) do
@@ -66,13 +80,14 @@ module TranslationDiff
     end
   end
 
+  # @private
   # Finds context-sensitive runs of truthy values.
   #
-  # @param [[true, false]] Array of whether that index has a difference.
-  # @param [Int] The amount of context on either side to include.
-  # @returns [ [Range] ] An Array of Ranges from the first parameter that have
+  # @param [Array<true, false>] Array of whether that index has a difference.
+  # @param [Integer] The amount of context on either side to include.
+  # @returns [Array<Range>] An Array of Ranges from the first parameter that have
   #   context-sensitive runs of truths.
-  def context_ranges(changes, context)
+  def self.context_ranges(changes, context)
     # Convert to searchable string
     changes_string = changes.each_with_index.map { |c, i| c ? "[#{i}]" : "-" }.join("")
 
