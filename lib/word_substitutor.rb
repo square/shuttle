@@ -361,13 +361,10 @@ class WordSubstitutor
 
     private
 
-    # @private
-    Move = Struct.new(:cost, :move)
-
     # finds the amount to offset ran
     # ges within s1 as it changes to s2
     def offsets(s1, s2)
-      operations = edits(s1, s2)
+      operations = Levenshtein.new.edits(s1, s2)
       offsets    = []
       counter    = 0
       operations.reverse.each do |operation|
@@ -388,26 +385,48 @@ class WordSubstitutor
     def shift_range(range, from_index, delta)
       (from_index <= range.min ? range.min + delta : range.min)..(from_index <= range.max ? range.max + delta : range.max)
     end
+  end
 
+  # A change performed to transform one Array or String to another. Returned
+  # by Levenshtein#edits. Contains the following fields:
+  #
+  # |        |                                                 |
+  # |:-------|:------------------------------------------------|
+  # | `cost` | The cost associated with this change.           |
+  # | `move` | The type of move performed. eg insert, replace. |
+  # | `one`  | The string or character transformed from.       |
+  # | `two`  | The string or character transformed to.         |
+  class Move < Struct.new(:cost, :move, :one, :two)
+  end
+
+  # Class that computes the Levenshtein distance
+  class Levenshtein
     EDITS_MEMO = Hash.new { |h, k| h[k] = Hash.new }
 
     # finds the series of edits necessary to transform s1 into s2. uses the
     # recursive levenshtein algorithm.
+    #
+    # @param [Array,String] Object to compare. Must be of same type as other parameter
+    # @returns [Array<Move>] The full history of edits required to transform s1 to s2
     def edits(s1, s2)
       if (memo = EDITS_MEMO[s1][s2])
         return memo
+      end
+      if String === s1 && String === s2
+        s1 = s1.split("")
+        s2 = s2.split("")
       end
 
       # BASE CASES
 
       # if they're both empty, create an "initial" node
-      return memoize_edit(s1, s2, [Move.new(0, :start)]) if s1.empty? && s2.empty?
+      return memoize_edit(s1, s2, [Move.new(0, :start, "", "")]) if s1.empty? && s2.empty?
       # if they're equal, only zero-cost substitutions are required
-      return memoize_edit(s1, s2, [Move.new(0, :replace)]*s1.length) if s1 == s2
+      return memoize_edit(s1, s2, s1.map { |l| Move.new(0, :replace, l, l) }.reverse) if s1 == s2
       # if s1 is empty, the operations to get to s2 is to just insert every character from s2 into s1
-      return memoize_edit(s1, s2, s2.length.times.map { |i| Move.new(s2.length - i, :insert) }) if s1.empty?
+      return memoize_edit(s1, s2, s2.length.times.map { |i| Move.new(s2.length - i, :insert, "", s2[s2.length - i - 1]) }) if s1.empty?
       # if s2 is empty, the operations to get to s2 is to just delete every character in s1
-      return memoize_edit(s1, s2, s1.length.times.map { |i| Move.new(s1.length - i, :delete) }) if s2.empty?
+      return memoize_edit(s1, s2, s1.length.times.map { |i| Move.new(s1.length - i, :delete, s1[s1.length - i - 1], "") }) if s2.empty?
 
       # RECURSIVE CASE
       # apply the levenshtein algorithm to the last character
@@ -416,9 +435,9 @@ class WordSubstitutor
       substitution_cost = s1[-1] == s2[-1] ? 0 : 1
 
       # build 3 potential moves
-      insert            = Move.new(1, :insert)
-      delete            = Move.new(1, :delete)
-      replace           = Move.new(substitution_cost, :replace)
+      insert            = Move.new(1, :insert, "", s2[-1])
+      delete            = Move.new(1, :delete, s1[-1], "")
+      replace           = Move.new(substitution_cost, :replace, s1[-1], s2[-1])
       # for each move, find the chain of moves that precedes it
       insert_moves      = edits(s1, s2[0..-2]).dup
       delete_moves      = edits(s1[0..-2], s2).dup
@@ -435,6 +454,8 @@ class WordSubstitutor
       # return the lowest-cost move
       return memoize_edit(s1, s2, [insert_moves, delete_moves, replace_moves].min_by { |chain| chain.first.cost })
     end
+
+    private
 
     def memoize_edit(s1, s2, value)
       EDITS_MEMO[s1][s2] = value if value
