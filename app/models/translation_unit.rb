@@ -57,6 +57,8 @@ class TranslationUnit < ActiveRecord::Base
             uniqueness: {scope: [:copy_sha_raw, :source_rfc5646_locale, :rfc5646_locale]}
   validate :locale_and_source_locale_different
 
+  attr_readonly :source_rfc5646_locale, :rfc5646_locale
+
   scope :exact_matches, ->(translation, locale_override=nil) {
     locale = locale_override || translation.locale
     source_copy_matches(translation.source_copy).where(

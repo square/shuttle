@@ -77,7 +77,7 @@ class Translation < ActiveRecord::Base
             presence: true
   validates :rfc5646_locale,
             presence:   true,
-            uniqueness: {scope: :key_id}
+            uniqueness: {scope: :key_id, on: :create}
   validate :cannot_approve_or_reject_untranslated
 
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
@@ -95,7 +95,7 @@ class Translation < ActiveRecord::Base
 
   after_destroy :recalculate_readiness
 
-  attr_readonly :rfc5646_locale, :locale
+  attr_readonly :source_rfc5646_locale, :rfc5646_locale, :key_id
 
   # @return [true, false] If `true`, the after-save hooks that recalculate
   #   Commit `ready?` values will not be run. You should use this when

@@ -64,12 +64,13 @@ group :development do
 end
 
 group :test do
-  gem 'sql_origin'
   gem 'rspec-rails'
   gem 'factory_girl_rails'
   gem 'pry'
   gem 'pry-nav'
 end
+
+gem 'sql_origin', groups: [:development, :test]
 
 # Doesn't work in Rails 4
 group :development, :test do

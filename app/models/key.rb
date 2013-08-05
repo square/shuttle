@@ -90,6 +90,7 @@ class Key < ActiveRecord::Base
   )
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }
+  before_validation(on: :create) { |obj| obj.original_key ||= obj.key }
 
   # @return [true, false] If `true`, the after-save hooks that recalculate
   #   Commit `ready?` values will not be run. You should use this when
@@ -121,9 +122,9 @@ class Key < ActiveRecord::Base
             presence:   true
   validates :key_sha_raw,
             presence:   true,
-            uniqueness: {scope: [:project_id, :source_copy_sha_raw]}
+            uniqueness: {scope: [:project_id, :source_copy_sha_raw], on: :create}
 
-  before_validation(on: :create) { |obj| obj.original_key ||= obj.key }
+  attr_readonly :project_id, :key, :original_key, :source_copy
 
   scope :in_blob, ->(blob) { where(project_id: blob.project_id, sha_raw: blob.sha_raw) }
   scope :by_key, -> { order('key_prefix ASC') }
