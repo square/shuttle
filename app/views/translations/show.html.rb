@@ -15,11 +15,13 @@
 #    limitations under the License.
 
 require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
+require Rails.root.join('app', 'helpers', 'history.html.rb')
 
 module Views
   module Translations
     class Show < Views::Layouts::Application
       needs :translation
+      include Views::Translations::History
 
       protected
 
@@ -30,6 +32,7 @@ module Views
           source_info
           copy_info
           status_info
+          history_info
         end
       end
 
