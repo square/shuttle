@@ -415,7 +415,11 @@ class Commit < ActiveRecord::Base
     tree.blobs.each do |name, blob|
       blob_path   = "#{path}/#{name}"
       blob_object = if options[:blobs]
-                      options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                      begin
+                        options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                      rescue ActiveRecord::RecordNotUnique
+                        project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
+                      end
                     else
                       project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
                     end
