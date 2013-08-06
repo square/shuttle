@@ -214,7 +214,9 @@ class Translation < ActiveRecord::Base
   # approved), and therefore, manifests that should now be stale would not be,
   # were it not for this handy hook
   def expire_affected_cached_manifests
-    return unless copy_changed? && approved? && !approved_changed?
+    # can't use copy_changed? because we overwrite the copy with itself, which
+    # does record a change (sigh)
+    return unless (copy != copy_was) && approved? && !approved_changed?
     # clear out existing cache entries if present
     TranslationCachedManifestExpirer.perform_once self.id
   end
