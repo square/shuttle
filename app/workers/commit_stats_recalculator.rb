@@ -44,9 +44,10 @@ class CommitStatsRecalculator
     commit.words_new
     commit.words_pending
 
-    keys_now_ready = commit.keys.includes(:project, :translations).select(&:should_become_ready?)
-    Key.where(id: keys_now_ready.map(&:id)).update_all(ready: true)
-    keys_now_ready.each { |k| KeyReadinessRecalculator.perform_once k.id } if should_recalculate_affected_commits
+    ready_keys, not_ready_keys = commit.keys.includes(:project, :translations).partition(&:should_become_ready?)
+    ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
+    not_ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
+    commit.keys.find_each { |k| KeyReadinessRecalculator.perform_once k.id } if should_recalculate_affected_commits
 
     commit.recalculate_ready!
     commit.save!
