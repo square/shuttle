@@ -74,8 +74,14 @@ class SourceGlossaryEntry < ActiveRecord::Base
   extend LocaleField
   locale_field :source_locale, from: :source_rfc5646_locale
 
-  extend SearchableField
-  searchable_field :source_copy, language_from: :source_locale
+  include Tire::Model::Search
+  include Tire::Model::Callbacks
+  mapping do
+    indexes :source_copy, analyzer: 'snowball', as: 'source_copy'
+    indexes :id, type: 'string', index: :not_analyzed
+    indexes :source_rfc5646_locale, type: 'string'
+    indexes :due_date, type: 'date', as: 'due_date'
+  end
 
   def as_json(options=nil)
     options ||= {}
