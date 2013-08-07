@@ -84,6 +84,7 @@ class Translation < ActiveRecord::Base
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
   before_validation :approve_translation_made_by_reviewer, on: :update
   before_validation :count_words
+  before_validation :populate_pseudo_translation
 
   before_save { |obj| obj.translated = obj.copy.to_bool; true } # in case validation was skipped
   before_update :reset_reviewed, unless: :preserve_reviewed_status
@@ -207,6 +208,12 @@ class Translation < ActiveRecord::Base
 
   def count_words
     self.words_count = source_copy.split(/\s+/).size
+  end
+
+  def populate_pseudo_translation
+    return true unless locale == PseudoTranslator.pseudo_locale
+    self.copy ||= PseudoTranslator.pseudo_translation_for(source_copy)
+    self.approved ||= true
   end
 
   # if the translation was updated post-approval, no associated commits will

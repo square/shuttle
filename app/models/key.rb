@@ -187,26 +187,6 @@ class Key < ActiveRecord::Base
     end
   end
 
-  # Creates the special pseudo-translation if this key is supposed to be
-
-  include PseudoTranslator
-  def add_pseudo_translation
-    pp "in add pseudo" # TODO (wenley) remove
-    return unless project.targeted_locales.include? pseudo_locale # TODO (wenley) remove
-    base_translation = translations.base.first
-    return unless base_translation
-
-    pp "going to add" # TODO (wenley) remove
-    translations.in_locale(pseudo_locale).create_or_update!(
-      source_copy:              base_translation.source_copy,
-      copy:                     pseudo_translation_for(base_translation.source_copy),
-      approved:                 true,
-      source_rfc5646_locale:    base_translation.source_locale,
-      rfc5646_locale:           pseudo_locale,
-      skip_readiness_hooks:     true,
-      preserve_reviewed_status: true)
-  end
-
   # Recalculates the value of the `ready` column and updates the record.
 
   def recalculate_ready!
