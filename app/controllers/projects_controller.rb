@@ -222,14 +222,19 @@ class ProjectsController < ApplicationController
     end
   end
 
+  include PseudoTranslator
   def project_params
     # too hard to do this with strong parameters :(
-    params[:project].to_hash.slice(*%w(
+    project_params = params[:project].to_hash.slice(*%w(
         name repository_url base_rfc5646_locale due_date cache_localization
         webhook_url skip_imports cache_manifest_formats key_exclusion
         key_inclusions skip_paths only_paths watched_branches
         targeted_rfc5646_locales key_locale_exclusions key_locale_inclusions
         only_importer_paths skip_importer_paths
     ))
+    if params[:project].to_hash["pseudo_translate"]
+      project_params[pseudo_locale] = true
+    end
+    project_params
   end
 end

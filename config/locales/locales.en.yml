@@ -8189,6 +8189,8 @@ en:
           _END_: Scottish Standard English
         scouse:
           _END_: Scouse
+        pseudot:
+          _END_: Pseudo-English
       ja:
         hepburn:
           _END_: Hepburn romanization

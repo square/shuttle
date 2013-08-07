@@ -36,6 +36,7 @@ en:
         name: name
         repository_url: repository URL
         base_rfc5646_locale: source locale
+        pseudo_translation_option: generate pseudo-translation?
         webhook_url: webhook URL
         targeted_rfc5646_locales: targeted localizations
         skip_imports: don’t use these importers

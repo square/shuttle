@@ -224,6 +224,8 @@ module Importer
           skip_readiness_hooks:     true,
           preserve_reviewed_status: true)
 
+      key.add_pseudo_translation if @blob.project.targeted_locales.include? pseudo_locale
+
       # add additional pending translations if necessary
       key.add_pending_translations
     end
