@@ -19,6 +19,7 @@ FactoryGirl.define do
     sequence(:revision) { rand(16**40).to_s(16).rjust(40, '0') }
     message "Fixed nil error in foo_controller.rb"
     committed_at { Time.now }
+    ready true
     skip_import true
     skip_sha_check true
   end

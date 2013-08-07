@@ -258,21 +258,19 @@ Ember.I18n.locales.translations.fr = {
     end
 
     it "should 404 if an incomplete locale is provided" do
-      @commit.update_attribute :ready, false
+      @commit.update_column :ready, false
 
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'yaml'
       response.status.should eql(404)
     end
 
     it "should 404 if an invalid commit SHA is provided" do
-      @commit.update_attribute :ready, false
-
       get :manifest, project_id: @project.to_param, id: 'deadbeef', format: 'yaml'
       response.status.should eql(404)
     end
 
     it "should not 404 if the partial param is set" do
-      @commit.update_attribute :ready, false
+      @commit.update_column :ready, false
 
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'yaml', partial: 'true'
       response.status.should eql(200)
