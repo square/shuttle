@@ -12,17 +12,31 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+# A library that generates Western mostly Latin-alphabet text to challenge
+# rendering of translated texts.
+#
+# @example
+#   PseudoTranslator.pseudo_translation_for("a word")
+#     => "éßt inventore"
+#     => "ut fügå"
+#   PseudoTranslator.pseudo_translation_for("a slightly longer and more complex phrase")
+#     => "molestiae eius éå vél cum åüþ aut"
+#     => "nòn quia qüîå quis quis rém qui"
 
 class PseudoTranslator
   class << self
+    # @returns [String] The RFC5646 code for the created pseudo-locale
     def pseudo_rfc5646
       "en-pseudo"
     end
 
+    # @returns [Locale] The created Pseudo-Locale
     def pseudo_locale
       Locale.from_rfc5646(pseudo_rfc5646)
     end
 
+    # @param [String] source_copy The original string
+    # @returns [String] A tricky string of approximately the same form
     def pseudo_translation_for(source_copy)
       sentences = source_copy.split(".")
       words = source_copy.split
