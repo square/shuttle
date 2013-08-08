@@ -54,6 +54,50 @@ class PseudoTranslator
 
   private
 
+  # Generating words
+
+  def pseudo_word(short_rate=0.5, spice_rate=0.5)
+    word = rand < short_rate ? pseudo_short_word : pseudo_long_word
+    rand < spice_rate ? spicefy(word) : word
+  end
+  def pseudo_phrase(num_words=rand(3..15))
+    (1..num_words).map { |_| pseudo_word(0.8) }.join(" ")
+  end
+  def pseudo_paragraph(num_sentences)
+    (1..num_sentences).map { |_| pseudo_phrase }.join(". ")
+  end
+
+  # Specifics
+
+  def short_words
+    @short_words ||= Faker::Base.translate('faker.lorem.words', locale: @locale).select{ |w| w.length <= 5 }
+  end
+  def long_words
+    @long_words ||= Faker::Base.translate('faker.lorem.words', locale: @locale).select{ |w| w.length > 6 }
+  end
+
+  def pseudo_short_word
+    short_words.sample[0..rand(1..5)]
+  end
+
+  def pseudo_long_word
+    long_words.sample(rand(1..3)).join("")
+  end
+
+
+  # For adding enhancements to strings
+
+  def spicefy(phrase)
+    punctuate_rate = 0.4
+    code_rate = 0.1
+    word = spices.reduce(phrase) { |p, spice|
+      k = spice[0]
+      v = spice[1]
+      p.sub(/#{k}/, v)
+    } + (rand < punctuate_rate ? punctuation : "")
+    rand < code_rate ? codify(word) : word
+  end
+
   def spices
     [
       # Spanish
@@ -83,38 +127,39 @@ class PseudoTranslator
     ]
   end
 
-  def spicefy(phrase)
-    spices.reduce(phrase) do |p, spice|
-      k = spice[0]
-      v = spice[1]
-      p.sub(/#{k}/, v)
-    end
+  def code_strings
+    [
+      "\#\{%s\}",
+      "\%\@%s",
+      "\%o%s",
+      "\%d%s",
+      "\%x%s",
+      "%%",
+    ]
+  end
+  def codify(word)
+    code_strings.sample.sub("%s", word)
   end
 
-  def short_words
-    @short_words ||= Faker::Base.translate('faker.lorem.words', locale: @locale).select{ |w| w.length <= 5 }
+  def simple_punctuation
+    '!@#$%^&*()[]{}/=\?+|;:,<.>\'"`~-_'.chars.to_a
   end
-  def long_words
-    @long_words ||= Faker::Base.translate('faker.lorem.words', locale: @locale).select{ |w| w.length > 6 }
+  def international_punctuation
+    [
+      "\u00A1", # ¿
+      "\u00BF", # ¡
+      "\u2018", # Curly left quote
+      "\u2019", # Curly apostrophe
+      "\u2026", # …
+      "\u2030", # ‰
+      "\u2031", # ‱
+      "\u2032",
+      "\u203D",
+      "\u22EF", # Midline ellipsis
+      "\uFE10",
+    ]
   end
-
-  def pseudo_short_word
-    short_words.sample
-  end
-
-  def pseudo_long_word
-    long_words.sample
-  end
-
-  def pseudo_word(short_rate=0.5, spice_rate=0.5)
-    word = rand < short_rate ? pseudo_short_word : pseudo_long_word
-    rand < spice_rate ? spicefy(word) : word
-  end
-  def pseudo_phrase(num_words=rand(3..15))
-    (1..num_words).map { |_| pseudo_word(0.8) }.join(" ")
-  end
-
-  def pseudo_paragraph(num_sentences)
-    (1..num_sentences).map { |_| pseudo_phrase }.join(". ")
+  def punctuation(international_rate=0.8)
+    rand < international_rate ? international_punctuation.sample : simple_punctuation.sample
   end
 end
