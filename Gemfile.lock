@@ -204,10 +204,6 @@ GEM
       sprockets (~> 2.8)
     sql_origin (1.1.0)
       rails (>= 4.0)
-    squash_rails (1.1.4)
-      squash_ruby
-    squash_ruby (1.2.0)
-      json
     stringex (2.0.3)
     temple (0.6.5)
     therubyracer (0.11.4)
@@ -281,9 +277,6 @@ DEPENDENCIES
   slugalicious
   sprockets-rails
   sql_origin
-  squash_logcreate!
-  squash_rails
-  squash_ruby
   therubyracer
   twitter-bootstrap-rails
   uea-stemmer
