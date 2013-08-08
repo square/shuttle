@@ -215,6 +215,7 @@ class Translation < ActiveRecord::Base
     self.copy ||= PseudoTranslator.pseudo_translation_for(source_copy)
     self.translated = true
     self.approved = true
+    self.preserve_reviewed_status = true
   end
 
   # if the translation was updated post-approval, no associated commits will
