@@ -39,6 +39,9 @@ gem 'libarchive'
 # WORD SUBSTITUTION
 gem 'uea-stemmer'
 
+# PSEUDO TRANSLATION
+gem 'faker'
+
 # BACKGROUND JOBS
 gem 'sidekiq'
 # Versions below 1.3.0 cause Sidekiq dashboard to break

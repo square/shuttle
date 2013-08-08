@@ -80,6 +80,8 @@ GEM
     factory_girl_rails (4.2.1)
       factory_girl (~> 4.2.0)
       railties (>= 3.0.0)
+    faker (1.2.0)
+      i18n (~> 0.5)
     find_or_create_on_scopes (1.4.0)
       activerecord (>= 3.1)
     font-awesome-rails (3.2.1.2)
@@ -243,6 +245,7 @@ DEPENDENCIES
   devise
   erector!
   factory_girl_rails
+  faker
   find_or_create_on_scopes
   font-awesome-rails
   git!
