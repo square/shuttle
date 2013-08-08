@@ -247,4 +247,47 @@ describe Key do
       excluded.translations.first.rfc5646_locale.should eql('fr')
     end
   end
+
+  describe "#should_become_ready?" do
+    before :each do
+      @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'en' => true, 'fr' => true, 'de' => false})
+      @key     = FactoryGirl.create(:key, project: @project)
+      FactoryGirl.create :translation, rfc5646_locale: 'en', key: @key, approved: true
+      @req_translation = FactoryGirl.create(:translation, rfc5646_locale: 'fr', key: @key, approved: true)
+      FactoryGirl.create :translation, rfc5646_locale: 'de', key: @key, approved: false
+    end
+
+    context "[translations loaded]" do
+      before :each do
+        @key.reload.translations(true)
+        expect(@key.translations).to be_loaded
+      end
+
+      it "should return true if all translations in required locales are approved" do
+        expect(@key.should_become_ready?).to be_true
+      end
+
+      it "should return false if a translation in a required locale is not approved" do
+        @req_translation.update_attribute :approved, nil
+        @key.translations(true)
+        expect(@key.should_become_ready?).to be_false
+      end
+    end
+
+    context "[translations not loaded]" do
+      before :each do
+        @key.reload
+        expect(@key.translations).not_to be_loaded
+      end
+
+      it "should return true if all translations in required locales are approved" do
+        expect(@key.should_become_ready?).to be_true
+      end
+
+      it "should return false if a translation in a required locale is not approved" do
+        @req_translation.update_attribute :approved, nil
+        expect(@key.should_become_ready?).to be_false
+      end
+    end
+  end
 end

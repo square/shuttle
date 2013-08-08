@@ -49,7 +49,7 @@ CREATE TABLE commits (
     revision_raw bytea NOT NULL,
     message character varying(256) NOT NULL,
     committed_at timestamp without time zone NOT NULL,
-    ready boolean DEFAULT true NOT NULL,
+    ready boolean DEFAULT false NOT NULL,
     loading boolean DEFAULT false NOT NULL,
     metadata text,
     created_at timestamp without time zone,
@@ -835,3 +835,5 @@ INSERT INTO schema_migrations (version) VALUES ('20130614052719');
 INSERT INTO schema_migrations (version) VALUES ('20130619195215');
 
 INSERT INTO schema_migrations (version) VALUES ('20130801190316');
+
+INSERT INTO schema_migrations (version) VALUES ('20130807224704');

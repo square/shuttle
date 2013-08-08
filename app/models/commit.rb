@@ -90,7 +90,7 @@ class Commit < ActiveRecord::Base
             presence: true
   validates :revision_raw,
             presence:   true,
-            uniqueness: {scope: :project_id}
+            uniqueness: {scope: :project_id, on: :create}
   validates :message,
             presence: true,
             length:   {maximum: 256}
@@ -103,6 +103,8 @@ class Commit < ActiveRecord::Base
   validates :due_date,
             timeliness: {type: :date},
             allow_nil:  true
+
+  attr_readonly :project_id, :revision_raw, :message, :committed_at
 
   extend GitObjectField
   git_object_field :revision,
@@ -167,10 +169,12 @@ class Commit < ActiveRecord::Base
   def import_strings(options={})
     raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
 
+    blobs = project.blobs.includes(:project) # preload blobs for performance
+
     # clear out existing keys so that we can import all new keys
     keys.clear unless options[:locale]
     # perform the recursive import
-    import_tree commit!.gtree, '', options
+    import_tree commit!.gtree, '', options.merge(blobs: blobs)
     # normally this is performed once the last worker is removed from the list,
     # but if we're not using workers, we need to do it here
     update_stats_at_end_of_loading(options[:locale]) if options[:inline]
@@ -405,7 +409,15 @@ class Commit < ActiveRecord::Base
   def import_tree(tree, path, options={})
     tree.blobs.each do |name, blob|
       blob_path   = "#{path}/#{name}"
-      blob_object = project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
+      blob_object = if options[:blobs]
+                      begin
+                        options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                      rescue ActiveRecord::RecordNotUnique
+                        project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
+                      end
+                    else
+                      project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
+                    end
 
       imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
       imps.each do |importer|

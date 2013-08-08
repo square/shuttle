@@ -51,7 +51,7 @@ describe Localizer::Storyboard do
   end
 
   it "should localize a Storyboard file" do
-    compiler = Compiler.new(@commit)
+    compiler = Compiler.new(@commit.reload)
     file     = compiler.localize
 
     entries = Hash.new

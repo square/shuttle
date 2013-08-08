@@ -45,7 +45,7 @@ describe Localizer::Xib do
   end
 
   it "should localize a Xib file" do
-    compiler = Compiler.new(@commit)
+    compiler = Compiler.new(@commit.reload)
     file     = compiler.localize
 
     entries = Hash.new
