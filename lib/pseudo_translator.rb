@@ -153,10 +153,11 @@ class PseudoTranslator
       "\u2026", # …
       "\u2030", # ‰
       "\u2031", # ‱
-      "\u2032",
-      "\u203D",
+      "\u2032", # 'prime' apostrophe
+      "\u203D", # Interrobang
+      "\u22EE", # Vertical ellipsis
       "\u22EF", # Midline ellipsis
-      "\uFE10",
+      "\uFE10", # Fancy comma
     ]
   end
   def punctuation(international_rate=0.8)
