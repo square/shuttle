@@ -51,40 +51,46 @@ class PseudoTranslator
 
     private
 
-    def spicefy(phrase)
+    @@spices = [
       # Spanish
-      phrase.sub!(/e/, "\u00E9") # é, acute accent
+      ["e", "\u00E9"], # é, acute accent
 
       # French
-      phrase.sub!(/o/, "\u00F2") # ò, Grave accent
-      phrase.sub!(/u/, "\u00FC") # ü, umlaut
-      phrase.sub!(/i/, "\u00EE") # î, circumflex
-      phrase.sub!(/c/, "\u00E7") # ç, limaçon
+      ["o", "\u00F2"], # ò, Grave accent
+      ["u", "\u00FC"], # ü, umlaut
+      ["i", "\u00EE"], # î, circumflex
+      ["c", "\u00E7"], # ç, limaçon
 
       # Swedish
-      phrase.sub!(/a/, "\u00E5") # å, a-ring
-      phrase.sub!(/A/, "\u00C5") # Å,
+      ["a", "\u00E5"], # å, a-ring
+      ["A", "\u00C5"], # Å,
 
       # Czech
-      phrase.sub!(/c/, "\u010D") # č, háček
+      ["c", "\u010D"], # č, háček
 
       # German
-      phrase.sub!(/s/, "\u00DF") # ß, esset
+      ["s", "\u00DF"], # ß, esset
 
       # Hungarian
-      phrase.sub!(/o/, "\u030B") # ő, double accent
+      ["o", "\u0151"], # ő, double accent
 
       # Icelandic
-      phrase.sub!(/t/, "\u00FE") # þ, thorn
+      ["t", "\u00FE"], # þ, thorn
+    ]
 
-      phrase
+    def spicefy(phrase)
+      @@spices.reduce(phrase) do |p, spice|
+        k = spice[0]
+        v = spice[1]
+        p.sub(/#{k}/, v)
+      end
     end
 
     def short_words
-      @short_words ||= Faker::Base.translate('faker.lorem.words').select{ |w| w.length < 5 }
+      @@short_words ||= Faker::Base.translate('faker.lorem.words').select{ |w| w.length <= 5 }
     end
     def long_words
-      @long_words ||= Faker::Base.translate('faker.lorem.words').select{ |w| w.length > 8 }
+      @@long_words ||= Faker::Base.translate('faker.lorem.words').select{ |w| w.length > 6 }
     end
 
     def pseudo_short_word
@@ -105,9 +111,6 @@ class PseudoTranslator
 
     def pseudo_paragraph(num_sentences)
       (1..num_sentences).map { |_| pseudo_phrase }.join(". ")
-    end
-
-    def pseudo_weird
     end
   end
 end
