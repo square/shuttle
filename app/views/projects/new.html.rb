@@ -94,8 +94,12 @@ module Views
                 f.content_tag_field 'div', :targeted_rfc5646_locales, 'data-value' => @project.targeted_rfc5646_locales.to_json
                 p class: 'help-block' do
                   text "A comma-delimited list of locales to target. Include "
-                  code PseudoTranslator.pseudo_rfc5646
-                  text " to generate pseudo-translations"
+                  text "any of " if PseudoTranslator.supported_rfc5646_locales.count > 1
+                  PseudoTranslator.supported_rfc5646_locales.each { |l|
+                    code l
+                    text " "
+                  }
+                  text "to generate pseudo-translations."
                 end
               end
             end
