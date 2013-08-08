@@ -16,10 +16,11 @@
 # rendering of translated texts.
 #
 # @example
-#   PseudoTranslator.pseudo_translation_for("a word")
+#   p = PseudoTranslator.new(Locale.from_rfc5646("en-pseudo"))
+#   p.translate("a word")
 #     => "éßt inventore"
 #     => "ut fügå"
-#   PseudoTranslator.pseudo_translation_for("a slightly longer and more complex phrase")
+#   p.translate("a slightly longer and more complex phrase")
 #     => "molestiae eius éå vél cum åüþ aut"
 #     => "nòn quia qüîå quis quis rém qui"
 
@@ -40,7 +41,7 @@ class PseudoTranslator
 
   # @param [String] source_copy The original string
   # @return [String] A tricky string of approximately the same form
-  def pseudo_translation_for(source_copy)
+  def translate(source_copy)
     sentences = source_copy.split(".")
     words = sentences.map { |s| s.split(" ") }
     currency_indexes = words.flatten.each_with_index.select { |w, i| w.match(/[#{currencies}]/) }.map { |_, i| i }

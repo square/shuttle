@@ -212,7 +212,7 @@ class Translation < ActiveRecord::Base
 
   def populate_pseudo_translation
     return true unless locale.pseudo?
-    self.copy ||= PseudoTranslator.new(locale).pseudo_translation_for(source_copy)
+    self.copy ||= PseudoTranslator.new(locale).translate(source_copy)
     self.translated = true
     self.approved = true
     self.preserve_reviewed_status = true
