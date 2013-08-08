@@ -39,6 +39,10 @@ class PseudoTranslator
     ["en-pseudo"]
   end
 
+  def self.supported_locales
+    supported_rfc5646_locales.map { |l| Locale.from_rfc5646(l) }
+  end
+
   # @param [String] source_copy The original string
   # @return [String] A tricky string of approximately the same form
   def translate(source_copy)
@@ -162,7 +166,7 @@ class PseudoTranslator
   end
 
   def simple_punctuation
-    '!@#$%^&*()[]{}/=\?+|;:,<.>\'"`~-_'.chars.to_a
+    '!@#$%^&*()[]{}/=\?+|;:,<>\'"`~-_'.chars.to_a
   end
   def international_punctuation
     [
