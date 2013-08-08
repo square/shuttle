@@ -44,7 +44,7 @@ class PseudoTranslator
         pseudo_word
       elsif sentences.count == 1
         pseudo_phrase(words.count)
-      elsif
+      else
         pseudo_paragraph(sentences.count)
       end
     end
