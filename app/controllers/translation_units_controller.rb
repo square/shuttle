@@ -116,7 +116,7 @@ class TranslationUnitsController < ApplicationController
 
   def update
     @translation_unit.update_attributes translation_unit_params
-    flash[:success] = t('controllers.translation_units.update.success')
+    flash[:success] = t('controllers.translation_units.update.success') if @translation_unit.valid?
     respond_with @translation_unit, location: translation_units_url
   end
 
