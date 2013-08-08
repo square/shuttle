@@ -255,6 +255,11 @@ class Locale
     parent.specified_parts.all? { |part| specified_parts.include?(part) }
   end
 
+  # @return [true, false] Whether this locale is a pseudo-locale.
+  def pseudo?
+    return variants.include? "pseudo"
+  end
+
   # @private
   def specificity
     specificity = 1
