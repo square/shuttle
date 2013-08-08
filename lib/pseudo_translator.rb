@@ -42,14 +42,14 @@ class PseudoTranslator
   # @return [String] A tricky string of approximately the same form
   def pseudo_translation_for(source_copy)
     sentences = source_copy.split(".")
-    words = source_copy.split
-    currency_indexes = words.each_with_index.select { |w, i| w.match(/[#{currencies}]/) }.map { |_, i| i }
-    to_return = if words.count == 1
+    words = sentences.map { |s| s.split(" ") }
+    currency_indexes = words.flatten.each_with_index.select { |w, i| w.match(/[#{currencies}]/) }.map { |_, i| i }
+    to_return = if words.flatten.count == 1
       pseudo_word
     elsif sentences.count == 1
-      pseudo_phrase(words.count)
+      pseudo_phrase(words.flatten.count)
     else
-      pseudo_paragraph(sentences.count)
+      pseudo_paragraph(words.map { |s| s.count })
     end
     add_currencies(to_return, currency_indexes)
   end
@@ -65,8 +65,8 @@ class PseudoTranslator
   def pseudo_phrase(num_words=rand(3..15))
     (1..num_words).map { |_| pseudo_word(0.8) }.join(" ")
   end
-  def pseudo_paragraph(num_sentences)
-    (1..num_sentences).map { |_| pseudo_phrase }.join(". ")
+  def pseudo_paragraph(words_per_sentence)
+    words_per_sentence.map { |num_words| pseudo_phrase(num_words) }.join(". ")
   end
 
   # Specifics
