@@ -32,8 +32,10 @@ module Views
 
       def translation_side
         h3 @translation_unit.locale.name
-        form_for @translation_unit do |f|
+        form_for @translation_unit, builder: ErrorTrackingFormBuilder do |f|
           f.text_area :copy, class: 'span12'
+
+          f.other_errors_tag
 
           div(class: 'form-actions') do
             f.submit class: 'btn btn-primary'

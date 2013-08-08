@@ -84,6 +84,7 @@ class Translation < ActiveRecord::Base
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
   before_validation :approve_translation_made_by_reviewer, on: :update
   before_validation :count_words
+  before_validation :populate_pseudo_translation
 
   before_save { |obj| obj.translated = obj.copy.to_bool; true } # in case validation was skipped
   before_update :reset_reviewed, unless: :preserve_reviewed_status
@@ -115,9 +116,18 @@ class Translation < ActiveRecord::Base
   attr_accessor :modifier
 
   # @private
-  # A hack to get around assign_attributes call in TranslationController
-  # @return [String] The true previous value of copy
-  attr_accessor :copy_actually_was
+  # The attributes we want TranslationChange to log
+  def self.tracked_attributes() [:approved, :copy] end
+
+  tracked_attributes.each { |a| attr_accessor :"#{a}_actually_was" }
+
+  # Method used to cached the current state of the Translation
+  # Required before making changes to a Translation that will be saved
+  def freeze_tracked_attributes
+    self.class.tracked_attributes.each do |a|
+      send(:"#{a}_actually_was=", send(a))
+    end
+  end
 
   scope :in_locale, ->(*langs) {
     if langs.size == 1
@@ -207,6 +217,14 @@ class Translation < ActiveRecord::Base
 
   def count_words
     self.words_count = source_copy.split(/\s+/).size
+  end
+
+  def populate_pseudo_translation
+    return true unless locale.pseudo?
+    self.copy ||= PseudoTranslator.new(locale).translate(source_copy)
+    self.translated = true
+    self.approved = true
+    self.preserve_reviewed_status = true
   end
 
   # if the translation was updated post-approval, no associated commits will

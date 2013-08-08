@@ -1,24 +1,3 @@
-# Files in the config/locales directory are used for internationalization
-# and are automatically loaded by Rails. If you want to use locales other
-# than English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t 'hello'
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t('hello') %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more, please read the Rails Internationalization guide
-# available at http://guides.rubyonrails.org/i18n.html.
-
 en:
   activerecord:
     errors:
@@ -31,6 +10,10 @@ en:
           attributes:
             approved:
               not_translated: cannot be set when translation is pending
+        translation_unit:
+          attributes:
+            source_copy_sha_raw:
+              taken: is a duplicate of another translation unit — you may delete this translation unit
     attributes:
       project:
         name: name
@@ -67,7 +50,9 @@ en:
         source_rfc5646_locale: source locale
         rfc5646_locale: target locale
         source_copy: source copy
+        source_copy_sha_raw: source copy
         copy: target text
+        copy_sha_raw: target text
       user:
         first_name: first name
         approved_rfc5646_locales: locale access privileges
@@ -124,6 +109,9 @@ en:
       user:
         create: Sign Up
         update: Save Changes
+    error_tracking_form:
+      could_not_be_saved: "Could not be saved because of the following errors not associated with any field:"
+      error_pair: "%{field} %{error}"
   date:
     formats:
       mon_day: "%b %-d"
