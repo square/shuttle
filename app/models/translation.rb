@@ -115,9 +115,18 @@ class Translation < ActiveRecord::Base
   attr_accessor :modifier
 
   # @private
-  # A hack to get around assign_attributes call in TranslationController
-  # @return [String] The true previous value of copy
-  attr_accessor :copy_actually_was
+  # The attributes we want TranslationChange to log
+  def self.tracked_attributes() [:approved, :copy] end
+
+  tracked_attributes.each { |a| attr_accessor :"#{a}_actually_was" }
+
+  # Method used to cached the current state of the Translation
+  # Required before making changes to a Translation that will be saved
+  def freeze_tracked_attributes
+    self.class.tracked_attributes.each do |a|
+      send(:"#{a}_actually_was=", send(a))
+    end
+  end
 
   scope :in_locale, ->(*langs) {
     if langs.size == 1

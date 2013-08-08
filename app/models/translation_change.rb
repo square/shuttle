@@ -44,18 +44,16 @@ class TranslationChange < ActiveRecord::Base
 
   def self.create_from_translation!(translation)
     # Only track changes we care about
-    tracked = [:translated, :approved, :copy]
-    return unless tracked.any? { |t| translation.send(:"#{t}_changed?") }
-    change = TranslationChange.new(translation: translation, user: translation.modifier)
-    diff = translation.changes.slice("copy", "approved")
+    return unless Translation.tracked_attributes.any? { |t| translation.send(:"#{t}_changed?") }
+    diff = {}
+    Translation.tracked_attributes.each do |a|
+      diff[a.to_s] = [translation.send(:"#{a}_actually_was"), translation.send(a)]
+    end
 
-    # Necessary due to assign_attributes pushing back the cache; see TranslationsController#update
-    diff["copy"] = [translation.copy_actually_was, translation.copy] if translation.copy_actually_was
     diff = diff.select { |k,v| v[0] != v[1] } # Filter for duplicates
     return if diff.empty?
 
-    change.diff = diff
-    change.save!
+    change = TranslationChange.create(translation: translation, user: translation.modifier, diff: diff)
     change.freeze
   end
 
