@@ -29,8 +29,8 @@ class PseudoTranslator
   #   translations in. Must be a pseudo-locale (i.e. have the "pseudo"
   #   variant).
   def initialize(locale)
-    raise ArgumentError("Not a pseudo-locale") unless locale.pseudo?
-    raise ArgumentError("Not a supported locale") unless self.class.supported_rfc5646_locales.include? locale.name
+    raise ArgumentError, "Not a pseudo-locale" unless locale.pseudo?
+    raise ArgumentError, "Not a supported locale" unless self.class.supported_rfc5646_locales.include? locale.rfc5646
     @locale = locale
   end
 
