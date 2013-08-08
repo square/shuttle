@@ -43,13 +43,15 @@ class PseudoTranslator
   def pseudo_translation_for(source_copy)
     sentences = source_copy.split(".")
     words = source_copy.split
-    if words.count == 1
+    currency_indexes = words.each_with_index.select { |w, i| w.match(/[#{currencies}]/) }.map { |_, i| i }
+    to_return = if words.count == 1
       pseudo_word
     elsif sentences.count == 1
       pseudo_phrase(words.count)
     else
       pseudo_paragraph(sentences.count)
     end
+    add_currencies(to_return, currency_indexes)
   end
 
   private
@@ -86,6 +88,23 @@ class PseudoTranslator
 
 
   # For adding enhancements to strings
+
+  def add_currencies(phrase, currency_indexes)
+    return phrase if currency_indexes.empty?
+    words = phrase.split(" ")
+    currency_indexes.each { |i| words[i] = currencies + words[i] }
+    words.join(" ")
+  end
+
+  def currencies
+    [
+      "$",
+      "\u00A2", # ¢, US cents
+      "\u00A3", # £, British pound
+      "\u00A5", # Yen
+      "\u20AC", # €, Euro
+    ].join("")
+  end
 
   def spicefy(phrase)
     punctuate_rate = 0.4
