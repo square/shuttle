@@ -46,7 +46,7 @@ module Views
                           change.diff["copy"][1] ? (pre change.full_copy_to) : (div "None")
                         end
                       end
-                      if change.diff["approval"].present?
+                      if change.diff["approved"].present?
                         dd change.approval_transition
                       end
                     end
