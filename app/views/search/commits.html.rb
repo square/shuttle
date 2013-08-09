@@ -48,7 +48,7 @@ module Views
           select_tag 'project_id', options_for_select(project_list)
 
           text " with SHA prefix "
-          text_field_tag 'sha', '', placeholder: 'e.g. 935ad4', id: 'commit-sha-field'
+          text_field_tag 'sha', '', placeholder: '935ad4', id: 'commit-sha-field'
           text ' '
           submit_tag "Search", class: 'btn btn-primary'
         end

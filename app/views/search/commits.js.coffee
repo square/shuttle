@@ -50,15 +50,19 @@ $(window).ready ->
     $('<a/>').text(commit.revision).attr('href', commit.url).appendTo(commitTD)
 
     $('<br/>').appendTo(commitTD)
-    $('<td/>').text(commit.project).appendTo(tr)
+    $('<td/>').text(commit.project.name).appendTo(tr)
 
-    td = $('<td/>').appendTo(tr)
-    klass = if commit.ready
-      'commit-ready'
+    klass = ''
+    status = ''
+    if commit.ready
+      status = 'Ready'
+      klass = 'commit-ready'
     else if commit.loading
-      'commit-loading'
-    else
-      '' # In progress
-    td.text(commit.status).addClass(klass).appendTo(tr)
+      status = 'Loading'
+      klass = 'commit-loading'
+    else # In progress
+      status = 'In Progress'
+      klass = ''
+    $('<td/>').text(status).addClass(klass).appendTo(tr)
 
 

@@ -137,14 +137,7 @@ class SearchController < ApplicationController
     commits.map do |commit|
       commit.as_json.merge(
         url: project_commit_url(commit.project, commit),
-        project: commit.project.name,
-        status: if commit.ready
-                  "Ready"
-                elsif commit.loading
-                  "Loading"
-                else
-                  "In Progress"
-                end
+        project: commit.project
       )
     end
   end
