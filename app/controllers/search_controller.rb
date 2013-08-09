@@ -80,6 +80,21 @@ class SearchController < ApplicationController
     end
   end
 
+  def commits
+    respond_to do |format|
+      format.html
+      format.json do
+        return head(:unprocessable_entity) if params[:project_id].to_i < 0
+        @results = Commit.with_sha_prefix(params[:sha]).
+          limit(params.fetch(:limit, 50))
+        if params[:project_id].to_i > 0
+          @results = @results.joins(:key).where(keys: {project_id: params[:project_id]})
+        end
+        render json: decorate_commits(@results).to_json
+      end
+    end
+  end
+
   private
 
   def decorate_translations(translations)
@@ -114,6 +129,22 @@ class SearchController < ApplicationController
                      end
             )
           end
+      )
+    end
+  end
+
+  def decorate_commits(commits)
+    commits.map do |commit|
+      commit.as_json.merge(
+        url: project_commit_url(commit.project, commit),
+        project: commit.project.name,
+        status: if commit.ready
+                  "Ready"
+                elsif commit.loading
+                  "Loading"
+                else
+                  "In Progress"
+                end
       )
     end
   end
