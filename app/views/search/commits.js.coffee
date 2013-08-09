@@ -20,7 +20,6 @@ $(window).ready ->
   commitScroll = commitTable.infiniteScroll makeCommitURL,
     windowScroll: true
     renderer: (commits) ->
-      formatTable(commitTable)
       for commit in commits
         do (commit) -> addCommit(commitTable, commit)
     dataSourceOptions: {type: 'GET'}
@@ -30,6 +29,7 @@ $(window).ready ->
     $.ajax commitTable.data('url'),
       data: commitSearchForm.serialize()
       success: (commits) ->
+        formatTable(commitTable)
         commitScroll.loadNextPage()
       error: =>
         $('<div/>').addClass('alert alert-error').text("Couldn't load search results").appendTo($('flashes'))
