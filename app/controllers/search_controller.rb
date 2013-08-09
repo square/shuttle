@@ -85,7 +85,7 @@ class SearchController < ApplicationController
       format.html
       format.json do
         return head(:unprocessable_entity) if params[:project_id].to_i < 0
-        @results = Commit.where("encode(revision_raw, 'hex') like ?", "#{params['sha']}%").
+        @results = Commit.with_sha_prefix(params[:sha]).
           limit(params.fetch(:limit, 50))
         if params[:project_id].to_i > 0
           @results = @results.joins(:key).where(keys: {project_id: params[:project_id]})
