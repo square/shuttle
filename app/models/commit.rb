@@ -171,13 +171,18 @@ class Commit < ActiveRecord::Base
 
     blobs = project.blobs.includes(:project) # preload blobs for performance
 
+    # add us as one of the workers, to prevent the commit from prematurely going
+    # ready; let's just invent a job ID for us
+    job_id = SecureRandom.uuid
+    add_worker! job_id
+
     # clear out existing keys so that we can import all new keys
     keys.clear unless options[:locale]
     # perform the recursive import
     import_tree commit!.gtree, '', options.merge(blobs: blobs)
-    # normally this is performed once the last worker is removed from the list,
-    # but if we're not using workers, we need to do it here
-    update_stats_at_end_of_loading(options[:locale]) if options[:inline]
+
+    # this will also kick of stats recalculation for inline imports
+    remove_worker! job_id
   end
 
   # Returns a commit object used to interact with Git.
