@@ -88,7 +88,7 @@ class SearchController < ApplicationController
         @results = Commit.with_sha_prefix(params[:sha]).
           limit(params.fetch(:limit, 50))
         if params[:project_id].to_i > 0
-          @results = @results.joins(:key).where(keys: {project_id: params[:project_id]})
+          @results = @results.joins(:project).where(projects: {id: params[:project_id]})
         end
         render json: decorate_commits(@results).to_json
       end
