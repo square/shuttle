@@ -274,6 +274,11 @@ module Views
             end
           end
 
+          p(class: 'form-inline') do
+            text "Filter for commits starting with "
+            text_field_tag 'sha', '', placeholder: "e.g. 935ab4"
+          end
+
           p { submit_tag 'Filter', class: 'btn btn-primary' }
         end
       end
