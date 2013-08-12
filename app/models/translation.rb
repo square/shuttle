@@ -48,6 +48,7 @@ require 'digest/sha2'
 # |:--------------|:------------------------------------------------------|
 # | `source_copy` | The copy for the string in the project's base locale. |
 # | `copy`        | The translated copy.                                  |
+# | `rules`       | The rules for when this translation applies.          |
 
 class Translation < ActiveRecord::Base
   belongs_to :key, inverse_of: :translations
@@ -58,7 +59,8 @@ class Translation < ActiveRecord::Base
   include HasMetadataColumn
   has_metadata_column(
       source_copy:  {allow_blank: true},
-      copy:         {allow_nil: true}
+      copy:         {allow_nil: true},
+      rules:        {allow_nil: true}
   )
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }
