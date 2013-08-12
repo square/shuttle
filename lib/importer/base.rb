@@ -417,6 +417,14 @@ module Importer
           @importer.add_string key, value, {source: importer.file.path}.merge(options)
         end
       end
+
+      def add_nt_string(key, string, comment, options={})
+        if locale
+          @importer.add_translation key, string, locale
+        else
+          @importer.add_nt_string key, string, comment, {source: importer.file.path}.merge(options)
+        end
+      end
     end
   end
 
