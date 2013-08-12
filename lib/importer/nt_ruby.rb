@@ -12,13 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'digest'
 module Importer
 
   # Parses translatable strings from Ruby i18n `.rb` files.
 
   class NtRuby < NtBase
-    def self.fencers() %w(RubyI18n) end
+    def self.fencers() %w(RubyNt) end
 
     protected
 
@@ -35,6 +34,9 @@ module Importer
         args = match[0]
         message = args.match(string_regex)
         comment = message.post_match.match(string_regex)
+
+        message = message[1..message.size].detect { |m| m.present? }
+        comment = comment[1..comment.size].detect { |c| c.present? }
 
         receiver.add_nt_string(key_for_message_comment(message, comment), message, comment)
       end

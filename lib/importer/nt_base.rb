@@ -16,6 +16,7 @@
 require 'digest'
 
 module Importer
+  # @abstract
   class NtBase < Base
     # @private
     def add_nt_string(key, value, comment, options={})
@@ -49,7 +50,7 @@ module Importer
     end
 
     def key_for_message_comment(message, comment)
-      Digest::SHA.new.update(message + comment).to_s
+      Digest::SHA2.new.update(message + comment).to_s
     end
   end
 end
