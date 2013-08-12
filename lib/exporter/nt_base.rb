@@ -17,22 +17,23 @@ module Exporter
   class NtBase < Base
     def nt_hash(*locales)
       hsh = Hash.new
-      @commit.keys.each do |key|
+      keys = @commit.keys.includes(:translations)
+      keys.each do |key|
         translation_set = {
-          string: key.source_copy,
-          comment: key.comment
+          "string"  => key.source_copy,
+          "comment" => key.comment
         }
         locales = locales.dup
-        locales.delete(key.source_locale) # Don't want to double include default
+        locales.delete(key.translations.first.source_locale) # Don't want to double include default
         translations = key.translations.select { |t| locales.include?(t.locale) }
-        translation_set[:translations] = translations.map { |t|
+        translation_set["translations"] = translations.map { |t|
           {
-            locale: t.locale.rfc5646,
-            string: t.copy,
-            rules: t.rules
-          }
+            "locale" => t.locale.rfc5646,
+            "string" => t.copy,
+            "rules"  => t.rules
+          }.delete_if { |k,v| v.nil? }
         }
-        hsh[key.key] = translation_set
+        hsh[key.key] = translation_set.delete_if { |k,v| v.nil? }
       end
       hsh
     end
