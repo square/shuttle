@@ -19,11 +19,11 @@ class CommitsController < ApplicationController
   # @private
   COMMIT_ATTRIBUTES = [:revision, :description, :due_date, :pull_request_url, :priority]
 
-  before_filter :authenticate_user!, except: [:manifest, :localize]
-  before_filter :monitor_required, except: [:manifest, :localize]
+  before_filter :authenticate_user!, except: [:manifest, :localize, :nt_manifest]
+  before_filter :monitor_required, except: [:manifest, :localize, :nt_manifest]
   before_filter :monitor_required, only: :destroy
   before_filter :find_project
-  before_filter :find_commit, except: [:create, :manifest, :localize]
+  before_filter :find_commit, except: [:create, :manifest, :localize, :nt_manifest]
 
   respond_to :html, :json, only: [:show, :create, :update, :destroy, :import, :sync, :match, :redo]
 
@@ -252,6 +252,67 @@ class CommitsController < ApplicationController
 
     compiler = Compiler.new(@commit)
     file = compiler.manifest(request.format,
+                             locale:  params[:locale].presence,
+                             partial: params[:partial].parse_bool,
+                             force:   params[:force].parse_bool)
+
+    response.charset                   = file.encoding
+    response.headers['X-Git-Revision'] = @commit.revision
+    send_data extract_data(file),
+              filename: file.filename,
+              type:     file.mime_type
+    file.close
+
+  rescue Compiler::CommitNotReadyError
+    render text: 'Commit not ready', status: :not_found
+  rescue Compiler::UnknownLocaleError
+    render text: 'Unknown locale', status: :bad_request
+  rescue Compiler::UnknownExporterError
+    render text: 'Unknown format', status: :not_acceptable
+  rescue ActiveRecord::RecordNotFound
+    render text: 'Unknown commit', status: :not_found
+  end
+
+  # Renders a digest of all translated strings applying to a revision. The
+  # request format is used to determine in what format the output will be
+  # rendered.
+  #
+  # The response will be a 404 Not Found if the Commit is not yet fully
+  # localized and approved, unless the `partial` query parameter is set.
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:project_id/commits/:id/manifest`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+  #
+  # Query Parameters
+  #
+  # |           |                                                                               |
+  # |:----------|:------------------------------------------------------------------------------|
+  # | `locale`  | The RFC 5646 identifier for a locale.                                         |
+  # | `partial` | If `true`, partially-translated manifests are allowed.                        |
+  # | `force`   | If `true`, forces a recompile of the manifest even if there is a cached copy. |
+  #
+  # Responses
+  # ---------
+  #
+  # ### Commit is not fully localized
+  #
+  # 404 Not Found is returned with no body.
+
+  def nt_manifest
+    @commit = @project.commit!(params[:id], skip_create: true)
+
+    compiler = Compiler.new(@commit)
+    file = compiler.nt_manifest(request.format,
                              locale:  params[:locale].presence,
                              partial: params[:partial].parse_bool,
                              force:   params[:force].parse_bool)
