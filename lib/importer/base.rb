@@ -50,12 +50,8 @@ module Importer
 
     # @return [Array<Class>] All known implementations of the base class.
     #   Automatically updated.
-    class_attribute :implementations
-    self.implementations = []
-
-    # @private
-    def self.inherited(subclass)
-      self.implementations << subclass
+    def self.implementations
+      self.subclasses.map { |subclass| [subclass, subclass.implementations] }.flatten
     end
 
     # @return [String] The human-readable description of this importer's file
