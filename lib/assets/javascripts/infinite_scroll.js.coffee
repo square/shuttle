@@ -79,7 +79,7 @@ class InfiniteScroll
 
   # @private
   loadAndAppend: ->
-    @dataSource.fetch(200)
+    @dataSource.fetch(50)
       .then (records) =>
         @append records
       , =>

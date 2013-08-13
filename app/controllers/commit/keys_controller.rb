@@ -17,11 +17,14 @@
 # progress.
 
 class Commit::KeysController < ApplicationController
+  # The number of records to return by default.
+  PER_PAGE = 50
+
   before_filter :find_project
   before_filter :find_commit
   respond_to :json
 
-  # Responds with a list of Keys associated with a Commit. Fifty records are
+  # Responds with a list of Keys associated with a Commit. 50 records are
   # returned at a time. The key JSON includes all translations of that Key.
   #
   # Routes
@@ -49,7 +52,7 @@ class Commit::KeysController < ApplicationController
   def index
     offset = params[:offset].to_i
     limit  = params[:limit].to_i
-    limit = 50 if limit < 1
+    limit = PER_PAGE if limit < 1
 
     @keys = @commit.keys.by_key.offset(offset).limit(limit).includes(:translations, :slugs)
 

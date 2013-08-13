@@ -13,6 +13,9 @@
 #    limitations under the License.
 
 class SearchController < ApplicationController
+  # The number of records to return by default.
+  PER_PAGE = 50
+
   before_filter :authenticate_user!
 
   def translations
@@ -22,7 +25,7 @@ class SearchController < ApplicationController
       format.json do
         @results = Translation.order('translations.id DESC').
             offset(params[:offset].to_i).
-            limit(params.fetch(:limit, 50)).
+            limit(params.fetch(:limit, PER_PAGE)).
             includes(key: [:slugs, :project])
 
         project_id = params[:project_id].to_i
@@ -68,7 +71,7 @@ class SearchController < ApplicationController
         else
           @results = Key.by_key.
               offset(params[:offset].to_i).
-              limit(params.fetch(:limit, 50)).
+              limit(params.fetch(:limit, PER_PAGE)).
               includes(:translations, :project, :slugs).
               where(keys: {project_id: params[:project_id]}).
               original_key_query(params[:filter]).

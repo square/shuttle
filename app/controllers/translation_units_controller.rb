@@ -15,12 +15,13 @@
 # Controller where users can view, edit, and delete translation units
 
 class TranslationUnitsController < ApplicationController
+  # The number of records to return by default.
+  PER_PAGE = 50
+
   before_filter :reviewer_required
   before_filter :find_translation_unit, only: [:edit, :update, :destroy]
 
   respond_to :html, :json
-
-  TRANSLATION_UNITS_PER_PAGE = 50
 
   # Renders a filtered list of all translation units.
   #
@@ -43,10 +44,13 @@ class TranslationUnitsController < ApplicationController
         @offset = 0 if @offset < 0
         @previous = @offset > 0
 
+        limit = params[:limit].to_i
+        limit = PER_PAGE if limit < 1
+
         @translation_units = TranslationUnit.
             order('id DESC').
             offset(@offset).
-            limit(TRANSLATION_UNITS_PER_PAGE)
+            limit(limit)
 
 
         if params[:target_locales].present?

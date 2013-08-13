@@ -14,5 +14,5 @@ $(window).ready ->
 
   translationUnitsSearchForm.submit ->
     scroll.reset()
-    sr.refresh(translationUnitsSearchForm.serialize())
-    return false
+    scroll.loadNextPage()
+    false
