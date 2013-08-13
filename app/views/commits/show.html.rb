@@ -45,12 +45,11 @@ module Views
       def filter_bar
         form_tag(nil, method: 'GET', id: 'filter-form', class: 'filter form-inline') do
           text "Show me "
-          select_tag 'filter', options_for_select(
+          select_tag 'status', options_for_select(
               [
                   ['all', nil],
-                  ['untranslated', 'untranslated'],
-                  ['translated but not approved', 'unapproved'],
-                  ['approved', 'approved']
+                  ['approved', 'approved'],
+                  ['pending', 'pending']
               ]
           ),         id: 'filter-select'
           text " translations with key substring "
@@ -61,11 +60,25 @@ module Views
       end
 
       def translation_grid
-        table class:         'table table-striped',
+        table(class:         'table table-striped',
               id:            'translations',
               'data-url'     => project_commit_keys_url(@project, @commit, format: 'json'),
-              'data-locales' => @locales.to_json,
-              'data-locale'  => @project.base_rfc5646_locale
+              'data-locales' => @project.targeted_rfc5646_locales.keys.join(',')) do
+          thead do
+            tr do
+              th # key
+              @project.locale_requirements.each do |locale, required|
+                th(class: required ? 'text-error' : nil) do
+                  text locale.rfc5646
+                  if @commit.all_translations_approved_for_locale?(locale)
+                    text ' '
+                    i class: 'icon-ok'
+                  end
+                end
+              end
+            end
+          end
+        end
       end
     end
   end

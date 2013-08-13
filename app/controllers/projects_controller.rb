@@ -35,8 +35,8 @@ class ProjectsController < ApplicationController
                      map_values: ->(req) { req.parse_bool }
   end
 
-  respond_to :html, except: [:index, :show]
-  respond_to :json, only: [:index, :show]
+  respond_to :html, except: :show
+  respond_to :json, only: :show
 
   # Returns a list of Projects.
   #
@@ -46,9 +46,9 @@ class ProjectsController < ApplicationController
   # * `GET /projects`
 
   def index
-    respond_to do |format|
+    @projects = Project.order('created_at DESC')
+    respond_with(@projects) do |format|
       format.json do
-        @projects = Project.order('created_at DESC').limit(25)
         if params[:offset].to_i > 0
           @projects = @projects.offset(params[:offset].to_i)
         end
@@ -226,7 +226,7 @@ class ProjectsController < ApplicationController
     # too hard to do this with strong parameters :(
     params[:project].to_hash.slice(*%w(
         name repository_url base_rfc5646_locale due_date cache_localization
-        webhook_url skip_imports cache_manifest_formats key_exclusion
+        webhook_url skip_imports cache_manifest_formats key_exclusions
         key_inclusions skip_paths only_paths watched_branches
         targeted_rfc5646_locales key_locale_exclusions key_locale_inclusions
         only_importer_paths skip_importer_paths

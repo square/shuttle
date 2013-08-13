@@ -19,6 +19,9 @@
 class Locale::TranslationsController < ApplicationController
   include TranslationDecoration
 
+  # The number of records to return by default.
+  PER_PAGE = 50
+
   before_filter :authenticate_user!
   before_filter :translator_required
   before_filter :find_locale
@@ -46,6 +49,9 @@ class Locale::TranslationsController < ApplicationController
     include_approved   = params[:include_approved].parse_bool
     include_new        = params[:include_new].parse_bool
 
+    limit = params[:limit].to_i
+    limit = PER_PAGE if limit < 1
+
     @translations = if params[:commit].present?
                       @commit = Commit.find(params[:commit])
                       @commit.translations
@@ -54,7 +60,7 @@ class Locale::TranslationsController < ApplicationController
                     end
 
     @translations = @translations.in_locale(@locale).
-        order('translations.created_at DESC').offset(params[:offset].to_i).limit(50).
+        order('translations.created_at DESC').offset(params[:offset].to_i).limit(limit).
         includes(key: :project)
     if include_translated && include_approved && include_new
       # include everything
