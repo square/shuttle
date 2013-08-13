@@ -30,9 +30,7 @@ module Views
         end
       end
 
-      def active_tab()
-        'admin'
-      end
+      def active_tab() 'admin' end
 
       private
 

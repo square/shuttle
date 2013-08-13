@@ -35,8 +35,8 @@ class ProjectsController < ApplicationController
                      map_values: ->(req) { req.parse_bool }
   end
 
-  respond_to :html, except: [:index, :show]
-  respond_to :json, only: [:index, :show]
+  respond_to :html, except: :show
+  respond_to :json, only: :show
 
   # Returns a list of Projects.
   #
@@ -46,9 +46,9 @@ class ProjectsController < ApplicationController
   # * `GET /projects`
 
   def index
-    respond_to do |format|
+    @projects = Project.order('created_at DESC')
+    respond_with(@projects) do |format|
       format.json do
-        @projects = Project.order('created_at DESC').limit(25)
         if params[:offset].to_i > 0
           @projects = @projects.offset(params[:offset].to_i)
         end
