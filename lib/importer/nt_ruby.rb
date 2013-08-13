@@ -46,9 +46,7 @@ module Importer
     #   call to nt
     def nt_calls_in(source)
       tree = Ripper.sexp(source)
-      calls = find_nt_in_parse_tree(tree).map { |subtree| puts "\n\n\nSubtrees:" ; pp subtree ; Ripper.hashify(subtree) }
-      puts "\n\n\nCalls"
-      pp calls
+      calls = find_nt_in_parse_tree(tree).map { |subtree| Ripper.hashify(subtree) }
       calls.map do |subtree|
         args = get_args(subtree)
         args[0..1].map { |arg_tree| arg_tree[:string_literal][:string_content][:@tstring_content][0] }
@@ -69,17 +67,13 @@ module Importer
       calls = []
       if Enumerable === tree
         tree.each do |subtree|
-          pp subtree
           if Symbol === subtree
-            puts "skipping...\n"
             next
           elsif Array === subtree &&
             [:command, :method_add_arg].include?(subtree[0]) &&
             subtree[1][1][1] == "nt"
-            puts "appending...\n"
             calls.append(subtree)
           else
-            puts "going deeper...\n"
             calls += find_nt_in_parse_tree(subtree)
           end
         end
