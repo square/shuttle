@@ -17,7 +17,16 @@ require 'digest'
 
 module Importer
   # @abstract
-  class NtBase < Base
+  module NtBase
+
+    @@implementations = []
+    def NtBase.included(klass)
+      @@implementations << klass
+    end
+    def NtBase.implementations
+      @@implementations
+    end
+
     # @private
     def add_nt_string(key, value, comment, options={})
       #if @blob.project.skip_key?(key, @blob.project.base_locale)

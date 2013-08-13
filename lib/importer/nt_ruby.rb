@@ -14,9 +14,16 @@
 
 module Importer
 
-  # Parses translatable strings from Ruby i18n `.rb` files.
+  # Parses translatable strings from Ruby `.rb` files.
+  #
+  # WARNING: Only recognizes String literals (single- or double-quoted)
+  # without any parentheses in their content
+  #
+  # TODO (wenley, tim) : Expand recognition beyond simple regex's
 
-  class NtRuby < NtBase
+  class NtRuby < Base
+    include NtBase
+
     def self.fencers() %w(RubyNt) end
 
     protected

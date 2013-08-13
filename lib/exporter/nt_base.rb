@@ -14,7 +14,16 @@
 
 module Exporter
 
-  class NtBase < Base
+  module NtBase
+
+    @@implementations = []
+    def NtBase.included(klass)
+      @@implementations << klass
+    end
+    def NtBase.implementations
+      @@implementations
+    end
+
     def nt_hash(*locales)
       hsh = Hash.new
       keys = @commit.keys.includes(:translations)

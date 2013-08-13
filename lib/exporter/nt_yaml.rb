@@ -19,7 +19,9 @@ module Exporter
   # Exports the translated strings of a Commit to a YAML file suitable for use
   # with the Ruby i18n gem.
 
-  class NtYaml < NtBase
+  class NtYaml < Base
+    include NtBase
+
     def export(io, *locales)
       output = nt_hash(*locales)
 
