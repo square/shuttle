@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 # Controller that works with {Key Keys} associated with a {Commit}. This
-# controller drives the `KeyList` view used by monitors to track commit
+# controller drives the key list view used by monitors to track commit
 # progress.
 
 class Commit::KeysController < ApplicationController
@@ -51,7 +51,18 @@ class Commit::KeysController < ApplicationController
     limit  = params[:limit].to_i
     limit = 50 if limit < 1
 
-    @keys = @commit.keys.by_key.offset(offset).limit(limit).includes(:translations)
+    @keys = @commit.keys.by_key.offset(offset).limit(limit).includes(:translations, :slugs)
+
+    case params[:status]
+      when 'approved'
+        @keys = @keys.where(ready: true)
+      when 'pending'
+        @keys = @keys.where(ready: false)
+    end
+
+    if params[:filter].present?
+      @keys = @keys.original_key_query(params[:filter])
+    end
 
     respond_with(@keys) do |format|
       format.json { render json: decorate(@keys) }

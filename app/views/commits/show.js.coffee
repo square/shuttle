@@ -13,54 +13,59 @@
 #    limitations under the License.
 
 $(window).ready ->
-  element = $('#translations')
-  baseLocale = element.attr('data-locale')
-  filterField = $('#filter-field')
+  table = $('#translations')
+  searchForm = $('#filter-form')
+  makeURL = -> "#{table.data('url')}?#{searchForm.serialize()}"
+  localeOrder = table.data('locales').split(',')
 
-  keyDataSource = new DataSourceBuilder()
-    .url(element.attr('data-url'))
-    .cache(yes)
-    .filter(yes)
-    .build()
+  addKey = (key) ->
+    tr = $('<tr/>').appendTo(table)
+    td = $('<td/>').text(key.original_key).appendTo(tr)
+    $('<br/>').appendTo td
+    $('<small/>').addClass('muted').text(key.source).appendTo td
 
-  keyList = new KeyList(
-    element,
-    keyDataSource,
-    JSON.parse(element.attr('data-locales')),
-    baseLocale
-  )
+    for locale in localeOrder
+      do (locale) ->
+        translation = (t for t in key.translations when t.locale.rfc5646 == locale)[0]
 
-  $('#filter-form').submit ->
-    keyFilter = filterField.val()
-    keyDataSource.applyFilter 'key', (key) ->
-      key.original_key.indexOf(keyFilter) > -1
-    keyList.reload()
-    return false
+        if translation?
+          klass = if translation.approved
+            'text-success'
+          else if translation.approved == false
+            'text-error'
+          else if translation.translated
+            'text-info'
+          else
+            'muted'
 
-  $('#filter-select').change ->
-    selection = $(this).val()
+          copy = if translation.translated == false
+            "(not yet translated)"
+          else if /\A\s*\z/.test(translation.copy)
+            "(blank string)"
+          else
+            translation.copy[0..30]
 
-    switch selection
-      when null, ''
-        filter = -> true
+          td = $('<td/>').appendTo(tr)
+          $('<a/>').attr('href', translation.url).addClass(klass).
+          text(copy).appendTo(td)
+        else
+          $('<td/>').appendTo tr
 
-      when 'untranslated'
-        filter = (key) ->
-          key.translations.some (t) ->
-            t.locale.rfc5646 isnt baseLocale and not t.translated
+  scroll = table.infiniteScroll makeURL,
+    windowScroll: true
+    renderer: (keys) =>
+      for key in keys
+        do (key) -> addKey(key)
 
-      when 'unapproved'
-        filter = (key) ->
-          key.translations.some (t) ->
-            t.locale.rfc5646 isnt baseLocale and t.translated and not t.approved
-
-      when 'approved'
-        filter = (key) ->
-          key.translations.every (t) ->
-            t.locale.rfc5646 is baseLocale or t.approved
-
-      else
-        throw new Error("unknown filter value '#{selection}'")
-
-    keyDataSource.applyFilter 'state', filter
-    keyList.reload()
+  searchForm.submit ->
+    table.find('tbody').empty()
+    scroll.reset()
+    scroll.loadNextPage()
+#    $.ajax table.data('url'),
+#      data: searchForm.serialize()
+#      success: (keys) ->
+#        for key in keys
+#          do (key) -> addKey(key)
+#      error: ->
+#        $('<div/>').addClass('alert alert-error').text("Couldn't load search results").insertBefore table
+    false
