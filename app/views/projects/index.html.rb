@@ -17,22 +17,41 @@
 require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
 
 module Views
-  module Home
-    class Administrators < Views::Layouts::Application
+  module Projects
+    class Index < Views::Layouts::Application
+      needs :projects
+
       protected
 
       def body_content
         article(class: 'container') do
-          page_header "Projects in Shuttle"
-          div id: 'projects', class: 'status-panel'
+          page_header "Projects"
+          project_list
+          add_project
+        end
+      end
 
-          if current_user.monitor?
-            button "Add Project", href: new_project_url, class: 'btn btn-default'
+      def active_tab() 'projects' end
+
+      private
+
+      def project_list
+        @projects.each do |project|
+          p do
+            a(href: edit_project_url(project)) do
+              i class: 'icon-edit'
+            end
+            text ' '
+            strong project.name
           end
         end
       end
 
-      def active_tab() 'admin' end
+      def add_project
+        p do
+          button_to "Add Project", new_project_url, class: 'btn'
+        end
+      end
     end
   end
 end

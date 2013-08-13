@@ -103,41 +103,6 @@ class HomeController < ApplicationController
     @older = @commits.offset(@offset + 30).exists?
   end
 
-  # Displays a landing page appropriate to translators: They can choose the
-  # locale they intend to localize for, then view a list of projects with
-  # pending localizations in that locale.
-  #
-  # Routes
-  # ------
-  #
-  # * `GET /translators`
-
-  def translators
-  end
-
-  # Displays a landing page appropriate to reviewers: They can choose the
-  # locale they intend to review, then view a list of projects with
-  # strings pending review in that locale.
-  #
-  # Routes
-  # ------
-  #
-  # * `GET /reviewers`
-
-  def reviewers
-  end
-
-  # Displays a landing page appropriate to administrators: They can view a list
-  # of projects and edit their settings.
-  #
-  # Routes
-  # ------
-  #
-  # * `GET /administrators`
-
-  def administrators
-  end
-
   # Displays a lnading page appropriate to translators: They can view a list of
   # projects and edit their glossary entries.
   #

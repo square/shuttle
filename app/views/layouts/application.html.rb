@@ -115,7 +115,7 @@ module Views
                   end
                   ul(class: 'nav pull-right') do
                     #tab "Settings", 'account', account_url
-                    tab "Projects", 'admin', administrators_url if current_user
+                    tab "Projects", 'projects', projects_url if current_user.admin?
                     tab "Glossary", 'glossary', glossary_url if current_user.translator?
                     tab "Users", 'users', users_url if current_user.admin?
                     tab "Log Out", 'logout', destroy_user_session_url, :'data-method' => 'delete'
