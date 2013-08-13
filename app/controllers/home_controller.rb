@@ -55,6 +55,12 @@ class HomeController < ApplicationController
         offset(@offset).
         limit(30)
 
+    # Filter by SHA prefix
+
+    if params[:sha].present? && params[:sha].match(/^[0-9A-F]+$/i)
+      @commits = @commits.with_sha_prefix(params[:sha])
+    end
+
     # Filter by project
 
     params[:project_id] ||= 'my-locales' if current_user.approved_locales.any?
