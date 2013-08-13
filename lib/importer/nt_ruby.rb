@@ -37,7 +37,6 @@ module Importer
       string_regex = /"((?:[^\\"]|\\.)*)"|'((?:[^\\']|\\.)*)'/
 
       file.contents.scan(nt_call_regex) do |match|
-        puts match.inspect
         args = match[0]
         message = args.match(string_regex)
         comment = message.post_match.match(string_regex)
