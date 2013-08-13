@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'ripper'
+
 module Importer
 
   # Parses translatable strings from Ruby `.rb` files.
@@ -33,19 +35,84 @@ module Importer
     end
 
     def import_strings(receiver)
-      nt_call_regex = /[^a-zA-Z0-9_](nt\((?<args>[^)]*)\))/
-      string_regex = /"((?:[^\\"]|\\.)*)"|'((?:[^\\']|\\.)*)'/
-
-      file.contents.scan(nt_call_regex) do |match|
-        args = match[0]
-        message = args.match(string_regex)
-        comment = message.post_match.match(string_regex)
-
-        message = message[1..message.size].detect { |m| m.present? }
-        comment = comment[1..comment.size].detect { |c| c.present? }
-
+      nt_calls_in(file.contents).each do |message, comment|
         receiver.add_nt_string(key_for(message, comment), message, comment)
       end
+    end
+
+    private
+
+    # @return [Array<Array<String>>] Returns the string and comments of each
+    #   call to nt
+    def nt_calls_in(source)
+      tree = Ripper.sexp(source)
+      calls = find_nt_in_parse_tree(tree).map { |subtree| puts "\n\n\nSubtrees:" ; pp subtree ; Ripper.hashify(subtree) }
+      puts "\n\n\nCalls"
+      pp calls
+      calls.map do |subtree|
+        args = get_args(subtree)
+        args[0..1].map { |arg_tree| arg_tree[:string_literal][:string_content][:@tstring_content][0] }
+      end
+    end
+
+    def get_args(subtree)
+      if subtree[:command]
+        subtree[:command][:args_add_block]
+      elsif subtree[:method_add_arg] && subtree[:method_add_arg][:arg_paren]
+        subtree[:method_add_arg][:arg_paren][:args_add_block]
+      else
+        nil
+      end
+    end
+
+    def find_nt_in_parse_tree(tree)
+      calls = []
+      if Enumerable === tree
+        tree.each do |subtree|
+          pp subtree
+          if Symbol === subtree
+            puts "skipping...\n"
+            next
+          elsif Array === subtree &&
+            [:command, :method_add_arg].include?(subtree[0]) &&
+            subtree[1][1][1] == "nt"
+            puts "appending...\n"
+            calls.append(subtree)
+          else
+            puts "going deeper...\n"
+            calls += find_nt_in_parse_tree(subtree)
+          end
+        end
+      end
+      calls
+    end
+  end
+end
+
+class Ripper
+  # @private
+  # Makes accessing subtree components much more readable
+  #
+  # @param [Array<Array<...>>] Nested arrays representing a syntax tree
+  # @return [Hash<Hash, Array, ...>] Nested hashes representing the same tree
+  def self.hashify(subtree)
+    if ! subtree.present?
+      subtree
+    elsif Symbol === subtree[0]
+      val = subtree[1..subtree.length].map { |sub| hashify(sub) }.reduce { |memo, obj|
+        if Hash === memo && Hash === obj # Recursive case
+          memo.merge(obj)
+        elsif Array === memo # Base case extended
+          memo.push(obj)
+        else # Base case
+          [memo, obj]
+        end
+      }
+      { subtree[0] => val }
+    elsif Array === subtree
+      subtree.map { |obj| hashify(obj) }
+    else
+      subtree
     end
   end
 end
