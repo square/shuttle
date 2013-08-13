@@ -194,6 +194,8 @@ en:
       name: Ember.js
     erb:
       name: ERb file
+    nt_ruby:
+      name: NT Ruby file
     properties:
       name: Java .properties file
     ruby:
@@ -223,6 +225,8 @@ en:
       name: ERb file
     ios:
       name: Cocoa .strings files (tarball)
+    nt_yaml:
+      name: NT YAML file
     properties:
       name: Java .properties file
     ruby:
