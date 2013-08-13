@@ -81,12 +81,16 @@ en:
       ig: Igbo
       ii: Sichuan Yi
       ik: Inupiaq
+      in: Indonesian
       io: Ido
       is: Icelandic
       it: Italian
       iu: Inuktitut
+      iw: Hebrew
       ja: Japanese
+      ji: Yiddish
       jv: Javanese
+      jw: Javanese
       ka: Georgian
       kg: Kongo
       ki: Kikuyu
@@ -117,6 +121,7 @@ en:
       mk: Macedonian
       ml: Malayalam
       mn: Mongolian
+      mo: Moldavian
       mr: Marathi
       ms: Malay (macrolanguage)
       mt: Maltese
@@ -124,7 +129,7 @@ en:
       na: Nauru
       nb: Norwegian Bokmål
       nd: North Ndebele
-      ne: Nepali
+      ne: Nepali (macrolanguage)
       ng: Ndonga
       nl: Dutch
       nn: Norwegian Nynorsk
@@ -135,7 +140,7 @@ en:
       oc: Occitan (post 1500)
       oj: Ojibwa
       om: Oromo
-      or: Oriya
+      or: Oriya (macrolanguage)
       os: Ossetian
       pa: Panjabi
       pi: Pali
@@ -281,6 +286,7 @@ en:
       adp: Adap
       adq: Adangbe
       adr: Adonara
+      ads: Adamorobe Sign Language
       adt: Adnyamathanha
       adu: Aduge
       adw: Amundava
@@ -290,10 +296,12 @@ en:
       aea: Areba
       aeb: Tunisian Arabic
       aec: Saidi Arabic
+      aed: Argentine Sign Language
       aee: Northeast Pashayi
       aek: Haeke
       ael: Ambele
       aem: Arem
+      aen: Armenian Sign Language
       aeq: Aer
       aer: Eastern Arrernte
       aes: Alsea
@@ -305,6 +313,7 @@ en:
       afb: Gulf Arabic
       afd: Andai
       afe: Putukwam
+      afg: Afghan Sign Language
       afh: Afrihili
       afi: Akrukay
       afk: Nanubae
@@ -330,6 +339,7 @@ en:
       agm: Angaataha
       agn: Agutaynen
       ago: Tainae
+      agp: Paranan
       agq: Aghem
       agr: Aguaruna
       ags: Esimbi
@@ -380,6 +390,7 @@ en:
       aja: Aja (Sudan)
       ajg: Aja (Benin)
       aji: Ajië
+      ajn: Andajin
       ajp: South Levantine Arabic
       ajt: Judeo-Tunisian Arabic
       aju: Judeo-Moroccan Arabic
@@ -439,7 +450,7 @@ en:
       amc: Amahuaca
       ame: Yanesha'
       amf: Hamer-Banna
-      amg: Amarag
+      amg: Amurdak
       ami: Amis
       amj: Amdang
       amk: Ambai
@@ -469,7 +480,7 @@ en:
       ani: Andi
       anj: Anor
       ank: Goemai
-      anl: Anu
+      anl: Anu-Hkongso Chin
       anm: Anal
       ann: Obolo
       ano: Andoque
@@ -501,6 +512,7 @@ en:
       aor: Aore
       aos: Taikat
       aot: A'tong
+      aou: A'ou
       aox: Atorada
       aoz: Uab Meto
       apa: Apache languages
@@ -565,6 +577,8 @@ en:
       asb: Assiniboine
       asc: Casuarina Coast Asmat
       asd: Asas
+      ase: American Sign Language
+      asf: Australian Sign Language
       asg: Cishingini
       ash: Abishira
       asi: Buruwai
@@ -573,11 +587,14 @@ en:
       asl: Asilulu
       asn: Xingú Asuriní
       aso: Dano
+      asp: Algerian Sign Language
+      asq: Austrian Sign Language
       asr: Asuri
       ass: Ipulo
       ast: Asturian
       asu: Tocantins Asurini
       asv: Asoa
+      asw: Australian Aborigines Sign Language
       asx: Muratayak
       asy: Yaosakor Asmat
       asz: As
@@ -636,6 +653,7 @@ en:
       avi: Avikam
       avk: Kotava
       avl: Eastern Egyptian Bedawi Arabic
+      avm: Angkamuthi
       avn: Avatime
       avo: Agavotaguerra
       avs: Aushiri
@@ -647,6 +665,7 @@ en:
       awc: Cicipu
       awd: Arawakan languages
       awe: Awetí
+      awg: Anguthimri
       awh: Awbono
       awi: Aekyom
       awk: Awabakal
@@ -662,6 +681,7 @@ en:
       awx: Awara
       awy: Edera Awyu
       axb: Abipon
+      axe: Ayerrerenge
       axg: Mato Grosso Arára
       axk: Yaka (Central African Republic)
       axm: Middle Armenian
@@ -684,14 +704,17 @@ en:
       ays: Sorsogon Ayta
       ayt: Magbukun Ayta
       ayu: Ayu
+      ayx: Ayi (China)
       ayy: Tayabas Ayta
       ayz: Mai Brat
       aza: Azha
       azb: South Azerbaijani
       azc: Uto-Aztecan languages
+      azd: Eastern Durango Nahuatl
       azg: San Pedro Amuzgos Amuzgo
       azj: North Azerbaijani
       azm: Ipalapa Amuzgo
+      azn: Western Durango Nahuatl
       azo: Awing
       azt: Faire Atta
       azz: Highland Puebla Nahuatl
@@ -755,7 +778,7 @@ en:
       bci: Baoulé
       bcj: Bardi
       bck: Bunaba
-      bcl: Central Bicolano
+      bcl: Central Bikol
       bcm: Bannoni
       bcn: Bali (Nigeria)
       bco: Kaluli
@@ -827,7 +850,9 @@ en:
       bff: Bofi
       bfg: Busang Kayan
       bfh: Blafe
+      bfi: British Sign Language
       bfj: Bafanji
+      bfk: Ban Khor Sign Language
       bfl: Banda-Ndélé
       bfm: Mmen
       bfn: Bunak
@@ -877,6 +902,7 @@ en:
       bhh: Bukharic
       bhi: Bhilali
       bhj: Bahing
+      bhk: Albay Bicolano
       bhl: Bimin
       bhm: Bathari
       bhn: Bohtan Neo-Aramaic
@@ -930,6 +956,7 @@ en:
       bjm: Bajelani
       bjn: Banjar
       bjo: Mid-Southern Banda
+      bjq: Southern Betsimisaraka Malagasy
       bjr: Binumarien
       bjs: Bajan
       bjt: Balanta-Ganja
@@ -940,6 +967,7 @@ en:
       bjy: Bayali
       bjz: Baruga
       bka: Kyak
+      bkb: Finallig
       bkc: Baka (Cameroon)
       bkd: Binukid
       bkf: Beeke
@@ -976,7 +1004,7 @@ en:
       blk: Pa'o Karen
       bll: Biloxi
       blm: Beli (Sudan)
-      bln: Southern Catanduanes Bicolano
+      bln: Southern Catanduanes Bikol
       blo: Anii
       blp: Blablanga
       blq: Baluan-Pam
@@ -1043,6 +1071,7 @@ en:
       bob: Aweer
       boe: Mundabli
       bof: Bolon
+      bog: Bamako Sign Language
       boh: Boma
       boi: Barbareño
       boj: Anjam
@@ -1096,6 +1125,7 @@ en:
       bqk: Banda-Mbrès
       bql: Bilakura
       bqm: Wumboko
+      bqn: Bulgarian Sign Language
       bqo: Balo
       bqp: Busa
       bqq: Biritai
@@ -1103,9 +1133,10 @@ en:
       bqs: Bosngun
       bqt: Bamukumbit
       bqu: Boguru
-      bqv: Begbere-Ejar
+      bqv: Koro Wachi
       bqw: Buru (Nigeria)
       bqx: Baangi
+      bqy: Bengkala Sign Language
       bqz: Bakaka
       bra: Braj
       brb: Lave
@@ -1157,6 +1188,7 @@ en:
       bsx: Yangkam
       bsy: Sabah Bisaya
       bta: Bata
+      btb: Beti (Cameroon)
       btc: Bati (Cameroon)
       btd: Batak Dairi
       bte: Gamo-Ningi
@@ -1216,6 +1248,7 @@ en:
       bvi: Belanda Viri
       bvj: Baan
       bvk: Bukat
+      bvl: Bolivian Sign Language
       bvm: Bamunka
       bvn: Buna
       bvo: Bolgo
@@ -1320,6 +1353,7 @@ en:
       bzp: Kemberano
       bzq: Buli (Indonesia)
       bzr: Biri
+      bzs: Brazilian Sign Language
       bzt: Brithenig
       bzu: Burmeso
       bzv: Bebe
@@ -1400,11 +1434,13 @@ en:
       cdn: Chaudangsi
       cdo: Min Dong Chinese
       cdr: Cinda-Regi-Tiyal
+      cds: Chadian Sign Language
       cdy: Chadong
       cdz: Koda
       cea: Lower Chehalis
       ceb: Cebuano
       ceg: Chamacoco
+      cek: Eastern Khumi Chin
       cel: Celtic languages
       cen: Cen
       cet: Centúúm
@@ -1458,6 +1494,7 @@ en:
       cjn: Chenapian
       cjo: Ashéninka Pajonal
       cjp: Cabécar
+      cjr: Chorotega
       cjs: Shor
       cjv: Chuave
       cjy: Jinyu Chinese
@@ -1481,10 +1518,12 @@ en:
       cle: Lealao Chinantec
       clh: Chilisso
       cli: Chakali
+      clj: Laitu Chin
       clk: Idu-Mishmi
       cll: Chala
       clm: Clallam
       clo: Lowland Oaxaca Chontal
+      clt: Lautu Chin
       clu: Caluyanun
       clw: Chulym
       cly: Eastern Highland Chatino
@@ -1493,11 +1532,12 @@ en:
       cme: Cerma
       cmg: Classical Mongolian
       cmi: Emberá-Chamí
+      cmk: Chimakum
       cml: Campalagian
       cmm: Michigamea
       cmn: Mandarin Chinese
       cmo: Central Mnong
-      cmr: Mro Chin
+      cmr: Mro-Khimi Chin
       cms: Messapic
       cmt: Camtho
       cna: Changthang
@@ -1578,14 +1618,24 @@ en:
       crz: Cruzeño
       csa: Chiltepec Chinantec
       csb: Kashubian
+      csc: Catalan Sign Language
+      csd: Chiangmai Sign Language
+      cse: Czech Sign Language
+      csf: Cuba Sign Language
+      csg: Chilean Sign Language
       csh: Asho Chin
       csi: Coast Miwok
       csk: Jola-Kasa
+      csl: Chinese Sign Language
       csm: Central Sierra Miwok
+      csn: Colombian Sign Language
       cso: Sochiapam Chinantec
+      csq: Croatia Sign Language
+      csr: Costa Rican Sign Language
       css: Southern Ohlone
       cst: Northern Ohlone
       csu: Central Sudanic languages
+      csv: Sumtu Chin
       csw: Swampy Cree
       csy: Siyin Chin
       csz: Coos
@@ -1594,12 +1644,13 @@ en:
       ctd: Tedim Chin
       cte: Tepinapa Chinantec
       ctg: Chittagonian
+      cth: Thaiphum Chin
       ctl: Tlacoatzintepec Chinantec
       ctm: Chitimacha
       ctn: Chhintange
       cto: Emberá-Catío
       ctp: Western Highland Chatino
-      cts: Northern Catanduanes Bicolano
+      cts: Northern Catanduanes Bikol
       ctt: Wayanad Chetti
       ctu: Chol
       ctz: Zacatepec Chatino
@@ -1677,11 +1728,14 @@ en:
       dbp: Duwai
       dbq: Daba
       dbr: Dabarre
+      dbt: Ben Tey Dogon
       dbu: Bondum Dom Dogon
       dbv: Dungu
+      dbw: Bankan Tey Dogon
       dby: Dibiyaso
       dcc: Deccan
       dcr: Negerhollands
+      dda: Dadi Dadi
       ddd: Dongotono
       dde: Doondo
       ddg: Fataluku
@@ -1689,6 +1743,7 @@ en:
       ddj: Jaru
       ddn: Dendi (Benin)
       ddo: Dido
+      ddr: Dhudhuroa
       dds: Donno So Dogon
       ddw: Dawera-Daweloor
       dec: Dagik
@@ -1717,13 +1772,17 @@ en:
       dgh: Dghwede
       dgi: Northern Dagara
       dgk: Dagba
+      dgl: Andaandi
       dgn: Dagoman
       dgo: Dogri (individual language)
       dgr: Dogrib
       dgs: Dogoso
+      dgt: Ndrag'ngith
       dgu: Degaru
+      dgw: Daungwurrung
       dgx: Doghoro
       dgz: Daga
+      dha: Dhanwar (India)
       dhd: Dhundari
       dhg: Dhangu
       dhi: Dhimal
@@ -1760,6 +1819,7 @@ en:
       dix: Dixon Reef
       diy: Diuwe
       diz: Ding
+      dja: Djadjawurrung
       djb: Djinba
       djc: Dar Daju Daju
       djd: Djamindjung
@@ -1777,6 +1837,7 @@ en:
       djw: Djawi
       dka: Dakpakha
       dkk: Dakka
+      dkl: Kolum So Dogon
       dkr: Kuijau
       dks: Southeastern Dinka
       dkx: Mazagway
@@ -1786,13 +1847,14 @@ en:
       dma: Duma
       dmb: Mombo Dogon
       dmc: Dimir
+      dmd: Madhi Madhi
       dme: Dugwor
       dmg: Upper Kinabatangan
       dmk: Domaaki
       dml: Dameli
       dmm: Dama
       dmn: Mande languages
-      dmo: Kemezung
+      dmo: Kemedzung
       dmr: East Damar
       dms: Dampelas
       dmu: Dubu
@@ -1809,6 +1871,7 @@ en:
       dnr: Danaru
       dnt: Mid Grand Valley Dani
       dnu: Danau
+      dnv: Danu
       dnw: Western Dani
       dny: Dení
       doa: Dom
@@ -1823,6 +1886,7 @@ en:
       don: Toura (Papua New Guinea)
       doo: Dongo
       dop: Lukpa
+      doq: Dominican Sign Language
       dor: Dori'o
       dos: Dogosé
       dot: Dass
@@ -1838,8 +1902,9 @@ en:
       drd: Darmiya
       dre: Dolpo
       drg: Rungus
+      drh: Darkhat
       dri: C'lela
-      drl: Darling
+      drl: Paakantyi
       drn: West Damar
       dro: Daro-Matu Melanau
       drq: Dura
@@ -1847,24 +1912,30 @@ en:
       drs: Gedeo
       drt: Drents
       dru: Rukai
+      drw: Darwazi
       dry: Darai
       dsb: Lower Sorbian
+      dse: Dutch Sign Language
       dsh: Daasanach
       dsi: Disa
+      dsl: Danish Sign Language
       dsn: Dusner
       dso: Desiya
       dsq: Tadaksahak
       dta: Daur
       dtb: Labuk-Kinabatangan Kadazan
       dtd: Ditidaht
+      dth: Adithinngithigh
       dti: Ana Tinga Dogon
       dtk: Tene Kan Dogon
       dtm: Tomo Kan Dogon
+      dto: Tommo So Dogon
       dtp: Central Dusun
       dtr: Lotud
       dts: Toro So Dogon
       dtt: Toro Tegu Dogon
       dtu: Tebul Ure Dogon
+      dty: Dotyali
       dua: Duala
       dub: Dubli
       duc: Duna
@@ -1917,6 +1988,7 @@ en:
       ebr: Ebrié
       ebu: Embu
       ecr: Eteocretan
+      ecs: Ecuadorian Sign Language
       ecy: Eteocypriot
       eee: E
       efa: Efai
@@ -1937,7 +2009,7 @@ en:
       ekg: Ekari
       eki: Eki
       ekk: Standard Estonian
-      ekl: Kol
+      ekl: Kol (Bangladesh)
       ekm: Elip
       eko: Koti
       ekp: Ekpeye
@@ -1997,13 +2069,17 @@ en:
       esh: Eshtehardi
       esi: North Alaskan Inupiatun
       esk: Northwest Alaska Inupiatun
+      esl: Egypt Sign Language
       esm: Esuma
+      esn: Salvadoran Sign Language
+      eso: Estonian Sign Language
       esq: Esselen
       ess: Central Siberian Yupik
       esu: Central Yupik
       esx: Eskimo-Aleut languages
       etb: Etebi
       etc: Etchemin
+      eth: Ethiopian Sign Language
       etn: Eton (Vanuatu)
       eto: Eton (Cameroon)
       etr: Edolo
@@ -2041,6 +2117,7 @@ en:
       fay: Southwestern Fars
       faz: Northwestern Fars
       fbl: West Albay Bikol
+      fcs: Quebec Sign Language
       fer: Feroge
       ffi: Foia Foia
       ffm: Maasina Fulfulde
@@ -2053,6 +2130,7 @@ en:
       fit: Tornedalen Finnish
       fiu: Finno-Ugrian languages
       fiw: Fiwaga
+      fkk: Kirya-Konzəl
       fkv: Kven Finnish
       fla: Kalispel-Pend d'Oreille
       flh: Foau
@@ -2084,6 +2162,9 @@ en:
       frr: Northern Frisian
       frs: Eastern Frisian
       frt: Fortsenal
+      fse: Finnish Sign Language
+      fsl: French Sign Language
+      fss: Finland-Swedish Sign Language
       fub: Adamawa Fulfulde
       fuc: Pulaar
       fud: East Futuna
@@ -2124,6 +2205,7 @@ en:
       gas: Adiwasi Garasia
       gat: Kenati
       gau: Mudhili Gadaba
+      gav: Gabutamon
       gaw: Nobonob
       gax: Borana-Arsi-Guji Oromo
       gay: Gayo
@@ -2177,6 +2259,7 @@ en:
       gdo: Ghodoberi
       gdq: Mehri
       gdr: Wipi
+      gds: Ghandruk Sign Language
       gdu: Gudu
       gdx: Godwari
       gea: Geruma
@@ -2198,6 +2281,7 @@ en:
       gez: Geez
       gfk: Patpatar
       gft: Gafat
+      gfx: Mangetti Dune !Xung
       gga: Gao
       ggb: Gbii
       ggd: Gugadj
@@ -2221,7 +2305,7 @@ en:
       gho: Ghomara
       ghr: Ghera
       ghs: Guhu-Samane
-      ght: Kutang Ghale
+      ght: Kuke
       gia: Kitja
       gib: Gibanawa
       gic: Gail
@@ -2236,6 +2320,7 @@ en:
       gir: Red Gelao
       gis: North Giziga
       git: Gitxsan
+      giu: Mulao
       giw: White Gelao
       gix: Gilima
       giy: Giyug
@@ -2247,6 +2332,7 @@ en:
       gka: Guya
       gke: Ndai
       gkn: Gokana
+      gko: Kok-Nar
       gkp: Guinea Kpelle
       glc: Bon Gula
       gld: Nanai
@@ -2318,11 +2404,13 @@ en:
       goy: Goundo
       goz: Gozarkhani
       gpa: Gupa-Abawa
+      gpe: Ghanaian Pidgin English
       gpn: Taiap
       gqa: Ga'anda
       gqi: Guiqiong
       gqn: Guana (Brazil)
       gqr: Gor
+      gqu: Qau
       gra: Rajput Garasia
       grb: Grebo
       grc: Ancient Greek (to 1453)
@@ -2344,10 +2432,14 @@ en:
       grx: Guriaso
       gry: Barclayville Grebo
       grz: Guramalum
+      gse: Ghanaian Sign Language
+      gsg: German Sign Language
       gsl: Gusilay
+      gsm: Guatemalan Sign Language
       gsn: Gusan
       gso: Southwest Gbaya
       gsp: Wasembo
+      gss: Greek Sign Language
       gsw: Swiss German
       gta: Guató
       gti: Gbati-ri
@@ -2368,6 +2460,7 @@ en:
       gup: Gunwinggu
       guq: Aché
       gur: Farefare
+      gus: Guinean Sign Language
       gut: Maléku Jaíka
       guu: Yanomamö
       guv: Gey
@@ -2396,6 +2489,7 @@ en:
       gwg: Moo
       gwi: Gwichʼin
       gwj: /Gwi
+      gwm: Awngthim
       gwn: Gwandara
       gwr: Gwere
       gwt: Gawar-Bati
@@ -2419,9 +2513,11 @@ en:
       gzi: Gazi
       gzn: Gane
       haa: Han
+      hab: Hanoi Sign Language
       hac: Gurani
       had: Hatam
       hae: Eastern Oromo
+      haf: Haiphong Sign Language
       hag: Hanga
       hah: Hahon
       hai: Haida
@@ -2448,6 +2544,7 @@ en:
       hca: Andaman Creole Hindi
       hch: Huichol
       hdn: Northern Haida
+      hds: Honduras Sign Language
       hdy: Hadiyya
       hea: Northern Qiandong Miao
       hed: Herdé
@@ -2480,11 +2577,12 @@ en:
       hka: Kahe
       hke: Hunde
       hkk: Hunjara-Kaina Ke
+      hks: Hong Kong Sign Language
       hla: Halia
       hlb: Halbi
       hld: Halang Doan
       hle: Hlersu
-      hlt: Nga La
+      hlt: Matu Chin
       hlu: Hieroglyphic Luwian
       hma: Southern Mashan Hmong
       hmb: Humburi Senni Songhay
@@ -2535,12 +2633,14 @@ en:
       hoo: Holoholo
       hop: Hopi
       hor: Horo
+      hos: Ho Chi Minh City Sign Language
       hot: Hote
       hov: Hovongan
       how: Honi
       hoy: Holiya
       hoz: Hozo
       hpo: Hpon
+      hps: Hawai'i Pidgin Sign Language
       hra: Hrangkhol
       hre: Hre
       hrk: Haruku
@@ -2552,6 +2652,8 @@ en:
       hrx: Hunsrik
       hrz: Harzani
       hsb: Upper Sorbian
+      hsh: Hungarian Sign Language
+      hsl: Hausa Sign Language
       hsn: Xiang Chinese
       hss: Harsusi
       hti: Hoti
@@ -2611,6 +2713,7 @@ en:
       iby: Ibani
       ica: Ede Ica
       ich: Etkywan
+      icl: Icelandic Sign Language
       icr: Islander Creole English
       ida: Idakho-Isukha-Tiriki
       idb: Indo-Portuguese
@@ -2642,6 +2745,7 @@ en:
       ihb: Iha Based Pidgin
       ihi: Ihievbe
       ihp: Iha
+      ihw: Bidhawal
       iir: Indo-Iranian languages
       ijc: Izon
       ije: Biseni
@@ -2655,7 +2759,7 @@ en:
       ikl: Ikulu
       iko: Olulumo-Ikom
       ikp: Ikpeshi
-      ikt: Western Canadian Inuktitut
+      ikt: Inuinnaqtun
       ikv: Iku-Gora-Ankwa
       ikw: Ikwere
       ikx: Ik
@@ -2667,6 +2771,7 @@ en:
       ilk: Ilongot
       ill: Iranun
       ilo: Iloko
+      ils: International Sign
       ilu: Ili'uun
       ilv: Ilue
       ilw: Talur
@@ -2685,10 +2790,12 @@ en:
       ing: Degexit'an
       inh: Ingush
       inj: Jungle Inga
+      inl: Indonesian Sign Language
       inm: Minaean
       inn: Isinai
       ino: Inoke-Yate
       inp: Iñapari
+      ins: Indian Sign Language
       int: Intha
       inz: Ineseño
       ior: Inor
@@ -2711,12 +2818,15 @@ en:
       isa: Isabi
       isc: Isconahua
       isd: Isnag
+      ise: Italian Sign Language
+      isg: Irish Sign Language
       ish: Esan
       isi: Nkem-Nkum
       isk: Ishkashimi
       ism: Masimasi
       isn: Isanzu
       iso: Isoko
+      isr: Israeli Sign Language
       ist: Istriot
       isu: Isu (Menchum Division)
       itb: Binongan Itneg
@@ -2761,6 +2871,7 @@ en:
       jak: Jakun
       jal: Yalahatan
       jam: Jamaican Creole English
+      jan: Jandai
       jao: Yanyuwa
       jaq: Yaqay
       jar: Jarawa (Nigeria)
@@ -2772,11 +2883,14 @@ en:
       jaz: Jawe
       jbe: Judeo-Berber
       jbj: Arandai
+      jbk: Barikewa
       jbn: Nafusi
       jbo: Lojban
       jbr: Jofotek-Bromnya
       jbt: Jabutí
       jbu: Jukun Takum
+      jbw: Yawijibaya
+      jcs: Jamaican Country Sign Language
       jct: Krymchak
       jda: Jad
       jdg: Jadgali
@@ -2794,15 +2908,17 @@ en:
       jeu: Jonkor Bourmataguil
       jgb: Ngbee
       jge: Judeo-Georgian
+      jgk: Gwak
       jgo: Ngomba
       jhi: Jehai
+      jhs: Jhankot Sign Language
       jia: Jina
       jib: Jibu
       jic: Tol
       jid: Bu
       jie: Jilbe
       jig: Djingili
-      jih: Shangzhai
+      jih: sTodsde
       jii: Jiiddu
       jil: Jilim
       jim: Jimi (Cameroon)
@@ -2812,9 +2928,14 @@ en:
       jiu: Youle Jinuo
       jiv: Shuar
       jiy: Buyuan Jinuo
+      jjr: Bankal
+      jkm: Mobwa Karen
       jko: Kubo
+      jkp: Paku Karen
+      jkr: Koro (India)
       jku: Labir
       jle: Ngile
+      jls: Jamaican Sign Language
       jma: Dima
       jmb: Zumbun
       jmc: Machame
@@ -2824,6 +2945,7 @@ en:
       jmn: Makuri Naga
       jmr: Kamara
       jms: Mashi (Nigeria)
+      jmw: Mouwase
       jmx: Western Juxtlahuaca Mixtec
       jna: Jangshung
       jnd: Jandavra
@@ -2835,6 +2957,7 @@ en:
       job: Joba
       jod: Wojenaka
       jor: Jorá
+      jos: Jordanian Sign Language
       jow: Jowulu
       jpa: Jewish Palestinian Aramaic
       jpr: Judeo-Persian
@@ -2845,11 +2968,13 @@ en:
       jrr: Jiru
       jrt: Jorto
       jru: Japrería
+      jsl: Japanese Sign Language
       jua: Júma
       jub: Wannu
       juc: Jurchen
       jud: Worodougou
       juh: Hõne
+      jui: Ngadjuri
       juk: Wapan
       jul: Jirel
       jum: Jumjum
@@ -2857,6 +2982,7 @@ en:
       juo: Jiba
       jup: Hupdë
       jur: Jurúna
+      jus: Jumla Sign Language
       jut: Jutish
       juu: Ju
       juw: Wãpha
@@ -2870,7 +2996,7 @@ en:
       kaa: Kara-Kalpak
       kab: Kabyle
       kac: Kachin
-      kad: Kadara
+      kad: Adara
       kae: Ketangalan
       kaf: Katso
       kag: Kajaman
@@ -3023,6 +3149,7 @@ en:
       kgf: Kube
       kgg: Kusunda
       kgh: Upper Tanudan Kalinga
+      kgi: Selangor Sign Language
       kgj: Gamale Kham
       kgk: Kaiwá
       kgl: Kunggari
@@ -3174,7 +3301,7 @@ en:
       kmi: Kami (Nigeria)
       kmj: Kumarbhag Paharia
       kmk: Limos Kalinga
-      kml: Lower Tanudan Kalinga
+      kml: Tanudan Kalinga
       kmm: Kom (India)
       kmn: Awtuw
       kmo: Kwoma
@@ -3398,7 +3525,8 @@ en:
       kvh: Komodo
       kvi: Kwang
       kvj: Psikye
-      kvl: Brek Karen
+      kvk: Korean Sign Language
+      kvl: Kayaw
       kvm: Kendem
       kvn: Border Kuna
       kvo: Dobel
@@ -3553,7 +3681,8 @@ en:
       lbn: Lamet
       lbo: Laven
       lbq: Wampar
-      lbr: Northern Lorung
+      lbr: Lohorung
+      lbs: Libyan Sign Language
       lbt: Lachi
       lbu: Labu
       lbv: Lavatbura-Lamusong
@@ -3571,7 +3700,7 @@ en:
       lcp: Western Lawa
       lcq: Luhu
       lcs: Lisabata-Nuniali
-      ldb: Idun
+      ldb: Dũya
       ldd: Luri
       ldg: Lenyima
       ldh: Lamja-Dengsa-Tola
@@ -3687,6 +3816,7 @@ en:
       llg: Lole
       llh: Lamu
       lli: Teke-Laali
+      llj: Ladji Ladji
       llk: Lelak
       lll: Lilau
       llm: Lasalimu
@@ -3694,6 +3824,7 @@ en:
       llo: Khlor
       llp: North Efate
       llq: Lolak
+      lls: Lithuanian Sign Language
       llu: Lau
       llx: Lauan
       lma: East Limba
@@ -3757,7 +3888,7 @@ en:
       lov: Lopi
       low: Tampias Lobu
       lox: Loun
-      loy: Lowa
+      loy: Loke
       loz: Lozi
       lpa: Lelepa
       lpe: Lepki
@@ -3774,18 +3905,24 @@ en:
       lrm: Marama
       lrn: Lorang
       lro: Laro
-      lrr: Southern Lorung
+      lrr: Southern Yamphu
       lrt: Larantuka Malay
       lrv: Larevat
       lrz: Lemerig
       lsa: Lasgerdi
       lsd: Lishana Deni
       lse: Lusengo
+      lsg: Lyons Sign Language
       lsh: Lish
       lsi: Lashi
+      lsl: Latvian Sign Language
       lsm: Saamia
+      lso: Laos Sign Language
+      lsp: Panamanian Sign Language
       lsr: Aruop
       lss: Lasi
+      lst: Trinidad and Tobago Sign Language
+      lsy: Mauritian Sign Language
       ltc: Late Middle Chinese
       ltg: Latgalian
       lti: Leti (Indonesia)
@@ -3917,6 +4054,7 @@ en:
       mdi: Mamvu
       mdj: Mangbetu
       mdk: Mangbutu
+      mdl: Maltese Sign Language
       mdm: Mayogo
       mdn: Mbati
       mdp: Mbala
@@ -3931,7 +4069,7 @@ en:
       mdy: Male (Ethiopia)
       mdz: Suruí Do Pará
       mea: Menka
-      meb: Ikobi-Mena
+      meb: Ikobi
       mec: Mara
       med: Melpa
       mee: Mengen
@@ -3973,6 +4111,7 @@ en:
       mfp: Makassar Malay
       mfq: Moba
       mfr: Marithiel
+      mfs: Mexican Sign Language
       mft: Mokerang
       mfu: Mbwela
       mfv: Mandjak
@@ -3986,7 +4125,7 @@ en:
       mgd: Moru
       mge: Mango
       mgf: Maklew
-      mgg: Mpongmpong
+      mgg: Mpumpong
       mgh: Makhuwa-Meetto
       mgi: Lijili
       mgj: Abureni
@@ -4056,6 +4195,7 @@ en:
       mix: Mixtepec Mixtec
       miy: Ayutla Mixtec
       miz: Coatzospan Mixtec
+      mja: Mahei
       mjc: San Juan Colorado Mixtec
       mjd: Northwest Maidu
       mje: Muskum
@@ -4182,6 +4322,7 @@ en:
       moc: Mocoví
       mod: Mobilian
       moe: Montagnais
+      mof: Mohegan-Montauk-Narragansett
       mog: Mongondow
       moh: Mohawk
       moi: Mboi
@@ -4222,7 +4363,7 @@ en:
       mpu: Makuráp
       mpv: Mungkip
       mpw: Mapidian
-      mpx: Misima-Paneati
+      mpx: Misima-Panaeati
       mpy: Mapia
       mpz: Mpi
       mqa: Maba (Indonesia)
@@ -4249,11 +4390,12 @@ en:
       mqw: Murupi
       mqx: Mamuju
       mqy: Manggarai
-      mqz: Malasanga
+      mqz: Pano
       mra: Mlabri
       mrb: Marino
       mrc: Maricopa
       mrd: Western Magar
+      mre: Martha's Vineyard Sign Language
       mrf: Elseng
       mrg: Mising
       mrh: Mara Chin
@@ -4276,6 +4418,7 @@ en:
       mrz: Marind
       msb: Masbatenyo
       msc: Sankaran Maninka
+      msd: Yucatec Maya Sign Language
       mse: Musey
       msf: Mekwei
       msg: Moraid
@@ -4289,7 +4432,9 @@ en:
       mso: Mombum
       msp: Maritsauá
       msq: Caac
+      msr: Mongolian Sign Language
       mss: West Masela
+      mst: Cataelano Mandaya
       msu: Musom
       msv: Maslam
       msw: Mansoanka
@@ -4351,7 +4496,7 @@ en:
       mve: Marwari (Pakistan)
       mvf: Peripheral Mongolian
       mvg: Yucuañe Mixtec
-      mvh: Mire
+      mvh: Mulgi
       mvi: Miyako
       mvk: Mekmek
       mvl: Mbara (Australia)
@@ -4439,6 +4584,7 @@ en:
       myq: Forest Maninka
       myr: Muniche
       mys: Mesmes
+      myt: Sangab Mandaya
       myu: Mundurukú
       myv: Erzya
       myw: Muyuw
@@ -4447,8 +4593,10 @@ en:
       myz: Classical Mandaic
       mza: Santa María Zacatepec Mixtec
       mzb: Tumzabt
+      mzc: Madagascar Sign Language
       mzd: Malimba
       mze: Morawa
+      mzg: Monastic Sign Language
       mzh: Wichí Lhamtés Güisnay
       mzi: Ixcatlán Mazatec
       mzj: Manya
@@ -4466,6 +4614,7 @@ en:
       mzv: Manza
       mzw: Deg
       mzx: Mawayana
+      mzy: Mozambican Sign Language
       mzz: Maiadomu
       naa: Namla
       nab: Southern Nambikuára
@@ -4479,7 +4628,7 @@ en:
       naj: Nalu
       nak: Nakanai
       nal: Nalik
-      nam: Nangikurrunggurr
+      nam: Ngan'gityemerri
       nan: Min Nan Chinese
       nao: Naaba
       nap: Neapolitan
@@ -4496,6 +4645,7 @@ en:
       nbc: Chang Naga
       nbd: Ngbinda
       nbe: Konyak Naga
+      nbf: Naxi
       nbg: Nagarchal
       nbh: Ngamo
       nbi: Mao Naga
@@ -4507,6 +4657,7 @@ en:
       nbp: Nnam
       nbq: Nggem
       nbr: Numana-Nunku-Gbantu-Numbu
+      nbs: Namibian Sign Language
       nbt: Na
       nbu: Rongmei Naga
       nbv: Ngamambo
@@ -4530,6 +4681,7 @@ en:
       nco: Sibe
       ncp: Ndaktup
       ncr: Ncane
+      ncs: Nicaraguan Sign Language
       nct: Chothe Naga
       ncu: Chumburung
       ncx: Central Puebla Nahuatl
@@ -4576,6 +4728,7 @@ en:
       ner: Yahadian
       nes: Bhoti Kinnauri
       net: Nete
+      neu: Neo
       nev: Nyaheun
       new: Newari
       nex: Neme
@@ -4603,7 +4756,7 @@ en:
       ngo: Ngoni
       ngp: Ngulu
       ngq: Ngurimi
-      ngr: Nanggu
+      ngr: Engdewu
       ngs: Gvoko
       ngt: Ngeq
       ngu: Guerrero Nahuatl
@@ -4676,6 +4829,7 @@ en:
       nju: Ngadjunmaya
       njx: Kunyi
       njy: Njyem
+      njz: Nyishi
       nka: Nkoya
       nkb: Khoibu Naga
       nkc: Nkongho
@@ -4721,7 +4875,7 @@ en:
       nmc: Ngam
       nmd: Ndumu
       nme: Mzieme Naga
-      nmf: Tangkhul Naga
+      nmf: Tangkhul Naga (India)
       nmg: Kwasio
       nmh: Monsang Naga
       nmi: Nyam
@@ -4779,6 +4933,7 @@ en:
       nok: Nooksack
       nom: Nocamán
       non: Old Norse
+      noo: Nootka
       nop: Numanggang
       noq: Ngongo
       nos: Eastern Nisu
@@ -4790,7 +4945,9 @@ en:
       noz: Nayi
       npa: Nar Phu
       npb: Nupbikha
+      npg: Ponyo-Gongwang Naga
       nph: Phom Naga
+      npi: Nepali (individual language)
       npl: Southeastern Puebla Nahuatl
       npn: Mondropolon
       npo: Pochuri Naga
@@ -4802,6 +4959,7 @@ en:
       nqm: Ndom
       nqn: Nen
       nqo: N'Ko
+      nqy: Akyaung Ari Naga
       nra: Ngom
       nrb: Nara
       nrc: Noric
@@ -4821,13 +4979,18 @@ en:
       nsc: Nshi
       nsd: Southern Nisu
       nse: Nsenga
+      nsf: Northwestern Nisu
       nsg: Ngasa
       nsh: Ngoshie
+      nsi: Nigerian Sign Language
       nsk: Naskapi
+      nsl: Norwegian Sign Language
       nsm: Sumi Naga
       nsn: Nehan
       nso: Pedi
+      nsp: Nepalese Sign Language
       nsq: Northern Sierra Miwok
+      nsr: Maritime Sign Language
       nss: Nali
       nst: Tase Naga
       nsu: Sierra Negra Nahuatl
@@ -4847,6 +5010,7 @@ en:
       nts: Natagaimas
       ntu: Natügu
       ntw: Nottoway
+      ntx: Tangkhul Naga (Myanmar)
       nty: Mantsi
       ntz: Natanzi
       nua: Yuaga
@@ -4877,12 +5041,15 @@ en:
       nuz: Tlamacazapa Nahuatl
       nvh: Nasarian
       nvm: Namiae
+      nvo: Nyokon
       nwa: Nawathinehena
       nwb: Nyabwa
       nwc: Classical Newari
       nwe: Ngwe
+      nwg: Ngayawung
       nwi: Southwest Tanna
       nwm: Nyamusa-Molo
+      nwo: Nauo
       nwr: Nawaru
       nwx: Middle Newar
       nwy: Nottoway-Meherrin
@@ -4891,6 +5058,7 @@ en:
       nxe: Nage
       nxg: Ngad'a
       nxi: Nindi
+      nxk: Koki Naga
       nxl: South Nuaulu
       nxm: Numidian
       nxn: Ngawun
@@ -4927,6 +5095,7 @@ en:
       nzi: Nzima
       nzk: Nzakara
       nzm: Zeme Naga
+      nzs: New Zealand Sign Language
       nzu: Teke-Nzikou
       nzy: Nzakambay
       nzz: Nanga Dama Dogon
@@ -4974,10 +5143,12 @@ en:
       okb: Okobo
       okd: Okodia
       oke: Okpe (Southwestern Edo)
+      okg: Koko Babangk
       okh: Koresh-e Rostam
       oki: Okiek
       okj: Oko-Juwoi
       okk: Kwamtim One
+      okl: Old Kentish Sign Language
       okm: Middle Korean (10th-16th cent.)
       okn: Oki-No-Erabu
       oko: Old Korean (3rd-9th cent.)
@@ -5051,6 +5222,7 @@ en:
       orv: Old Russian
       orw: Oro Win
       orx: Oro
+      ory: Oriya (individual language)
       orz: Ormu
       osa: Osage
       osc: Oscan
@@ -5240,6 +5412,7 @@ en:
       pko: Pökoot
       pkp: Pukapuka
       pkr: Attapady Kurumba
+      pks: Pakistan Sign Language
       pkt: Maleng
       pku: Paku
       pla: Miani
@@ -5268,6 +5441,7 @@ en:
       pma: Paama
       pmb: Pambia
       pmc: Palumata
+      pmd: Pallanganmiddang
       pme: Pwaamei
       pmf: Pamona
       pmh: Māhārāṣṭri Prākrit
@@ -5294,6 +5468,7 @@ en:
       png: Pongu
       pnh: Penrhyn
       pni: Aoheng
+      pnk: Paunaka
       pnm: Punan Batu 1
       pnn: Pinai-Hagahai
       pno: Panobo
@@ -5356,6 +5531,7 @@ en:
       prh: Porohanon
       pri: Paicî
       prk: Parauk
+      prl: Peruvian Sign Language
       prm: Kibiri
       prn: Prasuni
       pro: Old Provençal (to 1500)
@@ -5368,13 +5544,21 @@ en:
       prw: Parawen
       prx: Purik
       pry: Pray 3
+      prz: Providencia Sign Language
       psa: Asue Awyu
+      psc: Persian Sign Language
+      psd: Plains Indian Sign Language
       pse: Central Malay
+      psg: Penang Sign Language
       psh: Southwest Pashayi
       psi: Southeast Pashayi
+      psl: Puerto Rican Sign Language
       psm: Pauserna
       psn: Panasuan
+      pso: Polish Sign Language
+      psp: Philippine Sign Language
       psq: Pasi
+      psr: Portuguese Sign Language
       pss: Kaulong
       pst: Central Pashto
       psu: Sauraseni Prākrit
@@ -5425,6 +5609,7 @@ en:
       pye: Pye Krumen
       pym: Fyam
       pyn: Poyanáwa
+      pys: Paraguayan Sign Language
       pyu: Puyuma
       pyx: Pyu (Myanmar)
       pyy: Pyen
@@ -5516,6 +5701,7 @@ en:
       rbb: Rumai Palaung
       rbk: Northern Bontok
       rbl: Miraya Bikol
+      rbp: Barababaraba
       rcf: Réunion Creole French
       rdb: Rudbari
       rea: Rerau
@@ -5574,6 +5760,8 @@ en:
       rmo: Sinte Romani
       rmp: Rempi
       rmq: Caló
+      rmr: Caló
+      rms: Romanian Sign Language
       rmt: Domari
       rmu: Tavringer Romani
       rmv: Romanova
@@ -5587,6 +5775,7 @@ en:
       rnl: Ranglong
       rnn: Roon
       rnp: Rongpo
+      rnr: Nari Nari
       rnw: Rungwa
       roa: Romance languages
       rob: Tae'
@@ -5606,7 +5795,11 @@ en:
       rpt: Rapting
       rri: Ririo
       rro: Waima
+      rrt: Arritinngithigh
       rsb: Romano-Serbian
+      rsi: Rennellese Sign Language
+      rsl: Russian Sign Language
+      rtc: Rungtu Chin
       rth: Ratahan
       rtm: Rotuman
       rtw: Rathawi
@@ -5710,6 +5903,7 @@ en:
       sdh: Southern Kurdish
       sdj: Suundi
       sdk: Sos Kundi
+      sdl: Saudi Arabian Sign Language
       sdm: Semandang
       sdn: Gallurese Sardinian
       sdo: Bukar-Sadung Bidayuh
@@ -5746,17 +5940,24 @@ en:
       sew: Sewa Bay
       sey: Secoya
       sez: Senthang Chin
+      sfb: Langue des signes de Belgique Francophone
+      sfe: Eastern Subanen
       sfm: Small Flowery Miao
+      sfs: South African Sign Language
       sfw: Sehwi
       sga: Old Irish (to 900)
       sgb: Mag-antsi Ayta
       sgc: Kipsigis
       sgd: Surigaonon
       sge: Segai
+      sgg: Swiss-German Sign Language
       sgh: Shughni
       sgi: Suga
+      sgj: Surgujia
       sgk: Sangkong
+      sgl: Sanglechi-Ishkashimi
       sgm: Singa
+      sgn: Sign languages
       sgo: Songa
       sgp: Singpho
       sgr: Sangisari
@@ -5764,6 +5965,7 @@ en:
       sgt: Brokpake
       sgu: Salas
       sgw: Sebat Bet Gurage
+      sgx: Sierra Leone Sign Language
       sgy: Sanglechi
       sgz: Sursurunga
       sha: Shall-Zwall
@@ -5833,7 +6035,7 @@ en:
       sjw: Shawnee
       ska: Skagit
       skb: Saek
-      skc: Sauk
+      skc: Ma Manda
       skd: Southern Sierra Miwok
       ske: Seke (Vanuatu)
       skf: Sakirabiá
@@ -5842,7 +6044,7 @@ en:
       ski: Sika
       skj: Seke (Nepal)
       skk: Sok
-      skm: Sakam
+      skm: Kutong
       skn: Kolibugan Subanon
       sko: Seko Tengah
       skp: Sekapan
@@ -5860,6 +6062,7 @@ en:
       slc: Sáliba
       sld: Sissala
       sle: Sholaga
+      slf: Swiss-Italian Sign Language
       slg: Selungai Murut
       slh: Southern Puget Sound Salish
       sli: Lower Silesian
@@ -5870,6 +6073,7 @@ en:
       slp: Lamaholot
       slq: Salchuq
       slr: Salar
+      sls: Singapore Sign Language
       slt: Sila
       slu: Selaru
       slw: Sialum
@@ -5943,7 +6147,7 @@ en:
       sou: Southern Thai
       sov: Sonsorol
       sow: Sowanda
-      sox: So (Cameroon)
+      sox: Swo
       soy: Miyobe
       soz: Temi
       spb: Sepa (Indonesia)
@@ -5954,7 +6158,7 @@ en:
       spi: Saponi
       spk: Sengo
       spl: Selepet
-      spm: Sepen
+      spm: Akukem
       spo: Spokane
       spp: Supyire Senoufo
       spq: Loreto-Ucayali Spanish
@@ -5962,16 +6166,19 @@ en:
       sps: Saposa
       spt: Spiti Bhoti
       spu: Sapuan
+      spv: Sambalpuri
       spx: South Picene
       spy: Sabaot
       sqa: Shama-Sambuga
       sqh: Shau
       sqj: Albanian languages
+      sqk: Albanian Sign Language
       sqm: Suma
       sqn: Susquehannock
       sqo: Sorkhei
       sqq: Sou
       sqr: Siculo Arabic
+      sqs: Sri Lankan Sign Language
       sqt: Soqotri
       squ: Squamish
       sra: Saruga
@@ -6012,7 +6219,9 @@ en:
       ssm: Semnam
       ssn: Waata
       sso: Sissano
+      ssp: Spanish Sign Language
       ssq: So'a
+      ssr: Swiss-French Sign Language
       sss: Sô
       sst: Sinasina
       ssu: Susuami
@@ -6050,11 +6259,13 @@ en:
       sui: Suki
       suj: Shubi
       suk: Sukuma
+      sul: Surigaonon
+      sum: Sumo-Mayangna
       suq: Suri
       sur: Mwaghavul
       sus: Susu
       sut: Subtiaba
-      suv: Sulung
+      suv: Puroik
       suw: Sumbwa
       sux: Sumerian
       suy: Suyá
@@ -6063,6 +6274,7 @@ en:
       svb: Ulau-Suain
       svc: Vincentian Creole English
       sve: Serili
+      svk: Slovakian Sign Language
       svr: Savara
       svs: Savosavo
       svx: Skalvian
@@ -6074,6 +6286,7 @@ en:
       swi: Sui
       swj: Sira
       swk: Malawi Sena
+      swl: Swedish Sign Language
       swm: Samosa
       swn: Sawknah
       swo: Shanenawa
@@ -6113,6 +6326,7 @@ en:
       syr: Syriac
       sys: Sinyar
       syw: Kagate
+      syy: Al-Sayyid Bedouin Sign Language
       sza: Semelai
       szb: Ngalum
       szc: Semaq Beri
@@ -6255,6 +6469,7 @@ en:
       tgg: Tangga
       tgh: Tobagonian Creole English
       tgi: Lawunuia
+      tgj: Tagin
       tgn: Tandaganon
       tgo: Sudest
       tgp: Tangoa
@@ -6267,6 +6482,7 @@ en:
       tgw: Tagwana Senoufo
       tgx: Tagish
       tgy: Togoyo
+      tgz: Tagalaka
       thc: Tai Hang Tong
       thd: Thayore
       the: Chitwania Tharu
@@ -6291,6 +6507,7 @@ en:
       tia: Tidikelt Tamazight
       tic: Tira
       tid: Tidong
+      tie: Tingal
       tif: Tifal
       tig: Tigre
       tih: Timugon Murut
@@ -6314,6 +6531,7 @@ en:
       tja: Tajuasohn
       tjg: Tunjung
       tji: Northern Tujia
+      tjl: Tai Laing
       tjm: Timucua
       tjn: Tonjon
       tjo: Temacine Tamazight
@@ -6325,6 +6543,7 @@ en:
       tke: Takwane
       tkf: Tukumanféd
       tkg: Tesaka Malagasy
+      tkk: Takpa
       tkl: Tokelau
       tkm: Takelma
       tkn: Toku-No-Shima
@@ -6391,6 +6610,7 @@ en:
       tnc: Tanimuca-Retuarã
       tnd: Angosturas Tunebo
       tne: Tinoc Kallahan
+      tnf: Tangshewi
       tng: Tobanga
       tnh: Maiani
       tni: Tandia
@@ -6495,6 +6715,7 @@ en:
       tsb: Tsamai
       tsc: Tswa
       tsd: Tsakonian
+      tse: Tunisian Sign Language
       tsf: Southwestern Tamang
       tsg: Tausug
       tsh: Tsuvan
@@ -6502,13 +6723,17 @@ en:
       tsj: Tshangla
       tsk: Tseku
       tsl: Ts'ün-Lao
+      tsm: Turkish Sign Language
       tsp: Northern Toussian
+      tsq: Thai Sign Language
       tsr: Akei
+      tss: Taiwan Sign Language
       tst: Tondi Songway Kiini
       tsu: Tsou
       tsv: Tsogo
       tsw: Tsishingini
       tsx: Mubami
+      tsy: Tebul Sign Language
       tsz: Purepecha
       tta: Tutelo
       ttb: Gaa
@@ -6569,6 +6794,7 @@ en:
       tvo: Tidore
       tvs: Taveta
       tvt: Tutsa Naga
+      tvu: Tunen
       tvw: Sedoa
       tvy: Timor Pidgin
       twa: Twana
@@ -6623,6 +6849,7 @@ en:
       tyv: Tuvinian
       tyx: Teke-Tyee
       tyz: Tày
+      tza: Tanzanian Sign Language
       tzh: Tzeltal
       tzj: Tz'utujil
       tzm: Central Atlas Tamazight
@@ -6651,7 +6878,9 @@ en:
       uga: Ugaritic
       ugb: Kuku-Ugbanh
       uge: Ughele
+      ugn: Ugandan Sign Language
       ugo: Ugong
+      ugy: Uruguayan Sign Language
       uha: Uhami
       uhn: Damal
       uis: Uisai
@@ -6660,10 +6889,13 @@ en:
       uka: Kaburi
       ukg: Ukuriguma
       ukh: Ukhwejo
+      ukl: Ukrainian Sign Language
       ukp: Ukpe-Bayobiri
       ukq: Ukwa
+      uks: Urubú-Kaapor Sign Language
       uku: Ukue
       ukw: Ukwuani-Aboh-Ndoni
+      uky: Kuuk-Yak
       ula: Fungwa
       ulb: Ulukwumi
       ulc: Ulch
@@ -6827,6 +7059,9 @@ en:
       vro: Võro
       vrs: Varisi
       vrt: Burmbar
+      vsi: Moldova Sign Language
+      vsl: Venezuelan Sign Language
+      vsv: Valencian Sign Language
       vto: Vitou
       vum: Vumbu
       vun: Vunjo
@@ -6887,12 +7122,12 @@ en:
       wei: Kiunum
       wem: Weme Gbe
       wen: Sorbian languages
-      weo: North Wemale
+      weo: Wemale
       wep: Westphalien
       wer: Weri
       wes: Cameroon Pidgin
       wet: Perai
-      weu: Welaung
+      weu: Rawngtu Chin
       wew: Wejewa
       wfg: Yafi
       wga: Wagaya
@@ -6900,6 +7135,8 @@ en:
       wgg: Wangganguru
       wgi: Wahgi
       wgo: Waigeo
+      wgu: Wirangu
+      wgw: Wagawaga
       wgy: Warrgamay
       wha: Manusela
       whg: North Wahgi
@@ -6920,7 +7157,7 @@ en:
       wir: Wiraféd
       wit: Wintu
       wiu: Wiru
-      wiv: Muduapa
+      wiv: Vitu
       wiw: Wirangu
       wiy: Wiyot
       wja: Waja
@@ -6972,6 +7209,7 @@ en:
       wno: Wano
       wnp: Wanap
       wnu: Usan
+      wny: Wanyi
       woa: Tyaraity
       wob: Wè Northern
       woc: Wogeo
@@ -6995,9 +7233,11 @@ en:
       wrg: Warungu
       wrh: Wiradhuri
       wri: Wariyangga
+      wrk: Garrwa
       wrl: Warlmanpa
       wrm: Warumungu
       wrn: Warnang
+      wro: Worrorra
       wrp: Waropen
       wrr: Wardaman
       wrs: Waris
@@ -7033,6 +7273,7 @@ en:
       wux: Wulna
       wuy: Wauyai
       wwa: Waama
+      wwb: Wakabunga
       wwo: Wetamut
       wwr: Warrwa
       www: Wawa
@@ -7102,10 +7343,12 @@ en:
       xeu: Keoru-Ahia
       xfa: Faliscan
       xga: Galatian
+      xgb: Gbin
       xgf: Gabrielino-Fernandeño
       xgl: Galindan
       xgn: Mongolian languages
       xgr: Garza
+      xgu: Unggumi
       xha: Harami
       xhc: Hunnic
       xhd: Hadrami
@@ -7131,6 +7374,7 @@ en:
       xkf: Khengkha
       xkg: Kagoro
       xkh: Karahawyana
+      xki: Kenyan Sign Language
       xkj: Kajali
       xkk: Kaco'
       xkl: Mainstream Kenyah
@@ -7170,12 +7414,14 @@ en:
       xmh: Kuku-Muminh
       xmj: Majera
       xmk: Ancient Macedonian
+      xml: Malaysian Sign Language
       xmm: Manado Malay
       xmn: Manichaean Middle Persian
       xmo: Morerebi
       xmp: Kuku-Mu'inh
       xmq: Kuku-Mangk
       xmr: Meroitic
+      xms: Moroccan Sign Language
       xmt: Matbat
       xmu: Kamu
       xmv: Antankarana Malagasy
@@ -7193,6 +7439,7 @@ en:
       xnr: Kangri
       xns: Kanashi
       xnt: Narragansett
+      xnz: Kenzi
       xoc: O'chi'chi'
       xod: Kokoda
       xog: Soga
@@ -7208,6 +7455,7 @@ en:
       xpe: Liberia Kpelle
       xpg: Phrygian
       xpi: Pictish
+      xpj: Mpalitjanh
       xpk: Kulina Pano
       xpm: Pumpokol
       xpn: Kapinawá
@@ -7231,7 +7479,7 @@ en:
       xru: Marriammu
       xrw: Karawa
       xsa: Sabaean
-      xsb: Tinà Sambal
+      xsb: Sambal
       xsc: Scythian
       xsd: Sidetic
       xse: Sempan
@@ -7272,9 +7520,11 @@ en:
       xtz: Tasmanian
       xua: Alu Kurumba
       xub: Betta Kurumba
+      xud: Umiida
       xug: Kunigami
       xuj: Jennu Kurumba
       xum: Umbrian
+      xun: Unggarranggu
       xuo: Kuo
       xup: Upper Umpqua
       xur: Urartian
@@ -7297,6 +7547,7 @@ en:
       xxr: Koropó
       xxt: Tambora
       xyl: Yalakalore
+      xyy: Yorta Yorta
       xzh: Zhang-Zhung
       xzm: Zemgalian
       xzp: Ancient Zapotec
@@ -7348,6 +7599,7 @@ en:
       yde: Yangum Dey
       ydg: Yidgha
       ydk: Yoidik
+      yds: Yiddish Sign Language
       yea: Ravula
       yec: Yeniche
       yee: Yimas
@@ -7356,11 +7608,12 @@ en:
       yel: Yela
       yen: Yendang
       yer: Tarok
-      'yes': Yeskwa
+      'yes': Nyankpa
       yet: Yetfa
       yeu: Yerukula
       yev: Yapunda
       yey: Yeyi
+      yga: Malyangapa
       ygl: Yangum Gel
       ygm: Yagomi
       ygp: Gepo
@@ -7395,9 +7648,11 @@ en:
       ykk: Yakaikeke
       ykl: Khlula
       ykm: Kap
+      ykn: Kua-nsi
       yko: Yasa
       ykr: Yekora
       ykt: Kathu
+      yku: Kuamasi
       yky: Yakoma
       yla: Yaul
       ylb: Yaleba
@@ -7440,6 +7695,7 @@ en:
       ynl: Yangulam
       ynn: Yana
       yno: Yong
+      ynq: Yendang
       yns: Yansi
       ynu: Yahuna
       yob: Yoba
@@ -7450,6 +7706,7 @@ en:
       yom: Yombe
       yon: Yongkom
       yos: Yos
+      yot: Yotti
       yox: Yoron
       yoy: Yoy
       ypa: Phala
@@ -7473,6 +7730,8 @@ en:
       yrw: Yarawata
       ysc: Yassic
       ysd: Samatao
+      ysg: Sonaga
+      ysl: Yugoslavian Sign Language
       ysn: Sani
       yso: Nisi (China)
       ysp: Southern Lolopo
@@ -7515,6 +7774,8 @@ en:
       ywt: Xishanba Lalo
       ywu: Wumeng Nasu
       yww: Yawarawarga
+      yxg: Yagara
+      yxy: Yabula Yabula
       yyu: Yau (Sandaun Province)
       yyz: Ayizi
       yzg: E'ma Buyang
@@ -7558,6 +7819,7 @@ en:
       zen: Zenaga
       zga: Kinga
       zgb: Guibei Zhuang
+      zgh: Standard Moroccan Tamazight
       zgm: Minz Zhuang
       zgn: Guibian Zhuang
       zgr: Magori
@@ -7568,6 +7830,7 @@ en:
       zhw: Zhoa
       zhx: Chinese (family)
       zia: Zia
+      zib: Zimbabwe Sign Language
       zik: Zimakani
       zil: Zialo
       zim: Mesme
@@ -7577,9 +7840,11 @@ en:
       ziz: Zizilivakan
       zka: Kaimbulawa
       zkb: Koibal
+      zkd: Kadu
       zkg: Koguryo
       zkh: Khorezmian
       zkk: Karankawa
+      zkn: Kanan
       zko: Kott
       zkp: São Paulo Kaingáng
       zkr: Zakhring
@@ -7668,6 +7933,7 @@ en:
       zrs: Mairasi
       zsa: Sarasira
       zsk: Kaskean
+      zsl: Zambian Sign Language
       zsm: Standard Malay
       zsr: Southern Rincon Zapotec
       zsu: Sukurum
@@ -7729,6 +7995,147 @@ en:
         pga: Sudanese Creole Arabic
         shu: Chadian Arabic
         ssh: Shihhi Arabic
+      sgn:
+        ads: Adamorobe Sign Language
+        aed: Argentine Sign Language
+        aen: Armenian Sign Language
+        afg: Afghan Sign Language
+        ase: American Sign Language
+        asf: Australian Sign Language
+        asp: Algerian Sign Language
+        asq: Austrian Sign Language
+        asw: Australian Aborigines Sign Language
+        bfi: British Sign Language
+        bfk: Ban Khor Sign Language
+        bog: Bamako Sign Language
+        bqn: Bulgarian Sign Language
+        bqy: Bengkala Sign Language
+        bvl: Bolivian Sign Language
+        bzs: Brazilian Sign Language
+        cds: Chadian Sign Language
+        csc: Catalan Sign Language
+        csd: Chiangmai Sign Language
+        cse: Czech Sign Language
+        csf: Cuba Sign Language
+        csg: Chilean Sign Language
+        csl: Chinese Sign Language
+        csn: Colombian Sign Language
+        csq: Croatia Sign Language
+        csr: Costa Rican Sign Language
+        doq: Dominican Sign Language
+        dse: Dutch Sign Language
+        dsl: Danish Sign Language
+        ecs: Ecuadorian Sign Language
+        esl: Egypt Sign Language
+        esn: Salvadoran Sign Language
+        eso: Estonian Sign Language
+        eth: Ethiopian Sign Language
+        fcs: Quebec Sign Language
+        fse: Finnish Sign Language
+        fsl: French Sign Language
+        fss: Finland-Swedish Sign Language
+        gds: Ghandruk Sign Language
+        gse: Ghanaian Sign Language
+        gsg: German Sign Language
+        gsm: Guatemalan Sign Language
+        gss: Greek Sign Language
+        gus: Guinean Sign Language
+        hab: Hanoi Sign Language
+        haf: Haiphong Sign Language
+        hds: Honduras Sign Language
+        hks: Hong Kong Sign Language
+        hos: Ho Chi Minh City Sign Language
+        hps: Hawai'i Pidgin Sign Language
+        hsh: Hungarian Sign Language
+        hsl: Hausa Sign Language
+        icl: Icelandic Sign Language
+        ils: International Sign
+        inl: Indonesian Sign Language
+        ins: Indian Sign Language
+        ise: Italian Sign Language
+        isg: Irish Sign Language
+        isr: Israeli Sign Language
+        jcs: Jamaican Country Sign Language
+        jhs: Jhankot Sign Language
+        jls: Jamaican Sign Language
+        jos: Jordanian Sign Language
+        jsl: Japanese Sign Language
+        jus: Jumla Sign Language
+        kgi: Selangor Sign Language
+        kvk: Korean Sign Language
+        lbs: Libyan Sign Language
+        lls: Lithuanian Sign Language
+        lsg: Lyons Sign Language
+        lsl: Latvian Sign Language
+        lso: Laos Sign Language
+        lsp: Panamanian Sign Language
+        lst: Trinidad and Tobago Sign Language
+        lsy: Mauritian Sign Language
+        mdl: Maltese Sign Language
+        mfs: Mexican Sign Language
+        mre: Martha's Vineyard Sign Language
+        msd: Yucatec Maya Sign Language
+        msr: Mongolian Sign Language
+        mzc: Madagascar Sign Language
+        mzg: Monastic Sign Language
+        mzy: Mozambican Sign Language
+        nbs: Namibian Sign Language
+        ncs: Nicaraguan Sign Language
+        nsi: Nigerian Sign Language
+        nsl: Norwegian Sign Language
+        nsp: Nepalese Sign Language
+        nsr: Maritime Sign Language
+        nzs: New Zealand Sign Language
+        okl: Old Kentish Sign Language
+        pks: Pakistan Sign Language
+        prl: Peruvian Sign Language
+        prz: Providencia Sign Language
+        psc: Persian Sign Language
+        psd: Plains Indian Sign Language
+        psg: Penang Sign Language
+        psl: Puerto Rican Sign Language
+        pso: Polish Sign Language
+        psp: Philippine Sign Language
+        psr: Portuguese Sign Language
+        pys: Paraguayan Sign Language
+        rms: Romanian Sign Language
+        rsi: Rennellese Sign Language
+        rsl: Russian Sign Language
+        sdl: Saudi Arabian Sign Language
+        sfb: Langue des signes de Belgique Francophone
+        sfs: South African Sign Language
+        sgg: Swiss-German Sign Language
+        sgx: Sierra Leone Sign Language
+        slf: Swiss-Italian Sign Language
+        sls: Singapore Sign Language
+        sqk: Albanian Sign Language
+        sqs: Sri Lankan Sign Language
+        ssp: Spanish Sign Language
+        ssr: Swiss-French Sign Language
+        svk: Slovakian Sign Language
+        swl: Swedish Sign Language
+        syy: Al-Sayyid Bedouin Sign Language
+        tse: Tunisian Sign Language
+        tsm: Turkish Sign Language
+        tsq: Thai Sign Language
+        tss: Taiwan Sign Language
+        tsy: Tebul Sign Language
+        tza: Tanzanian Sign Language
+        ugn: Ugandan Sign Language
+        ugy: Uruguayan Sign Language
+        ukl: Ukrainian Sign Language
+        uks: Urubú-Kaapor Sign Language
+        vgt: Vlaamse Gebarentaal
+        vsi: Moldova Sign Language
+        vsl: Venezuelan Sign Language
+        vsv: Valencian Sign Language
+        xki: Kenyan Sign Language
+        xml: Malaysian Sign Language
+        xms: Moroccan Sign Language
+        yds: Yiddish Sign Language
+        ysl: Yugoslavian Sign Language
+        zib: Zimbabwe Sign Language
+        zsl: Zambian Sign Language
       ms:
         bjn: Banjar
         btj: Bacanese Malay
@@ -7802,6 +8209,7 @@ en:
       AI: Anguilla
       AL: Albania
       AM: Armenia
+      AN: Netherlands Antilles
       AO: Angola
       AQ: Antarctica
       AR: Argentina
@@ -7828,6 +8236,7 @@ en:
       BR: Brazil
       BS: Bahamas
       BT: Bhutan
+      BU: Burma
       BV: Bouvet Island
       BW: Botswana
       BY: Belarus
@@ -7846,12 +8255,14 @@ en:
       CO: Colombia
       CP: Clipperton Island
       CR: Costa Rica
+      CS: Serbia and Montenegro
       CU: Cuba
       CV: Cape Verde
       CW: Curaçao
       CX: Christmas Island
       CY: Cyprus
       CZ: Czech Republic
+      DD: German Democratic Republic
       DE: Germany
       DG: Diego Garcia
       DJ: Djibouti
@@ -7874,6 +8285,7 @@ en:
       FM: Federated States of Micronesia
       FO: Faroe Islands
       FR: France
+      FX: Metropolitan France
       GA: Gabon
       GB: United Kingdom
       GD: Grenada
@@ -7969,6 +8381,7 @@ en:
       'NO': Norway
       NP: Nepal
       NR: Nauru
+      NT: Neutral Zone
       NU: Niue
       NZ: New Zealand
       OM: Oman
@@ -7982,7 +8395,7 @@ en:
       PM: Saint Pierre and Miquelon
       PN: Pitcairn
       PR: Puerto Rico
-      PS: Occupied Palestinian Territory
+      PS: State of Palestine
       PT: Portugal
       PW: Palau
       PY: Paraguay
@@ -8010,6 +8423,7 @@ en:
       SR: Suriname
       SS: South Sudan
       ST: Sao Tome and Principe
+      SU: Union of Soviet Socialist Republics
       SV: El Salvador
       SX: Sint Maarten (Dutch part)
       SY: Syrian Arab Republic
@@ -8026,6 +8440,7 @@ en:
       TM: Turkmenistan
       TN: Tunisia
       TO: Tonga
+      TP: East Timor
       TR: Turkey
       TT: Trinidad and Tobago
       TV: Tuvalu
@@ -8047,10 +8462,13 @@ en:
       WF: Wallis and Futuna
       WS: Samoa
       XA..XZ: Private use
+      YD: Democratic Yemen
       YE: Yemen
       YT: Mayotte
+      YU: Yugoslavia
       ZA: South Africa
       ZM: Zambia
+      ZR: Zaire
       ZW: Zimbabwe
       ZZ: Private use
       '001': World
@@ -8124,6 +8542,12 @@ en:
           lipaw:
             _END_: The Lipovaz dialect of Resian
           _END_: Resian
+        bohoric:
+          _END_: Slovene in Bohorič alphabet
+        dajnko:
+          _END_: Slovene in Dajnko alphabet
+        metelko:
+          _END_: Slovene in Metelko alphabet
         nedis:
           _END_: Natisone dialect
       djk:
@@ -8192,8 +8616,11 @@ en:
         pseudo:
           _END_: Pseudo-English
       ja:
-        hepburn:
-          _END_: Hepburn romanization
+        Latn:
+          hepburn:
+            _END_: Hepburn romanization
+            heploc:
+              _END_: Hepburn romanization, Library of Congress method
       nn:
         hognorsk:
           _END_: Norwegian in Høgnorsk (High Norwegian) orthography
@@ -8218,6 +8645,8 @@ en:
       kw:
         kkcor:
           _END_: Common Cornish orthography of Revived Cornish
+        kscor:
+          _END_: Standard Cornish orthography of Revived Cornish
         uccor:
           _END_: Unified Cornish orthography of Revived Cornish
         ucrcor:
@@ -8238,13 +8667,15 @@ en:
         rigik:
           _END_: Volapük rigik
       zh:
-        pinyin:
-          _END_: Pinyin romanization
-        wadegile:
-          _END_: Wade-Giles romanization
+        Latn:
+          pinyin:
+            _END_: Pinyin romanization
+          wadegile:
+            _END_: Wade-Giles romanization
       bo:
-        pinyin:
-          _END_: Pinyin romanization
+        Latn:
+          pinyin:
+            _END_: Pinyin romanization
       sco:
         ulster:
           _END_: Ulster dialect of Scots
@@ -8253,6 +8684,7 @@ en:
           _END_: Valencian
     script:
       Afak: Afaka
+      Aghb: Caucasian Albanian
       Arab: Arabic
       Armi: Imperial Aramaic
       Armn: Armenian
@@ -8332,6 +8764,7 @@ en:
       Loma: Loma
       Lyci: Lycian
       Lydi: Lydian
+      Mahj: Mahajani
       Mand: Mandaic
       Mani: Manichaean
       Maya: Mayan hieroglyphs
