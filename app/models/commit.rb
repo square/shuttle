@@ -130,6 +130,7 @@ class Commit < ActiveRecord::Base
   attr_readonly :revision, :message
 
   scope :by_priority_and_due_date, -> { order('due_date ASC, priority ASC') }
+  scope :with_sha_prefix, lambda { |sha| where("encode(revision_raw, 'hex') like ?", "#{sha}%") }
 
   # @private
   def to_param() revision end

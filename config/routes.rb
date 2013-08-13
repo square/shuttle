@@ -67,6 +67,7 @@ Shuttle::Application.routes.draw do
   get 'search' => redirect('/search/translations')
   get 'search/translations' => 'search#translations', as: :search_translations
   get 'search/keys' => 'search#keys', as: :search_keys
+  get 'search/commits' => 'search#commits', as: :search_commits
 
   # HOME PAGES
   get 'administrators' => 'home#administrators', as: :administrators

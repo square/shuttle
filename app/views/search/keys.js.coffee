@@ -55,14 +55,17 @@ $(window).ready ->
     for locale in localeOrder
       do (locale) ->
         translation = (trans for trans in key.translations when trans.locale.rfc5646 == locale)[0]
-        klass = if translation.translated && translation.approved
-          'text-success'
-        else if translation.translated
-          'text-info'
-        else if translation.approved == false
-          'text-error'
+        if translation?
+          klass = if translation.translated && translation.approved
+            'text-success'
+          else if translation.translated
+            'text-info'
+          else if translation.approved == false
+            'text-error'
+          else
+            ''
+          td = $('<td/>').appendTo(tr)
+          $('<a/>').text(translation.copy[0..30]).attr('href', translation.url).
+              addClass(klass).appendTo(td)
         else
-          ''
-        td = $('<td/>').appendTo(tr)
-        $('<a/>').text(translation.copy[0..30]).attr('href', translation.url).
-        addClass(klass).appendTo(td)
+          td = $('<td/>').appendTo(tr)

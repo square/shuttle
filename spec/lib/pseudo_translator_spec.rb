@@ -39,7 +39,6 @@ describe PseudoTranslator do
     let(:paragraph) { ((" aoeu" * words_per_sentence) + ".") * sentences }
     subject { p.translate(paragraph) }
     it "should return the right number of words and sentences" do
-      puts paragraph
       expect(subject.split(".").count).to eq(sentences)
       expect(subject.split(" ").count).to eq(sentences * words_per_sentence)
     end

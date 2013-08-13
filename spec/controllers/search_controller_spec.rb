@@ -163,4 +163,56 @@ describe SearchController do
       end
     end
   end
+
+  describe "#commits" do
+    def finish_sha(prefix="")
+      prefix + rand(16**(40 - prefix.length)).to_s(16).rjust(40, '0')
+    end
+
+    let(:prefix1) { "abcdef" }
+    let(:prefix2) { "123456" }
+    let(:prefix3) { "abc111" }
+
+    before :all do
+      @user = FactoryGirl.create(:user, role: "translator")
+      @project1 = FactoryGirl.create(:project)
+      @project2 = FactoryGirl.create(:project)
+      2.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("abcdef")) }
+      2.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("123456")) }
+      1.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("abc111")) }
+      1.times { FactoryGirl.create(:commit, project: @project2, revision: finish_sha("abc111")) }
+    end
+
+    before :each do
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in @user
+    end
+
+    it "should return all commits if no filters are given" do
+      get :commits, format: 'json'
+      expect(response.status).to eq(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eq(6)
+    end
+
+    it "should return no commits if SHA given doesn't match any commits" do
+      get :commits, sha: '321', format: 'json'
+      expect(response.status).to eq(200)
+      expect(response.body).to eq('[]')
+    end
+
+    it "should filter according to SHA prefix" do
+      get :commits, sha: 'abc', format: 'json'
+      expect(response.status).to eq(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eq(4)
+    end
+
+    it "should filter according to project_id if given" do
+      get :commits, project_id: @project1.id, format:'json'
+      expect(response.status).to eq(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eq(5)
+    end
+  end
 end

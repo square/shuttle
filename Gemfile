@@ -64,6 +64,8 @@ gem 'twitter-bootstrap-rails'
 group :development do
   gem 'redcarpet', require: nil
   gem 'yard', require: nil, platform: :mri
+
+  gem 'parslet'
 end
 
 group :test do
