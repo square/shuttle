@@ -58,8 +58,8 @@ module Importer
       key.add_pending_translations
     end
 
-    def key_for_message_comment(message, comment)
-      Digest::SHA2.new.update(message + comment).to_s
+    def key_for(message, comment)
+      Digest::MD5.hexdigest("#{message}#{comment}")
     end
   end
 end

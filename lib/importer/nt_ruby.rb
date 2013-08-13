@@ -44,7 +44,7 @@ module Importer
         message = message[1..message.size].detect { |m| m.present? }
         comment = comment[1..comment.size].detect { |c| c.present? }
 
-        receiver.add_nt_string(key_for_message_comment(message, comment), message, comment)
+        receiver.add_nt_string(key_for(message, comment), message, comment)
       end
     end
   end
