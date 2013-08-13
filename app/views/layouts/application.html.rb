@@ -113,6 +113,9 @@ module Views
                   ul(class: 'nav') do
                     tab "Search", 'search', search_url
                   end
+                  ul(class: 'nav') do
+                    tab "Worker Status", 'workers', "", class: 'worker-status'
+                  end
                   ul(class: 'nav pull-right') do
                     #tab "Settings", 'account', account_url
                     tab "Projects", 'projects', projects_url if current_user.admin?
