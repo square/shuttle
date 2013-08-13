@@ -70,8 +70,8 @@ module Importer
           if Symbol === subtree
             next
           elsif Array === subtree &&
-            [:command, :method_add_arg].include?(subtree[0]) &&
-            subtree[1][1][1] == "nt"
+            ((subtree[0] == :command && subtree[1][1] == "nt") ||
+             (subtree[0] == :method_add_arg && subtree[1][1][1] == "nt"))
             calls.append(subtree)
           else
             calls += find_nt_in_parse_tree(subtree)
