@@ -24,6 +24,10 @@ module Exporter
       @@implementations
     end
 
+    def NtBase.find_by_format(format)
+      implementations.detect { |exp| exp.request_format == format.to_sym }
+    end
+
     def nt_hash(*locales)
       hsh = Hash.new
       keys = @commit.keys.includes(:translations)
