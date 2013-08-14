@@ -99,6 +99,17 @@ module Views
       def navbar
         div(class: 'navbar navbar-fixed-top') do
           div(class: 'navbar-inner') do
+            if current_user
+              div(class: 'container') do
+                div(class: 'worker-status pull-right') do
+                  if current_user.admin?
+                    a "Worker Status", href: "/sidekiq"
+                  else
+                    a "Worker Status"
+                  end
+                end
+              end
+            end
             div(class: 'container') do
               a(class: 'btn btn-navbar', :'data-toggle' => 'collapse', :'data-target' => '.nav-collapse') do
                 span class: 'icon-bar'
@@ -112,9 +123,6 @@ module Views
                 if current_user
                   ul(class: 'nav') do
                     tab "Search", 'search', search_url
-                  end
-                  ul(class: 'nav') do
-                    tab "Worker Status", 'workers', "", class: 'worker-status'
                   end
                   ul(class: 'nav pull-right') do
                     #tab "Settings", 'account', account_url
