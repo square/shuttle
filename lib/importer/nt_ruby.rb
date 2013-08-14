@@ -53,25 +53,13 @@ module Importer
       end
     end
 
-    def get_args(subtree)
-      if subtree[:command]
-        subtree[:command][:args_add_block]
-      elsif subtree[:method_add_arg] && subtree[:method_add_arg][:arg_paren]
-        subtree[:method_add_arg][:arg_paren][:args_add_block]
-      else
-        nil
-      end
-    end
-
     def find_nt_in_parse_tree(tree)
       calls = []
       if Enumerable === tree
         tree.each do |subtree|
           if Symbol === subtree
             next
-          elsif Array === subtree &&
-            ((subtree[0] == :command && subtree[1][1] == "nt") ||
-             (subtree[0] == :method_add_arg && subtree[1][1][1] == "nt"))
+          elsif Array === subtree && is_nt_call?(subtree)
             calls.append(subtree)
           else
             calls += find_nt_in_parse_tree(subtree)
@@ -79,6 +67,47 @@ module Importer
         end
       end
       calls
+    end
+
+    def get_args(subtree)
+      if sub = (subtree[:command] || subtree[:command_call])
+        sub[:args_add_block]
+      elsif subtree[:method_add_arg] && subtree[:method_add_arg][:arg_paren]
+        subtree[:method_add_arg][:arg_paren][:args_add_block]
+      end
+    end
+
+    def is_nt_call?(subtree)
+      (recognizer = syntax_recognizers[subtree[0]]) &&
+        recognizer.call(subtree)
+    end
+
+    def syntax_recognizers
+      {
+        :command => proc { |subtree|
+            if Array === subtree
+              subtree[1][1] == "nt"
+            elsif Hash === subtree
+              subtree[:command][:@ident][0] == "nt"
+            end
+        },
+        :command_call => proc { |subtree|
+            if Array === subtree
+              subtree[3][1] == "nt"
+            elsif Hash === subtree
+              subtree[:command][3][:@ident][0] == "nt"
+            end
+        },
+        :method_add_arg => proc { |subtree|
+            if Array === subtree
+              subtree[1][1][1] == "nt" || # nt(something)
+                subtree[1][3][1] == "nt"  # NaturalTranslation.nt(something)
+            elsif Hash === subtree
+              subtree[:method_add_arg][:fcall][:@ident][0] == "nt" ||  # nt(something)
+                subtree[:method_add_arg][:call][3][:@ident][0] == "nt" # NaturalTranslation.nt(something)
+            end
+        },
+      }
     end
   end
 end
