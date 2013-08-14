@@ -223,7 +223,7 @@ module Views
           div(class: 'form-actions') do
             f.submit class: 'btn btn-primary'
             text ' '
-            button 'Cancel', class: 'btn', href: administrators_url
+            button 'Cancel', class: 'btn', href: projects_url
           end
         end
       end

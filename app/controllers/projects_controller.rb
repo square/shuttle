@@ -122,7 +122,7 @@ class ProjectsController < ApplicationController
 
   def create
     @project = Project.create(project_params)
-    respond_with @project, location: administrators_url
+    respond_with @project, location: projects_url
   end
 
   # Displays a form where an admin can edit a Project.
@@ -166,7 +166,7 @@ class ProjectsController < ApplicationController
 
   def update
     @project.update_attributes project_params
-    respond_with @project, location: administrators_url
+    respond_with @project, location: projects_url
   end
 
   # Receives a github webhook and triggers a new import for the latest commit.
