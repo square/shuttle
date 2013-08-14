@@ -54,7 +54,7 @@ class Commit::KeysController < ApplicationController
     limit  = params[:limit].to_i
     limit = PER_PAGE if limit < 1
 
-    @keys = @commit.keys.by_key.offset(offset).limit(limit).includes(:translations, :slugs)
+    @keys = @commit.keys.by_key.offset(offset).limit(limit).preload(:translations, :slugs)
 
     case params[:status]
       when 'approved'
