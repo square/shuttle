@@ -48,6 +48,16 @@ test:
   password:
   host: localhost
 
+<% db = YAML.load_file('/app/shuttle/shared/database.yml') rescue {} %>
+staging:
+  adapter: postgresql
+  host: <%= db['host'] %>
+  username: <%= db['user'] %>
+  password: <%= db['password'] %>
+  database: <%= db['database'] %>
+  pool: 30
+  timeout: 5000
+
 production:
   adapter: postgresql
   encoding: unicode

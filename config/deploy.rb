@@ -3,11 +3,11 @@ set :repository, 'git@git.squareup.com:intl/shuttle.git'
 set :rvm_ruby_string, '1.9.3-p448@shuttle'
 set :rvm_type, :system
 
-set :scm, :git
+set :stages, %w(production staging)
+set :default_stage, 'staging'
+require 'capistrano/ext/multistage'
 
-role :web, 'ironweed.corp.squareup.com'
-role :app, 'ironweed.corp.squareup.com', 'ginger.corp.squareup.com'
-role :db, 'ironweed.corp.squareup.com', primary: true
+set :scm, :git
 
 set :user, 'square'
 set :runner, 'square'
