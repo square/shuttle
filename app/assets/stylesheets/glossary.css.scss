@@ -1,2 +1,145 @@
+.container {
+  position: relative;
+}
+
+.page-header-btn {
+  float: right;
+  margin: 5px 5px 5px 5px;
+}
+
+#alphabet-bar {
+  z-index: 2;
+
+  text-align: center;
+  padding-top: 5px;
+  padding-bottom: 15px;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(15%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, rgba(255,255,255,1) 15%,rgba(255,255,255,0) 100%); /* Chrome10+,Safari5.1+ */
+  pointer-events:none;
+
+  a {
+    margin-left: 10px;
+    margin-right: 10px;
+    display: inline;
+    pointer-events:auto;
+  }
+  
+  ul {
+    list-style-type: none;
+
+    li {
+      display: inline;
+    }
+  }
+
+}
+
+.affix {
+  position: fixed;
+  top: 40px;
+  width: 100%;
+}
+
 #glossary {
+  position: absolute;
+  top: 150px;
+
+  table {
+    table-layout: fixed; 
+    margin-bottom: 0px;
+
+    th {
+      text-align: center;
+      padding-left: 10px;
+      padding-right: 10px;
+      div {
+        border-bottom-width: 1px;
+        border-bottom-color: rgb(221, 221, 221);
+        border-bottom-style: solid;
+      }
+    }
+
+    td {
+      padding-left: 10px;
+      padding-right: 10px;
+      text-align: center;
+      border: 0px;
+
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+
+      h3 {
+        margin: 0px;
+      }
+
+      input {
+        height: 30px; 
+        -webkit-box-sizing: border-box; 
+        -moz-box-sizing: border-box; 
+        box-sizing: border-box;
+      }
+
+      textarea {
+        height: 95px;  
+        -webkit-box-sizing: border-box; 
+        -moz-box-sizing: border-box; 
+        box-sizing: border-box; 
+      }
+    }
+
+    .hiddenRow {
+      padding: 0 !important;
+    }
+
+  }
+}
+
+.control-label {
+  width: 80px !important;
+}
+
+.controls {
+  margin-left: 90px !importantcontent-length;
+
+  input[type=text] {
+    height: 30px; 
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  input[type=checkbox] {
+
+  }
+
+  textarea {
+    height: 95px;  
+    width: 100%;
+    resize: vertical;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  select {
+    height: 30px; 
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  .checkbox {
+    float: left;
+    width: 26%;
+    margin-right: 1%; 
+    padding-top: 0px !important; /* Override Bootstrap */
+    /*
+    .newline {
+      clear: left;
+    }
+    */
+  }
 }

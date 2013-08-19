@@ -30,6 +30,7 @@
 //= require xregexp
 //
 //= require twitter/bootstrap
+//= require bootstrap-datepicker
 //= require utilities
 //
 //= require buttons
