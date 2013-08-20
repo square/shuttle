@@ -32,6 +32,7 @@ gem 'httparty'
 gem 'therubyracer', platform: :mri, require: 'v8'
 gem 'nokogiri'
 gem 'CFPropertyList', require: 'cfpropertylist'
+gem 'natural_translation', git: 'git@git.squareup.com:intl/nt-ruby'
 
 # EXPORTING
 gem 'libarchive'

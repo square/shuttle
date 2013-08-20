@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'ripper'
+require 'natural_translation/importer/method_finder'
 
 module Importer
 

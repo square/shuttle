@@ -18,6 +18,12 @@ GIT
   specs:
     git (1.2.6)
 
+GIT
+  remote: git@git.squareup.com:intl/nt-ruby
+  revision: 861ff79eb2e1473997df3cff666349d96288ee14
+  specs:
+    natural_translation (0.0.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -258,6 +264,7 @@ DEPENDENCIES
   json
   less-rails
   libarchive
+  natural_translation!
   nokogiri
   parslet
   pg (< 0.14)
