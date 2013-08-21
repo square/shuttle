@@ -20,7 +20,7 @@ GIT
 
 GIT
   remote: git@git.squareup.com:intl/nt-ruby
-  revision: 861ff79eb2e1473997df3cff666349d96288ee14
+  revision: a04c6ee97d92be386ef1780fb9fb00ffddb19c9a
   specs:
     natural_translation (0.0.1)
 

@@ -59,7 +59,7 @@ module Importer
     end
 
     def key_for(message, comment)
-      Digest::MD5.hexdigest("#{message}#{comment}")
+      "#{message}#{comment}"
     end
   end
 end

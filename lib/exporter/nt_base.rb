@@ -46,9 +46,14 @@ module Exporter
             "rules"  => t.rules
           }.delete_if { |k,v| v.nil? }
         }
-        hsh[key.key] = translation_set.delete_if { |k,v| v.nil? }
+        hsh[key_for(key)] = translation_set.delete_if { |k,v| v.nil? }
       end
       hsh
+    end
+
+    # On client side, keys stored under MD5 hash of message and comment
+    def key_for(key)
+      Digest::MD5.hexdigest(key.key)
     end
   end
 end
