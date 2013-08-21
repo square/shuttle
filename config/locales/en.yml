@@ -196,6 +196,8 @@ en:
       name: ERb file
     nt_ruby:
       name: NT Ruby file
+    nt_erb:
+      name: NT ERb file
     properties:
       name: Java .properties file
     ruby:

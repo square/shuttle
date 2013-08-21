@@ -29,7 +29,7 @@ module Fencer
         break unless match
 
         start = scanner.pos
-        token = scanner.scan(/<%(.+?)%>/)
+        token = scanner.scan(/<%(.+?)%>/m)
         unless token
           # advance past the < again, so as not to catch it the next time around
           scanner.pos = scanner.pos + 1
