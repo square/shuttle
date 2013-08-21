@@ -31,7 +31,6 @@ module Importer
     end
 
     def import_strings(receiver)
-      Rails.logger.info "!!! NtErb importing #{@file.path} from blob #{@blob.id[0]}"
       ruby_locations = Fencer::Erb.fence(file.contents).values.reduce([], :+).sort { |x, y| x.begin <=> y.begin }
       ruby_code = ruby_locations.map { |range|
         file.contents[range].match(/<%[=#\-]?(.*)-?%>/m)
