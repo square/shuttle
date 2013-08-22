@@ -170,7 +170,7 @@ class Commit < ActiveRecord::Base
   def import_strings(options={})
     raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
 
-    blobs = project.blobs.includes(:project) # preload blobs for performance
+    blobs = Set.new(project.blobs.includes(:project).to_a) # preload blobs for performance
 
     # add us as one of the workers, to prevent the commit from prematurely going
     # ready; let's just invent a job ID for us
@@ -413,11 +413,13 @@ class Commit < ActiveRecord::Base
   end
 
   def import_tree(tree, path, options={})
+    importers = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
     tree.blobs.each do |name, blob|
       blob_path   = "#{path}/#{name}"
       blob_object = if options[:blobs]
                       begin
-                        options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                        options[:blobs].detect { |b| b.sha == blob.sha } ||
+                            project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha).tap { |b| options[:blobs] << b }
                       rescue ActiveRecord::RecordNotUnique
                         project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
                       end
@@ -425,8 +427,7 @@ class Commit < ActiveRecord::Base
                       project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
                     end
 
-      imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
-      imps.each do |importer|
+      importers.each do |importer|
         importer = importer.new(blob_object, blob_path, self)
 
         Shuttle::Redis.del("keys_for_blob:#{importer.class.ident}:#{blob.sha}") if options[:force]

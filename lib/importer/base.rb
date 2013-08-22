@@ -102,8 +102,7 @@ module Importer
       end
       if @commit
         Commit.transaction do
-          @keys -= @commit.keys
-          @commit.keys += @keys.to_a
+          @commit.keys += (@keys - @commit.keys).to_a
         end
       end
 
