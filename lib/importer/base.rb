@@ -413,11 +413,11 @@ module Importer
         end
       end
 
-      def add_nt_string(key, string, comment, options={})
+      def add_nt_string(string, comment, options={})
         if locale
-          @importer.add_translation key, string, locale
+          @importer.add_nt_translation string, comment, locale
         else
-          @importer.add_nt_string key, string, comment, {source: importer.file.path}.merge(options)
+          @importer.add_nt_string string, comment, {source: importer.file.path}.merge(options)
         end
       end
     end

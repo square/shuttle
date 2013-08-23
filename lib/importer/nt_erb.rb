@@ -38,7 +38,7 @@ module Importer
 
       MethodFinder.new(ruby_code).args_to("nt").each do |args|
         message, comment = args[0..1]
-        receiver.add_nt_string(key_for(message, comment), message, comment)
+        receiver.add_nt_string(message, comment)
       end
     end
   end

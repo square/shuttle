@@ -28,7 +28,8 @@ module Importer
     end
 
     # @private
-    def add_nt_string(key, value, comment, options={})
+    def add_nt_string(string, comment, options={})
+      key = key_for(string, comment)
       key = @blob.project.keys.for_key(key).source_copy_matches(value).create_or_update!(
           options.reverse_merge(
               key:                  key,
@@ -53,8 +54,39 @@ module Importer
       key.add_pending_translations
     end
 
-    def key_for(message, comment)
-      "#{message}#{comment}"
+    # @private
+    def add_nt_translation(string, comment, locale)
+      key = key_for(string, comment)
+      if @blob.project.skip_key?(key, locale)
+        log_skip key, "skip_key? returned true for #{locale.inspect}"
+        return
+      end
+
+      key_obj = @commit.keys.for_key(key).first
+      unless key_obj
+        log_skip key, "Couldn't find key"
+        return
+      end
+
+      base = key_obj.translations.base.first
+      unless base
+        log_skip key, "Couldn't find base translation"
+        return
+      end
+
+      key_obj.translations.in_locale(locale).create_or_update!(
+          source_copy:              base.copy,
+          copy:                     string,
+          comment:                  comment,
+          approved:                 true,
+          source_rfc5646_locale:    base.rfc5646_locale,
+          rfc5646_locale:           locale.rfc5646,
+          skip_readiness_hooks:     true,
+          preserve_reviewed_status: true)
+    end
+
+    def key_for(string, comment)
+      "#{string}#{comment}"
     end
   end
 end
