@@ -34,7 +34,7 @@ module Exporter
       keys.each do |key|
         translation_set = {
           "string"  => key.source_copy,
-          "comment" => key.comment
+          "comment" => key.context
         }
         locales = locales.dup
         locales.delete(key.translations.first.source_locale) # Don't want to double include default
@@ -51,9 +51,8 @@ module Exporter
       hsh
     end
 
-    # On client side, keys stored under MD5 hash of message and comment
     def key_for(key)
-      Digest::MD5.hexdigest(key.key)
+      "#{key.source_copy} (#{key.context})"
     end
   end
 end

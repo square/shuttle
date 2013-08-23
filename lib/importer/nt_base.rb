@@ -30,10 +30,10 @@ module Importer
     # @private
     def add_nt_string(string, comment, options={})
       key = key_for(string, comment)
-      key = @blob.project.keys.for_key(key).source_copy_matches(value).create_or_update!(
+      key = @blob.project.keys.for_key(key).source_copy_matches(string).create_or_update!(
           options.reverse_merge(
               key:                  key,
-              source_copy:          value,
+              source_copy:          string,
               context:              comment,
               importer:             self.class.ident,
               fencers:              self.class.fencers,
@@ -42,20 +42,17 @@ module Importer
       @keys << key
 
       key.translations.in_locale(@blob.project.base_locale).create_or_update!(
-          source_copy:              value,
-          copy:                     value,
+          source_copy:              string,
+          copy:                     string,
           approved:                 true,
           source_rfc5646_locale:    @blob.project.base_rfc5646_locale,
           rfc5646_locale:           @blob.project.base_rfc5646_locale,
           skip_readiness_hooks:     true,
           preserve_reviewed_status: true)
-
-      # add additional pending translations if necessary
-      key.add_pending_translations
     end
 
     def key_for(string, comment)
-      "#{string}#{comment}"
+      "#{string} (#{comment})"
     end
   end
 end
