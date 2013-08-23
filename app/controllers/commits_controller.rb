@@ -273,7 +273,7 @@ class CommitsController < ApplicationController
     render text: 'Unknown commit', status: :not_found
   end
 
-  # Renders a digest of all translated strings applying to a revision. The
+  # Renders a digest of all translated NT strings applying to a revision. The
   # request format is used to determine in what format the output will be
   # rendered.
   #
@@ -283,7 +283,7 @@ class CommitsController < ApplicationController
   # Routes
   # ------
   #
-  # * `GET /projects/:project_id/commits/:id/manifest`
+  # * `GET /projects/:project_id/commits/:id/nt_manifest`
   #
   # Path Parameters
   # ---------------
