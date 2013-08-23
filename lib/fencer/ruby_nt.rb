@@ -24,20 +24,15 @@ module Fencer
 
       tokens  = Hash.new { |hsh, k| hsh[k] = [] }
       until scanner.eos?
-        match = scanner.scan_until(/\{/)
+        match = scanner.scan_until(/\{\{/)
         break unless match
-        if scanner.peek(1) == "{"
-          close = /\}\}/
-        else
-          close = /\}/
-        end
 
-        start = scanner.pos - 1         # less the '{'
-        token = scanner.scan_until(close)
+        start = scanner.pos - 2         # less the '{'
+        token = scanner.scan_until(/\}\}/)
         next unless token
 
         stop          = scanner.pos - 1 # ranges are inclusive
-        tokens['{' + token] << (start..stop)
+        tokens['{{' + token] << (start..stop)
       end
 
       return tokens
