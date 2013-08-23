@@ -17,7 +17,7 @@ require 'psych'
 module Exporter
 
   # Exports the translated strings of a Commit to a YAML file suitable for use
-  # with the Ruby i18n gem.
+  # with the Ruby natural_translation gem.
 
   class NtYaml < Base
     include NtBase

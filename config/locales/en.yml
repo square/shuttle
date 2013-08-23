@@ -195,9 +195,9 @@ en:
     erb:
       name: ERb file
     nt_ruby:
-      name: NT Ruby file
+      name: Ruby file with calls to NT
     nt_erb:
-      name: NT ERb file
+      name: ERb file with calls to NT
     properties:
       name: Java .properties file
     ruby:
@@ -228,7 +228,7 @@ en:
     ios:
       name: Cocoa .strings files (tarball)
     nt_yaml:
-      name: NT YAML file
+      name: YAML file for use by NT
     properties:
       name: Java .properties file
     ruby:

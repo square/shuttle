@@ -44,9 +44,9 @@ module Exporter
             "locale" => t.locale.rfc5646,
             "string" => t.copy,
             "rules"  => t.rules
-          }.delete_if { |k,v| v.nil? }
+          }.delete_if { |k,v| v.blank? }
         }
-        hsh[key_for(key)] = translation_set.delete_if { |k,v| v.nil? }
+        hsh[key_for(key)] = translation_set.delete_if { |k,v| v.blank? }
       end
       hsh
     end

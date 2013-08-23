@@ -245,7 +245,19 @@ class CommitsController < ApplicationController
   #
   # ### Commit is not fully localized
   #
-  # 404 Not Found is returned with no body.
+  # 404 Not Found is returned with message "Commit not ready"
+  #
+  # ### Unknown Locale is passed
+  #
+  # 400 Bad Request is returned with message "Unknown Locale"
+  #
+  # ### Unknown format is requested
+  #
+  # 406 Not Acceptable is returned with message "Unknown format"
+  #
+  # ### Unknown commit id is passed
+  #
+  # 404 Not Found is returned with message "Unknown commit"
 
   def manifest
     @commit = @project.commit!(params[:id], skip_create: true)
@@ -306,7 +318,19 @@ class CommitsController < ApplicationController
   #
   # ### Commit is not fully localized
   #
-  # 404 Not Found is returned with no body.
+  # 404 Not Found is returned with message "Commit not ready"
+  #
+  # ### Unknown Locale is passed
+  #
+  # 400 Bad Request is returned with message "Unknown Locale"
+  #
+  # ### Unknown format is requested
+  #
+  # 406 Not Acceptable is returned with message "Unknown format"
+  #
+  # ### Unknown commit id is passed
+  #
+  # 404 Not Found is returned with message "Unknown commit"
 
   def nt_manifest
     @commit = @project.commit!(params[:id], skip_create: true)

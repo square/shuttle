@@ -67,7 +67,6 @@
 # | `original_key` | The identifier for this string in the project's code, as it originally appeared in the code.                             |
 # | `source_copy`  | The original source copy of the key. Used to ensure that a new Key is generated if the source copy changes.              |
 # | `context`      | A human-readable contextual description of the string, from the program's code.                                          |
-# | `comment`      | A human-readable comment about the contextual description of the string. Only used in NT.                                |
 # | `importer`     | The name of the {Importer::Base} subclass that created the Key.                                                          |
 # | `source`       | The path to the project file where the base string was found.                                                            |
 # | `fencers`      | An array of fencers that should be applied to the Translations of this string.                                           |
@@ -84,7 +83,6 @@ class Key < ActiveRecord::Base
       original_key: {presence: true},
       source_copy:  {allow_blank: true},
       context:      {allow_nil: true},
-      comment:      {allow_nil: true},
       importer:     {allow_nil: true},
       source:       {allow_nil: true},
       fencers:      {type: Array, default: []},
