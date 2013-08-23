@@ -56,16 +56,17 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   include HasMetadataColumn
   has_metadata_column(
       copy:        {allow_nil: true},
-      notes:       {allow_nil: true},
+      notes:       {allow_nil: true}
   )
 
   extend SetNilIfBlank
   set_nil_if_blank :copy, :notes
 
   validates :rfc5646_locale,
-            presence: true
+            presence: true,
+            uniqueness: { case_sensitive: false, scope: [ :source_glossary_entry_id ] }
   validates :source_glossary_entry,
-            presence: true 
+            presence: true
 
   attr_readonly :rfc5646_locale
 
@@ -75,7 +76,16 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   extend SearchableField
   searchable_field :copy, language_from: :locale
 
+  before_save :check_not_source_locale
   before_update :reset_reviewed
+
+  # Ensure only 1 entry per language
+  def check_not_source_locale
+    if self.rfc5646_locale == self.source_glossary_entry.source_rfc5646_locale 
+      return false
+    end 
+    return true
+  end 
 
   def reset_reviewed
     if copy_changed? && !approved_changed?
@@ -84,28 +94,5 @@ class LocaleGlossaryEntry < ActiveRecord::Base
     end
     return true
   end
-
-  # def self.ensure_entries_exist_in_locale(locale_id)
-  #   #this feels pretty in-elegant.
-  #   base_entries = GlossaryEntry.where(:rfc5646_locale => BASE_LOCALE)
-  #   # If there is the right number of entries in the locale, then short circuit
-  #   return if base_entries.count == GlossaryEntry.where(:rfc5646_locale => locale_id).count
-
-  #   # find the list of shas that are translated
-  #   base_shas = base_entries.pluck(:source_copy_sha_raw)
-  #   existing_entries = GlossaryEntry.where(source_copy_sha_raw: base_shas).where(rfc5646_locale: locale_id)
-  #   existing_shas = existing_entries.pluck(:source_copy_sha_raw)
-
-  #   # each base entry where there isn't an existing translated entry
-  #   existing_shas = [''] if existing_shas.empty? # fix error causing no rows to be returned
-  #   base_entries.where('source_copy_sha_raw NOT IN (?)', existing_shas).each do |entry|
-  #     ge = GlossaryEntry.new
-  #     ge.rfc5646_locale = locale_id
-  #     ge.source_rfc5646_locale = BASE_LOCALE
-  #     ge.source_copy = entry.source_copy
-  #     ge.copy = ''
-  #     ge.save!
-  #   end
-  # end
 
 end

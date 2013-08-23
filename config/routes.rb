@@ -52,6 +52,12 @@ Shuttle::Application.routes.draw do
     resources :glossary_entries, only: [:index, :create, :update, :destroy]
   end
 
+  resources :source_glossary_entries, only: [:index, :create, :update, :destroy], controller: 'glossary/source_glossary_entries' do 
+    resources :locale_glossary_entries, only: [:create, :update, :destroy], 
+              as: 'locale', 
+              controller: 'glossary/locale_glossary_entries'
+  end 
+
   resources :users, only: [:index, :show, :update, :destroy] do
     member { post :become }
   end

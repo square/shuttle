@@ -47,13 +47,13 @@ require 'digest/sha2'
 # | `notes`       | A human-readable explanation of what the glossary term is referring to. |
 
 class SourceGlossaryEntry < ActiveRecord::Base
-  has_many :locale_glossary_entries, inverse_of: :source_glossary_entry
-
+  has_many :locale_glossary_entries, :dependent => :delete_all, inverse_of: :source_glossary_entry
+  #### TODO: ADD DUE DATE
   include HasMetadataColumn
   has_metadata_column(
       source_copy: {allow_nil: true},
       context:     {allow_nil: true},
-      notes:       {allow_nil: true},
+      notes:       {allow_nil: true}
   )
 
   extend SetNilIfBlank
@@ -66,6 +66,8 @@ class SourceGlossaryEntry < ActiveRecord::Base
             presence: true
   validates :source_copy_sha,
             presence: true
+  validates :source_copy_sha_raw, 
+            uniqueness: true
 
   attr_readonly :source_rfc5646_locale
 
@@ -77,12 +79,5 @@ class SourceGlossaryEntry < ActiveRecord::Base
 
   extend SearchableField
   searchable_field :source_copy, language_from: :source_locale
-
-  def as_translation_json
-    return [locale_glossary_entries]
-  end
-
-  # Ensure only 1 entry per language
-   
 
 end

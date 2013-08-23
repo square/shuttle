@@ -12,15 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class GlossaryEntriesController < ApplicationController
+class Glossary::SourceGlossaryEntriesController < ApplicationController
   before_filter :authenticate_user!, except: :manifest
   respond_to :json
 
   def index
-    # confirm valid locale
-    # GlossaryEntry.ensure_entries_exist_in_locale params[:locale_id]
-    # render json: GlossaryEntry.where(rfc5646_locale: params[:locale_id]).order('source_copy_prefix ASC')
-    # SourceGlossaryEntry.all.order('source_copy_prefix ASC')
     returnEntries = []
 
     SourceGlossaryEntry.all.order('source_copy_prefix ASC').each do |sGlossaryEntry| 
@@ -49,7 +45,9 @@ class GlossaryEntriesController < ApplicationController
   def create
     sGlossaryEntry = SourceGlossaryEntry.new()
     sGlossaryEntry.source_copy = params[:source_copy]
-    sGlossaryEntry.source_rfc5646_locale = "en"
+    sGlossaryEntry.notes = params[:notes]
+    sGlossaryEntry.context = params[:context]
+    sGlossaryEntry.source_rfc5646_locale = "en" ## Possibly enable other sources
     
     if sGlossaryEntry.save
       render :json => true
@@ -59,15 +57,18 @@ class GlossaryEntriesController < ApplicationController
   end
 
   def update
-    ge = GlossaryEntry.find(params[:id])
-    if params[:review]
-      return render json: false unless current_user.reviewer?
-      ge.reviewer = current_user
-      ge.approved = (params[:approved] == "true")
-    end
-    ge.copy = params[:copy]
+    sGlossaryEntry = SourceGlossaryEntry.find(params[:id])
+    sGlossaryEntry.source_copy = params[:source_copy]
+    sGlossaryEntry.notes = params[:notes]
+    sGlossaryEntry.context = params[:context]
 
-    ge.save!
+    sGlossaryEntry.save!
     render json: true
   end
+
+  ## ADD DESTROY SUPPORT
+  # def destroy
+  #   SourceGlossaryEntry.find(params[:id]).destroy()
+  #   render json: true
+  # end
 end
