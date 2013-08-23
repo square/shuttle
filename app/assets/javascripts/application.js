@@ -31,6 +31,8 @@
 //
 //= require twitter/bootstrap
 //= require bootstrap-datepicker
+//= require handlebars.runtime
+//= require jqBootstrapValidation
 //= require utilities
 //
 //= require buttons
@@ -43,4 +45,6 @@
 //= require multifield
 //= require smart_form
 //
+//= require_tree ../templates
 //= require_tree .
+

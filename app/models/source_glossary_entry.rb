@@ -51,7 +51,7 @@ class SourceGlossaryEntry < ActiveRecord::Base
   #### TODO: ADD DUE DATE
   include HasMetadataColumn
   has_metadata_column(
-      source_copy: {allow_nil: true},
+      source_copy: {allow_nil: false},
       context:     {allow_nil: true},
       notes:       {allow_nil: true}
   )

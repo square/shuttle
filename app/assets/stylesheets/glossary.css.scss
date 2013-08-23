@@ -47,8 +47,13 @@
   table {
     table-layout: fixed; 
     margin-bottom: 0px;
+    border-color: none;
 
     th {
+      &:first-child {
+        width: 25px;
+        border-bottom-style: none; // TODO: Might remove
+      }
       text-align: center;
       padding-left: 10px;
       padding-right: 10px;
@@ -56,6 +61,16 @@
         border-bottom-width: 1px;
         border-bottom-color: rgb(221, 221, 221);
         border-bottom-style: solid;
+      }
+    }
+
+    tbody + tbody {
+      border-style: none;
+    }
+
+    .glossary-table-entry {
+      &:hover {
+        background-color: #f6f6f6; 
       }
     }
 
@@ -74,6 +89,7 @@
       }
 
       input {
+        width: 100%;
         height: 30px; 
         -webkit-box-sizing: border-box; 
         -moz-box-sizing: border-box; 
@@ -81,17 +97,22 @@
       }
 
       textarea {
+        width: 100%;
         height: 95px;  
         -webkit-box-sizing: border-box; 
         -moz-box-sizing: border-box; 
         box-sizing: border-box; 
+        resize: vertical;
       }
+    }
+
+    form {
+      margin-bottom: 0px;
     }
 
     .hiddenRow {
       padding: 0 !important;
     }
-
   }
 }
 
@@ -100,8 +121,9 @@
 }
 
 .controls {
-  margin-left: 90px !importantcontent-length;
-
+  margin-left: 90px !important;
+  margin-right: 45px !important;
+  
   input[type=text] {
     height: 30px; 
     width: 100%;

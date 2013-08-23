@@ -61,6 +61,8 @@ gem 'uglifier'
 gem 'less-rails'
 gem 'twitter-bootstrap-rails'
 gem 'bootstrap-datepicker-rails'
+gem 'handlebars_assets'
+
 
 group :development do
   gem 'redcarpet', require: nil

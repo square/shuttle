@@ -22,8 +22,6 @@ module Views
       protected
 
       def body_content
-        @placeholder = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-
         article(class: 'container') do
           page_header do
             h1 "Glossary", style: 'display: inline;'
@@ -38,7 +36,7 @@ module Views
               ul class: 'nav' do
                   "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").each do |letter|
                     li do
-                      a letter, href: "#" + letter
+                      a letter, href: "#glossary-table-" + letter
                     end
                   end
               end
@@ -46,95 +44,14 @@ module Views
           end
           div class: "row", id: 'glossary' do 
             span class: 'span12' do
-
-              table class: 'table table-condensed' do
-                thead do
-                  tr do
-                    th style: 'width: 25px; border-bottom-style: none;'
-                    th {div "English"}
-                    th {div "French"}
-                    th {div "Spanish"}
-                    th {div "British English"}
-                    th {div "Japanese"}
-                  end
-                end
-                ####
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").each do |letter|
-                  tr id: letter do 
-                    td do 
-                      h3 letter
-                      # div id: 'accordion' + letter, class: 'accordion' do
-                      #   div class: 'accordion-group' do
-                      #     div class: 'accordion-heading' do
-                      #       a letter + ' 1 lorem', class: 'accordion-toggle', href: '#collapse1' + letter, :'data-toggle'=>'collapse', :'data-parent'=>'#accordion' + letter
-                      #     end
-                      #     div id: 'collapse1' + letter, class: 'accordion-body collapse' do 
-                      #       div class: 'accordion-inner' do
-                      #         p @placeholder
-                      #       end
-                      #     end
-                      #   end
-                      # end
-                    end
-                  end
-
-                  tr class: 'accordion-toggle', 'data-target'=>'#entry' + letter, :'data-toggle'=>'collapse' do 
-                    td 
-                    td 'English'
-                    td 'French'
-                    td 'Spanish'
-                    td 'British English'
-                    td 'Japanese'
-                  end 
-
-                  tr do
-                    td class: 'hiddenRow', colspan: '6' do
-
-                      div class: 'accordion-body collapse', id: 'entry' + letter do
-                        form do 
-                          table class: 'table table-condensed' do
-                            tr do
-                              td style: 'width: 45px; border-bottom-style: none;'
-                              td style: "text-align: left;" do 
-                                label 'Context'
-                                input type: 'text', placeholder: 'Something'
-                                label 'Notes'
-                                textarea rows: "1", style: 'height: 30px;'
-                              end 
-                              td style: "text-align: left;" do 
-                                label 'Notes'
-                                textarea rows: "3"
-                              end 
-                              td style: "text-align: left;" do 
-                                label 'Notes'
-                                textarea rows: "3"
-                              end 
-                              td style: "text-align: left;" do 
-                                label 'Notes'
-                                textarea rows: "3"
-                              end 
-                              td style: "text-align: left;" do 
-                                label 'Notes'
-                                textarea rows: "3"
-                              end 
-                            end
-                          end
-                        end
-                      end
-
-                    end
-                  end
-                end
-                ####
-              end
-
+              table class: 'table table-condensed', id: 'glossary-table' 
             end
           end
 
         end
 
         div id: 'settings-modal', class: 'modal hide fade', tabindex: '-1', role: 'dialog', :'aria-labelledby' => 'myModalLabel', :'aria-hidden' => 'true' do
-          form id: 'add-term-form', class: 'form-horizontal', style: 'margin-bottom: 0px' do
+          form id: 'settings-form', class: 'form-horizontal', style: 'margin-bottom: 0px' do
             div class: 'modal-header' do
               button "×", type: 'button', class: 'close', :'data-dismiss' => 'modal', :'aria-hidden'=>'true'
               h3 "Edit Settings"
@@ -163,72 +80,6 @@ module Views
                       text "French"
                     end
                   end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "Spanish"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "German"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "Japanese"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "Great Britain"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "Russian"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "French"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "Spanish"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "German"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "Japanese"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "Great Britain"
-                    end
-                  end
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "Russian"
-                    end
-                  end
                 end
               end
 
@@ -252,28 +103,28 @@ module Views
               div class: 'control-group' do
                 label 'English', class: 'control-label', for: 'inputEnglish'
                 div class: 'controls' do
-                  input type: 'text', id: 'inputEnglish', placeholder: 'English'
+                  input type: 'text', id: 'add-term-inputEnglish', placeholder: 'English', autocomplete: 'off', required: 'true'
                 end
               end
 
               div class: 'control-group' do
                 label 'Context', class: 'control-label', for: 'inputContext'
                 div class: 'controls' do
-                  input type: 'text', id: 'inputContext', placeholder: 'Context'
+                  input type: 'text', id: 'add-term-inputContext', placeholder: 'Context', autocomplete: 'off'
                 end
               end
 
               div class: 'control-group' do
                 label 'Notes', class: 'control-label', for: 'textAreaNotes'
                 div class: 'controls' do
-                  textarea rows: "3", id: 'textAreaNotes', placeholder: 'Notes'
+                  textarea rows: "3", id: 'add-term-textAreaNotes', placeholder: 'Notes', autocomplete: 'off'
                 end
               end
 
               div class: 'control-group' do
                 label 'Due Date', class: 'control-label', for: 'inputDueDate'
                 div class: 'controls' do
-                  input type: 'text', id: 'inputDueDate', :'data-behaviour'=>'datepicker'
+                  input type: 'text', id: 'add-term-inputDueDate', autocomplete: 'off'
                 end
               end
             end

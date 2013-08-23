@@ -1,0 +1,51 @@
+# Copyright 2013 Square Inc.
+
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+
+#        http://www.apache.org/licenses/LICENSE-2.0
+
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+$('#alphabet-bar').affix(
+  offset: 
+    top: 120
+);
+# $('#alphabet-bar').scrollspy(); ## TODO: Make scrollspy work
+
+$(document).ready () ->
+  sourceLocale = ["English", "en"]
+  foreignLocales = [
+    ["France", "fr"], 
+    ["Spanish", "sp"], 
+    ["British English", "be"],
+    ["Japanese", "jp"]
+  ]
+  new GlossaryList(
+    $('#glossary-table'), "<%= source_glossary_entries_url %>", 
+    sourceLocale, foreignLocales, $('#settings-form'),
+    $('#add-term-form'), "<%= source_glossary_entries_url %>",
+    <%= current_user.translator? %>, <%= current_user.reviewer? %>
+  );
+
+
+# $(document).ready(function() {
+#   new GlossaryList(
+#     $('#locale'),
+#     $('#glossary'),
+#     "<%= locale_glossary_entries_url('REPLACEME', format: 'json') %>",
+#     $('#new-glossary-entry'),
+#     "<%= locale_glossary_entries_url("en", format: 'json') %>",
+#     <%= current_user.translator? %>,
+#     <%= current_user.reviewer? %>,
+#     <%= current_user.admin?? '"admin"' : current_user.approved_rfc5646_locales.to_json %>,
+#     "<%= locale_glossary_entry_url("REPLACEME_LOCALE", "REPLACEME_ID", format: 'json') %>"
+#   );
+#   $('#locale').find('input').val("en")
+#   $('#locale').submit()
+# });

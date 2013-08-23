@@ -48,7 +48,9 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
     sGlossaryEntry.notes = params[:notes]
     sGlossaryEntry.context = params[:context]
     sGlossaryEntry.source_rfc5646_locale = "en" ## Possibly enable other sources
-    
+    puts params.inspect
+    puts sGlossaryEntry.inspect
+
     if sGlossaryEntry.save
       render :json => true
     else

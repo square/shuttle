@@ -65,6 +65,7 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   validates :rfc5646_locale,
             presence: true,
             uniqueness: { case_sensitive: false, scope: [ :source_glossary_entry_id ] }
+  ### TODO: Don't allow nil copy anymore.
   validates :source_glossary_entry,
             presence: true
 
