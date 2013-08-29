@@ -28,7 +28,7 @@ $(document).ready () ->
   ]
   new GlossaryList(
     $('#glossary-table'), "<%= source_glossary_entries_url %>", 
-    sourceLocale, foreignLocales, $('#settings-form'),
+    "<%= remote_locales_url %>", $('#settings-modal'),
     $('#add-term-form'), "<%= source_glossary_entries_url %>",
     <%= current_user.translator? %>, <%= current_user.reviewer? %>
   );

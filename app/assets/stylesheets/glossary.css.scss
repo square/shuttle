@@ -1,3 +1,9 @@
+@mixin border-radius($radius: 5px) {
+  -webkit-border-radius: $radius;
+     -moz-border-radius: $radius;
+          border-radius: $radius;
+}
+
 .container {
   position: relative;
 }
@@ -117,11 +123,11 @@
 }
 
 .control-label {
-  width: 80px !important;
+  width: 100px !important;
 }
 
 .controls {
-  margin-left: 90px !important;
+  margin-left: 110px !important;
   margin-right: 45px !important;
   
   input[type=text] {
@@ -130,10 +136,6 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-  }
-
-  input[type=checkbox] {
-
   }
 
   textarea {
@@ -152,16 +154,27 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
   }
+}
 
-  .checkbox {
-    float: left;
-    width: 26%;
-    margin-right: 1%; 
-    padding-top: 0px !important; /* Override Bootstrap */
-    /*
-    .newline {
-      clear: left;
+#settings-listTargets {
+  height: 200px;
+  border: 1px solid rgb(204, 204, 204);
+  @include border-radius;
+  padding: 4px 6px 6px 4px;
+  li { 
+    padding: 2px;
+    width: 100%;
+    .removeLocale {
+      position: relative; 
+      color: #ff6666;
+      margin-right: 20px;
+    } 
+    &:hover {
+      background-color: #f6f6f6; 
     }
-    */
+
   }
 }
+
+
+

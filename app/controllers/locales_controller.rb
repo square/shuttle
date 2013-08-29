@@ -50,7 +50,77 @@ class LocalesController < ApplicationController
     end
 
     countries.each { |key, flag| countries[key] = view_context.image_path("country-flags/#{flag.downcase}.png") }
-
     render json: countries.to_json
   end
+
+  # TODO
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /locales/prefetch`
+
+  def prefetch
+    content = []
+
+    countries = YAML.load_file(Rails.root.join('data', 'locale_countries.yml'))
+    countries.select! { |_, flag| File.exist? Rails.root.join('app', 'assets', 'images', 'country-flags', "#{flag.downcase}.png") }
+    # apply potential region values too
+    Dir.glob(Rails.root.join('app', 'assets', 'images', 'country-flags', '*.png')).each do |file|
+      base = File.basename(file, '.png')
+      next if base.starts_with?('_')
+      countries[base.upcase] = base
+    end
+    countries.each do |rfc, flag| 
+      locale = t('locale')[:name][rfc.to_sym]
+      puts locale
+      if !locale.nil?
+        content << {
+          value: rfc + ' - ' + locale,
+          tokens: [rfc, locale, '-'],
+          rfc: rfc,
+          locale: locale,
+          flagUrl: view_context.image_path("country-flags/#{flag.downcase}.png")
+        }
+      end
+    end
+    
+    render json: content
+  end
+
+  # TODO
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /locales/remote`
+
+  def remote
+    content = []
+
+    countries = YAML.load_file(Rails.root.join('data', 'locale_countries.yml'))
+    countries.select! { |_, flag| File.exist? Rails.root.join('app', 'assets', 'images', 'country-flags', "#{flag.downcase}.png") }
+    # apply potential region values too
+    Dir.glob(Rails.root.join('app', 'assets', 'images', 'country-flags', '*.png')).each do |file|
+      base = File.basename(file, '.png')
+      next if base.starts_with?('_')
+      countries[base.upcase] = base
+    end
+    countries.each { |key, flag| countries[key] = view_context.image_path("country-flags/#{flag.downcase}.png") }
+    
+    t('locale')[:name].each do |rfc, locale|
+      rfc = rfc.id2name
+      temp = {
+        value: rfc + ' - ' + locale,
+        tokens: [rfc, locale, '-'],
+        rfc: rfc,
+        locale: locale,
+      }
+      if not countries[rfc].nil?
+        temp[:flagUrl] = countries[rfc]
+      end 
+      content << temp
+    end
+    render json: content
+  end 
 end

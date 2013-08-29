@@ -23,6 +23,7 @@ module Views
 
       def body_content
         article(class: 'container') do
+          #### Header Content ####
           page_header do
             h1 "Glossary", style: 'display: inline;'
             button class: 'btn page-header-btn', :'data-target'=>'#settings-modal', :'data-toggle'=>'modal' do
@@ -30,7 +31,9 @@ module Views
             end
             button "Add New Term", id: 'add-new-term', class: "btn btn-success page-header-btn", :'data-target'=>'#add-term-modal', :'data-toggle'=>'modal'
           end
+          ########################
 
+          ####  Alphabet Bar  ####
           div class: 'row', id: 'alphabet-bar' do 
             span class: 'span12' do
               ul class: 'nav' do
@@ -42,55 +45,52 @@ module Views
               end
             end
           end
+          ########################
+
+          #### Glossary Table ####
           div class: "row", id: 'glossary' do 
             span class: 'span12' do
               table class: 'table table-condensed', id: 'glossary-table' 
             end
           end
-
+          ########################
         end
 
+        #### Settings Modal ####
         div id: 'settings-modal', class: 'modal hide fade', tabindex: '-1', role: 'dialog', :'aria-labelledby' => 'myModalLabel', :'aria-hidden' => 'true' do
-          form id: 'settings-form', class: 'form-horizontal', style: 'margin-bottom: 0px' do
-            div class: 'modal-header' do
-              button "×", type: 'button', class: 'close', :'data-dismiss' => 'modal', :'aria-hidden'=>'true'
-              h3 "Edit Settings"
-            end
-            div class: 'modal-body' do
+          div class: 'modal-header' do
+            button "×", type: 'button', class: 'close', :'data-dismiss' => 'modal', :'aria-hidden'=>'true'
+            h3 "Edit Settings"
+          end
+          div class: 'modal-body' do
 
-              div class: 'control-group' do
-                label 'Source', class: 'control-label', for: 'selectSource'
-                div class: 'controls' do
-                  select id: 'selectSource' do
-                    option "en"
-                    option "fr"
-                    option "sp"
-                    option "gb"
-                    option "jp"
-                  end 
-                end
+            div class: 'control-group' do
+              label 'Add Locale', class: 'control-label', for: 'settings-inputTarget'
+              div class: 'controls' do
+                input type: 'text', id: 'settings-inputTarget', class: 'typeahead', 
+                  autocomplete: 'off', placeholder: 'Target Language', disabled: 'disabled'
+                p class: 'help-block', style: 'visibility: hidden;'
               end
+            end
 
-              div class: 'control-group' do
-                label 'Target Languages', class: 'control-label', for: 'inputEnglish'
-                div class: 'controls' do
-                  div class: 'checkbox' do
-                    label do
-                      input type: 'checkbox', value: '0'
-                      text "French"
-                    end
-                  end
-                end
+            div class: 'control-group' do
+              label 'Target Locales', class: 'control-label', for: 'settings-listTargets'
+              div class: 'controls' do
+                ul class: 'unstyled', id: 'settings-listTargets' do
+                end 
               end
+            end
+            
 
-            end
-            div class: 'modal-footer' do
-              a 'Cancel', href: '#', class: 'btn', :'data-dismiss' => 'modal'
-              input type: 'submit', value: 'Save', class: 'btn btn-primary'
-            end
+          end
+          div class: 'modal-footer' do
+            a 'Cancel', href: '#', class: 'btn', :'data-dismiss' => 'modal'
+            button 'Save', class: 'btn btn-primary', id: 'settings-submit', disabled: 'disabled'
           end
         end
+        ########################
 
+        #### Add Term Modal ####
         div id: 'add-term-modal', class: 'modal hide fade', tabindex: '-1', role: 'dialog', :'aria-labelledby' => 'myModalLabel', :'aria-hidden' => 'true' do
           form id: 'add-term-form', class: 'form-horizontal', style: 'margin-bottom: 0px' do
             div class: 'modal-header' do
@@ -135,6 +135,7 @@ module Views
             end
           end 
         end
+        ########################        
       end
 
       def active_tab() 'glossary' 

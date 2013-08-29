@@ -29,10 +29,11 @@
 //= require jquery-timers
 //= require xregexp
 //
+//= require hogan.js
 //= require twitter/bootstrap
 //= require bootstrap-datepicker
-//= require handlebars.runtime
 //= require jqBootstrapValidation
+//= require twitter/typeahead.min
 //= require utilities
 //
 //= require buttons

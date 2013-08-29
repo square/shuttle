@@ -228,11 +228,12 @@ class root.LocaleField
   # @param [jQuery element] element The element to apply locale field
   #   semantics to.
   #
-  constructor: (@element) ->
+  constructor: (@element, @options = {}) ->
     @selection = -1
     @count = 0
     @parent = @element.wrap($('<div/>').css({position: 'relative', display: 'inline-block'})).parent()
     @dropdown = $('<ul/>').addClass('locale-dropdown').insertAfter(@element).hide()
+    @curValue = ['en', 'English']
     this.setFlag()
 
     @element.attr 'autocomplete', 'off'
@@ -247,14 +248,14 @@ class root.LocaleField
         e.stopPropagation()
         e.preventDefault()
         return false
-      else if e.keyCode == 9 # tab
+      else if e.keyCode == 9 || e.keyCode == 13 # tab, enter
         return true if @count == 0 || @selection == -1
         this.activateSelection()
         this.setFlag()
         e.stopPropagation()
         e.preventDefault()
         return false
-      else if e.keyCode == 27 || e.keyCode == 13 # escape, enter
+      else if e.keyCode == 27 # escape
         this.setFlag()
         this.renderDropdown []
       else
@@ -335,6 +336,8 @@ class root.LocaleField
   # the dropdown.
   #
   activateSelection: ->
+    @curValue = [@dropdown.find('li.active :not(strong)').html() ,@dropdown.find('li.active>strong').text()]
+    console.log(@curValue)
     this.setLastValue @dropdown.find('li.active>strong').text()
     this.renderDropdown []
 

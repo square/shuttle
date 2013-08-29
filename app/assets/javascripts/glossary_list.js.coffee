@@ -14,21 +14,45 @@
 
 root = exports ? this
 
-$(document).ready(()-> 
-
-)
-
 #TODO: this should probably be abstracted out to share code.
 class root.GlossaryList
   currentLocale: 'en'
   # TODO: @availableLocalesOrAdmin, @updateEntryUrl
   constructor: (
-      @glossaryTable, @glossaryUrl, 
-      @sourceLocale, @foreignLocales, 
-      @settingsForm, @addTermForm, @addTermUrl, 
+      @glossaryTable, @glossaryUrl, @localesUrl,
+      @settingsModal, @addTermForm, @addTermUrl, 
       @isTranslator, @isReviewer) ->
+    @sourceLocale = {
+        flagUrl: "/assets/country-flags/en.png"
+        locale: "English"
+        rfc: "en"
+      }
+    @targetLocales = [
+      {
+        flagUrl: "/assets/country-flags/fr.png"
+        locale: "French"
+        rfc: "fr"
+      },
+      {
+        flagUrl: "/assets/country-flags/jp.png"
+        locale: "Japanese"
+        rfc: "ja"
+      },
+      {
+        flagUrl: "/assets/country-flags/es.png"
+        locale: "Spanish"
+        rfc: "es"
+      },
+      {
+        flagUrl: "/assets/country-flags/de.png"
+        locale: "German"
+        rfc: "de"
+      },
+    ]
+
     this.setupGlossary()
-    this.setupAddTermForm()
+    this.setupAddTermModal()
+    this.setupSettingsFormModal()
     this.loadGlossaryEntries()
 
   error: (message) ->
@@ -37,10 +61,10 @@ class root.GlossaryList
 
   setupGlossary: ->
     headerRow = $('<tr/>').appendTo($('<thead/>').appendTo(@glossaryTable)).append('<th/>')
-    $('<div/>').text(@sourceLocale[0]).appendTo($('<th/>').appendTo(headerRow))
+    $('<div/>').text(@sourceLocale.locale).appendTo($('<th/>').appendTo(headerRow))
     # TODO: Check length of foreignLocales
-    for locale in @foreignLocales
-      $('<div/>').text(locale[0]).appendTo($('<th/>').appendTo(headerRow))
+    for localeEntry in @targetLocales
+      $('<div/>').text(localeEntry.locale).appendTo($('<th/>').appendTo(headerRow))
     for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('')
       ## TODO: Possibly move this to a HBS template
       glossaryAnchor = $('<tbody/>', 
@@ -49,17 +73,16 @@ class root.GlossaryList
       ).hide().fadeIn().appendTo(@glossaryTable)
       glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<h3/>').text(letter))))
 
-  setupAddTermForm: =>
-    $('#add-term-inputDueDate').datepicker(
+  setupAddTermModal: =>
+    $('#add-term-inputDueDate').datepicker
       startDate: new Date()
       autoclose: true
       todayBtn: "linked"
-      );
-    $('#add-term-inputEnglish').jqBootstrapValidation(
+    $('#add-term-inputEnglish').jqBootstrapValidation
       preventSubmit: true
       filter: -> 
         return $(this).is(":visible")
-      )
+      
     @addTermForm.submit () => 
       $.ajax @addTermUrl, 
         type: "POST"
@@ -79,10 +102,71 @@ class root.GlossaryList
       $('#add-term-modal').modal('hide')
       return false
 
-  setupSettingsForm: ->
+  setupSettingsFormModal: =>
+    localesDict = {}
+
+    newTargetLocales = []
+    newUniqueLocales = {en: ''}
+
+    $.ajax @localesUrl,
+      success: (data) ->
+        for localeEntry in data
+          localesDict[localeEntry.rfc] = 
+            rfc: localeEntry.rfc
+            locale: localeEntry.locale
+            flagUrl: localeEntry.flagUrl
+
+        $('#settings-inputTarget').removeAttr('disabled')
+        $('#settings-submit').removeAttr('disabled')
+
+        $('#settings-inputTarget').typeahead
+          name: 'locales'
+          local: data # prefetch: '/locales/remote' # To debug, use incognito mode.  Remember this stores in cache.
+          template: '<img src=\"{{flagUrl}}\" style=\"float: right;\"><p><strong>{{rfc}}</strong> - {{locale}}</p>'
+          engine: Hogan
+
+        $('#settings-inputTarget').keypress (e) -> 
+          if e.which == 13
+            newRfc = $('#settings-inputTarget').val().split(' ')[0]
+            if newRfc not of localesDict
+              $('#settings-inputTarget').typeahead('setQuery', '')
+              console.log("invalid locale!") # TODO: !!!!
+              return false
+
+            if newRfc of newUniqueLocales
+              $('#settings-inputTarget').typeahead('setQuery', '')
+              console.log("duplicate locale!") # TODO: !!!!
+              # $('.help-block').text("Duplicate!!!").css('visibility', 'visible')
+              return false
+
+            newTargetLocales.push(localesDict[newRfc])
+            newUniqueLocales[newRfc] = ''
+
+            $("#settings-listTargets").append(
+              $(HoganTemplates['glossary/settings_locale_entry'].render(localesDict[newRfc])).hide().fadeIn()
+            )
+            $('#settings-listTargets > li:last-child > button.removeLocale').click () -> 
+              deleteRfc = newTargetLocales.splice($(this).parent().index(), 1)[0].rfc
+              delete newUniqueLocales[deleteRfc]
+              $(this).parent().fadeOut(300, () -> $(this).remove())
+              
+            $('#settings-inputTarget').typeahead('setQuery', '')
+            return false
+        
+      # $('#settings-inputTarget').jqBootstrapValidation
+      #   preventSubmit: true
+      #   filter: -> 
+      #     return $(this).is(":visible")
+    $('#settings-submit').click () =>
+      @targetLocales = newTargetLocales
+      newTargetLocales = []
+      newUniqueLocales = {en: ''}
+      $("#settings-listTargets").empty()
+      $('#settings-modal').modal('hide')
+      this.reloadGlossary()
 
   loadGlossaryEntries: => 
-    $('.glossary-table-entry').fadeOut().remove()
+    $('.glossary-table-entry').remove()
     ## TODO: Add loading animation http://fgnass.github.io/spin.js/
     $.ajax @glossaryUrl,
       type: "GET"
@@ -95,26 +179,25 @@ class root.GlossaryList
           do (sourceEntry) =>
             context = 
               entry_id: 'glossary-table-entry-' + i++
-              num_locales: @foreignLocales.length + 2
+              num_locales: @targetLocales.length + 2
               source_copy: sourceEntry.source_copy
               source_context: sourceEntry.context
               source_notes: sourceEntry.notes
               is_translator: @isTranslator
               is_reviewer: @isReviewer
               translated_copies: []
-            for locale in @foreignLocales
-              if locale[1] of sourceEntry.locale_glossary_entries
-                context.translated_copies.push(
-                  copy: sourceEntry.locale_glossary_entries[locale[1]].copy,
-                  notes: sourceEntry.locale_glossary_entries[locale[1]].notes
-                  )
+            for localeEntry in @targetLocales
+              if localeEntry.rfc of sourceEntry.locale_glossary_entries
+                context.translated_copies.push
+                  copy: sourceEntry.locale_glossary_entries[localeEntry.rfc].copy,
+                  notes: sourceEntry.locale_glossary_entries[localeEntry.rfc].notes
               else
-                context.translated_copies.push(
+                context.translated_copies.push
                   copy: ''
                   notes: ''
-                  )
             $('#glossary-table-' + sourceEntry.source_copy.substr(0, 1).toUpperCase())
-              .after($(HandlebarsTemplates['glossary_entry'](context)).hide().fadeIn())
+              .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
+
         ## TODO: Add functionality if is reviewer
         # if @isReviewer
         @glossaryTable.find("input, textarea").click (e) -> 
@@ -123,3 +206,8 @@ class root.GlossaryList
       error: =>
         this.error("Couldn't load glossary list!")
     return false
+
+  reloadGlossary: =>
+    @glossaryTable.empty()
+    this.setupGlossary()
+    this.loadGlossaryEntries()
