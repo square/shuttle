@@ -14,20 +14,16 @@
 
 require 'digest/sha2'
 
-# A localization of some commonly used copy to a certain locale. Glossary
-# entries must be reviewed by a reviewer before they are accepted; once they
-# are, they will appear in tooltips to translators who are translating similar
-# strings.
-#
-# Like Translations, glossary entries share a lot of duplicated information.
+# Source glossary entries encapsulate commonly used copies which need to be 
+# translated for a specific locale.  Note that copies from a single source 
+# must be unique.  
 #
 # Associations
 # ============
 #
-# |              |                                           |
-# |:-------------|:------------------------------------------|
-# | `translator` | The {User} who performed the translation. |
-# | `reviewer`   | The {User} who reviewed the translation.  |
+# |                           |                                                                           |
+# |:--------------------------|:--------------------------------------------------------------------------|
+# | `locale_glossary_entries` | Locale specific glossary entries that are translatiosn of the source copy |
 #
 # Properties
 # ==========
@@ -35,20 +31,19 @@ require 'digest/sha2'
 # |                 |                                                    |
 # |:----------------|:---------------------------------------------------|
 # | `source_locale` | The locale the copy is translated from.            |
-# | `locale`        | The locale the copy is translated to.              |
 #
 # Metadata
 # ========
 #
 # |               |                                                                         |
 # |:--------------|:------------------------------------------------------------------------|
-# | `copy`        | The copy for the string.                                                |
-# | `context`     | A human-readable explanation of what the glossary term is referring to. |
-# | `notes`       | A human-readable explanation of what the glossary term is referring to. |
+# | `source_copy` | The copy for the string.                                                |
+# | `context`     | A human-readable explanation of the context in which the copy is used.  |
+# | `notes`       | A human-readable explanation of any additional notes for translators.   |
 
 class SourceGlossaryEntry < ActiveRecord::Base
   has_many :locale_glossary_entries, :dependent => :delete_all, inverse_of: :source_glossary_entry
-  #### TODO: ADD DUE DATE
+  ## TODO: Add due date.  Does it actually need DUE Date?
   include HasMetadataColumn
   has_metadata_column(
       source_copy: {allow_nil: false},
@@ -79,5 +74,4 @@ class SourceGlossaryEntry < ActiveRecord::Base
 
   extend SearchableField
   searchable_field :source_copy, language_from: :source_locale
-
 end

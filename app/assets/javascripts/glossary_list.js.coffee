@@ -20,8 +20,11 @@ class root.GlossaryList
   # TODO: @availableLocalesOrAdmin, @updateEntryUrl
   constructor: (
       @glossaryTable, @glossaryUrl, @localesUrl,
+      @editSourceEntryUrl, @editLocaleEntryUrl, 
       @settingsModal, @addTermForm, @addTermUrl, 
-      @isTranslator, @isReviewer) ->
+      @isTranslator, @isReviewer, @approvedLocales) ->
+
+    # Defaults source/target locales
     @sourceLocale = {
         flagUrl: "/assets/country-flags/en.png"
         locale: "English"
@@ -56,8 +59,9 @@ class root.GlossaryList
     this.loadGlossaryEntries()
 
   error: (message) ->
-    flash = $('<p/>').addClass('alert alert-error').text(message).appendTo($('#flashes'))
+    flash = $('<p/>').addClass('alert alert-error').text(message).hide().appendTo($('#flashes')).slideDown()
     $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
+    flash.delay(4000).slideUp () -> flash.remove()
 
   setupGlossary: ->
     headerRow = $('<tr/>').appendTo($('<thead/>').appendTo(@glossaryTable)).append('<th/>')
@@ -88,21 +92,28 @@ class root.GlossaryList
         type: "POST"
         dataType: "json",
         data: 
-          source_copy: $('#add-term-inputEnglish').val()
-          context: $('#add-term-inputContext').val()
-          notes: $('#add-term-textAreaNotes').val()
-          due_date: $('#add-term-inputDueDate').val()
-        success: (added) =>
-          if not added
-            this.error("Duplicate term!")  
+          source_glossary_entry:
+            source_copy: $('#add-term-inputEnglish').val()
+            context: $('#add-term-inputContext').val()
+            notes: $('#add-term-textAreaNotes').val()
+            source_rfc5646_locale: "en"
+            # due_date: $('#add-term-inputDueDate').val()
+        success: (data) =>
           this.loadGlossaryEntries()
-        error: =>
+        error: (xhr) =>
+          #           if not added
+            # this.error("Duplicate term!")  
           this.error("Couldn't add new term!")
           this.loadGlossaryEntries()
       $('#add-term-modal').modal('hide')
       return false
 
   setupSettingsFormModal: =>
+    flashSettingsWarning = (warning) -> 
+      $('#settings-modal .help-block').fadeOut () -> 
+        $('#settings-modal .help-block').text(warning).css('color', 'red').fadeIn().delay(800).fadeOut () -> 
+          $('#settings-modal .help-block').text(' • Press Enter to add a new locale').css('color', 'green').fadeIn()
+
     localesDict = {}
 
     newTargetLocales = []
@@ -129,14 +140,13 @@ class root.GlossaryList
           if e.which == 13
             newRfc = $('#settings-inputTarget').val().split(' ')[0]
             if newRfc not of localesDict
+              flashSettingsWarning('• Invalid locale!')
               $('#settings-inputTarget').typeahead('setQuery', '')
-              console.log("invalid locale!") # TODO: !!!!
               return false
 
             if newRfc of newUniqueLocales
+              flashSettingsWarning('• Duplicate locale!')
               $('#settings-inputTarget').typeahead('setQuery', '')
-              console.log("duplicate locale!") # TODO: !!!!
-              # $('.help-block').text("Duplicate!!!").css('visibility', 'visible')
               return false
 
             newTargetLocales.push(localesDict[newRfc])
@@ -153,10 +163,6 @@ class root.GlossaryList
             $('#settings-inputTarget').typeahead('setQuery', '')
             return false
         
-      # $('#settings-inputTarget').jqBootstrapValidation
-      #   preventSubmit: true
-      #   filter: -> 
-      #     return $(this).is(":visible")
     $('#settings-submit').click () =>
       @targetLocales = newTargetLocales
       newTargetLocales = []
@@ -176,31 +182,46 @@ class root.GlossaryList
       success: (glossaryEntries) =>
         i = 0
         for sourceEntry in glossaryEntries.reverse()
+          ## Create on click problem...
           do (sourceEntry) =>
+            isTranslator = true
+            isReviewer = true
+            console.log(sourceEntry)
             context = 
               entry_id: 'glossary-table-entry-' + i++
               num_locales: @targetLocales.length + 2
               source_copy: sourceEntry.source_copy
               source_context: sourceEntry.context
               source_notes: sourceEntry.notes
-              is_translator: @isTranslator
-              is_reviewer: @isReviewer
+              source_edit_url: @editSourceEntryUrl.replace("REPLACEME_SOURCE", sourceEntry.id)
+              is_translator: isTranslator
+              is_reviewer: isReviewer
               translated_copies: []
             for localeEntry in @targetLocales
+              isTranslator = true
+              isReviewer = true
+
               if localeEntry.rfc of sourceEntry.locale_glossary_entries
                 context.translated_copies.push
                   copy: sourceEntry.locale_glossary_entries[localeEntry.rfc].copy,
                   notes: sourceEntry.locale_glossary_entries[localeEntry.rfc].notes
+                  is_translator: isTranslator
+                  is_reviewer: isReviewer
+                  locale_edit_url: @editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceEntry.id).replace("REPLACEME_LOCALE", sourceEntry.locale_glossary_entries[localeEntry.rfc].id)
               else
+                # CREATE A NEW ONE.
                 context.translated_copies.push
                   copy: ''
                   notes: ''
+                  is_translator: isTranslator
+                  is_reviewer: isReviewer
+                  locale_edit_url: @editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceEntry.id).replace("REPLACEME_LOCALE", localeEntry.id)
             $('#glossary-table-' + sourceEntry.source_copy.substr(0, 1).toUpperCase())
               .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
 
         ## TODO: Add functionality if is reviewer
         # if @isReviewer
-        @glossaryTable.find("input, textarea").click (e) -> 
+        @glossaryTable.find("input, textarea, button, a").click (e) -> 
           e.stopPropagation()
 
       error: =>

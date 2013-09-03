@@ -52,12 +52,6 @@ Shuttle::Application.routes.draw do
     resources :glossary_entries, only: [:index, :create, :update, :destroy]
   end
 
-  resources :source_glossary_entries, only: [:index, :create, :update, :destroy], controller: 'glossary/source_glossary_entries' do 
-    resources :locale_glossary_entries, only: [:create, :update, :destroy], 
-              as: 'locale', 
-              controller: 'glossary/locale_glossary_entries'
-  end 
-
   resources :users, only: [:index, :show, :update, :destroy] do
     member { post :become }
   end
@@ -66,16 +60,25 @@ Shuttle::Application.routes.draw do
 
   get 'substitute' => 'substitution#convert'
 
+  # SEARCH PAGES
   get 'search' => redirect('/search/translations')
   get 'search/translations' => 'search#translations', as: :search_translations
   get 'search/keys' => 'search#keys', as: :search_keys
   get 'search/commits' => 'search#commits', as: :search_commits
 
+  # GLOSSARY PAGES
+  get 'glossary' => 'glossary#index', as: :glossary
+  namespace 'glossary' do
+    resources :sources, only: [:index, :create, :edit, :update, :destroy], controller: 'source_glossary_entries' do 
+      resources :locales, only: [:create, :edit, :update, :destroy], 
+              controller: 'locale_glossary_entries'
+    end
+  end
+
   # HOME PAGES
   get 'administrators' => 'home#administrators', as: :administrators
   get 'translators' => 'home#translators', as: :translators
   get 'reviewers' => 'home#reviewers', as: :reviewers
-  get 'glossary' => 'home#glossary', as: :glossary
   root to: 'home#index'
 
   require 'sidekiq/web'

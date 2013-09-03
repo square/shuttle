@@ -14,13 +14,38 @@
 
 class Glossary::SourceGlossaryEntriesController < ApplicationController
   before_filter :authenticate_user!, except: :manifest
-  respond_to :json
+  before_filter :reviewer_required, only: [:edit, :update]
+  before_filter :admin_required, only: [:destroy]
+
+  before_filter :find_source_entry
+
+  respond_to :json, :only => [:index, :create]
+  respond_to :html
+  
+
+  # Renders JSON information about every source glossary entry and their respective
+  # locale glossary entries..
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:project_id/commits/:id`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
 
   def index
     returnEntries = []
 
     SourceGlossaryEntry.all.order('source_copy_prefix ASC').each do |sGlossaryEntry| 
-      newEntry =  { 'source_copy' => sGlossaryEntry.source_copy,
+      newEntry =  { 
+                    'id' => sGlossaryEntry.id,
+                    'source_copy' => sGlossaryEntry.source_copy,
                     'source_locale' => sGlossaryEntry.source_rfc5646_locale,
                     'context' => sGlossaryEntry.context,
                     'notes' => sGlossaryEntry.notes,
@@ -28,6 +53,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
                   }
       sGlossaryEntry.locale_glossary_entries.each do |lGlossaryEntry| 
         newEntry['locale_glossary_entries'][lGlossaryEntry.rfc5646_locale] = { 
+          'id' => lGlossaryEntry.id,
           'copy' => lGlossaryEntry.copy, 
           'notes' => lGlossaryEntry.notes, 
           'translator' => lGlossaryEntry.translator,
@@ -39,38 +65,107 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
       returnEntries << newEntry
     end 
 
-    render json: returnEntries
+    respond_with(returnEntries)
   end
+
+
+  # Creates a new source glossary entry.
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:project_id/commits`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |          |                                                            |
+  # |:---------|:-----------------------------------------------------------|
+  # | `commit` | Parameterized hash of Commit fields, including `revision`. |
 
   def create
-    sGlossaryEntry = SourceGlossaryEntry.new()
-    sGlossaryEntry.source_copy = params[:source_copy]
-    sGlossaryEntry.notes = params[:notes]
-    sGlossaryEntry.context = params[:context]
-    sGlossaryEntry.source_rfc5646_locale = "en" ## Possibly enable other sources
-    puts params.inspect
-    puts sGlossaryEntry.inspect
-
-    if sGlossaryEntry.save
-      render :json => true
-    else
-      render :json => false
-    end
+    @source_entry = SourceGlossaryEntry.create(params[:source_glossary_entry].to_hash)
+    if @source_entry.valid?
+      respond_to do |format|
+        format.json { render json: @source_entry.to_json, status: :created  }
+      end 
+    else 
+      respond_to do |format|
+        format.json { render json: @source_entry.errors.to_json, status: :unprocessable_entity  }
+      end 
+    end 
+    # respond_with(@source_entry, :include => :status)
   end
+
+  def edit
+    respond_with @source_entry
+  end 
+
+  # Updates a source glossary entry with new notes and context.
+  #
+  # Routes
+  # ------
+  #
+  # * `PATCH /projects/:project_id/commits/:commit_id`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `commit_id`  | The SHA of a Commit.   |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |          |                                      |
+  # |:---------|:-------------------------------------|
+  # | `commit` | Parameterized hash of Commit fields. |
 
   def update
-    sGlossaryEntry = SourceGlossaryEntry.find(params[:id])
-    sGlossaryEntry.source_copy = params[:source_copy]
-    sGlossaryEntry.notes = params[:notes]
-    sGlossaryEntry.context = params[:context]
-
-    sGlossaryEntry.save!
-    render json: true
+    @source_entry.update_attributes(entry_params)
+    respond_with(@source_entry, :location => glossary_url)
   end
 
-  ## ADD DESTROY SUPPORT
-  # def destroy
-  #   SourceGlossaryEntry.find(params[:id]).destroy()
-  #   render json: true
-  # end
+
+  # Removes a source glossary entry and all of its locale glossary entries..
+  #
+  # Routes
+  # ------
+  #
+  # * `DELETE /projects/:project_id/commits/:id`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def destroy
+    puts "HERE IN DESTROY!"
+    respond_with(@source_entry.destroy(), :location => glossary_url)
+  end
+
+  private
+
+  # Find the requested source entry by id.
+
+  def find_source_entry
+    @source_entry = SourceGlossaryEntry.find_by_id(params[:id])
+  end
+
+  def entry_params
+    params.require(:source_glossary_entry).permit(:source_copy, :context, :notes)
+  end
+
 end

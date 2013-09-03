@@ -14,20 +14,19 @@
 
 require 'digest/sha2'
 
-# A localization of some commonly used copy to a certain locale. Glossary
+# A localization of some commonly used copy to a certain locale. Locale glossary
 # entries must be reviewed by a reviewer before they are accepted; once they
 # are, they will appear in tooltips to translators who are translating similar
 # strings.
 #
-# Like Translations, glossary entries share a lot of duplicated information.
-#
 # Associations
 # ============
 #
-# |              |                                           |
-# |:-------------|:------------------------------------------|
-# | `translator` | The {User} who performed the translation. |
-# | `reviewer`   | The {User} who reviewed the translation.  |
+# |                           |                                                          |
+# |:--------------------------|:---------------------------------------------------------|
+# | `translator`              | The {User} who performed the translation.                |
+# | `reviewer`                | The {User} who reviewed the translation.                 |
+# | `source_glossary_entry`   | The {SourceGlossaryEntry} this entry is associated with  |
 #
 # Properties
 # ==========
@@ -36,17 +35,16 @@ require 'digest/sha2'
 # |:----------------|:---------------------------------------------------|
 # | `translated`    | If `true`, the copy has been translated.           |
 # | `approved`      | If `true`, the copy has been approved for release. |
-# | `source_locale` | The locale the copy is translated from.            |
 # | `locale`        | The locale the copy is translated to.              |
 #
 # Metadata
 # ========
 #
-# |               |                                                                         |
-# |:--------------|:------------------------------------------------------------------------|
-# | `source_copy` | The copy for the string in the base locale.                             |
-# | `copy`        | The translated copy.                                                    |
-# | `context`     | A human-readable explanation of what the glossary term is referring to. |
+# |               |                                                                                   |
+# |:--------------|:----------------------------------------------------------------------------------|
+# | `copy`        | The translated copy.                                                              |
+# | `notes`       | A human-readable explanation of any additional notes for translators/reviewers.   |
+
 
 class LocaleGlossaryEntry < ActiveRecord::Base
   belongs_to :translator, class_name: 'User', foreign_key: 'translator_id', inverse_of: :authored_glossary_entries
@@ -65,7 +63,6 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   validates :rfc5646_locale,
             presence: true,
             uniqueness: { case_sensitive: false, scope: [ :source_glossary_entry_id ] }
-  ### TODO: Don't allow nil copy anymore.
   validates :source_glossary_entry,
             presence: true
 
@@ -80,7 +77,7 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   before_save :check_not_source_locale
   before_update :reset_reviewed
 
-  # Ensure only 1 entry per language
+  # Checks to ensure that the targeted locale is not the same as the source
   def check_not_source_locale
     if self.rfc5646_locale == self.source_glossary_entry.source_rfc5646_locale 
       return false
@@ -88,6 +85,7 @@ class LocaleGlossaryEntry < ActiveRecord::Base
     return true
   end 
 
+  # Resets the reviewer and approval status if the copy is ever changed. 
   def reset_reviewed
     if copy_changed? && !approved_changed?
       self.reviewer_id = nil

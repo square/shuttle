@@ -8,43 +8,48 @@
   </tr>
   <tr>
     <td class="hiddenRow" colspan="{{num_locales}}">
-      <!-- style="border-bottom: 1px; border-bottom-style: solid;" -->
       <div class="accordion-body collapse" id="{{entry_id}}">
-        <form>
-          <table class="table table-condensed" style="background-color: transparent">
-            <tbody>
-              <tr>
-                <td style="width: 45px; border-bottom-style: none;"></td>
-                <td style="text-align: left;">
-                  <label>Context</label><input placeholder="Something" type="text" value="{{source_context}}">
-                  <label>Notes</label><textarea rows="1" style="height: 30px;">{{source_notes}}</textarea>
-                </td>
-                {{#translated_copies}}
-                <td style="text-align: left;">
-                  <label>Notes</label>
-                  <textarea rows="3">{{notes}}</textarea>
-                </td>
-                {{/translated_copies}}
-              </tr>
-            </tbody>
-          </table>
-        </form>
-
-        <div style="height: 40px">
-          {{#is_translator}}
-          <button class="btn" style="width: 40px;float: right; margin-right: 5px;">
-            <i class="icon-edit"></i>
-          </button>
-          {{/is_translator}}
-          {{#is_reviewer}}
-          <button class="btn btn-danger" style="width: 40px; float: right; margin-right: 20px;">
-            <i class="icon-remove"></i>
-          </button>
-          <button class="btn btn-success" style="width: 40px;float: right; margin-right: 10px;">
-            <i class="icon-ok"></i>
-          </button>
-          {{/is_reviewer}}
-        </div>
+        <table class="table table-condensed" style="background-color: transparent">
+          <tbody>
+            <tr>
+              <td style="width: 45px; border-bottom-style: none;"></td>
+              <td style="text-align: left;">
+                <label>Context</label>
+                <input placeholder="Something" type="text" value="{{source_context}}" readonly>
+                <label>Notes</label>
+                <textarea rows="2" style="height: 60px;" readonly>{{source_notes}}</textarea>
+                <div style="height: 40px">
+                  {{#is_translator}}
+                  <a href="{{source_edit_url}}" class="btn" style="float: right;">
+                    <i class="icon-edit"></i>
+                  </a>
+                  {{/is_translator}}
+                </div>
+              </td>
+              {{#translated_copies}}
+              <td style="text-align: left;">
+                <label>Notes</label>
+                <textarea rows="5" readonly>{{notes}}</textarea>
+                <div style="height: 40px">
+                  {{#is_translator}}
+                  <a href="{{locale_edit_url}}" class="btn" style="float: right;">
+                    <i class="icon-edit"></i>
+                  </a>
+                  {{/is_translator}}
+                  {{#is_reviewer}}
+                  <button class="btn btn-success" style="width: 40px; float: left; margin-right: 5px;">
+                    <i class="icon-ok"></i>
+                  </button>
+                  <button class="btn btn-danger" style="width: 40px; float: left; margin-right: 5px;">
+                    <i class="icon-remove"></i>
+                  </button>
+                  {{/is_reviewer}}
+                </div>
+              </td>
+              {{/translated_copies}}
+            </tr>
+          </tbody>
+        </table>
 
       </div>
     </td>

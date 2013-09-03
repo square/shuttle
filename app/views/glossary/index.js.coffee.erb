@@ -26,13 +26,15 @@ $(document).ready () ->
     ["British English", "be"],
     ["Japanese", "jp"]
   ]
-  new GlossaryList(
-    $('#glossary-table'), "<%= source_glossary_entries_url %>", 
-    "<%= remote_locales_url %>", $('#settings-modal'),
-    $('#add-term-form'), "<%= source_glossary_entries_url %>",
-    <%= current_user.translator? %>, <%= current_user.reviewer? %>
+  glossaryList = new GlossaryList(
+    $('#glossary-table'), "<%= glossary_sources_url %>", "<%= remote_locales_url %>", 
+    "<%= edit_glossary_source_url("REPLACEME_SOURCE") %>", "<%= edit_glossary_source_locale_url("REPLACEME_SOURCE", "REPLACEME_LOCALE") %>"
+    $('#settings-modal'), $('#add-term-form'), "<%= glossary_sources_url %>",
+    <%= current_user.translator? %>, <%= current_user.reviewer? %>,
+    <%= current_user.admin?? '"admin"' : current_user.approved_rfc5646_locales.to_json %>
   );
 
+  # console.log("<%= current_user.approved_locales %>");
 
 # $(document).ready(function() {
 #   new GlossaryList(

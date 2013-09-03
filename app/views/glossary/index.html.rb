@@ -17,8 +17,8 @@
 require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
 
 module Views
-  module Home
-    class Glossary < Views::Layouts::Application
+  module Glossary
+    class Index < Views::Layouts::Application
       protected
 
       def body_content
@@ -69,7 +69,7 @@ module Views
               div class: 'controls' do
                 input type: 'text', id: 'settings-inputTarget', class: 'typeahead', 
                   autocomplete: 'off', placeholder: 'Target Language', disabled: 'disabled'
-                p class: 'help-block', style: 'visibility: hidden;'
+                p ' • Press Enter to add a new locale', class: 'help-block'
               end
             end
 

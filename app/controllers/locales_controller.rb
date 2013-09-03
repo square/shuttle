@@ -121,6 +121,7 @@ class LocalesController < ApplicationController
       end 
       content << temp
     end
+    # Unsure why respond_with doesn't work!
     render json: content
   end 
 end

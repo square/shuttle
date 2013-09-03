@@ -14,7 +14,31 @@
 
 class Glossary::LocaleGlossaryEntriesController < ApplicationController
   before_filter :authenticate_user!, except: :manifest
-  respond_to :json
+  before_filter :find_source_entry
+  before_filter :find_locale_entry
+  respond_to :json, :html
+
+  # Marks a commit as needing localization. Creates a CommitCreator job to do the
+  # heavy lifting of importing strings.
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:project_id/commits`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |          |                                                            |
+  # |:---------|:-----------------------------------------------------------|
+  # | `commit` | Parameterized hash of Commit fields, including `revision`. |
 
   def create
     lGlossaryEntry = LocaleGlossaryEntry.new()
@@ -24,13 +48,34 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     lGlossaryEntry.notes = params[:notes]
     
     if lGlossaryEntry.save
-      render :json => true
+      respond_with(true)
     else
-      render :json => false
+      respond_with(true)
     end
   end
 
-  ### TODO: Possibly make it such that if it is approved, it can't be unchanged unless unapproved?
+  # Updates Commit metadata.
+  #
+  # Routes
+  # ------
+  #
+  # * `PATCH /projects/:project_id/commits/:commit_id`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `commit_id`  | The SHA of a Commit.   |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |          |                                      |
+  # |:---------|:-------------------------------------|
+  # | `commit` | Parameterized hash of Commit fields. |
+  ## TODO: Possibly make it such that if it is approved, it can't be unchanged unless unapproved?
   def update
     lGlossaryEntry = LocaleGlossaryEntry.find(params[:id])
     if params[:review]
@@ -42,6 +87,42 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     lGlossaryEntry.notes = params[:notes]
 
     lGlossaryEntry.save!
-    render json: true
+    respond_with(true)
   end
+
+  # Removes a Commit.
+  #
+  # Routes
+  # ------
+  #
+  # * `DELETE /projects/:project_id/commits/:id`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def edit 
+    puts @source_entry
+    puts @locale_entry
+    respond_with @source_entry, @locale_entry
+  end 
+
+  private
+  # Find the requested source entry by source id.
+
+  def find_source_entry
+    @source_entry = SourceGlossaryEntry.find_by_id(params[:source_id])
+  end
+
+
+  # Find the requested locale entry by locale id.
+
+  def find_locale_entry
+    @locale_entry = LocaleGlossaryEntry.find_by_id(params[:id])
+  end
+
 end

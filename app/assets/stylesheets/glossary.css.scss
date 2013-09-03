@@ -4,6 +4,24 @@
           border-radius: $radius;
 }
 
+@mixin no-focus-effect {
+  &:focus {
+    border: 1px solid #cccccc;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  }
+}
+
+@mixin border-box {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+// OVERRIDES
+
+// MAIN
 .container {
   position: relative;
 }
@@ -85,10 +103,7 @@
       padding-right: 10px;
       text-align: center;
       border: 0px;
-
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
-      box-sizing: border-box;
+      @include border-box;
 
       h3 {
         margin: 0px;
@@ -97,18 +112,20 @@
       input {
         width: 100%;
         height: 30px; 
-        -webkit-box-sizing: border-box; 
-        -moz-box-sizing: border-box; 
-        box-sizing: border-box;
+        @include border-box;
+        &[readonly] {
+          background-color: #ffffff;
+        }
       }
 
       textarea {
         width: 100%;
-        height: 95px;  
-        -webkit-box-sizing: border-box; 
-        -moz-box-sizing: border-box; 
-        box-sizing: border-box; 
+        height: 125px;  
+        @include border-box;
         resize: vertical;
+        &[readonly] {
+          background-color: #ffffff;
+        }
       }
     }
 
@@ -124,6 +141,7 @@
 
 .control-label {
   width: 100px !important;
+  float: left;
 }
 
 .controls {
@@ -133,28 +151,30 @@
   input[type=text] {
     height: 30px; 
     width: 100%;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+    @include border-box;
   }
 
   textarea {
     height: 95px;  
     width: 100%;
     resize: vertical;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+    @include border-box;
   }
 
   select {
     height: 30px; 
-    width: 100%;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+    width: 100%;  
+    @include border-box;
   }
 }
+
+#settings-modal {
+  .help-block {
+    margin-left: 20px;
+    color: green;
+  }
+}
+
 
 #settings-listTargets {
   height: 200px;
