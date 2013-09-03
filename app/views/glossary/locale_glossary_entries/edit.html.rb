@@ -44,14 +44,14 @@ module Views
             div class: 'control-group' do
               label 'English', class: 'control-label', for: 'inputEnglish'
               div class: 'controls' do
-                f.text_field :source_copy, placeholder: 'English', autocomplete: 'off', required: 'true', value: @locale_entry.copy
+                f.text_field :copy, placeholder: 'English', autocomplete: 'off', value: @locale_entry.copy
               end
             end
 
             div class: 'control-group' do
               label 'Notes', class: 'control-label'
               div class: 'controls' do
-                f.text_area :notes, placeholder: 'Notes', autocomplete: 'off', required: 'true', value: @locale_entry.notes
+                f.text_area :notes, placeholder: 'Notes', autocomplete: 'off', value: @locale_entry.notes
               end
             end
 

@@ -14,6 +14,8 @@
 
 class Glossary::LocaleGlossaryEntriesController < ApplicationController
   before_filter :authenticate_user!, except: :manifest
+  before_filter :translator_required, only: [:create, :edit, :update]
+
   before_filter :find_source_entry
   before_filter :find_locale_entry
   respond_to :json, :html
@@ -41,16 +43,19 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
   # | `commit` | Parameterized hash of Commit fields, including `revision`. |
 
   def create
-    lGlossaryEntry = LocaleGlossaryEntry.new()
-    lGlossaryEntry.rfc5646_locale = params[:locale]
-    lGlossaryEntry.source_glossary_entry = SourceGlossaryEntry.find(params[:source_glossary_entry_id])
-    lGlossaryEntry.copy = params[:copy]
-    lGlossaryEntry.notes = params[:notes]
+    @locale_entry = LocaleGlossaryEntry.new()
+    @locale_entry.rfc5646_locale = params[:locale_glossary_entry][:rfc5646_locale]
+    @locale_entry.source_glossary_entry = @source_entry
     
-    if lGlossaryEntry.save
-      respond_with(true)
+    if @locale_entry.save
+      respond_to do |format|
+        format.json { render json: @locale_entry.to_json, status: :created  }
+      end 
     else
-      respond_with(true)
+      puts @locale_entry.errors.to_json
+      respond_to do |format|
+        format.json { render json: @locale_entry.errors.to_json, status: :unprocessable_entity  }
+      end 
     end
   end
 
@@ -77,17 +82,16 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
   # | `commit` | Parameterized hash of Commit fields. |
   ## TODO: Possibly make it such that if it is approved, it can't be unchanged unless unapproved?
   def update
-    lGlossaryEntry = LocaleGlossaryEntry.find(params[:id])
     if params[:review]
       return render json: false unless current_user.reviewer?
-      lGlossaryEntry.reviewer = current_user
-      lGlossaryEntry.approved = (params[:approved] == "true")
+      @locale_entry.reviewer = current_user
+      @locale_entry.approved = (params[:approved] == "true")
     end
-    lGlossaryEntry.copy = params[:copy]
-    lGlossaryEntry.notes = params[:notes]
+    @locale_entry.copy = params[:locale_glossary_entry][:copy]
+    @locale_entry.notes = params[:locale_glossary_entry][:notes]
 
-    lGlossaryEntry.save!
-    respond_with(true)
+    @locale_entry.save!
+    respond_with(@locale_entry, :location => glossary_url)
   end
 
   # Removes a Commit.
@@ -106,8 +110,6 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def edit 
-    puts @source_entry
-    puts @locale_entry
     respond_with @source_entry, @locale_entry
   end 
 

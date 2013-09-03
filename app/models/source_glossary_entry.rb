@@ -48,7 +48,8 @@ class SourceGlossaryEntry < ActiveRecord::Base
   has_metadata_column(
       source_copy: {allow_nil: false},
       context:     {allow_nil: true},
-      notes:       {allow_nil: true}
+      notes:       {allow_nil: true},
+      due_date:    {allow_nil: true}
   )
 
   extend SetNilIfBlank

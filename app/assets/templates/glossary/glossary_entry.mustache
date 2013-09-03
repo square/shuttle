@@ -1,4 +1,4 @@
-<tbody class="glossary-table-entry accordion-toggle" data-target="#{{entry_id}}" data-toggle="collapse">
+<tbody class="glossary-table-entry accordion-toggle" data-target="#glossary-table-entry-{{source_id}}" data-toggle="collapse">
   <tr class="">
     <td></td>
     <td><b>{{source_copy}}</b></td>
@@ -8,7 +8,7 @@
   </tr>
   <tr>
     <td class="hiddenRow" colspan="{{num_locales}}">
-      <div class="accordion-body collapse" id="{{entry_id}}">
+      <div class="accordion-body collapse" id="glossary-table-entry-{{source_id}}">
         <table class="table table-condensed" style="background-color: transparent">
           <tbody>
             <tr>
@@ -27,12 +27,12 @@
                 </div>
               </td>
               {{#translated_copies}}
-              <td style="text-align: left;">
+              <td class="glossary-table-locale-entry" data-locale="{{locale}}" data-source-id="{{source_id}}" data-locale-id="{{locale_id}}" style="text-align: left;">
                 <label>Notes</label>
                 <textarea rows="5" readonly>{{notes}}</textarea>
                 <div style="height: 40px">
                   {{#is_translator}}
-                  <a href="{{locale_edit_url}}" class="btn" style="float: right;">
+                  <button class="btn glossary-table-edit-locale" style="float: right;">
                     <i class="icon-edit"></i>
                   </a>
                   {{/is_translator}}

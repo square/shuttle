@@ -29,7 +29,7 @@ module Views
             button class: 'btn page-header-btn', :'data-target'=>'#settings-modal', :'data-toggle'=>'modal' do
               i class: 'icon-cog'
             end
-            button "Add New Term", id: 'add-new-term', class: "btn btn-success page-header-btn", :'data-target'=>'#add-term-modal', :'data-toggle'=>'modal'
+            button "Add New Term", id: 'add-new-term', class: "btn btn-success page-header-btn", :'data-target'=>'#add-entry-modal', :'data-toggle'=>'modal'
           end
           ########################
 
@@ -91,8 +91,9 @@ module Views
         ########################
 
         #### Add Term Modal ####
-        div id: 'add-term-modal', class: 'modal hide fade', tabindex: '-1', role: 'dialog', :'aria-labelledby' => 'myModalLabel', :'aria-hidden' => 'true' do
-          form id: 'add-term-form', class: 'form-horizontal', style: 'margin-bottom: 0px' do
+        div id: 'add-entry-modal', class: 'modal hide fade', tabindex: '-1', role: 'dialog', :'aria-labelledby' => 'myModalLabel', :'aria-hidden' => 'true' do
+          # form_for (SourceGlossaryEntry.new), class: 'form-horizontal', style: 'margin-bottom: 0px;' do |f|
+          form id: 'add-entry-form', class: 'form-horizontal', style: 'margin-bottom: 0px' do
             div class: 'modal-header' do
               button "×", type: 'button', class: 'close', :'data-dismiss' => 'modal', :'aria-hidden'=>'true'
               h3 "Add New Term"
@@ -103,28 +104,28 @@ module Views
               div class: 'control-group' do
                 label 'English', class: 'control-label', for: 'inputEnglish'
                 div class: 'controls' do
-                  input type: 'text', id: 'add-term-inputEnglish', placeholder: 'English', autocomplete: 'off', required: 'true'
+                  input type: 'text', id: 'add-entry-inputEnglish', placeholder: 'English', autocomplete: 'off', required: 'true'
                 end
               end
 
               div class: 'control-group' do
                 label 'Context', class: 'control-label', for: 'inputContext'
                 div class: 'controls' do
-                  input type: 'text', id: 'add-term-inputContext', placeholder: 'Context', autocomplete: 'off'
+                  input type: 'text', id: 'add-entry-inputContext', placeholder: 'Context', autocomplete: 'off'
                 end
               end
 
               div class: 'control-group' do
                 label 'Notes', class: 'control-label', for: 'textAreaNotes'
                 div class: 'controls' do
-                  textarea rows: "3", id: 'add-term-textAreaNotes', placeholder: 'Notes', autocomplete: 'off'
+                  textarea rows: "3", id: 'add-entry-textAreaNotes', placeholder: 'Notes', autocomplete: 'off'
                 end
               end
 
               div class: 'control-group' do
                 label 'Due Date', class: 'control-label', for: 'inputDueDate'
                 div class: 'controls' do
-                  input type: 'text', id: 'add-term-inputDueDate', autocomplete: 'off'
+                  input type: 'text', id: 'add-entry-inputDueDate', autocomplete: 'off'
                 end
               end
             end

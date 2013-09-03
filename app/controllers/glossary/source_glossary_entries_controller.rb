@@ -152,7 +152,6 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def destroy
-    puts "HERE IN DESTROY!"
     respond_with(@source_entry.destroy(), :location => glossary_url)
   end
 

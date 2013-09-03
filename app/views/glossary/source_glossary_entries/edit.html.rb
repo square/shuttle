@@ -75,7 +75,7 @@ module Views
             if current_user.try!(:admin?)
               div class: 'controls', style: 'height: 40px;' do
                 # TODO: LOOK AT LATER.
-              button_to "Destroy Entry", glossary_source_url(@source_entry), :method => :delete, class: 'btn btn-danger', style: 'float: right; width: 200px;'
+              link_to "Destroy Entry", glossary_source_url(@source_entry), :method => :delete, class: 'btn btn-danger', style: 'float: right; width: 200px;'
               end  
             end
             

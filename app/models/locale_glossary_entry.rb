@@ -80,6 +80,7 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   # Checks to ensure that the targeted locale is not the same as the source
   def check_not_source_locale
     if self.rfc5646_locale == self.source_glossary_entry.source_rfc5646_locale 
+      errors.add(:base, "Can't set locale equal to source locale.")
       return false
     end 
     return true

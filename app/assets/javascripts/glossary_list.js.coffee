@@ -14,14 +14,14 @@
 
 root = exports ? this
 
-#TODO: this should probably be abstracted out to share code.
 class root.GlossaryList
   currentLocale: 'en'
   # TODO: @availableLocalesOrAdmin, @updateEntryUrl
   constructor: (
       @glossaryTable, @glossaryUrl, @localesUrl,
+      @addSourceEntryUrl, @addLocaleEntryUrl,
       @editSourceEntryUrl, @editLocaleEntryUrl, 
-      @settingsModal, @addTermForm, @addTermUrl, 
+      @settingsModal, @addEntryModal,
       @isTranslator, @isReviewer, @approvedLocales) ->
 
     # Defaults source/target locales
@@ -61,16 +61,13 @@ class root.GlossaryList
   error: (message) ->
     flash = $('<p/>').addClass('alert alert-error').text(message).hide().appendTo($('#flashes')).slideDown()
     $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
-    flash.delay(4000).slideUp () -> flash.remove()
 
   setupGlossary: ->
     headerRow = $('<tr/>').appendTo($('<thead/>').appendTo(@glossaryTable)).append('<th/>')
     $('<div/>').text(@sourceLocale.locale).appendTo($('<th/>').appendTo(headerRow))
-    # TODO: Check length of foreignLocales
     for localeEntry in @targetLocales
       $('<div/>').text(localeEntry.locale).appendTo($('<th/>').appendTo(headerRow))
     for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('')
-      ## TODO: Possibly move this to a HBS template
       glossaryAnchor = $('<tbody/>', 
         id: 'glossary-table-' + letter,
         class: 'glossary-table-anchor'
@@ -78,34 +75,32 @@ class root.GlossaryList
       glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<h3/>').text(letter))))
 
   setupAddTermModal: =>
-    $('#add-term-inputDueDate').datepicker
+    $('#add-entry-inputDueDate').datepicker
       startDate: new Date()
       autoclose: true
       todayBtn: "linked"
-    $('#add-term-inputEnglish').jqBootstrapValidation
+    $('#add-entry-inputEnglish').jqBootstrapValidation
       preventSubmit: true
       filter: -> 
         return $(this).is(":visible")
       
-    @addTermForm.submit () => 
-      $.ajax @addTermUrl, 
+    @addEntryModal.find("form").submit () => 
+      $.ajax @addSourceEntryUrl, 
         type: "POST"
-        dataType: "json",
+        dataType: "json"
         data: 
           source_glossary_entry:
-            source_copy: $('#add-term-inputEnglish').val()
-            context: $('#add-term-inputContext').val()
-            notes: $('#add-term-textAreaNotes').val()
             source_rfc5646_locale: "en"
-            # due_date: $('#add-term-inputDueDate').val()
+            source_copy: $('#add-entry-inputEnglish').val()
+            context: $('#add-entry-inputContext').val()
+            notes: $('#add-entry-textAreaNotes').val()
+            due_date: $('#add-entry-inputDueDate').val()
         success: (data) =>
           this.loadGlossaryEntries()
-        error: (xhr) =>
-          #           if not added
-            # this.error("Duplicate term!")  
-          this.error("Couldn't add new term!")
+        error: (jqXHR) =>
+          this.error("ERROR {0}: Couldn't add new term!".format(jqXHR.status))
           this.loadGlossaryEntries()
-      $('#add-term-modal').modal('hide')
+          @addEntryModal.modal('hide')
       return false
 
   setupSettingsFormModal: =>
@@ -168,7 +163,7 @@ class root.GlossaryList
       newTargetLocales = []
       newUniqueLocales = {en: ''}
       $("#settings-listTargets").empty()
-      $('#settings-modal').modal('hide')
+      @settingsModal.modal('hide')
       this.reloadGlossary()
 
   loadGlossaryEntries: => 
@@ -184,11 +179,11 @@ class root.GlossaryList
         for sourceEntry in glossaryEntries.reverse()
           ## Create on click problem...
           do (sourceEntry) =>
-            isTranslator = true
+            isTranslator = true ## TODO: Fix up later
             isReviewer = true
-            console.log(sourceEntry)
+            
             context = 
-              entry_id: 'glossary-table-entry-' + i++
+              source_id: sourceEntry.id
               num_locales: @targetLocales.length + 2
               source_copy: sourceEntry.source_copy
               source_context: sourceEntry.context
@@ -200,24 +195,42 @@ class root.GlossaryList
             for localeEntry in @targetLocales
               isTranslator = true
               isReviewer = true
-
+              localeContext = 
+                copy: ''
+                notes: ''
+                locale: localeEntry.rfc
+                is_translator: isTranslator
+                is_reviewer: isReviewer
               if localeEntry.rfc of sourceEntry.locale_glossary_entries
-                context.translated_copies.push
-                  copy: sourceEntry.locale_glossary_entries[localeEntry.rfc].copy,
-                  notes: sourceEntry.locale_glossary_entries[localeEntry.rfc].notes
-                  is_translator: isTranslator
-                  is_reviewer: isReviewer
-                  locale_edit_url: @editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceEntry.id).replace("REPLACEME_LOCALE", sourceEntry.locale_glossary_entries[localeEntry.rfc].id)
-              else
-                # CREATE A NEW ONE.
-                context.translated_copies.push
-                  copy: ''
-                  notes: ''
-                  is_translator: isTranslator
-                  is_reviewer: isReviewer
-                  locale_edit_url: @editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceEntry.id).replace("REPLACEME_LOCALE", localeEntry.id)
-            $('#glossary-table-' + sourceEntry.source_copy.substr(0, 1).toUpperCase())
+                localeContext.locale_id = sourceEntry.locale_glossary_entries[localeEntry.rfc].id
+                localeContext.copy = sourceEntry.locale_glossary_entries[localeEntry.rfc].copy
+                localeContext.notes = sourceEntry.locale_glossary_entries[localeEntry.rfc].notes
+              context.translated_copies.push(localeContext)
+
+            newGlossaryEntry = $('#glossary-table-' + sourceEntry.source_copy.substr(0, 1).toUpperCase())
               .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
+
+        for domLocaleEntry in $('.glossary-table-locale-entry')
+          localeID = $(domLocaleEntry).data('localeId') 
+          sourceID = $(domLocaleEntry).data('sourceId') 
+          locale = $(domLocaleEntry).data('locale') 
+
+          $(domLocaleEntry).find(".glossary-table-edit-locale").click(((addLocaleEntryUrl, editLocaleEntryUrl, localeID, sourceID, locale) ->
+            return () ->
+              if localeID
+                window.location.href = editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID)
+              else 
+                $.ajax addLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID),
+                  type: "POST"
+                  dataType: "json"
+                  data: 
+                    locale_glossary_entry:
+                      source_glossary_entry_id: sourceID
+                      rfc5646_locale: locale
+                  success: (newEntry) =>
+                    window.location.href = editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", newEntry.id)
+                    console.error(xhr)
+          )(@addLocaleEntryUrl, @editLocaleEntryUrl, localeID, sourceID, locale))
 
         ## TODO: Add functionality if is reviewer
         # if @isReviewer
