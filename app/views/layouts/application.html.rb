@@ -113,6 +113,15 @@ module Views
                   ul(class: 'nav') do
                     tab "Search", 'search', search_url
                   end
+
+                  div(class: 'nav pull-right worker-status') do
+                    if current_user.admin?
+                      a "…", href: '/sidekiq'
+                    else
+                      a "…"
+                    end
+                  end
+
                   ul(class: 'nav pull-right') do
                     #tab "Settings", 'account', account_url
                     tab "Projects", 'projects', projects_url if current_user.admin?

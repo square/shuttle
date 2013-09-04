@@ -76,5 +76,16 @@ Shuttle::Application.routes.draw do
   constraint = lambda { |request| request.env["warden"].authenticate? and request.env['warden'].user.admin? }
   constraints constraint do
     mount Sidekiq::Web => '/sidekiq'
+    get '/queue_status' => proc {
+      queue_size = Sidekiq::Queue.new.size
+      queue_status = if queue_size == 0
+                       "idle"
+                     elsif queue_size < 21
+                       "working"
+                     else
+                       "heavy"
+                     end
+      [200, {"Content-Type" => "text/plain"}, [queue_status]]
+    }
   end
 end
