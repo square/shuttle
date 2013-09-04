@@ -1,9 +1,25 @@
-
 .worker-status {
-  padding: 5px 15px;
+  padding: 13px 15px;
+  height: 40px - 13px*2;
   box-shadow: inset 0 2px 5px rgba(100, 100, 100, 0.7);
   display: inline-block;
   background: #CCC;
   color: #666;
-  font-size: 80%;
+  font-size: 11px;
+  line-height: 14px;
+
+  &.worker-status-idle {
+    background-color: rgb(240, 255, 240);
+    a { color: #888; }
+  }
+
+  &.worker-status-busy {
+    background-color: rgb(255, 255, 240);
+    a { color: #777; }
+  }
+
+  &.worker-status-swamped {
+    background-color: rgb(255, 240, 240);
+    a { color: #666; }
+  }
 }

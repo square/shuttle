@@ -19,22 +19,15 @@ $(document).ready((->
       .done( (data) ->
         if data == 'idle'
           text = "Workers Idle"
-          color = "#AAFFAA"
-          text_color = "#777777"
-          shadow = "0 1px 0 #FFFFFF"
+          klass = 'worker-status-idle'
         else if data == 'working'
           text = "Workers Busy"
-          color = "#FFFFAA"
-          text_color = "#777777"
-          shadow = "0 1px 0 #FFFFFF"
+          klass = 'worker-status-busy'
         else if data == 'heavy'
           text = "Workers Swamped"
-          color = "#FFAAAA"
-          text_color = "#666666"
-          shadow = "0 1px 0 #AAAAAA"
+          klass = 'worker-status-swamped'
 
-        $('.worker-status a').text(text)
-        $('.worker-status').css({background: color, color: text_color, textShadow: shadow})
+        $('.worker-status').addClass(klass).find('a').text(text)
       );
 
   minPerQuery = 1
