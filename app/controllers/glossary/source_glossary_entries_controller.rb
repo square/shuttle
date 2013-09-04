@@ -91,17 +91,9 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # | `commit` | Parameterized hash of Commit fields, including `revision`. |
 
   def create
-    @source_entry = SourceGlossaryEntry.create(params[:source_glossary_entry].to_hash)
-    if @source_entry.valid?
-      respond_to do |format|
-        format.json { render json: @source_entry.to_json, status: :created  }
-      end 
-    else 
-      respond_to do |format|
-        format.json { render json: @source_entry.errors.to_json, status: :unprocessable_entity  }
-      end 
-    end 
-    # respond_with(@source_entry, :include => :status)
+    @source_entry = SourceGlossaryEntry.create(entry_params)
+
+    respond_with @source_entry, :location => glossary_sources_url
   end
 
   def edit
@@ -132,9 +124,9 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
 
   def update
     @source_entry.update_attributes(entry_params)
-    respond_with(@source_entry, :location => glossary_url)
-  end
 
+    respond_with @source_entry, :location => glossary_url
+  end
 
   # Removes a source glossary entry and all of its locale glossary entries..
   #
@@ -152,7 +144,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def destroy
-    respond_with(@source_entry.destroy(), :location => glossary_url)
+    respond_with @source_entry.destroy(), :location => glossary_url
   end
 
   private
@@ -164,7 +156,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   end
 
   def entry_params
-    params.require(:source_glossary_entry).permit(:source_copy, :context, :notes)
+    params.require(:source_glossary_entry).permit(:source_copy, :context, :notes, :due_date)
   end
 
 end

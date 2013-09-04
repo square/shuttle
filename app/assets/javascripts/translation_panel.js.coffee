@@ -107,7 +107,7 @@ class TranslationItem
     @element.find('textarea, input').attr 'disabled', 'disabled'
 
     $.ajax @translation.url + '.json',
-      type: 'PATCH'
+      type: 'PUT'
       data: $.param('translation[copy]': @element.find('textarea').val())
       complete: => @element.find('textarea, input').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
@@ -170,7 +170,7 @@ class TranslationItem
       icons = $('<p/>').addClass('icons').appendTo(@right)
       button_approve = $('<button/>').addClass('btn btn-success btn-mini').appendTo(icons).click =>
         $.ajax @translation.approve_url,
-          type: 'PATCH'
+          type: 'PUT'
           success: (translation) => this.refresh translation
           error: => modal("Couldn’t approve that translation.", "An error occurred.")
         return false
@@ -179,7 +179,7 @@ class TranslationItem
 
       button_reject = $('<button/>').addClass('btn btn-danger btn-mini').appendTo(icons).click =>
         $.ajax @translation.reject_url,
-          type: 'PATCH'
+          type: 'PUT'
           success: (translation) => this.refresh translation
           error: => modal("Couldn’t reject that translation.", "An error occurred.")
         return false
@@ -359,6 +359,7 @@ class TranslationItem
     return fenced_p
 
   renderGlossaryTooltip: ->
+    console.log(@parent.glossary)
     glossaryTips = []
     for term in @parent.glossary
       if @element.find('.fenced-copy').text().toLowerCase().search(term[0].toLowerCase()) > -1

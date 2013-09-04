@@ -30,7 +30,6 @@ module Views
             page_header "Edit Source Glossary Entry"
             div(class: 'row-fluid') do
               div(class: 'span6') { edit_side }
-              div(class: 'span6') { information_side }
             end
           end
         end
@@ -87,10 +86,6 @@ module Views
             dt "Last updated at:"
             dd @source_entry.updated_at
           end
-        end
-
-        def information_side
-
         end
 
         def active_tab() 'glossary' 

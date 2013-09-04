@@ -19,36 +19,40 @@ $('#alphabet-bar').affix(
 # $('#alphabet-bar').scrollspy(); ## TODO: Make scrollspy work
 
 $(document).ready () ->
-  sourceLocale = ["English", "en"]
-  foreignLocales = [
-    ["France", "fr"], 
-    ["Spanish", "sp"], 
-    ["British English", "be"],
-    ["Japanese", "jp"]
+      # Defaults source/target locales
+  sourceLocale = {
+      flagUrl: "/assets/country-flags/en.png"
+      locale: "English"
+      rfc: "en"
+    }
+  targetLocales = [
+    {
+      flagUrl: "/assets/country-flags/fr.png"
+      locale: "French"
+      rfc: "fr"
+    },
+    {
+      flagUrl: "/assets/country-flags/jp.png"
+      locale: "Japanese"
+      rfc: "ja"
+    },
+    {
+      flagUrl: "/assets/country-flags/es.png"
+      locale: "Spanish"
+      rfc: "es"
+    },
+    {
+      flagUrl: "/assets/country-flags/de.png"
+      locale: "German"
+      rfc: "de"
+    },
   ]
   new GlossaryList(
-    $('#glossary-table'), "<%= glossary_sources_url %>", "<%= remote_locales_url %>", 
+    $('#glossary-table'), "<%= glossary_sources_url %>", 
+    "<%= remote_locales_url %>", sourceLocale, targetLocales,
     "<%= glossary_sources_url(format:'json') %>", "<%= glossary_source_locales_url("REPLACEME_SOURCE", format:'json') %>",
     "<%= edit_glossary_source_url("REPLACEME_SOURCE") %>", "<%= edit_glossary_source_locale_url("REPLACEME_SOURCE", "REPLACEME_LOCALE") %>",
+    "<%= approve_glossary_source_locale_url("REPLACEME_SOURCE", "REPLACEME_LOCALE") %>", "<%= reject_glossary_source_locale_url("REPLACEME_SOURCE", "REPLACEME_LOCALE") %>",
     $('#settings-modal'), $('#add-entry-modal'),
-    <%= current_user.translator? %>, <%= current_user.reviewer? %>,
-    <%= current_user.admin?? '"admin"' : current_user.approved_rfc5646_locales.to_json %>
+    "<%= current_user.role %>", <%= current_user.approved_rfc5646_locales.to_json %>
   );
-
-  # console.log("<%= current_user.approved_locales %>");
-
-# $(document).ready(function() {
-#   new GlossaryList(
-#     $('#locale'),
-#     $('#glossary'),
-#     "<%= locale_glossary_entries_url('REPLACEME', format: 'json') %>",
-#     $('#new-glossary-entry'),
-#     "<%= locale_glossary_entries_url("en", format: 'json') %>",
-#     <%= current_user.translator? %>,
-#     <%= current_user.reviewer? %>,
-#     <%= current_user.admin?? '"admin"' : current_user.approved_rfc5646_locales.to_json %>,
-#     "<%= locale_glossary_entry_url("REPLACEME_LOCALE", "REPLACEME_ID", format: 'json') %>"
-#   );
-#   $('#locale').find('input').val("en")
-#   $('#locale').submit()
-# });

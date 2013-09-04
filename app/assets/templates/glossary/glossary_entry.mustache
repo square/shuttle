@@ -3,7 +3,7 @@
     <td></td>
     <td><b>{{source_copy}}</b></td>
     {{#translated_copies}}
-    <td><b>{{copy}}</b></td>
+    <td><b class="{{locale}}-copy {{entry_state}}">{{copy}}</b></td>
     {{/translated_copies}}
   </tr>
   <tr>
@@ -15,7 +15,7 @@
               <td style="width: 45px; border-bottom-style: none;"></td>
               <td style="text-align: left;">
                 <label>Context</label>
-                <input placeholder="Something" type="text" value="{{source_context}}" readonly>
+                <input type="text" value="{{source_context}}" readonly>
                 <label>Notes</label>
                 <textarea rows="2" style="height: 60px;" readonly>{{source_notes}}</textarea>
                 <div style="height: 40px">
@@ -32,15 +32,15 @@
                 <textarea rows="5" readonly>{{notes}}</textarea>
                 <div style="height: 40px">
                   {{#is_translator}}
-                  <button class="btn glossary-table-edit-locale" style="float: right;">
+                  <button class="btn glossary-table-edit-locale" style="float: right;" {{#approved}} {{^is_reviewer}} disabled {{/is_reviewer}} {{/approved}}>
                     <i class="icon-edit"></i>
                   </a>
                   {{/is_translator}}
                   {{#is_reviewer}}
-                  <button class="btn btn-success" style="width: 40px; float: left; margin-right: 5px;">
+                  <button class="btn btn-success glossary-table-approve-locale" style="width: 40px; float: left; margin-right: 5px;" {{#approved}}disabled{{/approved}}>
                     <i class="icon-ok"></i>
                   </button>
-                  <button class="btn btn-danger" style="width: 40px; float: left; margin-right: 5px;">
+                  <button class="btn btn-danger glossary-table-reject-locale" style="width: 40px; float: left; margin-right: 5px;" {{#rejected}}disabled{{/rejected}}>
                     <i class="icon-remove"></i>
                   </button>
                   {{/is_reviewer}}

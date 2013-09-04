@@ -15,6 +15,7 @@
 class Glossary::LocaleGlossaryEntriesController < ApplicationController
   before_filter :authenticate_user!, except: :manifest
   before_filter :translator_required, only: [:create, :edit, :update]
+  before_filter :reviewer_required, only: [:approve, :reject]
 
   before_filter :find_source_entry
   before_filter :find_locale_entry
@@ -90,6 +91,9 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     @locale_entry.copy = params[:locale_glossary_entry][:copy]
     @locale_entry.notes = params[:locale_glossary_entry][:notes]
 
+    @locale_entry.translated = true
+    @locale_entry.translator = current_user
+
     @locale_entry.save!
     respond_with(@locale_entry, :location => glossary_url)
   end
@@ -113,7 +117,60 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     respond_with @source_entry, @locale_entry
   end 
 
+
+  # Marks a Translation as approved and records the reviewer as the current
+  # User.
+  #
+  # Routes
+  # ------
+  #
+  # * `PUT /projects/:project_id/keys/:key_id/translations/:id/approve`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                                    |
+  # |:-------------|:-----------------------------------|
+  # | `project_id` | The slug of a Project.             |
+  # | `key_id`     | The Slug of a Key in that project. |
+  # | `id`         | The ID of a Translation.           |
+
+  def approve
+    @locale_entry.approved = true
+    @locale_entry.reviewer = current_user
+    @locale_entry.save!
+    
+    respond_with(@locale_entry, :location => glossary_source_locales_url)
+  end
+
+  # Marks a Translation as rejected and records the reviewer as the current
+  # User.
+  #
+  # Routes
+  # ------
+  #
+  # * `PUT /projects/:project_id/keys/:key_id/translations/:id/reject`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                                    |
+  # |:-------------|:-----------------------------------|
+  # | `project_id` | The slug of a Project.             |
+  # | `key_id`     | The slug of a Key in that project. |
+  # | `id`         | The ID of a Translation.           |
+
+  def reject
+    @locale_entry.approved = false
+    @locale_entry.reviewer = current_user
+    @locale_entry.save!
+    
+    respond_with(@locale_entry, :location => glossary_source_locales_url)
+  end
+
+
   private
+
   # Find the requested source entry by source id.
 
   def find_source_entry

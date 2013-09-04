@@ -105,6 +105,10 @@
       border: 0px;
       @include border-box;
 
+      b.approved     { color: #7f7; }
+      b.rejected     { color: #f77; }
+      b.translated   { color: #77f; }
+
       h3 {
         margin: 0px;
       }

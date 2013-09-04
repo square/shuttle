@@ -18,41 +18,18 @@ class root.GlossaryList
   currentLocale: 'en'
   # TODO: @availableLocalesOrAdmin, @updateEntryUrl
   constructor: (
-      @glossaryTable, @glossaryUrl, @localesUrl,
+      @glossaryTable, @glossaryUrl, 
+      @localesUrl, @sourceLocale, @targetLocales, 
       @addSourceEntryUrl, @addLocaleEntryUrl,
       @editSourceEntryUrl, @editLocaleEntryUrl, 
+      @approveLocaleEntryUrl, @rejectLocaleEntryUrl
       @settingsModal, @addEntryModal,
-      @isTranslator, @isReviewer, @approvedLocales) ->
-
-    # Defaults source/target locales
-    @sourceLocale = {
-        flagUrl: "/assets/country-flags/en.png"
-        locale: "English"
-        rfc: "en"
-      }
-    @targetLocales = [
-      {
-        flagUrl: "/assets/country-flags/fr.png"
-        locale: "French"
-        rfc: "fr"
-      },
-      {
-        flagUrl: "/assets/country-flags/jp.png"
-        locale: "Japanese"
-        rfc: "ja"
-      },
-      {
-        flagUrl: "/assets/country-flags/es.png"
-        locale: "Spanish"
-        rfc: "es"
-      },
-      {
-        flagUrl: "/assets/country-flags/de.png"
-        locale: "German"
-        rfc: "de"
-      },
-    ]
-
+      @userRole, @approvedLocales) ->
+    if this.readCookie("sourceLocale") != null
+      @sourceLocale = JSON.parse(this.readCookie("sourceLocale"))
+    if this.readCookie("targetLocales") != null
+      @targetLocales = JSON.parse(this.readCookie("targetLocales"))
+      
     this.setupGlossary()
     this.setupAddTermModal()
     this.setupSettingsFormModal()
@@ -88,19 +65,13 @@ class root.GlossaryList
       $.ajax @addSourceEntryUrl, 
         type: "POST"
         dataType: "json"
-        data: 
-          source_glossary_entry:
-            source_rfc5646_locale: "en"
-            source_copy: $('#add-entry-inputEnglish').val()
-            context: $('#add-entry-inputContext').val()
-            notes: $('#add-entry-textAreaNotes').val()
-            due_date: $('#add-entry-inputDueDate').val()
+        data: @addEntryModal.find("form").serialize()
         success: (data) =>
           this.loadGlossaryEntries()
         error: (jqXHR) =>
-          this.error("ERROR {0}: Couldn't add new term!".format(jqXHR.status))
+          this.error("ERROR: Couldn't add new term!")
           this.loadGlossaryEntries()
-          @addEntryModal.modal('hide')
+      @addEntryModal.modal('hide')
       return false
 
   setupSettingsFormModal: =>
@@ -122,8 +93,7 @@ class root.GlossaryList
             locale: localeEntry.locale
             flagUrl: localeEntry.flagUrl
 
-        $('#settings-inputTarget').removeAttr('disabled')
-        $('#settings-submit').removeAttr('disabled')
+        $('#settings-btn').removeAttr('disabled')
 
         $('#settings-inputTarget').typeahead
           name: 'locales'
@@ -164,6 +134,8 @@ class root.GlossaryList
       newUniqueLocales = {en: ''}
       $("#settings-listTargets").empty()
       @settingsModal.modal('hide')
+      this.createCookie("sourceLocale", JSON.stringify(@sourceLocale), 1);
+      this.createCookie("targetLocales", JSON.stringify(@targetLocales), 1);
       this.reloadGlossary()
 
   loadGlossaryEntries: => 
@@ -177,10 +149,17 @@ class root.GlossaryList
       success: (glossaryEntries) =>
         i = 0
         for sourceEntry in glossaryEntries.reverse()
-          ## Create on click problem...
           do (sourceEntry) =>
-            isTranslator = true ## TODO: Fix up later
-            isReviewer = true
+
+            switch @userRole
+              when "admin" then isTranslator = true
+              when "reviewer", "translator" 
+                if @approvedLocales.indexOf(sourceEntry.source_locale) > -1                
+                  isTranslator = true
+                else 
+                  isTranslator = false  
+              else 
+                isTranslator = false
             
             context = 
               source_id: sourceEntry.id
@@ -190,11 +169,29 @@ class root.GlossaryList
               source_notes: sourceEntry.notes
               source_edit_url: @editSourceEntryUrl.replace("REPLACEME_SOURCE", sourceEntry.id)
               is_translator: isTranslator
-              is_reviewer: isReviewer
               translated_copies: []
             for localeEntry in @targetLocales
-              isTranslator = true
-              isReviewer = true
+              switch @userRole
+                when "admin"
+                  isTranslator = true
+                  isReviewer = true
+                when "reviewer" 
+                  if @approvedLocales.indexOf(localeEntry.rfc) > -1                
+                    isTranslator = true
+                    isReviewer = true
+                  else 
+                    isTranslator = false  
+                    isReviewer = false
+                when "translator"
+                  if @approvedLocales.indexOf(localeEntry.rfc) > -1                
+                    isTranslator = true
+                  else 
+                    isTranslator = false  
+                  isReviewer = false
+                else 
+                  isTranslator = false
+                  isReviewer = false
+
               localeContext = 
                 copy: ''
                 notes: ''
@@ -205,6 +202,21 @@ class root.GlossaryList
                 localeContext.locale_id = sourceEntry.locale_glossary_entries[localeEntry.rfc].id
                 localeContext.copy = sourceEntry.locale_glossary_entries[localeEntry.rfc].copy
                 localeContext.notes = sourceEntry.locale_glossary_entries[localeEntry.rfc].notes
+
+                if sourceEntry.locale_glossary_entries[localeEntry.rfc].translated
+                  approved = sourceEntry.locale_glossary_entries[localeEntry.rfc].approved
+                  if approved == true
+                    localeContext.entry_state = "approved"
+                    localeContext.approved = true
+                    localeContext.rejected = false
+                  else if approved == false
+                    localeContext.entry_state = "rejected"
+                    localeContext.approved = false
+                    localeContext.rejected = true
+                  else 
+                    localeContext.entry_state = "translated"
+                    localeContext.approved = false
+                    localeContext.rejected = false
               context.translated_copies.push(localeContext)
 
             newGlossaryEntry = $('#glossary-table-' + sourceEntry.source_copy.substr(0, 1).toUpperCase())
@@ -232,8 +244,52 @@ class root.GlossaryList
                     console.error(xhr)
           )(@addLocaleEntryUrl, @editLocaleEntryUrl, localeID, sourceID, locale))
 
-        ## TODO: Add functionality if is reviewer
-        # if @isReviewer
+          $(domLocaleEntry).find(".glossary-table-approve-locale").click(((domLocaleEntry, addLocaleEntryUrl, editLocaleEntryUrl, approveLocaleEntryUrl, localeID, sourceID, locale) ->
+            return () ->
+              $(domLocaleEntry).find(".glossary-table-reject-locale").prop('disabled', false)
+              $(domLocaleEntry).find(".glossary-table-approve-locale").prop('disabled', true)
+              if localeID
+                $.ajax approveLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID),
+                  type: "PATCH"
+                  success: () ->
+                    $(domLocaleEntry).parents(".glossary-table-entry").find("." + locale + "-copy")
+                      .hide().removeClass("translated rejected").addClass("approved").fadeIn(500)
+              else 
+                $.ajax addLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID),
+                  type: "POST"
+                  dataType: "json"
+                  data: 
+                    locale_glossary_entry:
+                      source_glossary_entry_id: sourceID
+                      rfc5646_locale: locale
+                  success: (newEntry) =>
+                    $.ajax approveLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID),
+                      type: "PATCH"
+          )(domLocaleEntry, @addLocaleEntryUrl, @editLocaleEntryUrl, @approveLocaleEntryUrl, localeID, sourceID, locale))
+
+          $(domLocaleEntry).find(".glossary-table-reject-locale").click(((domLocaleEntry, addLocaleEntryUrl, editLocaleEntryUrl, rejectLocaleEntryUrl, localeID, sourceID, locale) ->
+            return () ->
+              $(domLocaleEntry).find(".glossary-table-reject-locale").prop('disabled', true)
+              $(domLocaleEntry).find(".glossary-table-approve-locale").prop('disabled', false)
+              if localeID
+                $.ajax rejectLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID),
+                  type: "PATCH"
+                  success: () ->
+                    $(domLocaleEntry).parents(".glossary-table-entry").find("." + locale + "-copy")
+                      .hide().removeClass("translated approved").addClass("rejected").fadeIn(500)
+              else 
+                $.ajax addLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID),
+                  type: "POST"
+                  dataType: "json"
+                  data: 
+                    locale_glossary_entry:
+                      source_glossary_entry_id: sourceID
+                      rfc5646_locale: locale
+                  success: (newEntry) =>
+                    $.ajax rejectLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID),
+                      type: "PATCH"
+          )(domLocaleEntry, @addLocaleEntryUrl, @editLocaleEntryUrl, @rejectLocaleEntryUrl, localeID, sourceID, locale))
+
         @glossaryTable.find("input, textarea, button, a").click (e) -> 
           e.stopPropagation()
 
@@ -245,3 +301,24 @@ class root.GlossaryList
     @glossaryTable.empty()
     this.setupGlossary()
     this.loadGlossaryEntries()
+
+  createCookie: (name, value, days) ->
+    if (days) 
+      date = new Date()
+      date.setTime(date.getTime() + (days*24*60*60*1000))
+      expires = "; expires=" + date.toGMTString()
+    else
+      expires = ""
+    document.cookie = name + "=" + value + expires + "; path=/"
+
+  readCookie: (name) ->
+    nameEQ = name + "="
+    for c in document.cookie.split(';')
+      while c.charAt(0) == ' '
+        c = c.substring(1, c.length)
+      if c.indexOf(nameEQ) == 0
+        return c.substring(nameEQ.length, c.length)
+    return null
+
+  eraseCookie: (name) ->
+    createCookie(name, "", -1)

@@ -24,7 +24,7 @@ require 'digest/sha2'
 # |                           |                                                                           |
 # |:--------------------------|:--------------------------------------------------------------------------|
 # | `locale_glossary_entries` | Locale specific glossary entries that are translatiosn of the source copy |
-#
+# 
 # Properties
 # ==========
 #
@@ -43,7 +43,7 @@ require 'digest/sha2'
 
 class SourceGlossaryEntry < ActiveRecord::Base
   has_many :locale_glossary_entries, :dependent => :delete_all, inverse_of: :source_glossary_entry
-  ## TODO: Add due date.  Does it actually need DUE Date?
+
   include HasMetadataColumn
   has_metadata_column(
       source_copy: {allow_nil: false},
@@ -53,7 +53,7 @@ class SourceGlossaryEntry < ActiveRecord::Base
   )
 
   extend SetNilIfBlank
-  set_nil_if_blank :context, :notes
+  set_nil_if_blank :context, :notes, :due_date
 
   extend PrefixField
   prefix_field :source_copy
@@ -75,4 +75,11 @@ class SourceGlossaryEntry < ActiveRecord::Base
 
   extend SearchableField
   searchable_field :source_copy, language_from: :source_locale
+
+  before_validation :default_locale
+
+  def default_locale
+    self.source_rfc5646_locale ||= 'en'
+  end
+
 end

@@ -42,9 +42,9 @@ module Views
 
           form_for @locale_entry, url: glossary_source_locale_url(@source_entry, @locale_entry), html: {} do |f|
             div class: 'control-group' do
-              label 'English', class: 'control-label', for: 'inputEnglish'
+              label @locale_entry.locale.name, class: 'control-label'
               div class: 'controls' do
-                f.text_field :copy, placeholder: 'English', autocomplete: 'off', value: @locale_entry.copy
+                f.text_field :copy, id: 'locale-copy', placeholder: 'English', autocomplete: 'off', value: @locale_entry.copy
               end
             end
 
@@ -66,6 +66,15 @@ module Views
           end
 
           dl do
+            if @locale_entry.translator
+              dt "Translator"
+              dd @locale_entry.translator.name
+            end
+            if @locale_entry.reviewer
+              dt "Reviewer"
+              dd @locale_entry.reviewer.name
+            end
+
             dt "Created at:"
             dd @locale_entry.created_at
             dt "Last updated at:"
@@ -76,13 +85,35 @@ module Views
         def information_side
           h3 @source_entry.source_locale.name
 
-          pre @source_entry.source_copy, class: 'well', id: 'source-copy'
-          p { a "Copy to #{@locale_entry.locale.name}", href: '#', id: 'copy-button', class: 'btn btn-small' }
+          div class: 'control-group', style: 'height: 40px' do
+            label @source_entry.source_locale.name, class: 'control-label'
+            div class: 'controls' do
+              div class: 'input-append input-block-level' do
+                input type: 'text', disabled: 'disabled', value: @source_entry.source_copy
+                a "Copy to #{@locale_entry.locale.name}", id: 'copy-source-button', class: 'btn add-on'
+              end
+            end
+          end
 
-          pre @source_entry.context, class: 'well'
-          pre @source_entry.notes, class: 'well'
+          div class: 'control-group' do
+            label 'Context', class: 'control-label'
+            div class: 'controls' do
+              input type: 'text', disabled: 'disabled', value: @source_entry.context
+            end
+          end
+          
+          div class: 'control-group' do
+            label 'Notes', class: 'control-label'
+            div class: 'controls' do
+              textarea @source_entry.notes, disabled: 'disabled'
+            end
+          end
 
           dl do
+            if @source_entry.due_date
+              dt "Due at:"
+              dd @source_entry.due_date
+            end
             dt "Created at:"
             dd @source_entry.created_at
             dt "Last updated at:"

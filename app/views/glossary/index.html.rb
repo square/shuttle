@@ -26,10 +26,10 @@ module Views
           #### Header Content ####
           page_header do
             h1 "Glossary", style: 'display: inline;'
-            button class: 'btn page-header-btn', :'data-target'=>'#settings-modal', :'data-toggle'=>'modal' do
+            button id: 'settings-btn', class: 'btn page-header-btn', disabled: 'disabled', :'data-target'=>'#settings-modal', :'data-toggle'=>'modal' do
               i class: 'icon-cog'
             end
-            button "Add New Term", id: 'add-new-term', class: "btn btn-success page-header-btn", :'data-target'=>'#add-entry-modal', :'data-toggle'=>'modal'
+            button "Add New Term", id: 'add-new-term-btn', class: "btn btn-success page-header-btn", :'data-target'=>'#add-entry-modal', :'data-toggle'=>'modal'
           end
           ########################
 
@@ -68,7 +68,7 @@ module Views
               label 'Add Locale', class: 'control-label', for: 'settings-inputTarget'
               div class: 'controls' do
                 input type: 'text', id: 'settings-inputTarget', class: 'typeahead', 
-                  autocomplete: 'off', placeholder: 'Target Language', disabled: 'disabled'
+                  autocomplete: 'off', placeholder: 'Target Language'
                 p ' • Press Enter to add a new locale', class: 'help-block'
               end
             end
@@ -85,15 +85,14 @@ module Views
           end
           div class: 'modal-footer' do
             a 'Cancel', href: '#', class: 'btn', :'data-dismiss' => 'modal'
-            button 'Save', class: 'btn btn-primary', id: 'settings-submit', disabled: 'disabled'
+            button 'Save', class: 'btn btn-primary', id: 'settings-submit'
           end
         end
         ########################
 
         #### Add Term Modal ####
-        div id: 'add-entry-modal', class: 'modal hide fade', tabindex: '-1', role: 'dialog', :'aria-labelledby' => 'myModalLabel', :'aria-hidden' => 'true' do
-          # form_for (SourceGlossaryEntry.new), class: 'form-horizontal', style: 'margin-bottom: 0px;' do |f|
-          form id: 'add-entry-form', class: 'form-horizontal', style: 'margin-bottom: 0px' do
+        div id: 'add-entry-modal', class: 'glossary-modal modal hide fade', tabindex: '-1', role: 'dialog', :'aria-labelledby' => 'myModalLabel', :'aria-hidden' => 'true' do
+          form_for (SourceGlossaryEntry.new), url: glossary_sources_url, class: 'form-horizontal', style: 'margin: 0px;' do |f|
             div class: 'modal-header' do
               button "×", type: 'button', class: 'close', :'data-dismiss' => 'modal', :'aria-hidden'=>'true'
               h3 "Add New Term"
@@ -102,37 +101,37 @@ module Views
             div class: 'modal-body' do
 
               div class: 'control-group' do
-                label 'English', class: 'control-label', for: 'inputEnglish'
+                label 'English', class: 'control-label'
                 div class: 'controls' do
-                  input type: 'text', id: 'add-entry-inputEnglish', placeholder: 'English', autocomplete: 'off', required: 'true'
+                  f.text_field :source_copy, placeholder: 'English', autocomplete: 'off', required: 'true'
                 end
               end
 
               div class: 'control-group' do
-                label 'Context', class: 'control-label', for: 'inputContext'
+                label 'Context', class: 'control-label'
                 div class: 'controls' do
-                  input type: 'text', id: 'add-entry-inputContext', placeholder: 'Context', autocomplete: 'off'
+                  f.text_field :context, placeholder: 'Context', autocomplete: 'off'
                 end
               end
 
               div class: 'control-group' do
-                label 'Notes', class: 'control-label', for: 'textAreaNotes'
+                label 'Notes', class: 'control-label'
                 div class: 'controls' do
-                  textarea rows: "3", id: 'add-entry-textAreaNotes', placeholder: 'Notes', autocomplete: 'off'
+                  f.text_area :notes, rows: "3", placeholder: 'Notes', autocomplete: 'off'
                 end
               end
 
               div class: 'control-group' do
-                label 'Due Date', class: 'control-label', for: 'inputDueDate'
+                label 'Due Date', class: 'control-label'
                 div class: 'controls' do
-                  input type: 'text', id: 'add-entry-inputDueDate', autocomplete: 'off'
+                  f.text_field :due_date, id: 'add-entry-inputDueDate', autocomplete: 'off'
                 end
               end
             end
 
             div class: 'modal-footer' do
               a 'Cancel', href: '#', class: 'btn', :'data-dismiss' => 'modal'
-              input type: 'submit', value: 'Submit', class: 'btn btn-primary'
+              f.submit "Submit", class: 'btn btn-primary'
             end
           end 
         end
