@@ -14,6 +14,12 @@ en:
           attributes:
             source_copy_sha_raw:
               taken: is a duplicate of another translation unit — you may delete this translation unit
+        locale_glossary_entry:
+          attributes:
+            locale:
+              cant_equal_source_locale: "Can't set locale equal to source locale."
+            unpermitted_user:
+              illegal_change: "Translators can't change a translation that has been approved."
     attributes:
       project:
         name: name
@@ -139,7 +145,7 @@ en:
         deleted: Commit %{sha} has been removed.
       create:
         success: "Your commit %{revision} has been received and is being processed."
-    locale:
+    locale:        
       projects:
         locale_access_required: You don't have permission to access that locale.
     projects:

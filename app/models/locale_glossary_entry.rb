@@ -75,12 +75,22 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   searchable_field :copy, language_from: :locale
 
   before_save :check_not_source_locale
+  before_save :translator_cant_change_approved
   before_update :reset_reviewed
 
   # Checks to ensure that the targeted locale is not the same as the source
   def check_not_source_locale
-    if self.rfc5646_locale == self.source_glossary_entry.source_rfc5646_locale 
-      errors.add(:base, "Can't set locale equal to source locale.")
+    if rfc5646_locale == source_glossary_entry.source_rfc5646_locale 
+      errors.add(:locale, :cant_equal_source_locale)
+      return false
+    end 
+    return true
+  end 
+
+  # Checks to ensure that a translator can't modify an approved entry.
+  def translator_cant_change_approved
+    if approved and !translator.reviewer?
+      errors.add(:unpermitted_user, :illegal_change)
       return false
     end 
     return true
@@ -89,17 +99,20 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   # Resets the reviewer and approval status if the copy is ever changed. 
   def reset_reviewed
     if copy_changed? && !approved_changed?
-      self.reviewer_id = nil
-      self.approved    = nil
+      if copy_change[0] != copy_change[1]
+        reviewer_id = nil
+        approved    = nil
+      end
     end
     return true
   end
 
+  # Used to convert Locale Glossary Entries into a translation json
   def as_translation_json
-    if self.copy.blank?
+    if copy.blank?
       return nil
     else 
-      return [self.source_glossary_entry.source_copy, self.copy]
+      return [source_glossary_entry.source_copy, copy]
     end
   end
 end

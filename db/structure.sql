@@ -292,7 +292,7 @@ CREATE TABLE source_glossary_entries (
     id integer NOT NULL,
     metadata text,
     searchable_source_copy tsvector,
-    source_rfc5646_locale character varying(15) NOT NULL,
+    source_rfc5646_locale character varying(15) DEFAULT 'en'::character varying NOT NULL,
     source_copy_sha_raw bytea,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,

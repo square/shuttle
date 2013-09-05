@@ -118,8 +118,7 @@
     box-sizing: border-box; }
 
 #settings-modal .help-block {
-  margin-left: 20px;
-  color: green; }
+  margin-left: 20px; }
 
 #settings-listTargets {
   height: 200px;

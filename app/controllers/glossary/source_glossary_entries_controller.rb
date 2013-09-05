@@ -17,7 +17,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   before_filter :reviewer_required, only: [:edit, :update]
   before_filter :admin_required, only: [:destroy]
 
-  before_filter :find_source_entry
+  before_filter :find_source_entry, except: [:index, :create]
 
   respond_to :json, :only => [:index, :create]
   respond_to :html
@@ -40,32 +40,8 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def index
-    returnEntries = []
-
-    SourceGlossaryEntry.all.order('source_copy_prefix ASC').each do |sGlossaryEntry| 
-      newEntry =  { 
-                    'id' => sGlossaryEntry.id,
-                    'source_copy' => sGlossaryEntry.source_copy,
-                    'source_locale' => sGlossaryEntry.source_rfc5646_locale,
-                    'context' => sGlossaryEntry.context,
-                    'notes' => sGlossaryEntry.notes,
-                    'locale_glossary_entries' => {}
-                  }
-      sGlossaryEntry.locale_glossary_entries.each do |lGlossaryEntry| 
-        newEntry['locale_glossary_entries'][lGlossaryEntry.rfc5646_locale] = { 
-          'id' => lGlossaryEntry.id,
-          'copy' => lGlossaryEntry.copy, 
-          'notes' => lGlossaryEntry.notes, 
-          'translator' => lGlossaryEntry.translator,
-          'translated' => lGlossaryEntry.translated,
-          'reviewer' => lGlossaryEntry.reviewer,
-          'approved' => lGlossaryEntry.approved
-        }
-      end
-      returnEntries << newEntry
-    end 
-
-    respond_with(returnEntries)
+    @entries = SourceGlossaryEntry.order('source_copy_prefix ASC')
+    respond_with(@entries) 
   end
 
 
@@ -152,7 +128,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # Find the requested source entry by id.
 
   def find_source_entry
-    @source_entry = SourceGlossaryEntry.find_by_id(params[:id])
+    @source_entry = SourceGlossaryEntry.find params[:id]
   end
 
   def entry_params

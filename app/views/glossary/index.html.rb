@@ -69,7 +69,9 @@ module Views
               div class: 'controls' do
                 input type: 'text', id: 'settings-inputTarget', class: 'typeahead', 
                   autocomplete: 'off', placeholder: 'Target Language'
-                p ' • Press Enter to add a new locale', class: 'help-block'
+                p class: 'help-block' do 
+                  span ' • Press Enter to add a new locale', class: 'text-success'
+                end 
               end
             end
 

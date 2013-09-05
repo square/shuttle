@@ -16,7 +16,6 @@
 
 class GlossaryController < ApplicationController
   before_filter :authenticate_user!
-  ## TODO: Ask what this does?
   # before_filter :translator_required, only: [:translators, :glossary]
   # before_filter :reviewer_required, only: :reviewers
 

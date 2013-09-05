@@ -76,9 +76,11 @@ class root.GlossaryList
 
   setupSettingsFormModal: =>
     flashSettingsWarning = (warning) -> 
-      $('#settings-modal .help-block').fadeOut () -> 
-        $('#settings-modal .help-block').text(warning).css('color', 'red').fadeIn().delay(800).fadeOut () -> 
-          $('#settings-modal .help-block').text(' • Press Enter to add a new locale').css('color', 'green').fadeIn()
+      $('#settings-modal .help-block span').fadeOut () -> 
+        $('#settings-modal .help-block span').text(warning)
+          .removeClass('text-success').addClass('text-error').fadeIn().delay(800).fadeOut () -> 
+            $('#settings-modal .help-block span').text(' • Press Enter to add a new locale')
+              .removeClass('text-error').addClass('text-success').fadeIn()
 
     localesDict = {}
 
@@ -237,7 +239,6 @@ class root.GlossaryList
                   dataType: "json"
                   data: 
                     locale_glossary_entry:
-                      source_glossary_entry_id: sourceID
                       rfc5646_locale: locale
                   success: (newEntry) =>
                     window.location.href = editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", newEntry.id)

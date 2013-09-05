@@ -28,9 +28,9 @@ require 'digest/sha2'
 # Properties
 # ==========
 #
-# |                 |                                                    |
-# |:----------------|:---------------------------------------------------|
-# | `source_locale` | The locale the copy is translated from.            |
+# |                 |                                                          |
+# |:----------------|:---------------------------------------------------------|
+# | `source_locale` | The locale the copy that needs to be translated is from. |
 #
 # Metadata
 # ========
@@ -40,6 +40,7 @@ require 'digest/sha2'
 # | `source_copy` | The copy for the string.                                                |
 # | `context`     | A human-readable explanation of the context in which the copy is used.  |
 # | `notes`       | A human-readable explanation of any additional notes for translators.   |
+# | `due_date`    | The expected date when a glossary entry is due to be translated.        |
 
 class SourceGlossaryEntry < ActiveRecord::Base
   has_many :locale_glossary_entries, :dependent => :delete_all, inverse_of: :source_glossary_entry
@@ -75,11 +76,12 @@ class SourceGlossaryEntry < ActiveRecord::Base
 
   extend SearchableField
   searchable_field :source_copy, language_from: :source_locale
-
-  before_validation :default_locale
-
-  def default_locale
-    self.source_rfc5646_locale ||= 'en'
+  
+  def as_json(*)
+    super.merge(locale_glossary_entries: locale_glossary_entries.inject({}) do |memo, cur|
+      memo[cur.rfc5646_locale] = cur.as_json
+      memo
+    end)
   end
 
 end

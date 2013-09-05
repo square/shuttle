@@ -20,7 +20,7 @@ class CreateSourceGlossaryEntries < ActiveRecord::Migration
           id SERIAL PRIMARY KEY,
           metadata text,
           searchable_source_copy tsvector,
-          source_rfc5646_locale character varying(15) NOT NULL,
+          source_rfc5646_locale character varying(15) NOT NULL DEFAULT 'en',
           source_copy_sha_raw bytea,
           created_at timestamp without time zone,
           updated_at timestamp without time zone,

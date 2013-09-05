@@ -43,21 +43,21 @@ module Views
             div class: 'control-group' do
               label 'English', class: 'control-label', for: 'inputEnglish'
               div class: 'controls' do
-                f.text_field :source_copy, placeholder: 'English', autocomplete: 'off', required: 'true', value: @source_entry.source_copy
+                f.text_field :source_copy, placeholder: 'English', autocomplete: 'off', required: 'true'
               end
             end
 
             div class: 'control-group' do
               label 'Context', class: 'control-label'
               div class: 'controls' do
-                f.text_field :context, placeholder: 'Context', autocomplete: 'off', value: @source_entry.context
+                f.text_field :context, placeholder: 'Context', autocomplete: 'off'
               end
             end
 
             div class: 'control-group' do
               label 'Notes', class: 'control-label'
               div class: 'controls' do
-                f.text_area :notes, placeholder: 'Notes', autocomplete: 'off', value: @source_entry.notes
+                f.text_area :notes, placeholder: 'Notes', autocomplete: 'off'
               end
             end
 
@@ -67,14 +67,14 @@ module Views
           #   end
 
             div class: 'controls', style: 'height: 40px;' do
-              f.submit "Update Entry", class: 'btn btn-primary', style: 'float: right; width: 200px;'
+              f.submit "Update Entry", id: 'btn-update-entry', class: 'btn btn-primary'
             end
 
             # TODO: Add a modal in the future to CONFIRM destroy.
             if current_user.try!(:admin?)
               div class: 'controls', style: 'height: 40px;' do
                 # TODO: LOOK AT LATER.
-              link_to "Destroy Entry", glossary_source_url(@source_entry), :method => :delete, class: 'btn btn-danger', style: 'float: right; width: 200px;'
+              link_to "Destroy Entry", glossary_source_url(@source_entry), :method => :delete, id: 'btn-destroy-entry', class: 'btn btn-danger'
               end  
             end
             

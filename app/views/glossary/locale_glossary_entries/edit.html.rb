@@ -40,18 +40,18 @@ module Views
         def edit_side
           h3 @locale_entry.locale.name
 
-          form_for @locale_entry, url: glossary_source_locale_url(@source_entry, @locale_entry), html: {} do |f|
+          form_for @locale_entry, url: glossary_source_locale_url(@source_entry, @locale_entry) do |f|
             div class: 'control-group' do
               label @locale_entry.locale.name, class: 'control-label'
               div class: 'controls' do
-                f.text_field :copy, id: 'locale-copy', placeholder: @locale_entry.locale.name, autocomplete: 'off', value: @locale_entry.copy
+                f.text_field :copy, id: 'locale-copy', placeholder: @locale_entry.locale.name, autocomplete: 'off'
               end
             end
 
             div class: 'control-group' do
               label 'Notes', class: 'control-label'
               div class: 'controls' do
-                f.text_area :notes, placeholder: 'Notes', autocomplete: 'off', value: @locale_entry.notes
+                f.text_area :notes, placeholder: 'Notes', autocomplete: 'off'
               end
             end
 
@@ -61,7 +61,7 @@ module Views
           #   end
 
             div class: 'controls', style: 'height: 40px;' do
-              f.submit class: 'btn btn-primary', style: 'float: right;'
+              f.submit id: 'btn-update-entry', class: 'btn btn-primary'
             end
           end
 

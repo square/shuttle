@@ -48,3 +48,13 @@
   }
 }
 
+#btn-update-entry {
+  float: right; 
+  width: 200px;
+}
+
+#btn-destroy-entry {
+  float: right; 
+  width: 200px;
+  @include border-box; 
+}
