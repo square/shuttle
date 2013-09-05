@@ -77,10 +77,10 @@ class PseudoTranslator
   # Specifics
 
   def short_words
-    @short_words ||= Faker::Base.translate('faker.lorem.words', locale: @locale).select{ |w| w.length <= 5 }
+    @short_words ||= Faker::Base.translate('faker.lorem.words', locale: @locale.rfc5646).select{ |w| w.length <= 5 }
   end
   def long_words
-    @long_words ||= Faker::Base.translate('faker.lorem.words', locale: @locale).select{ |w| w.length > 6 }
+    @long_words ||= Faker::Base.translate('faker.lorem.words', locale: @locale.rfc5646).select{ |w| w.length > 6 }
   end
 
   def pseudo_short_word
