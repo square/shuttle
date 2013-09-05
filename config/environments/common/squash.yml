@@ -10,4 +10,5 @@ ignored_exception_messages:
   NoMethodError:
   - !ruby/regexp '/undefined method `.+?'' for #<Sidekiq::Shutdown.+?>/'
 disabled: true
-api_key: fa0509c3-9af0-4002-a47c-b37543c72d15
+api_host: "https://squash.corp.squareup.com"
+api_key: 2b4eea87-a79c-4b1e-87b1-f7cca7cd0cfd

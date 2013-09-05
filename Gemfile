@@ -85,7 +85,6 @@ end
 
 # SQUARE
 gem 'squash_ruby', require: 'squash/ruby'
-gem 'squash_logcreate', git: 'https://git.squareup.com/square/squash_logcreate.git'
 gem 'squash_rails', require: 'squash/rails'
 gem 'newrelic_rpm'
 group :development do

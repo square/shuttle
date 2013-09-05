@@ -18,13 +18,6 @@ GIT
   specs:
     git (1.2.6)
 
-GIT
-  remote: https://git.squareup.com/square/squash_logcreate.git
-  revision: bbaba80e27d9174f9635d955bafb6d720cb94139
-  specs:
-    squash_logcreate (1.0.0)
-      squash_ruby
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -307,7 +300,6 @@ DEPENDENCIES
   slugalicious
   sprockets-rails
   sql_origin
-  squash_logcreate!
   squash_rails
   squash_ruby
   therubyracer
