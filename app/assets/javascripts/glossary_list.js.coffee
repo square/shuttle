@@ -206,15 +206,15 @@ class root.GlossaryList
                 if sourceEntry.locale_glossary_entries[localeEntry.rfc].translated
                   approved = sourceEntry.locale_glossary_entries[localeEntry.rfc].approved
                   if approved == true
-                    localeContext.entry_state = "approved"
+                    localeContext.entry_state = "text-success"
                     localeContext.approved = true
                     localeContext.rejected = false
                   else if approved == false
-                    localeContext.entry_state = "rejected"
+                    localeContext.entry_state = "text-error"
                     localeContext.approved = false
                     localeContext.rejected = true
                   else 
-                    localeContext.entry_state = "translated"
+                    localeContext.entry_state = "text-info"
                     localeContext.approved = false
                     localeContext.rejected = false
               context.translated_copies.push(localeContext)
@@ -253,7 +253,7 @@ class root.GlossaryList
                   type: "PATCH"
                   success: () ->
                     $(domLocaleEntry).parents(".glossary-table-entry").find("." + locale + "-copy")
-                      .hide().removeClass("translated rejected").addClass("approved").fadeIn(500)
+                      .hide().removeClass("text-info text-error").addClass("text-success").fadeIn(500)
               else 
                 $.ajax addLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID),
                   type: "POST"
@@ -276,7 +276,7 @@ class root.GlossaryList
                   type: "PATCH"
                   success: () ->
                     $(domLocaleEntry).parents(".glossary-table-entry").find("." + locale + "-copy")
-                      .hide().removeClass("translated approved").addClass("rejected").fadeIn(500)
+                      .hide().removeClass("text-info text-success").addClass("text-error").fadeIn(500)
               else 
                 $.ajax addLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID),
                   type: "POST"

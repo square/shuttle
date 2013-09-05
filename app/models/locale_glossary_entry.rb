@@ -95,4 +95,11 @@ class LocaleGlossaryEntry < ActiveRecord::Base
     return true
   end
 
+  def as_translation_json
+    if self.copy.blank?
+      return nil
+    else 
+      return [self.source_glossary_entry.source_copy, self.copy]
+    end
+  end
 end

@@ -359,7 +359,6 @@ class TranslationItem
     return fenced_p
 
   renderGlossaryTooltip: ->
-    console.log(@parent.glossary)
     glossaryTips = []
     for term in @parent.glossary
       if @element.find('.fenced-copy').text().toLowerCase().search(term[0].toLowerCase()) > -1

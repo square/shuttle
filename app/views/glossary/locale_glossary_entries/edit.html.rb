@@ -44,7 +44,7 @@ module Views
             div class: 'control-group' do
               label @locale_entry.locale.name, class: 'control-label'
               div class: 'controls' do
-                f.text_field :copy, id: 'locale-copy', placeholder: 'English', autocomplete: 'off', value: @locale_entry.copy
+                f.text_field :copy, id: 'locale-copy', placeholder: @locale_entry.locale.name, autocomplete: 'off', value: @locale_entry.copy
               end
             end
 

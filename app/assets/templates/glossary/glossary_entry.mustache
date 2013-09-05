@@ -3,7 +3,13 @@
     <td></td>
     <td><b>{{source_copy}}</b></td>
     {{#translated_copies}}
-    <td><b class="{{locale}}-copy {{entry_state}}">{{copy}}</b></td>
+    <td>
+      <span class="{{locale}}-copy {{entry_state}}">
+        {{#approved}} <b> {{/approved}}
+          {{copy}}
+        {{#approved}} </b> {{/approved}}
+      </span>
+    </td>
     {{/translated_copies}}
   </tr>
   <tr>
