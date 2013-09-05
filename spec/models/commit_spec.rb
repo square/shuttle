@@ -116,12 +116,49 @@ describe Commit do
         @commit = FactoryGirl.create(:commit, ready: false, user: FactoryGirl.create(:user))
         ActionMailer::Base.deliveries.clear
         @commit.ready = true
+
+        @commit.project.key_inclusions.push("inc_key_1", "inc_key_2")
+        @commit.project.key_exclusions.push("exc_key_1", "exc_key_2", "exc_key_3")
+        
+        @commit.project.key_locale_inclusions = {"fr" => ["fr_exc_key_1", "fr_exc_key_2", "fr_exc_key_3"], "aa" => ["aa_exc_key_1", "aa_exc_key_2"]}
+        @commit.project.key_locale_exclusions = {"ja" => ["ja_inc_key_1", "ja_inc_key_2", "ja_inc_key_3"]}
+
+        @commit.project.only_paths.push("only_path_1", "only_path_2", "only_path_1")
+        @commit.project.skip_paths.push("skip_path_1", "skip_path_2")
+        
+        @commit.project.skip_importer_paths = {"Android XML" => ["an_skip_key_1", "an_skip_key_2", "an_skip_key_3"]}
+        @commit.project.only_importer_paths = {"Ember.js" => ["em_only_key_1", "em_only_key_2", "em_only_key_3"], "ERb File" => ["erb_only_key_1", "erb_only_key_2"]}
+        
         @commit.save!
         ActionMailer::Base.deliveries.size.should eql(1)
         email = ActionMailer::Base.deliveries.first
         email.to.should eql([@commit.user.email])
         email.subject.should eql('[Shuttle] Finished translation of commit')
         email.body.to_s.should include(@commit.revision.to_s)
+
+        @commit.project.key_inclusions.each {|key| email.body.to_s.should include(key)}
+        @commit.project.key_exclusions.each {|key| email.body.to_s.should include(key)}
+
+        @commit.project.key_locale_inclusions.each_key do |locale|
+          email.body.to_s.should include(locale + ":")
+          @commit.project.key_locale_inclusions[locale].each {|key| email.body.to_s.should include(key)}
+        end
+        @commit.project.key_locale_exclusions.each_key do |locale|
+          email.body.to_s.should include(locale + ":")
+          @commit.project.key_locale_exclusions[locale].each {|key| email.body.to_s.should include(key)}
+        end
+
+        @commit.project.only_paths.each {|key| email.body.to_s.should include(key)}
+        @commit.project.skip_paths.each {|key| email.body.to_s.should include(key)}
+
+        @commit.project.skip_importer_paths.each_key do |path|
+          email.body.to_s.should include(path + ":")
+          @commit.project.skip_importer_paths[path].each {|key| email.body.to_s.should include(key)}
+        end
+        @commit.project.only_importer_paths.each_key do |path|
+          email.body.to_s.should include(path + ":")
+          @commit.project.only_importer_paths[path].each {|key| email.body.to_s.should include(key)}
+        end
       end
 
       it "should not send an email when ready changes to true from false if the commit has no user or the user has no email" do

@@ -13,5 +13,6 @@
  *= require bootstrap_and_overrides
  *
  *= require locale_field
+ *= require worker_status
  *= require_tree .
 */

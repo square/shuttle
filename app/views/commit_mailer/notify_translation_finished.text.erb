@@ -1,6 +1,57 @@
 Translation of commit <%= @commit.revision[0,6] %> on <%= @commit.project.name %> is finished on Shuttle!
 
 SHA: <%= @commit.revision %>
+<% if not @commit.project.key_inclusions.empty? %>
 
+Only translate keys containing these substrings:
+<%= @commit.project.key_inclusions.join("\n").indent(2)%>
+<% end %>
+<% if not @commit.project.key_exclusions.empty? %>
+
+Don't translate keys containing these substrings:
+<%= @commit.project.key_exclusions.join("\n").indent(2)%>
+<% end %>
+<% if not @commit.project.key_locale_inclusions.empty? %>
+
+Only translate keys containing these substrings to these locales:
+<% @commit.project.key_locale_inclusions.each_key do |locale| %>
+<%= locale.indent(2) %>:
+<%= @commit.project.key_locale_inclusions[locale].join("\n").indent(4) %>
+<% end %>
+<% end %>
+<% if not @commit.project.key_locale_exclusions.empty? %>
+
+Don’t translate keys containing these substrings to these locales:
+<% @commit.project.key_locale_exclusions.each_key do |locale| %>
+<%= locale.indent(2) %>:
+<%= @commit.project.key_locale_exclusions[locale].join("\n").indent(4) %>
+<% end %>
+<% end %>
+<% if not @commit.project.only_paths.empty? %>
+
+Only search for strings under these paths:
+<%= @commit.project.only_paths.join("\n").indent(2)%>
+<% end %>
+<% if not @commit.project.skip_paths.empty? %>
+
+Don’t search for strings under these paths:
+<%= @commit.project.skip_paths.join("\n").indent(2)%>
+<% end %>
+<% if not @commit.project.skip_importer_paths.empty? %>
+
+Only search for strings under these paths using these importers:
+<% @commit.project.skip_importer_paths.each_key do |importer| %>
+<%= importer.indent(2) %>:
+<%= @commit.project.skip_importer_paths[importer].join("\n").indent(4) %>
+<% end %>
+<% end %>
+<% if not @commit.project.only_importer_paths.empty? %>
+
+Don’t search for strings under these paths using these importers:
+<% @commit.project.only_importer_paths.each_key do |importer| %>
+<%= importer.indent(2) %>:
+<%= @commit.project.only_importer_paths[importer].join("\n").indent(4) %>
+<% end %>
+<% end %>
 Sincerely,
 The Shuttle Automated Mailer
