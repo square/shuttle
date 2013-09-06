@@ -19,33 +19,10 @@ $('#alphabet-bar').affix(
 
 $(document).ready () ->
   # Default source/target locales
-  sourceLocale = {
-      flagUrl: "/assets/country-flags/en.png"
-      locale: "English"
-      rfc: "en"
-    }
-  targetLocales = [
-    {
-      flagUrl: "/assets/country-flags/fr.png"
-      locale: "French"
-      rfc: "fr"
-    },
-    {
-      flagUrl: "/assets/country-flags/jp.png"
-      locale: "Japanese"
-      rfc: "ja"
-    },
-    {
-      flagUrl: "/assets/country-flags/es.png"
-      locale: "Spanish"
-      rfc: "es"
-    },
-    {
-      flagUrl: "/assets/country-flags/de.png"
-      locale: "German"
-      rfc: "de"
-    },
-  ]
+  sourceLocale = JSON.parse("<%= escape_javascript @source_locale.to_json %>")
+  targetLocales = JSON.parse("<%= escape_javascript @target_locales.to_json %>")
+  
+  # Create a new glossary entry list
   new GlossaryList(
     $('#glossary-table'), "<%= glossary_sources_url %>", 
     "<%= remote_locales_url %>", sourceLocale, targetLocales,

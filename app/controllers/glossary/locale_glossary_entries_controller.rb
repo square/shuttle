@@ -21,58 +21,62 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
   before_filter :find_locale_entry, except: [:create]
   respond_to :json, :html
 
-  # Marks a commit as needing localization. Creates a CommitCreator job to do the
-  # heavy lifting of importing strings.
+  # Creates a new locale glossary entry for the source glossary entry in the 
+  # specified locale.  Note that a copy and notes are optional for the new 
+  # locale glossary entry.
   #
   # Routes
   # ------
   #
-  # * `POST /projects/:project_id/commits`
+  # * `POST /glossary/sources/:source_id/locales`
   #
   # Path Parameters
   # ---------------
   #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
+  # |             |                                                      |
+  # |:------------|:-----------------------------------------------------|
+  # | `source_id` | The id of the source entry that is being translated. |
   #
   # Body Parameters
   # ---------------
   #
-  # |          |                                                            |
-  # |:---------|:-----------------------------------------------------------|
-  # | `commit` | Parameterized hash of Commit fields, including `revision`. |
+  # |                  |                                                        |
+  # |:-----------------|:-------------------------------------------------------|
+  # | `copy`           | The localized translation of the source copy.          |
+  # | `notes`          | Any additional information regarding the translation.  |
+  # | `rfc5646_locale` | The locale that the source copy is being translated to |
+
 
   def create
-    @locale_entry = @source_entry.locale_glossary_entries.create(entry_params)
-    
+    @locale_entry = @source_entry.locale_glossary_entries.create(create_params)
     respond_with @locale_entry, location: glossary_source_locales_url
   end
 
-  # Updates Commit metadata.
+  # Updates a locale glossary entry. 
   #
   # Routes
   # ------
   #
-  # * `PATCH /projects/:project_id/commits/:commit_id`
+  # * `PATCH /glossary/sources/:source_id/locales/:id`
   #
   # Path Parameters
   # ---------------
   #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `commit_id`  | The SHA of a Commit.   |
+  # |             |                                                            |
+  # |:------------|:-----------------------------------------------------------|
+  # | `source_id` | The id of the source entry of the locale glossary entry.   |
+  # | `id`        | The id of the locale glossary entry that is being updated. |
   #
   # Body Parameters
   # ---------------
   #
-  # |          |                                      |
-  # |:---------|:-------------------------------------|
-  # | `commit` | Parameterized hash of Commit fields. |
+  # |         |                                                       |
+  # |:--------|:------------------------------------------------------|
+  # | `copy`  | The localized translation of the source copy.         |
+  # | `notes` | Any additional information regarding the translation. |
 
   def update
-    @locale_entry.assign_attributes(entry_params)
+    @locale_entry.assign_attributes(update_params)
 
     @locale_entry.translated = true
     @locale_entry.translator = current_user
@@ -81,42 +85,42 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     respond_with @locale_entry, location: glossary_url
   end
 
-  # Removes a Commit.
+  # Displays a large-format glossary entry edit page which contains a reference to 
+  # its respective source glossary entry's data.
   #
   # Routes
   # ------
   #
-  # * `DELETE /projects/:project_id/commits/:id`
+  # * `GET /glossary/sources/:source_id/locales/:id/edit`
   #
   # Path Parameters
   # ---------------
   #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `id`         | The SHA of a Commit.   |
+  # |             |                                                            |
+  # |:------------|:-----------------------------------------------------------|
+  # | `source_id` | The id of the source entry of the locale glossary entry.   |
+  # | `id`        | The id of the locale glossary entry that is being editted. |
 
   def edit 
     respond_with @source_entry, @locale_entry
   end 
 
 
-  # Marks a Translation as approved and records the reviewer as the current
+  # Marks a locale glossary entry as approved and records the reviewer as the current
   # User.
   #
   # Routes
   # ------
   #
-  # * `PUT /projects/:project_id/keys/:key_id/translations/:id/approve`
+  # * `PATCH /glossary/sources/:source_id/locales/:id/approve`
   #
   # Path Parameters
   # ---------------
   #
-  # |              |                                    |
-  # |:-------------|:-----------------------------------|
-  # | `project_id` | The slug of a Project.             |
-  # | `key_id`     | The Slug of a Key in that project. |
-  # | `id`         | The ID of a Translation.           |
+  # |             |                                                             |
+  # |:------------|:------------------------------------------------------------|
+  # | `source_id` | The id of the source entry of the locale glossary entry.    |
+  # | `id`        | The id of the locale glossary entry that is being approved. |
 
   def approve
     @locale_entry.approved = true
@@ -126,22 +130,21 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     respond_with @locale_entry, location: glossary_source_locales_url
   end
 
-  # Marks a Translation as rejected and records the reviewer as the current
+  # Marks a locale glossary entry as rejected and records the reviewer as the current
   # User.
   #
   # Routes
   # ------
   #
-  # * `PUT /projects/:project_id/keys/:key_id/translations/:id/reject`
+  # * `PATCH /glossary/sources/:source_id/locales/:id/reject`
   #
   # Path Parameters
   # ---------------
   #
-  # |              |                                    |
-  # |:-------------|:-----------------------------------|
-  # | `project_id` | The slug of a Project.             |
-  # | `key_id`     | The slug of a Key in that project. |
-  # | `id`         | The ID of a Translation.           |
+  # |             |                                                             |
+  # |:------------|:------------------------------------------------------------|
+  # | `source_id` | The id of the source entry of the locale glossary entry.    |
+  # | `id`        | The id of the locale glossary entry that is being rejected. |
 
   def reject
     @locale_entry.approved = false
@@ -167,8 +170,11 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     @locale_entry = LocaleGlossaryEntry.find_by_id(params[:id])
   end
 
-  def entry_params
+  def create_params
     params.require(:locale_glossary_entry).permit(:copy, :notes, :rfc5646_locale)
   end
 
+  def update_params
+    params.require(:locale_glossary_entry).permit(:copy, :notes)
+  end
 end

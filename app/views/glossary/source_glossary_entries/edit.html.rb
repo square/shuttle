@@ -32,6 +32,7 @@ module Views
               div(class: 'span6') { edit_side }
             end
           end
+          confirm_delete_modal
         end
 
         private
@@ -41,7 +42,7 @@ module Views
 
           form_for @source_entry, url: glossary_source_url(@source_entry) do |f|
             div class: 'control-group' do
-              label 'English', class: 'control-label', for: 'inputEnglish'
+              label 'English', class: 'control-label'
               div class: 'controls' do
                 f.text_field :source_copy, placeholder: 'English', autocomplete: 'off', required: 'true'
               end
@@ -61,20 +62,20 @@ module Views
               end
             end
 
-          #   label(for: 'blank_string', class: 'checkbox') do
-          #     check_box_tag 'blank_string', '1', (@translation.translated? && @translation.copy.blank? ? 'checked' : nil)
-          #     text " The translation for this copy is a blank string"
-          #   end
+            div class: 'control-group' do
+              label 'Due Date', class: 'control-label'
+              div class: 'controls' do
+                f.text_field :due_date, autocomplete: 'off', id: 'edit-entry-inputDueDate'
+              end
+            end
 
             div class: 'controls', style: 'height: 40px;' do
               f.submit "Update Entry", id: 'btn-update-entry', class: 'btn btn-primary'
             end
 
-            # TODO: Add a modal in the future to CONFIRM destroy.
             if current_user.try!(:admin?)
               div class: 'controls', style: 'height: 40px;' do
-                # TODO: LOOK AT LATER.
-              link_to "Destroy Entry", glossary_source_url(@source_entry), :method => :delete, id: 'btn-destroy-entry', class: 'btn btn-danger'
+                button "Delete Entry", id: 'btn-confirm-delete', class: "btn btn-danger", :'data-target'=>'#confirm-delete-modal', :'data-toggle'=>'modal'
               end  
             end
             
@@ -87,6 +88,24 @@ module Views
             dd @source_entry.updated_at
           end
         end
+
+        def confirm_delete_modal
+          div id: 'confirm-delete-modal', class: 'modal hide fade', tabindex: '-1', role: 'dialog', :'aria-labelledby' => 'myModalLabel', :'aria-hidden' => 'true' do
+            div class: 'modal-header' do
+              button "×", type: 'button', class: 'close', :'data-dismiss' => 'modal', :'aria-hidden'=>'true'
+              h3 "Confirm Delete"
+            end
+
+            div class: 'modal-body' do
+              p "Are you sure you want to delete this entry?"
+            end
+
+            div class: 'modal-footer' do
+              a 'Cancel', href: '#', class: 'btn', :'data-dismiss' => 'modal'
+              link_to "Delete Entry", glossary_source_url(@source_entry), :method => :delete, id: 'btn-destroy-entry', class: 'btn btn-danger'
+            end
+          end 
+        end 
 
         def active_tab() 'glossary' 
         end

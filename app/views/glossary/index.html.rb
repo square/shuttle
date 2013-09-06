@@ -19,9 +19,12 @@ require Rails.root.join('app', 'views', 'layouts', 'application.html.rb')
 module Views
   module Glossary
     class Index < Views::Layouts::Application
+      needs :source_locale, :target_locales
+
       protected
 
       def body_content
+
         article(class: 'container') do
           #### Header Content ####
           page_header do
@@ -126,7 +129,7 @@ module Views
               div class: 'control-group' do
                 label 'Due Date', class: 'control-label'
                 div class: 'controls' do
-                  f.text_field :due_date, id: 'add-entry-inputDueDate', autocomplete: 'off'
+                  f.text_field :due_date, id: 'edit-entry-inputDueDate', autocomplete: 'off'
                 end
               end
             end

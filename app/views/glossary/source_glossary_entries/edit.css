@@ -26,14 +26,7 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box; }
 
-#btn-update-entry {
+#btn-update-entry, #btn-confirm-delete {
   float: right; 
   width: 200px;
 }
-
-#btn-destroy-entry {
-  float: right; 
-  width: 200px;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box; }

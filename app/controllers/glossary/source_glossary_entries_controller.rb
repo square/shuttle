@@ -24,20 +24,12 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   
 
   # Renders JSON information about every source glossary entry and their respective
-  # locale glossary entries..
+  # locale glossary entries.
   #
   # Routes
   # ------
   #
-  # * `GET /projects/:project_id/commits/:id`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `id`         | The SHA of a Commit.   |
+  # * `GET /glossary/sources`
 
   def index
     @entries = SourceGlossaryEntry.order('source_copy_prefix ASC')
@@ -45,32 +37,43 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   end
 
 
-  # Creates a new source glossary entry.
+  # Creates a new source glossary entry. Note that the context, notes, and are optional for the new 
+  # source glossary entry.
   #
   # Routes
   # ------
   #
-  # * `POST /projects/:project_id/commits`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
+  # * `POST /glossary/sources`
   #
   # Body Parameters
   # ---------------
   #
-  # |          |                                                            |
-  # |:---------|:-----------------------------------------------------------|
-  # | `commit` | Parameterized hash of Commit fields, including `revision`. |
+  # |                         |                                                           |
+  # |:------------------------|:----------------------------------------------------------|
+  # | `source_copy`           | The text that will be translated into various locales     |
+  # | `source_rfc5646_locale` | The source locale of the entry                            |
+  # | `context`               | The context in which the copy is being used               |
+  # | `notes`                 | Any additional information regarding translation or usage |
+  # | `due_date`              | A soft due date for the translation                       |
 
   def create
-    @source_entry = SourceGlossaryEntry.create(entry_params)
-
+    @source_entry = SourceGlossaryEntry.create(create_params)
     respond_with @source_entry, :location => glossary_sources_url
   end
+
+  # Displays a large-format glossary entry edit page.
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /glossary/sources/:id/edit`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                                      |
+  # |:-----|:-------------------------------------|
+  # | `id` | The id of the source glossary entry. |
 
   def edit
     respond_with @source_entry
@@ -81,43 +84,43 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # Routes
   # ------
   #
-  # * `PATCH /projects/:project_id/commits/:commit_id`
+  # * `PATCH /glossary/sources/:id`
   #
   # Path Parameters
   # ---------------
   #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `commit_id`  | The SHA of a Commit.   |
+  # |      |                                      |
+  # |:-----|:-------------------------------------|
+  # | `id` | The id of the source glossary entry. |
   #
   # Body Parameters
   # ---------------
   #
-  # |          |                                      |
-  # |:---------|:-------------------------------------|
-  # | `commit` | Parameterized hash of Commit fields. |
+  # |               |                                                           |
+  # |:--------------|:----------------------------------------------------------|
+  # | `source_copy` | The text that will be translated into various locales     |
+  # | `context`     | The context in which the copy is being used               |
+  # | `notes`       | Any additional information regarding translation or usage |
+  # | `due_date`    | A soft due date for the translation                       |
 
   def update
-    @source_entry.update_attributes(entry_params)
-
+    @source_entry.update_attributes(update_params)
     respond_with @source_entry, :location => glossary_url
   end
 
-  # Removes a source glossary entry and all of its locale glossary entries..
+  # Removes a source glossary entry and all of its locale glossary entries.
   #
   # Routes
   # ------
   #
-  # * `DELETE /projects/:project_id/commits/:id`
+  # * `DELETE /glossary/sources/:id`
   #
   # Path Parameters
   # ---------------
   #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `id`         | The SHA of a Commit.   |
+  # |      |                                      |
+  # |:-----|:-------------------------------------|
+  # | `id` | The id of the source glossary entry. |
 
   def destroy
     respond_with @source_entry.destroy(), :location => glossary_url
@@ -131,7 +134,13 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
     @source_entry = SourceGlossaryEntry.find params[:id]
   end
 
-  def entry_params
+  def create_params
+    params.require(:source_glossary_entry).permit(:source_copy, :context, :notes, :due_date, :source_rfc5646_locale)
+  end
+
+  # The permitted fields that can be updated. 
+
+  def update_params
     params.require(:source_glossary_entry).permit(:source_copy, :context, :notes, :due_date)
   end
 

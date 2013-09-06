@@ -70,7 +70,7 @@ Shuttle::Application.routes.draw do
   get 'glossary' => 'glossary#index', as: :glossary
   namespace 'glossary' do
     resources :sources, only: [:index, :create, :edit, :update, :destroy], controller: 'source_glossary_entries' do 
-      resources :locales, only: [:create, :edit, :update, :destroy], controller: 'locale_glossary_entries' do
+      resources :locales, only: [:create, :edit, :update], controller: 'locale_glossary_entries' do
         member do
           patch :approve, :reject
         end 

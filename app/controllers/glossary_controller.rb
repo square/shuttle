@@ -16,9 +16,7 @@
 
 class GlossaryController < ApplicationController
   before_filter :authenticate_user!
-  # before_filter :translator_required, only: [:translators, :glossary]
-  # before_filter :reviewer_required, only: :reviewers
-
+  
   # Renders the list of glossary entries that enable translator and reviewers
   # to look over, edit, and approve copy translations.
   #
@@ -26,7 +24,19 @@ class GlossaryController < ApplicationController
   # ------
   #
   # * `GET /glossary`
-  def index
-  end
   
+  def index
+    @source_locale = convert_locale(Locale.new(Shuttle::Configuration.locales.source_locale))
+    @target_locales = Project.all.map(&:targeted_locales).flatten.uniq.map {|locale| convert_locale(locale)}
+    @target_locales.delete(@source_locale)
+  end
+
+  private 
+
+  # Converts a locale object to a form readable for the glossary list
+
+  def convert_locale(locale)
+    {rfc: locale.rfc5646, locale: locale.name, flagUrl: nil}
+  end 
+
 end
