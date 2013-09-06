@@ -55,11 +55,6 @@ module Views
               end
             end
 
-          #   label(for: 'blank_string', class: 'checkbox') do
-          #     check_box_tag 'blank_string', '1', (@translation.translated? && @translation.copy.blank? ? 'checked' : nil)
-          #     text " The translation for this copy is a blank string"
-          #   end
-
             div class: 'controls', style: 'height: 40px;' do
               f.submit id: 'btn-update-entry', class: 'btn btn-primary'
             end
