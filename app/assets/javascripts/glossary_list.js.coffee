@@ -15,8 +15,30 @@
 root = exports ? this
 
 class root.GlossaryList
-  currentLocale: 'en'
-  # TODO: @availableLocalesOrAdmin, @updateEntryUrl
+
+  # Constructor method for the Glossary List 
+  # 
+  # Parameters
+  # ----------
+  # 
+  # |                         |                                                             |
+  # |:------------------------|:------------------------------------------------------------|
+  # | `glossaryTable`         | Div that contains the glossary table                        |
+  # | `glossaryUrl`           | URL to retrieve all source glossary entries                 |
+  # | `localesUrl`            | URL to retrieve all locales                                 |
+  # | `sourceLocale`          | The initial source locale                                   |
+  # | `targetLocales`         | The initial target locales                                  |
+  # | `addSourceEntryUrl`     | URL to add a new source entry                               |
+  # | `addLocaleentryUrl`     | URL to add a new locale entry                               |
+  # | `editSourceEntryUrl`    | URL to update an existing source entry                      |
+  # | `editLocaleEntryUrl`    | URL to update an existing locale entry                      |
+  # | `approveLocaleEntryUrl` | URL to approve an existing locale entry                     |
+  # | `rejectLocaleEntryUrl`  | URL to reject an existing locale entry                      |
+  # | `settingsModal`         | Div that contains the modal to modify settings              |
+  # | `addEntryModal`         | Div that contains the modal to add a new entry              |
+  # | `userRole`              | The current user's role (monitor/translator/reviewer/admin) |
+  # | `approvedLocales`       | The current user's approved locales to modify               |
+
   constructor: (
       @glossaryTable, @glossaryUrl, 
       @localesUrl, @sourceLocale, @targetLocales, 
@@ -35,9 +57,20 @@ class root.GlossaryList
     this.setupSettingsFormModal()
     this.loadGlossaryEntries()
 
+  # Flashes an error at the top of the screen.
+  # 
+  # Parameters
+  # ----------
+  # |           |                                             |
+  # |:----------|:--------------------------------------------|
+  # | `message` | The message that will be flashed at the top |
+
   error: (message) ->
     flash = $('<p/>').addClass('alert alert-error').text(message).hide().appendTo($('#flashes')).slideDown()
     $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
+
+
+  # Sets up the glossary within the glossary table div
 
   setupGlossary: ->
     headerRow = $('<tr/>').appendTo($('<thead/>').appendTo(@glossaryTable)).append('<th/>')
@@ -50,6 +83,8 @@ class root.GlossaryList
         class: 'glossary-table-anchor'
       ).hide().fadeIn().appendTo(@glossaryTable)
       glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<h3/>').text(letter))))
+
+  # Sets up the add term modal by enabling the date picker and the validator.
 
   setupAddTermModal: =>
     $('#add-entry-inputDueDate').datepicker
@@ -73,6 +108,9 @@ class root.GlossaryList
           this.loadGlossaryEntries()
       @addEntryModal.modal('hide')
       return false
+
+  # Sets up the settings modal by retrieving all locales from @localesUrl and rendering them
+  # within the typeahead
 
   setupSettingsFormModal: =>
     flashSettingsWarning = (warning) -> 
@@ -298,10 +336,22 @@ class root.GlossaryList
         this.error("Couldn't load glossary list!")
     return false
 
+  # Reloads the glossary by emptying the glossary table and setting it up again.
+
   reloadGlossary: =>
     @glossaryTable.empty()
     this.setupGlossary()
     this.loadGlossaryEntries()
+
+  # Creates a cookie with a given `name` and `value` and stores it for `days` days.
+  # 
+  # Parameters
+  # ----------
+  # |         |                                                       |
+  # |:--------|:------------------------------------------------------|
+  # | `name`  | The name that can be used to retrieve the cookie      |
+  # | `value` | The value that will be stored in the cookie           |
+  # | `days`  | The number of days that the cookie will be stored for |
 
   createCookie: (name, value, days) ->
     if (days) 
@@ -312,6 +362,14 @@ class root.GlossaryList
       expires = ""
     document.cookie = name + "=" + value + expires + "; path=/"
 
+  # Reads a cookie with a given `name`
+  # 
+  # Parameters
+  # ----------
+  # |        |                                                   |
+  # |:-------|:--------------------------------------------------|
+  # | `name` | The name that will be used to search for a cookie |
+
   readCookie: (name) ->
     nameEQ = name + "="
     for c in document.cookie.split(';')
@@ -320,6 +378,14 @@ class root.GlossaryList
       if c.indexOf(nameEQ) == 0
         return c.substring(nameEQ.length, c.length)
     return null
+
+  # Erases a cookie with a given `name`
+  # 
+  # Parameters
+  # ----------
+  # |        |                                                   |
+  # |:-------|:--------------------------------------------------|
+  # | `name` | The name that will be used to search for a cookie |
 
   eraseCookie: (name) ->
     createCookie(name, "", -1)
