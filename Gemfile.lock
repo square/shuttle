@@ -219,7 +219,7 @@ GEM
       sprockets (~> 2.8)
     sql_origin (1.1.0)
       rails (>= 4.0)
-    squash_rails (1.1.4)
+    squash_rails (1.2.0)
       squash_ruby
     squash_ruby (1.2.0)
       json
