@@ -117,14 +117,14 @@ describe Commit do
         ActionMailer::Base.deliveries.clear
         @commit.ready = true
 
-        @commit.project.key_inclusions.push("inc_key_1", "inc_key_2")
-        @commit.project.key_exclusions.push("exc_key_1", "exc_key_2", "exc_key_3")
+        @commit.project.key_inclusions += %w(inc_key_1 inc_key_2)
+        @commit.project.key_exclusions += %w(exc_key_1 exc_key_2 exc_key_3)
         
         @commit.project.key_locale_inclusions = {"fr" => ["fr_exc_key_1", "fr_exc_key_2", "fr_exc_key_3"], "aa" => ["aa_exc_key_1", "aa_exc_key_2"]}
         @commit.project.key_locale_exclusions = {"ja" => ["ja_inc_key_1", "ja_inc_key_2", "ja_inc_key_3"]}
 
-        @commit.project.only_paths.push("only_path_1", "only_path_2", "only_path_1")
-        @commit.project.skip_paths.push("skip_path_1", "skip_path_2")
+        @commit.project.only_paths += %w(only_path_1 only_path_2 only_path_1)
+        @commit.project.skip_paths += %w(skip_path_1 skip_path_2)
         
         @commit.project.skip_importer_paths = {"Android XML" => ["an_skip_key_1", "an_skip_key_2", "an_skip_key_3"]}
         @commit.project.only_importer_paths = {"Ember.js" => ["em_only_key_1", "em_only_key_2", "em_only_key_3"], "ERb File" => ["erb_only_key_1", "erb_only_key_2"]}
