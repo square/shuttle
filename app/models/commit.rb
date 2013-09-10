@@ -361,12 +361,24 @@ class Commit < ActiveRecord::Base
     end
   end
 
+  # Returns whether a translator's work is entirely done for this Commit.
+  #
+  # @param [Locale] locale The locale the translator is working in.
+  # @return [true, false] `true` if all translations are complete; `false` if
+  #   the translator still has work to do.
+
   def all_translations_entered_for_locale?(locale)
-    translations.not_base.where(rfc5646_locale: locale.rfc5646, translated: false).count == 0
+    translations.where(rfc5646_locale: locale.rfc5646, translated: false).count == 0
   end
 
+  # Returns whether an approver's work is entirely done for this Commit.
+  #
+  # @param [Locale] locale The locale the approver is working in.
+  # @return [true, false] `true` if all translations are approved; `false` if
+  #   the translator still has work to do.
+
   def all_translations_approved_for_locale?(locale)
-    translations.not_base.where(rfc5646_locale: locale.rfc5646, approved: false).count == 0
+    translations.where(rfc5646_locale: locale.rfc5646).where('approved IS NOT TRUE').count == 0
   end
 
   # @private

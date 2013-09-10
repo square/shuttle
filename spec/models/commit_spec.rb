@@ -119,16 +119,16 @@ describe Commit do
 
         @commit.project.key_inclusions += %w(inc_key_1 inc_key_2)
         @commit.project.key_exclusions += %w(exc_key_1 exc_key_2 exc_key_3)
-        
+
         @commit.project.key_locale_inclusions = {"fr" => ["fr_exc_key_1", "fr_exc_key_2", "fr_exc_key_3"], "aa" => ["aa_exc_key_1", "aa_exc_key_2"]}
         @commit.project.key_locale_exclusions = {"ja" => ["ja_inc_key_1", "ja_inc_key_2", "ja_inc_key_3"]}
 
         @commit.project.only_paths += %w(only_path_1 only_path_2 only_path_1)
         @commit.project.skip_paths += %w(skip_path_1 skip_path_2)
-        
+
         @commit.project.skip_importer_paths = {"Android XML" => ["an_skip_key_1", "an_skip_key_2", "an_skip_key_3"]}
         @commit.project.only_importer_paths = {"Ember.js" => ["em_only_key_1", "em_only_key_2", "em_only_key_3"], "ERb File" => ["erb_only_key_1", "erb_only_key_2"]}
-        
+
         @commit.save!
         ActionMailer::Base.deliveries.size.should eql(1)
         email = ActionMailer::Base.deliveries.first
@@ -136,28 +136,28 @@ describe Commit do
         email.subject.should eql('[Shuttle] Finished translation of commit')
         email.body.to_s.should include(@commit.revision.to_s)
 
-        @commit.project.key_inclusions.each {|key| email.body.to_s.should include(key)}
-        @commit.project.key_exclusions.each {|key| email.body.to_s.should include(key)}
+        @commit.project.key_inclusions.each { |key| email.body.to_s.should include(key) }
+        @commit.project.key_exclusions.each { |key| email.body.to_s.should include(key) }
 
         @commit.project.key_locale_inclusions.each_key do |locale|
           email.body.to_s.should include(locale + ":")
-          @commit.project.key_locale_inclusions[locale].each {|key| email.body.to_s.should include(key)}
+          @commit.project.key_locale_inclusions[locale].each { |key| email.body.to_s.should include(key) }
         end
         @commit.project.key_locale_exclusions.each_key do |locale|
           email.body.to_s.should include(locale + ":")
-          @commit.project.key_locale_exclusions[locale].each {|key| email.body.to_s.should include(key)}
+          @commit.project.key_locale_exclusions[locale].each { |key| email.body.to_s.should include(key) }
         end
 
-        @commit.project.only_paths.each {|key| email.body.to_s.should include(key)}
-        @commit.project.skip_paths.each {|key| email.body.to_s.should include(key)}
+        @commit.project.only_paths.each { |key| email.body.to_s.should include(key) }
+        @commit.project.skip_paths.each { |key| email.body.to_s.should include(key) }
 
         @commit.project.skip_importer_paths.each_key do |path|
           email.body.to_s.should include(path + ":")
-          @commit.project.skip_importer_paths[path].each {|key| email.body.to_s.should include(key)}
+          @commit.project.skip_importer_paths[path].each { |key| email.body.to_s.should include(key) }
         end
         @commit.project.only_importer_paths.each_key do |path|
           email.body.to_s.should include(path + ":")
-          @commit.project.only_importer_paths[path].each {|key| email.body.to_s.should include(key)}
+          @commit.project.only_importer_paths[path].each { |key| email.body.to_s.should include(key) }
         end
       end
 
@@ -284,6 +284,61 @@ describe Commit do
       Importer::Yaml.any_instance.stub(:skip?).and_return(true)
       @project.commit! 'HEAD'
       @project.keys.map(&:importer).uniq.sort.should eql(Importer::Base.implementations.map(&:ident).sort - %w(yaml))
+    end
+  end
+
+  describe "#all_translations_entered_for_locale?" do
+    before :all do
+      @commit      = FactoryGirl.create(:commit)
+      @keys        = FactoryGirl.create_list(:key, 4)
+      @commit.keys += @keys
+    end
+
+    it "should return true if every translation is either pending approval, approved, or rejected" do
+      FactoryGirl.create :translation, approved: nil, key: @keys[0], rfc5646_locale: 'de'
+      FactoryGirl.create :translation, approved: true, key: @keys[1], rfc5646_locale: 'de'
+      FactoryGirl.create :translation, approved: false, key: @keys[2], rfc5646_locale: 'de'
+
+      # red herring
+      FactoryGirl.create :translation, copy: nil, approved: nil, key: @keys[3], rfc5646_locale: 'fr'
+
+      expect(@commit.all_translations_entered_for_locale?(Locale.from_rfc5646('de'))).to be_true
+    end
+
+    it "should return false otherwise" do
+      FactoryGirl.create :translation, copy: nil, key: @keys[0], rfc5646_locale: 'de'
+      FactoryGirl.create :translation, approved: true, key: @keys[1], rfc5646_locale: 'de'
+      FactoryGirl.create :translation, approved: false, key: @keys[2], rfc5646_locale: 'de'
+
+      expect(@commit.all_translations_entered_for_locale?(Locale.from_rfc5646('de'))).to be_false
+    end
+  end
+
+  describe "#all_translations_approved_for_locale?" do
+    before :all do
+      @commit      = FactoryGirl.create(:commit)
+      @keys        = FactoryGirl.create_list(:key, 3)
+      @commit.keys += @keys
+    end
+
+    it "should return true if every translation is approved" do
+      FactoryGirl.create :translation, approved: true, key: @keys[0], rfc5646_locale: 'de'
+      FactoryGirl.create :translation, approved: true, key: @keys[1], rfc5646_locale: 'de'
+
+      # red herring
+      FactoryGirl.create :translation, approved: nil, key: @keys[2], rfc5646_locale: 'fr'
+
+      expect(@commit.all_translations_approved_for_locale?(Locale.from_rfc5646('de'))).to be_true
+    end
+
+    it "should return false otherwise" do
+      FactoryGirl.create :translation, approved: true, key: @keys[0], rfc5646_locale: 'de'
+      t = FactoryGirl.create(:translation, approved: nil, key: @keys[1], rfc5646_locale: 'de')
+
+      expect(@commit.all_translations_approved_for_locale?(Locale.from_rfc5646('de'))).to be_false
+
+      t.update_attribute :approved, false
+      expect(@commit.all_translations_approved_for_locale?(Locale.from_rfc5646('de'))).to be_false
     end
   end
 end
