@@ -25,7 +25,7 @@ $(document).ready () ->
   # Create a new glossary entry list
   new GlossaryList(
     $('#glossary-table'), "<%= glossary_sources_url %>", 
-    "<%= remote_locales_url %>", sourceLocale, targetLocales,
+    "<%= typeahead_locales_url %>", sourceLocale, targetLocales,
     "<%= glossary_sources_url(format:'json') %>", "<%= glossary_source_locales_url("REPLACEME_SOURCE", format:'json') %>",
     "<%= edit_glossary_source_url("REPLACEME_SOURCE") %>", "<%= edit_glossary_source_locale_url("REPLACEME_SOURCE", "REPLACEME_LOCALE") %>",
     "<%= approve_glossary_source_locale_url("REPLACEME_SOURCE", "REPLACEME_LOCALE") %>", "<%= reject_glossary_source_locale_url("REPLACEME_SOURCE", "REPLACEME_LOCALE") %>",

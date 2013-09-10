@@ -13,37 +13,15 @@
 #    limitations under the License.
 
 class GlossaryEntriesController < ApplicationController
+  include GlossaryDecoration
+
   before_filter :authenticate_user!, except: :manifest
+
   respond_to :json
 
   def index
-    # confirm valid locale
-    # GlossaryEntry.ensure_entries_exist_in_locale params[:locale_id]
-    # render json: GlossaryEntry.where(rfc5646_locale: params[:locale_id]).order('source_copy_prefix ASC')
-    # SourceGlossaryEntry.all.order('source_copy_prefix ASC')
-    returnEntries = []
-
-    SourceGlossaryEntry.all.order('source_copy_prefix ASC').each do |sGlossaryEntry| 
-      newEntry =  { 'source_copy' => sGlossaryEntry.source_copy,
-                    'source_locale' => sGlossaryEntry.source_rfc5646_locale,
-                    'context' => sGlossaryEntry.context,
-                    'notes' => sGlossaryEntry.notes,
-                    'locale_glossary_entries' => {}
-                  }
-      sGlossaryEntry.locale_glossary_entries.each do |lGlossaryEntry| 
-        newEntry['locale_glossary_entries'][lGlossaryEntry.rfc5646_locale] = { 
-          'copy' => lGlossaryEntry.copy, 
-          'notes' => lGlossaryEntry.notes, 
-          'translator' => lGlossaryEntry.translator,
-          'translated' => lGlossaryEntry.translated,
-          'reviewer' => lGlossaryEntry.reviewer,
-          'approved' => lGlossaryEntry.approved
-        }
-      end
-      returnEntries << newEntry
-    end 
-
-    render json: returnEntries
+    # puts decorate(SourceGlossaryEntry.all.order('source_copy_prefix ASC').as_json)
+    render json: SourceGlossaryEntry.all.order('source_copy_prefix ASC').as_json
   end
 
   def create

@@ -45,7 +45,7 @@ Shuttle::Application.routes.draw do
   end
 
   resources :locales, only: :index do
-    collection { get :countries, :prefetch, :remote }
+    collection { get :countries, :typeahead }
     resources :projects, only: [:index, :show], controller: 'locale/projects' do
       resources :translations, controller: 'locale/translations', only: :index
     end

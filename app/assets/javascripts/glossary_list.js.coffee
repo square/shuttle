@@ -51,27 +51,19 @@ class root.GlossaryList
       @sourceLocale = JSON.parse(this.readCookie("sourceLocale"))
     if this.readCookie("targetLocales") != null
       @targetLocales = JSON.parse(this.readCookie("targetLocales"))
-      
-    this.setupGlossary()
     this.setupAddTermModal()
     this.setupSettingsFormModal()
-    this.loadGlossaryEntries()
+    this.reloadGlossary()
 
   # Flashes an error at the top of the screen.
   # 
-  # Parameters
-  # ----------
-  # |           |                                             |
-  # |:----------|:--------------------------------------------|
-  # | `message` | The message that will be flashed at the top |
-
+  # @param [String] message The message that will be flashed at the top
   error: (message) ->
     flash = $('<p/>').addClass('alert alert-error').text(message).hide().appendTo($('#flashes')).slideDown()
     $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
 
 
   # Sets up the glossary within the glossary table div
-
   setupGlossary: ->
     headerRow = $('<tr/>').appendTo($('<thead/>').appendTo(@glossaryTable)).append('<th/>')
     $('<div/>').text(@sourceLocale.locale).appendTo($('<th/>').appendTo(headerRow))
@@ -85,7 +77,6 @@ class root.GlossaryList
       glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<h3/>').text(letter))))
 
   # Sets up the add term modal by enabling the date picker and the validator.
-
   setupAddTermModal: =>
     $('#add-entry-inputDueDate').datepicker
       startDate: new Date()
@@ -111,7 +102,6 @@ class root.GlossaryList
 
   # Sets up the settings modal by retrieving all locales from @localesUrl and rendering them
   # within the typeahead
-
   setupSettingsFormModal: =>
     flashSettingsWarning = (warning) -> 
       $('#settings-modal .help-block span').fadeOut () -> 
@@ -178,16 +168,13 @@ class root.GlossaryList
       this.createCookie("targetLocales", JSON.stringify(@targetLocales), 1);
       this.reloadGlossary()
 
+  # Loads the glossary entries and appends them to the glossary table
   loadGlossaryEntries: => 
     $('.glossary-table-entry').remove()
-    ## TODO: Add loading animation http://fgnass.github.io/spin.js/
     $.ajax @glossaryUrl,
       type: "GET"
       dataType: "json"
-      complete: => 
-        ## TODO: Remove loading animation
       success: (glossaryEntries) =>
-        i = 0
         for sourceEntry in glossaryEntries.reverse()
           do (sourceEntry) =>
 
@@ -337,7 +324,6 @@ class root.GlossaryList
     return false
 
   # Reloads the glossary by emptying the glossary table and setting it up again.
-
   reloadGlossary: =>
     @glossaryTable.empty()
     this.setupGlossary()
@@ -345,14 +331,9 @@ class root.GlossaryList
 
   # Creates a cookie with a given `name` and `value` and stores it for `days` days.
   # 
-  # Parameters
-  # ----------
-  # |         |                                                       |
-  # |:--------|:------------------------------------------------------|
-  # | `name`  | The name that can be used to retrieve the cookie      |
-  # | `value` | The value that will be stored in the cookie           |
-  # | `days`  | The number of days that the cookie will be stored for |
-
+  # @param [String] name The name that can be used to retrieve the cookie
+  # @param [String] value The value that will be stored in the cookie
+  # @param [Integer] days The number of days that the cookie will be stored for
   createCookie: (name, value, days) ->
     if (days) 
       date = new Date()
@@ -364,12 +345,7 @@ class root.GlossaryList
 
   # Reads a cookie with a given `name`
   # 
-  # Parameters
-  # ----------
-  # |        |                                                   |
-  # |:-------|:--------------------------------------------------|
-  # | `name` | The name that will be used to search for a cookie |
-
+  # @param [String] name The name that will be used to search for a cookie
   readCookie: (name) ->
     nameEQ = name + "="
     for c in document.cookie.split(';')
@@ -381,11 +357,6 @@ class root.GlossaryList
 
   # Erases a cookie with a given `name`
   # 
-  # Parameters
-  # ----------
-  # |        |                                                   |
-  # |:-------|:--------------------------------------------------|
-  # | `name` | The name that will be used to search for a cookie |
-
+  # @param [String] name The name that will be used to search for a cookie
   eraseCookie: (name) ->
     createCookie(name, "", -1)

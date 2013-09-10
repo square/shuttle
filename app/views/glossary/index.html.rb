@@ -108,7 +108,7 @@ module Views
               div class: 'control-group' do
                 label 'English', class: 'control-label'
                 div class: 'controls' do
-                  f.text_field :source_copy, placeholder: 'English', autocomplete: 'off', required: 'true'
+                  f.text_field :source_copy, id: 'add-entry-inputEnglish', placeholder: 'English', autocomplete: 'off', required: 'true'
                 end
               end
 
@@ -129,7 +129,7 @@ module Views
               div class: 'control-group' do
                 label 'Due Date', class: 'control-label'
                 div class: 'controls' do
-                  f.text_field :due_date, id: 'edit-entry-inputDueDate', autocomplete: 'off'
+                  f.text_field :due_date, id: 'add-entry-inputDueDate', autocomplete: 'off'
                 end
               end
             end

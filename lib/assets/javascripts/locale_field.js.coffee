@@ -336,8 +336,6 @@ class root.LocaleField
   # the dropdown.
   #
   activateSelection: ->
-    @curValue = [@dropdown.find('li.active :not(strong)').html() ,@dropdown.find('li.active>strong').text()]
-    console.log(@curValue)
     this.setLastValue @dropdown.find('li.active>strong').text()
     this.renderDropdown []
 

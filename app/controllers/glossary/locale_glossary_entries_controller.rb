@@ -160,14 +160,14 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
   # Find the requested source entry by source id.
 
   def find_source_entry
-    @source_entry = SourceGlossaryEntry.find_by_id(params[:source_id])
+    @source_entry = SourceGlossaryEntry.find params[:source_id]
   end
 
 
   # Find the requested locale entry by locale id.
 
   def find_locale_entry
-    @locale_entry = LocaleGlossaryEntry.find_by_id(params[:id])
+    @locale_entry = LocaleGlossaryEntry.find params[:id]
   end
 
   def create_params
