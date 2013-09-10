@@ -56,7 +56,7 @@ module Views
             end
 
             div class: 'controls', style: 'height: 40px;' do
-              f.submit id: 'btn-update-entry', class: 'btn btn-primary'
+              f.submit id: 'btn-update-entry', class: 'btn btn-primary', value: 'Update Entry'
             end
           end
 

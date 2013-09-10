@@ -33,7 +33,7 @@
                 </div>
               </td>
               {{#translated_copies}}
-              <td class="glossary-table-locale-entry" data-locale="{{locale}}" data-source-id="{{source_id}}" data-locale-id="{{locale_id}}" style="text-align: left;">
+              <td class="glossary-table-locale-entry" data-locale="{{locale}}" data-locale-id="{{locale_id}}" data-add-url="{{add_url}}" data-edit-url="{{edit_url}}" data-approve-url="{{approve_url}}" data-reject-url="{{reject_url}}" style="text-align: left;">
                 <label>Notes</label>
                 <textarea rows="5" readonly>{{notes}}</textarea>
                 <div style="height: 40px">
@@ -43,10 +43,10 @@
                   </a>
                   {{/is_translator}}
                   {{#is_reviewer}}
-                  <button class="btn btn-success glossary-table-approve-locale" style="width: 40px; float: left; margin-right: 5px;" {{#approved}}disabled{{/approved}}>
+                  <button class="btn btn-success glossary-table-approve-locale" style="width: 40px; float: left; margin-right: 5px;" {{#approved}} disabled {{/approved}} {{^locale_id}} disabled {{/locale_id}}>
                     <i class="icon-ok"></i>
                   </button>
-                  <button class="btn btn-danger glossary-table-reject-locale" style="width: 40px; float: left; margin-right: 5px;" {{#rejected}}disabled{{/rejected}}>
+                  <button class="btn btn-danger glossary-table-reject-locale" style="width: 40px; float: left; margin-right: 5px;" {{#rejected}} disabled {{/rejected}} {{^locale_id}} disabled {{/locale_id}}>
                     <i class="icon-remove"></i>
                   </button>
                   {{/is_reviewer}}

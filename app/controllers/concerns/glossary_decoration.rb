@@ -19,18 +19,18 @@ module GlossaryDecoration
   private
 
   def decorate(glossary_entries)
-    # glossary_entries.map do |glossary_entry|
-    #   glossary_entry.as_json.merge(
-    #       add_source_entry_url:   glossary_sources_url(format:'json'),
-    #       add_locale_entry_url:   glossary_source_locales_url("REPLACEME_SOURCE", format:'json'),
-    #       edit_source_entry_url:  
-    #       edit_locale_entry_url:  
-    #       approve_url:    approve_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
-    #       reject_url:     reject_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
-    #       translator:     translation.translator.as_json,
-    #       reviewer:       translation.reviewer.as_json # not sure why it's necessary to explicitly include these, but it is
-    #   )
-    #  @approveLocaleEntryUrl, @rejectLocaleEntryUrl 
+    glossary_entries.map do |glossary_entry|
+      glossary_entry[:locale_glossary_entries].each do |locale, locale_glossary_entry|
+        glossary_entry[:locale_glossary_entries][locale] = locale_glossary_entry.merge(
+          edit_locale_entry_url:  edit_glossary_source_locale_url(glossary_entry["id"], locale_glossary_entry["id"]),
+          approve_url:            approve_glossary_source_locale_url(glossary_entry["id"], locale_glossary_entry["id"]),
+          reject_url:             reject_glossary_source_locale_url(glossary_entry["id"], locale_glossary_entry["id"])
+        )
+      end 
+      glossary_entry.merge(
+          add_locale_entry_url:   glossary_source_locales_url(glossary_entry["id"]),
+          edit_source_entry_url:  edit_glossary_source_url(glossary_entry["id"])
+      )
     end
   end
 end

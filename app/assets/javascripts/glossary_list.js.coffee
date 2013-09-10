@@ -18,33 +18,27 @@ class root.GlossaryList
 
   # Constructor method for the Glossary List 
   # 
-  # Parameters
-  # ----------
-  # 
-  # |                         |                                                             |
-  # |:------------------------|:------------------------------------------------------------|
-  # | `glossaryTable`         | Div that contains the glossary table                        |
-  # | `glossaryUrl`           | URL to retrieve all source glossary entries                 |
-  # | `localesUrl`            | URL to retrieve all locales                                 |
-  # | `sourceLocale`          | The initial source locale                                   |
-  # | `targetLocales`         | The initial target locales                                  |
-  # | `addSourceEntryUrl`     | URL to add a new source entry                               |
-  # | `addLocaleentryUrl`     | URL to add a new locale entry                               |
-  # | `editSourceEntryUrl`    | URL to update an existing source entry                      |
-  # | `editLocaleEntryUrl`    | URL to update an existing locale entry                      |
-  # | `approveLocaleEntryUrl` | URL to approve an existing locale entry                     |
-  # | `rejectLocaleEntryUrl`  | URL to reject an existing locale entry                      |
-  # | `settingsModal`         | Div that contains the modal to modify settings              |
-  # | `addEntryModal`         | Div that contains the modal to add a new entry              |
-  # | `userRole`              | The current user's role (monitor/translator/reviewer/admin) |
-  # | `approvedLocales`       | The current user's approved locales to modify               |
-
+  # @param [jQuery Element] glossaryTable The table jQuery element that will 
+  #   soon contain the glossary table
+  # @param [String] glossaryUrl The url from which we can pull all glossary 
+  #   entries from
+  # @param [String] addSourceEntryUrl The url to add a new source entry to the 
+  #   glossary
+  # @param [String] localesUrl The url that retrieves a list of all locales 
+  #   along with their flag
+  # @param [Array] sourceLocale The locale where all source entries derive from
+  # @param [Array] targetLocale The locales that we want to view translated 
+  #   entries from
+  # @param [jQueryElement] settingsModal The jQuery element that contains an
+  #   uninitialized settings modal
+  # @param [jQueryElement] addEntryModal The jQuery element that contains an 
+  #   uninitialized add entry modal
+  # @param [String] userRole The role of the user (monitor/translator/etc.)
+  # @param [Array] approvedLocales An array of the locales the user is approved
+  #   for
   constructor: (
-      @glossaryTable, @glossaryUrl, 
+      @glossaryTable, @glossaryUrl, @addSourceEntryUrl, 
       @localesUrl, @sourceLocale, @targetLocales, 
-      @addSourceEntryUrl, @addLocaleEntryUrl,
-      @editSourceEntryUrl, @editLocaleEntryUrl, 
-      @approveLocaleEntryUrl, @rejectLocaleEntryUrl
       @settingsModal, @addEntryModal,
       @userRole, @approvedLocales) ->
     if this.readCookie("sourceLocale") != null
@@ -76,7 +70,8 @@ class root.GlossaryList
       ).hide().fadeIn().appendTo(@glossaryTable)
       glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<h3/>').text(letter))))
 
-  # Sets up the add term modal by enabling the date picker and the validator.
+  # Sets up the add term modal by enabling the date picker and the 
+  # validator.
   setupAddTermModal: =>
     $('#add-entry-inputDueDate').datepicker
       startDate: new Date()
@@ -100,8 +95,8 @@ class root.GlossaryList
       @addEntryModal.modal('hide')
       return false
 
-  # Sets up the settings modal by retrieving all locales from @localesUrl and rendering them
-  # within the typeahead
+  # Sets up the settings modal by retrieving all locales from @localesUrl and 
+  # rendering them within the typeahead
   setupSettingsFormModal: =>
     flashSettingsWarning = (warning) -> 
       $('#settings-modal .help-block span').fadeOut () -> 
@@ -177,7 +172,6 @@ class root.GlossaryList
       success: (glossaryEntries) =>
         for sourceEntry in glossaryEntries.reverse()
           do (sourceEntry) =>
-
             switch @userRole
               when "admin" then isTranslator = true
               when "reviewer", "translator" 
@@ -194,7 +188,7 @@ class root.GlossaryList
               source_copy: sourceEntry.source_copy
               source_context: sourceEntry.context
               source_notes: sourceEntry.notes
-              source_edit_url: @editSourceEntryUrl.replace("REPLACEME_SOURCE", sourceEntry.id)
+              source_edit_url: sourceEntry.edit_source_entry_url
               is_translator: isTranslator
               translated_copies: []
             for localeEntry in @targetLocales
@@ -225,10 +219,14 @@ class root.GlossaryList
                 locale: localeEntry.rfc
                 is_translator: isTranslator
                 is_reviewer: isReviewer
+                add_url: sourceEntry.add_locale_entry_url
               if localeEntry.rfc of sourceEntry.locale_glossary_entries
                 localeContext.locale_id = sourceEntry.locale_glossary_entries[localeEntry.rfc].id
                 localeContext.copy = sourceEntry.locale_glossary_entries[localeEntry.rfc].copy
                 localeContext.notes = sourceEntry.locale_glossary_entries[localeEntry.rfc].notes
+                localeContext.edit_url = sourceEntry.locale_glossary_entries[localeEntry.rfc].edit_locale_entry_url
+                localeContext.approve_url = sourceEntry.locale_glossary_entries[localeEntry.rfc].approve_url
+                localeContext.reject_url = sourceEntry.locale_glossary_entries[localeEntry.rfc].reject_url
 
                 if sourceEntry.locale_glossary_entries[localeEntry.rfc].translated
                   approved = sourceEntry.locale_glossary_entries[localeEntry.rfc].approved
@@ -248,73 +246,54 @@ class root.GlossaryList
 
             newGlossaryEntry = $('#glossary-table-' + sourceEntry.source_copy.substr(0, 1).toUpperCase())
               .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
+            console.log(newGlossaryEntry)
 
         for domLocaleEntry in $('.glossary-table-locale-entry')
-          localeID = $(domLocaleEntry).data('localeId') 
-          sourceID = $(domLocaleEntry).data('sourceId') 
           locale = $(domLocaleEntry).data('locale') 
+          localeId = $(domLocaleEntry).data('localeId') 
+          addLocaleEntryUrl = $(domLocaleEntry).data('addUrl') 
+          editLocaleEntryUrl = $(domLocaleEntry).data('editUrl') 
+          approveLocaleEntryUrl = $(domLocaleEntry).data('approveUrl') 
+          rejectLocaleEntryUrl = $(domLocaleEntry).data('rejectUrl') 
 
-          $(domLocaleEntry).find(".glossary-table-edit-locale").click(((addLocaleEntryUrl, editLocaleEntryUrl, localeID, sourceID, locale) ->
+          $(domLocaleEntry).find(".glossary-table-edit-locale").click(((addLocaleEntryUrl, editLocaleEntryUrl, locale, localeId) ->
             return () ->
-              if localeID
-                window.location.href = editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID)
+              if localeId
+                window.location.href = editLocaleEntryUrl
               else 
-                $.ajax addLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID),
+                $.ajax addLocaleEntryUrl,
                   type: "POST"
                   dataType: "json"
                   data: 
                     locale_glossary_entry:
                       rfc5646_locale: locale
-                  success: (newEntry) =>
-                    window.location.href = editLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", newEntry.id)
-                    console.error(xhr)
-          )(@addLocaleEntryUrl, @editLocaleEntryUrl, localeID, sourceID, locale))
+                  success: (newEntry, textStatus, jqXhr) =>
+                    window.location.href = jqXhr.getResponseHeader("location")
+          )(addLocaleEntryUrl, editLocaleEntryUrl, locale, localeId))
 
-          $(domLocaleEntry).find(".glossary-table-approve-locale").click(((domLocaleEntry, addLocaleEntryUrl, editLocaleEntryUrl, approveLocaleEntryUrl, localeID, sourceID, locale) ->
+          $(domLocaleEntry).find(".glossary-table-approve-locale").click(((domLocaleEntry, addLocaleEntryUrl, approveLocaleEntryUrl, locale, localeId) ->
             return () ->
               $(domLocaleEntry).find(".glossary-table-reject-locale").prop('disabled', false)
               $(domLocaleEntry).find(".glossary-table-approve-locale").prop('disabled', true)
-              if localeID
-                $.ajax approveLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID),
+              if localeId
+                $.ajax approveLocaleEntryUrl,
                   type: "PATCH"
                   success: () ->
                     $(domLocaleEntry).parents(".glossary-table-entry").find("." + locale + "-copy")
                       .hide().removeClass("text-info text-error").addClass("text-success").fadeIn(500)
-              else 
-                $.ajax addLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID),
-                  type: "POST"
-                  dataType: "json"
-                  data: 
-                    locale_glossary_entry:
-                      source_glossary_entry_id: sourceID
-                      rfc5646_locale: locale
-                  success: (newEntry) =>
-                    $.ajax approveLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID),
-                      type: "PATCH"
-          )(domLocaleEntry, @addLocaleEntryUrl, @editLocaleEntryUrl, @approveLocaleEntryUrl, localeID, sourceID, locale))
+          )(domLocaleEntry, addLocaleEntryUrl, approveLocaleEntryUrl, locale, localeId))
 
-          $(domLocaleEntry).find(".glossary-table-reject-locale").click(((domLocaleEntry, addLocaleEntryUrl, editLocaleEntryUrl, rejectLocaleEntryUrl, localeID, sourceID, locale) ->
+          $(domLocaleEntry).find(".glossary-table-reject-locale").click(((domLocaleEntry, addLocaleEntryUrl, rejectLocaleEntryUrl, locale, localeId) ->
             return () ->
               $(domLocaleEntry).find(".glossary-table-reject-locale").prop('disabled', true)
               $(domLocaleEntry).find(".glossary-table-approve-locale").prop('disabled', false)
-              if localeID
-                $.ajax rejectLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID),
+              if localeId
+                $.ajax rejectLocaleEntryUrl,
                   type: "PATCH"
                   success: () ->
                     $(domLocaleEntry).parents(".glossary-table-entry").find("." + locale + "-copy")
                       .hide().removeClass("text-info text-success").addClass("text-error").fadeIn(500)
-              else 
-                $.ajax addLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID),
-                  type: "POST"
-                  dataType: "json"
-                  data: 
-                    locale_glossary_entry:
-                      source_glossary_entry_id: sourceID
-                      rfc5646_locale: locale
-                  success: (newEntry) =>
-                    $.ajax rejectLocaleEntryUrl.replace("REPLACEME_SOURCE", sourceID).replace("REPLACEME_LOCALE", localeID),
-                      type: "PATCH"
-          )(domLocaleEntry, @addLocaleEntryUrl, @editLocaleEntryUrl, @rejectLocaleEntryUrl, localeID, sourceID, locale))
+          )(domLocaleEntry, addLocaleEntryUrl, rejectLocaleEntryUrl, locale, localeId))
 
         @glossaryTable.find("input, textarea, button, a").click (e) -> 
           e.stopPropagation()
@@ -323,13 +302,15 @@ class root.GlossaryList
         this.error("Couldn't load glossary list!")
     return false
 
-  # Reloads the glossary by emptying the glossary table and setting it up again.
+  # Reloads the glossary by emptying the glossary table and setting it up 
+  # again.
   reloadGlossary: =>
     @glossaryTable.empty()
     this.setupGlossary()
     this.loadGlossaryEntries()
 
-  # Creates a cookie with a given `name` and `value` and stores it for `days` days.
+  # Creates a cookie with a given `name` and `value` and stores it for `days` 
+  # days.
   # 
   # @param [String] name The name that can be used to retrieve the cookie
   # @param [String] value The value that will be stored in the cookie

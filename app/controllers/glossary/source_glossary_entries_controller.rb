@@ -13,6 +13,8 @@
 #    limitations under the License.
 
 class Glossary::SourceGlossaryEntriesController < ApplicationController
+  include GlossaryDecoration
+
   before_filter :authenticate_user!, except: :manifest
   before_filter :reviewer_required, only: [:edit, :update]
   before_filter :admin_required, only: [:destroy]
@@ -33,7 +35,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
 
   def index
     @entries = SourceGlossaryEntry.order('source_copy_prefix ASC')
-    respond_with(@entries) 
+    respond_with decorate(@entries.as_json)
   end
 
 

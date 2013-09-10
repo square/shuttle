@@ -49,7 +49,7 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
 
   def create
     @locale_entry = @source_entry.locale_glossary_entries.create(create_params)
-    respond_with @locale_entry, location: glossary_source_locales_url
+    respond_with @locale_entry, location: edit_glossary_source_locale_url(@source_entry, @locale_entry)
   end
 
   # Updates a locale glossary entry. 
