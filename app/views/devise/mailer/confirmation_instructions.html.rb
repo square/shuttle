@@ -24,7 +24,7 @@ module Views
           div do
             p "Welcome #{@resource.email}!"
             p "You can confirm your account email through the link below:"
-            p { link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @resource.confirmation_token) }
+            p { link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) }
           end
         end
       end

@@ -24,7 +24,7 @@ module Views
           p "Hello #{@resource.email}!"
           p "Your account has been locked due to an excessive amount of unsuccessful sign in attempts."
           p "Click the link below to unlock your account:"
-          p { link_to 'Unlock my account', unlock_url(@resource, unlock_token: @resource.unlock_token) }
+          p { link_to 'Unlock my account', unlock_url(@resource, unlock_token: @token) }
         end
       end
     end
