@@ -18,7 +18,7 @@ module Views
   module Devise
     module Mailer
       class ConfirmationInstructions < Erector::Widget
-        needs :resource
+        needs :resource, :token
 
         def content
           div do
