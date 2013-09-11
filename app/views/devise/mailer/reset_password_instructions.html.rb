@@ -18,7 +18,7 @@ module Views
   module Devise
     module Mailer
       class ResetPasswordInstructions < Erector::Widget
-        needs :resource
+        needs :resource, :token
 
         def content
           p "Hello #{@resource.email}!"
