@@ -188,7 +188,7 @@ module Views
                 end
                 td do
                   if commit.user
-                    text! mail_to(commit.user.email, commit.user.abbreviated_name)
+                    text! mail_to(commit.user.email, commit.user.name)
                   else
                     text '-'
                   end
