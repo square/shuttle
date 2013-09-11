@@ -112,7 +112,6 @@ class TranslationItem
       complete: => @element.find('textarea, input').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
       error: (jqXhr) => 
-        console.log(jqXhr)
         if jqXhr.status == 422
           modaldiv = $('<div/>').addClass('modal hide fade')
 
