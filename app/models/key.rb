@@ -68,6 +68,7 @@
 # | `source_copy`  | The original source copy of the key. Used to ensure that a new Key is generated if the source copy changes.              |
 # | `context`      | A human-readable contextual description of the string, from the program's code.                                          |
 # | `importer`     | The name of the {Importer::Base} subclass that created the Key.                                                          |
+# | `interpolator` | The technique that is being used to interpolate values into the translated string.                                       |
 # | `source`       | The path to the project file where the base string was found.                                                            |
 # | `fencers`      | An array of fencers that should be applied to the Translations of this string.                                           |
 # | `other_data`   | A hash of importer-specific information applied to the string. Not used by anyone except possible the importer/exporter. |
@@ -84,6 +85,7 @@ class Key < ActiveRecord::Base
       source_copy:  {allow_blank: true},
       context:      {allow_nil: true},
       importer:     {allow_nil: true},
+      interpolator: {allow_nil: true}, 
       source:       {allow_nil: true},
       fencers:      {type: Array, default: []},
       other_data:   {type: Hash, default: {}}
@@ -153,6 +155,13 @@ class Key < ActiveRecord::Base
 
   # @return [String] The human-readable name for the importer.
   def importer_name() importer_class.human_name end
+
+  # @return [Module] The module under `Interpolator` that has the 
+  #   interpolator's name.
+  def interpolator_module
+    return nil unless interpolator
+    Interpolator.const_get interpolator.camelcase
+  end 
 
   # Scans all of the base Translations under this Key and adds Translations for
   # each of the Project's required locales where such a Translation does not

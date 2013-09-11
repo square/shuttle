@@ -10,6 +10,8 @@ en:
           attributes:
             approved:
               not_translated: cannot be set when translation is pending
+            copy:
+              invalid_interpolations: has an invalid interpolation
         translation_unit:
           attributes:
             source_copy_sha_raw:

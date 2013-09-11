@@ -80,6 +80,7 @@ class Translation < ActiveRecord::Base
             presence:   true,
             uniqueness: {scope: :key_id, on: :create}
   validate :cannot_approve_or_reject_untranslated
+  validate :valid_interpolations
 
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
   before_validation :approve_translation_made_by_reviewer, on: :update
@@ -181,6 +182,13 @@ class Translation < ActiveRecord::Base
   end
 
   private
+
+  def valid_interpolations 
+    return unless copy and key.interpolator_module
+    unless key.interpolator_module.valid?(copy) 
+      errors.add(:copy, :invalid_interpolations)
+    end 
+  end 
 
   def recalculate_readiness
     key.recalculate_ready! if destroyed? || translated_changed? || approved_changed?

@@ -107,11 +107,36 @@ class TranslationItem
     @element.find('textarea, input').attr 'disabled', 'disabled'
 
     $.ajax @translation.url + '.json',
-      type: 'PATCH'
+      type: 'PUT'
       data: $.param('translation[copy]': @element.find('textarea').val())
       complete: => @element.find('textarea, input').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
-      error: => modal("Couldn’t update that translation.", "An error occurred.")
+      error: (jqXhr) => 
+        console.log(jqXhr)
+        if jqXhr.status == 422
+          modaldiv = $('<div/>').addClass('modal hide fade')
+
+          header = $('<div/>').addClass('modal-header').appendTo(modaldiv)
+          $('<h3/>').text("Couldn't Update Translation").appendTo header
+
+          body_div = $('<div/>').addClass('modal-body').appendTo(modaldiv)
+          $('<b/>').text('Errors:').appendTo body_div
+          body_list = $('<ul/>').addClass("text-error")
+
+          for own field, errors of jqXhr.responseJSON
+            do (field, errors) ->
+              field = field.charAt(0).toUpperCase() + field.slice(1)
+              for error in errors 
+                $('<li/>').text(field + " " + error).appendTo(body_list)
+          
+          body_list.appendTo body_div
+
+          footer = $('<div/>').addClass('modal-footer').appendTo(modaldiv)
+          $('<a/>').addClass('btn btn-primary').text("Confirm").attr('data-dismiss', 'modal').appendTo(footer)
+
+          modaldiv.modal()
+        else   
+          modal("Couldn’t Update Translation", "An error occurred.")
     return true
 
   # Re-renders the cell using a new translation object (loaded from JSON).
@@ -170,7 +195,7 @@ class TranslationItem
       icons = $('<p/>').addClass('icons').appendTo(@right)
       button_approve = $('<button/>').addClass('btn btn-success btn-mini').appendTo(icons).click =>
         $.ajax @translation.approve_url,
-          type: 'PATCH'
+          type: 'PUT'
           success: (translation) => this.refresh translation
           error: => modal("Couldn’t approve that translation.", "An error occurred.")
         return false
@@ -179,7 +204,7 @@ class TranslationItem
 
       button_reject = $('<button/>').addClass('btn btn-danger btn-mini').appendTo(icons).click =>
         $.ajax @translation.reject_url,
-          type: 'PATCH'
+          type: 'PUT'
           success: (translation) => this.refresh translation
           error: => modal("Couldn’t reject that translation.", "An error occurred.")
         return false
