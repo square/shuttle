@@ -26,10 +26,21 @@ class ProjectTranslationAdder
 
   def perform(project_id)
     project = Project.find(project_id)
+    worker_queue = "KeyTranslationAdder:#{SecureRandom.uuid}"
 
     project.keys.each do |key|
-      KeyTranslationAdder.perform_once key.id
+      Shuttle::Redis.sadd(worker_queue, KeyTranslationAdder.perform_once(key.id))
     end
+
+    # Try for up to 1 hour
+    720.times do
+      break if Shuttle::Redis.scard(worker_queue) == 0
+      sleep(5)
+    end 
+
+    project.commits.each do |commit|
+      CommitStatsRecalculator.perform_once(commit.id)
+    end 
   end
 
   include SidekiqLocking
