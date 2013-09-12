@@ -22,12 +22,16 @@ class KeyTranslationAdder
   # Executes this worker.
   #
   # @param [Fixnum] id The ID of a Key.
+  # @param [String] worker_queue A Redis counter that counts  the number of
+  #   completed `KeyTranslationAdder`s for a {ProjectTranslationAdder}.
 
-  def perform(id)
+  def perform(id, worker_queue=nil)
     key = Key.find(id)
     key.add_pending_translations
     key.remove_excluded_pending_translations
     key.recalculate_ready!
+
+    Shuttle::Redis.incr(worker_queue) if worker_queue
   end
 
   include SidekiqLocking

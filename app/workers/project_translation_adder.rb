@@ -27,14 +27,14 @@ class ProjectTranslationAdder
   def perform(project_id)
     project = Project.find(project_id)
     worker_queue = "KeyTranslationAdder:#{SecureRandom.uuid}"
-
+    num_jobs = project.keys.count.to_s
     project.keys.each do |key|
-      Shuttle::Redis.sadd(worker_queue, KeyTranslationAdder.perform_once(key.id))
+      KeyTranslationAdder.perform_once(key.id, worker_queue)
     end
 
     # Try for up to 1 hour
     720.times do
-      break if Shuttle::Redis.scard(worker_queue) == 0
+      break if Shuttle::Redis.get(worker_queue) == num_jobs
       sleep(5)
     end 
 
