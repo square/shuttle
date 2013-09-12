@@ -25,7 +25,7 @@ describe Importer::Xib do
       @commit  = @project.commit!('HEAD')
     end
 
-    it "should import strings from SVG files" do
+    it "should import strings from Xib files" do
       trans = @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIText').first.translations.find_by_rfc5646_locale('en-US')
       trans.copy.should eql('text field text')
       trans.key.context.should start_with('text field notes')

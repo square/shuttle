@@ -211,7 +211,11 @@ en:
     xib:
       automatic_context: "%{text_class} for %{object_class} in %{file}"
       automatic_context_item: "%{text_class} for item %{index} in %{object_class} in %{file}"
-      name: Apple XIB file
+      name: Apple XIB file (Xcode 4.6 and older)
+    xib3:
+      automatic_context: "%{text_class} for %{object_class} in %{file}"
+      automatic_context_item: "%{text_class} for item %{index} in %{object_class} in %{file}"
+      name: Apple XIB file (Xcode 5 and newer)
     yaml:
       name: Rails i18n (YAML)
   exporter:
@@ -239,7 +243,9 @@ en:
     svg:
       name: SVG file
     xib:
-      name: Apple XIB file
+      name: Apple XIB file (Xcode 4.6 and older)
+    xib3:
+      name: Apple XIB file (Xcode 5 and newer)
   mailer:
     commit:
       notify_translators:

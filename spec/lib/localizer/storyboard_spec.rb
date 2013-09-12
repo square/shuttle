@@ -43,8 +43,13 @@ describe Localizer::Storyboard do
         '/apple/en-US.lproj/example.storyboard:beo-Nd-8Qm.title'                                           => 'view controller title',
         '/apple/en-US.lproj/example.storyboard:NN0-LQ-6Cj.text'                                            => "has\nnewline"
     }.each do |key, string|
-      key = @project.keys.for_key(key).source_copy_matches(string).first!
-      key.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes(
+      keyobj = @project.keys.for_key(key).source_copy_matches(string).first!
+      keyobj.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes(
+          copy:     "#{string} (de)",
+          approved: true)
+
+      keyobj = @project.keys.for_key(key.sub('example.storyboard', 'example3.storyboard')).source_copy_matches(string).first!
+      keyobj.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes(
           copy:     "#{string} (de)",
           approved: true)
     end
@@ -62,8 +67,8 @@ describe Localizer::Storyboard do
       end
     end
 
-    entries.size.should eql(1)
-    entries.keys.first.should eql('apple/de-DE.lproj/example.storyboard')
-    entries.values.first.should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.storyboard')))
+    entries.size.should eql(2)
+    entries['apple/de-DE.lproj/example.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.storyboard')))
+    entries['apple/de-DE.lproj/example3.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example3-de.storyboard')))
   end
 end
