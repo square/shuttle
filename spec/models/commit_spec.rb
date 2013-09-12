@@ -25,19 +25,23 @@ describe Commit do
     before :all do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @commit = @project.commit!('HEAD')
     end
 
-    before(:each) { @commit = @project.commit!('HEAD') }
+    before(:each) { @commit.keys.each(&:destroy) }
 
     it "should set ready to false for commits with unready keys" do
-      @commit.keys << FactoryGirl.create(:key, ready: false)
-      @commit.keys << FactoryGirl.create(:key, ready: true)
+      @commit.keys << FactoryGirl.create(:key)
+      @commit.keys << FactoryGirl.create(:key)
+      FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+      @commit.keys.last.recalculate_ready!
+
       @commit.recalculate_ready!
       @commit.should_not be_ready
     end
 
     it "should set ready to true for commits with all ready keys" do
-      @commit.keys << FactoryGirl.create(:key, ready: true)
+      @commit.keys << FactoryGirl.create(:key)
       @commit.recalculate_ready!
       @commit.should be_ready
     end
