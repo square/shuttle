@@ -11,6 +11,7 @@
  *= require_self
  *= require font-awesome
  *= require bootstrap_and_overrides
+ *= require bootstrap-datepicker
  *
  *= require locale_field
  *= require worker_status

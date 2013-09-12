@@ -180,6 +180,20 @@ module Views
         file = Rails.root.join('app', self.class.to_s.underscore + '.css')
         style(raw(File.read(file)), type: 'text/css') if File.exist?(file)
 
+        filename = Rails.root.join('app', self.class.to_s.underscore + '.css.scss')
+        if File.exist?(filename)
+          file = File.read(filename)
+          compiled_css = Sass.compile(file, style: :compressed, syntax: :scss, filename: filename)
+          style(compiled_css, type: 'text/css')
+        end
+
+        filename = Rails.root.join('app', self.class.to_s.underscore + '.css.sass')
+        if File.exist?(filename)
+          file         = File.read(filename)
+          compiled_css = Sass.compile(file, style: :compressed, syntax: :sass, filename: filename)
+          style(compiled_css, type: 'text/css')
+        end
+
         file = Rails.root.join('app', self.class.to_s.underscore + '.css.erb')
         style(raw(ERB.new(File.read(file)).result(binding)), type: 'text/css') if File.exist?(file)
       end

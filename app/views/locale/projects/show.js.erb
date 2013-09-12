@@ -16,7 +16,7 @@ $(document).ready(function() {
   new TranslationPanel($('#strings'),
                        $('#filter'),
                        "<%= locale_project_translations_url(@locale, @project, format: 'json') %>",
-                       <%= GlossaryEntry.where(rfc5646_locale: @locale.rfc5646, approved: true).map(&:as_translation_json) %>,
+                       JSON.parse("<%= escape_javascript @glossary_entries.to_json %>"),
                        {
                            review: <%= current_user.reviewer?.inspect %>,
                            word_substitute_url: <%= @word_substitute_url ? @word_substitute_url.inspect : 'null' %>

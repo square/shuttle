@@ -14,88 +14,334 @@
 
 root = exports ? this
 
-#TODO this should probably be abstracted out to share code.
+# Manager class for the glossary list view.
+#
 class root.GlossaryList
-  currentLocale: 'en'
 
+  # Creates a new glossary list manager.
+  # 
+  # @param [jQuery element] glossaryTable The table jQuery element that will
+  #   soon contain the glossary table.
+  # @param [String] glossaryUrl The URL from which we can pull all glossary
+  #   entries.
+  # @param [String] addSourceEntryUrl The URL to POST to that adds a new source
+  #   entry to the glossary.
+  # @param [String] localesUrl The URL to GET that retrieves a list of all
+  #   locales along with their flags.
+  # @param [Array] sourceLocale The locale of all source entries.
+  # @param [Array] targetLocale The locales that we want to view translated 
+  #   entries in.
+  # @param [jQuery element] settingsModal The jQuery element that contains an
+  #   uninitialized settings modal.
+  # @param [jQuery element] addEntryModal The jQuery element that contains an
+  #   uninitialized add-entry modal.
+  # @param [String] userRole The role of the user (monitor/translator/etc.)
+  # @param [Array] approvedLocales An array of the locales the user is approved
+  #   to translate in.
+  #
+  constructor: (
+      @glossaryTable, @glossaryUrl, @addSourceEntryUrl, 
+      @sourceLocale, @targetLocales,
+      @settingsModal, @addEntryModal,
+      @userRole, @approvedLocales) ->
+    if $.cookie('sourceLocale')?
+      @sourceLocale = Locale.from_rfc5646($.cookie('sourceLocale'))
+    else
+      @sourceLocale = Locale.from_rfc5646(@sourceLocale)
+    if $.cookie('targetLocales')?
+      @targetLocales = JSON.parse($.cookie('targetLocales'))
+    else
+      @targetLocales = @approvedLocales
+
+    setup = =>
+      this.setupAddTermModal()
+      this.setupSettingsFormModal()
+      this.reloadGlossary()
+
+    setup() if window.localesLoaded
+    $(document).bind 'locales_loaded', setup
+
+  # Flashes an error at the top of the screen.
+  # 
+  # @param [String] message The message that will be flashed.
+  #
   error: (message) ->
-    flash = $('<p/>').addClass('alert alert-error').text(message).appendTo($('#flashes'))
+    flash = $('<p/>').addClass('alert alert-error').text(message).hide().appendTo($('#flashes')).slideDown()
     $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
 
-  loadLocale: (locale) =>
-    if (@availableLocalesOrAdmin != 'admin' &&
-          $.inArray(locale, @availableLocalesOrAdmin) == -1 &&
-          locale != "en")
-      this.error("Locale is unavailable.")
+
+  # @private
+  setupGlossary: ->
+    headerRow = $('<tr/>').appendTo($('<thead/>').appendTo(@glossaryTable)).append('<th/>')
+    $('<div/>').text(@sourceLocale.name()).appendTo($('<th/>').appendTo(headerRow))
+    for rfc5646 in @targetLocales
+      localeEntry = Locale.from_rfc5646(rfc5646)
+      $('<div/>').text(localeEntry.name()).appendTo($('<th/>').appendTo(headerRow))
+    for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+      glossaryAnchor = $('<tbody/>', 
+        id: 'glossary-table-' + letter,
+        class: 'glossary-table-anchor'
+      ).hide().fadeIn().appendTo(@glossaryTable)
+      glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<h3/>').text(letter))))
+
+  # @private
+  setupAddTermModal: =>
+    @addEntryModal.find("input[name='source_glossary_entry[due_date]']").datepicker
+      startDate: new Date()
+      autoclose: true
+      todayBtn: 'linked'
+    @addEntryModal.find("input[name='source_glossary_entry[source_copy]']").jqBootstrapValidation
+      preventSubmit: true
+      filter: -> 
+        return $(this).is(':visible')
+      
+    @addEntryModal.find('form').submit () =>
+      $.ajax @addSourceEntryUrl, 
+        type: 'POST'
+        data: @addEntryModal.find('form').serialize()
+        success: => this.loadGlossaryEntries()
+        error: =>
+          this.error("Couldn’t add new term.")
+          this.loadGlossaryEntries()
+      @addEntryModal.modal('hide')
       return false
-    this.currentlocale = locale
 
-    $('<i/>').addClass('icon-refresh spinning').appendTo @localeForm
-    $.ajax @glossaryUrl.replace('REPLACEME', locale),
-      complete: => @localeForm.find('i').remove()
+  # @private
+  setupSettingsFormModal: =>
+    @inputTarget = @settingsModal.find('.locale-field')
+    @addTargetBtn = @settingsModal.find('.locale-field').parents('.controls').find('.btn')
+    @listTargets = @settingsModal.find('ul.unstyled')
+
+    @newTargetLocales = @targetLocales.slice(0)
+    @settingsModal.find('.modal-footer > button').click =>
+      @targetLocales = @newTargetLocales.slice(0)
+      @newTargetLocales = []
+      $('#settings-listTargets').empty()
+      @settingsModal.modal('hide')
+      $.cookie('sourceLocale', @sourceLocale.rfc5646(), { expires: 1 });
+      $.cookie('targetLocales', JSON.stringify(@targetLocales), { expires: 1 });
+      this.reloadGlossary()
+
+    @settingsModal.on 'hidden', =>
+      @listTargets.empty()
+      @newTargetLocales = @targetLocales.slice(0)
+      this.prepopulateLocalesList()
+
+    this.setupTypeahead()
+
+    $("button[data-target='#" + @settingsModal.attr('id') + "']").removeAttr('disabled')
+
+  # @private
+  prepopulateLocalesList: ->
+    for rfc5646 in @targetLocales
+      do (rfc5646) =>
+        locale = Locale.from_rfc5646(rfc5646)
+        targetEntry = $(HoganTemplates['glossary/settings_locale_entry'].render(locale))
+          .data('rfc5646', locale.rfc5646())
+        @listTargets.append(targetEntry)
+        
+        targetEntry.find('button.removeLocale').click(
+          {newTargetLocales: @newTargetLocales},
+          (event) ->
+            newTargetLocales = event.data.newTargetLocales
+            newTargetLocales.splice(newTargetLocales.indexOf($(this).parent().data()), 1)
+            $(this).parent().fadeOut(300, () -> $(this).remove())
+        )
+
+
+  # @private
+  setupTypeahead: ->
+    this.prepopulateLocalesList()
+
+    flashSettingsWarning = (warning) =>
+      helpBlock = @settingsModal.find('.help-block span')
+      helpBlock.fadeOut () ->
+        helpBlock.text(warning)
+        .removeClass('text-success').addClass('text-error').fadeIn().delay(800).fadeOut () ->
+          helpBlock.text(' • Press Enter to add a new locale')
+          .removeClass('text-error').addClass('text-success').fadeIn()
+
+    addTargetLocale = () =>
+      newRfc = @inputTarget.val().split(' ')[0]
+      locale = Locale.from_rfc5646(newRfc)
+
+      unless locale? and locale.rfc5646() != @sourceLocale.rfc5646()
+        flashSettingsWarning('• Invalid locale')
+        @inputTarget.val('')
+        return false
+
+      if @newTargetLocales.indexOf(locale.rfc5646()) >= 0
+        flashSettingsWarning('• Duplicate locale')
+        @inputTarget.val('')
+        return false
+
+      @newTargetLocales.push(locale.rfc5646())
+
+      targetEntry = $(HoganTemplates['glossary/settings_locale_entry'].render(locale))
+        .data('rfc5646', locale.rfc5646())
+        .hide().fadeIn()
+
+      @listTargets.append(targetEntry)
+      
+      targetEntry.find('button.removeLocale').click(
+        {newTargetLocales: @newTargetLocales},
+        (event) ->
+          newTargetLocales = event.data.newTargetLocales
+          newTargetLocales.splice(newTargetLocales.indexOf($(this).parent().data()), 1)
+          $(this).parent().fadeOut(300, () -> $(this).remove())
+      )
+
+      @inputTarget.val('')
+      return false
+      
+    @addTargetBtn.click =>
+      addTargetLocale()
+    
+    @inputTarget.keypress (e) =>
+      if e.which == 13 # enter
+        addTargetLocale()
+
+  # @private
+  loadGlossaryEntries: => 
+    $('.glossary-table-entry').remove()
+    $.ajax @glossaryUrl,
+      type: 'GET'
       success: (glossaryEntries) =>
-        @glossaryDiv.empty()
-        for entry in glossaryEntries
-          do (entry) =>
-            tr = $('<div/>').addClass('row').appendTo(@glossaryDiv)
-            td1 = $('<div/>').addClass('span6').append($("<div/>").addClass("well").text(entry.source_copy)).appendTo(tr)
-            existingEntryForm = $('<form/>').append($('<input/>').val(entry.copy)).submit ->
-              $.ajax @updateEntryUrl.replace('REPLACEME_LOCALE', locale).replace("REPLACEME_ID", entry.id),
-                data: {review: false, copy: $(this).find('input').val()},
-                type: "PATCH"
-                success: (data) ->
-                  # on success, reload
-                  this.loadLocale(locale)
-              false
+        for sourceEntry in glossaryEntries.reverse()
+          do (sourceEntry) =>
+            switch @userRole
+              when 'admin' then isTranslator = true
+              when 'reviewer', 'translator'
+                if @approvedLocales.indexOf(sourceEntry.source_locale) > -1                
+                  isTranslator = true
+                else 
+                  isTranslator = false  
+              else 
+                isTranslator = false
+            
+            context = 
+              source_id: sourceEntry.id
+              num_locales: @targetLocales.length + 2
+              source_copy: sourceEntry.source_copy
+              source_context: sourceEntry.context
+              source_notes: sourceEntry.notes
+              source_edit_url: sourceEntry.edit_source_entry_url
+              is_translator: isTranslator
+              translated_copies: []
+            for rfc5646 in @targetLocales
+              localeEntry = Locale.from_rfc5646(rfc5646)
+              switch @userRole
+                when 'admin'
+                  isTranslator = true
+                  isReviewer = true
+                when 'reviewer'
+                  if @approvedLocales.indexOf(localeEntry.rfc5646()) > -1
+                    isTranslator = true
+                    isReviewer = true
+                  else 
+                    isTranslator = false  
+                    isReviewer = false
+                when 'translator'
+                  if @approvedLocales.indexOf(localeEntry.rfc5646()) > -1
+                    isTranslator = true
+                  else 
+                    isTranslator = false  
+                  isReviewer = false
+                else 
+                  isTranslator = false
+                  isReviewer = false
 
-            if entry.approved
-              existingEntryForm.find('input').attr('disabled','disabled')
-            else
+              localeContext =
+                copy: ''
+                notes: ''
+                locale: localeEntry.rfc5646()
+                is_translator: isTranslator
+                is_reviewer: isReviewer
+                add_url: sourceEntry.add_locale_entry_url
+              if sourceEntry.locale_glossary_entries[localeEntry.rfc5646()]?
+                lge = sourceEntry.locale_glossary_entries[localeEntry.rfc5646()]
+                localeContext.locale_id   = lge.id
+                localeContext.copy        = lge.copy
+                localeContext.notes       = lge.notes
+                localeContext.edit_url    = lge.edit_locale_entry_url
+                localeContext.approve_url = lge.approve_url
+                localeContext.reject_url  = lge.reject_url
 
-            td2 = $('<div/>').addClass('span6').append($('<div/>').addClass('well').append(existingEntryForm)).appendTo(tr)
+                if lge.translated
+                  approved = lge.approved
+                  if approved == true
+                    localeContext.entry_state = "text-success"
+                    localeContext.approved = true
+                    localeContext.rejected = false
+                  else if approved == false
+                    localeContext.entry_state = "text-error"
+                    localeContext.approved = false
+                    localeContext.rejected = true
+                  else 
+                    localeContext.entry_state = "text-info"
+                    localeContext.approved = false
+                    localeContext.rejected = false
+              context.translated_copies.push(localeContext)
 
-            # only add the buttons if they should be able to see them
-            if @isReviewer
-              buttons = $('<span />').addClass('buttons').appendTo(td2.find('.well'))
-              # make the buttons do everything they need to.
-              btn1 = $('<button/>').addClass('btn btn-mini').append($('<i/>').addClass('icon icon-ok'))
-              btn1.click =>
-                $.ajax @updateEntryUrl.replace('REPLACEME_LOCALE', locale).replace("REPLACEME_ID", entry.id),
-                  data: {review: true, approved: true, copy: existingEntryForm.find('input').val()},
+            $('#glossary-table-' + sourceEntry.source_copy.substr(0, 1).toUpperCase())
+              .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
+
+        for domLocaleEntry in $('.glossary-table-locale-entry')
+          locale = $(domLocaleEntry).data('locale') 
+          localeId = $(domLocaleEntry).data('localeId') 
+          addLocaleEntryUrl = $(domLocaleEntry).data('addUrl') 
+          editLocaleEntryUrl = $(domLocaleEntry).data('editUrl')
+          approveLocaleEntryUrl = $(domLocaleEntry).data('approveUrl')
+          rejectLocaleEntryUrl = $(domLocaleEntry).data('rejectUrl') 
+
+          $(domLocaleEntry).find(".glossary-table-edit-locale").click(((addLocaleEntryUrl, editLocaleEntryUrl, locale, localeId) ->
+            return () ->
+              if localeId
+                window.location.href = editLocaleEntryUrl
+              else 
+                $.ajax addLocaleEntryUrl,
+                  type: "POST"
+                  dataType: "json"
+                  data: 
+                    locale_glossary_entry:
+                      rfc5646_locale: locale
+                  success: (newEntry, textStatus, jqXhr) =>
+                    window.location.href = jqXhr.getResponseHeader("location")
+          )(addLocaleEntryUrl, editLocaleEntryUrl, locale, localeId))
+
+          $(domLocaleEntry).find(".glossary-table-approve-locale").click(((domLocaleEntry, addLocaleEntryUrl, approveLocaleEntryUrl, locale, localeId) ->
+            return () ->
+              $(domLocaleEntry).find(".glossary-table-reject-locale").prop('disabled', false)
+              $(domLocaleEntry).find(".glossary-table-approve-locale").prop('disabled', true)
+              if localeId
+                $.ajax approveLocaleEntryUrl,
                   type: "PATCH"
-                  success: (data) =>
-                    # on success, reload
-                    this.loadLocale(locale)
-                false
-              btn1.appendTo buttons
-              btn2 = $('<button/>').addClass('btn btn-danger btn-mini').append($('<i/>').addClass('icon icon-remove'))
-              btn2.click =>
-                $.ajax @updateEntryUrl.replace('REPLACEME_LOCALE', locale).replace("REPLACEME_ID", entry.id),
-                  data: {review: true, approved: false, copy: existingEntryForm.find('input').val()},
+                  success: () ->
+                    $(domLocaleEntry).parents(".glossary-table-entry").find("." + locale + "-copy")
+                      .hide().removeClass("text-info text-error").addClass("text-success").fadeIn(500)
+          )(domLocaleEntry, addLocaleEntryUrl, approveLocaleEntryUrl, locale, localeId))
+
+          $(domLocaleEntry).find(".glossary-table-reject-locale").click(((domLocaleEntry, addLocaleEntryUrl, rejectLocaleEntryUrl, locale, localeId) ->
+            return () ->
+              $(domLocaleEntry).find(".glossary-table-reject-locale").prop('disabled', true)
+              $(domLocaleEntry).find(".glossary-table-approve-locale").prop('disabled', false)
+              if localeId
+                $.ajax rejectLocaleEntryUrl,
                   type: "PATCH"
-                  success: (data) =>
-                    # on success, reload
-                    this.loadLocale(locale)
-                false
-              btn2.appendTo buttons
-      error: =>
-        this.error("Couldn’t load project list.")
+                  success: () ->
+                    $(domLocaleEntry).parents(".glossary-table-entry").find("." + locale + "-copy")
+                      .hide().removeClass("text-info text-success").addClass("text-error").fadeIn(500)
+          )(domLocaleEntry, addLocaleEntryUrl, rejectLocaleEntryUrl, locale, localeId))
+
+        @glossaryTable.find("input, textarea, button, a").click (e) -> 
+          e.stopPropagation()
+
+      error: => this.error "Couldn’t load glossary list."
     return false
 
-  constructor: (@localeForm, @glossaryDiv, @glossaryUrl, @newEntryForm,
-    @newEntryUrl, @isTranslator, @isReviewer, @availableLocalesOrAdmin,
-    @updateEntryUrl) ->
-    @newEntryForm.submit =>
-      $('<i/>').addClass('icon-refresh spinning').appendTo @newEntryForm
-      $.ajax @newEntryUrl,
-        data: @newEntryForm.serialize()
-        type: "POST",
-        complete: => @newEntryForm.find('i').remove()
-        success: (success) =>
-          this.loadLocale(this.currentLocale)
-      return false
-
-    # I don't know why coffeescript makes me do this...
-    localeForm = @localeForm
-    @localeForm.submit =>
-      this.loadLocale(@localeForm.serializeObject().locale)
+  # Reloads the glossary by emptying the glossary table and setting it up again.
+  #
+  reloadGlossary: =>
+    @glossaryTable.empty()
+    this.setupGlossary()
+    this.loadGlossaryEntries()

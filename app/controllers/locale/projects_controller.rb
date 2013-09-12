@@ -68,7 +68,15 @@ class Locale::ProjectsController < ApplicationController
                              nil
                            end
 
-  respond_with @project
+    @glossary_entries = LocaleGlossaryEntry.joins(:source_glossary_entry)
+        .where(
+            source_glossary_entries: {source_rfc5646_locale: Shuttle::Configuration.locales.source_locale},
+            rfc5646_locale:          @locale.rfc5646,
+            approved:                true)
+        .map(&:as_translation_json)
+        .compact
+
+    respond_with @project
   end
 
   private

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Copyright 2013 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +15,8 @@
 #    limitations under the License.
 
 FactoryGirl.define do
-  factory :glossary_entry do
-    sequence(:source_copy) { |i| "Source copy #{i}" }
-    sequence(:copy) { |i| "Copy #{i}" }
-    source_rfc5646_locale 'en-US'
-    rfc5646_locale 'de-DE'
+  factory :source_glossary_entry do
+    source_rfc5646_locale 'en'
+    source_copy "Glossary entry"
   end
 end

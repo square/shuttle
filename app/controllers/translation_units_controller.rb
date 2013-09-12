@@ -33,9 +33,9 @@ class TranslationUnitsController < ApplicationController
   # Query Parameters
   # ----------------
   #
-  # |              |                                               |
-  # |:-------------|:----------------------------------------------|
-  # | `offset`     | The offset used to display the next 50 results.|
+  # |          |                                                 |
+  # |:---------|:------------------------------------------------|
+  # | `offset` | The offset used to display the next 50 results. |
 
   def index
     respond_with (@translation_units) do |format|
@@ -107,16 +107,16 @@ class TranslationUnitsController < ApplicationController
   # Path Parameters
   # ---------------
   #
-  # |              |                              |
-  # |:-------------|:-----------------------------|
-  # | `id`         | The ID of a TranslationUnit. |
+  # |      |                              |
+  # |:-----|:-----------------------------|
+  # | `id` | The ID of a TranslationUnit. |
   #
   # Body Parameters
   # ---------------
   #
-  # |                    |                                                |
-  # |:-------------------|:-----------------------------------------------|
-  # | `translation_unit` | Parameterized hash of TranslationUnit fields.  |
+  # |                    |                                               |
+  # |:-------------------|:----------------------------------------------|
+  # | `translation_unit` | Parameterized hash of TranslationUnit fields. |
 
   def update
     @translation_unit.update_attributes translation_unit_params
@@ -134,9 +134,9 @@ class TranslationUnitsController < ApplicationController
   # Path Parameters
   # ---------------
   #
-  # |              |                                 |
-  # |:-------------|:--------------------------------|
-  # | `id`         | The ID of a TranslationUnit.    |
+  # |      |                              |
+  # |:-----|:-----------------------------|
+  # | `id` | The ID of a TranslationUnit. |
 
   def destroy
     @translation_unit.destroy

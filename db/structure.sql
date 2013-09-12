@@ -168,6 +168,44 @@ ALTER SEQUENCE keys_id_seq OWNED BY keys.id;
 
 
 --
+-- Name: locale_glossary_entries; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE locale_glossary_entries (
+    id integer NOT NULL,
+    translator_id integer,
+    reviewer_id integer,
+    source_glossary_entry_id integer,
+    metadata text,
+    searchable_copy tsvector,
+    rfc5646_locale character varying(15) NOT NULL,
+    translated boolean DEFAULT false NOT NULL,
+    approved boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: locale_glossary_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE locale_glossary_entries_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: locale_glossary_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE locale_glossary_entries_id_seq OWNED BY locale_glossary_entries.id;
+
+
+--
 -- Name: projects; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -244,6 +282,41 @@ CREATE SEQUENCE slugs_id_seq
 --
 
 ALTER SEQUENCE slugs_id_seq OWNED BY slugs.id;
+
+
+--
+-- Name: source_glossary_entries; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE source_glossary_entries (
+    id integer NOT NULL,
+    metadata text,
+    searchable_source_copy tsvector,
+    source_rfc5646_locale character varying(15) DEFAULT 'en'::character varying NOT NULL,
+    source_copy_sha_raw bytea,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    source_copy_prefix character(5) NOT NULL
+);
+
+
+--
+-- Name: source_glossary_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE source_glossary_entries_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: source_glossary_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE source_glossary_entries_id_seq OWNED BY source_glossary_entries.id;
 
 
 --
@@ -421,6 +494,13 @@ ALTER TABLE ONLY keys ALTER COLUMN id SET DEFAULT nextval('keys_id_seq'::regclas
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY locale_glossary_entries ALTER COLUMN id SET DEFAULT nextval('locale_glossary_entries_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY projects ALTER COLUMN id SET DEFAULT nextval('projects_id_seq'::regclass);
 
 
@@ -429,6 +509,13 @@ ALTER TABLE ONLY projects ALTER COLUMN id SET DEFAULT nextval('projects_id_seq':
 --
 
 ALTER TABLE ONLY slugs ALTER COLUMN id SET DEFAULT nextval('slugs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY source_glossary_entries ALTER COLUMN id SET DEFAULT nextval('source_glossary_entries_id_seq'::regclass);
 
 
 --
@@ -500,6 +587,14 @@ ALTER TABLE ONLY keys
 
 
 --
+-- Name: locale_glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY locale_glossary_entries
+    ADD CONSTRAINT locale_glossary_entries_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: projects_api_key_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -521,6 +616,14 @@ ALTER TABLE ONLY projects
 
 ALTER TABLE ONLY slugs
     ADD CONSTRAINT slugs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: source_glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY source_glossary_entries
+    ADD CONSTRAINT source_glossary_entries_pkey PRIMARY KEY (id);
 
 
 --
@@ -767,6 +870,30 @@ ALTER TABLE ONLY keys
 
 
 --
+-- Name: locale_glossary_entries_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY locale_glossary_entries
+    ADD CONSTRAINT locale_glossary_entries_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: locale_glossary_entries_source_glossary_entry_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY locale_glossary_entries
+    ADD CONSTRAINT locale_glossary_entries_source_glossary_entry_id_fkey FOREIGN KEY (source_glossary_entry_id) REFERENCES source_glossary_entries(id) ON DELETE CASCADE;
+
+
+--
+-- Name: locale_glossary_entries_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY locale_glossary_entries
+    ADD CONSTRAINT locale_glossary_entries_translator_id_fkey FOREIGN KEY (translator_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
 -- Name: translation_changes_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -837,3 +964,7 @@ INSERT INTO schema_migrations (version) VALUES ('20130619195215');
 INSERT INTO schema_migrations (version) VALUES ('20130801190316');
 
 INSERT INTO schema_migrations (version) VALUES ('20130807224704');
+
+INSERT INTO schema_migrations (version) VALUES ('20130821011600');
+
+INSERT INTO schema_migrations (version) VALUES ('20130821011614');

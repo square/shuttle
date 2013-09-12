@@ -1,0 +1,63 @@
+<tbody class="glossary-table-entry accordion-toggle" data-target="#glossary-table-entry-{{source_id}}" data-toggle="collapse">
+  <tr class="">
+    <td></td>
+    <td><b>{{source_copy}}</b></td>
+    {{#translated_copies}}
+    <td>
+      <span class="{{locale}}-copy {{entry_state}}">
+        <b>
+          {{copy}}
+        </b>
+      </span>
+    </td>
+    {{/translated_copies}}
+  </tr>
+  <tr>
+    <td class="hiddenRow" colspan="{{num_locales}}">
+      <div class="accordion-body collapse" id="glossary-table-entry-{{source_id}}">
+        <table class="table table-condensed" style="background-color: transparent">
+          <tbody>
+            <tr>
+              <td style="width: 45px; border-bottom-style: none;"></td>
+              <td style="text-align: left;">
+                <label>Context</label>
+                <input type="text" value="{{source_context}}" readonly>
+                <label>Notes</label>
+                <textarea rows="2" style="height: 60px;" readonly>{{source_notes}}</textarea>
+                <div style="height: 40px">
+                  {{#is_translator}}
+                  <a href="{{source_edit_url}}" class="btn" style="float: right;">
+                    <i class="icon-edit"></i>
+                  </a>
+                  {{/is_translator}}
+                </div>
+              </td>
+              {{#translated_copies}}
+              <td class="glossary-table-locale-entry" data-locale="{{locale}}" data-locale-id="{{locale_id}}" data-add-url="{{add_url}}" data-edit-url="{{edit_url}}" data-approve-url="{{approve_url}}" data-reject-url="{{reject_url}}" style="text-align: left;">
+                <label>Notes</label>
+                <textarea rows="5" readonly>{{notes}}</textarea>
+                <div style="height: 40px">
+                  {{#is_translator}}
+                  <a class="btn glossary-table-edit-locale" style="float: right;" {{#approved}} {{^is_reviewer}} disabled {{/is_reviewer}} {{/approved}}>
+                    <i class="icon-edit"></i>
+                  </a>
+                  {{/is_translator}}
+                  {{#is_reviewer}}
+                  <button class="btn btn-success glossary-table-approve-locale" style="width: 40px; float: left; margin-right: 5px;" {{#approved}} disabled {{/approved}} {{^locale_id}} disabled {{/locale_id}}>
+                    <i class="icon-ok"></i>
+                  </button>
+                  <button class="btn btn-danger glossary-table-reject-locale" style="width: 40px; float: left; margin-right: 5px;" {{#rejected}} disabled {{/rejected}} {{^locale_id}} disabled {{/locale_id}}>
+                    <i class="icon-remove"></i>
+                  </button>
+                  {{/is_reviewer}}
+                </div>
+              </td>
+              {{/translated_copies}}
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </td>
+  </tr>
+</tbody>
