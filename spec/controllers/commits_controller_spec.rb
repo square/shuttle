@@ -301,6 +301,105 @@ de:
     end
   end
 
+  describe "#nt_manifest" do
+    before :all do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project,
+                                    base_rfc5646_locale: 'en-US',
+                                    targeted_rfc5646_locales: {'en-US' => true, 'en' => true, 'es' => true, 'fr' => false},
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s
+                                   )
+      @commit = @project.commit!('HEAD^', skip_import: true)
+      @newer_commit = @project.commit!('HEAD', skip_import: true)
+
+      key1 = FactoryGirl.create(:key,
+                                project: @project,
+                                key: 'key1',
+                                source_copy: 'Hi {{name}}!',
+                                context: 'Greeting',
+                                source: 'does/not/exist.txt'
+                               )
+      key2 = FactoryGirl.create(:key,
+                                project: @project,
+                                key: 'key2',
+                                source_copy: 'Your cart has {{count}} items',
+                                context: 'Item count',
+                                source: 'does/not/exist.txt'
+                               )
+
+      @commit.keys = [key1, key2]
+
+      FactoryGirl.create(:translation,
+                         key: key1,
+                         source_copy: "Hi {{name}}!",
+                         copy:        "Hi {{name}}!",
+                         source_rfc5646_locale: 'en-US',
+                         rfc5646_locale:        'en',
+                         approved: true
+                        )
+      FactoryGirl.create(:translation,
+                         key: key1,
+                         source_copy: "Hi {{name}}!",
+                         copy:        "Hola {{name}}!",
+                         source_rfc5646_locale: 'en-US',
+                         rfc5646_locale:        'es',
+                         approved: true
+                        )
+
+      FactoryGirl.create(:translation,
+                         key: key2,
+                         source_copy: "Your cart has {{count}} items",
+                         copy:        "Your cart has {{count}} items",
+                         source_rfc5646_locale: 'en-US',
+                         rfc5646_locale:        'en',
+                         approved: true
+                        )
+      FactoryGirl.create(:translation,
+                         key: key2,
+                         source_copy: "Your cart has {{count}} items",
+                         copy:        "Su carrito lleva {{count}} ítemes",
+                         source_rfc5646_locale: 'en-US',
+                         rfc5646_locale:        'es',
+                         approved: true
+                        )
+      FactoryGirl.create(:translation,
+                         key: key2,
+                         source_copy: "Your cart has {{count}} items",
+                         copy:        "Votre panier comprend {{count}} articles",
+                         source_rfc5646_locale: 'en-US',
+                         rfc5646_locale:        'fr',
+                         approved: true
+                        )
+    end
+
+    context '[formats]' do
+      it 'should export a YAML file' do
+        get :nt_manifest, project_id: @project.to_param, id: @commit.to_param, format: 'yaml'
+        expect(response.status).to eq(200)
+        expect(response.headers['Content-Disposition']).to eq('attachment; filename="manifest.yaml"')
+        expect(response.body).to eq(<<-YAML)
+---
+Hi {{name}}! (Greeting):
+  string: Hi {{name}}!
+  comment: Greeting
+  translations:
+  - locale: en
+    string: Hi {{name}}!
+  - locale: es
+    string: Hola {{name}}!
+Your cart has {{count}} items (Item count):
+  string: Your cart has {{count}} items
+  comment: Item count
+  translations:
+  - locale: en
+    string: Your cart has {{count}} items
+  - locale: es
+    string: Su carrito lleva {{count}} ítemes
+        YAML
+      end
+    end
+  end
+
   describe '#localize' do
     before :all do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all

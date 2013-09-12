@@ -14,30 +14,25 @@
 
 module Fencer
 
-  # Fences out ERb escapes. See {Fencer}.
+  # Fences out Ruby NT interpolations (such as `{count}`). See {Fencer}.
 
-  module Erb
+  module RubyNt
     extend self
 
     def fence(string)
       scanner = UnicodeScanner.new(string)
 
-      tokens = Hash.new { |hsh, k| hsh[k] = [] }
+      tokens  = Hash.new { |hsh, k| hsh[k] = [] }
       until scanner.eos?
-        match       = scanner.scan_until(/</)
-        scanner.pos = scanner.pos - 1 # rewind back to tag opening
+        match = scanner.scan_until(/\{\{/)
         break unless match
 
-        start = scanner.pos
-        token = scanner.scan(/<%(.+?)%>/m)
-        unless token
-          # advance past the < again, so as not to catch it the next time around
-          scanner.pos = scanner.pos + 1
-          next
-        end
-        stop = scanner.pos - 1
+        start = scanner.pos - 2         # less the '{'
+        token = scanner.scan_until(/\}\}/)
+        next unless token
 
-        tokens[token] << (start..stop)
+        stop          = scanner.pos - 1 # ranges are inclusive
+        tokens['{{' + token] << (start..stop)
       end
 
       return tokens

@@ -50,12 +50,9 @@ module Importer
 
     # @return [Array<Class>] All known implementations of the base class.
     #   Automatically updated.
-    class_attribute :implementations
-    self.implementations = []
-
-    # @private
-    def self.inherited(subclass)
-      self.implementations << subclass
+    def self.implementations(memo=[])
+      self.subclasses.each { |s| memo << s ; s.implementations(memo) }
+      memo
     end
 
     # @return [String] The human-readable description of this importer's file
@@ -106,8 +103,7 @@ module Importer
       end
       if @commit
         Commit.transaction do
-          @keys -= @commit.keys
-          @commit.keys += @keys.to_a
+          @commit.keys += (@keys - @commit.keys).to_a
         end
       end
 
@@ -415,6 +411,14 @@ module Importer
           @importer.add_translation key, value, locale
         else
           @importer.add_string key, value, {source: importer.file.path}.merge(options)
+        end
+      end
+
+      def add_nt_string(string, comment, options={})
+        if locale
+          raise "NT cannot directly import translations"
+        else
+          @importer.add_nt_string string, comment, {source: importer.file.path}.merge(options)
         end
       end
     end

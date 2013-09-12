@@ -46,38 +46,30 @@ class Compiler
   #   `format`.
 
   def manifest(format, options={})
-    raise CommitNotReadyError if !@commit.ready? && !options[:partial]
+    generate_manifest(Exporter::Base, format, options)
+  end
 
-    if options[:locale]
-      locale = Locale.from_rfc5646(options[:locale])
-      raise UnknownLocaleError unless locale
-    else
-      locale = nil
-    end
+  # NT Manifest a commit to a given output stream.
+  #
+  # @param [String] format The format identifier of an exporter to use, such as
+  #   "application/javascript".
+  # @param [Hash] options Additional options.
+  # @option options [true, false] partial (false) If `true`, non-ready Commits
+  #   are allowed, with untranslated strings being omitted.
+  # @option options [String] locale The RFC 5646 code for a locale to export, or
+  #   `nil` to export all required locales.
+  # @option options [true, false] force (false) If `true`, busts the cache and
+  #   forces a recompile.
+  # @return [File] Output data and metadata.
+  # @raise [CommitNotReadyError] If the Commit is not ready and a non-partial
+  #   manifest is requested.
+  # @raise [UnknownLocaleError] If the RFC 5646 code for `locale` is not
+  #   recognized.
+  # @raise [UnknownExporterError] If no exporter can be found to handle
+  #   `format`.
 
-    exporter = Exporter::Base.find_by_format(format)
-    raise UnknownExporterError unless exporter
-
-    if !options[:force] && locale.nil? && (data = cached_manifest(format))
-      return File.new(
-          StringIO.new(data),
-          exporter.character_encoding,
-          "#{locale.try!(:rfc5646) || 'manifest'}.#{exporter.file_extension}",
-          exporter.mime_type
-      )
-    end
-
-    io = StringIO.new
-    exporter = exporter.new(@commit)
-    exporter.export io, *locales_for_export(locale, options[:partial])
-    io.rewind
-
-    return File.new(
-        io,
-        exporter.class.character_encoding,
-        "#{locale.try!(:rfc5646) || 'manifest'}.#{exporter.class.file_extension}",
-        exporter.class.mime_type
-    )
+  def nt_manifest(format, options={})
+    generate_manifest(Exporter::NtBase, format, options)
   end
 
   # Generates localized versions of localizable files in a commit.
@@ -126,6 +118,42 @@ class Compiler
   end
 
   private
+
+  # Consolidates the generation of manifests for both NT and non-NT
+  def generate_manifest(base, format, options={})
+    raise CommitNotReadyError if !@commit.ready? && !options[:partial]
+
+    if options[:locale]
+      locale = Locale.from_rfc5646(options[:locale])
+      raise UnknownLocaleError unless locale
+    else
+      locale = nil
+    end
+
+    exporter = base.find_by_format(format)
+    raise UnknownExporterError unless exporter
+
+    if !options[:force] && locale.nil? && (data = cached_manifest(format))
+      return File.new(
+          StringIO.new(data),
+          exporter.character_encoding,
+          "#{locale.try!(:rfc5646) || 'manifest'}.#{exporter.file_extension}",
+          exporter.mime_type
+      )
+    end
+
+    io = StringIO.new
+    exporter = exporter.new(@commit)
+    exporter.export io, *locales_for_export(locale, options[:partial])
+    io.rewind
+
+    return File.new(
+        io,
+        exporter.class.character_encoding,
+        "#{locale.try!(:rfc5646) || 'manifest'}.#{exporter.class.file_extension}",
+        exporter.class.mime_type
+    )
+  end
 
   def locales_for_export(locale, partial)
     if locale
