@@ -17,7 +17,6 @@
 # display a list of locale options.
 
 class LocalesController < ApplicationController
-  respond_to :json
 
   # Returns a list of known locales and their variants, scripts, etc.
   #
@@ -50,7 +49,46 @@ class LocalesController < ApplicationController
     end
 
     countries.each { |key, flag| countries[key] = view_context.image_path("country-flags/#{flag.downcase}.png") }
-
     render json: countries.to_json
   end
+
+  # Retrieves all locales as an array of hashes where each hash contains a value 
+  # (the rfc and locale combined), a set of tokens to help the typeahead search
+  # for the array, the locale's rfc, the locale's name, and the url to a flag if 
+  # it is available. 
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /locales/typeahead`
+
+  def typeahead
+    content = []
+
+    countries = YAML.load_file(Rails.root.join('data', 'locale_countries.yml'))
+    countries.select! { |_, flag| File.exist? Rails.root.join('app', 'assets', 'images', 'country-flags', "#{flag.downcase}.png") }
+    # apply potential region values too
+    Dir.glob(Rails.root.join('app', 'assets', 'images', 'country-flags', '*.png')).each do |file|
+      base = File.basename(file, '.png')
+      next if base.starts_with?('_')
+      countries[base.upcase] = base
+    end
+    countries.each { |key, flag| countries[key] = view_context.image_path("country-flags/#{flag.downcase}.png") }
+    
+    t('locale.name').each do |rfc, locale|
+      rfc = rfc.id2name
+      temp = {
+        value: rfc + ' - ' + locale,
+        tokens: [rfc, locale, '-'],
+        rfc: rfc,
+        locale: locale
+      }
+      if countries[rfc]
+        temp[:flagUrl] = countries[rfc]
+      end 
+      content << temp
+    end
+    
+    render json: content
+  end 
 end

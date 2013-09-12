@@ -103,14 +103,4 @@ class HomeController < ApplicationController
     @older = @commits.offset(@offset + 30).exists?
   end
 
-  # Displays a lnading page appropriate to translators: They can view a list of
-  # projects and edit their glossary entries.
-  #
-  # Routes
-  # ------
-  #
-  # * `GET /glossary`
-
-  def glossary
-  end
 end

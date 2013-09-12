@@ -29,7 +29,11 @@
 //= require jquery-timers
 //= require xregexp
 //
+//= require hogan.js
 //= require twitter/bootstrap
+//= require bootstrap-datepicker
+//= require jqBootstrapValidation
+//= require twitter/typeahead.min
 //= require utilities
 //
 //= require buttons
@@ -42,4 +46,6 @@
 //= require multifield
 //= require smart_form
 //
+//= require_tree ../templates
 //= require_tree .
+

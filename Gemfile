@@ -59,7 +59,11 @@ gem 'sass-rails'
 gem 'coffee-rails'
 gem 'uglifier'
 gem 'less-rails'
+gem 'hogan_assets'
 gem 'twitter-bootstrap-rails'
+gem 'twitter-typeahead-rails'
+gem 'bootstrap-datepicker-rails'
+
 
 group :development do
   gem 'redcarpet', require: nil

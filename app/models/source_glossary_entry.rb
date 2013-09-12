@@ -1,0 +1,87 @@
+# Copyright 2013 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+require 'digest/sha2'
+
+# Source glossary entries encapsulate commonly used copies which need to be 
+# translated for a specific locale.  Note that copies from a single source 
+# must be unique.  
+#
+# Associations
+# ============
+#
+# |                           |                                                                           |
+# |:--------------------------|:--------------------------------------------------------------------------|
+# | `locale_glossary_entries` | Locale specific glossary entries that are translatiosn of the source copy |
+# 
+# Properties
+# ==========
+#
+# |                 |                                                          |
+# |:----------------|:---------------------------------------------------------|
+# | `source_locale` | The locale the copy that needs to be translated is from. |
+#
+# Metadata
+# ========
+#
+# |               |                                                                         |
+# |:--------------|:------------------------------------------------------------------------|
+# | `source_copy` | The copy for the string.                                                |
+# | `context`     | A human-readable explanation of the context in which the copy is used.  |
+# | `notes`       | A human-readable explanation of any additional notes for translators.   |
+# | `due_date`    | The expected date when a glossary entry is due to be translated.        |
+
+class SourceGlossaryEntry < ActiveRecord::Base
+  has_many :locale_glossary_entries, :dependent => :delete_all, inverse_of: :source_glossary_entry
+
+  include HasMetadataColumn
+  has_metadata_column(
+      source_copy: {allow_nil: false},
+      context:     {allow_nil: true},
+      notes:       {allow_nil: true},
+      due_date:    {allow_nil: true}
+  )
+
+  extend SetNilIfBlank
+  set_nil_if_blank :context, :notes, :due_date
+
+  extend PrefixField
+  prefix_field :source_copy
+
+  validates :source_rfc5646_locale,
+            presence: true
+  validates :source_copy_sha,
+            presence: true
+  validates :source_copy_sha_raw, 
+            uniqueness: true
+
+  attr_readonly :source_rfc5646_locale
+
+  extend DigestField
+  digest_field :source_copy
+
+  extend LocaleField
+  locale_field :source_locale, from: :source_rfc5646_locale
+
+  extend SearchableField
+  searchable_field :source_copy, language_from: :source_locale
+  
+  def as_json(*)
+    super.merge(locale_glossary_entries: locale_glossary_entries.inject({}) do |memo, cur|
+      memo[cur.rfc5646_locale] = cur.as_json
+      memo
+    end)
+  end
+
+end

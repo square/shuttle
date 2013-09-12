@@ -1,0 +1,138 @@
+.container {
+  position: relative; }
+
+.page-header-btn {
+  float: right;
+  margin: 5px 5px 5px 5px; }
+
+#alphabet-bar {
+  z-index: 2;
+  text-align: center;
+  padding-top: 5px;
+  padding-bottom: 15px;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(15%, white), color-stop(100%, rgba(255, 255, 255, 0)));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, white 15%, rgba(255, 255, 255, 0) 100%);
+  /* Chrome10+,Safari5.1+ */
+  pointer-events: none; }
+  #alphabet-bar a {
+    margin-left: 10px;
+    margin-right: 10px;
+    display: inline;
+    pointer-events: auto; }
+  #alphabet-bar ul {
+    list-style-type: none; }
+    #alphabet-bar ul li {
+      display: inline; }
+
+.affix {
+  position: fixed;
+  top: 40px;
+  width: 100%; }
+
+#glossary {
+  position: absolute;
+  top: 150px; }
+  #glossary table {
+    table-layout: fixed;
+    margin-bottom: 0px;
+    border-color: none; }
+    #glossary table th {
+      text-align: center;
+      padding-left: 10px;
+      padding-right: 10px; }
+      #glossary table th:first-child {
+        width: 25px;
+        border-bottom-style: none; }
+      #glossary table th div {
+        border-bottom-width: 1px;
+        border-bottom-color: #dddddd;
+        border-bottom-style: solid; }
+    #glossary table tbody + tbody {
+      border-style: none; }
+    #glossary table .glossary-table-entry:hover {
+      background-color: #f6f6f6; }
+    #glossary table td {
+      padding-left: 10px;
+      padding-right: 10px;
+      text-align: center;
+      border: 0px;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box; }
+      #glossary table td b.approved {
+        color: #7f7; }
+      #glossary table td b.rejected {
+        color: #f77; }
+      #glossary table td b.translated {
+        color: #77f; }
+      #glossary table td h3 {
+        margin: 0px; }
+      #glossary table td input {
+        width: 100%;
+        height: 30px;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box; }
+        #glossary table td input[readonly] {
+          background-color: #ffffff; }
+      #glossary table td textarea {
+        width: 100%;
+        height: 125px;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        resize: vertical; }
+        #glossary table td textarea[readonly] {
+          background-color: #ffffff; }
+    #glossary table form {
+      margin-bottom: 0px; }
+    #glossary table .hiddenRow {
+      padding: 0 !important; }
+
+.control-label {
+  width: 100px !important;
+  float: left; }
+
+.controls {
+  margin-left: 110px !important;
+  margin-right: 45px !important; }
+  .controls input[type=text] {
+    height: 30px;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; }
+  .controls textarea {
+    height: 95px;
+    width: 100%;
+    resize: vertical;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; }
+  .controls select {
+    height: 30px;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; }
+
+#settings-modal .help-block {
+  margin-left: 20px; }
+
+#settings-listTargets {
+  height: 200px;
+  border: 1px solid #cccccc;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  padding: 4px 6px 6px 4px; }
+  #settings-listTargets li {
+    padding: 2px;
+    width: 100%; }
+    #settings-listTargets li .removeLocale {
+      position: relative;
+      color: #ff6666;
+      margin-right: 20px; }
+    #settings-listTargets li:hover {
+      background-color: #f6f6f6; }

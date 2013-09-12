@@ -1,0 +1,3 @@
+$('#copy-source-button').click () ->
+  $('#locale-copy').val("<%= escape_javascript @source_entry.source_copy %>") 
+  return false

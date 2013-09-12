@@ -1,0 +1,32 @@
+.control-label {
+  width: 100px !important;
+  float: left;
+}
+
+.controls {
+  margin-left: 110px !important;
+  margin-right: 45px !important; }
+  .controls input[type=text] {
+    height: 30px;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; }
+  .controls textarea {
+    height: 95px;
+    width: 100%;
+    resize: vertical;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; }
+  .controls select {
+    height: 30px;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; }
+
+#btn-update-entry, #btn-confirm-delete {
+  float: right; 
+  width: 200px;
+}
