@@ -41,7 +41,7 @@ module PrefixField
     before_save do |object|
       fields.each do |field|
         column = options[:prefix_column] || :"#{field}_prefix"
-        object.send :"#{column}=", object.send(field)[0, options[:length] || 5]
+        object.send :"#{column}=", object.send(field)[0, options[:length] || 5].downcase
       end
     end
   end

@@ -66,7 +66,7 @@ module Localizer
             where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).each do |translation|
           next unless translation.key.source
           source    = translation.key.source.sub(/^\//, '')
-          localizer = implementations.detect { |localizer| localizer.localizable?(commit.project, source) }
+          localizer = implementations.detect { |localizer| localizer.localizable?(commit.project, translation.key) }
           next unless localizer
           organized_translations[localizer.ident][source][translation.rfc5646_locale] << translation
         end

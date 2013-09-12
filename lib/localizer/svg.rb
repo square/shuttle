@@ -17,8 +17,8 @@ module Localizer
   # Applies localized copy to SVG files.
 
   class Svg < Base
-    def self.localizable?(project, path)
-      path.end_with?("-#{project.base_rfc5646_locale}.svg")
+    def self.localizable?(project, key)
+      key.source.end_with?("-#{project.base_rfc5646_locale}.svg")
     end
 
     def localize(input_file, output_file, locale)

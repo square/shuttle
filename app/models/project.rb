@@ -129,7 +129,6 @@ class Project < ActiveRecord::Base
   before_validation :create_api_key, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
   after_update :add_or_remove_pending_translations
-  after_update :recalculate_commit_readiness
 
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked

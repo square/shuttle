@@ -1,0 +1,31 @@
+# Copyright 2013 Square Inc.
+
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+
+#        http://www.apache.org/licenses/LICENSE-2.0
+
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+$('#alphabet-bar').affix(
+  offset: 
+    top: 120
+);
+
+$(document).ready () ->
+  # Default source/target locales
+  sourceLocale = JSON.parse("<%= escape_javascript @source_locale.to_json %>")
+  targetLocales = JSON.parse("<%= escape_javascript @target_locales.to_json %>")
+  
+  # Create a new glossary entry list
+  new GlossaryList(
+    $('#glossary table'), "<%= glossary_sources_url %>", "<%= glossary_sources_url(format:'json') %>"
+    sourceLocale, targetLocales,
+    $('#settings-modal'), $('#add-entry-modal'),
+    "<%= current_user.role %>", <%= current_user.approved_rfc5646_locales.to_json %>
+  );

@@ -24,14 +24,14 @@ module Localizer
     # XML files that could contain localizable resources.
     FILENAMES = %w(strings.xml arrays.xml plurals.xml titles.xml)
 
-    def self.localizable?(project, path)
-      _, qualifiers = AndroidQualifiers::parse_qualifiers(::File.basename(::File.dirname(path)))
+    def self.localizable?(project, key)
+      _, qualifiers = AndroidQualifiers::parse_qualifiers(::File.basename(::File.dirname(key.source)))
       file_locale   = Locale.new(qualifiers['language'] || project.base_locale.iso639,
                                  nil,
                                  nil,
                                  qualifiers['region'].try!(:[], 1, 2) || project.base_locale.region)
 
-      file_locale == project.base_locale && FILENAMES.include?(::File.basename(path))
+      file_locale == project.base_locale && FILENAMES.include?(::File.basename(key.source))
     end
 
     def localize(input_file, output_file, locale)

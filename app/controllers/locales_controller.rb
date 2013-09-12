@@ -17,7 +17,6 @@
 # display a list of locale options.
 
 class LocalesController < ApplicationController
-  respond_to :json
 
   # Returns a list of known locales and their variants, scripts, etc.
   #

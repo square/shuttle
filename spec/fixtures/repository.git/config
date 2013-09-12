@@ -1,7 +1,8 @@
 [core]
 	repositoryformatversion = 0
 	filemode = true
-	bare = false
-	logallrefupdates = true
+	bare = true
 	ignorecase = true
 	precomposeunicode = false
+[remote "origin"]
+	url = /Users/tim/Development/shuttle-test-repository

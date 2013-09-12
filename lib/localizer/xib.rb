@@ -21,8 +21,9 @@ module Localizer
   class Xib < Base
     include IosCommon
 
-    def self.localizable?(project, path)
-      path =~ /#{Regexp.escape project.base_rfc5646_locale}\.lproj\/[^\/]+\.xib$/
+    def self.localizable?(project, key)
+      key.source =~ /#{Regexp.escape project.base_rfc5646_locale}\.lproj\/[^\/]+\.xib$/ &&
+          key.importer == 'xib'
     end
 
     def localize(input_file, output_file, locale)
