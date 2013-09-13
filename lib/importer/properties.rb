@@ -19,6 +19,8 @@ module Importer
   # Parses translatable strings from Java .properties files.
 
   class Properties < Base
+    def self.fencers() %w(MessageFormat) end
+
     protected
 
     def import_file?(locale=nil)
