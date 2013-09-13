@@ -101,7 +101,7 @@ describe Commit do
         email.to.should eql([Shuttle::Configuration.mailer.translators_list])
         email.cc.should eql([@commit.user.email])
         email.subject.should eql('[Shuttle] New commit ready for translation')
-        email.body.to_s.should include("https://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
+        email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
       end
 
       it "sends one email to the translators when loading changes to false if the commit has no user" do
@@ -113,7 +113,7 @@ describe Commit do
         email = ActionMailer::Base.deliveries.first
         email.to.should eql([Shuttle::Configuration.mailer.translators_list])
         email.subject.should eql('[Shuttle] New commit ready for translation')
-        email.body.to_s.should include("https://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
+        email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
       end
 
       it "sends an email when ready changes to true from false" do
