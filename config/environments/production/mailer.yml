@@ -1,3 +1,4 @@
 ---
 default_url_options:
   host: shuttle.squareup.com
+  protocol: https

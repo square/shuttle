@@ -102,6 +102,9 @@ class User < ActiveRecord::Base
             inclusion: {in: ROLES},
             allow_nil: true
 
+  extend SetNilIfBlank
+  set_nil_if_blank :role
+
   # @private Used by Devise.
   def active_for_authentication?() super && role? end
 
