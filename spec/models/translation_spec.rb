@@ -265,5 +265,12 @@ describe Translation do
       trans = FactoryGirl.build(:translation, source_copy: "", copy: nil)
       trans.should be_valid
     end
+
+    it "should add an error if the interpolation is invalid" do
+      key = FactoryGirl.create(:key, interpolator: 'android')
+      trans = FactoryGirl.build(:translation, copy: "{{hello world}}", key: key)
+      expect(trans).not_to be_valid
+      expect(trans.errors[:copy]).to eql(["has an invalid interpolation"])
+    end 
   end
 end

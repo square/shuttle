@@ -204,13 +204,13 @@ module Importer
       #  log_skip key, "skip_key? returned true for #{@blob.project.base_locale.inspect}"
       #  return
       #end
-
       key = @blob.project.keys.for_key(key).source_copy_matches(value).create_or_update!(
           options.reverse_merge(
               key:                  key,
               source_copy:          value,
               importer:             self.class.ident,
               fencers:              self.class.fencers,
+              interpolator:         self.class.default_interpolator,
               skip_readiness_hooks: true)
       )
       @keys << key
@@ -303,6 +303,13 @@ module Importer
         extract_value value, new_key, &block
       end
     end
+
+    # @return [String, nil] Returns the interpolator typically used with this 
+    #   i18n library.
+
+    def self.default_interpolator
+      return nil
+    end 
 
     private
 
