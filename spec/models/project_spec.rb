@@ -35,9 +35,9 @@ describe Project do
       # for commit! creation
       @project.stub(:repo).and_yield(@repo)
       @commit_obj = double('Git::Object::Commit',
-                         sha:     'a4b6dd88498817d4947730c7964a1a14c8f13d91',
-                         message: 'foo',
-                         author:  double('Git::Author', date: Time.now))
+                           sha:     'a4b6dd88498817d4947730c7964a1a14c8f13d91',
+                           message: 'foo',
+                           author:  double('Git::Author', date: Time.now))
       Commit.any_instance.stub(:import_strings)
     end
 
@@ -284,6 +284,79 @@ describe Project do
                                  skip_importer_paths: {})
 
       @project.skip_path?('bar/foo.txt', Importer::Ruby).should be_false
+    end
+  end
+
+  describe "#skip_tree?" do
+    context '[only paths]' do
+      before :all do
+        @project = FactoryGirl.create(:project,
+                                      only_paths:          %w(only/path),
+                                      only_importer_paths: {'foo' => %w(importeronly/path)})
+      end
+
+      it "should return false if given an only path" do
+        expect(@project.skip_tree?('/only/path')).to be_false
+      end
+
+      it "should return false if given the parent of an only path" do
+        expect(@project.skip_tree?('/only')).to be_false
+      end
+
+      it "should return false if given the child of an only path" do
+        expect(@project.skip_tree?('/only/path/child')).to be_false
+      end
+
+      it "should return false if given an importer-specific only path" do
+        expect(@project.skip_tree?('/importeronly/path')).to be_false
+      end
+
+      it "should return false if given the parent of an importer-specific only path" do
+        expect(@project.skip_tree?('/importeronly')).to be_false
+      end
+
+      it "should return false if given the child of an importer-specific only path" do
+        expect(@project.skip_tree?('/importeronly/path/child')).to be_false
+      end
+
+      it "should return true if true if a path that's not related to the only paths" do
+        expect(@project.skip_tree?('/foo/bar')).to be_true
+      end
+    end
+
+    context '[skip paths]' do
+      before :all do
+        @project = FactoryGirl.create(:project,
+                                      skip_paths:          %w(skip/path),
+                                      skip_importer_paths: {'foo' => %w(importerskip/path)})
+      end
+      it "should return true if given a skip path" do
+        expect(@project.skip_tree?('/skip/path')).to be_true
+      end
+
+      it "should return false if given the parent of a skip path" do
+        expect(@project.skip_tree?('/skip')).to be_false
+      end
+
+      it "should return true if given the child of a skip path" do
+        expect(@project.skip_tree?('/skip/path/child')).to be_true
+      end
+
+      it "should return true if given an importer-specific skip path" do
+        expect(@project.skip_tree?('/importerskip/path')).to be_true
+      end
+
+      it "should return false if given the parent of an importer-specific skip path" do
+        expect(@project.skip_tree?('/importerskip')).to be_false
+      end
+
+      it "should return true if given the child of an importer-specific skip path" do
+        expect(@project.skip_tree?('/importerskip/path/child')).to be_true
+      end
+
+      it "should return false if there are no applicable skip paths" do
+        expect(@project.skip_tree?('/foo/bar')).to be_false
+      end
     end
   end
 

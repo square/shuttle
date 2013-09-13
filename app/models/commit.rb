@@ -425,6 +425,9 @@ class Commit < ActiveRecord::Base
   end
 
   def import_tree(tree, path, options={})
+    return if project.skip_tree?(path)
+    imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
+
     tree.blobs.each do |name, blob|
       blob_path   = "#{path}/#{name}"
       blob_object = if options[:blobs]
@@ -437,7 +440,6 @@ class Commit < ActiveRecord::Base
                       project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
                     end
 
-      imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
       imps.each do |importer|
         importer = importer.new(blob_object, blob_path, self)
 
