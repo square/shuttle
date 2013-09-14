@@ -26,4 +26,14 @@ describe Fencer::Android do
           should eql('{{two}}' => [12..18], '{{tokens}}' => [20..29])
     end
   end
+
+  describe ".valid?" do
+    it "should return true for a string that only contains a-z between { }" do
+      Fencer::Android.valid?("String with {two} {tokens}.").should be_true
+    end
+
+    it "should return false for a string that only contains any other character between { }" do
+      Fencer::Android.valid?("String with {{two}} {tokens}.").should be_false
+    end
+  end
 end

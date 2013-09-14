@@ -88,6 +88,10 @@ class TranslationItem
 
   constructor: (@parent, @translation, @options) ->
     @next = null
+    @fencers = []
+    for fencer_type in @translation.key.fencers
+      do (fencer_type) =>
+        @fencers.push(new Fencer(fencer_type, @translation.source_fences))
 
   # Submits the copy for translation and re-renders the cell. Aborts early if
   # the copy does not pass token parity checks.
@@ -95,8 +99,7 @@ class TranslationItem
   # @return [Boolean] Whether the submission passed checks.
   #
   submit: ->
-    if @copy_field.val().length > 0 &&
-        this.checkTokenParity(@translation.source_fences, @copy_field.val()).length > 0
+    if @copy_field.val().length > 0 && this.hasMissingTokens(@copy_field.val())
       this.highlightTokenParityWarning()
       return false
 
@@ -111,7 +114,31 @@ class TranslationItem
       data: $.param('translation[copy]': @element.find('textarea').val())
       complete: => @element.find('textarea, input').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
-      error: => modal("Couldn’t update that translation.", "An error occurred.")
+      error: (jqXhr) => 
+        if jqXhr.status == 422
+          modaldiv = $('<div/>').addClass('modal hide fade')
+
+          header = $('<div/>').addClass('modal-header').appendTo(modaldiv)
+          $('<h3/>').text("Couldn't Update Translation").appendTo header
+
+          body_div = $('<div/>').addClass('modal-body').appendTo(modaldiv)
+          $('<b/>').text('Errors:').appendTo body_div
+          body_list = $('<ul/>').addClass("text-error")
+
+          for own field, errors of jqXhr.responseJSON
+            do (field, errors) ->
+              field = field.charAt(0).toUpperCase() + field.slice(1)
+              for error in errors 
+                $('<li/>').text(field + " " + error).appendTo(body_list)
+          
+          body_list.appendTo body_div
+
+          footer = $('<div/>').addClass('modal-footer').appendTo(modaldiv)
+          $('<a/>').addClass('btn btn-primary').text("Confirm").attr('data-dismiss', 'modal').appendTo(footer)
+
+          modaldiv.modal()
+        else   
+          modal("Couldn’t Update Translation", "An error occurred.")
     return true
 
   # Re-renders the cell using a new translation object (loaded from JSON).
@@ -253,7 +280,7 @@ class TranslationItem
       this.setUnsaved()
       # show warnings
       this.checkForDumbCharacters(@copy_field.val())
-      this.warnForTokenParity(@translation.source_fences, @copy_field.val())
+      this.warnForTokenParity(@copy_field.val())
       return true
 
     for chars in TranslationItem::DUMB_CHARACTERS
@@ -309,16 +336,18 @@ class TranslationItem
         @element.find(".dumb-#{chars[0]}").hide()
 
   # @private
-  checkTokenParity: (fences, copy) ->
-    (key for own key, value of fences when copy.indexOf(key) == -1)
+  hasMissingTokens: (copy) ->
+    (f for f in @fencers when f.missingFences(copy).length > 0).length > 0
 
   # @private
-  warnForTokenParity: (fences, copy) ->
+  warnForTokenParity: (copy) ->
     if copy.length == 0
       @element.find('.token-parity-warning').hide()
       return
 
-    missing_fences = this.checkTokenParity(fences, copy)
+    missing_fences = []
+    for fencer in @fencers
+      do (fencer) -> missing_fences = missing_fences.concat(fencer.missingFences(copy))
     if missing_fences.length > 0
       @element.find('.token-parity-warning').text("You’re missing the following tokens in your translation: #{toSentence(missing_fences)}").show()
     else

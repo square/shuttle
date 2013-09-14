@@ -37,5 +37,11 @@ module Fencer
 
       return tokens
     end
+
+    # Verifies that `{interpolation_names}` only contain letters or underscores.
+
+    def valid?(string)
+      /\{[^\}]*[^}_a-z][^\}]*\}/ !~ string
+    end
   end
 end

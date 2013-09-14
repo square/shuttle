@@ -32,6 +32,8 @@ gem 'httparty'
 gem 'therubyracer', platform: :mri, require: 'v8'
 gem 'nokogiri'
 gem 'CFPropertyList', require: 'cfpropertylist'
+gem 'parslet'
+gem 'mustache'
 
 # EXPORTING
 gem 'libarchive'
@@ -67,8 +69,6 @@ gem 'bootstrap-datepicker-rails'
 group :development do
   gem 'redcarpet', require: nil
   gem 'yard', require: nil, platform: :mri
-
-  gem 'parslet'
 end
 
 group :test do

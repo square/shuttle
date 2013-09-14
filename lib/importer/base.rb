@@ -204,7 +204,6 @@ module Importer
       #  log_skip key, "skip_key? returned true for #{@blob.project.base_locale.inspect}"
       #  return
       #end
-
       key = @blob.project.keys.for_key(key).source_copy_matches(value).create_or_update!(
           options.reverse_merge(
               key:                  key,

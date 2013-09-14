@@ -37,5 +37,8 @@ module Fencer
 
       return tokens
     end
+
+    # No particular validation checking.
+    def valid?(_) true end
   end
 end

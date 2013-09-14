@@ -40,8 +40,9 @@
 //= require buttons
 //= require dynamic_search_field
 //= require data_source_builder
-//= require infinite_scroll
+//= require fencer
 //= require form_with_errors
+//= require infinite_scroll
 //= require locale_field
 //= require live_update
 //= require multifield

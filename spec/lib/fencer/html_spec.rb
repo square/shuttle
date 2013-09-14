@@ -41,4 +41,16 @@ describe Fencer::Html do
                 should eql({})
     end
   end
+
+  describe ".valid?" do
+    it "should return true for a string with valid HTML" do
+      Fencer::Html.valid?("Some <b>valid<html /></b>.").should be_true
+    end
+
+    it "should return false for a string with invalid HTML" do
+      Fencer::Html.valid?("An <unclosed>tag.").should be_false
+      Fencer::Html.valid?("A <mismatched></tag>.").should be_false
+      Fencer::Html.valid?("An <<invalid>/>tag.").should be_false
+    end
+  end
 end

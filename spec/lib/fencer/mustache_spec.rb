@@ -31,4 +31,16 @@ describe Fencer::Mustache do
           should eql('{{#opening}}' => [12..23], '{{/closing}}' => [29..40])
     end
   end
+
+  describe ".valid?" do
+    it "should return true for a string with valid interpolations" do
+      Fencer::Mustache.valid?("String with {{valid}} {{#foo}}interpolations{{/foo}}.").should be_true
+    end
+
+    it "should return false for a string with invalid interpolations" do
+      Fencer::Mustache.valid?("String with {{invalid {{#foo}}interpolations{{/foo}}.").should be_false
+      Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations{{/bar}}.").should be_false
+      Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations.").should be_false
+    end
+  end
 end

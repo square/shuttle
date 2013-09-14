@@ -71,5 +71,15 @@ module Fencer
 
       return tokens
     end
+
+    # Verifies using Nokogiri that the HTML is valid.
+
+    def valid?(string)
+      wrapped_str = '<?xml version="1.0" encoding="UTF-8"?><root>' + string + '</root>'
+      Nokogiri::XML(wrapped_str, nil, nil, Nokogiri::XML::ParseOptions::STRICT|Nokogiri::XML::ParseOptions::NONET)
+      true
+    rescue Nokogiri::XML::SyntaxError
+      false
+    end
   end
 end

@@ -10,6 +10,8 @@ en:
           attributes:
             approved:
               not_translated: cannot be set when translation is pending
+            copy:
+              invalid_interpolations: has an invalid %{fencer} interpolation
         translation_unit:
           attributes:
             source_copy_sha_raw:
@@ -186,8 +188,10 @@ en:
         2: P2
         3: P3
   fencer:
+    Android: "{android}"
     Erb: "<%= ERb %>"
     Html: "<HTML>"
+    MessageFormat: "Java MessageFormat [{0}]"
     Mustache: "{{Mustache}}"
     Printf: "printf() [%s]"
     RubyI18n: "%{Ruby i18n}"

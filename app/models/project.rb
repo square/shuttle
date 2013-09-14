@@ -280,6 +280,33 @@ class Project < ActiveRecord::Base
     return false
   end
 
+  # Tests a path and its subpaths against the path inclusions/exclusions and
+  # locale-based inclusions/exclusions. Returns `true` only if that path and all
+  # possible subpaths can be skipped.
+  #
+  # @param [String] path A path, relative to the project root, to test.
+  # @return [true, false] If `true`, the path and its subpaths should _not_ be
+  #   searched for strings.
+
+  def skip_tree?(path)
+    path = path.sub(/^\//, '')
+
+    if only_paths.present? || only_importer_paths.present?
+      # we can't skip this path if any of the only_paths have this path as a
+      # child or parent.
+      # otherwise we can, since the only paths we care about are unrelated to
+      # this path
+      paths = only_paths + only_importer_paths.values.flatten.compact
+      return paths.none? { |op| op.start_with?(path) || path.start_with?(op) }
+    end
+
+    return false if only_importer_paths.values.flatten.compact.any? { |op| op.start_with?(path) }
+    # we can skip this path if at least one of the skip_paths are subpaths of
+    # this path
+    return skip_paths.any? { |sp| path.start_with?(sp) } ||
+        skip_importer_paths.values.flatten.compact.any? { |sp| path.start_with?(sp) }
+  end
+
   # @private
   def as_json(options=nil)
     options ||= {}
