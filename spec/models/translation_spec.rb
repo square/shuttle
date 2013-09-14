@@ -30,12 +30,12 @@ describe Translation do
       end
 
       it "should log the change and the changer when a user changes the translation" do
-        old_copy = @trans.copy
-        new_copy = "A new translation"
+        old_copy   = @trans.copy
+        new_copy   = "A new translation"
         translator = FactoryGirl.create(:user)
         expect {
           @trans.freeze_tracked_attributes
-          @trans.copy = new_copy
+          @trans.copy     = new_copy
           @trans.modifier = translator
           @trans.save
         }.to change { TranslationChange.count }.by(1)
@@ -264,6 +264,37 @@ describe Translation do
     it "should allow translations with blank source copy" do
       trans = FactoryGirl.build(:translation, source_copy: "", copy: nil)
       trans.should be_valid
+    end
+
+    context "[fencing]" do
+      it "should add an error if the interpolation is invalid" do
+        key   = FactoryGirl.create(:key, fencers: %w(Android))
+        trans = FactoryGirl.create(:translation, key: key)
+
+        trans.copy = "{{hello world}}"
+        expect(trans).not_to be_valid
+        expect(trans.errors[:copy]).to eql(["has an invalid {android} interpolation"])
+      end
+
+      it "should apply the fencers in reverse order" do
+        key   = FactoryGirl.create(:key, fencers: %w(Erb Html))
+        trans = FactoryGirl.create(:translation, key: key)
+
+        trans.copy = "<<%= foo %>bar>baz</<%= foo %>bar>"
+        expect(trans).to be_valid
+
+        trans.copy = "<<%= foo %>bar>baz</<%= foo %>bar2>"
+        expect(trans).not_to be_valid
+        expect(trans.errors[:copy]).to eql(["has an invalid <HTML> interpolation"])
+
+        trans.copy = "<<%= foo %>bar>baz</<%= foo >bar>"
+        expect(trans).not_to be_valid
+        expect(trans.errors[:copy]).to eql(["has an invalid <%= ERb %> interpolation"])
+
+        trans.copy = "<<%= foo %>bar>baz</<%= foo >bar2>"
+        expect(trans).not_to be_valid
+        expect(trans.errors[:copy]).to eql(["has an invalid <%= ERb %> interpolation"])
+      end
     end
   end
 end

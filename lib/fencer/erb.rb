@@ -42,5 +42,11 @@ module Fencer
 
       return tokens
     end
+
+    # Verifies that `<%`s and `%>`s are balanced.
+
+    def valid?(string)
+      string.scan(/<%/).size == string.scan(/%>/).size
+    end
   end
 end

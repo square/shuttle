@@ -37,5 +37,13 @@ module Fencer
 
       return tokens
     end
+
+    def valid?(string)
+      @parser ||= ::Mustache::Parser.new
+      @parser.compile string
+      true
+    rescue ::Mustache::Parser::SyntaxError
+      false
+    end
   end
 end

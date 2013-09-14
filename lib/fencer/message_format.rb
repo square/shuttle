@@ -22,8 +22,8 @@ module Fencer
     extend self
 
     def fence(string)
-      @parser      ||= Parser.new
-      result       = @parser.parse(string)
+      @parser ||= Parser.new
+      result  = @parser.parse(string)
       return {} unless result.kind_of?(Array)
 
       fences = {}
@@ -71,6 +71,16 @@ module Fencer
       rule(:argument_index) { match('[0-9]').repeat(1) }
 
       root :message_format_pattern
+    end
+
+    # Verifies using a PEG that the interpolations are valid.
+
+    def valid?(string)
+      @parser ||= Parser.new
+      @parser.parse(string)
+      true
+    rescue Parslet::ParseFailed
+      false
     end
   end
 end

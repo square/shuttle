@@ -92,6 +92,10 @@ module Importer
       end
     end
 
+    def self.default_interpolator
+      return "android"
+    end 
+
     def attributes_from_tag(tag, *except)
       attrs = tag.keys.zip(tag.values)
       attrs.delete_if { |(k, _)| except.include? k }

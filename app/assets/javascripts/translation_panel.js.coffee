@@ -114,7 +114,31 @@ class TranslationItem
       data: $.param('translation[copy]': @element.find('textarea').val())
       complete: => @element.find('textarea, input').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
-      error: => modal("Couldn’t update that translation.", "An error occurred.")
+      error: (jqXhr) => 
+        if jqXhr.status == 422
+          modaldiv = $('<div/>').addClass('modal hide fade')
+
+          header = $('<div/>').addClass('modal-header').appendTo(modaldiv)
+          $('<h3/>').text("Couldn't Update Translation").appendTo header
+
+          body_div = $('<div/>').addClass('modal-body').appendTo(modaldiv)
+          $('<b/>').text('Errors:').appendTo body_div
+          body_list = $('<ul/>').addClass("text-error")
+
+          for own field, errors of jqXhr.responseJSON
+            do (field, errors) ->
+              field = field.charAt(0).toUpperCase() + field.slice(1)
+              for error in errors 
+                $('<li/>').text(field + " " + error).appendTo(body_list)
+          
+          body_list.appendTo body_div
+
+          footer = $('<div/>').addClass('modal-footer').appendTo(modaldiv)
+          $('<a/>').addClass('btn btn-primary').text("Confirm").attr('data-dismiss', 'modal').appendTo(footer)
+
+          modaldiv.modal()
+        else   
+          modal("Couldn’t Update Translation", "An error occurred.")
     return true
 
   # Re-renders the cell using a new translation object (loaded from JSON).

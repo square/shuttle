@@ -80,6 +80,7 @@ class Translation < ActiveRecord::Base
             presence:   true,
             uniqueness: {scope: :key_id, on: :create}
   validate :cannot_approve_or_reject_untranslated
+  validate :valid_interpolations, on: :update
 
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
   before_validation :approve_translation_made_by_reviewer, on: :update
@@ -181,6 +182,24 @@ class Translation < ActiveRecord::Base
   end
 
   private
+
+  def valid_interpolations
+    return unless copy.present? && copy_changed?
+
+    validating_copy = copy.dup
+
+    # Remove fences from the copy as we validate them, so that they don't
+    # interfere with futre validations
+    key.fencers.each do |fencer|
+      fencer_module = Fencer.const_get(fencer)
+      unless fencer_module.valid?(validating_copy)
+        errors.add(:copy, :invalid_interpolations, fencer: I18n.t("fencer.#{fencer}"))
+        break
+      end
+      fences = fencer_module.fence(validating_copy).values.flatten.sort_by(&:first).reverse
+      fences.each { |fence| validating_copy[fence] = '' }
+    end
+  end
 
   def recalculate_readiness
     key.recalculate_ready! if destroyed? || translated_changed? || approved_changed?

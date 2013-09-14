@@ -33,4 +33,16 @@ describe Fencer::MessageFormat do
           to eql('{0,number,#.##}' => [0..14], '{0,number,#.#}' => [17..30])
     end
   end
+
+  describe ".valid?" do
+    it "should return true for a string with valid interpolations" do
+      Fencer::MessageFormat.valid?("String with {0} valid {1,number} tokens.").should be_true
+    end
+
+    it "should return false for a string with invalid interpolations" do
+      Fencer::MessageFormat.valid?("String with {foo}.").should be_false
+      Fencer::MessageFormat.valid?("String with {0,foo}.").should be_false
+      Fencer::MessageFormat.valid?("String with {0.").should be_false
+    end
+  end
 end

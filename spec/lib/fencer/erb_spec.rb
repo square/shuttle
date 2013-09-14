@@ -27,4 +27,14 @@ describe Fencer::Erb do
           should eql('<%= "with %> an" %>' => [9..27])
     end
   end
+
+  describe ".valid?" do
+    it "should return true for a string with balanced interpolation delimiters" do
+      Fencer::Erb.valid?("String with <%= two %> <% tokens -%>.").should be_true
+    end
+
+    it "should return false for a string with unbalanced interpolation delimiters" do
+      Fencer::Erb.valid?("String with <%= two % > <% tokens -%>.").should be_false
+    end
+  end
 end
