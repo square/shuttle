@@ -40,7 +40,7 @@ module Views
           div class: 'row', id: 'alphabet-bar' do 
             span class: 'span12' do
               ul class: 'nav' do
-                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").each do |letter|
+                  "#ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").each do |letter|
                     li do
                       a letter, href: "#glossary-table-" + letter
                     end
