@@ -77,7 +77,7 @@ class root.GlossaryList
     for rfc5646 in @targetLocales
       localeEntry = Locale.from_rfc5646(rfc5646)
       $('<div/>').text(localeEntry.name()).appendTo($('<th/>').appendTo(headerRow))
-    for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+    for letter in '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
       glossaryAnchor = $('<tbody/>', 
         id: 'glossary-table-' + letter,
         class: 'glossary-table-anchor'
@@ -283,8 +283,13 @@ class root.GlossaryList
                     localeContext.rejected = false
               context.translated_copies.push(localeContext)
 
-            $('#glossary-table-' + sourceEntry.source_copy.substr(0, 1).toUpperCase())
-              .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
+            firstLetter = sourceEntry.source_copy.substr(0, 1).toUpperCase()
+            if firstLetter.match(/[A-Z]/)
+              $('#glossary-table-' + firstLetter)
+                .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
+            else 
+              $('#glossary-table-\\#')
+                .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
 
         for domLocaleEntry in $('.glossary-table-locale-entry')
           locale = $(domLocaleEntry).data('locale') 
