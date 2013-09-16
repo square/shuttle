@@ -59,7 +59,7 @@ require 'sidekiq/capistrano'
 
 namespace :squash do
   task :notify do
-    run "cd #{release_path} && script/rails runner -e #{rails_env} 'Squash::Ruby.notify_deploy #{rails_env.inspect}, #{current_revision.inspect}, #{Socket.gethostname.inspect}'", once: true
+    run "cd #{release_path} && bin/rails runner -e #{rails_env} 'Squash::Ruby.notify_deploy #{rails_env.inspect}, #{current_revision.inspect}, #{Socket.gethostname.inspect}'", once: true
   end
 end
 after 'deploy:restart', 'squash:notify'
