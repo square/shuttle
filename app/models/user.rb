@@ -70,8 +70,8 @@ class User < ActiveRecord::Base
   has_many :authored_translations, class_name: 'Translation', foreign_key: 'translator_id', inverse_of: :translator, dependent: :nullify
   has_many :reviewed_translations, class_name: 'Translation', foreign_key: 'reviewer_id', inverse_of: :reviewer, dependent: :nullify
 
-  has_many :authored_glossary_entries, class_name: 'GlossaryEntry', foreign_key: 'translator_id', inverse_of: :translator, dependent: :nullify
-  has_many :reviewed_glossary_entries, class_name: 'GlossaryEntry', foreign_key: 'reviewer_id', inverse_of: :reviewer, dependent: :nullify
+  has_many :authored_glossary_entries, class_name: 'LocaleGlossaryEntry', foreign_key: 'translator_id', inverse_of: :translator, dependent: :nullify
+  has_many :reviewed_glossary_entries, class_name: 'LocaleGlossaryEntry', foreign_key: 'reviewer_id', inverse_of: :reviewer, dependent: :nullify
 
   has_many :commits, inverse_of: :user, dependent: :nullify
 
