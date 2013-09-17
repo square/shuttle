@@ -99,7 +99,12 @@ class root.GlossaryList
       $.ajax @addSourceEntryUrl, 
         type: 'POST'
         data: @addEntryModal.find('form').serialize()
-        success: => this.loadGlossaryEntries()
+        success: => 
+          @addEntryModal.find("input[name='source_glossary_entry[source_copy]']").val("")
+          @addEntryModal.find("input[name='source_glossary_entry[context]']").val("")
+          @addEntryModal.find("input[name='source_glossary_entry[notes]']").val("")
+          @addEntryModal.find("input[name='source_glossary_entry[due_date]']").val("")
+          this.loadGlossaryEntries()
         error: =>
           this.error("Couldn’t add new term.")
           this.loadGlossaryEntries()
