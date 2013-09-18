@@ -34,6 +34,7 @@ gem 'nokogiri'
 gem 'CFPropertyList', require: 'cfpropertylist'
 gem 'parslet'
 gem 'mustache'
+gem 'html_validation'
 
 # EXPORTING
 gem 'libarchive'

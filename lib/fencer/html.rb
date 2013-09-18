@@ -75,11 +75,23 @@ module Fencer
     # Verifies using Nokogiri that the HTML is valid.
 
     def valid?(string)
-      wrapped_str = '<?xml version="1.0" encoding="UTF-8"?><root>' + string + '</root>'
-      Nokogiri::XML(wrapped_str, nil, nil, Nokogiri::XML::ParseOptions::STRICT|Nokogiri::XML::ParseOptions::NONET)
-      true
-    rescue Nokogiri::XML::SyntaxError
-      false
+      wrapped_str = HTML_TEMPLATE.sub('%{string}', string)
+      @validator ||= PageValidations::HTMLValidation.new(nil, %w(-utf8))
+      validation = @validator.validation(wrapped_str, '_')
+      return validation.valid?
     end
+
+    # @private
+    HTML_TEMPLATE = <<-HTML
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>test</title>
+  </head>
+  <body>
+    <div>%{string}</div>
+  </body>
+</html>
+    HTML
   end
 end

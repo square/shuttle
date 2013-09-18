@@ -280,18 +280,18 @@ describe Translation do
         key   = FactoryGirl.create(:key, fencers: %w(Erb Html))
         trans = FactoryGirl.create(:translation, key: key)
 
-        trans.copy = "<<%= foo %>bar>baz</<%= foo %>bar>"
+        trans.copy = "<<%= foo %>em>baz</<%= foo %>em>"
         expect(trans).to be_valid
 
-        trans.copy = "<<%= foo %>bar>baz</<%= foo %>bar2>"
+        trans.copy = "<<%= foo %>em>baz</<%= foo %>b>"
         expect(trans).not_to be_valid
         expect(trans.errors[:copy]).to eql(["has an invalid <HTML> interpolation"])
 
-        trans.copy = "<<%= foo %>bar>baz</<%= foo >bar>"
+        trans.copy = "<<%= foo %>em>baz</<%= foo >em>"
         expect(trans).not_to be_valid
         expect(trans.errors[:copy]).to eql(["has an invalid <%= ERb %> interpolation"])
 
-        trans.copy = "<<%= foo %>bar>baz</<%= foo >bar2>"
+        trans.copy = "<<%= foo %>em>baz</<%= foo >b>"
         expect(trans).not_to be_valid
         expect(trans.errors[:copy]).to eql(["has an invalid <%= ERb %> interpolation"])
       end
