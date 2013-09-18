@@ -185,6 +185,7 @@ class Translation < ActiveRecord::Base
 
   def valid_interpolations
     return unless copy.present? && copy_changed?
+    return if base_translation? #TODO should we provide some kind of warning to the engineer?
 
     validating_copy = copy.dup
 
