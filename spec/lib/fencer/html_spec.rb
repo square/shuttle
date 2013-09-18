@@ -43,14 +43,19 @@ describe Fencer::Html do
   end
 
   describe ".valid?" do
-    it "should return true for a string with valid HTML" do
-      Fencer::Html.valid?("Some <b>valid<html /></b>.").should be_true
+    it "should return true for a string with valid XHTML" do
+      Fencer::Html.valid?('Some <b id="bar">valid<br /> XHTML</b>.').should be_true
+    end
+
+    it "should return true for a string with valid HTML5" do
+      Fencer::Html.valid?("Some <b id=bar>valid<br> HTML</b>.").should be_true
     end
 
     it "should return false for a string with invalid HTML" do
-      Fencer::Html.valid?("An <unclosed>tag.").should be_false
-      Fencer::Html.valid?("A <mismatched></tag>.").should be_false
-      Fencer::Html.valid?("An <<invalid>/>tag.").should be_false
+      Fencer::Html.valid?("An <unknown>tag.").should be_false
+      Fencer::Html.valid?("An <b>unclosed tag.").should be_false
+      Fencer::Html.valid?("A <b>mismatched tag</i>.").should be_false
+      Fencer::Html.valid?("An <<b>/>invalid</b>tag.").should be_false
     end
   end
 end
