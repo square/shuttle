@@ -24,49 +24,58 @@ describe TranslationUnitsController do
     end
 
     context "[pagination]" do
-      before :all do
+      before(:all) do
+        reset_elastic_search
         TranslationUnit.delete_all
-        @trans_units_list = FactoryGirl.create_list(:translation_unit, 51, copy: 'foo').sort_by!(&:id).reverse!
-        @user             = FactoryGirl.create(:user, role: 'reviewer')
+        @trans_units_list = FactoryGirl.create_list(:translation_unit, 51).sort_by(&:id).reverse
+        @user = FactoryGirl.create(:user, role: 'reviewer')
+        regenerate_elastic_search_indexes
       end
-
-      before :each do
-        @request.env['devise.mapping'] = Devise.mappings[:user]
+      
+      before(:each) do
+        @request.env["devise.mapping"] = Devise.mappings[:user]
         sign_in @user
+        sleep(2)
       end
-
+  
       it "loads only 50 translation units per page" do
-        get :index, keyword: 'foo', field: 'searchable_copy', format: 'json'
+        get :index, field: 'searchable_source_copy', keyword: 'carried', format: 'json'
         response.status.should eql(200)
-        JSON.parse(response.body).map { |e| e['id'] }.should eql(@trans_units_list[0, 50].map(&:id))
+        assigns(:offset).should eql(0)
+        assigns(:translation_units).to_a.should eql(@trans_units_list[0,50])
       end
-
+  
       it "renders the first page of results if passed offset < 0" do
-        get :index, keyword: 'foo', field: 'searchable_copy', offset: -1, format: 'json'
+        get :index, field: 'searchable_source_copy', keyword: 'carried', offset: -1, format: 'json'
         response.status.should eql(200)
-        JSON.parse(response.body).map { |e| e['id'] }.should eql(@trans_units_list[0, 50].map(&:id))
+        assigns(:offset).should eql(0)
+        assigns(:translation_units).to_a.should eql(@trans_units_list[0,50])
       end
-
+  
       it "correctly lists the last page of results" do
-        get :index, keyword: 'foo', field: 'searchable_copy', offset: 50, format: 'json'
+        get :index, field: 'searchable_source_copy', keyword: 'carried', offset: 50, format: 'json'
         response.status.should eql(200)
-        JSON.parse(response.body).map { |e| e['id'] }.should eql(@trans_units_list[50, 51].map(&:id))
+        assigns(:offset).should eql(50)
+        assigns(:translation_units).to_a.should eql(@trans_units_list[50,1])
       end
     end
 
     context "[filtering]" do
       before :all do
+        reset_elastic_search
         TranslationUnit.delete_all
         @tus_source_foo = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "foo #{i}", copy: "baz #{i}", rfc5646_locale: 'fr') }.sort_by!(&:id).reverse!
         @tus_source_bar = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "bar #{i}", copy: "baz #{i}", rfc5646_locale: 'ja') }.sort_by!(&:id).reverse!
         @tus_target_foo = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "baz #{i}", copy: "foo #{i}", rfc5646_locale: 'fr') }.sort_by!(&:id).reverse!
         @tus_target_bar = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "baz #{i}", copy: "bar #{i}", rfc5646_locale: 'ja') }.sort_by!(&:id).reverse!
         @user           = FactoryGirl.create(:user, role: 'reviewer')
+        regenerate_elastic_search_indexes
       end
 
       before :each do
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user
+        sleep(2)
       end
 
       it "should filter by source copy" do

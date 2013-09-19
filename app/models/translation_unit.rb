@@ -42,9 +42,14 @@ class TranslationUnit < ActiveRecord::Base
   locale_field :source_locale, from: :source_rfc5646_locale
   locale_field :locale
 
-  extend SearchableField
-  searchable_field :copy, language_from: :locale
-  searchable_field :source_copy, language_from: :source_locale
+  include Tire::Model::Search
+  include Tire::Model::Callbacks
+  mapping do
+    indexes :copy, analyzer: 'snowball'
+    indexes :source_copy, analyzer: 'snowball'
+    indexes :id, type: 'string', index: :not_analyzed
+    indexes :rfc5646_locale, analyzer: 'simple'
+  end
 
   validates :source_rfc5646_locale,
             presence: true

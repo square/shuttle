@@ -44,35 +44,41 @@ class TranslationUnitsController < ApplicationController
         @offset = 0 if @offset < 0
         @previous = @offset > 0
 
-        limit = params[:limit].to_i
-        limit = PER_PAGE if limit < 1
-
-        @translation_units = TranslationUnit.
-            order('id DESC').
-            offset(@offset).
-            limit(limit)
-
-
         if params[:target_locales].present?
-          @target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
-          return head(:unprocessable_entity) unless @target_locales.all?
-          @translation_units = @translation_units.where(rfc5646_locale: @target_locales.map(&:rfc5646))
+          target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
+          return head(:unprocessable_entity) unless target_locales.all?
         end
 
-        method = case params[:field]
-                   when 'searchable_source_copy' then
-                     :source_copy_query
-                   else
-                     :copy_query
-                 end
+        field = params[:field]
+        query_filter = params[:keyword]
+        offset = @offset
+        if query_filter.present? and params[:keyword].present?
+          @translation_units = TranslationUnit.search(load: true) do
+            if target_locales
+              if target_locales.size > 1
+                locale_filters = target_locales.map do |locale|
+                  { term: {rfc5646_locale: locale.rfc5646} }
+                end
+                filter :or, *locale_filters
+              else
+                filter :term, rfc5646_locale: target_locales.map(&:rfc5646)[0]
+              end
+            end
+            sort { by :id, 'desc'}
+            from offset
+            size PER_PAGE
 
-        @translation_units = if params[:keyword].present?
-                               @translation_units.send(method, params[:keyword])
-                             else
-                               @translation_units.where('FALSE')
-                             end
-
-        render json: decorate(@translation_units)
+            case field
+              when 'searchable_source_copy' then
+                query { string "source_copy:\"#{query_filter}\"" }
+              else
+                query { string "copy:\"#{query_filter}\"" }
+            end
+          end
+        else
+          @translation_units = []
+        end
+        render json: decorate(@translation_units).to_json
       end
 
       format.html

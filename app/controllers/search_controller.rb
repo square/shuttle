@@ -23,35 +23,44 @@ class SearchController < ApplicationController
       format.html # translations.html.rb
 
       format.json do
-        @results = Translation.order('translations.id DESC').
-            offset(params[:offset].to_i).
-            limit(params.fetch(:limit, PER_PAGE)).
-            includes(key: [:slugs, :project])
-
-        project_id = params[:project_id].to_i
-        if project_id > 0
-          @results = @results.joins(:key).where(keys: {project_id: params[:project_id]})
-        end
-
+        offset       = params[:offset].to_i
+        limit        = params.fetch(:limit, PER_PAGE)
+        project_id   = params[:project_id].to_i
+        query_filter = params[:query]
+        field        = params[:field]
         if params[:target_locales].present?
-          @target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
-          return head(:unprocessable_entity) unless @target_locales.all?
-          @results = @results.where(rfc5646_locale: @target_locales.map(&:rfc5646))
+          target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
+          return head(:unprocessable_entity) unless target_locales.all?
         end
+        if query_filter.present?
+          @results = Translation.search(load: {include: {key: [:slugs, :project]}}) do
+            if target_locales
+              if target_locales.size > 1
+                locale_filters = target_locales.map do |locale|
+                  {term: {rfc5646_locale: locale.rfc5646}}
+                end
+                filter :or, *locale_filters
+              else
+                filter :term, rfc5646_locale: target_locales.map(&:rfc5646)[0]
+              end
+            end
+            sort { by :id, 'desc' }
+            size limit
+            from offset
+            if project_id and project_id > 0
+              filter :term, project_id: project_id
+            end
 
-        method   = case params[:field]
-                     when 'searchable_source_copy' then
-                       :source_copy_query
-                     else
-                       :copy_query
-                   end
-        tsc      = @locale ? SearchableField::text_search_configuration(@locale) : 'english'
-        @results = if params[:query].present?
-                     @results.send(method, params[:query], tsc)
-                   else
-                     @results.where('FALSE')
-                   end
-
+            case field
+              when 'searchable_source_copy' then
+                query { string "source_copy:\"#{query_filter}\"" }
+              else
+                query { string "copy:\"#{query_filter}\"" }
+            end
+          end
+        else
+          @results = []
+        end
         render json: decorate_translations(@results).to_json
       end
     end
@@ -66,17 +75,24 @@ class SearchController < ApplicationController
         if params[:metadata] # return metadata about the search only
           @project = Project.find(params[:project_id])
           render json: {
-              locales: ([@project.base_locale] + @project.targeted_locales.sort_by(&:rfc5646)).uniq
-          }.to_json
+                           locales: ([@project.base_locale] + @project.targeted_locales.sort_by(&:rfc5646)).uniq
+                       }.to_json
         else
-          @results = Key.by_key.
-              offset(params[:offset].to_i).
-              limit(params.fetch(:limit, PER_PAGE)).
-              includes(:translations, :project, :slugs).
-              where(keys: {project_id: params[:project_id]}).
-              original_key_query(params[:filter]).
-              order('key_prefix ASC')
-
+          query_filter = params[:filter]
+          offset       = params[:offset].to_i
+          id           = params[:project_id]
+          limit        = params.fetch(:limit, PER_PAGE)
+          if query_filter.present?
+            @results = Key.search(load: {include: [:translations, :project, :slugs]}) do
+              query { string "original_key:\"#{query_filter}\"" }
+              filter :term, project_id: id
+              from offset
+              size limit
+              sort { by :original_key, 'asc' }
+            end
+          else
+            @results = []
+          end
           render json: decorate_keys(@results).to_json
         end
       end
@@ -89,7 +105,7 @@ class SearchController < ApplicationController
       format.json do
         return head(:unprocessable_entity) if params[:project_id].to_i < 0
         @results = Commit.with_sha_prefix(params[:sha]).
-          limit(params.fetch(:limit, 50))
+            limit(params.fetch(:limit, 50))
         if params[:project_id].to_i > 0
           @results = @results.joins(:project).where(projects: {id: params[:project_id]})
         end
@@ -105,7 +121,8 @@ class SearchController < ApplicationController
       translation.as_json.merge(
           locale:        translation.locale.as_json,
           source_locale: translation.source_locale.as_json,
-          url:           (if current_user.translator?
+          url:           (
+                         if current_user.translator?
                            edit_project_key_translation_url(translation.key.project, translation.key, translation)
                          else
                            project_key_translation_url(translation.key.project, translation.key, translation)
@@ -139,8 +156,8 @@ class SearchController < ApplicationController
   def decorate_commits(commits)
     commits.map do |commit|
       commit.as_json.merge(
-        url: project_commit_url(commit.project, commit),
-        project: commit.project
+          url:     project_commit_url(commit.project, commit),
+          project: commit.project
       )
     end
   end

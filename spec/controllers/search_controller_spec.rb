@@ -17,30 +17,34 @@ require 'spec_helper'
 describe SearchController do
   include Devise::TestHelpers
 
-  describe '#translations' do
+  describe "#translations" do
     before :all do
+      reset_elastic_search
       @user = FactoryGirl.create(:user, role: 'translator')
 
       %w(term1 term2).each do |term|
         %w(source_copy copy).each do |field|
-          other_field        = (field == 'copy' ? 'source_copy' : 'copy')
-          locale_field       = (field == 'copy' ? :rfc5646_locale : :source_rfc5646_locale)
+          other_field = (field == 'copy' ? 'source_copy' : 'copy')
+          locale_field = (field == 'copy' ? :rfc5646_locale : :source_rfc5646_locale)
           other_locale_field = (field == 'copy' ? :source_rfc5646_locale : :rfc5646_locale)
           %w(en fr).each do |locale|
             other_locale = (locale == 'en' ? 'fr' : 'en')
             FactoryGirl.create :translation,
-                               field              => "foo #{term} bar",
-                               other_field        => 'something else',
-                               locale_field       => locale,
+                               field => "foo #{term} bar",
+                               other_field => 'something else',
+                               locale_field => locale,
                                other_locale_field => other_locale
           end
         end
       end
+
+      regenerate_elastic_search_indexes
     end
 
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
+      sleep(2)
     end
 
     it "should return an empty result list if no query is given" do
@@ -74,6 +78,17 @@ describe SearchController do
       results.first['locale']['rfc5646'].should eql('fr')
     end
 
+    it "should filter by more than one target locale" do
+      get :translations, query: 'term1', target_locales: 'fr, en', format: 'json'
+      response.status.should eql(200)
+      results = JSON.parse(response.body)
+      results.size.should eql(2)
+      results.first['copy'].should eql('foo term1 bar')
+      results.first['locale']['rfc5646'].should eql('fr')
+      results.last['copy'].should eql('foo term1 bar')
+      results.last['locale']['rfc5646'].should eql('en')
+    end
+
     it "should respond with a 422 if the locale is unknown" do
       get :translations, query: 'term1', target_locales: 'fr, foobar?', format: 'json'
       response.status.should eql(422)
@@ -97,16 +112,19 @@ describe SearchController do
 
   describe '#keys' do
     before :all do
-      @user    = FactoryGirl.create(:user, role: 'translator')
+      reset_elastic_search
+      @user = FactoryGirl.create(:user, role: 'translator')
       @project = FactoryGirl.create(:project)
 
       5.times { |i| FactoryGirl.create :key, project: @project, key: "t1_n#{i}" }
-      5.times { |i| FactoryGirl.create :key, project: @project, key: "t2_n#{i}" }
+      5.times { |i| FactoryGirl.create :key, project: @project, key: "t2_n#{i}"
+      regenerate_elastic_search_indexes}
     end
 
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
+      sleep(2)
     end
 
     it "should return an empty result list if no query is given" do

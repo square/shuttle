@@ -67,9 +67,22 @@ class Translation < ActiveRecord::Base
   locale_field :source_locale, from: :source_rfc5646_locale
   locale_field :locale
 
-  extend SearchableField
-  searchable_field :copy, language_from: :locale
-  searchable_field :source_copy, language_from: :source_locale
+  include Tire::Model::Search
+  include Tire::Model::Callbacks
+  mapping do
+    # use send(:key) instead of key because there is a variable that shadows the
+    # key method.
+    indexes :copy, analyzer: 'snowball', as: 'copy'
+    indexes :source_copy, analyzer: 'snowball', as: 'source_copy'
+    indexes :id, type: 'string', index: :not_analyzed
+    indexes :project_id, type: 'integer', as: 'send(:key).project_id'
+    indexes :rfc5646_locale, type: 'string'
+    indexes :created_at, type: 'date'
+    indexes :translated, type: 'boolean'
+    indexes :approved, type: 'integer', as: 'if approved==true then 1 elsif approved==false then 0 else nil end'
+    # it would be wonderful to someday figure out why Commit comes with a scope here
+    indexes :commit_ids, as: 'Commit.unscoped { send(:key).commits.map(&:id) }'
+  end
 
   validates :key,
             presence: true,
