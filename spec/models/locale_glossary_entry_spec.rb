@@ -16,7 +16,7 @@
 
 require 'spec_helper'
 
-describe SourceGlossaryEntry do
+describe LocaleGlossaryEntry do
   context "[hooks]" do
     before :each do
       reviewer = FactoryGirl.create(:user, role: 'reviewer')

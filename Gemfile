@@ -15,6 +15,7 @@ gem 'has_metadata_column'
 gem 'find_or_create_on_scopes'
 gem 'composite_primary_keys', github: 'RISCfuture/composite_primary_keys', branch: 'rebase'
 gem 'rails-observers'
+gem 'tire'
 
 # VIEWS
 gem 'jquery-rails'

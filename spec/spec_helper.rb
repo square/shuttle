@@ -61,3 +61,19 @@ RSpec.configure do |config|
   end
 end
 
+def reset_elastic_search
+  ActiveRecord::Base.subclasses.each do |model|
+    next unless model.respond_to?(:tire)
+    index = model.tire.index
+    Tire::Tasks::Import.delete_index(index)
+    Tire::Tasks::Import.create_index(index, model)
+  end
+end
+
+def regenerate_elastic_search_indexes
+  ActiveRecord::Base.subclasses.each do |model|
+    next unless model.respond_to?(:tire)
+    Tire::Tasks::Import.import_model(model.tire.index, model, {})
+  end
+end
+

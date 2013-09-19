@@ -49,47 +49,68 @@ class Locale::TranslationsController < ApplicationController
     include_approved   = params[:include_approved].parse_bool
     include_new        = params[:include_new].parse_bool
 
-    limit = params[:limit].to_i
-    limit = PER_PAGE if limit < 1
+    offset = params[:offset].to_i
+    limit = PER_PAGE
+    query_filter = params[:filter]
+    commit_id = params[:commit]
+    locale = @locale
 
-    @translations = if params[:commit].present?
-                      @commit = Commit.find(params[:commit])
-                      @commit.translations
-                    else
-                      @project.translations
-                    end
+    filter_source = params[:filter_source]
+    catch :include_nothing do
+      @translations = Translation.search(load: {include: {key: :project}}) do
+        if commit_id.present?
+          query do
+            string "commit_ids:\"#{commit_id}\""
+          end
+        end
 
-    @translations = @translations.in_locale(@locale).
-        order('translations.created_at DESC').offset(params[:offset].to_i).limit(limit).
-        includes(key: :project)
-    if include_translated && include_approved && include_new
-      # include everything
-    elsif include_translated && include_approved
-      @translations = @translations.where(translated: true)
-    elsif include_translated && include_new
-      @translations = @translations.where('approved IS NULL OR approved IS FALSE')
-    elsif include_approved && include_new
-      @translations = @translations.where('approved IS TRUE OR translated IS FALSE')
-    elsif include_approved
-      @translations = @translations.where('approved IS TRUE')
-    elsif include_new
-      @translations = @translations.where('translated IS FALSE OR approved IS FALSE')
-    elsif include_translated
-      @translations = @translations.where(translated: true, approved: nil)
-    else
-      # include nothing
-      @translations = @translations.where('FALSE')
-    end
+        if locale
+          query do
+            string "rfc5646_locale:\"#{locale.rfc5646}\""
+          end
+        end
+        sort { by :created_at, 'desc'}
+        from offset
+        size limit
 
-    if params[:filter].present?
-      if params[:filter_source] == 'source'
-        tsc = SearchableField::text_search_configuration(@project.base_locale)
-        @translations = @translations.source_copy_query(params[:filter], tsc)
-      elsif params[:filter_source] == 'translated'
-        tsc = SearchableField::text_search_configuration(@locale)
-        @translations = @translations.copy_query(params[:filter], tsc)
+        if include_translated && include_approved && include_new
+          # include everything
+        elsif include_translated && include_approved
+          filter :term, translated: 1
+        elsif include_translated && include_new
+          filter :or,
+                 {missing: {field: 'approved', existence: true, null_value: true }},
+                 {term: {approved: 0 }}
+        elsif include_approved && include_new
+          filter :or,
+                 {term: {approved: 1}},
+                 {term: {translated: 0 }}
+        elsif include_approved
+          filter :term, approved: 1
+        elsif include_new
+          filter :or,
+                 {term: {translated: 0}},
+                 {term: {approved: 0 }}
+        elsif include_translated
+          filter :and,
+                 {missing: {field: 'approved', existence: true, null_value: true }},
+                 {term: {translated: 1 }}
+        else
+          # include nothing
+          throw :include_nothing
+        end
+
+        if query_filter.present?
+          if filter_source == 'source'
+            query { string "source_copy:\"#{query_filter}\""}
+          elsif filter_source == 'translated'
+            query { string "copy:\"#{query_filter}\"" }
+          end
+        end
       end
     end
+
+    @translations ||= []
 
     respond_with @translations do |format|
       format.json { render json: decorate(@translations).to_json }

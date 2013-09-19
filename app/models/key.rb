@@ -104,8 +104,15 @@ class Key < ActiveRecord::Base
   digest_field :key, scope: :for_key
   digest_field :source_copy, scope: :source_copy_matches
 
-  extend SearchableField
-  searchable_field :original_key, language: 'simple', search_column: :searchable_key
+  include Tire::Model::Search
+  include Tire::Model::Callbacks
+  settings analysis: {tokenizer: {key_tokenizer: {type: 'pattern', pattern: '[^A-Za-z0-9]'}},
+           analyzer: {key_analyzer: {type: 'custom', tokenizer: 'key_tokenizer', filter: 'lowercase'}}}
+  mapping do
+    indexes :original_key, analyzer: 'key_analyzer', as: 'original_key'
+    indexes :project_id, type: 'integer'
+    indexes :ready, type: 'boolean'
+  end
 
   extend PrefixField
   prefix_field :original_key, prefix_column: 'key_prefix', length: 10
