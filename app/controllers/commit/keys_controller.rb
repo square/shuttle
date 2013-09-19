@@ -54,10 +54,11 @@ class Commit::KeysController < ApplicationController
     offset       = params[:offset].to_i
     limit        = params.fetch(:limit, PER_PAGE)
     ready        = params[:status] == 'approved'
+    project_id   = @project.id
 
     @keys = Key.search(load: {include: [:translations, :slugs]}) do
       query { string "original_key:\"#{query_filter}\"" } if query_filter.present?
-      filter :term, project_id: @project.id
+      filter :term, project_id: project_id
       filter :term, ready: ready
       from offset
       size limit
