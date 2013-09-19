@@ -50,21 +50,18 @@ class Commit::KeysController < ApplicationController
   # | `query`  | A string to filter translation keys by.                    |
 
   def index
-    offset = params[:offset].to_i
-    limit  = params[:limit].to_i
-    limit = PER_PAGE if limit < 1
+    query_filter = params[:filter]
+    offset       = params[:offset].to_i
+    limit        = params.fetch(:limit, PER_PAGE)
+    ready        = params[:status] == 'approved'
 
-    @keys = @commit.keys.by_key.offset(offset).limit(limit).preload(:translations, :slugs)
-
-    case params[:status]
-      when 'approved'
-        @keys = @keys.where(ready: true)
-      when 'pending'
-        @keys = @keys.where(ready: false)
-    end
-
-    if params[:filter].present?
-      @keys = @keys.original_key_query(params[:filter])
+    @keys = Key.search(load: {include: [:translations, :slugs]}) do
+      query { string "original_key:\"#{query_filter}\"" } if query_filter.present?
+      filter :term, project_id: @project.id
+      filter :term, ready: ready
+      from offset
+      size limit
+      sort { by :original_key, 'asc' }
     end
 
     respond_with(@keys) do |format|

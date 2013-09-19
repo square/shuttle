@@ -23,11 +23,11 @@ class SearchController < ApplicationController
       format.html # translations.html.rb
 
       format.json do
-        offset = params[:offset].to_i
-        limit = params.fetch(:limit, PER_PAGE)
-        project_id = params[:project_id].to_i
+        offset       = params[:offset].to_i
+        limit        = params.fetch(:limit, PER_PAGE)
+        project_id   = params[:project_id].to_i
         query_filter = params[:query]
-        field = params[:field]
+        field        = params[:field]
         if params[:target_locales].present?
           target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
           return head(:unprocessable_entity) unless target_locales.all?
@@ -37,14 +37,14 @@ class SearchController < ApplicationController
             if target_locales
               if target_locales.size > 1
                 locale_filters = target_locales.map do |locale|
-                  { term: {rfc5646_locale: locale.rfc5646} }
+                  {term: {rfc5646_locale: locale.rfc5646}}
                 end
                 filter :or, *locale_filters
               else
                 filter :term, rfc5646_locale: target_locales.map(&:rfc5646)[0]
               end
             end
-            sort { by :id, 'desc'}
+            sort { by :id, 'desc' }
             size limit
             from offset
             if project_id and project_id > 0
@@ -75,20 +75,20 @@ class SearchController < ApplicationController
         if params[:metadata] # return metadata about the search only
           @project = Project.find(params[:project_id])
           render json: {
-              locales: ([@project.base_locale] + @project.targeted_locales.sort_by(&:rfc5646)).uniq
-          }.to_json
+                           locales: ([@project.base_locale] + @project.targeted_locales.sort_by(&:rfc5646)).uniq
+                       }.to_json
         else
           query_filter = params[:filter]
-          offset = params[:offset].to_i
-          id = params[:project_id]
-          limit = params.fetch(:limit, PER_PAGE)
+          offset       = params[:offset].to_i
+          id           = params[:project_id]
+          limit        = params.fetch(:limit, PER_PAGE)
           if query_filter.present?
             @results = Key.search(load: {include: [:translations, :project, :slugs]}) do
               query { string "original_key:\"#{query_filter}\"" }
               filter :term, project_id: id
               from offset
               size limit
-              sort { by :original_key, 'asc'}
+              sort { by :original_key, 'asc' }
             end
           else
             @results = []
@@ -105,7 +105,7 @@ class SearchController < ApplicationController
       format.json do
         return head(:unprocessable_entity) if params[:project_id].to_i < 0
         @results = Commit.with_sha_prefix(params[:sha]).
-          limit(params.fetch(:limit, 50))
+            limit(params.fetch(:limit, 50))
         if params[:project_id].to_i > 0
           @results = @results.joins(:project).where(projects: {id: params[:project_id]})
         end
@@ -121,7 +121,8 @@ class SearchController < ApplicationController
       translation.as_json.merge(
           locale:        translation.locale.as_json,
           source_locale: translation.source_locale.as_json,
-          url:           (if current_user.translator?
+          url:           (
+                         if current_user.translator?
                            edit_project_key_translation_url(translation.key.project, translation.key, translation)
                          else
                            project_key_translation_url(translation.key.project, translation.key, translation)
@@ -155,8 +156,8 @@ class SearchController < ApplicationController
   def decorate_commits(commits)
     commits.map do |commit|
       commit.as_json.merge(
-        url: project_commit_url(commit.project, commit),
-        project: commit.project
+          url:     project_commit_url(commit.project, commit),
+          project: commit.project
       )
     end
   end

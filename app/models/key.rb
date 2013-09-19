@@ -111,6 +111,7 @@ class Key < ActiveRecord::Base
   mapping do
     indexes :original_key, analyzer: 'key_analyzer', as: 'original_key'
     indexes :project_id, type: 'integer'
+    indexes :ready, type: 'boolean'
   end
 
   extend PrefixField
