@@ -452,18 +452,7 @@ class root.TranslationPanel
   #
   search: ->
     @empty()
-    $('<p/>').text("Loading…").addClass('big-status').appendTo @list
-    $.ajax @makeURL(),
-      success: (translations) =>
-        @empty()
-        if translations.length == 0
-          $('<p/>').addClass('big-status').text("Nothing to translate").appendTo @list
-          return
-        @scroll.append translations
-      error: =>
-        @empty()
-        flash = $('<p/>').addClass('alert alert-error').text("Couldn’t load list of translations.").appendTo($('#flashes'))
-        $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
+    @scroll.loadNextPage()
 
   # Removes all items from the strings list.
   #
