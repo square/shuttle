@@ -49,63 +49,69 @@ class Locale::TranslationsController < ApplicationController
     include_approved   = params[:include_approved].parse_bool
     include_new        = params[:include_new].parse_bool
 
-    offset = params[:offset].to_i
-    limit = PER_PAGE
+    offset       = params[:offset].to_i
+    limit        = PER_PAGE
     query_filter = params[:filter]
-    commit_id = params[:commit]
-    locale = @locale
+    commit_id    = params[:commit]
+    locale       = @locale
+    project_id   = @project.id
 
     filter_source = params[:filter_source]
     catch :include_nothing do
-      @translations = Translation.search(load: {include: {key: :project}}) do
-        if commit_id.present?
-          query do
-            string "commit_ids:\"#{commit_id}\""
+      @translations = Translation.search(load: {include: {key: [:slugs, :project]}}) do
+        query_terms = []
+        query_terms << "commit_ids:\"#{commit_id}\"" if commit_id.present?
+        query_terms << "rfc5646_locale:\"#{locale.rfc5646}\"" if locale
+        if query_filter.present?
+          if filter_source == 'source'
+            query_terms << "source_copy:\"#{query_filter}\""
+          elsif filter_source == 'translated'
+            query_terms << "copy:\"#{query_filter}\""
           end
         end
+        query { string query_terms.join(' '), default_operator: 'AND' } if query_terms.present?
 
-        if locale
-          query do
-            string "rfc5646_locale:\"#{locale.rfc5646}\""
-          end
-        end
-        sort { by :created_at, 'desc'}
+        sort { by :created_at, 'desc' }
         from offset
         size limit
 
         if include_translated && include_approved && include_new
           # include everything
+          filter :term, project_id: project_id
         elsif include_translated && include_approved
-          filter :term, translated: 1
+          filter :and,
+                 {term: {project_id: project_id}},
+                 {term: {translated: 1}}
         elsif include_translated && include_new
-          filter :or,
-                 {missing: {field: 'approved', existence: true, null_value: true }},
-                 {term: {approved: 0 }}
+          filter :and,
+                 {term: {project_id: project_id}},
+                 {or: [
+                          {missing: {field: 'approved', existence: true, null_value: true}},
+                          {term: {approved: 0}}]}
         elsif include_approved && include_new
-          filter :or,
-                 {term: {approved: 1}},
-                 {term: {translated: 0 }}
+          filter :and,
+                 {term: {project_id: project_id}},
+                 {or: [
+                          {term: {approved: 1}},
+                          {term: {translated: 0}}]}
         elsif include_approved
-          filter :term, approved: 1
+          filter :and,
+                 {term: {project_id: project_id}},
+                 {term: {approved: 1}}
         elsif include_new
-          filter :or,
-                 {term: {translated: 0}},
-                 {term: {approved: 0 }}
+          filter :and,
+                 {term: {project_id: project_id}},
+                 {or: [
+                          {term: {translated: 0}},
+                          {term: {approved: 0}}]}
         elsif include_translated
           filter :and,
-                 {missing: {field: 'approved', existence: true, null_value: true }},
-                 {term: {translated: 1 }}
+                 {term: {project_id: project_id}},
+                 {missing: {field: 'approved', existence: true, null_value: true}},
+                 {term: {translated: 1}}
         else
           # include nothing
           throw :include_nothing
-        end
-
-        if query_filter.present?
-          if filter_source == 'source'
-            query { string "source_copy:\"#{query_filter}\""}
-          elsif filter_source == 'translated'
-            query { string "copy:\"#{query_filter}\"" }
-          end
         end
       end
     end

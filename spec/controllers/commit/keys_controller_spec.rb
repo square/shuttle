@@ -44,7 +44,7 @@ describe Commit::KeysController do
     end
 
     it "should return the first 50 keys of a commit" do
-      get :index, project_id: @project.to_param, commit_id: @commit.to_param, format: 'json'
+      get :index, project_id: @project.to_param, commit_id: @commit.to_param, status: 'approved', format: 'json'
       response.status.should eql(200)
       body = JSON.parse(response.body)
       body.should be_kind_of(Array)
@@ -54,7 +54,7 @@ describe Commit::KeysController do
     end
 
     it "should accept an offset" do
-      get :index, project_id: @project.to_param, commit_id: @commit.to_param, format: 'json', offset: 50
+      get :index, project_id: @project.to_param, commit_id: @commit.to_param, status: 'approved', format: 'json', offset: 50
       response.status.should eql(200)
       body = JSON.parse(response.body)
       body.size.should eql(1)
