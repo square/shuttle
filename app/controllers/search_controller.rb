@@ -23,11 +23,12 @@ class SearchController < ApplicationController
       format.html # translations.html.rb
 
       format.json do
-        offset       = params[:offset].to_i
-        limit        = params.fetch(:limit, PER_PAGE)
-        project_id   = params[:project_id].to_i
-        query_filter = params[:query]
-        field        = params[:field]
+        offset        = params[:offset].to_i
+        limit         = params.fetch(:limit, PER_PAGE)
+        project_id    = params[:project_id].to_i
+        query_filter  = params[:query]
+        field         = params[:field]
+        translator_id = params[:translator_id].to_i
         if params[:target_locales].present?
           target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
           return head(:unprocessable_entity) unless target_locales.all?
