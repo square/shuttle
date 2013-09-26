@@ -210,7 +210,10 @@ module Views
               div(class: 'controls') do
                 # create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
                 hidden_field_tag 'project[cache_manifest_formats][]', ''
-                Exporter::Base.implementations.select(&:multilingual?).each_with_index do |importer, index|
+                # TODO (wenley, tim) : Once everything is on NT, remove
+                # Exporter::Base
+                (Exporter::Base.implementations.select(&:multilingual?) +
+                 Exporter::NtBase.implementations.select(&:multilingual?)).each_with_index do |importer, index|
                   label_tag "project_cache_manifest_formats_#{index}", class: 'checkbox' do
                     check_box_tag "project[cache_manifest_formats][]", importer.request_format.to_s, @project.cache_manifest_formats.include?(importer.request_format.to_s), id: "project_cache_manifest_formats_#{index}"
                     text importer.human_name

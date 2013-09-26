@@ -19,9 +19,7 @@ module Exporter
   # Exports the translated strings of a Commit to a YAML file suitable for use
   # with the Ruby natural_translation gem.
 
-  class NtYaml < Base
-    include NtBase
-
+  class NtYaml < NtBase
     def export(io, *locales)
       output = nt_hash(*locales)
 

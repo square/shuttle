@@ -14,19 +14,7 @@
 
 module Exporter
 
-  module NtBase
-
-    @@implementations = []
-    def NtBase.included(klass)
-      @@implementations << klass
-    end
-    def NtBase.implementations
-      @@implementations
-    end
-
-    def NtBase.find_by_format(format)
-      implementations.detect { |exp| exp.request_format == format.to_sym }
-    end
+  class NtBase < Base
 
     def nt_hash(*locales)
       hsh = Hash.new
