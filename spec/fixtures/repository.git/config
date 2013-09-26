@@ -1,10 +1,7 @@
 [core]
 	repositoryformatversion = 0
 	filemode = true
-	bare = true
+	bare = false
+	logallrefupdates = true
 	ignorecase = true
 	precomposeunicode = false
-[remote "origin"]
-	url = /Users/wenley/Development/shuttle/spec/fixtures/repository.git
-	fetch = +refs/*:refs/*
-	mirror = true
