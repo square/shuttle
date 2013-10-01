@@ -17,15 +17,7 @@ require 'digest'
 
 module Importer
   # @abstract
-  module NtBase
-
-    @@implementations = []
-    def NtBase.included(klass)
-      @@implementations << klass
-    end
-    def NtBase.implementations
-      @@implementations
-    end
+  class NtBase < Base
 
     # @private
     def add_nt_string(string, comment, options={})

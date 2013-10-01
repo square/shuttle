@@ -19,8 +19,7 @@ module Importer
 
   # Parses translatable strings from Ruby `.rb` files.
 
-  class NtErb < Base
-    include NtBase
+  class NtErb < NtBase
 
     def self.fencers() %w(RubyNt) end
 
