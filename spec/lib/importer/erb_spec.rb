@@ -36,6 +36,7 @@ describe Importer::Erb do
       translation.copy.should eql(file)
       translation.fences.should eql(
                                     '<%= something %>' => [22..37],
+                                    "<%= nt('some string', 'some context') %>" => [59..98],
                                     '<b>'              => [5..7],
                                     '</b>'             => [12..15]
                                 )
