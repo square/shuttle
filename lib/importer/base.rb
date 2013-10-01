@@ -51,7 +51,12 @@ module Importer
     # @return [Array<Class>] All known implementations of the base class.
     #   Automatically updated.
     def self.implementations(memo=[])
-      self.subclasses.each { |s| memo << s ; s.implementations(memo) }
+      self.subclasses.each { |s|
+        if s != NtBase # NtBase is not a real implementation
+          memo << s
+        end
+        s.implementations(memo)
+      }
       memo
     end
 

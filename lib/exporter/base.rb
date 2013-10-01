@@ -28,16 +28,15 @@ module Exporter
   class Base
     # @return [Array<Class>] All known implementations of the base class.
     #   Automatically updated.
-    def self.implementations
+    def self.implementations(memo=[])
       # TODO (wenley, tim) : Once everything is on NT, make NtBase the
       # only base.
-      self.subclasses.map { |subclass|
-        if subclass != Exporter::NtBase # Disjoint implementations sets
-          [subclass, subclass.implementations]
-        else
-          []
+      self.subclasses.each { |s|
+        if s != Exporter::NtBase # To create disjoint implementations sets
+          memo << s ; s.implementations(memo)
         end
-      }.flatten
+      }
+      memo
     end
 
     # Prepares an exporter for use with a Commit.
