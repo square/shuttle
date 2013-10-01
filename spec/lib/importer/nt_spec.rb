@@ -16,8 +16,7 @@ describe Importer::NtBase do
 
   describe "#add_nt_string" do
     it "should add keys for blobs" do
-      importer = Importer::Base.new(@blob, "DNE.text", @commit)
-      importer.class.send(:include, Importer::NtBase)
+      importer = Importer::NtBase.new(@blob, "DNE.text", @commit)
       importer.instance_variable_set(:@keys, Set.new)
 
       importer.add_nt_string("A string to translate", "The context for the string")

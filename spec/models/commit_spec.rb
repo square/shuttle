@@ -25,6 +25,9 @@ describe Commit do
     before :all do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+
+      # Delete Shuttle's local cache
+      FileUtils.rm_rf(@project.send(:repo_path))
     end
 
     before(:each) { @commit = @project.commit!('HEAD') }
@@ -229,6 +232,9 @@ describe Commit do
     before :each do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+
+      # Remove Shuttle's local cache
+      FileUtils.rm_rf(@project.send(:repo_path))
     end
 
     it "should call #import on all importer subclasses" do
