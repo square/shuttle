@@ -437,10 +437,17 @@ class Commit < ActiveRecord::Base
           next
         end
 
+        locale = options[:locale].try!(:rfc5646)
+
+        # NT does not collect inferred translations
+        if importer.class < Importer::NtBase && locale
+          next
+        end
+
         if options[:inline]
-          BlobImporter.new.perform importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try!(:rfc5646)
+          BlobImporter.new.perform importer.class.ident, project.id, blob.sha, blob_path, id, locale
         else
-          add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try!(:rfc5646))
+          add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, blob_path, id, locale)
         end
       end
     end

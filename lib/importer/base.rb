@@ -421,7 +421,7 @@ module Importer
 
       def add_nt_string(string, comment, options={})
         if locale
-          raise "NT cannot directly import translations"
+          Rails.logger.error "NT cannot directly import translations : #{string} => #{comment}"
         else
           @importer.add_nt_string string, comment, {source: importer.file.path}.merge(options)
         end
