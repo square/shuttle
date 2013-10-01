@@ -1,2 +1,1 @@
-#!/bin/sh
-.git/hooks/ctags >/dev/null 2>&1 &
+/Users/wenley/Development/config_files/dot-files/git_template/hooks/post-merge

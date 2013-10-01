@@ -1,4 +1,1 @@
-#!/bin/sh
-case "$1" in
-  rebase) exec .git/hooks/post-merge ;;
-esac
+/Users/wenley/Development/config_files/dot-files/git_template/hooks/post-rewrite
