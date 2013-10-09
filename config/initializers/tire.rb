@@ -15,3 +15,5 @@
 Tire.configure do
   url Shuttle::Configuration.elasticsearch.url
 end
+
+Tire::Model::Search.index_prefix "shuttle_#{Rails.env}"
