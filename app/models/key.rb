@@ -112,6 +112,8 @@ class Key < ActiveRecord::Base
     indexes :original_key, analyzer: 'key_analyzer', as: 'original_key'
     indexes :project_id, type: 'integer'
     indexes :ready, type: 'boolean'
+    # it would be wonderful to someday figure out why Commit comes with a scope here
+    indexes :commit_ids, as: 'Commit.unscoped { commits.map(&:id) }'
   end
 
   extend PrefixField

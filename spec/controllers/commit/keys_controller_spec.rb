@@ -17,6 +17,8 @@ require 'spec_helper'
 describe Commit::KeysController do
   describe '#index' do
     before :all do
+      reset_elastic_search
+
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     base_rfc5646_locale:      'en',
@@ -36,11 +38,14 @@ describe Commit::KeysController do
       @commit.keys = @keys
 
       @user = FactoryGirl.create(:user, role: 'monitor')
+
+      regenerate_elastic_search_indexes
     end
 
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
+      sleep 2
     end
 
     it "should return the first 50 keys of a commit" do
