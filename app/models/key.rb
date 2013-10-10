@@ -109,7 +109,10 @@ class Key < ActiveRecord::Base
   settings analysis: {tokenizer: {key_tokenizer: {type: 'pattern', pattern: '[^A-Za-z0-9]'}},
            analyzer: {key_analyzer: {type: 'custom', tokenizer: 'key_tokenizer', filter: 'lowercase'}}}
   mapping do
-    indexes :original_key, analyzer: 'key_analyzer', as: 'original_key'
+    indexes :original_key, type: 'multi_field', as: 'original_key', fields: {
+        original_key:       {type: 'string', analyzer: 'key_analyzer'},
+        original_key_exact: {type: 'string', index: :not_analyzed}
+    }
     indexes :project_id, type: 'integer'
     indexes :ready, type: 'boolean'
     # it would be wonderful to someday figure out why Commit comes with a scope here

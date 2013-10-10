@@ -52,7 +52,7 @@ class Commit::KeysController < ApplicationController
   def index
     query_filter = params[:filter]
     offset       = params[:offset].to_i
-    limit        = params.fetch(:limit, PER_PAGE)
+    limit        = params.fetch(:limit, PER_PAGE).to_i
     status       = params[:status]
     commit_id    = @commit.id
 
@@ -69,7 +69,7 @@ class Commit::KeysController < ApplicationController
       end
       from offset
       size limit
-      sort { by :original_key, 'asc' }
+      sort { by :original_key_exact, 'asc' }
     end
 
     respond_with(@keys) do |format|
