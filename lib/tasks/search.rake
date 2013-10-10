@@ -14,8 +14,17 @@
 
 namespace :search do
   task index: :environment do
-    Dir[Rails.root.join('app', 'models', '**', '*.rb')].each { |f| require f }
-    ActiveRecord::Base.subclasses.each do |klass|
+    klasses = if ENV['CLASS'].present?
+                ENV['CLASS'].split(',').map do |klass|
+                  require Rails.root.join('app', 'models', klass.underscore + '.rb')
+                  klass.constantize
+                end
+              else
+                Dir[Rails.root.join('app', 'models', '**', '*.rb')].each { |f| require f }
+                ActiveRecord::Base.subclasses
+              end
+
+    klasses.each do |klass|
       total  = klass.count rescue nil
       next unless klass.respond_to?(:tire)
       Tire::Tasks::Import.add_pagination_to_klass(klass)
