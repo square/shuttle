@@ -201,6 +201,8 @@ en:
       name: Android XML
     ember:
       name: Ember.js
+    ember_module:
+      name: Ember.js (with dependency injection)
     erb:
       name: ERb file
     properties:

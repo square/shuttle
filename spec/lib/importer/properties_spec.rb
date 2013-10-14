@@ -20,7 +20,7 @@ describe Importer::Properties do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
-                                    only_paths:     %w(js/),
+                                    only_paths:     %w(properties/),
                                     skip_imports:   Importer::Base.implementations.map(&:ident) - %w(properties))
       @commit  = @project.commit!('HEAD')
     end
