@@ -41,33 +41,61 @@ module Views
       private
 
       def translation_search_bar
-        form_tag(search_translations_url, method: 'GET', id: 'translation-search-form', class: 'filter form-inline') do
-          text 'Find '
-          text_field_tag 'query', '', id: 'search-field', placeholder: 'query'
-          text ' in '
-          select_tag 'field', options_for_select([
-                                                     %w(source searchable_source_copy),
-                                                     %w(translation searchable_copy),
-                                                 ]), id: 'field-select', class: 'span2'
-          text ' with translation in '
-          if current_user.approved_locales.any?
-            select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
-          else
-            text_field_tag 'target_locales', '', class: 'locale-field locale-field-list span2', id: 'locale-field', placeholder: "any target locale"
+        form_tag(search_translations_url, method: 'GET', id: 'translation-search-form', class: 'filter form-horizontal') do
+          div(class: 'control-group') do
+            label 'Find', class: 'control-label'
+            div(class: 'controls') do
+              text_field_tag 'query', '', id: 'search-field', placeholder: 'query'
+            end
           end
-          text ' for '
-          project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-          project_list.unshift ['all', nil]
-          select_tag 'project_id', options_for_select(project_list)
-          text ' '
-          submit_tag "Search", class: 'btn btn-primary'
+
+          div(class: 'control-group') do
+            label 'in field', class: 'control-label'
+            div(class: 'controls') do
+              select_tag 'field', options_for_select([
+                                                         %w(source searchable_source_copy),
+                                                         %w(translation searchable_copy),
+                                                     ]), id: 'field-select', class: 'span2'
+            end
+          end
+
+          div(class: 'control-group') do
+            label 'translated to', class: 'control-label'
+            div(class: 'controls') do
+              if current_user.approved_locales.any?
+                select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
+              else
+                text_field_tag 'target_locales', '', class: 'locale-field locale-field-list span2', id: 'locale-field', placeholder: "any target locale"
+              end
+            end
+          end
+
+          div(class: 'control-group') do
+            label 'in project', class: 'control-label'
+            div(class: 'controls') do
+              project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+              project_list.unshift ['all', nil]
+              select_tag 'project_id', options_for_select(project_list)
+            end
+          end
+
+          div(class: 'control-group') do
+            label 'translated by', class: 'control-label'
+            div(class: 'controls') do
+              select_tag 'translator_id', options_for_select(User.order('email ASC').map { |u| [u.name, u.id] }.unshift(['anyone', nil]))
+            end
+          end
+
+          div(class: 'form-actions') do
+            submit_tag "Search", class: 'btn btn-primary'
+          end
         end
       end
 
       def translation_grid
-        table class:         'table table-striped',
-              id:            'translations',
-              'data-url'     => search_translations_url(format: 'json')
+        table class:     'table table-striped',
+              id:        'translations',
+              'data-url' => search_translations_url(format: 'json')
       end
     end
   end
