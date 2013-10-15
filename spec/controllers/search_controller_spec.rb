@@ -47,12 +47,6 @@ describe SearchController do
       sleep(2)
     end
 
-    it "should return an empty result list if no query is given" do
-      get :translations, query: ' ', format: 'json'
-      response.status.should eql(200)
-      response.body.should eql('[]')
-    end
-
     it "should search the copy field by default" do
       get :translations, query: 'term1', format: 'json'
       response.status.should eql(200)

@@ -83,3 +83,12 @@ td.loading {
   background-color: #eee;
   border-radius: 8px;
 }
+
+.filter.form-horizontal {
+  .form-actions {
+    padding-top: 0;
+    padding-bottom: 0;
+    background-color: transparent;
+    border: none;
+  }
+}

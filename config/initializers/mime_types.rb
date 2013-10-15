@@ -52,3 +52,7 @@ Mime::Type.register 'text/x-yaml', :yaml, [], %w(yml)
 # Mime::Type uses the obsolete text/javascript; MIME::Type uses the correct application/javascript
 Mime::Type.unregister :js
 Mime::Type.register 'application/javascript', :js, %w(text/javascript application/x-javascript), []
+
+# For dependency-injected JavaScript
+#TODO this should really be an option passed to the .js URL
+Mime::Type.register_alias 'application/javascript', :jsm

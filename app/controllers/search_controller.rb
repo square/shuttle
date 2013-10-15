@@ -33,25 +33,29 @@ class SearchController < ApplicationController
           target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
           return head(:unprocessable_entity) unless target_locales.all?
         end
-        if query_filter.present?
-          @results = Translation.search(load: {include: {key: [:slugs, :project]}}) do
-            if target_locales
-              if target_locales.size > 1
-                locale_filters = target_locales.map do |locale|
-                  {term: {rfc5646_locale: locale.rfc5646}}
-                end
-                filter :or, *locale_filters
-              else
-                filter :term, rfc5646_locale: target_locales.map(&:rfc5646)[0]
+        @results = Translation.search(load: {include: {key: [:slugs, :project]}}) do
+          if target_locales
+            if target_locales.size > 1
+              locale_filters = target_locales.map do |locale|
+                {term: {rfc5646_locale: locale.rfc5646}}
               end
+              filter :or, *locale_filters
+            else
+              filter :term, rfc5646_locale: target_locales.map(&:rfc5646)[0]
             end
-            sort { by :id, 'desc' }
-            size limit
-            from offset
-            if project_id and project_id > 0
-              filter :term, project_id: project_id
-            end
+          end
+          sort { by :id, 'desc' }
+          size limit
+          from offset
 
+          if project_id and project_id > 0
+            filter :term, project_id: project_id
+          end
+          if translator_id and translator_id > 0
+            filter :term, translator_id: translator_id
+          end
+
+          if query_filter.present?
             case field
               when 'searchable_source_copy' then
                 query { string "source_copy:\"#{query_filter}\"" }
@@ -59,8 +63,6 @@ class SearchController < ApplicationController
                 query { string "copy:\"#{query_filter}\"" }
             end
           end
-        else
-          @results = []
         end
         render json: decorate_translations(@results).to_json
       end

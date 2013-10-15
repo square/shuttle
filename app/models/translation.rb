@@ -76,6 +76,7 @@ class Translation < ActiveRecord::Base
     indexes :source_copy, analyzer: 'snowball', as: 'source_copy'
     indexes :id, type: 'string', index: :not_analyzed
     indexes :project_id, type: 'integer', as: 'send(:key).project_id'
+    indexes :translator_id, type: 'integer'
     indexes :rfc5646_locale, type: 'string'
     indexes :created_at, type: 'date'
     indexes :translated, type: 'boolean'

@@ -20,7 +20,7 @@ describe Importer::Ember do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
-                                    only_paths:     %w(js/),
+                                    only_paths:     %w(ember/),
                                     skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
       @commit  = @project.commit!('HEAD')
     end
@@ -48,7 +48,7 @@ describe Importer::Ember do
       @project = FactoryGirl.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en',
-                                    only_paths:          %w(js/),
+                                    only_paths:          %w(ember/),
                                     skip_imports:        Importer::Base.implementations.map(&:ident) - %w(ember))
       @commit  = @project.commit!('HEAD')
 
@@ -62,7 +62,7 @@ describe Importer::Ember do
       @project = FactoryGirl.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en-GB',
-                                    only_paths:          %w(js/),
+                                    only_paths:          %w(ember/),
                                     skip_imports:        Importer::Base.implementations.map(&:ident) - %w(ember))
       @commit  = @project.commit!('HEAD')
 
