@@ -234,6 +234,8 @@ en:
       name: Android XML files (tarball)
     ember:
       name: Ember.js i18n file
+    ember_module:
+        name: Ember.js i18n file (dependency injection)
     erb:
       name: ERb file
     ios:
