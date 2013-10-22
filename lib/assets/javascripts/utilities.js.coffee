@@ -137,6 +137,11 @@ root.toSentence = (ary) ->
   else
     "#{ary[0...-1].join(', ')}, and #{ary[ary.length - 1]}"
 
+# Converts the names and values of a form into a JavaScript object.
+#
+# @example
+#   $('#my-form').serializeObject() #=> { key1: 'value1', key2: 'value2', ... }
+
 jQuery.fn.serializeObject = ->
   object = {}
   pairs = $(this[0]).serializeArray()
@@ -151,5 +156,6 @@ jQuery.fn.serializeObject = ->
   object
 
 jQuery.fn.extend
+  # Like $.append, but safely appends text with HTML-unsafe characters.
   appendText: (text) ->
     $(this).append document.createTextNode(text)
