@@ -79,7 +79,7 @@ class TranslationDiff
     @diff ||= [consolidated.map { |m| m.one }.join(joiner), consolidated.map { |m| m.two }.join(joiner)]
   end
 
-  # @returns [Array<String>] The two strings being compared, padded to
+  # @return [Array<String>] The two strings being compared, padded to
   #   visually align words that are matched according to minimal Levenshtein
   #   distance
   def aligned
@@ -97,9 +97,10 @@ class TranslationDiff
   # @private
   # Finds context-sensitive runs of truthy values.
   #
-  # @param [Array<true, false>] Array of whether that index has a difference.
-  # @param [Integer] The amount of context on either side to include.
-  # @returns [Array<Range>] An Array of Ranges from the first parameter that have
+  # @param [Array<true, false>] changes Array of whether that index has a
+  #   difference.
+  # @param [Integer] context The amount of context on either side to include.
+  # @return [Array<Range>] An Array of Ranges from the first parameter that have
   #   context-sensitive runs of truths.
   def context_ranges(changes, context)
     # Convert to searchable string

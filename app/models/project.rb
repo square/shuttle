@@ -22,13 +22,12 @@ require 'file_mutex'
 # Associations
 # ============
 #
-# |                    |                                                                 |
-# |:-------------------|:----------------------------------------------------------------|
-# | `commits`          | The {Commit Commits} under this Project.                        |
-# | `keys`             | The {Key Keys} found in this Project.                           |
-# | `translations`     | The {Translation Translations} under this Project.              |
-# | `blobs`            | The Git {Blob Blobs} imported into this Project.                |
-# | `glossary_entries` | The {GlossaryEntry GlossaryEntries} applicable to this Project. |
+# |                |                                                    |
+# |:---------------|:---------------------------------------------------|
+# | `commits`      | The {Commit Commits} under this Project.           |
+# | `keys`         | The {Key Keys} found in this Project.              |
+# | `translations` | The {Translation Translations} under this Project. |
+# | `blobs`        | The Git {Blob Blobs} imported into this Project.   |
 #
 # Properties
 # ==========
@@ -71,7 +70,6 @@ class Project < ActiveRecord::Base
   has_many :keys, inverse_of: :project, dependent: :delete_all
   has_many :blobs, inverse_of: :project, dependent: :delete_all
   has_many :translations, through: :keys
-  has_many :glossary_entries
 
   include HasMetadataColumn
   has_metadata_column(

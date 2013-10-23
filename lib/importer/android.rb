@@ -20,7 +20,7 @@ module Importer
   # strings can have multiple "qualifiers" attached (e.g., this string applies
   # only to high-DPI screens in the French language), these qualifiers are
   # parsed out from the directory name and serialized into the key. The
-  # {Exporter::Android exporter} de-serializes them and recreates the correct
+  # {Localizer::Android localizer} de-serializes them and recreates the correct
   # directory structure.
 
   class Android < Base

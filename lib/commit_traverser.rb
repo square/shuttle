@@ -5,7 +5,7 @@ module CommitTraverser
   # Recursively scans the trees of a commit, locating and yielding blobs. Will
   # run indefinitely if there are cycles in the tree graph.
   #
-  # @param [Git::Object::Commit] A commit to traverse.
+  # @param [Git::Object::Commit] commit A commit to traverse.
   # @yield [path, blob] The operation to perform on each blob found.
   # @yieldparam [String] path The path to a blob, with leading slash.
   # @yieldparam [Git::Object::Blob] blob A blob in the commit.

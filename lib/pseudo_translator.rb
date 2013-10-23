@@ -26,7 +26,7 @@
 
 class PseudoTranslator
 
-  # @param [Locale] the Locale you want this PseudoTranslator to produce
+  # @param [Locale] locale The Locale you want this PseudoTranslator to produce
   #   translations in. Must be a pseudo-locale (i.e. have the "pseudo"
   #   variant).
   def initialize(locale)
@@ -35,16 +35,21 @@ class PseudoTranslator
     @locale = locale
   end
 
+  # @return [Array<String>] The supported pseudo-locale codes.
   def self.supported_rfc5646_locales
-    ["en-pseudo"]
+    %w(en-pseudo)
   end
 
+  # @return [Array<Locale>] The supported pseudo-locales.
   def self.supported_locales
     supported_rfc5646_locales.map { |l| Locale.from_rfc5646(l) }
   end
 
-  # @param [String] source_copy The original string
-  # @return [String] A tricky string of approximately the same form
+  # Pseudo-translates a source string.
+  #
+  # @param [String] source_copy The original string.
+  # @return [String] A tricky string of approximately the same form.
+
   def translate(source_copy)
     sentences = source_copy.split(".")
     words = sentences.map { |s| s.split(" ") }
@@ -90,7 +95,6 @@ class PseudoTranslator
   def pseudo_long_word
     long_words.sample(rand(1..3)).join("")
   end
-
 
   # For adding enhancements to strings
 

@@ -212,7 +212,7 @@ class Key < ActiveRecord::Base
     update_commit_readiness(true) if !skip_readiness_hooks && ready != ready_was
   end
 
-  # @ereturn [true, false] `true` if this Commit should now be marked as ready.
+  # @return [true, false] `true` if this Commit should now be marked as ready.
 
   def should_become_ready?
     if translations.loaded?

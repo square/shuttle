@@ -403,11 +403,15 @@ class WordSubstitutor
   class Levenshtein
     EDITS_MEMO = Hash.new { |h, k| h[k] = Hash.new }
 
-    # finds the series of edits necessary to transform s1 into s2. uses the
-    # recursive levenshtein algorithm.
+    # Finds the series of edits necessary to transform `s1` into `s2`. Uses the
+    # recursive Levenshtein algorithm.
     #
-    # @param [Array,String] Object to compare. Must be of same type as other parameter
-    # @returns [Array<Move>] The full history of edits required to transform s1 to s2
+    # @param [Array, String] s1 Object to compare. Must be of same type as other
+    #   parameter.
+    # @param [Array, String] s2 Object to compare. Must be of same type as other
+    #   parameter.
+    # @return [Array<Move>] The full history of edits required to transform `s1`
+    #   to `s2`.
     def edits(s1, s2)
       if (memo = EDITS_MEMO[s1][s2])
         return memo

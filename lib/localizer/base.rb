@@ -78,7 +78,7 @@ module Localizer
       end
     end
 
-    # @override post_process(commit, receiver, locale, ...)
+    # @overload post_process(commit, receiver, locale, ...)
     #   Override this method to do additional post-processing of the localized
     #   archive before the file is closed and sent to the client. Use this,
     #   e.g., to add additional files to the archive.
