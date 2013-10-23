@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 require 'localizer/storyboard'
-require 'copies_ios_resources_without_translations'
+require 'localizer/copies_ios_resources_without_translations'
 
 module Localizer
 

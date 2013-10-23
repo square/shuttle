@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'copies_ios_resources_without_translations'
+require 'localizer/copies_ios_resources_without_translations'
 
 module Localizer
 

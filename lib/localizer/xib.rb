@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 require 'ios_common'
-require 'copies_ios_resources_without_translations'
+require 'localizer/copies_ios_resources_without_translations'
 
 module Localizer
 
