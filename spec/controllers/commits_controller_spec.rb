@@ -580,6 +580,9 @@ de:
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
+
+      keys = Shuttle::Redis.keys('submitted_revision:*')
+      Shuttle::Redis.del(*keys) unless keys.empty?
     end
 
     it "should strip the commit revision of whitespace" do
@@ -597,6 +600,16 @@ de:
       @project.commits.first.description.should eql('desc')
       @project.commits.first.pull_request_url.should eql('url')
       @project.commits.first.due_date.should eql(Date.today.tomorrow)
+    end
+
+    it "should not attempt to import the same revision twice in quick succession" do
+      CommitCreator.should_receive(:perform_once).once
+      post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
+      expect(JSON.parse(response.body)['message']).to include('has been received')
+
+      CommitCreator.should_not_receive(:perform_once)
+      post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
+      expect(JSON.parse(response.body)['message']).to include('already submitted')
     end
   end
 

@@ -146,7 +146,8 @@ en:
       destroy:
         deleted: Commit %{sha} has been removed.
       create:
-        success: "Your commit %{revision} has been received and is being processed."
+        success: Your commit %{revision} has been received and is being processed.
+        already_submitted: You have already submitted that revision for translation. Once it is loaded from the repository, it will appear on Shuttle and the import process will begin.
     locale:        
       projects:
         locale_access_required: You don't have permission to access that locale.
