@@ -129,6 +129,7 @@ class Project < ActiveRecord::Base
   before_validation :create_api_key, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
   after_update :add_or_remove_pending_translations
+  after_update :invalidate_manifests_and_localizations
 
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
@@ -355,6 +356,11 @@ class Project < ActiveRecord::Base
 
   def add_or_remove_pending_translations
     ProjectTranslationAdder.perform_once id
+  end
+
+  def invalidate_manifests_and_localizations
+    keys = Shuttle::Redis.keys("manifest:#{id}:*") + Shuttle::Redis.keys("localize:#{id}:*")
+    Shuttle::Redis.del(*keys) unless keys.empty?
   end
 
   def require_valid_locales_hash
