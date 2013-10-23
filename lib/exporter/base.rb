@@ -162,7 +162,7 @@ module Exporter
         end
       end
 
-      # de-duplicate translations``
+      # de-duplicate translations
       translations.reject! do |translation|
         possible_duplicates[translation.key.key].include?(translation.copy)
       end if deduplicate.present?

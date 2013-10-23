@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'copies_ios_resources_without_translations'
+
 module Localizer
 
   # Applies localized copy to Apple Storyboard files.
