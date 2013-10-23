@@ -56,8 +56,8 @@ describe Localizer::Xib do
       end
     end
 
-    entries.size.should eql(1)
-    entries.keys.first.should eql('apple/de-DE.lproj/example.xib')
-    entries.values.first.should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.xib')))
+    entries.size.should >= 2
+    entries['apple/de-DE.lproj/example.xib'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.xib')))
+    entries['apple/de-DE.lproj/no-translations.xib'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'no-translations.xib')))
   end
 end

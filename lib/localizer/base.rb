@@ -51,23 +51,7 @@ module Localizer
 
     def self.localize(commit, *locales)
       locales = commit.project.required_locales if locales.empty?
-      # by localizer, then by source, then by locale
-      organized_translations = Hash.new { |h, k|
-        h[k] = Hash.new { |h2, k2|
-          h2[k2] = Hash.new { |h3, k3|
-            h3[k3] = []
-          }
-        }
-      }
-
-      Translation.in_commit(commit).includes(:key).not_base.
-          where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).each do |translation|
-        next unless translation.key.source
-        source    = translation.key.source.sub(/^\//, '')
-        localizer = implementations.detect { |localizer| localizer.localizable?(commit.project, translation.key) }
-        next unless localizer
-        organized_translations[localizer.ident][source][translation.rfc5646_locale] << translation
-      end
+      organized_translations = organize_translations(commit, *locales)
 
       build_archive do |receiver|
         organized_translations.each do |localizer, translations_by_source|
@@ -77,18 +61,33 @@ module Localizer
             input_file = Localizer::File.new(source, file_contents)
 
             translations_by_locale.each do |locale, translations|
-              output_file = Localizer::File.new
-              klass       = find_by_ident(localizer)
+              output_file        = Localizer::File.new
+              klass              = find_by_ident(localizer)
+              localizer_instance = klass.new(commit.project, translations)
+
               Rails.logger.tagged(klass.to_s) do
-                klass.new(commit.project, translations).
-                    localize input_file, output_file, Locale.from_rfc5646(locale)
+                localizer_instance.localize input_file, output_file, Locale.from_rfc5646(locale)
               end
               next unless output_file.path && output_file.content
               receiver.add_file output_file.path, output_file.content
+
+              localizer_instance.post_process commit, receiver, *locales
             end
           end
         end
       end
+    end
+
+    # @override post_process(commit, receiver, locale, ...)
+    #   Override this method to do additional post-processing of the localized
+    #   archive before the file is closed and sent to the client. Use this,
+    #   e.g., to add additional files to the archive.
+    #   @param [Commit] commit The commit being localized.
+    #   @param [Multifile::Receiver] A proxy object allowing you to add files to
+    #     the archive.
+    #   @param [Locale] locale A locale being included in the archive.
+
+    def self.post_process(commit, receiver, *locales)
     end
 
     # Prepares a localizer for use with a Commit.
@@ -140,6 +139,31 @@ module Localizer
       "Localizer::#{ident.camelize}".constantize
     rescue NameError
       nil
+    end
+
+    # @private
+    def self.organize_translations(commit, *locales)
+      #TODO cache somehow
+
+      # by localizer, then by source, then by locale
+      organized_translations = Hash.new { |h, k|
+        h[k] = Hash.new { |h2, k2|
+          h2[k2] = Hash.new { |h3, k3|
+            h3[k3] = []
+          }
+        }
+      }
+
+      Translation.in_commit(commit).includes(:key).not_base.
+          where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).each do |translation|
+        next unless translation.key.source
+        source    = translation.key.source.sub(/^\//, '')
+        localizer = implementations.detect { |localizer| localizer.localizable?(commit.project, translation.key) }
+        next unless localizer
+        organized_translations[localizer.ident][source][translation.rfc5646_locale] << translation
+      end
+
+      organized_translations
     end
   end
 

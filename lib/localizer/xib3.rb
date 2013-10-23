@@ -23,5 +23,13 @@ module Localizer
       key.source =~ /#{Regexp.escape project.base_rfc5646_locale}\.lproj\/[^\/]+\.xib$/ &&
           key.importer == 'xib3'
     end
+
+    private
+
+    include CopiesIosResourcesWithoutTranslations
+    def copy_resource?(path, contents, base_locale)
+      path =~ /#{Regexp.escape(base_locale.rfc5646)}\.lproj\/[^\/]+\.xib$/ &&
+          Nokogiri::XML(contents).root.name == 'document'
+    end
   end
 end

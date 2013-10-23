@@ -78,6 +78,12 @@ module Localizer
 
     private
 
+    include CopiesIosResourcesWithoutTranslations
+    def copy_resource?(path, contents, base_locale)
+      path =~ /#{Regexp.escape(base_locale.rfc5646)}\.lproj\/[^\/]+\.xib$/ &&
+          Nokogiri::XML(contents).root.name == 'archive'
+    end
+
     def set_text_in_text_node(text, text_node)
       raise "Cannot set string content in node if node has children" unless text_node.element_children.empty?
       raise "Cannot set string content in node if node is not of type 'string'" unless text_node.name == 'string'

@@ -69,6 +69,7 @@ require 'fileutils'
 
 class Commit < ActiveRecord::Base
   extend RedisMemoize
+  include CommitTraverser
 
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
@@ -180,7 +181,9 @@ class Commit < ActiveRecord::Base
     # clear out existing keys so that we can import all new keys
     keys.clear unless options[:locale]
     # perform the recursive import
-    import_tree commit!.gtree, '', options.merge(blobs: blobs)
+    traverse(commit!) do |path, blob|
+      import_blob path, blob, options.merge(blobs: blobs)
+    end
 
     # this will also kick of stats recalculation for inline imports
     remove_worker! job_id
@@ -424,42 +427,35 @@ class Commit < ActiveRecord::Base
     end
   end
 
-  def import_tree(tree, path, options={})
+  def import_blob(path, blob, options={})
     return if project.skip_tree?(path)
     imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
 
-    tree.blobs.each do |name, blob|
-      blob_path   = "#{path}/#{name}"
-      blob_object = if options[:blobs]
-                      begin
-                        options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
-                      rescue ActiveRecord::RecordNotUnique
-                        project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
-                      end
-                    else
+    blob_object = if options[:blobs]
+                    begin
+                      options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                    rescue ActiveRecord::RecordNotUnique
                       project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
                     end
+                  else
+                    project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
+                  end
 
-      imps.each do |importer|
-        importer = importer.new(blob_object, blob_path, self)
+    imps.each do |importer|
+      importer = importer.new(blob_object, path, self)
 
-        Shuttle::Redis.del("keys_for_blob:#{importer.class.ident}:#{blob.sha}") if options[:force]
+      Shuttle::Redis.del("keys_for_blob:#{importer.class.ident}:#{blob.sha}") if options[:force]
 
-        if importer.skip?(options[:locale])
-          #Importer::SKIP_LOG.info "commit=#{revision} blob=#{blob.sha} path=#{blob_path} importer=#{importer.class.ident} #skip? returned true for #{options[:locale].inspect}"
-          next
-        end
-
-        if options[:inline]
-          BlobImporter.new.perform importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try!(:rfc5646)
-        else
-          add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try!(:rfc5646))
-        end
+      if importer.skip?(options[:locale])
+        #Importer::SKIP_LOG.info "commit=#{revision} blob=#{blob.sha} path=#{blob_path} importer=#{importer.class.ident} #skip? returned true for #{options[:locale].inspect}"
+        next
       end
-    end
 
-    tree.trees.each do |name, subtree|
-      import_tree subtree, "#{path}/#{name}", options
+      if options[:inline]
+        BlobImporter.new.perform importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
+      else
+        add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646))
+      end
     end
   end
 

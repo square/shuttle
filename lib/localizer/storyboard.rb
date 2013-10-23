@@ -104,5 +104,12 @@ module Localizer
       output_file.path    = input_file.path.sub("/#{@project.base_rfc5646_locale}.lproj/", "/#{locale.rfc5646}.lproj/")
       output_file.content = xml.to_xml
     end
+
+    private
+
+    include CopiesIosResourcesWithoutTranslations
+    def copy_resource?(path, contents, base_locale)
+      path =~ /#{Regexp.escape(base_locale.rfc5646)}\.lproj\/[^\/]+\.storyboard$/
+    end
   end
 end

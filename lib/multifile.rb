@@ -38,7 +38,8 @@ module Multifile
   class Receiver
     # @private
     def initialize(archive)
-      @archive = archive
+      @archive     = archive
+      @added_files = Set.new
     end
 
     # Adds a file to the archive.
@@ -46,8 +47,14 @@ module Multifile
     # @param [String] path The full path of the file relative to the archive
     #   root.
     # @param [String] data The file contents.
+    # @param [Hash] options Additional options.
+    # @option options [true, false] :overwrite (true) If `false`, will not add
+    #   the file if it has already been added.
 
-    def add_file(path, data)
+    def add_file(path, data, options={})
+      options[:overwrite] = true unless options.include?(:overwrite)
+      return if !options[:overwrite] && @added_files.include?(path)
+
       @archive.new_entry do |entry|
         entry.pathname = path
         entry.filetype = 0100000    # normal file
@@ -61,6 +68,8 @@ module Multifile
         @archive.write_header entry
         @archive.write_data data
       end
+
+      @added_files << path
     end
   end
 end
