@@ -77,13 +77,6 @@ body.translations {
     input[type="text"], textarea {
       width: 100%;
     }
-    input[type="checkbox"] {
-      margin-right: 10px;
-    }
-
-    &+.controls {
-      margin-top: 10px; 
-    }
   }
 
   dl {

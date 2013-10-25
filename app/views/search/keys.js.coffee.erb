@@ -13,6 +13,16 @@
 #    limitations under the License.
 
 $(window).ready ->
+  $("#expand-search").click () ->
+    if $(".collapse").data("toggle")
+      $("#expand-search").removeClass("active")
+      $(".collapse").data("toggle", false)
+      $(".collapse").slideUp()
+    else 
+      $("#expand-search").addClass("active")
+      $(".collapse").data("toggle", true)
+      $(".collapse").slideDown()
+  
   # Methods
   localeOrder = []
   formatTable = (keyTable, locales) ->

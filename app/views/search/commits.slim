@@ -30,13 +30,19 @@ hr.divider
 .border
   .filter-bar
     = form_tag(search_commits_url(format: 'json'), method: :get, id: 'commit-search-form', class: 'filter form-inline') do
-      | Show me commits in project 
-      - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-      - project_list.unshift ['all', nil]
-      = select_tag 'project_id', options_for_select(project_list)
-      |  with SHA prefix 
-      = text_field_tag 'sha', '', placeholder: '935ad4', id: 'commit-sha-field'
-      |  
-      = submit_tag 'Search', class: 'primary'
+      .main
+        = text_field_tag 'sha', '', placeholder: '935ad4', id: 'commit-sha-field'
+        = submit_tag 'Search', class: 'primary'
+        .pull-right#expand-search
+          i.icon-angle-right
+
+      .collapse 
+
+        .control-group 
+          = label_tag 'project_id', 'Projects', class: 'control-label'
+          .controls
+            - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+            - project_list.unshift ['all', nil]
+            = select_tag 'project_id', options_for_select(project_list)
   
   table.table.hover-rows#commits data-url=search_commits_url(format: 'json')

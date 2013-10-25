@@ -29,19 +29,25 @@ hr.divider
 .border 
   .filter-bar 
     = form_tag(translation_units_url, method: :get, id: 'translation-units-search-form', class: 'filter form-inline') do
-      | Find 
-      = text_field_tag 'keyword', '', id: 'search-field', placeholder: 'keyword'
-      |  in 
-      = select_tag 'field', options_for_select([\
-                                                   %w(source searchable_source_copy),\
-                                                   %w(translation searchable_copy),\
-                                               ]), id: 'field-select', class: 'span2'
-      |  with translation in 
-      - if current_user.approved_locales.any?
-        = select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
-      - else
-        / locale field
-        = text_field_tag 'target_locales', '', class: 'locale-field', id: '', placeholder: 'any target locale'
-      |  
-      = submit_tag 'search', class: 'primary'
+      .main
+        = text_field_tag 'keyword', '', id: 'search-field', placeholder: 'Search Query'
+        = select_tag 'field', options_for_select([\
+                                       %w(source searchable_source_copy),\
+                                       %w(translation searchable_copy),\
+                                   ]), id: 'field-select', class: 'span2'
+        = submit_tag 'Search', class: 'primary'
+        .pull-right#expand-search
+          i.icon-angle-right
+
+      .collapse 
+
+        .control-group 
+          = label_tag 'target_locales', 'Target Locales', class: 'control-label'
+          .controls
+            - if current_user.approved_locales.any?
+              = select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
+            - else
+              / locale field
+              = text_field_tag 'target_locales', '', class: 'locale-field', id: '', placeholder: 'any target locale'
+
   table.table.hover-rows#translation_units data-url=translation_units_url(format: 'json')

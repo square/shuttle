@@ -71,6 +71,11 @@ legend {
   }
   .controls {
     margin-left: 180px;
+    & + .controls {
+      margin-top: 15px;
+    }
+
+    select { margin-top: 0px; }
 
     input + input {
       margin-top: 8px;
@@ -84,6 +89,8 @@ legend {
       margin: 0;
       padding-top: 9px;
     }
+
+
   }
 }  
 

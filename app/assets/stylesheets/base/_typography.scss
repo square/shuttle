@@ -26,11 +26,14 @@ h1, h2, h3, h4, h5, h6 {
 
 p { margin-top: 0.5em; margin-bottom: 0.5em; }
 
+// ----- OTHERS
+
 a {
   color: $dark-blue;
   cursor: pointer;
   text-decoration: none;
   &:hover {
+    @include transition(all, 0.2s, ease);
     color: darken($dark-blue, 10%);
     text-decoration: underline;
   }

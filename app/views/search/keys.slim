@@ -29,22 +29,32 @@ hr.divider
 .border 
   .filter-bar 
     = form_tag(search_keys_url(format: 'json'), method: :get, id: 'key-search-form', class: 'filter form-inline') do
-      | Show me 
-      = select_tag 'filter', options_for_select(\
-          [\
-            ['all', nil],\
-            ['untranslated', 'untranslated'],\
-            ['translated but not approved', 'unapproved'],\
-            ['approved', 'approved']\
-          ]\
-        ), id: 'key-filter-select'
+      .main
+        = text_field_tag 'filter', '', placeholder: 'Filter by Key', id: 'key-filter-field'
+        = submit_tag 'Search', class: 'primary'
+        .pull-right#expand-search
+          i.icon-angle-right
 
-      |  translations in project  
-      - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-      = select_tag 'project_id', options_for_select(project_list)
-      |  with key substring 
-      = text_field_tag 'filter', '', placeholder: 'filter by key', id: 'key-filter-field'
-      |  
-      = submit_tag 'Filter', class: 'primary'
+      .collapse 
+        .control-group 
+          = label_tag 'filter', 'Key Status', class: 'control-label'
+          .controls
+            = select_tag 'filter', options_for_select(\
+                      [\
+                        ['all', nil],\
+                        ['untranslated', 'untranslated'],\
+                        ['translated but not approved', 'unapproved'],\
+                        ['approved', 'approved']\
+                      ]\
+                    ), id: 'key-filter-select'
+
+        .control-group 
+          = label_tag 'project_id', 'Projects', class: 'control-label'
+          .controls
+            - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+            = select_tag 'project_id', options_for_select(project_list)
+          .controls
+            = check_box_tag 'not_elastic_search', true
+            | Search for exact matches
 
   table.table#keys data-url=search_keys_url(format: 'json')

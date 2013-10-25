@@ -85,6 +85,13 @@ class SearchController < ApplicationController
           offset       = params[:offset].to_i
           id           = params[:project_id]
           limit        = params.fetch(:limit, PER_PAGE)
+          
+          if params[:not_elastic_search]  
+            p "HERE!!!!!!"
+            p params
+            p "HERE!!!!!!"  
+          end 
+
           if query_filter.present?
             @results = Key.search(load: {include: [:translations, :project, :slugs]}) do
               query { string "original_key:\"#{query_filter}\"" }

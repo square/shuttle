@@ -3,24 +3,52 @@
 
 body.search {
   .filter-bar {
-    input[type="submit"] { margin-left: 15px; }
-  }
+    select {
+      text-transform: capitalize;
+    }
 
-  &#search-translations {
-    .filter-bar {
-      .row + .row {
-        margin-top: 15px;
+    .main {
+      input[type="text"] { width: 700px; }
+      input + input, input + select, select + input { 
+        margin-left: 15px;
+      }
+      select {width: 150px; }
+
+      #expand-search {
+        margin-right: 10px;
+        font-weight: 500;
+        font-size: 30px;
+        @include transition(all, 0.3s, ease);
+        &:hover {
+          cursor: pointer;
+          color: $dark-blue;
+          @include transform(rotate(90deg));  
+        }
+        &.active {
+          color: $dark-blue;
+          @include transform(rotate(90deg));   
+        }
       }
 
-      // input[type="submit"] { float: right; margin-top: 20px; margin-right: 300px; }
     }
+
+    .collapse {
+      margin-top: 30px;
+      margin-left: 40px;
+      display: none;
+      .controls {
+        width: 480px;
+        input, select, .twitter-typeahead { width: 100%; }
+      }
+    }
+
   }
 
   &#search-keys {
     table {
       table-layout: fixed;
       th:nth-child(1) {
-        width: 70px;
+        width: 90px;
       } 
       th:nth-child(2) {
         width: 450px;

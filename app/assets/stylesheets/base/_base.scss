@@ -62,23 +62,3 @@ hr.divider {
   margin-top: 5px;
   margin-bottom: 40px;
 }
-
-// ----- OTHERS
-
-a {
-  color: $gray1;
-  // CURRENTLY, links aren't very distinguishable.  Need a way to make them stand out.  
-  span {
-    background-color: $gray1;
-  }
-
-  &:hover {
-    @include transition(all, 0.2s, ease);
-    color: $dark-blue !important;
-
-    span {
-      @include transition(all, 0.2s, ease);
-      background-color: $dark-blue !important;
-    }
-  }
-}
