@@ -1,0 +1,48 @@
+- content_for :file_name do
+  = 'views/commits/show'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+.header
+  h1 Commit Status
+  - if current_user.admin?
+    .pull-right  
+      button.danger href=project_commit_url(@project, @commit) data-method='DELETE' data-confirm='Are you sure you want to delete this commit?' Delete
+
+  h6
+    strong #{@commit.revision}
+
+hr.divider
+
+.border
+  #filter
+    = form_tag(nil, method: 'GET', id: 'filter-form', class: 'filter') do
+      = select_tag 'status', options_for_select(\
+          [\
+            ['all', nil],\
+            ['approved', 'approved'],\
+            ['pending', 'pending']\
+          ]\
+        ), id: 'filter-select' 
+      = text_field_tag 'filter', '', placeholder: 'Substring', id: 'filter-field'
+      = submit_tag 'Filter', class: 'primary'
+
+  table.table.table-striped#translations[
+      data-url=project_commit_keys_url(@project, @commit, format: 'json') 
+      data-locales=@project.targeted_rfc5646_locales.keys.join(',') ]
+    thead
+      tr
+        th STRING
+        - @project.locale_requirements.each do |locale, required|
+          - finished = @commit.all_translations_approved_for_locale?(locale)
+          th class=(required ? (finished ? "text-success" : "text-error") : nil)
+            = locale.rfc5646
+            - if finished
+              |  
+              i.icon-ok
+
+

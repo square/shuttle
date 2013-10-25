@@ -1,0 +1,110 @@
+- content_for :file_name do
+  = 'views/users/show'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+.header
+  h1 = @user.name
+  - unless @user.admin? || @user == current_user
+    .pull-right  
+      button.submit href=become_user_url(@user) data-method='POST' Impersonate
+
+hr.divider
+
+.row 
+  .six.columns
+    .image-wrapper
+      = image_tag "default_photo.jpg"
+  .eight.columns
+    = form_for(@user) do |f|
+      fieldset 
+        legend Profile
+        .control-group
+          label.control-label Email
+          .controls
+            p = @user.email
+        .control-group
+          = f.label :first_name, class: 'control-label'
+          .controls
+            = f.text_field :first_name
+        .control-group
+          = f.label :last_name, class: 'control-label'
+          .controls
+            = f.text_field :last_name
+        .control-group
+          = f.label :password, class: 'control-label'
+          .controls
+            = f.password_field :password, placeholder: 'Password'
+            = f.password_field :password_confirmation, placeholder: 'Confirm your password'
+        .control-group
+          = f.label :role, class: 'control-label'
+          .controls
+            = f.select :role, t('models.user.role').to_a.map(&:reverse), include_blank: true, class: 'styled'
+
+        .control-group
+          label.control-label Signed Up
+          .controls
+            p = "#{l @user.created_at, format: :short_full}"
+            / (#{time_ago_in_words @user.created_at} ago)
+
+        .control-group
+          label.control-label Last Updated
+          .controls
+            p = "#{l @user.updated_at, format: :short_full}"
+            / (#{time_ago_in_words @user.updated_at} ago)
+
+      fieldset 
+        legend Languages
+        .control-group
+          = f.label :approved_rfc5646_locales, "Privileged Locales", class: 'control-label'
+          .controls
+            = f.content_tag_field 'div', :approved_rfc5646_locales, class: 'array-field', 'data-value' => @user.approved_rfc5646_locales.to_json
+
+      fieldset 
+        legend.activity Activity
+        dl 
+          .item            
+            dt Number of logins
+            dd = number_with_delimiter(@user.sign_in_count)
+          .item  
+            dt Number of failed logins
+            dd = number_with_delimiter(@user.failed_attempts)
+          .item  
+            dt Locked because of too many failed logins?
+            dd 
+              - if @user.locked_at
+                = "Yes, since #{time_ago_in_words @user.locked_at} ago"
+              - else
+                | No
+          .item              
+            dt Reset password token sent?
+            dd 
+              - if @user.reset_password_sent_at
+                = "Yes, #{time_ago_in_words @user.reset_password_sent_at} ago"
+              - else
+                | No
+          .item              
+            dt Currently signed in since
+            dd 
+              - if @user.current_sign_in_at
+                = "#{l @user.current_sign_in_at, format: :short_full}"
+                / from #{@user.current_sign_in_ip}
+              - else
+                | Never
+          .item              
+            dt Last signed in at
+            dd 
+              - if @user.last_sign_in_at
+                = "#{l @user.last_sign_in_at, format: :short_full}"
+                / from #{@user.last_sign_in_ip}
+              - else
+                | Never
+
+
+      .form-actions
+        = f.submit class: 'primary', value: 'save'
+        button.danger href=user_url(@user) data-method='DELETE' data-confirm='Are you sure you want to delete this account?' Delete

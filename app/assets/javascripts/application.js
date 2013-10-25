@@ -25,16 +25,21 @@
 // GO AFTER THE REQUIRES BELOW.
 //
 //= require jquery
+//= require jquery-ui
+//= require jquery-autosize
+//= require jquery-cookie
 //= require jquery_ujs
 //= require jquery-timers
-//= require jquery.cookie
+//= require jquery-leanModal
+//= require jquery-qtip
+//= require datepicker
+//= require twitter/typeahead
 //= require xregexp
 //
+//= require d3
+//= require nvd3
+//
 //= require hogan
-//= require twitter/bootstrap
-//= require bootstrap-datepicker
-//= require jqBootstrapValidation
-//= require twitter/typeahead.min
 //= require utilities
 //
 //= require buttons
@@ -45,9 +50,14 @@
 //= require infinite_scroll
 //= require locale_field
 //= require live_update
-//= require multifield
 //= require smart_form
 //
 //= require_tree ../templates
 //= require_tree .
 
+$(document).ready(function() {
+  // enable leanModal on all modal links
+  $("a[rel*=modal]").leanModal({closeButton: '.close'});
+  $("button[rel*=modal]").leanModal({closeButton: '.close'});
+  $("textarea.resize").autosize();
+});

@@ -1,0 +1,106 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :file_name do
+  = 'views/glossary/locale_glossary_entries/edit'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+/ Status Line
+.header
+  h1 Translate Locale Glossary Entry
+
+hr.divider
+
+/ Filter Bar
+= form_for @locale_entry, url: glossary_source_locale_url(@source_entry, @locale_entry) do |f|
+  .entry.row
+    / Edit Side
+    .eight.columns.edit-side
+      fieldset 
+        legend = @locale_entry.locale.name
+
+        .control-group
+          = f.label :copy, @locale_entry.locale.name, class: "control-label"
+          .controls 
+            = f.text_field :copy, id: 'locale-copy', placeholder: @locale_entry.locale.name, autocomplete: 'off'
+
+        .control-group
+          = f.label :notes, 'Notes', class: "control-label"
+          .controls 
+            = f.text_area :notes, placeholder: 'Notes', autocomplete: 'off', rows: 7, class: 'resize'
+
+      fieldset 
+        legend.activity Activity
+
+        dl 
+          - if @locale_entry.translator
+            .item 
+              dt Translator
+              dd = @locale_entry.translator.name
+          
+          - if @locale_entry.reviewer
+            .item 
+              dt Reviewer
+              dd = @locale_entry.reviewer.name
+          .item 
+            dt Created at
+            dd = "#{l @locale_entry.created_at, format: :short_full}"
+          .item 
+            dt Last updated at
+            dd = "#{l @locale_entry.updated_at, format: :short_full}"
+      .form-actions
+        = f.submit class: 'primary', value: 'Update'
+
+    / Information Side
+    .eight.columns.info-side
+      button.small.default.copy-source Copy to #{@locale_entry.locale.name}
+      fieldset 
+        legend = @source_entry.source_locale.name
+        .control-group
+          label.control-label = @source_entry.source_locale.name
+          .controls 
+            input type="text" readonly="readonly" value=@source_entry.source_copy
+
+        .control-group
+          label.control-label Context
+          .controls 
+            input type="text" readonly="readonly" value=@source_entry.context
+
+        .control-group
+          label.control-label Notes
+          .controls 
+            textarea.resize readonly="readonly" rows=7 
+              = @source_entry.notes
+
+      fieldset 
+        legend.activity Activity
+
+        dl 
+          - if @source_entry.due_date
+            .item
+              dt Due Date
+              dd = "#{l DateTime.strptime(@source_entry.due_date, "%m/%d/%Y"), format: :short_full}"
+          .item
+            dt Created at
+            dd = "#{l @source_entry.created_at, format: :short_full}"
+          .item
+            dt Last updated at
+            dd = "#{l @source_entry.updated_at, format: :short_full}"
+  
+  

@@ -1,0 +1,42 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :file_name do
+  = 'views/search/commits'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+.header
+  h1 Commits Search
+
+hr.divider
+
+/ tab-content
+.border
+  .filter-bar
+    = form_tag(search_commits_url(format: 'json'), method: :get, id: 'commit-search-form', class: 'filter form-inline') do
+      | Show me commits in project 
+      - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+      - project_list.unshift ['all', nil]
+      = select_tag 'project_id', options_for_select(project_list)
+      |  with SHA prefix 
+      = text_field_tag 'sha', '', placeholder: '935ad4', id: 'commit-sha-field'
+      |  
+      = submit_tag 'Search', class: 'primary'
+  
+  table.table.hover-rows#commits data-url=search_commits_url(format: 'json')

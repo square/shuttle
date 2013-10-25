@@ -113,10 +113,7 @@ class LocaleGlossaryEntry < ActiveRecord::Base
     options[:only] = Array.wrap(options[:only])
     options[:only] << :id << :copy << :notes << :translated << :approved
 
-    super(options).merge(
-        translator: translator.as_json,
-        reviewer:   reviewer.as_json
-    )
+    super(options)
   end
 
   private

@@ -43,9 +43,10 @@ class root.GlobalSearch
 
   addTranslation: (translation) ->
     tr = $('<tr/>').appendTo(@body)
+    tr.click () -> 
+      document.location = translation.url
     $('<td/>').text(translation.project.name).appendTo tr
-    id = $('<td/>').appendTo tr
-    $('<a/>').text(translation.id).attr('href', translation.url).appendTo(id)
+    $('<td/>').text(translation.id).appendTo tr
     $('<td/>').text(translation.source_locale.rfc5646).appendTo tr
     $('<td/>').text(translation.source_copy).appendTo tr
     $('<td/>').text(translation.locale.rfc5646).appendTo tr

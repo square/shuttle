@@ -1,0 +1,89 @@
+@import "base/vars";
+@import "css3-mixins";
+
+form#new_project {
+  p { margin: 0 0 10px 0; }
+
+  p.help-block {
+    font-size: 90%;
+    color: $gray3;
+  }
+}
+
+// forms lack the padding granted by empty grid columns when in stacked layout.
+// add some padding to compensate.
+@include iphone-landscape-and-smaller {
+  form {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+fieldset {
+  padding: 20px 0px 50px 0px;
+}
+
+legend {
+  font-size: $legend-size; 
+  line-height: $legend-line-height;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: block;
+  width: 100%;
+  padding-bottom: 15px;
+  border-bottom: 1px solid $gray3;
+}
+
+.form-actions {
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 1px solid $gray5;
+  input, button {
+    width: 175px;
+    @include box-sizing(border-box);
+  }
+  input+input, button+button, button+input, input + button {
+    margin-left: 7px;
+  }
+}
+
+.help-block {
+  font-size: 80%;
+}
+
+.space-group {
+  margin-bottom: 30px;
+}
+
+.control-label {
+  font-weight: 500;
+}
+
+.control-group {
+  margin-bottom: 15px;
+  label {
+    float: left;
+    width: 160px;
+    padding-top: 9px;
+    text-align: left;
+    text-transform: capitalize;
+  }
+  .controls {
+    margin-left: 180px;
+
+    input + input {
+      margin-top: 8px;
+    }
+
+    .twitter-typeahead * {
+      margin: 0px;
+    }
+
+    p {
+      margin: 0;
+      padding-top: 9px;
+    }
+  }
+}  
+

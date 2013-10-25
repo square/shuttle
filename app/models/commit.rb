@@ -67,7 +67,7 @@ require 'fileutils'
 # | `description`      | A user-submitted description of why we are localizing this commit. |
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
 
-class Commit < ActiveRecord::Base
+class Commit < ActiveRecord::Base 
   extend RedisMemoize
   include CommitTraverser
 
@@ -83,36 +83,39 @@ class Commit < ActiveRecord::Base
 
   include HasMetadataColumn
   has_metadata_column(
-      description:      {allow_nil: true},
-      pull_request_url: {allow_nil: true}
+    description:      {allow_nil: true},
+    pull_request_url: {allow_nil: true}
   )
 
   validates :project,
-            presence: true
+    presence: true
   validates :revision_raw,
-            presence:   true,
-            uniqueness: {scope: :project_id, on: :create}
+    presence:   true,
+    uniqueness: {scope: :project_id, on: :create}
   validates :message,
-            presence: true,
-            length:   {maximum: 256}
+    presence: true,
+    length:   {maximum: 256}
   validates :committed_at,
-            presence:   true,
-            timeliness: {type: :time}
+    presence:   true,
+    timeliness: {type: :time}
   validates :priority,
-            numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3},
-            allow_nil:    true
+    numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3},
+    allow_nil:    true
   validates :due_date,
-            timeliness: {type: :date},
-            allow_nil:  true
+    timeliness: {type: :date},
+    allow_nil:  true
+  validates :completed_at,
+    timeliness: {type: :date},
+    allow_nil:  true
 
   attr_readonly :project_id, :revision_raw, :message, :committed_at
 
   extend GitObjectField
   git_object_field :revision,
-                   git_type:        :commit,
-                   repo:            ->(c) { c.project.try!(:repo) },
-                   repo_must_exist: true,
-                   scope:           :for_revision
+    git_type:        :commit,
+    repo:            ->(c) { c.project.try!(:repo) },
+    repo_must_exist: true,
+    scope:           :for_revision
 
   extend SetNilIfBlank
   set_nil_if_blank :description, :due_date
@@ -133,14 +136,130 @@ class Commit < ActiveRecord::Base
   scope :by_priority_and_due_date, -> { order('due_date ASC, priority ASC') }
   scope :with_sha_prefix, lambda { |sha| where("encode(revision_raw, 'hex') like ?", "#{sha}%") }
 
+  # Counts the total commits.  
+  #
+  # @return [Fixnum] The number of commits
+
+  def self.total_commits
+    Commit.all.count
+  end
+
+
+  # Counts the number of incomplete commits.  
+  #
+  # @return [Fixnum] The number of incomplete commits
+
+
+  def self.total_commits_incomplete
+    Commit.where("ready=false").count
+  end
+
+
+  # Counts the number of commits created every day for the past 30 days.  
+  #
+  # @return [Array<Fixnum>] An array containing the number of commits created each day for the past 30 days.
+
+  def self.daily_commits_created
+    daily_commits_created = []
+
+    timespan = 30
+
+    last_date = Date.today
+    first_date = Date.today - timespan.days
+
+    commits = Commit.where("created_at >= :date", date: first_date).where("created_at <= :date", date: last_date).order('created_at ASC')
+
+    i = 0
+    while first_date < last_date         
+      num_finished = 0 
+
+      while i < commits.length and commits[i].created_at.utc.to_date == first_date 
+        num_finished += 1
+        i += 1
+      end 
+
+      daily_commits_created << [first_date.to_time.utc.to_i, num_finished]
+      first_date += 1.day
+    end 
+
+    return daily_commits_created
+  end 
+
+
+  # Counts the number of commits finished every day for the past 30 days.  
+  #
+  # @return [Array<Fixnum>] An array containing the number of commits finished each day for the past 30 days.
+
+  def self.daily_commits_finished
+    daily_commits_finished = []
+
+    timespan = 30
+
+    last_date = Date.today
+    first_date = Date.today - timespan.days
+
+    commits = Commit.where("completed_at >= :date", date: first_date).where("completed_at <= :date", date: last_date).order('completed_at ASC')
+
+    i = 0
+    while first_date < last_date         
+      num_finished = 0 
+
+      while i < commits.length and commits[i].completed_at.utc.to_date == first_date 
+        num_finished += 1
+        i += 1
+      end 
+
+      daily_commits_finished << [first_date.to_time.utc.to_i, num_finished]
+      first_date += 1.day
+    end 
+
+    return daily_commits_finished
+  end 
+
+  # Calculates 
+  # 
+  # @return [Array<Fixnum>] An array containing the number of commits finished each day for the past 30 days.
+  
+  def self.average_completion_time
+    moving_average = []
+
+    timespan = 30
+    window = 7
+
+    last_date = Date.today
+    first_date = Date.today - timespan.days
+
+    # Ensures that completed_at is not nil
+    commits = Commit.where("completed_at >= :date", date: first_date)
+                    .where("completed_at <= :date", date: last_date)
+                    .order('completed_at ASC')
+
+    while first_date < last_date 
+      window_commits = commits.reject { |commit| commit.completed_at < first_date || commit.completed_at > first_date + window.days }
+      average_completion_time = window_commits.inject(0) { |total, commit| total += commit.time_to_complete }
+        .fdiv(window_commits.count.nonzero? || 1)
+
+      # Add the average completion time
+      moving_average << [first_date.to_time.utc.to_i, average_completion_time]  
+      first_date += 1.day
+    end
+
+    return moving_average
+  end
+
   # @private
   def to_param() revision end
 
   # Calculates the value of the `ready` field and saves the record.
+  # If this is the first time a commit has been marked as ready, sets 
+  # completed_at to be the current time.
 
   def recalculate_ready!
     ready = !keys.where(ready: false).exists?
     self.ready = ready
+    if self.ready and self.completed_at.nil?
+      self.completed_at = Time.current
+    end
     save!
     compile_and_cache_or_clear(ready)
   end
@@ -232,6 +351,20 @@ class Commit < ActiveRecord::Base
     super options
   end
 
+
+  # Computes the time to complete a commit using the 
+  # created_at time and the completed_at time.
+  #
+  # @return [timestamp] The time it took to complete a commit. 
+
+  def time_to_complete
+    if !self.completed_at.nil?
+      self.completed_at - self.created_at
+    else
+      nil
+    end
+  end
+
   # @return [Fixnum] The number of approved Translations across all required
   #   under this Commit.
 
@@ -285,7 +418,7 @@ class Commit < ActiveRecord::Base
   def translations_pending(*locales)
     locales = project.required_locales if locales.empty?
     translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
+      where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
   end
   redis_memoize :translations_pending
 
@@ -299,7 +432,7 @@ class Commit < ActiveRecord::Base
   def words_pending(*locales)
     locales = project.required_locales if locales.empty?
     translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
+      where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
   end
   redis_memoize :words_pending
 

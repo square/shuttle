@@ -1,0 +1,79 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.home { 
+  .filter-bar {
+    select[name="status"] {
+      width: 225px;
+    }
+
+    select[name="project_id"] {
+      width: 200px;
+    }
+
+    .locale-field {
+      width: 200px;
+    }
+
+    input[name="sha"] {
+      width: 175px;
+    }
+  }
+
+  table#commits {
+    th:first-child {
+      padding: 0px; 
+    }
+
+    tbody {
+      tr {
+        border-top: 3px white solid;
+        &:hover {cursor: pointer;}
+
+        td {
+          &.commit-translating,
+          &.commit-loading,
+          &.commit-ready {
+            padding: 0;
+            width: 5px;
+          }
+          &.commit-translating { background-color: $commit-red; } 
+          &.commit-loading { background-color: $commit-blue; }
+          &.commit-ready { background-color: $commit-green; }
+
+          &.due-date {width: 110px;}
+          &.due-date-very-soon { }
+          &.due-date-soon { }
+          &.centered { text-align: center; }
+          
+          select { width: 100%; }
+          input[type="text"] { width: 110px; }
+          a {text-decoration: underline; }
+        }
+      }
+    }
+  }
+
+  .commit-priority-0 { color: #E94239; font-weight: bold; }
+  .commit-priority-1 { color: #E98C39; font-weight: bold; }
+  .commit-priority-2 { color: #E9B039; font-weight: bold; }
+  .commit-priority-3 { color: $input-green; font-weight: bold; }
+
+  .control-group {
+    label {
+      width: 120px;
+    }
+    .controls {
+      margin-left: 140px;
+    }
+  }
+
+  .pagination-links {
+    width: 100%;
+    font-size: 20px;
+    height: 40px;
+    margin: 10px 0px;
+    .newer { float: right; }
+    .older { float: left; }
+  }
+}

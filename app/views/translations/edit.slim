@@ -1,0 +1,137 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :file_name do
+  = 'views/translations/edit'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+
+/ Status Line
+.header
+  h1 Translation #{@translation.id}
+
+hr.divider
+
+/ Filter Bar
+= form_for @translation, url: project_key_translation_url(@project, @key, @translation), html: {id: 'large-translation'} do |f|
+  .entry.row
+    / Edit Side
+    .eight.columns.edit-side
+      fieldset 
+        legend = @translation.locale.name
+
+        .control-group
+          = f.label :copy, @translation.locale.name, class: "control-label"
+          .controls 
+            = f.text_area :copy, autocomplete: 'off', rows: 7, class: "resize"
+          .controls
+            = check_box_tag 'blank_string', '1', (@translation.translated? && @translation.copy.blank? ? 'checked' : nil)
+            | The translation is a blank string
+
+      - if @translation.translation_changes.present?
+        fieldset
+          legend History
+
+          .translation-history
+            - @translation.translation_changes.reverse.each do |change|
+              .history-entry
+                strong = change.user.present? ? change.user.name : "(Automatic)"
+                .pull-right: strong = change.created_at.strftime("%l:%M %P, %B %-d, %Y")              
+
+                - if change.diff["approved"].present?
+                  .change 
+                    - if change.diff["copy"].present?
+                      .change-state class=TranslationChange.style(change.diff["approved"][0])
+                        = change.transition_from
+                      .arrow 
+                      .change-state class=TranslationChange.style(change.diff["approved"][1])
+                        = change.transition_to
+
+                .change.copy
+                  - if change.diff["copy"].present?
+                    .change-state[
+                        data-full=(change.full_copy_from ? change.full_copy_from : "None")
+                        data-compact=(change.compact_copy_from ? change.compact_copy_from : "None")
+                      ]
+                      = change.compact_copy_from ? change.compact_copy_from : "None"
+                    .arrow
+                      i.icon-double-angle-right.text-error
+                    .change-state[
+                        data-full=(change.full_copy_to ? change.full_copy_to : "None")
+                        data-compact=(change.compact_copy_to ? change.compact_copy_to : "None")
+                      ]
+                      = change.compact_copy_to ? change.compact_copy_to : "None"
+
+      .form-actions
+        = f.submit class: 'primary', value: 'Save'
+            
+        
+
+    / Information Side
+    .eight.columns.info-side
+      button.small.default.copy-source Copy to #{@translation.locale.name}
+      fieldset 
+        legend = @translation.source_locale.name
+
+        .control-group
+          label.control-label English
+          .controls 
+            textarea.resize readonly="readonly" rows=7 
+              = @translation.source_copy
+
+      fieldset.activity
+        legend Activity
+
+        dl 
+          .item
+            dt String ID 
+            dd = @translation.key.id
+          .item
+            dt Key
+            dd = @translation.key.original_key
+          .item
+            dt Context
+            dd = (@translation.key.context || "none")
+          .item
+            dt Importer
+            dd = @translation.key.importer_name
+          .item
+            dt Fencers
+            dd = @translation.key.fencers.map { |f| I18n.t("fencer.#{f}") }.to_sentence
+          .item
+            dt Source
+            dd = @translation.key.source
+          - if @translation.translator
+            .item
+              dt Translator
+              dd = @translation.translator.name
+          - if @translation.reviewer
+            .item
+              dt Reviewer
+              dd = @translation.reviewer.name
+          .item class=(if @translation.approved == false then "text-error" elsif @translation.approved == true then "text-success" end)
+            dt Status
+            dd
+              - if @translation.approved.nil?
+                = @translation.translated? ? "Pending Approval" : "Pending Translation"
+              - elsif @translation.approved == false
+                | Rejected
+              - elsif @translation.approved == true
+                | Approved
+

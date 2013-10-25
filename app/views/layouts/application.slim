@@ -1,0 +1,79 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+doctype html
+html lang="en"
+  head
+    meta charset="utf-8"
+    meta name="description" content="A tool for automatically detecting and managing a project's localizable strings."
+    meta name="author" content="Square, Inc."
+    meta name="viewport" content="width=device-width, initial-scale=1.0"
+    = csrf_meta_tags
+    / link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Raleway"
+    = stylesheet_link_tag "application", :media => "all"
+    
+    title = content_for?(:shuttle_title) ? yield(:shuttle_title) : 'Shuttle: Magic Localization Dust'
+    /[if lt IE 9] = javascript_include_tag "http://html5shim.googlecode.com/svn/trunk/html5.js"
+
+  body class=yield(:class) id=yield(:id)
+    .wrapper 
+      = render partial: 'layouts/navbar' 
+      .content-container 
+        .container.modal-container 
+          = yield
+
+      - if yield(:class) != 'sessions'
+        .push
+
+    - if yield(:class) != 'sessions'
+      = render partial: 'layouts/footer'
+
+    div id="flashes"
+    
+    = javascript_include_tag "application"
+    = yield :javascript
+    script type='text/javascript'
+      - js_file             = Rails.root.join('app', yield(:file_name) + '.js')
+      - js_coffee_file      = Rails.root.join('app', yield(:file_name) + '.js.coffee')
+      - js_erb_file         = Rails.root.join('app', yield(:file_name) + '.js.erb')
+      - js_coffee_erb_file  = Rails.root.join('app', yield(:file_name) + '.js.coffee.erb')
+      = raw(File.read(js_file)) if File.exists?(js_file)
+      = raw(CoffeeScript.compile(File.read(js_coffee_file))) if File.exist?(js_coffee_file)
+      = raw(ERB.new(File.read(js_erb_file)).result(binding)) if File.exist?(js_erb_file)
+      = raw(CoffeeScript.compile(ERB.new(File.read(js_coffee_erb_file)).result(binding))) if File.exist?(js_coffee_erb_file)
+
+    - if flash[:alert]
+      -if flash[:alert].is_a?(Array)
+        javascript:
+          $(document).ready(function() { 
+            errors = JSON.parse("#{flash[:alert]}".replace(/&quot;/ig, '"'))
+            new Flash('alert').list(errors.shift(), errors);
+          });
+      - else 
+        javascript:
+          $(document).ready(function() { 
+            new Flash('alert').text("#{escape_javascript raw(flash[:alert]) }");
+          });
+
+    - if flash[:notice]
+      javascript:
+        $(document).ready(function() { 
+          $(window).oneTime(250, function() { new Flash('notice' ).text("#{escape_javascript raw(flash[:notice]) }");})
+        });
+
+    - if flash[:success]
+      javascript:
+        $(document).ready(function() { 
+          $(window).oneTime(500, function() { new Flash('success').text("#{escape_javascript raw(flash[:success]) }");}) 
+        });

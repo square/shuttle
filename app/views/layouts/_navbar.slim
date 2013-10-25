@@ -1,0 +1,56 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+div id="navbar-container"
+  nav class="container full-size-only"
+    ul
+      li id="logo"
+        a href="/#"
+          = content_for?(:shuttle_logo) ? yield(:shuttle_logo) : image_tag("shuttle.png")
+      - if current_user
+        - if current_user.monitor?
+          li class=("active" if controller_name == "projects")
+            a href=projects_url Projects
+        - if current_user.translator?
+          li class=("active" if controller_name == "glossary")
+            a href=glossary_url Glossary
+        li class=("active" if controller_name == "stats")
+          a href=stats_url Stats
+        - if current_user.admin?
+          li class=("active" if controller_name == "users")
+            a href=users_url Users
+        li class=("active" if (controller_name == "search" || controller_name == "translation_units"))
+          a href=search_url Search
+          - if (controller_name == "search" || controller_name == "translation_units")
+            .uparrow
+      li id="quicknav-container" &nbsp;
+      - if current_user
+        - if current_user.monitor?
+          li.worker-status 
+            i.icon-circle
+            | &nbsp; Workers
+        li: a href=destroy_user_session_url data-method='delete' Log Out
+- if (controller_name == "search" || controller_name == "translation_units")
+  div id="search-container" 
+    nav class="container full-size-only"
+      ul
+        li class=("active" if action_name == "translations")
+          a href=search_translations_url Translations
+        li class=("active" if action_name == "keys")
+          a href=search_keys_url Keys
+        li class=("active" if action_name == "commits")
+          a href=search_commits_url Commits    
+        - if current_user.reviewer?
+          li class=("active" if controller_name == "translation_units")
+            a href=translation_units_url Translation Memory

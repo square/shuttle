@@ -1,0 +1,48 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the top of the
+ * compiled file, but it's generally better to create a new file per style scope.
+ *
+ *= require reset
+ *
+ *= require jquery-qtip
+ *= require font-awesome
+ *= require nvd3
+ *= require css3-mixins
+ *
+ *= require_self
+ *= require_tree ./pages
+ */
+
+// ----- BASE
+@import "css3-mixins";
+@import "base/vars";
+@import "base/grid";
+@import "base/typography";
+
+@import "base/base";
+
+@import "base/controls";
+@import "base/forms";
+@import "base/tables";
+
+@import "base/mixins";
+@import "base/flash";
+
+// ----- PARTIALS
+@import "partials/alerts";
+@import "partials/datepicker";
+@import "partials/footer";
+@import "partials/infinite_scroll";
+@import "partials/locale_field";
+@import "partials/multi_field";
+@import "partials/modal";
+@import "partials/navbar";
+@import "partials/translation_panel";
+@import "partials/worker_status";
+@import "partials/tooltip";

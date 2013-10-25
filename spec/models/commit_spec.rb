@@ -28,7 +28,10 @@ describe Commit do
       @commit = @project.commit!('HEAD')
     end
 
-    before(:each) { @commit.keys.each(&:destroy) }
+    before(:each) { 
+      @commit.keys.each(&:destroy) 
+      @commit.update_attribute(:completed_at, nil)
+    }
 
     it "should set ready to false for commits with unready keys" do
       @commit.keys << FactoryGirl.create(:key)
@@ -40,6 +43,17 @@ describe Commit do
       @commit.should_not be_ready
     end
 
+    it "completed_at should remain nil if not ready" do
+      @commit.keys << FactoryGirl.create(:key)
+      @commit.keys << FactoryGirl.create(:key)
+      FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+      @commit.keys.last.recalculate_ready!
+
+      @commit.recalculate_ready!
+      @commit.should_not be_ready
+      @commit.completed_at.should be_nil
+    end 
+
     it "should set ready to true for commits with all ready keys" do
       @commit.keys << FactoryGirl.create(:key)
       @commit.recalculate_ready!
@@ -50,6 +64,30 @@ describe Commit do
       @commit.recalculate_ready!
       @commit.should be_ready
     end
+
+    it "should set completed_at to current time when ready" do
+      # Approximation since its impossible to check actual time.
+      start_time = Time.current
+      @commit.keys << FactoryGirl.create(:key)      
+      @commit.recalculate_ready!
+      @commit.should be_ready
+
+      (@commit.completed_at).should be > start_time
+    end 
+
+    it "should not change completed_at if commit goes from ready to unready." do
+      @commit.keys << FactoryGirl.create(:key)
+      @commit.recalculate_ready!
+      @commit.should be_ready
+      completed_time = @commit.completed_at
+
+      FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+      @commit.keys.last.recalculate_ready!
+      @commit.recalculate_ready!
+
+      @commit.should_not be_ready
+      (@commit.completed_at).should eql(completed_time)
+    end     
   end
 
   context "[hooks]" do

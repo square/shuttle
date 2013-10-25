@@ -41,10 +41,7 @@ class HomeController < ApplicationController
 
     @status = params[:status]
     unless %w(uncompleted completed all).include?(@status)
-      @status = case current_user.role
-                 when 'translator', 'reviewer' then 'uncompleted'
-                 else 'all'
-               end
+      @status = 'uncompleted'
     end
 
     # Load commits
@@ -98,6 +95,11 @@ class HomeController < ApplicationController
                else
                  []
                end
+    @sha = if params[:sha].present?
+             params[:sha]
+           else
+             ''
+           end
 
     @newer = @offset >= 30
     @older = @commits.offset(@offset + 30).exists?

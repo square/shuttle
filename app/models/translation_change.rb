@@ -82,7 +82,9 @@ class TranslationChange < ActiveRecord::Base
   end
 
   def approval_transition
-    "#{self.class.status(diff["approved"][0])} to #{self.class.status(diff["approved"][1])}"
+    initial = diff["approved"][0].nil? ? "text-info" : (diff["approved"][0] ? "text-success" : "text-error") 
+    final = diff["approved"][1].nil? ? "text-info" : (diff["approved"][1] ? "text-success" : "text-error")
+    "<strong class=#{initial}>#{self.class.status(diff["approved"][0])}</strong> to <strong class=#{final}>#{self.class.status(diff["approved"][1])}</strong>"
   end
 
   def self.status(approval_status)
