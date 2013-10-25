@@ -87,7 +87,7 @@ module Localizer
     #     the archive.
     #   @param [Locale] locale A locale being included in the archive.
 
-    def self.post_process(commit, receiver, *locales)
+    def post_process(commit, receiver, *locales)
     end
 
     # Prepares a localizer for use with a Commit.
