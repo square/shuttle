@@ -27,3 +27,18 @@ $(document).ready ->
     copy_field.val "<%= escape_javascript @translation.source_copy %>"
     false
 
+  $(".history-entry").click (e) -> 
+    $.each( $(this).find(".change.copy > .change-state"), (i, elt) -> 
+      if $(this).hasClass("full")
+        $(this).fadeOut( () -> 
+          $(this).text( $(this).data("compact"))
+                 .removeClass("full")
+                 .fadeIn()
+        )
+      else 
+        $(this).fadeOut( () -> 
+          $(this).text( $(this).data("full") )
+                 .addClass("full")
+                 .fadeIn()
+        )
+    )
