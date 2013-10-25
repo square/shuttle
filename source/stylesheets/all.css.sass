@@ -1,0 +1,153 @@
+//= require lightbox
+
+@import "fonts/_sqmarket"
+@import "compass/utilities/general/clearfix"
+
+$highlight: rgb(53, 132, 180)
+
+body
+  font-family: SQMarket-Regular, Helvetica, sans-serif
+  font-size: 18px
+  font-weight: normal
+  padding: 0
+  margin: 0
+  min-width: 1100px
+
+a,
+a:link,
+a:visited,
+a:hover,
+a:active
+  color: $highlight
+
+strong
+  font-weight: normal
+  font-family: SQMarket-Medium
+
+header
+  width: 640px
+  margin: 2em auto
+
+h2
+  font-family: SQMarket-MediumItalic, Helvetica, sans-serif
+  font-weight: normal
+  color: gray
+  font-size: 36px
+  margin-top: 10px
+  margin-bottom: 20px
+
+h1
+  font-family: SQMarket-MediumItalic, Helvetica, sans-serif
+  font-weight: normal
+  margin-bottom: 0
+  font-size: 60px
+  color: black
+  a
+    text-decoration: none
+
+header h3
+  font-family: SQMarket-Regular, Helvetica, sans-serif
+  font-weight: normal
+  color: gray
+  font-size: 24px
+
+p#video
+  text-align: center
+
+#menu-container
+  width: 100%
+  background-color: rgb(32, 32, 32)
+  z-index: 100
+
+  &.fixed
+    position: fixed
+    top: 0
+    left: 0
+    right: 0
+    margin: 0
+    box-shadow: 0 10px 10px white
+
+ul#menu
+  width: 1100px
+  margin: 0 auto
+  display: block // cs
+  text-align: center
+  padding: 5px 0
+
+  > li
+    display: inline-block
+    font-family: SQMarket-Light, Helvetica, sans-serif
+    text-transform: uppercase
+    font-size: 14px
+    color: $highlight
+    padding: 0 10px
+    vertical-align: middle
+    list-style-type: none
+
+    &:first-child
+      padding-left: 0
+
+    &:last-child
+      padding-right: 0
+
+    a
+      color: #ccc
+      text-decoration: none
+
+    i
+      margin-right: 0.5em
+
+
+article
+  width: 960px
+  margin: 2em auto 0 auto
+  +clearfix
+  font-family: SQMarket-Light, Helvetica, sans-serif
+
+section
+  float: left
+  margin: 0 0 20px 0
+  line-height: 195%
+  +clearfix
+
+  &:nth-child(odd)
+    margin-right: 28px
+
+  a[data-lightbox]
+    float: left
+    margin-left: 5px
+    margin-right: 1em
+    margin-bottom: 0
+
+    img
+      border: 2px solid white
+      box-shadow: rgba(0, 0, 0, 0.5) 0 0 5px
+      max-width: 250px
+
+  h3
+    font-family: SQMarket-Medium, Helvetica, sans-serif
+    color: gray
+    font-size: 24px
+    font-weight: normal
+    border-top: 2px solid #ddd
+    padding-top: 7px
+    &:first-child
+      margin-top: 0
+  p
+    position: relative
+    top: -8px
+
+  &#cta
+    clear: both
+    float: right
+    margin: 0
+    padding: 0
+    line-height: inherit
+
+    h1
+      font-size: 48px
+
+footer
+  margin-top: 20px
+  text-align: center
+  margin-bottom: 20px
