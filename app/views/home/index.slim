@@ -104,7 +104,7 @@ hr.divider
                 span class="#{date_class}" = l(commit.due_date, format: :mon_day_year)
               - else 
                 | -
-          td class=("centered" if !commit.priority)
+          td.centered
             - if current_user.admin?
               = form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
                 = f.select :priority, \

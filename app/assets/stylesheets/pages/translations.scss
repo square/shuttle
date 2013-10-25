@@ -31,23 +31,44 @@ body.translations {
   }
 
   .translation-history {
-    height: 400px;
-    margin-top: 0px;
+    height: 450px;
+    margin-top: -20px;
     margin-bottom: -60px;
     overflow-y: auto;
-    padding-right: 20px; 
 
     legend { margin-bottom: -20px };
-    .timestamp { 
-      text-align: right;
-      margin-bottom: 5px;
-    }
+  
     .history-entry {
-      padding: 7px 0px;
-
+      padding: 10px 20px;
+      &:hover {
+        cursor: pointer;
+        background-color: $off-blue;
+      }
 
       & + .history-entry {
         border-top: 1px solid $gray5;
+      }
+      &:last-of-type {
+        border-bottom: 1px solid $gray5; 
+      }
+
+      .change {
+        margin-top: 10px;
+
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+        .change-state {
+          flex: 1 1 30px;
+        }
+        .arrow {
+          flex: 0 0 none;
+          margin: 0px 30px;
+          min-width: 15px;
+        }
+
       }
     }
   }

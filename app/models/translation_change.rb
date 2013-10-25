@@ -81,11 +81,23 @@ class TranslationChange < ActiveRecord::Base
     diff["copy"].nil? || diff["copy"][1].nil? ? nil : full_copy[1]
   end
 
-  def approval_transition
-    initial = diff["approved"][0].nil? ? "text-info" : (diff["approved"][0] ? "text-success" : "text-error") 
-    final = diff["approved"][1].nil? ? "text-info" : (diff["approved"][1] ? "text-success" : "text-error")
-    "<strong class=#{initial}>#{self.class.status(diff["approved"][0])}</strong> to <strong class=#{final}>#{self.class.status(diff["approved"][1])}</strong>"
-  end
+  def transition_from
+    self.class.status(diff["approved"][0])
+  end 
+
+  def transition_to
+    self.class.status(diff["approved"][1])
+  end 
+
+  def self.style(approval_status) 
+    if approval_status.nil?
+      "text-info"
+    elsif approval_status
+      "text-success"
+    else
+      "text-error"
+    end
+  end 
 
   def self.status(approval_status)
     if approval_status.nil?
