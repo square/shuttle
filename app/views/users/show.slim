@@ -18,7 +18,7 @@ hr.divider
 .row 
   .six.columns
     .image-wrapper
-      = image_tag "default_photo.jpg"
+      = image_tag @user.gravatar
   .eight.columns
     = form_for(@user) do |f|
       fieldset 

@@ -123,6 +123,11 @@ class User < ActiveRecord::Base
     %w(translator reviewer admin).include? role
   end
 
+  # @return [String] The URL to the user's Gravatar.
+  def gravatar
+    "http://www.gravatar.com/avatar/#{Digest::MD5.hexdigest email}?s=600"
+  end
+
   # Returns whether or not a translator is allowed to translate in a given
   # locale.
   #
