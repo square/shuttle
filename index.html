@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Shuttle: Powerful cross-platform localization</title>
+        <meta name="description" content="powerful cross-platform localization">
+        <meta name="viewport" content="width=device-width">
+        <link href="/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+    <h1>Shuttle</h1>
+
+    <h2>Powerful cross-platform localization from
+        <a href="https://squareup.com">Square</a>.</h2>
+</header>
+
+<nav id="menu-container">
+    <ul id="menu">
+        <li>
+            <a href="#dashboard"><i class="fa fa-check-square-o"></i>Project
+                Management</a>
+        </li>
+        <li>
+            <a href="#project-list"><i class="fa fa-code-fork"></i>Git
+                Integration</a>
+        </li>
+        <li>
+            <a href="#workbench"><i class="fa fa-columns"></i>Translator
+                Workbench</a>
+        </li>
+        <li>
+            <a href="#glossary"><i class="fa fa-comments-o"></i>Glossary</a>
+        </li>
+        <li>
+            <a href="#memory"><i class="fa fa-book"></i>Translation Memory</a>
+        </li>
+        <li>
+            <a href="#statistics"><i class="fa fa-bar-chart-o"></i>Statistics</a>
+        </li>
+    </ul>
+</nav>
+
+<article>
+    <section id="dashboard">
+        <h3>Project Management</h3>
+
+        <p>
+            <a href="images/dashboard.png" data-lightbox="dashboard" title="Project Management"><img src="images/dashboard.png" /></a>
+
+            Shuttle organizes translation work into separate commits among
+            different projects.
+            <strong>Commits are given a priority and due date</strong>, so
+            translators can focus their effort where it is needed most.
+            <strong>Project managers can track the progress of commits</strong>,
+            ensuring that localization is done on schedule.</p>
+    </section>
+
+    <section id="project-list">
+        <h3>Git Integration</h3>
+
+        <p>
+            <a href="images/project-list.png" data-lightbox="project-list" title="Git Integration"><img src="images/project-list.png" /></a>
+
+            Shuttle checks out your project's Git repository and
+            <strong>automatically scans for localizable content</strong> and
+            imports it into its database. Translators can begin translation of
+            new content immediately, with no engineer intervention required.
+            When a commit is ready to be released or deployed,
+            <strong>Shuttle makes available a manifest of translated
+                strings</strong> in any of a variety of formats, to easily
+            integrate back into your project at build time.</p>
+    </section>
+
+    <section id="workbench">
+        <h3>Translator Workbench</h3>
+
+        <p>
+            <a href="images/workbench.png" data-lightbox="workbench" title="Translator Workbench"><img src="images/workbench.png" /></a>
+
+            The translator workbench is designed to make
+            <strong>translation and review as fast and accurate as
+                possible</strong>. Translators have access to tools such as the
+            <a href="#glossary">glossary</a> and
+            <a href="#memory">translation memory</a> to help improve their
+            accuracy and ensure a consistent voice across translators and
+            projects.</p>
+
+        <p>Shuttle <strong>recognizes non-translatable substrings</strong> (such
+            as ERb escapes and HTML character entities) and
+            <strong>fences them out</strong>. It displays an error if
+            translators omit or mistype fenced tokens.</p>
+
+        <p>Shuttle maintains typographical quality by ensuring translators use
+            curly quotes, em-dashes, and other non-ASCII characters when
+            appropriate.</p>
+    </section>
+
+    <section id="glossary">
+        <h3>Glossary</h3>
+
+        <p>
+            <a href="images/glossary.png" data-lightbox="glossary" title="Glossary"><img src="images/glossary.png" /></a>
+
+            Reviewers and administrators can contribute to a
+            <strong>project glossary</strong> that
+            <strong>standardizes common terminology</strong> across projects and
+            translators. Reviewers maintain a corpus of commonly-used or
+            jargon-like terms and phrases, and translators contribute
+            standardized translations of these in their respective languages.
+            These terms are presented on the workbench when appropriate.</p>
+    </section>
+
+    <section id="memory">
+        <h3>Translation Memory</h3>
+
+        <p>
+            <a href="images/memory.png" data-lightbox="memory" title="Translation Memory"><img src="images/memory.png" /></a>
+
+            <strong>Shuttle maintains a complete memory of every translation
+                contributed</strong>, even if the source string is no longer
+            present. These translations contribute to a
+            <strong>suggestion engine</strong> to save translator time and
+            effort and ensure a consistent voice across time. Administrators can
+            cull bad translations from this memory.</p>
+    </section>
+
+    <section id="statistics">
+        <h3>Statistics</h3>
+
+        <p>
+            <a href="images/stats.png" data-lightbox="statistics" title="Statistics"><img src="images/stats.png" /></a>
+
+            <strong>Shuttle displays statistics to help project managers budget
+                translation effort and track the improving speed of
+                translators.</strong> Users can track trends in the average
+            amount of elapsed time between when a commit is submitted for
+            translation and when it is fully translated and review, as well as
+            see periods of intensive translator demand, and which projects
+            require the most translation effort.</p>
+    </section>
+
+    <section id="cta">
+        <h1>
+            <a href="https://github.com/square/shuttle">Start using Shuttle.</a>
+        </h1>
+
+        <p>
+            See <a href="https://github.com/square">other Square open-source
+            projects.</a>
+        </p>
+    </section>
+</article>
+
+<footer>
+    <a href="https://squareup.com"><img src="images/jewel.png" /></a>
+</footer>
+
+
+
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="/javascripts/all.js" type="text/javascript"></script>
+            <script type="text/javascript" charset="utf-8">
+        $(document).ready(function () {
+            var menu = $('#menu-container');
+            var menuPosition = menu.offset().top;
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > menuPosition && !menu.hasClass('fixed'))
+                    menu.addClass('fixed');
+                else if ($(window).scrollTop() < menuPosition && menu.hasClass('fixed'))
+                    menu.removeClass('fixed');
+            });
+        });
+    </script>
+
+
+        <script type="text/javascript">
+            (function (i, s, o, g, r, a, m) {
+                i['GoogleAnalyticsObject'] = r;
+                i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+                a = s.createElement(o),
+                        m = s.getElementsByTagName(o)[0];
+                a.async = 1;
+                a.src = g;
+                m.parentNode.insertBefore(a, m)
+            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+            ga('create', 'UA-45126168-1', 'useshuttle.com');
+            ga('send', 'pageview');
+
+        </script>
+    </body>
+</html>
