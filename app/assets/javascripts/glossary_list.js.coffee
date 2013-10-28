@@ -66,9 +66,7 @@ class root.GlossaryList
   # @param [String] message The message that will be flashed.
   #
   error: (message) ->
-    flash = $('<p/>').addClass('alert alert-error').text(message).hide().appendTo($('#flashes')).slideDown()
-    $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
-
+    new Flash('alert').text(message);
 
   # @private
   setupGlossary: ->
@@ -82,7 +80,7 @@ class root.GlossaryList
         id: 'glossary-table-' + letter,
         class: 'glossary-table-anchor'
       ).hide().fadeIn().appendTo(@glossaryTable)
-      glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<h3/>').text(letter))))
+      glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<strong/>').text(letter))))
 
   # @private
   setupAddTermModal: =>
@@ -90,10 +88,10 @@ class root.GlossaryList
       startDate: new Date()
       autoclose: true
       todayBtn: 'linked'
-    @addEntryModal.find("input[name='source_glossary_entry[source_copy]']").jqBootstrapValidation
-      preventSubmit: true
-      filter: -> 
-        return $(this).is(':visible')
+    # @addEntryModal.find("input[name='source_glossary_entry[source_copy]']").jqBootstrapValidation
+    #   preventSubmit: true
+    #   filter: -> 
+    #     return $(this).is(':visible')
       
     @addEntryModal.find('form').submit () =>
       $.ajax @addSourceEntryUrl, 
@@ -108,98 +106,39 @@ class root.GlossaryList
 
   # @private
   setupSettingsFormModal: =>
-    @inputTarget = @settingsModal.find('.locale-field')
-    @addTargetBtn = @settingsModal.find('.locale-field').parents('.controls').find('.btn')
-    @listTargets = @settingsModal.find('ul.unstyled')
+    # @settingsModal.find("#glossary_target_locales").attr("data-value", "#{JSON.stringify(@targetLocales)}")
 
-    @newTargetLocales = @targetLocales.slice(0)
-    @settingsModal.find('.modal-footer > button').click =>
-      @targetLocales = @newTargetLocales.slice(0)
-      @newTargetLocales = []
-      $('#settings-listTargets').empty()
-      @settingsModal.modal('hide')
-      $.cookie('sourceLocale', @sourceLocale.rfc5646(), { expires: 1 });
-      $.cookie('targetLocales', JSON.stringify(@targetLocales), { expires: 1 });
-      this.reloadGlossary()
+    @settingsModal.find("#glossary_target_locales").arrayField(
+      renderer: (container, name, value) ->
+        text_field = $('<input/>').attr('type', 'text')
+                                  .attr('name', name)
+                                  .attr('placeholder', "Locale")
+                                  .addClass('locale-field')
+                                  .val(value)
+        text_field.appendTo container
+        new LocaleField(text_field)
+        return text_field
+    )
 
-    @settingsModal.on 'hidden', =>
-      @listTargets.empty()
-      @newTargetLocales = @targetLocales.slice(0)
-      this.prepopulateLocalesList()
+    # TODO: RELOAD WHEN CLOSE LATER.
 
-    this.setupTypeahead()
-
-    $("button[data-target='#" + @settingsModal.attr('id') + "']").removeAttr('disabled')
-
-  # @private
-  prepopulateLocalesList: ->
-    for rfc5646 in @targetLocales
-      do (rfc5646) =>
-        locale = Locale.from_rfc5646(rfc5646)
-        targetEntry = $(HoganTemplates['glossary/settings_locale_entry'].render(locale))
-          .data('rfc5646', locale.rfc5646())
-        @listTargets.append(targetEntry)
-        
-        targetEntry.find('button.removeLocale').click(
-          {newTargetLocales: @newTargetLocales},
-          (event) ->
-            newTargetLocales = event.data.newTargetLocales
-            newTargetLocales.splice(newTargetLocales.indexOf($(this).parent().data()), 1)
-            $(this).parent().fadeOut(300, () -> $(this).remove())
-        )
-
-
-  # @private
-  setupTypeahead: ->
-    this.prepopulateLocalesList()
-
-    flashSettingsWarning = (warning) =>
-      helpBlock = @settingsModal.find('.help-block span')
-      helpBlock.fadeOut () ->
-        helpBlock.text(warning)
-        .removeClass('text-success').addClass('text-error').fadeIn().delay(800).fadeOut () ->
-          helpBlock.text(' • Press Enter to add a new locale')
-          .removeClass('text-error').addClass('text-success').fadeIn()
-
-    addTargetLocale = () =>
-      newRfc = @inputTarget.val().split(' ')[0]
-      locale = Locale.from_rfc5646(newRfc)
-
-      unless locale? and locale.rfc5646() != @sourceLocale.rfc5646()
-        flashSettingsWarning('• Invalid locale')
-        @inputTarget.val('')
-        return false
-
-      if @newTargetLocales.indexOf(locale.rfc5646()) >= 0
-        flashSettingsWarning('• Duplicate locale')
-        @inputTarget.val('')
-        return false
-
-      @newTargetLocales.push(locale.rfc5646())
-
-      targetEntry = $(HoganTemplates['glossary/settings_locale_entry'].render(locale))
-        .data('rfc5646', locale.rfc5646())
-        .hide().fadeIn()
-
-      @listTargets.append(targetEntry)
-      
-      targetEntry.find('button.removeLocale').click(
-        {newTargetLocales: @newTargetLocales},
-        (event) ->
-          newTargetLocales = event.data.newTargetLocales
-          newTargetLocales.splice(newTargetLocales.indexOf($(this).parent().data()), 1)
-          $(this).parent().fadeOut(300, () -> $(this).remove())
+    @settingsModal.find("button.save").click => 
+      @targetLocales = $.map( 
+        @settingsModal.find(".locale-field"), 
+        (field) -> 
+          return $(field).val() 
+      ).filter(
+        (locale) ->
+          locale != ""
       )
 
-      @inputTarget.val('')
+      $.cookie('sourceLocale', @sourceLocale.rfc5646(), { expires: 1 });
+      $.cookie('targetLocales', JSON.stringify(@targetLocales), { expires: 1 });
+
+      $("#lean_overlay").fadeOut(200);
+      @settingsModal.css({ 'display': 'none' });
+      this.reloadGlossary()
       return false
-      
-    @addTargetBtn.click =>
-      addTargetLocale()
-    
-    @inputTarget.keypress (e) =>
-      if e.which == 13 # enter
-        addTargetLocale()
 
   # @private
   loadGlossaryEntries: => 
@@ -340,6 +279,9 @@ class root.GlossaryList
 
         @glossaryTable.find("input, textarea, button, a").click (e) -> 
           e.stopPropagation()
+
+        # TODO HERE!!
+        new TableAccordion(@glossaryTable)
 
       error: => this.error "Couldn’t load glossary list."
     return false

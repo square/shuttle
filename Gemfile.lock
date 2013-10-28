@@ -7,13 +7,6 @@ GIT
       activerecord (>= 4.0.0)
 
 GIT
-  remote: git://github.com/RISCfuture/erector.git
-  revision: d741e01ba7f16fef30abfa424cc72d2b2b4758e2
-  specs:
-    erector (0.9.0)
-      treetop (>= 1.2.3)
-
-GIT
   remote: git://github.com/RISCfuture/ruby-git.git
   revision: 2da2ed301fc5d2f9cb3125bd78db0522b322ed84
   specs:
@@ -53,8 +46,6 @@ GEM
     bcrypt-ruby (3.1.2)
     blankslate (2.1.2.4)
     boolean (1.0.1)
-    bootstrap-datepicker-rails (1.1.1.7)
-      railties (>= 3.0)
     builder (3.1.4)
     celluloid (0.15.1)
       timers (~> 1.1.0)
@@ -237,12 +228,7 @@ GEM
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
-    twitter-bootstrap-rails (2.2.8)
-      actionpack (>= 3.1)
-      execjs
-      rails (>= 3.1)
-      railties (>= 3.1)
-    twitter-typeahead-rails (0.9.3)
+    twitter-typeahead-rails (0.9.2)
       actionpack (>= 3.1)
       jquery-rails
       railties (>= 3.1)
@@ -266,13 +252,11 @@ PLATFORMS
 
 DEPENDENCIES
   CFPropertyList
-  bootstrap-datepicker-rails
   coffee-rails
   coffee-script
   composite_primary_keys!
   configoro
   devise
-  erector!
   factory_girl_rails
   faker
   find_or_create_on_scopes
@@ -307,7 +291,6 @@ DEPENDENCIES
   sql_origin
   therubyracer
   tire
-  twitter-bootstrap-rails
   twitter-typeahead-rails
   uea-stemmer
   uglifier

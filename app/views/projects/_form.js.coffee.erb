@@ -1,0 +1,101 @@
+# Copyright 2013 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+$(document).ready () ->
+  setupToolTips = () -> 
+    $(".tooltip-parent").each () -> 
+      $(this).qtip(
+        content:
+          text: $($(this).data("tooltip"))
+        position: 
+          my: 'bottom left'
+          at: 'top right'
+        show: 'focus'
+        hide: 'blur'
+      )
+
+  setupLocaleField = () ->
+    $("#project_required_rfc5646_locales, #project_other_rfc5646_locales").arrayField(
+      renderer: (container, name, value) ->
+        text_field = $('<input/>').attr('type', 'text')
+                                  .attr('name', name)
+                                  .attr('placeholder', "Locale")
+                                  .addClass('locale-field')
+                                  .val(value)
+        text_field.appendTo container
+        new LocaleField(text_field)
+        return text_field
+    )
+
+  setupKeyFields = () ->
+    $('#project_key_locale_exclusions, #project_key_locale_inclusions').hashField(
+      renderer: (container, name, value) ->
+
+        key_field = $('<div/>').addClass('hashfield-key').appendTo(container)
+        value_field = $('<div/>').addClass('hashfield-multi-value').appendTo(container)
+
+        new LocaleField(
+          $('<input/>').attr(
+              type: 'text'
+              rel: 'key'
+              placeholder: 'Locale'
+              name: name
+            ).val(value)
+            .addClass('locale-field').appendTo(key_field)
+        )
+
+        valueField = $('<div/>').attr({rel: 'value', 'data-value': JSON.stringify(value)}).addClass('array-field').appendTo(value_field);
+        valueField.arrayField(
+          renderer: (container, name, value) ->
+            $('<input/>').attr(
+              name: name
+              type: 'text'
+              placeholder: 'Key or Glob'
+            ).val(value).appendTo(container)
+        )
+    )
+
+  setupPathFields = () ->
+    $('#project_skip_importer_paths, #project_only_importer_paths').hashField(
+      renderer: (container, key, value) ->
+        key_field = $('<div/>').addClass('hashfield-key').appendTo(container)
+        value_field = $('<div/>').addClass('hashfield-multi-value').appendTo(container)
+
+        select = $('<select/>').attr({rel: 'key'}).appendTo(key_field)
+        <% Importer::Base.implementations.each do |importer| %>
+        $('<option/>').text("<%= escape_javascript importer.human_name %>")
+          .attr({value: "<%= escape_javascript importer.ident %>", selected: key == "<%= escape_javascript importer.ident %>" ? 'selected' : ''})
+          .appendTo(select)
+        <% end %>
+        select.val(key);
+
+        valueField = $('<div/>').attr(
+            rel: 'value',
+            'data-value': JSON.stringify(value)
+          ).addClass('array-field')
+          .appendTo(value_field)
+
+        valueField.arrayField()
+    )
+
+
+  setupToolTips()
+  if (window.localesLoaded) 
+    setupLocaleField()
+    setupKeyFields()
+    setupPathFields()
+  else 
+    $(document).bind('locales_loaded', setupLocaleField);
+    $(document).bind('locales_loaded', setupKeyFields);
+    $(document).bind('locales_loaded', setupPathFields);

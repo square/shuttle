@@ -1,0 +1,50 @@
+@import "base/vars";
+@import "css3-mixins";
+
+.filter-bar {
+  padding: 15px 10px;
+  background-color: $off-blue;
+  border-bottom: 1px solid $gray5;
+  .control {
+    input[type="checkbox"] {
+      margin-right: 7px;
+    }
+
+    display: inline-block;
+    margin-right: 15px;
+  }
+}
+
+table.table {
+  width: 100%;
+
+  &.hover-rows {
+    tbody > tr:hover {
+      cursor: pointer;
+      background-color: $off-blue;
+    }
+  }
+
+  thead {
+    tr {
+      text-align: left;
+      font-weight: bold;
+      text-transform: uppercase;
+      th {
+        padding: 15px 10px;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      &:nth-child(odd) {
+        background-color: $gray6;
+      }
+
+      td {
+        padding: 10px;
+      }
+    }
+  }
+}

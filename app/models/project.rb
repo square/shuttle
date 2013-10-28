@@ -216,6 +216,15 @@ class Project < ActiveRecord::Base
   # @return [Array<Locale>] The locales this Project *must* be localized to.
   def required_locales() targeted_rfc5646_locales.select { |_, req| req }.map(&:first).map { |l| Locale.from_rfc5646(l) } end
 
+  def required_rfc5646_locales
+    targeted_rfc5646_locales.select { |_, req| req }.map(&:first)
+  end 
+
+  def other_rfc5646_locales
+    targeted_rfc5646_locales.select { |_, req| !req }.map(&:first)
+  end 
+
+
   # Generates a new API key for the Project. Does not save the Project.
   def create_api_key() self.api_key = SecureRandom.uuid end
 

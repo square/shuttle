@@ -1,0 +1,65 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.translation_units {
+  table {
+    .locale-td {
+      font-weight: bold;
+      white-space: nowrap;
+      img {
+        vertical-align: middle;
+      }
+    }
+    td { max-width: 500px; }
+  }
+
+
+  .eight.columns {
+    margin-top: -30px;
+    padding: 30px;
+    @include box-sizing;
+    position: relative;
+  }
+
+  .info-side {
+    background-color: $gray6;
+  }
+
+  .activity {
+    margin-bottom: -20px;
+  }
+
+  .controls {
+    input, textarea {
+      width: 100%;
+    }
+  }
+
+  dl {
+    .item {
+      &:last-of-type {
+        // border-top: 1px solid $gray5;
+      }
+      border-bottom: 1px solid $gray5;
+    }
+
+    dt {
+      float: left;
+      width: 300px;
+      text-align: left;
+      text-transform: capitalize;
+      padding-top: 7px;
+    }
+    dd {
+      padding-top: 7px;
+      margin-left: 300px;
+    }
+  }
+
+  .form-actions {
+    div {
+      display: inline; 
+      margin-left: 10px;
+    }
+  }
+}

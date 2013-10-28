@@ -12,6 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-$('#copy-source-button').click () ->
+$('.copy-source').click () ->
   $('#locale-copy').val("<%= escape_javascript @source_entry.source_copy %>") 
   return false

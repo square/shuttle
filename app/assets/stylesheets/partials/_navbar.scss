@@ -1,0 +1,203 @@
+@import "base/vars";
+@import "css3-mixins";
+
+#navbar-container {
+  background-color: $navbar-background;
+}
+
+#search-container {
+  background-color: $subnav-background;
+  li {
+    line-height: $subnav-height;
+  }
+}
+
+.uparrow {
+  width:0;
+  height:0;
+
+  position: absolute; 
+  bottom: 0px;
+  left: 25%;
+
+  border-color: transparent transparent $subnav-background transparent;
+  border-style: solid;
+  border-width: 10px;
+  z-index: 1000;
+}
+
+nav {
+  z-index: 99;
+  letter-spacing: 1px;
+
+  &#expanded-nav {
+    display: none;
+
+    &.shown { display: block; }
+    &>ul { display: block; }
+  }
+
+
+  &>ul {
+    width: 100%;
+
+    @include box;
+    @include box-orient(horizontal);
+
+    $nav-horiz-margin: 10px;
+    &>li {
+      font-size: $nav-font-size;
+      font-weight: 500;
+      text-transform: uppercase;
+
+      margin: 0 $nav-horiz-margin;
+      line-height: $nav-height;
+
+      position: relative;
+
+      a:hover { 
+        text-decoration: none !important;
+        color: $navbar-highlight-text !important;
+      }
+
+      &.active {
+        a {
+          color: $navbar-highlight-text !important;
+        }
+      }
+
+      &#logo {
+        margin-right: 40px;
+        text-transform: uppercase;
+        line-height: 60px;
+        
+        a {
+          vertical-align: middle;
+          img {
+            height: 27px;
+            vertical-align: middle;
+          }
+        }
+      }
+
+      a, i { color: $navbar-gray-text; }
+
+
+      &#quicknav-container {
+        position: relative;
+        @include flex;
+
+        #quicknav {
+          padding-left: 0;
+          padding-right: 0;
+          background-color: $gray2;
+          color: black;
+          font-weight: normal;
+
+          &:focus {
+            width: 100%;
+            -webkit-transition: width 0.5s;
+            -moz-transition: width 0.5s;
+            transition: width 0.5s;
+            outline: none;
+            background-color: $gray3;
+          }
+
+          &:not(:focus) {
+            width: 50%;
+            @include iphone-landscape-and-smaller { width: 100%; }
+
+            -webkit-transition: width 0.5s;
+            -moz-transition: width 0.5s;
+            transition: width 0.5s;
+          }
+        }
+
+        ul#search-suggestions {
+          position: absolute;
+          top: $nav-height;
+          left: 0;
+          border: 1px solid rgba(black, 0.5);
+          @include box-shadow(0 2px 2px rgba(black, 0.5));
+          background-color: white;
+          color: black;
+          margin: 0;
+          padding: 0;
+          line-height: 12px;
+
+          @include iphone-landscape-and-smaller { display: none; }
+
+          &>li {
+            color: $gray3;
+            background-color: white;
+            margin: 0;
+            padding: 10px;
+
+            &.hint {
+              color: $gray4;
+              font-weight: bold;
+
+              em { font-weight: normal; }
+            }
+
+            a { color: $gray3; }
+
+            span.newline {
+              color: $gray4;
+              font-weight: bold;
+              float: right;
+              padding-left: 10px;
+            }
+          }
+        }
+      }
+
+      // large-screen dropdown nav menu
+      @include ipad-and-larger {
+        &.with-dropdown {
+          position: relative;
+
+          &>ul {
+            display: none;
+            position: absolute;
+            top: $nav-height + 1px; // shift down one so the border doesn't overlap the navbar
+            left: -$nav-horiz-margin; // line it up with the nav item
+            border-bottom: 3px solid white;
+            border-left: 3px solid white;
+            border-right: 3px solid white;
+            z-index: 99;
+
+            &.shown {
+              display: block;
+              width: 300px;
+            }
+
+            li {
+              background-color: #212121;
+              padding: 10px;
+              border-bottom: 1px solid $gray2;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              line-height: normal;
+              margin: 0;
+
+              &.divider {
+                height: 2px;
+                padding: 0;
+                margin: 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // small-screen dropdown nav menu
+  ul.subnav {
+    display: none;
+
+    &.shown { display: block; }
+    &>li { list-style-type: none; }
+  }
+}

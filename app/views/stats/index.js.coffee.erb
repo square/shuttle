@@ -1,0 +1,138 @@
+# Copyright 2013 Square Inc.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+$(window).ready () ->
+  error = (message) ->
+    new Flash('alert').text(message);
+
+  # Add in element that its added to too
+  generatePieChart= (d3element, data) ->
+    nv.addGraph () => 
+      chart = nv.models.pieChart()
+        .x((d) -> return d.key)
+        .y((d) -> return d.y)
+        .donut(true)
+        .showLabels(true)
+        .showLegend(false)
+        .tooltipContent( (key, y, e, graph) -> 
+          return '<h3>' + key + '</h3>' +'<p>' + numberWithDelimiter(parseFloat(y.replace(",", "")).toFixed()) + ' words </p>'
+        )
+
+      chart.color([
+        "#A6CEE3",
+        "#1F78B4",
+        "#B2DF8A",
+        "#33A02C",
+        "#FB9A99",
+        "#E31A1C",
+        "#FDBF6F",
+        "#FF7F00",
+        "#CAB2D6",
+        "#6A3D9A",
+      ])
+
+      d3element.datum(data)
+        .transition().duration(1200)
+        .call(chart)
+
+      return chart
+  # Add in element that its added to too
+  generateLineBarChart = (d3element, data) ->
+    nv.addGraph =>
+      chart = nv.models.linePlusBarChart().margin(
+          top: 30
+          right: 60
+          bottom: 50
+          left: 70
+        )
+        .x( (d, i) -> i )
+        .tooltipContent( (key, x, y, e, graph) -> 
+          if e.series.originalKey == "Number of Commits Created"
+            return "<h3>#{x}</h3> <p> #{y} commits created </p>"
+          else 
+            return "<h3>#{x}</h3> <p> Average commit took #{y} hours to complete </p>"
+        )
+
+      chart.color([
+        "#4296c2",
+        "#ffc05d",
+      ])
+        
+
+      chart.xAxis.tickFormat((d) ->
+          dx = data[0].values[d] and data[0].values[d].x or 0
+          (if dx then d3.time.format("%x")(new Date(dx)) else "")
+        )
+        .showMaxMin(false)
+
+      chart.y1Axis.tickFormat( d3.format(",f") )
+      chart.y2Axis.tickFormat( (d) ->
+        return d3.format(",.2f")(d)
+      )
+
+      chart.bars.forceY([0]).padData false
+      
+      #chart.lines.forceY([0]);
+      d3element.datum(data)
+        .transition().duration(500)
+        .call(chart)
+
+      nv.utils.windowResize(chart.update)
+
+      chart.dispatch.on "stateChange", (e) ->
+        nv.log "New State:", JSON.stringify(e)
+
+      return chart
+
+  ## GENERATE GRAPHS
+
+  $.ajax "<%= stats_words_per_project_url %>", 
+    type: 'GET'
+    dataType: 'json'
+    success: (project_data) => 
+      if not $.isEmptyObject(project_data) 
+        formatted_data = []
+        for project in project_data 
+          formatted_data.push 
+            key: project[0]
+            y: project[1]
+        generatePieChart(d3.select("#chart svg"), formatted_data)
+    error: => 
+      error("Unable to retrieve words per project stats")
+
+  $.ajax "<%= stats_avg_completion_and_daily_creates_url %>", 
+    type: 'GET'
+    dataType: 'json'
+    success: (project_data) => 
+      formatted_data = [
+        {
+          "key" : "Number of Commits Created",
+          "bar": true,
+          "values" : project_data["daily_creates"]
+        },
+        {
+          "key" : "Average Time per Commit (in hours)",
+          "values" : project_data["average_completion_time"]
+        }
+      ].map( (series) -> 
+        series.values = series.values.map( (d) -> return {x: d[0] * 1000, y:d[1] } )
+        return series
+      )
+      
+      formatted_data[1].values = formatted_data[1].values.map (d) -> 
+        return {x: d.x, y: d.y/(3600) } # In Hours
+    
+      generateLineBarChart(d3.select("#chart2 svg"), formatted_data)
+    error: => 
+      error("Unable to retrieve commit time stats")

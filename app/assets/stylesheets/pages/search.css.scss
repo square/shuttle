@@ -1,0 +1,33 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.search {
+  .filter-bar {
+    input[type="submit"] { margin-left: 15px; }
+  }
+
+  &#search-translations {
+    .filter-bar {
+      .row + .row {
+        margin-top: 15px;
+      }
+
+      // input[type="submit"] { float: right; margin-top: 20px; margin-right: 300px; }
+    }
+  }
+
+  &#search-keys {
+    table {
+      table-layout: fixed;
+      th:nth-child(1) {
+        width: 70px;
+      } 
+      th:nth-child(2) {
+        width: 450px;
+      }
+      a {
+        text-decoration: underline;
+      }
+    }
+  }
+}

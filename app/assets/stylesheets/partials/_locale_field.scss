@@ -1,0 +1,80 @@
+@import "base/vars";
+@import "css3-mixins";
+
+.twitter-typeahead .tt-query,
+.twitter-typeahead .tt-hint {
+  margin-bottom: 0;
+  vertical-align: inherit !important;
+  width: 100%;
+}
+
+.tt-dropdown-menu {
+  width: 100%;
+  margin-top: 2px;
+  padding: 5px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0,0,0,.2);
+  *border-right-width: 2px;
+  *border-bottom-width: 2px;
+  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+     -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+          box-shadow: 0 5px 10px rgba(0,0,0,.2);
+  -webkit-background-clip: padding-box;
+     -moz-background-clip: padding;
+          background-clip: padding-box;
+}
+
+.tt-suggestion {
+  display: block;
+  padding: 3px 20px;
+}
+
+.tt-suggestion.tt-is-under-cursor {
+  background-color: $off-blue;
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+
+.locale-field-wrapper {
+  position: relative;
+  .locale-flag {
+    position: absolute;
+    left: 15px;
+  }
+  .tt-hint {
+    padding-left: 49px;
+  }
+  input[type="text"] {
+    padding-left: 49px;
+  }
+
+  .locale-field-suggestion {
+    position: relative;
+    padding: 3px 0px 3px 0px;
+    img {
+      position: absolute;
+      top: 0px;
+      left: -5px;
+    }
+    .locale-rfc {
+      position: absolute;
+      top: 3px;
+      left: 30px; 
+    }
+    .locale-name {
+      margin-left: 65px;
+      width: auto;
+
+      @include box-sizing;
+
+      color: $gray4;
+      white-space:nowrap;
+      text-overflow: ellipsis;
+      overflow:hidden; 
+    }
+  }
+}
+

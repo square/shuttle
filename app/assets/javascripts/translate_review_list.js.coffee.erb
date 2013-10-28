@@ -43,8 +43,7 @@ class root.TranslateReviewList
   #
   error: (message) ->
     @list.empty()
-    flash = $('<p/>').addClass('alert alert-error').text(message).appendTo($('#flashes'))
-    $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
+    new Flash('alert').text(message);
 
   # Loads the project list for a locale.
   #

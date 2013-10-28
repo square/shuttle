@@ -1,0 +1,111 @@
+@import "base/vars";
+@import "css3-mixins";
+
+.translation-panel {
+  width: 100%;
+  // height: 900px;
+  border-top: none;
+  // overflow-y: scroll;
+
+  .entry {
+    .eight.columns {
+      @include box-sizing;
+
+      &.left { padding: 10px 10px 10px 20px; }
+      &.right { padding: 10px 20px 10px 10px; }
+
+      .translation-side {
+        padding: 10px;
+        min-height: 240px;
+
+        textarea.translation-area {
+          &.approved { color: $input-green; font-weight: 500; }
+          &.rejected { color: $input-red; font-weight: 500; }
+          &.translated{ color: $input-blue; font-weight: 500; }
+          &.unsaved { color: black; }
+          width: 100%;
+          min-height: 150px;
+        }
+
+        button.copy-source {
+          margin: 0;
+        }
+
+        span.controls {
+          float: right;
+        }
+
+        .half {
+          @include box-sizing;
+          padding: 10px 10px;
+
+          width: 50%;
+          display: inline-block;
+
+          p.glossary-tips { color: $input-blue; } // TODO:
+          p.warning { color: $input-orange; } // TODO:
+          p.alert { color: $input-red; } // TODO:
+          p.token-parity-warning {}
+          p.glossary-tips, p.warning, p.alert {
+            font-size: 12px;
+            font-style: italic;
+            font-weight: 500;
+            line-height: 15px;
+            margin: 5px;
+          }
+        }
+      }
+
+      
+      .info-side {
+        padding: 10px;
+        min-height: 240px;
+        position: relative; 
+
+        background-color: $gray6;
+        p.source-copy {
+          .fenced {
+            color: $input-red;
+          }
+
+          margin-bottom: 30px;
+        }
+
+        p.context {
+          margin-left: 30px;
+          margin-bottom: 110px;
+          
+          
+        }
+
+        .additional-info {
+          font-size: 80%;
+          color: $gray3;
+
+          .item {
+            &.context {
+              margin-bottom: 10px;
+            }
+
+            &.approved {
+              color: $input-green; // TODO:
+            }
+            &.rejected {
+              color: $input-red; // TODO:
+            }
+
+            dt { float: left; width: 100px; }
+            dd { margin: 0px 0px 0px 100px; }
+          }
+
+        }
+      }
+    }
+    &:not(:last-of-type) {
+      .entry-spacer {
+        margin: 0px 20px;
+        border-bottom: 1px solid $gray5;
+      }
+    }
+  }
+}

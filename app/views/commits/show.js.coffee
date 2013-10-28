@@ -67,5 +67,6 @@ $(window).ready ->
 #        for key in keys
 #          do (key) -> addKey(key)
 #      error: ->
-#        $('<div/>').addClass('alert alert-error').text("Couldn't load search results").insertBefore table
+#        $('<div/>').addClass('alert alert-error').text("Couldn't load search results").insertBefore table 
+# TODO: !!!!
     false

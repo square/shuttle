@@ -15,40 +15,6 @@
 root = exports ? this
 
 # @private
-modal = (title, body, confirm='OK') ->
-  modaldiv = $('<div/>').addClass('modal hide fade')
-
-  header = $('<div/>').addClass('modal-header').appendTo(modaldiv)
-  $('<h3/>').text(title).appendTo header
-
-  body_div = $('<div/>').addClass('modal-body').appendTo(modaldiv)
-  $('<p/>').text(body).appendTo body_div
-
-  footer = $('<div/>').addClass('modal-footer').appendTo(modaldiv)
-  $('<a/>').addClass('btn btn-primary').text(confirm).attr('data-dismiss', 'modal').appendTo(footer)
-
-  modaldiv.modal()
-
-# @private
-modalQuery = (title, body, options={}, yes_proc) ->
-  modal = $('<div/>').addClass('modal hide fade')
-
-  header = $('<div/>').addClass('modal-header').appendTo(modal)
-  $('<h3/>').text(title).appendTo header
-
-  body_div = $('<div/>').addClass('modal-body').appendTo(modal)
-  $('<p/>').text(body).appendTo body_div
-
-  footer = $('<div/>').addClass('modal-footer').appendTo(modal)
-  $('<a/>').addClass('btn btn').text(options.no ? 'Cancel').attr('data-dismiss', 'modal').appendTo(footer)
-  ok = $('<a/>').addClass('btn btn-primary').text(options.yes ? 'OK').appendTo(footer)
-  ok.click ->
-    modal.modal('hide')
-    yes_proc()
-
-  modal.modal()
-
-# @private
 htmlEscape = (str) -> str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 
 # @private
@@ -107,38 +73,14 @@ class TranslationItem
     if !@copy_field.val().length && !@translation.copy?.length
       return true
 
-    @element.find('textarea, input').attr 'disabled', 'disabled'
+    @element.find('.translation-area, input').attr 'disabled', 'disabled'
 
     $.ajax @translation.url + '.json',
       type: 'PUT'
-      data: $.param('translation[copy]': @element.find('textarea').val())
-      complete: => @element.find('textarea, input').removeAttr 'disabled', 'disabled'
+      data: $.param('translation[copy]': @element.find('.translation-area').val())
+      complete: => @element.find('.translation-area, input').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
-      error: (jqXhr) => 
-        if jqXhr.status == 422
-          modaldiv = $('<div/>').addClass('modal hide fade')
-
-          header = $('<div/>').addClass('modal-header').appendTo(modaldiv)
-          $('<h3/>').text("Couldn't Update Translation").appendTo header
-
-          body_div = $('<div/>').addClass('modal-body').appendTo(modaldiv)
-          $('<b/>').text('Errors:').appendTo body_div
-          body_list = $('<ul/>').addClass("text-error")
-
-          for own field, errors of jqXhr.responseJSON
-            do (field, errors) ->
-              field = field.charAt(0).toUpperCase() + field.slice(1)
-              for error in errors 
-                $('<li/>').text(field + " " + error).appendTo(body_list)
-          
-          body_list.appendTo body_div
-
-          footer = $('<div/>').addClass('modal-footer').appendTo(modaldiv)
-          $('<a/>').addClass('btn btn-primary').text("Confirm").attr('data-dismiss', 'modal').appendTo(footer)
-
-          modaldiv.modal()
-        else   
-          modal("Couldn’t Update Translation", "An error occurred.")
+      error: => new Flash('alert').text("Couldn't update that translation.");
     return true
 
   # Re-renders the cell using a new translation object (loaded from JSON).
@@ -151,12 +93,13 @@ class TranslationItem
     old_element = @element
     this.build().insertAfter old_element
     old_element.remove()
+    @element.find(".translation-area").autosize()
 
   # Attempts to find an existing matching translation. If one is found,
   # pre-populates the copy field with it.
   #
   loadSuggestion: ->
-    return unless !@translation.translated && @element.find('textarea').val() == ''
+    return unless !@translation.translated && @element.find('.translation-area').val() == ''
     $.ajax @translation.suggestion_url,
       success: (match) =>
         return unless match?
@@ -167,87 +110,79 @@ class TranslationItem
 
   # @private
   build: ->
-    @element = $('<div/>').addClass('text row-fluid')
-    @element.addClass('alternate') if @options.alternate
-    @element.addClass 'approved' if @translation.approved == true
-    @element.addClass 'rejected' if @translation.approved == false
-    @element.addClass 'translated' if @translation.approved == null && @translation.translated
+    # TODO: 
+    ###### EXPAND BUTTON ######
+    # expand = $('<div/>').addClass('large-view pull-right').appendTo(@right)
+    # expand_link = $('<a/>').addClass('icon-external-link').attr('href', '#').appendTo(expand)
+    # expand_desc = $('<span/>').text("Go to full-screen view ").prependTo(expand).hide()
+    # expand_link.click (e) =>
+    # expand.hover (-> expand_desc.show()), -> expand_desc.hide()
+    
+    context = {}
 
-    @left = $('<div/>').addClass('span6').appendTo(@element)
-    @right = $('<div/>').addClass('span6').appendTo(@element)
+    switch @translation.approved
+      when true then context.status = 'approved'
+      when false then context.status = 'rejected'
+      else
+        if @translation.translated
+          context.status = 'translated'
+        else
+          context.status = ''
 
-    expand = $('<div/>').addClass('large-view pull-right').appendTo(@right)
-    expand_link = $('<a/>').addClass('icon-external-link').attr('href', '#').appendTo(expand)
-    expand_desc = $('<span/>').text("Go to full-screen view ").prependTo(expand).hide()
-    expand_link.click (e) =>
-      window.open @translation.edit_url, '_blank'
-      expand_link.removeClass('icon-external-link').addClass 'icon-refresh'
-      expand_desc.text "Reload any changes you made "
-      expand_link.unbind('click').click =>
-        $.ajax (@translation.url + '.json'),
-               success: (translation) => this.refresh translation
-               success: (translation) => this.refresh translation
-               error: => modal("Couldn’t refresh a translation.", "An error occurred.")
-      e.preventDefault(); e.stopPropagation(); return false
-    expand.hover (-> expand_desc.show()), -> expand_desc.hide()
+    context.translation_copy = @translation.copy
+    context.source_copy = this.renderCopyWithFencing(
+                                                      @translation.source_copy,
+                                                      @translation.source_fences
+                                                    ).html()
 
-    this.renderCopyWithFencing(@translation.source_copy, @translation.source_fences).appendTo(@right)
-
-    if @options.review && @translation.approved == null
-      icons = $('<p/>').addClass('icons').appendTo(@right)
-      button_approve = $('<button/>').addClass('btn btn-success btn-mini').appendTo(icons).click =>
-        $.ajax @translation.approve_url,
-          type: 'PUT'
-          success: (translation) => this.refresh translation
-          error: => modal("Couldn’t approve that translation.", "An error occurred.")
-        return false
-      $('<i/>').addClass('icon-ok').appendTo button_approve
-      icons.append ' '
-
-      button_reject = $('<button/>').addClass('btn btn-danger btn-mini').appendTo(icons).click =>
-        $.ajax @translation.reject_url,
-          type: 'PUT'
-          success: (translation) => this.refresh translation
-          error: => modal("Couldn’t reject that translation.", "An error occurred.")
-        return false
-      $('<i/>').addClass('icon-remove').appendTo button_reject
-      icons.append ' '
-
-    button_flag = $('<button/>').addClass('btn btn-warning btn-mini').appendTo(icons)
-    $('<i/>').addClass('icon-flag').appendTo button_flag
+    if @options.review && (@translation.approved == null)
+      context.controls = true
 
     if @translation.key.context?
-      $('<h6/>').text("Context").appendTo @right
-      $('<p/>').addClass('context').text(@translation.key.context).appendTo @right
+      context.context = @translation.key.context
 
+    if @options.word_substitute_url
+      context.convert_source = true
 
-    stats = $('<p/>').addClass('stats').appendTo(@right)
-
-    $('<strong/>').text("Key: ").appendTo stats
-    stats.appendText @translation.key.original_key
-    $('<br/>').appendTo stats
-
-    $('<strong/>').text("Source: ").appendTo stats
+    context.key = @translation.key.original_key
     if @translation.key.source?
-      stats.appendText @translation.key.source
+      context.source = @translation.key.source
       if @translation.key.importer_name?
-        stats.appendText " (imported by #{@translation.key.importer_name})"
+        context.source += " (imported by #{@translation.key.importer_name})"
     else
-      stats.append " (by request)"
-    $('<br/>').appendTo stats
+      context.source = " (by request)"
 
-    @copy_field = $('<textarea/>').addClass('span12').val(@translation.copy).appendTo(@left)
+    if @translation.translator
+      context.translator = @translation.translator.name
+    if @translation.reviewer
+      context.approved = @translation.approved
+      context.reviewer = @translation.reviewer.name
 
-    # select entire range when focused
-    @copy_field.focus =>
+    @element = $(HoganTemplates['translationpanel/translation_entry'].render(context)) 
+
+    @copy_field = @element.find('.translation-area').first()
+
+    @expand_link_button = @element.find('.expand-link').first()
+    @copy_source_button = @element.find('.copy-source').first()
+    @convert_source_button = @element.find('.convert-source').first()
+
+    @approve_button = @element.find('button.square.approve').first()
+    @reject_button = @element.find('button.square.reject').first()
+
+    @alerts = @element.find('div.alerts').first()
+    @glossary_tips = @element.find('div.tips').first()
+    
+    # Set up @copy_field
+    @copy_field.focus () =>
+      # select entire range when focused
       @copy_field[0].selectionStart = 0
       @copy_field[0].selectionEnd = @copy_field.val().length
       this.loadSuggestion()
       this.hideOtherGlossaryTooltips()
       this.renderGlossaryTooltip()
 
-    # hitting enter saves the field
     @copy_field.keydown (e) =>
+      # hitting enter saves the field
       if e.keyCode == 13
         e.preventDefault()
         this.submit() && this.advanceSelection()
@@ -255,15 +190,36 @@ class TranslationItem
       else
         return true
 
-    @left.append ' '
-    $('<a/>').addClass('btn btn-mini').text('Copy from source').attr('href', '#').appendTo(@left).click =>
+    @copy_field.keyup () =>
+      # mark field unsaved when modified
+      this.setUnsaved()
+      # show warnings
+      this.checkForDumbCharacters(@copy_field.val())
+      this.warnForTokenParity(@translation.source_fences, @copy_field.val())
+      return true
+    
+    # Set up @expand_link_button
+    @expand_link_button.click (e) =>
+      window.open @translation.edit_url, '_blank'
+      # expand_link.removeClass('icon-external-link').addClass 'icon-refresh'
+      # expand_desc.text "Reload any changes you made "
+      # expand_link.unbind('click').click =>
+      #   $.ajax (@translation.url + '.json'),
+      #          success: (translation) => this.refresh translation
+      #          success: (translation) => this.refresh translation
+      #          error: => new Flash('alert').text("Couldn't refresh a translation.");
+      e.preventDefault(); e.stopPropagation(); return false
+
+    # Set up @copy_source_button
+    @copy_source_button.click () => 
       @copy_field.val @translation.source_copy
       this.setUnsaved()
       @copy_field.focus()
-      false
-    if @options.word_substitute_url
-      @left.append ' '
-      $('<a/>').addClass('btn btn-mini').text('Convert from source').attr('href', '#').appendTo(@left).click =>
+      return false
+
+    # Set up @convert_source_button
+    if @convert_source_button.size() > 0
+      @convert_source_button.click () =>
         $.ajax "#{@options.word_substitute_url}&string=#{encodeURIComponent @translation.source_copy}",
           success: (result) =>
             this.clearNotes()
@@ -272,35 +228,37 @@ class TranslationItem
               do (note) => this.addNote note
             for suggestion in result.suggestions
               do (suggestion) => this.addNote suggestion
-          error: -> modal("Couldn’t automatically convert the source string.", "An error occurred.")
-      false
+          error: () => new Flash('alert').text("Couldn't automatically convert the source string.");
+        return false
 
-    @copy_field.keyup =>
-      # mark field unsaved when modified
-      this.setUnsaved()
-      # show warnings
-      this.checkForDumbCharacters(@copy_field.val())
-      this.warnForTokenParity(@copy_field.val())
-      return true
+    # Set up @approve_button and @reject_button
+    if (@approve_button.size() > 0) && (@reject_button.size() > 0)
+      @approve_button.click () =>
+        $.ajax @translation.approve_url,
+          type: 'PUT'
+          success: (translation) => this.refresh translation
+          error: () => new Flash('alert').text("Couldn't approve that translation.");
+        return false
+      @reject_button.click () =>
+        $.ajax @translation.reject_url,
+          type: 'PUT'
+          success: (translation) => this.refresh translation
+          error: () => new Flash('alert').text("Couldn't reject that translation.");
+        return false
+
+    # Set up @alerts
+    $('<p/>').addClass('alert token-parity-warning')
+      .appendTo(@alerts).hide()
 
     for chars in TranslationItem::DUMB_CHARACTERS
-      $('<p/>').addClass("alert dumb-#{chars[0]}").text("Consider using #{chars[4]} #{chars[3]} instead of #{chars[2]} #{chars[1]}.").insertAfter(@copy_field).hide()
+      $('<p/>').addClass("warning dumb-#{chars[0]}")
+        .text("Consider using #{chars[4]} #{chars[3]} instead of #{chars[2]} #{chars[1]}.")
+        .appendTo(@alerts).hide()
 
-    $('<p/>').addClass('alert token-parity-warning').insertAfter(@copy_field).hide()
-
-    $('<p/>').addClass('alert alert-info glossary-tips').insertAfter(@copy_field).hide()
-
-    if @translation.translator
-      p = $('<p/>').text("Translated by #{@translation.translator.name}").appendTo(@right)
-      $('<i/>').addClass('icon-globe').prependTo p
-    if @translation.reviewer
-      if @translation.approved == true
-        p = $('<p/>').css('color', 'darkgreen').text(" Approved by #{@translation.reviewer.name}").appendTo(@right)
-        $('<i/>').addClass('icon-ok').prependTo p
-      if @translation.approved == false
-        p = $('<p/>').css('color', 'darkred').text(" Rejected by #{@translation.reviewer.name}").appendTo(@right)
-        $('<i/>').addClass('icon-remove').prependTo p
-
+    # Set up @glossary_tips
+    $('<p/>').addClass('glossary-tips')
+      .appendTo(@glossary_tips).hide()
+    
     return @element
 
   # Moves focus to the next translation item in the list.
@@ -313,14 +271,14 @@ class TranslationItem
   setUnsaved: ->
     if @translation.copy?
       if @translation.copy != @copy_field.val()
-        @element.addClass('unsaved') if !@element.hasClass('unsaved')
+        @copy_field.addClass('unsaved') if !@copy_field.hasClass('unsaved')
       else
-        @element.removeClass 'unsaved'
+        @copy_field.removeClass 'unsaved'
     else
       if @copy_field.val().length > 0
-        @element.addClass('unsaved') if !@element.hasClass('unsaved')
+        @copy_field.addClass('unsaved') if !@copy_field.hasClass('unsaved')
       else
-        @element.removeClass 'unsaved'
+        @copy_field.removeClass 'unsaved'
 
   # @private
   checkForDumbCharacters: (copy) ->
@@ -380,7 +338,7 @@ class TranslationItem
       # consume the range and enclose it in a span
       $('<span/>').addClass('fenced').text(copy[range[0]..range[1]]).appendTo fenced_p
       copy_index = range[1] + 1
-
+    
     # consume from the end of the last range to the end of the string
     if copy_index < copy.length
       fenced_p.append htmlEscape(copy[copy_index..])
@@ -445,8 +403,12 @@ class root.TranslationPanel
   constructor: (@list, @filter, @url, @glossary, @options) ->
     @items = []
     @scroll = @list.infiniteScroll (=> @makeURL()),
-      renderer: (items) => @addItems items
-    @filter.submit => @search(); return false
+      windowScroll: true
+      renderer: (items) =>
+        @addItems items
+    @filter.submit => 
+      @search() 
+      return false
 
   # Submits a filter query and refreshes the strings list.
   #
@@ -466,12 +428,13 @@ class root.TranslationPanel
     previousItem = null
     for translation, i in translations
       do (translation) =>
-        options = $.extend({}, @options, {alternate: i % 2 == 1})
-        item = new TranslationItem(this, translation, options)
+        item = new TranslationItem(this, translation, @options)
         previousItem.next = item if previousItem?
         item.build().appendTo @list
         @items.push item
         previousItem = item
+    @list.find(".translation-area").autosize()
 
   # @private
-  makeURL: -> @url + "?" + @filter.serialize()
+  makeURL: -> 
+    @url + "?" + @filter.serialize()

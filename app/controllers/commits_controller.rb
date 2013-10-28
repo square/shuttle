@@ -122,6 +122,10 @@ class CommitsController < ApplicationController
   # | `commit` | Parameterized hash of Commit fields. |
 
   def update
+    if !params[:commit]["due_date"].nil?
+      params[:commit]["due_date"] = Date::strptime(params[:commit]["due_date"], "%m/%d/%Y")
+    end
+    
     @commit.update_attributes commit_params
     respond_with @commit, location: project_commit_url(@project, @commit)
   end

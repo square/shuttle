@@ -1,0 +1,223 @@
+@import "base/vars";
+@import "css3-mixins";
+
+// Mixins
+@mixin button($color, $bg-color, $border-color) {
+  @include appearance(none);
+  @include box-sizing(border-box);
+  @include border-radius($button-radius-size);
+
+  background: $bg-color;
+  border: 1px solid $border-color;
+  color: $color;
+  display: inline-block;
+  font-size: $control-font-size;
+  font-weight: normal;
+  letter-spacing: 1px;
+  height: $input-size;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  padding: 5px 20px;
+
+  &:active, &:focus {
+    outline: -webkit-focus-ring-color none;
+  }
+
+  &:hover { 
+    background: darken($bg-color, 5%);
+    color: $color !important;
+    cursor: pointer; 
+    text-decoration: none !important;
+  }
+
+  &:active:not([disabled]):not(.disabled) {
+    position: relative;
+    top: 1px;
+  }
+
+  &[disabled], &.disabled {
+    &:hover { cursor: default; }
+    background: fade-out($bg-color, .4);
+    color: lighten($color, 20%);
+    border: 1px solid fade-out($bg-color, .4);
+  }
+
+  &.small {
+    font-size: 11px;
+  }
+
+  &.square {
+    height: $input-size; 
+    width: $input-size; 
+    padding: 5px;
+  }
+}
+
+@mixin field-options {
+  @include box-sizing(border-box);
+  @include border-radius($input-radius-size);
+
+  padding: 5px 10px;
+  font-size: $control-font-size;
+  font-weight: normal;
+  background-color: $input-white;
+  border: 1px solid $input-white-border;
+  margin: 0;
+
+  &[disabled], .disabled {
+    background-color: $gray6 !important;
+    border: 1px solid $gray4 !important;
+    color: $gray4 !important;
+  }
+
+  &:focus {
+    outline: -webkit-focus-ring-color none;
+    border: 1px solid $dark-blue;
+  }
+
+  &[readonly="readonly"] {
+    &:focus {
+      outline: -webkit-focus-ring-color none;
+      border: 1px solid $input-white-border;
+    }
+  }
+}
+
+@mixin input-affix {
+  &>span {
+    @include field-options;
+    line-height: 20px;
+    min-width: 15px;
+
+    &.disabled {
+      border: 3px solid $gray6;
+    }
+  }
+
+  &>input { display: inline !important; }
+}
+
+
+input[type=button], input[type=submit], button, .button {
+  @include button($input-blue-text, $input-blue, $input-blue-border);
+  &.default { @include button($input-white-text, $input-white, $input-white-border); }
+  &.submit { @include button($input-orange-text, $input-orange, $input-orange-border); }
+  &.danger { @include button($input-red-text, $input-red, $input-red-border); }
+
+  &.approve { @include button($input-green-text, $input-green, $input-green-border); }
+  &.reject { @include button($input-red-text, $input-red, $input-red-border); }
+  &.flag { @include button($input-orange-text, $input-orange, $input-orange-border); }
+}
+
+input[type=text], input[type=email], input[type=password], input[type=search], input[type=tel], input[type=number], textarea {
+  @include field-options;
+}
+
+input[type=text], input[type=email], input[type=password], input[type=search], input[type=tel], input[type=number] {
+  height: $input-size;
+}
+
+textarea {
+  resize: vertical;
+  line-height: 20px;
+}
+
+select {
+  @include field-options;
+  @include appearance(none);
+  text-indent: 0.01px;
+  text-overflow: '';
+
+  background:#fff image-url('custom-select-arrow-down.png') right center no-repeat;
+  padding-right: 28px;
+  height: $input-size;
+  overflow: hidden; 
+  white-space: nowrap; 
+  margin-top: -3px;
+  vertical-align: middle;
+  
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+input.error, select.error, textarea.error {
+  background-color: $background-red !important;
+}
+
+input[type=checkbox] {
+  @include appearance(none);
+  @include border-radius(2px);
+
+  font-size: 16px;
+  position: relative;
+  border: 1px solid $input-white-border;
+  display: inline-block;
+  line-height: 1em;
+  margin: 0;
+  padding: 0;
+  width: 1em !important;
+  height: 1em !important;
+  vertical-align: text-top;
+  background: $input-white;
+}
+
+input[type=checkbox]:active {
+  background: darken($input-white, 5%);
+}
+
+input[type=checkbox]:active, input[type=checkbox]:focus {
+  outline: 0;
+}
+
+input[type=checkbox]:checked::after {
+  @include transform(rotate(-45deg));
+
+  position: absolute;
+  content: '';
+  left: 15%;
+  top: 18%;
+  height: 25%;
+  width: 60%;
+  border-bottom: 2px solid $input-white-text;
+  border-left: 2px solid $input-white-text;
+}
+
+// Input Append/Prepend
+
+.input-prepend {
+  @include input-affix;
+
+  &>span {
+    @include border-radius-separate($input-radius-size, 0px, $input-radius-size, 0px);
+    margin-right: 0;
+    padding-right: 0;
+
+    &.disabled { border-right: none; }
+  }
+
+  &>input {
+    @include border-radius-separate(0px, $input-radius-size, 0px, $input-radius-size);
+    margin-left: 0;
+
+    &.disabled { border-left: none; }
+  }
+}
+
+.input-append {
+  @include input-affix;
+
+  &>span {
+    margin-left: 0;
+    padding-left: 0;
+
+    &.disabled { border-left: none; }
+  }
+
+  &>input {
+    @include border-radius-separate($input-radius-size, 0px, $input-radius-size, 0px);
+    margin-right: 0;
+
+    &.disabled { border-right: none; }
+  }
+}

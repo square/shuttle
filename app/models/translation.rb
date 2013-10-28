@@ -136,6 +136,31 @@ class Translation < ActiveRecord::Base
 
   tracked_attributes.each { |a| attr_accessor :"#{a}_actually_was" }
 
+  # TODO:
+  def self.total_words 
+    Translation.not_base.sum(:words_count)
+  end 
+
+  # TODO:
+  def self.total_words_new
+    Translation.not_base.where(translated: false).sum(:words_count)
+  end 
+
+  # TODO:
+  def self.total_words_pending
+    Translation.not_base.where('approved IS NOT TRUE')
+      .where(translated: true).sum(:words_count)
+  end 
+
+  # TODO:
+  def self.total_words_per_project
+    Translation.not_base.joins(key: :project)
+      .select("sum(words_count), projects.name").group("projects.name")
+      .order("sum DESC")
+      .map { |t| [t.name, t.sum] }
+  end 
+
+
   # Method used to cached the current state of the Translation
   # Required before making changes to a Translation that will be saved
   def freeze_tracked_attributes

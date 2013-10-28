@@ -1,0 +1,87 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :file_name do
+  = 'views/glossary/index'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+.header
+  h1 Glossary
+  .pull-right 
+    button.default.square href='#settings' rel='modal': i.icon-globe
+    button.primary href='#add-entry' rel='modal' Add Term
+
+hr.divider
+
+.border 
+  .filter-bar#alphabet-bar
+    / = button_tag 'Language', class: 'default'
+    ul
+      - "\#ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").each do |letter|
+        li
+          a href=("#glossary-table-" + letter) = letter
+  table.table.hover-rows#glossary
+        
+
+/ Add Term Modal
+.row
+  .modal.eight.columns#add-entry
+    a.close ×
+    h2 Add New Term
+    = form_for (SourceGlossaryEntry.new), url: glossary_sources_url do |f|
+      .modal-body
+
+        .control-group
+          = f.label :source_copy, 'English', class: "control-label"
+          .controls 
+            = f.text_field :source_copy, placeholder: 'English', autocomplete: 'off', required: 'true'
+
+        .control-group
+          = f.label :context, 'Context', class: "control-label"
+          .controls 
+            = f.text_field :context, placeholder: 'Context', autocomplete: 'off'
+
+        .control-group
+          = f.label :notes, 'Notes', class: "control-label"
+          .controls                   
+            = f.text_area :notes, rows: "4", placeholder: 'Notes', autocomplete: 'off', class: 'resize'
+
+        .control-group
+          = f.label :due_date, 'Due Date', class: "control-label"
+          .controls 
+            = f.text_field :due_date, autocomplete: 'off'
+
+        = submit_tag 'Submit', class: 'primary'
+
+/ Settings Modal
+.row
+  .modal.eight.columns#settings
+    a.close ×
+    h2 Target Locales
+
+    .modal-body
+      .control-group
+        = label_tag :glossary, 'Target Locales', class: 'control-label'
+        .controls
+          .list 
+            = content_tag_field 'div', :glossary, :target_locales, \
+              class: 'array-field', 'data-value' => []
+
+      = button_tag 'Save', class: 'primary save'
+
