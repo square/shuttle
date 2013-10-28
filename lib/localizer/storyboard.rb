@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'localizer/copies_ios_resources_without_translations'
+require 'importer/storyboard'
 
 module Localizer
 
@@ -110,8 +111,9 @@ module Localizer
     private
 
     include CopiesIosResourcesWithoutTranslations
-    def copy_resource?(path, contents, base_locale)
-      path =~ /#{Regexp.escape(base_locale.rfc5646)}\.lproj\/[^\/]+\.storyboard$/
+    def copy_resource?(path, blob, project)
+      throw :prune if project.skip_path?(::File.dirname(path[1..-1]), Importer::Storyboard)
+      path =~ /#{Regexp.escape(project.base_rfc5646_locale)}\.lproj\/[^\/]+\.storyboard$/
     end
   end
 end

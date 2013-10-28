@@ -14,6 +14,7 @@
 
 require 'localizer/storyboard'
 require 'localizer/copies_ios_resources_without_translations'
+require 'importer/xib3'
 
 module Localizer
 
@@ -28,9 +29,10 @@ module Localizer
     private
 
     include CopiesIosResourcesWithoutTranslations
-    def copy_resource?(path, contents, base_locale)
-      path =~ /#{Regexp.escape(base_locale.rfc5646)}\.lproj\/[^\/]+\.xib$/ &&
-          Nokogiri::XML(contents).root.name == 'document'
+    def copy_resource?(path, blob, project)
+      throw :prune if project.skip_path?(::File.dirname(path), Importer::Xib3)
+      path =~ /#{Regexp.escape(project.base_rfc5646_locale)}\.lproj\/[^\/]+\.xib$/ &&
+          Nokogiri::XML(blob.contents).root.name == 'document'
     end
   end
 end
