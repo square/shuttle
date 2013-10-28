@@ -6,7 +6,8 @@ module CommitTraverser
   # run indefinitely if there are cycles in the tree graph.
   #
   # @param [Git::Object::Commit] commit A commit to traverse.
-  # @yield [path, blob] The operation to perform on each blob found.
+  # @yield [path, blob] The operation to perform on each blob found. Throw
+  #   `:prune` to skip processing any further blobs under the current tree.
   # @yieldparam [String] path The path to a blob, with leading slash.
   # @yieldparam [Git::Object::Blob] blob A blob in the commit.
 
@@ -17,9 +18,11 @@ module CommitTraverser
   private
 
   def import_tree(tree, path, &block)
-    tree.blobs.each do |name, blob|
-      blob_path = "#{path}/#{name}"
-      block.(blob_path, blob)
+    catch :prune do
+      tree.blobs.each do |name, blob|
+        blob_path = "#{path}/#{name}"
+        block.(blob_path, blob)
+      end
     end
 
     tree.trees.each do |name, subtree|

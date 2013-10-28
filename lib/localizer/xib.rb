@@ -14,6 +14,7 @@
 
 require 'ios_common'
 require 'localizer/copies_ios_resources_without_translations'
+require 'importer/xib'
 
 module Localizer
 
@@ -80,9 +81,10 @@ module Localizer
     private
 
     include CopiesIosResourcesWithoutTranslations
-    def copy_resource?(path, contents, base_locale)
-      path =~ /#{Regexp.escape(base_locale.rfc5646)}\.lproj\/[^\/]+\.xib$/ &&
-          Nokogiri::XML(contents).root.name == 'archive'
+    def copy_resource?(path, blob, project)
+      throw :prune if project.skip_path?(::File.dirname(path[1..-1]), Importer::Xib)
+      path =~ /#{Regexp.escape(project.base_rfc5646_locale)}\.lproj\/[^\/]+\.xib$/ &&
+          Nokogiri::XML(blob.contents).root.name == 'archive'
     end
 
     def set_text_in_text_node(text, text_node)

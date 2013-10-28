@@ -55,6 +55,8 @@ module Localizer
 
       build_archive do |receiver|
         organized_translations.each do |localizer, translations_by_source|
+          klass              = find_by_ident(localizer)
+
           translations_by_source.each do |source, translations_by_locale|
             file_contents = commit.project.repo.object("#{commit.revision}^{tree}:#{source}").try!(:contents)
             next unless file_contents
@@ -62,7 +64,6 @@ module Localizer
 
             translations_by_locale.each do |locale, translations|
               output_file        = Localizer::File.new
-              klass              = find_by_ident(localizer)
               localizer_instance = klass.new(commit.project, translations)
 
               Rails.logger.tagged(klass.to_s) do
@@ -70,10 +71,10 @@ module Localizer
               end
               next unless output_file.path && output_file.content
               receiver.add_file output_file.path, output_file.content
-
-              localizer_instance.post_process commit, receiver, *locales
             end
           end
+
+          klass.new(commit.project, []).post_process commit, receiver, *locales
         end
       end
     end

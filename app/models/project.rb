@@ -268,6 +268,7 @@ class Project < ActiveRecord::Base
 
   def skip_path?(path, importer)
     path = path.sub(/^\//, '')
+    return false if path.empty?
 
     return true if skip_paths.any? { |sp| path.start_with?(sp) }
     return true if only_paths.present? && only_paths.none? { |op| path.start_with?(op) }

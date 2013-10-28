@@ -31,7 +31,7 @@ module Localizer
     def all_ios_resources(commit)
       resources = {}
       traverse commit.commit! do |path, blob|
-        resources[path.sub!(/^\//, '')] = blob.contents if copy_resource?(path, blob.contents, commit.project.base_locale)
+        resources[path.sub!(/^\//, '')] = blob.contents if copy_resource?(path, blob, commit.project)
       end
       return resources
     end
