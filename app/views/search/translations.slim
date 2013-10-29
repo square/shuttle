@@ -60,7 +60,7 @@ hr.divider
         .control-group 
           = label_tag 'translator_id', 'Translator', class: 'control-label'
           .controls
-            = select_tag 'translator_id', options_for_select(User.order('email ASC').map { |u| [u.name, u.id] }.unshift(['anyone', nil]))        
+            = select_tag 'translator_id', options_for_select(User.order('email ASC').map { |u| [u.name, u.id] }.unshift(['Anyone', nil]))        
 
   
   / translation_grid

@@ -21,7 +21,6 @@ body.translation_units {
         &:hover {
           cursor: pointer;
           color: $dark-blue;
-          @include transform(rotate(90deg));  
         }
         &.active {
           color: $dark-blue;

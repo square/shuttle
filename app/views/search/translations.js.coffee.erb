@@ -25,6 +25,8 @@ $(window).ready ->
 
   translationSearchForm = $('#translation-search-form')
   table = $('#translations')
+  $('select[name="translator_id"]').chosen
+    width: "100%"
 
   sr = new GlobalSearch(table, table.data('url'))
 

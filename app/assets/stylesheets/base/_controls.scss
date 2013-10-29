@@ -125,10 +125,11 @@ textarea {
 select {
   @include field-options;
   @include appearance(none);
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
   text-indent: 0.01px;
   text-overflow: '';
 
-  background:#fff image-url('custom-select-arrow-down.png') right center no-repeat;
+  background: #fff image-url('custom-select-arrow-down.png') right center no-repeat;
   padding-right: 28px;
   height: $input-size;
   overflow: hidden; 

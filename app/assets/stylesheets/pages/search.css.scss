@@ -22,7 +22,6 @@ body.search {
         &:hover {
           cursor: pointer;
           color: $dark-blue;
-          @include transform(rotate(90deg));  
         }
         &.active {
           color: $dark-blue;
@@ -35,7 +34,7 @@ body.search {
     .collapse {
       margin-top: 30px;
       margin-left: 40px;
-      display: none;
+      // display: none;
       .controls {
         width: 480px;
         input, select, .twitter-typeahead { width: 100%; }

@@ -32,6 +32,7 @@
 //= require jquery-timers
 //= require jquery-leanModal
 //= require jquery-qtip
+//= require jquery-chosen
 //= require datepicker
 //= require twitter/typeahead
 //= require xregexp
