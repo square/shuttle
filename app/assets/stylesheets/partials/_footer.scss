@@ -1,0 +1,41 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body {
+  &:not(.sessions) {
+    .wrapper {
+      min-height: 100%;
+      height: auto !important;
+      height: 100%;
+      overflow: hidden;
+      margin-bottom: 0 auto -9em;
+    }
+
+    .push {
+      height: 9em;
+    }
+  }
+}
+
+footer {
+  margin-top: -9em;
+  height: 9em;
+  overflow: hidden;
+  background-color: $navbar-background;
+  p {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #555555;
+    margin-top: 20px;
+    a {
+      color: #555555;
+    }
+  }
+
+  img {
+    opacity:0.2;
+  }
+}

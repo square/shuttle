@@ -75,7 +75,7 @@ class root.TranslationUnitsSearch
     thead = $('<thead/>').appendTo(@element)
     tr = $('<tr/>').appendTo(thead)
 
-    $('<th colspan="3"/>').text("Source").appendTo tr
-    $('<th colspan="3"/>').text("Target").appendTo tr
+    $('<th colspan="2"/>').text("Source").appendTo tr
+    $('<th colspan="2"/>').text("Target").appendTo tr
 
     @body = $('<tbody/>').appendTo(@element)

@@ -149,7 +149,7 @@ class TranslationsController < ApplicationController
           render json: @translation.errors, status: :unprocessable_entity
         end
       end
-      format.html { redirect_to project_key_translation_url(@project, @key, @translation), success: t('controllers.translations.update.success') }
+      format.html { redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: {success: t('controllers.translations.update.success') }}
     end
   end
 

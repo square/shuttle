@@ -1,0 +1,99 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.users {
+  table {
+    border: 1px solid $gray5;
+
+    thead {
+      tr {
+        text-align: left;
+        font-weight: bold;
+        text-transform: uppercase;
+
+        th {
+          padding: 15px;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        &:nth-child(odd) {
+          background-color: $gray6;
+        }
+
+        &:hover {
+          background-color: $off-blue;
+          cursor: pointer;
+        }
+
+        td {
+          &:first-child {
+            font-weight: bold;
+          }
+          padding: 0px 15px;
+          height: 50px;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
+  &#users-show {
+    .image-wrapper {
+      padding-top: 40px;
+      padding-right: 80px;
+      padding-left: 30px;
+      img {
+        border-radius: 50%;
+        width: 100%;
+      }
+    }
+    
+
+    .activity {
+      margin-bottom: -20px;
+    }
+
+    .controls {
+      width: 300px;
+      input, select, .twitter-typeahead {
+        width: 100%;
+      }
+      select {
+        text-transform: capitalize;
+      }
+    }
+
+    dl {
+      .item {
+        &:last-of-type {
+          // border-top: 1px solid $gray5;
+        }
+        border-bottom: 1px solid $gray5;
+      }
+
+      dt {
+        float: left;
+        width: 350px;
+        text-align: left;
+        text-transform: capitalize;
+        padding-top: 7px;
+      }
+      dd {
+        padding-top: 7px;
+        margin-left: 350px;
+      }
+    }
+
+    .form-actions {
+      border: none;
+
+      input+input, button+button, button+input, input + button {
+        margin: 0px;
+        margin-left: 10px;
+      }
+    }
+  }
+}

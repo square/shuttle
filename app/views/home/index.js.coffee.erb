@@ -1,0 +1,109 @@
+# Copyright 2013 Square Inc.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+$(window).ready () ->
+  toggle = (row) ->
+    entry = row.find('.description')
+    full_description = entry.data('full-description')
+    short_description = entry.data('short-description')
+    
+    if not entry.data("orig-height")
+      orig_height = entry.prop('scrollHeight')
+      entry.data("orig-height", orig_height)
+
+    if full_description 
+      if row.hasClass("expanded")
+        orig_height = entry.data("orig-height")
+        entry.animate({height: orig_height}, 500, () -> 
+          entry.text(short_description)   
+          row.removeClass("expanded")     
+        )
+        row.removeClass("expanded")     
+      else
+        $(".expanded").each () ->
+          toggle($(this))
+
+        orig_height = entry.data("orig-height")
+        orig_width = entry.width()
+
+        entry.height(orig_height)
+        entry.width(orig_width)
+
+        entry.html(full_description)
+        entry.animate({height: entry.prop('scrollHeight')}, 500, () -> 
+          entry.html(full_description)   
+          row.addClass("expanded")     
+        )
+        row.addClass("expanded")  
+
+
+  $("table").find("input, select, button, a").click (e) -> 
+    e.stopPropagation()
+
+  $(".datepicker").datepicker(
+    autoclose: true
+    startDate: new Date()
+  ) 
+
+  $('.translate-link').click () ->
+    if ($(this).hasClass('disabled')) 
+      return false
+
+    sha = $(this).data('sha')
+    project = $(this).data('project')
+    locale = $(this).data('locale')
+    
+    if Locale.from_rfc5646( $("[name=locales]").val() ) != null
+      locale = $("[name=locales]").val()
+
+    url = '/locales/' + encodeURIComponent(locale) + '/projects/' + encodeURIComponent(project) + '?commit=' + sha
+    window.location = url
+
+    return false
+
+  $('.translate-link-locale').keydown () ->
+    if (($(this).val()).length > 0) 
+      $($(this).data('target')).removeClass('disabled')
+    else 
+      $($(this).data('target')).addClass('disabled')
+    return true
+
+  new SmartForm($('#new_commit'), () -> window.location.reload() )
+  $('#new_commit_project_id').change () ->
+    project = $(this).val()
+    $('#new_commit').attr('action', '/projects/' + project + '/commits.json')
+
+  $('.edit_commit select, .edit_commit input[type="text"]').change () ->
+    select = $(this)
+    form = select.closest('form')
+    authParam = $('meta[name=csrf-param]').attr('content')
+    authToken = $('meta[name=csrf-token]').attr('content')
+    data = form.serializeObject()
+    data[authParam] = authToken
+
+    $.ajax(form.attr('action'), 
+      data: data,
+      type: 'PATCH',
+      success: () ->
+        select.css('backgroundColor', '#dfd')
+              .delay(200)
+              .animate({backgroundColor: "white"}, 300)
+      ,
+      error: () ->
+        new Flash('alert').text("Couldn't change commit priority.")
+    )
+
+  $('tbody tr').click () ->
+    toggle($(this))
+

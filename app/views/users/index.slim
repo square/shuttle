@@ -1,0 +1,36 @@
+- content_for :file_name do
+  = 'views/users/index'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+.header
+  h1 Users
+
+hr.divider
+
+.border
+  table.table.hover-rows
+    thead
+      tr
+        th Name
+        th Email
+        th Role
+        th
+    tbody 
+      - @users.each do |user|
+        tr onclick="document.location = '#{user_url(user)}'"
+          td = user.name
+          td = user.email
+          td
+            - if user.role?
+              = t("models.user.role.#{user.role}")
+            - else
+              span.label.label-info unauthorized
+          td
+            - unless user.admin? || user == current_user
+              button.submit href=become_user_url(user) data-method='POST' Impersonate
+              

@@ -1,0 +1,87 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :file_name do
+  = 'views/locale/projects/show'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+- @mode = params[:mode] || case current_user.role\
+                            when 'translator' then 'translation'\
+                            else 'review'\
+                          end
+
+/ Status Line
+.header
+  h1 =@project.name
+  .pull-right.locale-select
+    - if current_user.role == "admin"
+      input.locale-field type="text" placeholder="locale"
+    - else 
+      select 
+        - current_user.approved_locales.each do |locale|
+          option value=locale.rfc5646 = locale.name
+    - commit = params[:commit].present? ? @project.commits.for_revision(params[:commit]).first : nil
+    button.submit.translate-link [ 
+                data-sha=commit.revision 
+                data-project=commit.project.to_param
+                ] Translate
+    
+  h6
+    strong 
+      - if (commit = @project.commits.order('committed_at DESC').first)
+        | Last imported 
+        = "#{time_ago_in_words(commit.committed_at)} ago"
+        |  / 
+        = "#{commit.revision[0, 6]}"
+      - else 
+        Never imported before
+
+hr.divider
+
+/ Filter Bar
+.border 
+  .filter-bar
+    form
+      .control  
+        input type="text" name="filter" placeholder="Substring"
+      .control
+        - preselected_commit = params[:commit].present? ? @project.commits.for_revision(params[:commit]).first : nil
+        = select_tag 'commit' , options_for_select(\
+                                                  @project.commits\
+                                                    .order('committed_at DESC')\
+                                                    .map {|c| ["#{c.revision[0, 6]}: #{truncate c.message}", c.id]}\
+                                                    .unshift(['all commits', nil])\
+                                                  , preselected_commit.try!(:id))
+      .control                                                
+        = select_tag 'filter_source', options_for_select( [\
+                                                            [@locale.name, 'translated'],\
+                                                            [@project.base_locale.name, 'source']\
+                                                          ])
+      .control
+        = submit_tag 'Filter', class: 'primary'
+      .control
+        input type="checkbox" name="include_translated" value="true" checked=(@mode == 'review' ? 'checked' : nil)
+        label for="include_translated" Translated
+      .control
+        input type="checkbox" name="include_approved" value="true"
+        label for="include_approved" Approved
+      .control
+        input type="checkbox" name="include_new" value="true" checked=(@mode == 'translation' ? 'checked' : nil)
+        label for="include_new" New
+    
+  .translation-panel  

@@ -65,7 +65,7 @@ class User < ActiveRecord::Base
   ROLES = %w(monitor translator reviewer admin)
 
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable, :lockable
+         :recoverable, :rememberable, :trackable, :validatable
 
   has_many :authored_translations, class_name: 'Translation', foreign_key: 'translator_id', inverse_of: :translator, dependent: :nullify
   has_many :reviewed_translations, class_name: 'Translation', foreign_key: 'reviewer_id', inverse_of: :reviewer, dependent: :nullify
@@ -121,6 +121,11 @@ class User < ActiveRecord::Base
   # @private
   def translator?
     %w(translator reviewer admin).include? role
+  end
+
+  # @return [String] The URL to the user's Gravatar.
+  def gravatar
+    "http://www.gravatar.com/avatar/#{Digest::MD5.hexdigest email}?s=600"
   end
 
   # Returns whether or not a translator is allowed to translate in a given

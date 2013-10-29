@@ -1,0 +1,224 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.glossary { 
+
+  .header button { margin-right: 10px;}
+
+  #alphabet-bar {
+    z-index: 2;
+
+    padding: 15px 60px 15px 10px;
+    text-align: right;
+    ul {
+      list-style-type: none;
+      li { 
+        display: inline; 
+        a {
+          color: $gray2;
+          line-height: 32px;
+          margin-left: 6px;
+          margin-right: 6px;
+          display: inline;
+          pointer-events: auto;
+          &:hover { text-decoration: none; }
+        }
+      }
+    }
+  }
+
+  table#glossary {
+    table-layout: fixed;
+    margin-bottom: 0px;
+
+    th {
+      padding: 10px;
+      text-align: left;
+      
+      &:first-child { width: 25px; }
+      div { 
+        padding-bottom: 5px;
+        border-bottom: 1px solid rgb(221, 221, 221); 
+      }      
+    }
+
+    tbody.glossary-table-anchor {
+      tr { 
+        border-style: none; 
+        td {
+          font-size: 28px;
+          background-color: white;  
+          &:hover {
+            cursor: default;      
+          }
+        }
+      }
+    }
+
+    tbody.glossary-table-entry {
+      background-color: $gray6;
+      border: none;
+
+      &:nth-child(odd) { background-color: white; }
+      &:hover { background-color: $off-blue; }
+
+      
+
+      tr { 
+        border: none; 
+        cursor: auto;
+      }
+      tr.accordion-toggle { cursor: pointer; }
+      tr.accordion-header { 
+        background-color: transparent; 
+        &.active {
+          font-weight: 500; 
+          background-color: $off-blue; 
+        }
+      }
+      tr.accordion-body {
+        background-color: white;
+        border-bottom: 1px solid $gray5;
+
+        td {
+          padding: 0px;
+          vertical-align: top;
+
+          div {
+            float: left;
+            padding: 10px;
+            @include box-sizing;
+            width: 100%;
+
+            p {
+              width: 100%;
+              min-height: 21px;
+              padding-bottom: 15px;
+              &.label {
+                font-weight: 500;
+                border-bottom: 1px solid $gray5;  
+              }
+            }
+
+            input {
+              width: 100%;
+              height: 30px;
+              @include box-sizing;
+              &[readonly] { background-color: #ffffff; }
+            }
+
+            textarea {
+              width: 100%;
+              height: 125px;
+              @include box-sizing;
+              resize: vertical;
+              &[readonly] { background-color: #ffffff; }
+            }
+
+            button, .button { 
+              float: right;
+              & + button {
+                margin-right: 10px;  
+              }
+            }
+
+          }
+        }
+
+      }
+
+      
+    }
+
+  }
+
+  .modal {
+    input, select, textarea, .twitter-typeahead {
+      width: 100%;
+    }
+    textarea {
+      min-height: 150px;
+    }
+
+    .modal-body {
+
+      .list {
+        min-height: 250px;
+        // border: 1px solid $gray5;
+        padding-right: 30px;
+      }
+
+      input[type="submit"], button.save {
+        width: auto;
+        float: right;
+      }
+    }
+  }
+}
+
+body.source_glossary_entries, body.locale_glossary_entries {
+  .eight.columns {
+    margin-top: -30px;
+    padding: 30px;
+    @include box-sizing;
+    position: relative;
+  }
+
+  .copy-source {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    
+    &:active {
+      position: absolute !important;
+      top: 24px !important;
+      right: 30px !important;
+    }
+  }
+
+  .info-side {
+    background-color: $gray6;
+  }
+
+  .activity {
+    margin-bottom: -20px;
+  }
+
+  .controls {
+    input, textarea {
+      width: 100%;
+    }
+  }
+
+  dl {
+    .item {
+      &:last-of-type {
+        // border-top: 1px solid $gray5;
+      }
+      border-bottom: 1px solid $gray5;
+    }
+
+    dt {
+      float: left;
+      width: 300px;
+      text-align: left;
+      text-transform: capitalize;
+      padding-top: 7px;
+    }
+    dd {
+      padding-top: 7px;
+      margin-left: 300px;
+    }
+  }
+
+  .form-actions {
+    button, input {
+      float: left;
+    }
+    input+input, button+button, button+input, input + button {
+      margin: 0px;
+      margin-left: 10px;
+    }
+  }
+}
+

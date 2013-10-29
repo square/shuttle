@@ -1,0 +1,258 @@
+/* -------------------------------------------------------------
+  Sass CSS3 Mixins! The Cross-Browser CSS3 Sass Library
+  By: Matthieu Aussaguel, http://www.mynameismatthieu.com, @matthieu_tweets
+
+  List of CSS3 Sass Mixins File to be @imported and @included as you need
+
+  The purpose of this library is to facilitate the use of CSS3 on different browsers avoiding HARD TO READ and NEVER
+  ENDING css files
+
+  note: All CSS3 Properties are being supported by Safari 5
+  more info: http://www.findmebyip.com/litmus/#css3-properties
+
+  Mixins available:
+    -   background-gradient     - arguments: Start Color: #3C3C3C, End Color: #999999
+    -   background-size         - arguments: Width: 100%, Height: 100%
+    -   border-radius           - arguments: Radius: 5px
+    -   border-radius-separate  - arguments: Top Left: 5px, Top Left: 5px, Bottom Left: 5px, Bottom Right: 5px
+    -   box                     - arguments: Orientation: horizontal, Pack: center, Align: center
+    -   box-rgba                - arguments: R: 60, G: 3, B: 12, Opacity: 0.23, Color: #3C3C3C
+    -   box-shadow              - arguments: X: 2px, Y: 2px, Blur: 5px, Color: rgba(0,0,0,.4)
+    -   box-sizing              - arguments: Type: border-box
+    -   columns                 - arguments: Count: 3, Gap: 10
+    -   double-borders          - arguments: Color One: #3C3C3C, Color Two: #999999, Radius: 0
+    -   flex                    - arguments: Value: 1
+    -   flip                    - arguments: ScaleX: -1
+    -   font-face               - arguments: Font Family: myFont, Eot File Src: myFont.eot, Woff File Src: myFont.woff, Ttf File Src: myFont.ttf
+    -   opacity                 - arguments: Opacity: 0.5
+    -   outline radius          - arguments: Radius: 5px
+    -   resize                  - arguments: Direction: both
+    -   rotate                  - arguments: Degree: 0, M11: 0, M12: 0, M21: 0, M22: 0
+    CSS Matrix Rotation Calculator http://www.boogdesign.com/examples/transforms/matrix-calculator.html
+    -   text-shadow             - arguments: X: 2px, Y: 2px, Blur: 5px, Color: rgba(0,0,0,.4)
+    -   transform               - arguments: Parameters: null
+    -   transition              - arguments: What: all, Length: 1s, Easing: ease-in-out
+    -   triple-borders          - arguments: Color One: #3C3C3C, Color Two: #999999, Color Three: #000000, Radius: 0
+
+------------------------------------------------------------- */
+
+@mixin appearance($what: none) {
+  -webkit-appearance: $what;
+  -moz-appearance: $what;
+  appearance: $what;
+}
+
+/* BACKGROUND GRADIENT */
+@mixin background-gradient($startColor: #3C3C3C, $endColor: #999999) {
+    background-color: $startColor;
+    background-image: -webkit-gradient(linear, left top, left bottom, from($startColor), to($endColor));
+    background-image: -webkit-linear-gradient(top, $startColor, $endColor);
+    background-image:    -moz-linear-gradient(top, $startColor, $endColor);
+    background-image:     -ms-linear-gradient(top, $startColor, $endColor);
+    background-image:      -o-linear-gradient(top, $startColor, $endColor);
+    background-image:         linear-gradient(top, $startColor, $endColor);
+    filter:            progid:DXImageTransform.Microsoft.gradient(startColorStr='#{$startColor}', endColorStr='#{$endColor}');
+}
+
+
+/* BACKGROUND SIZE */
+@mixin background-size($width: 100%, $height: 100%) {
+     -moz-background-size: $width $height;
+  -webkit-background-size: $width $height;
+          background-size: $width $height;
+}
+
+
+/* BORDER RADIUS */
+@mixin border-radius($radius: 5px) {
+    -moz-border-radius:    $radius;
+    -webkit-border-radius: $radius;
+    border-radius:         $radius;
+}
+
+@mixin border-radius-separate($topLeftRadius: 5px, $topRightRadius: 5px, $bottomLeftRadius: 5px, $bottomRightRadius: 5px) {
+    -webkit-border-top-left-radius:     $topLeftRadius;
+    -webkit-border-top-right-radius:    $topRightRadius;
+    -webkit-border-bottom-right-radius: $bottomRightRadius;
+    -webkit-border-bottom-left-radius:  $bottomLeftRadius;
+
+    -moz-border-radius-topleft:     $topLeftRadius;
+    -moz-border-radius-topright:    $topRightRadius;
+    -moz-border-radius-bottomright: $bottomRightRadius;
+    -moz-border-radius-bottomleft:  $bottomLeftRadius;
+
+    border-top-left-radius:     $topLeftRadius;
+    border-top-right-radius:    $topRightRadius;
+    border-bottom-right-radius: $bottomRightRadius;
+    border-bottom-left-radius:  $bottomLeftRadius;
+}
+
+/* BOX */
+@mixin box() {
+    display: -webkit-box;
+    display: -moz-box;
+    display: box;
+}
+
+@mixin box-orient($orient: horizontal) {
+    -webkit-box-orient: $orient;
+    -moz-box-orient:    $orient;
+    box-orient:         $orient;
+}
+
+@mixin box-align($pack: center) {
+    -webkit-box-pack: $pack;
+    -moz-box-pack:    $pack;
+    box-pack:         $pack;
+}
+
+@mixin box-pack($align: center) {
+    -webkit-box-align: $align;
+    -moz-box-align:    $align;
+    box-align:         $align;
+}
+
+/* BOX RGBA */
+@mixin box-rgba($r: 60, $g: 3, $b: 12, $opacity: 0.23, $color: #3C3C3C) {
+  background-color: transparent;
+  background-color: rgba($r, $g, $b, $opacity);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{$color}',endColorstr='#{$color}');
+            zoom:   1;
+}
+
+
+/* BOX SHADOW */
+@mixin box-shadow($x: 2px, $y: 2px, $blur: 5px, $color: rgba(0,0,0,.4), $inset: "") {
+  @if ($inset != "") {
+    -webkit-box-shadow: $inset $x $y $blur $color;
+    -moz-box-shadow:    $inset $x $y $blur $color;
+    box-shadow:         $inset $x $y $blur $color;
+  } @else {
+    -webkit-box-shadow: $x $y $blur $color;
+    -moz-box-shadow:    $x $y $blur $color;
+    box-shadow:         $x $y $blur $color;
+  }
+}
+
+/* BOX SIZING */
+@mixin box-sizing($type: border-box) {
+    -webkit-box-sizing:   $type;
+    -moz-box-sizing:      $type;
+    box-sizing:           $type;
+}
+
+/* COLUMNS */
+@mixin columns($count: 3, $gap: 10) {
+    -webkit-column-count: $count;
+    -moz-column-count:    $count;
+    column-count:         $count;
+
+    -webkit-column-gap:   $gap;
+    -moz-column-gap:      $gap;
+    column-gap:           $gap;
+}
+
+/* DOUBLE BORDERS */
+@mixin double-borders($colorOne: #3C3C3C, $colorTwo: #999999, $radius: 0) {
+    border: 1px solid $colorOne;
+
+    -webkit-box-shadow: 0 0 0 1px $colorTwo;
+    -moz-box-shadow:    0 0 0 1px $colorTwo;
+    box-shadow:         0 0 0 1px $colorTwo;
+
+    @include border-radius( $radius );
+}
+
+/* FLEX */
+@mixin flex($value: 1) {
+    -webkit-box-flex: $value;
+    -moz-box-flex:    $value;
+    box-flex:         $value;
+}
+
+/* FLIP */
+@mixin flip($scaleX: -1) {
+  -moz-transform:    scaleX($scaleX);
+  -o-transform:      scaleX($scaleX);
+  -webkit-transform: scaleX($scaleX);
+  transform:         scaleX($scaleX);
+  filter:            FlipH;
+  -ms-filter:        "FlipH";
+}
+
+/* FONT FACE */
+@mixin font-face($fontFamily: myFont, $eotFileSrc: 'myFont.eot', $woffFileSrc: 'myFont.woff', $ttfFileSrc: 'myFont.ttf') {
+  font-family: $fontFamily;
+  src: url($eotFileSrc)  format('eot'),
+       url($woffFileSrc) format('woff'),
+       url($ttfFileSrc)  format('truetype');
+}
+
+/* OPACITY */
+@mixin opacity($opacity: 0.5) {
+    filter:         alpha(opacity=($opacity * 100));
+    -ms-filter:     "progid:DXImageTransform.Microsoft.Alpha(Opacity=" + ($opacity * 100) + ")";
+    -moz-opacity:   $opacity;
+    -khtml-opacity: $opacity;
+    opacity:        $opacity;
+}
+
+
+/* OUTLINE RADIUS */
+@mixin outline-radius($radius: 5px) {
+    -webkit-outline-radius: $radius;
+    -moz-outline-radius:    $radius;
+    outline-radius:         $radius;
+}
+
+/* RESIZE */
+@mixin resize($direction: both) {
+    -webkit-resize: $direction;
+    -moz-resize:    $direction;
+    resize:         $direction;
+}
+
+/* ROTATE*/
+@mixin rotate($deg: 0, $m11: 0, $m12: 0, $m21: 0, $m22: 0) {
+     -moz-transform: rotate($deg + deg);
+       -o-transform: rotate($deg + deg);
+  -webkit-transform: rotate($deg + deg);
+      -ms-transform: rotate($deg + deg);
+          transform: rotate($deg + deg);
+             filter: progid:DXImageTransform.Microsoft.Matrix(
+                     M11=#{$m11}, M12=#{$m12}, M21=#{$m21}, M22=#{$m22}, sizingMethod='auto expand');
+               zoom: 1;
+}
+
+/* TEXT SHADOW */
+@mixin text-shadow($x: 2px, $y: 2px, $blur: 5px, $color: rgba(0,0,0,.4)) {
+    text-shadow: $x $y $blur $color;
+}
+
+/* TRANSFORM  */
+@mixin transform($params) {
+    -webkit-transform: $params;
+    -moz-transform:    $params;
+    transform:         $params;
+}
+
+/* TRANSITION */
+@mixin transition($what: all, $length: 1s, $easing: ease-in-out) {
+    -moz-transition:    $what $length $easing;
+    -o-transition:      $what $length $easing;
+    -webkit-transition: $what $length $easing;
+    -ms-transition:     $what $length $easing;
+    transition:         $what $length $easing;
+
+}
+
+/* TRIPLE BORDERS */
+@mixin triple-borders($colorOne: #3C3C3C, $colorTwo: #999999, $colorThree: #000000, $radius: 0) {
+    border: 1px solid $colorOne;
+
+    @include border-radius($radius);
+
+    -webkit-box-shadow: 0 0 0 1px $colorTwo, 0 0 0 2px $colorThree;
+    -moz-box-shadow:    0 0 0 1px $colorTwo, 0 0 0 2px $colorThree;
+    box-shadow:         0 0 0 1px $colorTwo, 0 0 0 2px $colorThree;
+}

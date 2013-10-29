@@ -120,7 +120,6 @@
 # Rails.
 
 class ApplicationController < ActionController::Base
-  layout false  # handled by view class inheritance
   protect_from_forgery
   clear_helpers # see application.html.rb
   self.responder = JsonDetailResponder

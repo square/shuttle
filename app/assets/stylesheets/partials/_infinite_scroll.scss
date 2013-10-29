@@ -1,0 +1,31 @@
+@import "css3-mixins";
+
+p.loading-more {
+  margin-top: 40px;
+  text-align: center;
+}
+
+// font awesome improvements
+@-webkit-keyframes spin {
+  from { -webkit-transform: rotate(0deg); }
+  to { -webkit-transform: rotate(360deg); }
+}
+@-moz-keyframes spin {
+  0% { -moz-transform: rotate(0deg); }
+  100% { -moz-transform: rotate(360deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinning {
+  display: block;
+  -webkit-animation: spin 1s infinite linear;
+  -moz-animation: spin 1s infinite linear;
+  animation: spin 1s infinite linear;
+}
+
+.icon-refresh.spinning {
+  display: inline-block;
+}

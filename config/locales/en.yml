@@ -29,15 +29,15 @@ en:
         base_rfc5646_locale: source locale
         webhook_url: webhook URL
         targeted_rfc5646_locales: targeted localizations
-        skip_imports: don’t use these importers
-        only_importer_paths: only search for strings under these paths using these importers
-        skip_importer_paths: don’t search for strings under these paths using these importers
-        skip_paths: don’t search for strings under these paths
-        only_paths: only search for strings under these paths
-        key_exclusions: don’t translate keys containing these substrings
-        key_inclusions: only translate keys containing these substrings
-        key_locale_exclusions: don’t translate keys containing these substrings to these locales
-        key_locale_inclusions: only translate keys containing these substrings to these locales
+        skip_imports: Don’t use these importers
+        only_importer_paths: Only search for strings under these paths using these importers
+        skip_importer_paths: Don’t search for strings under these paths using these importers
+        skip_paths: Don’t search for strings under these paths
+        only_paths: Only search for strings under these paths
+        key_exclusions: Don’t translate keys containing these substrings
+        key_inclusions: Only translate keys containing these substrings
+        key_locale_exclusions: Don’t translate keys containing these substrings to these locales
+        key_locale_inclusions: Only translate keys containing these substrings to these locales
         cache_localization: precompile and cache localizer output
         cache_manifest_formats: precompile and cache manifests for these exporters
         watched_branches: watched branches
@@ -123,12 +123,15 @@ en:
   date:
     formats:
       mon_day: "%b %-d"
+      mon_day_year: "%m/%-d/%Y"
   time:
     formats:
       short_date: "%B %-m, %Y"
       trados: "%d%m%Y, %H:%M:%S"
+      short_full: "%A, %B %-d, %Y"
       full: "%A, %B %-d, %Y %-I:%M:%S %P"
       mon_day: "%b %-d"
+      mon_day_year: "%m/%-d/%Y"
   controllers:
     application:
       mass_assignment_security: You tried to modify something you weren’t allowed to!
@@ -152,6 +155,10 @@ en:
       projects:
         locale_access_required: You don't have permission to access that locale.
     projects:
+      create:
+        success: "%{project} was created."
+      update:
+        success: "%{project} was updated."
       sync:
         success: The latest revision (%{revision}) is being loaded and parsed.
         up_to_date: "%{project} is already up to date."
@@ -252,6 +259,8 @@ en:
     yaml:
       name: YAML file (Ruby I18n)
   localizer:
+    android:
+      name: Android XML
     storyboard:
       name: Apple Storyboard file
     svg:

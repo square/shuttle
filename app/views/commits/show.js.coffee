@@ -61,11 +61,4 @@ $(window).ready ->
     table.find('tbody').empty()
     scroll.reset()
     scroll.loadNextPage()
-#    $.ajax table.data('url'),
-#      data: searchForm.serialize()
-#      success: (keys) ->
-#        for key in keys
-#          do (key) -> addKey(key)
-#      error: ->
-#        $('<div/>').addClass('alert alert-error').text("Couldn't load search results").insertBefore table
     false
