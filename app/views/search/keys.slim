@@ -37,16 +37,15 @@ hr.divider
 
       .collapse 
         .control-group 
-          = label_tag 'filter', 'Key Status', class: 'control-label'
+          = label_tag 'status', 'Key Status', class: 'control-label'
           .controls
-            = select_tag 'filter', options_for_select(\
+            = select_tag 'status', options_for_select(\
                       [\
                         ['all', nil],\
-                        ['untranslated', 'untranslated'],\
-                        ['translated but not approved', 'unapproved'],\
-                        ['approved', 'approved']\
+                        ['ready', true],\
+                        ['not ready', false]\
                       ]\
-                    ), id: 'key-filter-select'
+                    ), id: 'key-status-select'
 
         .control-group 
           = label_tag 'project_id', 'Projects', class: 'control-label'
