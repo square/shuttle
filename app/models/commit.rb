@@ -115,7 +115,7 @@ class Commit < ActiveRecord::Base
                    scope:           :for_revision
 
   extend SetNilIfBlank
-  set_nil_if_blank :description, :due_date
+  set_nil_if_blank :description, :due_date, :pull_request_url
 
   before_validation :load_message, on: :create
   before_validation(on: :create) do |obj|
