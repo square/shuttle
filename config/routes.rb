@@ -87,7 +87,7 @@ Shuttle::Application.routes.draw do
   constraints(constraint) { mount Sidekiq::Web => '/sidekiq' }
 
   get '/queue_status' => proc {
-    queue_size   = Sidekiq::Queue.new.size
+    queue_size   = %w(high low).map { |q| Sidekiq::Queue.new(q).size }.inject(:+)
     queue_status = if queue_size == 0
                      'idle'
                    elsif queue_size < 21
