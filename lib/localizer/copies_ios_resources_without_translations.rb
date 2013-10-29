@@ -15,6 +15,7 @@ module Localizer
 
     # @private
     def post_process(commit, receiver, *locales)
+      return #TODO temporarily disabled because this is very slow
       ios_resources = all_ios_resources(commit)
       resources_to_copy = ios_resources.keys - translated_ios_resources(commit)
       resources_to_copy.each do |resource_path|

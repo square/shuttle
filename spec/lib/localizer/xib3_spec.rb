@@ -56,8 +56,12 @@ describe Localizer::Xib3 do
       end
     end
 
-    entries.size.should >= 2
+    #entries.size.should >= 2
+    #entries['apple/de-DE.lproj/example3.xib'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example3-de.xib')))
+    #entries['apple/de-DE.lproj/no-translations3.xib'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'no-translations3.xib')))
+    #TODO re-enable when enabling CopiesIosResourcesWithoutTranslations
+
+    entries.size.should == 1
     entries['apple/de-DE.lproj/example3.xib'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example3-de.xib')))
-    entries['apple/de-DE.lproj/no-translations3.xib'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'no-translations3.xib')))
   end
 end

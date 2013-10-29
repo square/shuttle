@@ -67,9 +67,14 @@ describe Localizer::Storyboard do
       end
     end
 
-    entries.size.should >= 3
+    #entries.size.should >= 3
+    #entries['apple/de-DE.lproj/example.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.storyboard')))
+    #entries['apple/de-DE.lproj/example3.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example3-de.storyboard')))
+    #entries['apple/de-DE.lproj/no-translations.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'no-translations.storyboard')))
+    #TODO re-enable when enabling CopiesIosResourcesWithoutTranslations
+
+    entries.size.should == 2
     entries['apple/de-DE.lproj/example.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.storyboard')))
     entries['apple/de-DE.lproj/example3.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example3-de.storyboard')))
-    entries['apple/de-DE.lproj/no-translations.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'no-translations.storyboard')))
   end
 end
