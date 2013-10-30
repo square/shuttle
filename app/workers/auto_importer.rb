@@ -50,7 +50,7 @@ class AutoImporter
         project.commit! branch,
                         other_fields: {description: "Automatically imported from the #{branch} branch"}
       end
-    rescue Timeout::Error
+    rescue Timeout::Error => err
       Squash::Ruby.notify err, project_id: project_id
       self.class.perform_in 2.minutes, project_id
     end
