@@ -19,7 +19,7 @@ htmlEscape = (str) -> str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/
 
 # @private
 #
-# Manages a single item in a translation panel view. Translation items act as a
+# Manages a single item in a translation workbench view. Translation items act as a
 # linked list via the `next` instance variable.
 #
 class TranslationItem
@@ -41,14 +41,14 @@ class TranslationItem
 
   # Creates a new translation item manager.
   #
-  # @param [TranslationPanel] parent The translation panel this item belongs to.
+  # @param [TranslationWorkbench] parent The translation workbench this item belongs to.
   # @param [Object] translation The translation (loaded from JSON) for this
   #   item.
   # @param [Object] options Additional options.
   # @option options [Boolean] alternate (false) If `true`, this cell will be
   #   rendered with a slightly darker background.
   # @option options [Boolean] review (false) If `true`, the nomenclature for
-  #   the translation panel will be geared towards reviewers, not translators.
+  #   the translation workbench will be geared towards reviewers, not translators.
   # @option options [String] word_substitute_url If provided, a button will be
   #   provided that submits the source copy for automatic word substitution.
 
@@ -158,7 +158,7 @@ class TranslationItem
       context.approved = @translation.approved
       context.reviewer = @translation.reviewer.name
 
-    @element = $(HoganTemplates['translationpanel/translation_entry'].render(context)) 
+    @element = $(HoganTemplates['translationworkbench/translation_item'].render(context)) 
 
     @copy_field = @element.find('.translation-area').first()
 
@@ -384,13 +384,13 @@ class TranslationItem
       @copy_field[0].selectionEnd = oldEnd
 
 
-# Manages and renders a translation panel where translators can quickly view and
+# Manages and renders a translation workbench where translators can quickly view and
 # contribute translations to a project, and reviewers can quickly approve or
 # reject translations.
 #
-class root.TranslationPanel
+class root.TranslationWorkbench
 
-  # Creates a new translation panel manager.
+  # Creates a new translation workbench manager.
   #
   # @param [jQuery Object] list The element that the translation list will be
   #   rendered into.
