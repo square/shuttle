@@ -233,7 +233,7 @@ body:after {
   font-family: "SQMarket-BoldItalic";
   src: url("/fonts/sqmarket/sqmarket-bolditalic.otf") format('opentype'), url("/fonts/sqmarket/sqmarket-bolditalic.eot") format('embedded-opentype'), url("/fonts/sqmarket/sqmarket-bolditalic.woff") format('woff'), url("/fonts/sqmarket/sqmarket-bolditalic.ttf") format('truetype'), url("/fonts/sqmarket/sqmarket-bolditalic.svg") format('svg'); }
 
-/* line 7, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 7, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 body {
   font-family: SQMarket-Regular, Helvetica, sans-serif;
   font-size: 18px;
@@ -242,7 +242,7 @@ body {
   margin: 0;
   min-width: 1100px; }
 
-/* line 15, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 15, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 a,
 a:link,
 a:visited,
@@ -250,17 +250,17 @@ a:hover,
 a:active {
   color: #3584b4; }
 
-/* line 22, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 22, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 strong {
   font-weight: normal;
   font-family: SQMarket-Medium; }
 
-/* line 26, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 26, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 header {
   width: 640px;
   margin: 2em auto; }
 
-/* line 30, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 30, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 h2 {
   font-family: SQMarket-MediumItalic, Helvetica, sans-serif;
   font-weight: normal;
@@ -269,34 +269,34 @@ h2 {
   margin-top: 10px;
   margin-bottom: 20px; }
 
-/* line 38, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 38, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 h1 {
   font-family: SQMarket-MediumItalic, Helvetica, sans-serif;
   font-weight: normal;
   margin-bottom: 0;
   font-size: 60px;
   color: black; }
-  /* line 44, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+  /* line 44, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
   h1 a {
     text-decoration: none; }
 
-/* line 47, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 47, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 header h3 {
   font-family: SQMarket-Regular, Helvetica, sans-serif;
   font-weight: normal;
   color: gray;
   font-size: 24px; }
 
-/* line 53, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 53, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 p#video {
   text-align: center; }
 
-/* line 56, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 56, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 #menu-container {
   width: 100%;
   background-color: #202020;
   z-index: 100; }
-  /* line 61, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+  /* line 61, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
   #menu-container.fixed {
     position: fixed;
     top: 0;
@@ -305,14 +305,14 @@ p#video {
     margin: 0;
     box-shadow: 0 10px 10px white; }
 
-/* line 69, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 69, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 ul#menu {
   width: 1100px;
   margin: 0 auto;
   display: block;
   text-align: center;
   padding: 5px 0; }
-  /* line 76, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+  /* line 76, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
   ul#menu > li {
     display: inline-block;
     font-family: SQMarket-Light, Helvetica, sans-serif;
@@ -322,21 +322,21 @@ ul#menu {
     padding: 0 10px;
     vertical-align: middle;
     list-style-type: none; }
-    /* line 86, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+    /* line 86, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
     ul#menu > li:first-child {
       padding-left: 0; }
-    /* line 89, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+    /* line 89, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
     ul#menu > li:last-child {
       padding-right: 0; }
-    /* line 92, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+    /* line 92, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
     ul#menu > li a {
       color: #cccccc;
       text-decoration: none; }
-    /* line 96, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+    /* line 96, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
     ul#menu > li i {
       margin-right: 0.5em; }
 
-/* line 100, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 100, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 article {
   width: 960px;
   margin: 2em auto 0 auto;
@@ -344,28 +344,28 @@ article {
   *zoom: 1;
   font-family: SQMarket-Light, Helvetica, sans-serif; }
 
-/* line 106, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 106, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 section {
   float: left;
   margin: 0 0 20px 0;
   line-height: 195%;
   overflow: hidden;
   *zoom: 1; }
-  /* line 112, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+  /* line 112, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
   section:nth-child(odd) {
     margin-right: 28px; }
-  /* line 115, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+  /* line 115, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
   section a[data-lightbox] {
     float: left;
     margin-left: 5px;
     margin-right: 1em;
     margin-bottom: 0; }
-    /* line 121, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+    /* line 121, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
     section a[data-lightbox] img {
       border: 2px solid white;
       box-shadow: rgba(0, 0, 0, 0.5) 0 0 5px;
       max-width: 250px; }
-  /* line 126, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+  /* line 126, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
   section h3 {
     font-family: SQMarket-Medium, Helvetica, sans-serif;
     color: gray;
@@ -373,25 +373,25 @@ section {
     font-weight: normal;
     border-top: 2px solid #dddddd;
     padding-top: 7px; }
-    /* line 133, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+    /* line 133, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
     section h3:first-child {
       margin-top: 0; }
-  /* line 135, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+  /* line 135, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
   section p {
     position: relative;
     top: -8px; }
-  /* line 139, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+  /* line 139, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
   section#cta {
     clear: both;
     float: right;
     margin: 0;
     padding: 0;
     line-height: inherit; }
-    /* line 146, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+    /* line 146, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
     section#cta h1 {
       font-size: 48px; }
 
-/* line 149, /Documents/Programs/Ruby/Rails/shuttle/source/stylesheets/all.css.sass */
+/* line 149, /Users/ricksong/Documents/Projects/shuttle/source/stylesheets/all.css.sass */
 footer {
   margin-top: 20px;
   text-align: center;
