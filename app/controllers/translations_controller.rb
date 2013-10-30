@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Controller for working with Translations. The `TranslationPanel` JavaScript
+# Controller for working with Translations. The `TranslationWorkbench` JavaScript
 # uses these endpoints to modify, approve, and reject Translations.
 
 class TranslationsController < ApplicationController
