@@ -114,7 +114,7 @@ module Importer
         until scanner.eos?
           match = scanner.scan_until /\\/
           unless match
-            result << scanner.scan(/.*/)
+            result << scanner.scan(/.*/m)
             next
           end
           result << match[0..-2]
