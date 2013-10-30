@@ -322,9 +322,6 @@ To-Do Items
 * Segmentation for large files
 * `<STYLE>`/`<SCRIPT>` tag content should not be localizable
 
-### Exporting
-
-* Transifex API integration
 
 ### Performance optimizations
 
