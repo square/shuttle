@@ -20,7 +20,7 @@ module Importer
   # strings can have multiple "qualifiers" attached (e.g., this string applies
   # only to high-DPI screens in the French language), these qualifiers are
   # parsed out from the directory name and serialized into the key. The
-  # {Exporter::Android exporter} de-serializes them and recreates the correct
+  # {Localizer::Android localizer} de-serializes them and recreates the correct
   # directory structure.
 
   class Android < Base
@@ -105,11 +105,40 @@ module Importer
     private
 
     def unescape(string)
+      result = ''
       if string =~ /^"(.+?)"$/
-        $1
+        result = $1
       else
-        string.gsub("\\'", "'")
-      end.gsub(/\\u([0-9a-f]{4})/) { $1.to_i(16).chr(Encoding::UTF_8) }
+        scanner = UnicodeScanner.new(string)
+
+        until scanner.eos?
+          match = scanner.scan_until /\\/
+          unless match
+            result << scanner.scan(/.*/)
+            next
+          end
+          result << match[0..-2]
+          if scanner.scan(/\\/)
+            result << '\\'
+          elsif scanner.scan(/'/)
+            result << "'"
+          elsif scanner.scan(/n/)
+            result << "\n"
+          elsif scanner.scan(/r/)
+            result << "\r"
+          elsif scanner.scan(/t/)
+            result << "\t"
+          elsif scanner.scan(/@/)
+            result << '@'
+          elsif (match = scanner.scan(/u[0-9a-f]{4}/))
+            result << Integer("0x#{match[1..-1]}").chr('utf-8')
+          else
+            raise "Invalid escape sequence at position #{scanner.pos} in #{string.inspect}"
+          end
+        end
+      end
+
+      return result
     end
 
     def find_comment(tag)

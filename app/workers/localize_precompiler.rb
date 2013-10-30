@@ -39,9 +39,9 @@ class LocalizePrecompiler
   # Returns the Redis key for a cached localized tarball.
   #
   # @param [Commit] commit A commit that was localized.
-  # @return [Pathname] The key for the cached localization, if it exists.
+  # @return [String] The key for the cached localization, if it exists.
 
   def key(commit)
-    "localize:#{commit.id}"
+    "localize:#{commit.project_id}:#{commit.id}"
   end
 end

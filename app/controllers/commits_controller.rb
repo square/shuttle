@@ -82,12 +82,19 @@ class CommitsController < ApplicationController
 
   def create
     revision = params[:commit][:revision].strip
+
     respond_to do |format|
       format.json do
-        other_fields = params[:commit].stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
+        other_fields           = params[:commit].stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
         other_fields[:user_id] = current_user.id
-        CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-        render json: {message: t('controllers.commits.create.success', revision: revision)}
+
+        if already_submitted_revision?(@project, revision)
+          render json: {message: t('controllers.commits.create.already_submitted')}
+        else
+          CommitCreator.perform_once @project.id, revision, other_fields: other_fields
+          record_submitted_revision @project, revision
+          render json: {message: t('controllers.commits.create.success', revision: revision)}
+        end
       end
     end
   end
@@ -115,6 +122,10 @@ class CommitsController < ApplicationController
   # | `commit` | Parameterized hash of Commit fields. |
 
   def update
+    if !params[:commit]["due_date"].nil?
+      params[:commit]["due_date"] = Date::strptime(params[:commit]["due_date"], "%m/%d/%Y")
+    end
+    
     @commit.update_attributes commit_params
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
@@ -251,10 +262,10 @@ class CommitsController < ApplicationController
     @commit = @project.commit!(params[:id], skip_create: true)
 
     compiler = Compiler.new(@commit)
-    file = compiler.manifest(request.format,
-                             locale:  params[:locale].presence,
-                             partial: params[:partial].parse_bool,
-                             force:   params[:force].parse_bool)
+    file     = compiler.manifest(request.format,
+                                 locale:  params[:locale].presence,
+                                 partial: params[:partial].parse_bool,
+                                 force:   params[:force].parse_bool)
 
     response.charset                   = file.encoding
     response.headers['X-Git-Revision'] = @commit.revision
@@ -363,7 +374,7 @@ class CommitsController < ApplicationController
         strings_total:      commit.strings_total
     )
   end
-  
+
   # extract data while preserving BOM from a Compiler::File object
   def extract_data(file)
     if file.io.respond_to?(:string)
@@ -377,5 +388,18 @@ class CommitsController < ApplicationController
 
   def commit_params
     params.require(:commit).permit(*COMMIT_ATTRIBUTES)
+  end
+
+  def already_submitted_revision?(project, revision)
+    Shuttle::Redis.get(submitted_revision_key(project, revision)) == '1'
+  end
+
+  def record_submitted_revision(project, revision)
+    Shuttle::Redis.set submitted_revision_key(project, revision), '1'
+    Shuttle::Redis.expire submitted_revision_key(project, revision), 30
+  end
+
+  def submitted_revision_key(project, revision)
+    "submitted_revision:#{project.id}:#{revision}"
   end
 end

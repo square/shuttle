@@ -12,6 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'localizer/copies_ios_resources_without_translations'
+require 'importer/storyboard'
+
 module Localizer
 
   # Applies localized copy to Apple Storyboard files.
@@ -103,6 +106,14 @@ module Localizer
 
       output_file.path    = input_file.path.sub("/#{@project.base_rfc5646_locale}.lproj/", "/#{locale.rfc5646}.lproj/")
       output_file.content = xml.to_xml
+    end
+
+    private
+
+    include CopiesIosResourcesWithoutTranslations
+    def copy_resource?(path, blob, project)
+      throw :prune if project.skip_path?(::File.dirname(path[1..-1]), Importer::Storyboard)
+      path =~ /#{Regexp.escape(project.base_rfc5646_locale)}\.lproj\/[^\/]+\.storyboard$/
     end
   end
 end

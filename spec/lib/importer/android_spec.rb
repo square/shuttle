@@ -70,12 +70,13 @@ describe Importer::Android do
 
     it "should properly escape strings" do
       @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[3]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Êtes-vous sûr ?')
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[4]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello \\'world\\'")
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[5]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello 'world'")
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[4]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello\\\n@\\nworld!")
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[5]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello \\'world\\'")
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[6]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello 'world'")
     end
 
     it "should add comments as context" do
-      k = @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[6]').first
+      k = @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[7]').first
       k.context.should eql("This is not a date format string. Rather, it is hint text in a field, presented to the merchant.")
     end
   end

@@ -173,16 +173,16 @@ Replace the colon-prefixed placeholders with the following:
 
 The value of `:format` will depend on the localization library you are using:
 
-| Library                    | `:format`    | Notes                                                                                                   |
-|:---------------------------|:-------------|:--------------------------------------------------------------------------------------------------------|
-| Android                    | `android`    | Will be a gzipped tarball that can be extracted into your project root.                                 |
-| Rails i18n (YAML)          | `yaml`       | All locales will be merged into one file unless the `locale` query parameter is specified.              |
-| Ember.js                   | `js`         | All locales will be merged into one file unless the `locale` query parameter is specified.              |
-| Ember.js (dependency-injected)                   | `jsm`         | Similar to Ember.js, but places translations under a `module.exports` object. Locale must be specified.              |
-| iOS .strings (single file) | `strings`    | The `locale` query parameter must be specified. File is in UTF-16LE encoding.                           |
-| iOS .strings (tarball)     | `ios`        | Will be a gzipped tarball that can be extracted into your project root. Files are in UTF-16LE encoding. |
-| Rails i18n (Ruby)          | `rb`         | All locales will be merged into one file unless the `locale` query parameter is specified.              |
-| Java Properties            | `properties` | File will be UTF-8 encoded with no escapes.                                                             |
+| Library                        | `:format`    | Notes                                                                                                   |
+|:-------------------------------|:-------------|:--------------------------------------------------------------------------------------------------------|
+| Android                        | `android`    | Will be a gzipped tarball that can be extracted into your project root.                                 |
+| Rails i18n (YAML)              | `yaml`       | All locales will be merged into one file unless the `locale` query parameter is specified.              |
+| Ember.js                       | `js`         | All locales will be merged into one file unless the `locale` query parameter is specified.              |
+| Ember.js (dependency-injected) | `jsm`        | Similar to Ember.js, but places translations under a `module.exports` object. Locale must be specified. |
+| iOS .strings (single file)     | `strings`    | The `locale` query parameter must be specified. File is in UTF-16LE encoding.                           |
+| iOS .strings (tarball)         | `ios`        | Will be a gzipped tarball that can be extracted into your project root. Files are in UTF-16LE encoding. |
+| Rails i18n (Ruby)              | `rb`         | All locales will be merged into one file unless the `locale` query parameter is specified.              |
+| Java Properties                | `properties` | File will be UTF-8 encoded with no escapes.                                                             |
 
 The following query parameters are supported:
 

@@ -16,7 +16,11 @@ Shuttle::Application.routes.draw do
   constraints(host: 'shuttle.corp.squareup.com') do
     match '*glob' => redirect('https://shuttle.squareup.com'), via: [:get, :post, :put, :patch, :delete]
   end
-
+  
+  # BLOCK DEVISE ROUTES
+  get 'users/sign_up', to: redirect('/users/sign_in#sign-up')
+  get 'users/password/new', to: redirect('/users/sign_in#forgot-password')
+  
   # AUTHENTICATION
   devise_for :users, controllers: {registrations: 'registrations'}
 
@@ -70,6 +74,14 @@ Shuttle::Application.routes.draw do
   get 'search/keys' => 'search#keys', as: :search_keys
   get 'search/commits' => 'search#commits', as: :search_commits
 
+  # STATS PAGES
+  get 'stats' => 'stats#index'
+  get 'stats/words_per_project' => 'stats#words_per_project'
+  get 'stats/average_completion_time' => 'stats#average_completion_time'
+  get 'stats/daily_commits_created' => 'stats#daily_commits_created'
+  get 'stats/daily_commits_finished' => 'stats#daily_commits_finished'
+  get 'stats/avg_completion_and_daily_creates' => 'stats#avg_completion_and_daily_creates'
+
   # GLOSSARY PAGES
   get 'glossary' => 'glossary#index', as: :glossary
   namespace 'glossary' do
@@ -91,7 +103,7 @@ Shuttle::Application.routes.draw do
   constraints(constraint) { mount Sidekiq::Web => '/sidekiq' }
 
   get '/queue_status' => proc {
-    queue_size   = Sidekiq::Queue.new.size
+    queue_size   = %w(high low).map { |q| Sidekiq::Queue.new(q).size }.inject(:+)
     queue_status = if queue_size == 0
                      'idle'
                    elsif queue_size < 21

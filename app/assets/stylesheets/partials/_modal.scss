@@ -1,0 +1,57 @@
+@import "base/vars";
+@import "css3-mixins";
+
+#lean_overlay {
+  position: fixed;
+  z-index: 100;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  background: black;
+  display: none;
+}
+
+.modal {
+  display: none;
+  background-color: $gray6;
+  padding: 30px 70px;
+
+  h2 {
+    margin-bottom: 30px;
+  }
+
+  input, select, textarea{
+    width: 100%;
+  }
+
+  input[type="submit"] {
+    width: auto;
+    float: right;
+  }
+
+  &>a.close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: rgba(black, 0.5);
+    text-decoration: none;
+    &:hover { color: black; }
+  }
+
+  .modal-body {
+    .accordion {
+      .accordion-pair>h5 { background-color: $gray4; }
+    }
+
+    .half {
+      width: 50%;
+      @include box-sizing;
+      display: inline-block;
+      padding: 15px;
+      vertical-align: top;
+    }
+  }
+}

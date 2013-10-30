@@ -22,13 +22,12 @@ require 'file_mutex'
 # Associations
 # ============
 #
-# |                    |                                                                 |
-# |:-------------------|:----------------------------------------------------------------|
-# | `commits`          | The {Commit Commits} under this Project.                        |
-# | `keys`             | The {Key Keys} found in this Project.                           |
-# | `translations`     | The {Translation Translations} under this Project.              |
-# | `blobs`            | The Git {Blob Blobs} imported into this Project.                |
-# | `glossary_entries` | The {GlossaryEntry GlossaryEntries} applicable to this Project. |
+# |                |                                                    |
+# |:---------------|:---------------------------------------------------|
+# | `commits`      | The {Commit Commits} under this Project.           |
+# | `keys`         | The {Key Keys} found in this Project.              |
+# | `translations` | The {Translation Translations} under this Project. |
+# | `blobs`        | The Git {Blob Blobs} imported into this Project.   |
 #
 # Properties
 # ==========
@@ -71,7 +70,6 @@ class Project < ActiveRecord::Base
   has_many :keys, inverse_of: :project, dependent: :delete_all
   has_many :blobs, inverse_of: :project, dependent: :delete_all
   has_many :translations, through: :keys
-  has_many :glossary_entries
 
   include HasMetadataColumn
   has_metadata_column(
@@ -129,6 +127,7 @@ class Project < ActiveRecord::Base
   before_validation :create_api_key, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
   after_update :add_or_remove_pending_translations
+  after_update :invalidate_manifests_and_localizations
 
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
@@ -217,6 +216,15 @@ class Project < ActiveRecord::Base
   # @return [Array<Locale>] The locales this Project *must* be localized to.
   def required_locales() targeted_rfc5646_locales.select { |_, req| req }.map(&:first).map { |l| Locale.from_rfc5646(l) } end
 
+  def required_rfc5646_locales
+    targeted_rfc5646_locales.select { |_, req| req }.map(&:first)
+  end 
+
+  def other_rfc5646_locales
+    targeted_rfc5646_locales.select { |_, req| !req }.map(&:first)
+  end 
+
+
   # Generates a new API key for the Project. Does not save the Project.
   def create_api_key() self.api_key = SecureRandom.uuid end
 
@@ -269,6 +277,7 @@ class Project < ActiveRecord::Base
 
   def skip_path?(path, importer)
     path = path.sub(/^\//, '')
+    return false if path.empty?
 
     return true if skip_paths.any? { |sp| path.start_with?(sp) }
     return true if only_paths.present? && only_paths.none? { |op| path.start_with?(op) }
@@ -355,6 +364,11 @@ class Project < ActiveRecord::Base
 
   def add_or_remove_pending_translations
     ProjectTranslationAdder.perform_once id
+  end
+
+  def invalidate_manifests_and_localizations
+    keys = Shuttle::Redis.keys("manifest:#{id}:*") + Shuttle::Redis.keys("localize:#{id}:*")
+    Shuttle::Redis.del(*keys) unless keys.empty?
   end
 
   def require_valid_locales_hash

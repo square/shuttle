@@ -1,0 +1,86 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.commits { 
+  .header h6 {
+    color: $gray4;
+    text-transform: uppercase;
+    margin-left: 30px;
+    line-height: 10px;
+    margin-top: 0px;
+  }
+
+  #filter {
+    padding: 15px 10px;
+    background-color: $off-blue;
+
+    select, input[type="text"] {
+      margin-left: 5px;
+      margin-right: 15px;
+      text-transform: capitalize;
+    }
+    select {
+      width: 200px;
+    }
+    input[type="text"] {
+      width: 400px;
+    }
+  }
+
+  table#translations {
+    table-layout: fixed;
+
+    thead {
+      tr {
+        text-align: left;
+        font-weight: bold;
+        text-transform: uppercase;
+
+        th {
+          padding: 15px 10px;
+          &.text-success {
+            color: #468847;
+          }
+
+          &:first-child { 
+            padding-left: 20px; 
+            width: 50%;
+          }
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        &:nth-child(odd) {
+          background-color: $gray6;
+        }
+
+        a { text-decoration: underline; }
+
+        td {
+          padding: 7px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          &:first-child { 
+            padding-left: 20px; 
+          }
+
+          .muted { 
+            color: $gray3;
+          }
+
+          .text-success{
+            color: #468847;
+          }
+        }
+      }
+    }
+  }
+
+  p.loading-more {
+    margin-top: 40px;
+    text-align: center;
+  }
+}
+

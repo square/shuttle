@@ -63,12 +63,13 @@ class InfiniteScroll
   # @private
   loadNextPage: ->
     unless @loading_more?
-      @loading_more = $('<p/>').addClass('alert alert-info').text(" Loading more…")
+      @loading_more = $('<p/>').addClass('loading-more').text(" Loading more…")
+      $('<i/>').addClass('icon-refresh spinning').prependTo @loading_more
       if (@scroller[0] == window)
         @loading_more.insertAfter(@element)
       else
         @loading_more.appendTo(@element)
-      $('<i/>').addClass('icon-refresh spinning').prependTo @loading_more
+
     @loadAndAppend()
 
   append: (records) ->
@@ -83,13 +84,8 @@ class InfiniteScroll
       .then (records) =>
         @append records
       , =>
-        flash = $('<p/>').addClass('alert alert-error').text("Couldn’t load additional items.")
-        $('<a/>').addClass('close').attr('data-dismiss', 'alert').text('×').appendTo flash
-        if (@scroller[0] == window)
-          flash.insertAfter(@element)
-        else
-          flash.appendTo(@element)
-
+        new Flash('alert').text("Couldn’t load additional items.");
+        
         if @loading_more?
           @loading_more.remove()
           @loading_more = null

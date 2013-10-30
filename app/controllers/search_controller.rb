@@ -82,16 +82,29 @@ class SearchController < ApplicationController
                        }.to_json
         else
           query_filter = params[:filter]
+          status       = params[:status]
           offset       = params[:offset].to_i
           id           = params[:project_id]
           limit        = params.fetch(:limit, PER_PAGE)
+          not_elastic  = params[:not_elastic_search] 
+
           if query_filter.present?
             @results = Key.search(load: {include: [:translations, :project, :slugs]}) do
-              query { string "original_key:\"#{query_filter}\"" }
+              if not_elastic
+                filter :term, original_key_exact: query_filter                  
+              else 
+                query { string "original_key:\"#{query_filter}\"" }
+              end 
               filter :term, project_id: id
+
+              unless status.blank?
+                filter :term, ready: status
+              end 
+              
               from offset
               size limit
               sort { by :original_key, 'asc' }
+              puts to_json()
             end
           else
             @results = []

@@ -1,0 +1,152 @@
+$base-font-size: 14px;
+$nav-font-size: 12px;
+$control-font-size: 14px;
+
+$legend-size: 19px;
+
+$h1-size: 32px;
+$h2-size: 26px;
+$h3-size: 22px;
+$h4-size: 18px;
+$h5-size: 14px;
+$h6-size: 12px;
+
+
+$base-line-height: 21px;
+
+$legend-line-height: 28px;
+
+$h1-line-height: 40px;
+$h2-line-height: 38px;
+$h3-line-height: 32px;
+$h4-line-height: 28px;
+$h5-line-height: 24px;
+$h6-line-height: 20px;
+
+$button-radius-size: 1px;
+$input-radius-size: 1px;
+$notification-radius-size: 4px;
+
+$nav-height: 70px;
+$subnav-height: 40px;
+$input-size: 32px;
+$button-size: 32px;
+
+// ----- COLORS
+
+$gray1: #212121;
+$gray2: #434343;
+$gray3: #727272;
+$gray4: #b3b3b3;
+$gray5: #dfdfdf;
+$gray6: #f9f9f9;
+
+$off-blue: #def1f7;
+$dark-blue: #2884b4;
+
+$navbar-background: #2b2b2b;
+$subnav-background: #373737;
+$navbar-gray-text: $gray3;
+$navbar-highlight-text: $dark-blue;
+
+$commit-red: #ff8e8e;
+$commit-green: #cbe5c1;
+$commit-blue: #c5e2ff;
+$commit-yellow: #fffb8e;
+
+$flash-red: #ff8e8e;
+$flash-green: #cbe5c1;
+$flash-blue: #c5e2ff;
+$flash-yellow: #fffb8e;
+
+$background-red: #ffe5e5;
+$background-green: #e5ffe5;
+$background-blue: #f0f0ff;
+$background-yellow: #fffcdf;
+
+$input-white: #fbfcfc;
+$input-white-text: #6e797f;
+$input-white-border: #d3d9de;
+
+$input-blue: #4296c2;
+$input-blue-text: white;
+$input-blue-border: #3688b3;
+
+$input-orange: #ffc05d;
+$input-orange-text: white;
+$input-orange-border: #ffac2a;
+
+$input-red: #c24444;
+$input-red-text: white;
+$input-red-border: #7e1616;
+
+$input-green: #369836;
+$input-green-text: white;
+$input-green-border: #126512;
+
+$button-approve: #9cfac8;
+$button-reject: #fa9c9c;
+$button-flag: #f5d68d;
+
+// ----- GRID
+
+$columns: 16;
+
+$widescreen-size: 1200px;
+$widescreen-column-width: $widescreen-size/$columns;
+
+$desktop-size: 960px;
+$desktop-column-width: $desktop-size/$columns;
+
+$ipad-size: 768px;
+$ipad-column-width: $ipad-size/$columns;
+
+$iphone-landscape-size: 480px;
+$iphone-landscape-column-width: $iphone-landscape-size/$columns;
+
+$iphone-portrait-size: 320px;
+$iphone-portrait-column-width: $iphone-portrait-size/$columns;
+
+// ----- RESPONSIVE
+
+@mixin iphone-portrait {
+  @media (max-width: $iphone-landscape-size - 1px) {
+    @content;
+  }
+}
+
+@mixin iphone-landscape {
+  @media (min-width: $iphone-landscape-size) and (max-width: $ipad-size - 1px) {
+    @content;
+  }
+}
+
+@mixin iphone-landscape-and-smaller {
+  @media (max-width: $ipad-size - 1px) {
+    @content;
+  }
+}
+
+@mixin ipad {
+  @media (min-width: $ipad-size) and (max-width: $desktop-size - 1px) {
+    @content;
+  }
+}
+
+@mixin ipad-and-larger {
+  @media (min-width: $ipad-size) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $desktop-size) and (max-width: $widescreen-size - 1px) {
+    @content;
+  }
+}
+
+@mixin widescreen {
+  @media (min-width: $widescreen-size) {
+    @content;
+  }
+}

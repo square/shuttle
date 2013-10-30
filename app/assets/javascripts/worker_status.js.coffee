@@ -14,20 +14,20 @@
 
 
 $(document).ready((->
+  $('.worker-status').click () -> 
+    window.location = "/sidekiq"
+
   checkWorkerStatus = ->
     $.ajax("/queue_status", $.extend({}, cache: false))
       .done( (data) ->
         if data == 'idle'
-          text = "Workers Idle"
           klass = 'worker-status-idle'
         else if data == 'working'
-          text = "Workers Busy"
           klass = 'worker-status-busy'
         else if data == 'heavy'
-          text = "Workers Swamped"
           klass = 'worker-status-swamped'
 
-        $('.worker-status').addClass(klass).find('a').text(text)
+        $('.worker-status').addClass(klass)
       );
 
   minPerQuery = 1

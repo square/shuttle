@@ -1,0 +1,91 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :file_name do
+  = 'views/devise/sessions/new'
+- content_for :shuttle_logo do 
+  = image_tag("shuttle_white.png")
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+
+.row.row-modal
+  .three.columns &nbsp;
+  .ten.columns 
+    h1 Log in to Shuttle
+    p Website and Application Translation Software 
+    .body-portion
+      .row.active#sign-in
+        .three.columns &nbsp;
+        = form_for(resource,\
+            as: resource_name, \
+            url: session_path(resource_name), \
+            html: {method: :post, class: 'four columns greywashed'}) do |f|
+          div
+            = f.email_field :email, placeholder: "E-mail"
+          div
+            = f.password_field :password, placeholder: "Password"
+          div
+            = f.submit "Login", class: 'submit sign-in'
+          div 
+            a href="#sign-up" Sign up for Shuttle
+        .three.columns &nbsp;
+      
+      .row.inactive#sign-up
+        .three.columns &nbsp;
+        = form_for(resource,\ 
+            as: resource_name, \
+            url: registration_path(resource_name), \
+            html: {method: :post, class: 'four columns greywashed'}) do |f|
+          div
+            = f.text_field :first_name, placeholder: "First Name", required: true
+          div 
+            = f.text_field :last_name, placeholder: "Last Name", required: true
+          div
+            = f.email_field :email, placeholder: "E-mail", required: true
+          div
+            = f.password_field :password, placeholder: "Password", required: true
+          div 
+            = f.password_field :password_confirmation, placeholder: "Confirm Password", required: true
+          div
+            = f.submit "Sign up", class: 'submit sign-up'
+          div 
+            a href="#sign-in" Sign in to Shuttle
+        .three.columns &nbsp;
+
+      .row.inactive#forgot-password
+        .three.columns &nbsp;
+        = form_for(resource, \
+            as: resource_name, \
+            url: password_path(resource_name), \
+            html: {method: :post, class: 'four columns greywashed'}) do |f|
+          div
+            = f.email_field :email, placeholder: "E-mail", required: true
+          div
+            = f.submit "Send E-mail", class: 'submit sign-up'
+          div 
+            a href="#sign-in" Sign in to Shuttle
+            br
+            a href="#sign-up" Sign up for Shuttle
+        .three.columns &nbsp;
+        
+    .footer-portion 
+      .row  
+        a href="#forgot-password"
+          span: i.icon-lock 
+          | Forgot Password?
+
+
+  .three.columns &nbsp;

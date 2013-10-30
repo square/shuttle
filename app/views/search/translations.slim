@@ -1,0 +1,67 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :file_name do
+  = 'views/search/translations'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+.header
+  h1 Translation Search
+
+hr.divider
+
+.border
+  .filter-bar
+    / translation_search_bar
+    = form_tag(search_translations_url, method: 'GET', id: 'translation-search-form', class: 'filter form-inline')
+      .main
+        = text_field_tag 'query', '', id: 'search-field', placeholder: 'Translation Query'
+        = select_tag 'field', options_for_select([\
+                                                     %w(source searchable_source_copy),\
+                                                     %w(translation searchable_copy),\
+                                                 ]), id: 'field-select', class: 'span2'
+        = submit_tag 'Search', class: 'primary'
+        .pull-right#expand-search
+          i.icon-angle-right
+        
+      .collapse
+        .control-group 
+          = label_tag 'target_locales', 'Target Locales', class: 'control-label'
+          .controls
+            - if current_user.approved_locales.any?
+              = select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
+            - else 
+              = text_field_tag 'target_locales', '', class: 'locale-field', id: '', placeholder: 'any target locale'
+
+
+        .control-group 
+          = label_tag 'project_id', 'Projects', class: 'control-label'
+          .controls
+            - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+            - project_list.unshift ['all', nil]
+            = select_tag 'project_id', options_for_select(project_list)
+
+        .control-group 
+          = label_tag 'translator_id', 'Translator', class: 'control-label'
+          .controls
+            = select_tag 'translator_id', options_for_select(User.order('email ASC').map { |u| [u.name, u.id] }.unshift(['Anyone', nil]))        
+
+  
+  / translation_grid
+  table.table.hover-rows#translations data-url=search_translations_url(format: 'json')

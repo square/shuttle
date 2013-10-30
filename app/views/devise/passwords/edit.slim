@@ -1,0 +1,51 @@
+/ Copyright 2013 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :file_name do
+  = 'views/devise/sessions/passwords/edit'
+- content_for :shuttle_logo do 
+  = image_tag("shuttle_white.png")
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+
+.row.row-modal
+  .three.columns &nbsp;
+  .ten.columns 
+    h1 Change your password
+    p Enter a new password 
+    .body-portion
+      .row.active
+        .three.columns &nbsp;
+        = form_for(resource, 
+                  as: resource_name, 
+                  url: password_path(resource_name), 
+                  html: {method: :patch, class: 'form-horizontal'}) do |f|
+          div
+            = f.password_field :password
+          div
+            = f.password_field :password_confirmation
+          div
+            = f.submit "Change my password", class: 'submit sign-in'
+          div 
+            a href="#sign-up" Sign in to Shuttle
+            a href="#sign-up" Sign up for Shuttle
+        .three.columns &nbsp;
+      
+        
+    .footer-portion 
+      .row  
+
+  .three.columns &nbsp;

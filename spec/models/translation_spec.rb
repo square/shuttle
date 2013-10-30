@@ -232,8 +232,15 @@ describe Translation do
         Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml)).should be_true
       end
 
-      it "should expire cached manifests when the copy of an approved translation is changed" do
+      it "should expire cached manifests when the copy of an approved translation is changed and the approval status is unchanged" do
         @trans1.update_attributes copy: "new copy", preserve_reviewed_status: true
+        Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit)).should be_false
+        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb)).should be_false
+        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml)).should be_false
+      end
+
+      it "should expire cached manifests when a translation is unapproved" do
+        @trans1.update_attributes approved: false
         Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit)).should be_false
         Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb)).should be_false
         Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml)).should be_false

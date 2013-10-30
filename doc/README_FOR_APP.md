@@ -60,14 +60,19 @@ version of libarchive. To run Shuttle for the first time:
 
         gem install libarchive -- --with-opt-dir=/usr/local/Cellar/libarchive/3.1.2
 
-5. You’ll need to run Bundler: `bundle install`
-6. Run `rake db:migrate db:seed` to seed the database.
-7. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
-8. Verify that all specs pass with `rspec spec`
-9. To run the server, use `rails server`
-10. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
+5. Install Redis and ElasticSearch. For Homebrew, run
+
+        brew install redis elasticsearch
+
+   and follow the post-install instructions.
+6. You’ll need to run Bundler: `bundle install`
+7. Run `rake db:migrate db:seed` to seed the database.
+8. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
+9. Verify that all specs pass with `rspec spec`
+10. To run the server, use `rails server`
+11. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
 to run the Sidekiq development server.
-11. Visit [http://localhost:3000](http://localhost:3000) and log in with the
+12. Visit [http://localhost:3000](http://localhost:3000) and log in with the
    credentials:
 
    username: **admin@example.com**<br>

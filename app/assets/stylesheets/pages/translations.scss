@@ -1,0 +1,109 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.translations {
+  .eight.columns {
+    margin-top: -30px;
+    padding: 30px;
+    @include box-sizing;
+    position: relative;
+  }
+
+  .copy-source {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    
+    &:active {
+      position: absolute !important;
+      top: 24px !important;
+      right: 30px !important;
+    }
+  }
+
+  .info-side {
+    background-color: $gray6;
+  }
+
+  .activity {
+    margin-top: 30px;
+    legend { margin-bottom: -20px };
+  }
+
+  .translation-history {
+    height: 450px;
+    margin-top: -20px;
+    margin-bottom: -60px;
+    overflow-y: auto;
+
+    legend { margin-bottom: -20px };
+  
+    .history-entry {
+      padding: 10px 20px;
+      &:hover {
+        cursor: pointer;
+        background-color: $off-blue;
+      }
+
+      & + .history-entry {
+        border-top: 1px solid $gray5;
+      }
+      &:last-of-type {
+        border-bottom: 1px solid $gray5; 
+      }
+
+      .change {
+        margin-top: 10px;
+
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+        .change-state {
+          flex: 1 1 30px;
+        }
+        .arrow {
+          flex: 0 0 none;
+          margin: 0px 30px;
+          min-width: 15px;
+        }
+
+      }
+    }
+  }
+
+  .controls {
+    input[type="text"], textarea {
+      width: 100%;
+    }
+  }
+
+  dl {
+    .item {
+      &:last-of-type {
+        // border-top: 1px solid $gray5;
+      }
+      border-bottom: 1px solid $gray5;
+    }
+
+    dt {
+      float: left;
+      width: 150px;
+      text-align: left;
+      text-transform: capitalize;
+      padding-top: 7px;
+    }
+    dd {
+      padding-top: 7px;
+      margin-left: 150px;
+    }
+  }
+
+  .form-actions { 
+    input+input, button+button, button+input, input + button {
+      margin: 0px;
+      margin-left: 10px;
+    }
+  }
+}

@@ -13,6 +13,8 @@
 #    limitations under the License.
 
 require 'ios_common'
+require 'localizer/copies_ios_resources_without_translations'
+require 'importer/xib'
 
 module Localizer
 
@@ -77,6 +79,13 @@ module Localizer
     end
 
     private
+
+    include CopiesIosResourcesWithoutTranslations
+    def copy_resource?(path, blob, project)
+      throw :prune if project.skip_path?(::File.dirname(path[1..-1]), Importer::Xib)
+      path =~ /#{Regexp.escape(project.base_rfc5646_locale)}\.lproj\/[^\/]+\.xib$/ &&
+          Nokogiri::XML(blob.contents).root.name == 'archive'
+    end
 
     def set_text_in_text_node(text, text_node)
       raise "Cannot set string content in node if node has children" unless text_node.element_children.empty?

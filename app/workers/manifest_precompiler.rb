@@ -42,9 +42,9 @@ class ManifestPrecompiler
   #
   # @param [Commit] commit A commit that was manifested.
   # @param [Symbol] format A manifest format (such as `:yaml`).
-  # @return [Pathname] The key for the cached manifest, if it exists.
+  # @return [String] The key for the cached manifest, if it exists.
 
   def key(commit, format)
-    "manifest:#{commit.id}:#{format.to_sym}"
+    "manifest:#{commit.project_id}:#{commit.id}:#{format.to_sym}"
   end
 end

@@ -25,14 +25,16 @@ class ProjectsController < ApplicationController
                      [:project, :skip_paths],
                      [:project, :only_paths],
                      [:project, :cache_manifest_formats],
-                     [:project, :watched_branches]
+                     [:project, :watched_branches],
+                     [:project, :required_rfc5646_locales],
+                     [:project, :other_rfc5646_locales]
     fix_empty_hashes [:project, :key_locale_exclusions],
                      [:project, :key_locale_inclusions],
                      [:project, :only_importer_paths],
                      [:project, :skip_importer_paths],
                      reject_blank_value_elements: true
-    fix_empty_hashes [:project, :targeted_rfc5646_locales],
-                     map_values: ->(req) { req.parse_bool }
+    # fix_empty_hashes [:project, :targeted_rfc5646_locales],
+    #                  map_values: ->(req) { req.parse_bool }
   end
 
   respond_to :html, except: :show
@@ -122,6 +124,7 @@ class ProjectsController < ApplicationController
 
   def create
     @project = Project.create(project_params)
+    flash[:success] = t('controllers.projects.create.success', project: @project.name)
     respond_with @project, location: projects_url
   end
 
@@ -166,6 +169,7 @@ class ProjectsController < ApplicationController
 
   def update
     @project.update_attributes project_params
+    flash[:success] = t('controllers.projects.update.success', project: @project.name)
     respond_with @project, location: projects_url
   end
 
@@ -224,12 +228,19 @@ class ProjectsController < ApplicationController
 
   def project_params
     # too hard to do this with strong parameters :(
-    params[:project].to_hash.slice(*%w(
+    targeted_rfc5646_locales = Hash[params[:project][:required_rfc5646_locales].map {|locale| [locale, true]}]
+    targeted_rfc5646_locales = targeted_rfc5646_locales.merge(
+      Hash[params[:project][:other_rfc5646_locales].map {|locale| [locale, false]}]
+    )
+    
+    project_params = params[:project].to_hash.slice(*%w(
         name repository_url base_rfc5646_locale due_date cache_localization
         webhook_url skip_imports cache_manifest_formats key_exclusions
         key_inclusions skip_paths only_paths watched_branches
-        targeted_rfc5646_locales key_locale_exclusions key_locale_inclusions
+        key_locale_exclusions key_locale_inclusions
         only_importer_paths skip_importer_paths
     ))
+    project_params["targeted_rfc5646_locales"] = targeted_rfc5646_locales
+    project_params
   end
 end

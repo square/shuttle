@@ -67,8 +67,9 @@ require 'fileutils'
 # | `description`      | A user-submitted description of why we are localizing this commit. |
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
 
-class Commit < ActiveRecord::Base
+class Commit < ActiveRecord::Base 
   extend RedisMemoize
+  include CommitTraverser
 
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
@@ -82,39 +83,42 @@ class Commit < ActiveRecord::Base
 
   include HasMetadataColumn
   has_metadata_column(
-      description:      {allow_nil: true},
-      pull_request_url: {allow_nil: true}
+    description:      {allow_nil: true},
+    pull_request_url: {allow_nil: true}
   )
 
   validates :project,
-            presence: true
+    presence: true
   validates :revision_raw,
-            presence:   true,
-            uniqueness: {scope: :project_id, on: :create}
+    presence:   true,
+    uniqueness: {scope: :project_id, on: :create}
   validates :message,
-            presence: true,
-            length:   {maximum: 256}
+    presence: true,
+    length:   {maximum: 256}
   validates :committed_at,
-            presence:   true,
-            timeliness: {type: :time}
+    presence:   true,
+    timeliness: {type: :time}
   validates :priority,
-            numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3},
-            allow_nil:    true
+    numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3},
+    allow_nil:    true
   validates :due_date,
-            timeliness: {type: :date},
-            allow_nil:  true
+    timeliness: {type: :date},
+    allow_nil:  true
+  validates :completed_at,
+    timeliness: {type: :date},
+    allow_nil:  true
 
   attr_readonly :project_id, :revision_raw, :message, :committed_at
 
   extend GitObjectField
   git_object_field :revision,
-                   git_type:        :commit,
-                   repo:            ->(c) { c.project.try!(:repo) },
-                   repo_must_exist: true,
-                   scope:           :for_revision
+    git_type:        :commit,
+    repo:            ->(c) { c.project.try!(:repo) },
+    repo_must_exist: true,
+    scope:           :for_revision
 
   extend SetNilIfBlank
-  set_nil_if_blank :description, :due_date
+  set_nil_if_blank :description, :due_date, :pull_request_url
 
   before_validation :load_message, on: :create
   before_validation(on: :create) do |obj|
@@ -132,14 +136,130 @@ class Commit < ActiveRecord::Base
   scope :by_priority_and_due_date, -> { order('due_date ASC, priority ASC') }
   scope :with_sha_prefix, lambda { |sha| where("encode(revision_raw, 'hex') like ?", "#{sha}%") }
 
+  # Counts the total commits.  
+  #
+  # @return [Fixnum] The number of commits
+
+  def self.total_commits
+    Commit.all.count
+  end
+
+
+  # Counts the number of incomplete commits.  
+  #
+  # @return [Fixnum] The number of incomplete commits
+
+
+  def self.total_commits_incomplete
+    Commit.where("ready=false").count
+  end
+
+
+  # Counts the number of commits created every day for the past 30 days.  
+  #
+  # @return [Array<Fixnum>] An array containing the number of commits created each day for the past 30 days.
+
+  def self.daily_commits_created
+    daily_commits_created = []
+
+    timespan = 30
+
+    last_date = Date.today
+    first_date = Date.today - timespan.days
+
+    commits = Commit.where("created_at >= :date", date: first_date).where("created_at <= :date", date: last_date).order('created_at ASC')
+
+    i = 0
+    while first_date < last_date         
+      num_finished = 0 
+
+      while i < commits.length and commits[i].created_at.utc.to_date == first_date 
+        num_finished += 1
+        i += 1
+      end 
+
+      daily_commits_created << [first_date.to_time.utc.to_i, num_finished]
+      first_date += 1.day
+    end 
+
+    return daily_commits_created
+  end 
+
+
+  # Counts the number of commits finished every day for the past 30 days.  
+  #
+  # @return [Array<Fixnum>] An array containing the number of commits finished each day for the past 30 days.
+
+  def self.daily_commits_finished
+    daily_commits_finished = []
+
+    timespan = 30
+
+    last_date = Date.today
+    first_date = Date.today - timespan.days
+
+    commits = Commit.where("completed_at >= :date", date: first_date).where("completed_at <= :date", date: last_date).order('completed_at ASC')
+
+    i = 0
+    while first_date < last_date         
+      num_finished = 0 
+
+      while i < commits.length and commits[i].completed_at.utc.to_date == first_date 
+        num_finished += 1
+        i += 1
+      end 
+
+      daily_commits_finished << [first_date.to_time.utc.to_i, num_finished]
+      first_date += 1.day
+    end 
+
+    return daily_commits_finished
+  end 
+
+  # Calculates 
+  # 
+  # @return [Array<Fixnum>] An array containing the number of commits finished each day for the past 30 days.
+  
+  def self.average_completion_time
+    moving_average = []
+
+    timespan = 30
+    window = 7
+
+    last_date = Date.today
+    first_date = Date.today - timespan.days
+
+    # Ensures that completed_at is not nil
+    commits = Commit.where("completed_at >= :date", date: first_date)
+                    .where("completed_at <= :date", date: last_date)
+                    .order('completed_at ASC')
+
+    while first_date < last_date 
+      window_commits = commits.reject { |commit| commit.completed_at < first_date || commit.completed_at > first_date + window.days }
+      average_completion_time = window_commits.inject(0) { |total, commit| total += commit.time_to_complete }
+        .fdiv(window_commits.count.nonzero? || 1)
+
+      # Add the average completion time
+      moving_average << [first_date.to_time.utc.to_i, average_completion_time]  
+      first_date += 1.day
+    end
+
+    return moving_average
+  end
+
   # @private
   def to_param() revision end
 
   # Calculates the value of the `ready` field and saves the record.
+  # If this is the first time a commit has been marked as ready, sets 
+  # completed_at to be the current time.
 
   def recalculate_ready!
     ready = !keys.where(ready: false).exists?
     self.ready = ready
+    if self.ready and self.completed_at.nil?
+      self.completed_at = Time.current
+    end
     save!
     compile_and_cache_or_clear(ready)
   end
@@ -180,7 +300,9 @@ class Commit < ActiveRecord::Base
     # clear out existing keys so that we can import all new keys
     keys.clear unless options[:locale]
     # perform the recursive import
-    import_tree commit!.gtree, '', options.merge(blobs: blobs)
+    traverse(commit!) do |path, blob|
+      import_blob path, blob, options.merge(blobs: blobs)
+    end
 
     # this will also kick of stats recalculation for inline imports
     remove_worker! job_id
@@ -230,6 +352,20 @@ class Commit < ActiveRecord::Base
     options[:except] << :revision_raw
 
     super options
+  end
+
+
+  # Computes the time to complete a commit using the 
+  # created_at time and the completed_at time.
+  #
+  # @return [timestamp] The time it took to complete a commit. 
+
+  def time_to_complete
+    if !self.completed_at.nil?
+      self.completed_at - self.created_at
+    else
+      nil
+    end
   end
 
   # @return [Fixnum] The number of approved Translations across all required
@@ -285,7 +421,7 @@ class Commit < ActiveRecord::Base
   def translations_pending(*locales)
     locales = project.required_locales if locales.empty?
     translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
+      where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
   end
   redis_memoize :translations_pending
 
@@ -299,7 +435,7 @@ class Commit < ActiveRecord::Base
   def words_pending(*locales)
     locales = project.required_locales if locales.empty?
     translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
+      where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
   end
   redis_memoize :words_pending
 
@@ -429,42 +565,35 @@ class Commit < ActiveRecord::Base
     end
   end
 
-  def import_tree(tree, path, options={})
+  def import_blob(path, blob, options={})
     return if project.skip_tree?(path)
     imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
 
-    tree.blobs.each do |name, blob|
-      blob_path   = "#{path}/#{name}"
-      blob_object = if options[:blobs]
-                      begin
-                        options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
-                      rescue ActiveRecord::RecordNotUnique
-                        project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
-                      end
-                    else
+    blob_object = if options[:blobs]
+                    begin
+                      options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                    rescue ActiveRecord::RecordNotUnique
                       project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
                     end
+                  else
+                    project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
+                  end
 
-      imps.each do |importer|
-        importer = importer.new(blob_object, blob_path, self)
+    imps.each do |importer|
+      importer = importer.new(blob_object, path, self)
 
-        Shuttle::Redis.del("keys_for_blob:#{importer.class.ident}:#{blob.sha}") if options[:force]
+      Shuttle::Redis.del("keys_for_blob:#{importer.class.ident}:#{blob.sha}") if options[:force]
 
-        if importer.skip?(options[:locale])
-          #Importer::SKIP_LOG.info "commit=#{revision} blob=#{blob.sha} path=#{blob_path} importer=#{importer.class.ident} #skip? returned true for #{options[:locale].inspect}"
-          next
-        end
-
-        if options[:inline]
-          BlobImporter.new.perform importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try!(:rfc5646)
-        else
-          add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, blob_path, id, options[:locale].try!(:rfc5646))
-        end
+      if importer.skip?(options[:locale])
+        #Importer::SKIP_LOG.info "commit=#{revision} blob=#{blob.sha} path=#{blob_path} importer=#{importer.class.ident} #skip? returned true for #{options[:locale].inspect}"
+        next
       end
-    end
 
-    tree.trees.each do |name, subtree|
-      import_tree subtree, "#{path}/#{name}", options
+      if options[:inline]
+        BlobImporter.new.perform importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
+      else
+        add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646))
+      end
     end
   end
 

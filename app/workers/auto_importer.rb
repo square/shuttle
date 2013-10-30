@@ -46,8 +46,11 @@ class AutoImporter
     def perform(project_id)
       project = Project.find(project_id)
       project.repo &:fetch
-      project.watched_branches.each { |branch| project.commit! branch }
-    rescue Timeout::Error => err
+      project.watched_branches.each do |branch|
+        project.commit! branch,
+                        other_fields: {description: "Automatically imported from the #{branch} branch"}
+      end
+    rescue Timeout::Error
       Squash::Ruby.notify err, project_id: project_id
       self.class.perform_in 2.minutes, project_id
     end

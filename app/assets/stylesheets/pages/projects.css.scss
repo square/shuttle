@@ -1,0 +1,115 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.projects {
+  .header .pull-right {
+    button, input, select {vertical-align: top;}
+    input, select { width: 200px; }
+  }
+  
+
+  table {
+    thead {
+      tr {
+        text-align: left;
+        font-weight: bold;
+        text-transform: uppercase;
+
+        th {
+          padding: 15px;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        td {
+          &:first-child {
+            font-weight: bold;
+          }
+          padding: 0px 15px;
+          height: 50px;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+  
+  &#projects-show {
+    .filter-bar {
+      input[type="text"] {
+        width: 300px;
+      }
+      select[name="commit"] {
+        width: 250px;
+      }
+      select[name="filter_source"] {
+        width: 150px;
+      }
+    }
+  }
+
+  &#projects-edit, &#projects-new, &#projects-update {
+    .eight.columns {
+      margin-top: -30px;
+      padding: 30px;
+      box-sizing: border-box;
+    }
+
+    .right-side {
+      background-color: $gray6;
+    }
+
+    form {
+      fieldset {
+        &:last-of-type { padding-bottom: 0px; }
+        
+        .controls {
+          &.checkboxes {
+            &:first-of-type {
+              margin-top: 10px;
+              border-top: 1px solid $gray5;              
+            }
+
+            &:last-of-type { 
+              margin-bottom: 30px;
+            }
+
+            border-bottom: 1px solid $gray5;
+            padding: 5px 0px;;
+            span {
+              display: block;
+              padding-right: 40px;
+            }
+          }
+          
+
+          label {
+            font-weight: 400;
+            padding: 0;
+            padding-right: 30px;
+            text-transform: none;
+            width: auto;
+            float: none;
+          }
+
+          input[type="text"], .twitter-typeahead, .list-field {
+            width: 100%;
+          }
+
+          input[type="checkbox"] {
+            margin-right: 10px; 
+            margin-top: 3px;
+            float: right;
+          }
+        }
+      }
+
+      .list-field {
+        margin-top: 7px;
+      }
+
+    } 
+  }
+
+}

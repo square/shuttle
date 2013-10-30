@@ -1,0 +1,14 @@
+@import "base/vars";
+@import "css3-mixins";
+
+.alert {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin: 20px 0;
+
+  &.error { background-color: $background-red; }
+  &.warning { background-color: $background-yellow; }
+  &.success { background-color: $background-green; }
+  &.info { background-color: $background-blue; }
+}

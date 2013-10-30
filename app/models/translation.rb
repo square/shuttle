@@ -136,6 +136,31 @@ class Translation < ActiveRecord::Base
 
   tracked_attributes.each { |a| attr_accessor :"#{a}_actually_was" }
 
+  # TODO:
+  def self.total_words 
+    Translation.not_base.sum(:words_count)
+  end 
+
+  # TODO:
+  def self.total_words_new
+    Translation.not_base.where(translated: false).sum(:words_count)
+  end 
+
+  # TODO:
+  def self.total_words_pending
+    Translation.not_base.where('approved IS NOT TRUE')
+      .where(translated: true).sum(:words_count)
+  end 
+
+  # TODO:
+  def self.total_words_per_project
+    Translation.not_base.joins(key: :project)
+      .select("sum(words_count), projects.name").group("projects.name")
+      .order("sum DESC")
+      .map { |t| [t.name, t.sum] }
+  end 
+
+
   # Method used to cached the current state of the Translation
   # Required before making changes to a Translation that will be saved
   def freeze_tracked_attributes
@@ -266,10 +291,13 @@ class Translation < ActiveRecord::Base
   # approved), and therefore, manifests that should now be stale would not be,
   # were it not for this handy hook
   def expire_affected_cached_manifests
-    # can't use copy_changed? because we overwrite the copy with itself, which
-    # does record a change (sigh)
-    return unless (copy != copy_was) && approved? && !approved_changed?
-    # clear out existing cache entries if present
-    TranslationCachedManifestExpirer.perform_once self.id
+    # if we changed the copy but kept the approval status, we need to expire the
+    # cache
+    if copy != copy_was && approved? && !approved_changed?
+      # clear out existing cache entries if present
+      # can't use copy_changed? because we overwrite the copy with itself, which
+      # does record a change (sigh)
+      TranslationCachedManifestExpirer.perform_once self.id
+    end
   end
 end

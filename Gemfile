@@ -19,8 +19,8 @@ gem 'tire'
 
 # VIEWS
 gem 'jquery-rails'
-gem 'erector', github: 'RISCfuture/erector'
 gem 'font-awesome-rails'
+gem 'twitter-typeahead-rails'
 
 # UTILITIES
 gem 'json'
@@ -64,9 +64,6 @@ gem 'coffee-rails'
 gem 'uglifier'
 gem 'less-rails'
 gem 'hogan_assets'
-gem 'twitter-bootstrap-rails'
-gem 'twitter-typeahead-rails'
-gem 'bootstrap-datepicker-rails'
 
 group :development do
   gem 'redcarpet', require: nil
