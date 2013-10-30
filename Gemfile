@@ -19,7 +19,7 @@ gem 'tire'
 
 # VIEWS
 gem 'jquery-rails'
-gem 'font-awesome-rails'
+gem 'font-awesome-rails', '< 4.0.0'
 gem 'twitter-typeahead-rails'
 
 # UTILITIES
