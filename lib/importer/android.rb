@@ -53,7 +53,7 @@ module Importer
         end
 
         context = find_comment(tag).try!(:content)
-        receiver.add_string "#{file.path}:#{tag.path}",
+        receiver.add_string "#{file.path}:#{tag['name']}",
                             unescape(tag.content),
                             context:      clean_comment(context),
                             original_key: tag['name']
@@ -66,12 +66,12 @@ module Importer
         end
 
         global_context = find_comment(tag).try!(:content)
-        tag.xpath('item').each do |item_tag|
+        tag.xpath('item').each_with_index do |item_tag, index|
           context = find_comment(item_tag).try!(:content)
-          receiver.add_string "#{file.path}:#{item_tag.path}",
+          receiver.add_string "#{file.path}:#{tag['name']}[#{index}]",
                               unescape(item_tag.content),
                               context:      clean_comment(context || global_context),
-                              original_key: tag['name']
+                              original_key: "#{tag['name']}[#{index}]"
         end
       end
 
@@ -84,17 +84,15 @@ module Importer
         global_context = find_comment(tag).try!(:content)
         tag.xpath('item').each do |subtag|
           context = find_comment(subtag).try!(:content)
-          receiver.add_string "#{file.path}:#{subtag.path}",
+          receiver.add_string "#{file.path}:#{tag['name']}[#{subtag['quantity']}]",
                               unescape(subtag.content),
                               context:      clean_comment(context || global_context),
-                              original_key: tag['name']
+                              original_key: "#{tag['name']}[#{subtag['quantity']}]"
         end
       end
     end
 
-    def self.default_interpolator
-      return "android"
-    end 
+    def self.default_interpolator() return 'android' end
 
     def attributes_from_tag(tag, *except)
       attrs = tag.keys.zip(tag.values)
