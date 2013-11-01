@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/RISCfuture/composite_primary_keys.git
-  revision: df55887de2a8e984c7c052ad375df994d53fac59
+  revision: 3c9a43cb1fbf3717124565665fc16248e7cc4035
   branch: rebase
   specs:
     composite_primary_keys (6.0.0)
