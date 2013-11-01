@@ -98,4 +98,6 @@ Shuttle::Application.configure do
   }
 
   config.use_ssl = true
+
+  config.action_mailer.delivery_method = :file
 end
