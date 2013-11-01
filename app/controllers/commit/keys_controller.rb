@@ -57,10 +57,12 @@ class Commit::KeysController < ApplicationController
     commit_id    = @commit.id
 
     @keys = Key.search(load: {include: [:translations, :slugs]}) do
-      query_terms = []
-      query_terms << "commit_ids:\"#{commit_id}\""
-      query_terms << "original_key:\"#{query_filter}\"" if query_filter.present?
-      query { string query_terms.join(' ') }
+      query { string "commit_ids:\"#{commit_id}\"" }
+
+      if query_filter.present?
+        filter :prefix, original_key_exact: query_filter
+      end
+
       case status
         when 'approved'
           filter :term, ready: 1
@@ -70,6 +72,8 @@ class Commit::KeysController < ApplicationController
       from offset
       size limit
       sort { by :original_key_exact, 'asc' }
+
+      puts to_json
     end
 
     respond_with(@keys) do |format|
