@@ -81,7 +81,7 @@ hr.divider
         input type="checkbox" name="include_approved" value="true"
         label for="include_approved" Approved
       .control
-        input type="checkbox" name="include_new" value="true" checked=(@mode == 'translation' ? 'checked' : nil)
+        input type="checkbox" name="include_new" value="true" checked=((@mode == 'translation' || @mode == 'review') ? 'checked' : nil)
         label for="include_new" New
     
-  .translation-panel  
+  .translation-workbench
