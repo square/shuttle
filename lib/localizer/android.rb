@@ -38,8 +38,37 @@ module Localizer
       xml = Nokogiri::XML(input_file.content)
 
       @translations.each do |translation|
-        xpath                             = translation.key.key.sub(/^#{Regexp.escape translation.key.source}:/, '')
-        xml.xpath(xpath).first.inner_html = escape(process_copy(translation.copy))
+        key = translation.key.key.split(':').last
+        case key
+          when /^(\w+)\[(\d+)\]$/
+            tags = xml.css("string-array[name=#{$1}]")
+            raise "Multiple string-array tags with key #{$1} found" if tags.size > 1
+            raise "No string-array tag with key #{$1} found" if tags.empty?
+            tag = tags.first
+
+            subtag = tag.css('item')[$2.to_i]
+            raise "No string-array child tag with key #{$1}[#{$2}] found" unless subtag
+
+            subtag.inner_html = escape(process_copy(translation.copy))
+          when /^(\w+)\[(\w+)\]$/
+            tags = xml.css("plurals[name=#{$1}]")
+            raise "Multiple tags with key #{$1} found" if tags.size > 1
+            raise "No tag with key #{$1} found" if tags.empty?
+            tag = tags.first
+
+            subtags = tag.css("item[quantity=#{$2}]")
+            raise "Multiple plurals child tags with key #{$1} found" if subtags.size > 1
+            raise "No plurals child tag with key #{$1}[#{$2}] found" if subtags.empty?
+
+            subtags.first.inner_html = escape(process_copy(translation.copy))
+          else
+            tags = xml.css("string[name=#{key}]")
+            raise "Multiple tags with key #{key} found" if tags.size > 1
+            raise "No tag with key #{key} found" if tags.empty?
+            tag = tags.first
+
+            tag.inner_html = escape(process_copy(translation.copy))
+        end
       end
 
       # build a path, replacing the parent directory with the correct qualifiers
