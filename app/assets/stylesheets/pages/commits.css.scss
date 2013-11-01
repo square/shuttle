@@ -17,9 +17,9 @@ body.commits {
     select, input[type="text"] {
       margin-left: 5px;
       margin-right: 15px;
-      text-transform: capitalize;
     }
     select {
+      text-transform: capitalize;
       width: 200px;
     }
     input[type="text"] {
