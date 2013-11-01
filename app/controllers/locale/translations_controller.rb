@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 # Controller for translating all of a Project's strings under a certain
-# locale. The `TranslationPanel` JavaScript object uses this controller to
+# locale. The `TranslationWorkbench` JavaScript object uses this controller to
 # populate its content.
 
 class Locale::TranslationsController < ApplicationController

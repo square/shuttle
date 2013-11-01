@@ -40,7 +40,7 @@ $(document).ready () ->
 
   setupKeyFields = () ->
     $('#project_key_locale_exclusions, #project_key_locale_inclusions').hashField(
-      renderer: (container, name, value) ->
+      renderer: (container, key, value) ->
 
         key_field = $('<div/>').addClass('hashfield-key').appendTo(container)
         value_field = $('<div/>').addClass('hashfield-multi-value').appendTo(container)
@@ -50,8 +50,8 @@ $(document).ready () ->
               type: 'text'
               rel: 'key'
               placeholder: 'Locale'
-              name: name
-            ).val(value)
+              name: key
+            ).val(key)
             .addClass('locale-field').appendTo(key_field)
         )
 
