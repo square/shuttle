@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/RISCfuture/composite_primary_keys.git
-  revision: 3c9a43cb1fbf3717124565665fc16248e7cc4035
+  revision: df55887de2a8e984c7c052ad375df994d53fac59
   branch: rebase
   specs:
     composite_primary_keys (6.0.0)
@@ -41,7 +41,7 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     ansi (1.4.3)
-    arel (4.0.1)
+    arel (4.0.0)
     atomic (1.1.14)
     bcrypt-ruby (3.1.2)
     blankslate (2.1.2.4)
@@ -114,7 +114,7 @@ GEM
     mime-types (1.25)
     mini_portile (0.5.1)
     minitest (4.7.5)
-    multi_json (1.8.2)
+    multi_json (1.8.0)
     multi_xml (0.5.5)
     mustache (0.99.4)
     nokogiri (1.6.0)
@@ -232,7 +232,7 @@ GEM
       actionpack (>= 3.1)
       jquery-rails
       railties (>= 3.1)
-    tzinfo (0.3.38)
+    tzinfo (0.3.37)
     uea-stemmer (0.10.1)
     uglifier (2.2.1)
       execjs (>= 0.3.0)
