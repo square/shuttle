@@ -49,7 +49,7 @@ class RekeyAndroidStrings < ActiveRecord::Migration
       end
     end
 
-    obsolete_keys = select_values("SELECT id FROM keys WHERE id NOT IN (SELECT key_id FROM commits_keys")
+    obsolete_keys = select_values("SELECT id FROM keys WHERE id NOT IN (SELECT key_id FROM commits_keys)")
     say "Deleting #{obsolete_keys.size} obsolete keys..."
     Key.where(id: obsolete_keys).destroy_all
   end
