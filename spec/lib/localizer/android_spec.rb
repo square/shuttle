@@ -24,20 +24,20 @@ describe Localizer::Android do
     @commit  = FactoryGirl.create(:commit, project: @project)
 
     {
-        '/java/basic-hdpi/strings.xml:string'              => 'Hallo!',
-        '/java/basic-hdpi/strings.xml:excluded'            => 'Welt!',
-        '/java/basic-hdpi/strings.xml:special_chars'       => '(de) Êtes-vous sûr ?',
-        '/java/basic-hdpi/strings.xml:quoted_escaped'      => "Hallo \\'Welt\\'",
-        '/java/basic-hdpi/strings.xml:unquoted_escaped'    => "Hallo 'Welt'",
-        '/java/basic-hdpi/strings.xml:with_context'        => 'dd/MM/yyyy',
-        '/java/basic-hdpi/strings.xml:attributed_string'   => 'Hallo!',
-        '/java/basic-hdpi/strings.xml:smart_quotes'        => '‘guillemets’',
-        '/java/basic-hdpi/strings.xml:array[0]'            => 'Hallo',
-        '/java/basic-hdpi/strings.xml:array[1]'            => 'Welt',
-        '/java/basic-hdpi/strings.xml:attributed_array[0]' => 'Hallo',
-        '/java/basic-hdpi/strings.xml:attributed_array[1]' => 'Welt',
-        '/java/basic-hdpi/strings.xml:plural[one]'         => 'Welt',
-        '/java/basic-hdpi/strings.xml:plural[other]'       => 'Welten'
+        '/java/basic-hdpi/strings.xml:/resources/string[1]'               => 'Hallo!',
+        '/java/basic-hdpi/strings.xml:/resources/string[2]'               => 'Welt!',
+        '/java/basic-hdpi/strings.xml:/resources/string[3]'               => '(de) Êtes-vous sûr ?',
+        '/java/basic-hdpi/strings.xml:/resources/string[4]'               => "Hallo \\'Welt\\'",
+        '/java/basic-hdpi/strings.xml:/resources/string[5]'               => "Hallo 'Welt'",
+        '/java/basic-hdpi/strings.xml:/resources/string[6]'               => 'dd/MM/yyyy',
+        '/java/basic-hdpi/strings.xml:/resources/string[7]'               => 'Hallo!',
+        '/java/basic-hdpi/strings.xml:/resources/string[8]'               => '‘guillemets’',
+        '/java/basic-hdpi/strings.xml:/resources/string-array[1]/item[1]' => 'Hallo',
+        '/java/basic-hdpi/strings.xml:/resources/string-array[1]/item[2]' => 'Welt',
+        '/java/basic-hdpi/strings.xml:/resources/string-array[2]/item[1]' => 'Hallo',
+        '/java/basic-hdpi/strings.xml:/resources/string-array[2]/item[2]' => 'Welt',
+        '/java/basic-hdpi/strings.xml:/resources/plurals/item[1]'         => 'Welt',
+        '/java/basic-hdpi/strings.xml:/resources/plurals/item[2]'         => 'Welten'
     }.each do |key, value|
       key_obj = FactoryGirl.create(:key, key: key, project: @project, source: '/java/basic-hdpi/strings.xml')
       FactoryGirl.create :translation, key: key_obj, copy: value, source_locale: @en, locale: @de
