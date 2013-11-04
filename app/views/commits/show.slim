@@ -9,7 +9,7 @@
 
 .header
   h1 Commit Status
-  - if current_user.admin?
+  - if current_user.monitor?
     .pull-right  
       button.danger href=project_commit_url(@project, @commit) data-method='DELETE' data-confirm='Are you sure you want to delete this commit?' Delete
 
