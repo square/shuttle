@@ -1,0 +1,5 @@
+@import "css3-mixins";
+
+.shadow {
+  @include box-shadow(0px, 4px);
+}
