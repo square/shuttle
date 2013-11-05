@@ -32,6 +32,9 @@ hr.divider
     = form_tag(search_translations_url, method: 'GET', id: 'translation-search-form', class: 'filter form-inline')
       .main
         = text_field_tag 'query', '', id: 'search-field', placeholder: 'Translation Query'
+        - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+        - project_list.unshift ['all projects', nil]
+        = select_tag 'project_id', options_for_select(project_list)
         = select_tag 'field', options_for_select([\
                                                      %w(source searchable_source_copy),\
                                                      %w(translation searchable_copy),\
@@ -48,14 +51,6 @@ hr.divider
               = select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
             - else 
               = text_field_tag 'target_locales', '', class: 'locale-field', id: '', placeholder: 'any target locale'
-
-
-        .control-group 
-          = label_tag 'project_id', 'Projects', class: 'control-label'
-          .controls
-            - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-            - project_list.unshift ['all', nil]
-            = select_tag 'project_id', options_for_select(project_list)
 
         .control-group 
           = label_tag 'translator_id', 'Translator', class: 'control-label'
