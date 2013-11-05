@@ -55,8 +55,10 @@ class root.TranslationUnitsSearch
     $('<td/>').text(translation_unit.source_copy).appendTo tr
     locale = $('<td/>').text(" " + translation_unit.locale.rfc5646).addClass('locale-td').appendTo tr
     $('<img/>').attr('src', translation_unit.locale_flag).prependTo locale
-    $('<td/>').text(translation_unit.copy).appendTo tr
-    $(tr).click -> window.location = translation_unit.url
+    $('<a>', {
+      text: translation_unit.copy
+      href: translation_unit.url
+    }).appendTo( $('<td/>').appendTo tr )
 
   # Sets or clears a table-wide informational message. Removes all rows from the
   # table.
