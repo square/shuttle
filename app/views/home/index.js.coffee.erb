@@ -13,40 +13,39 @@
 #   limitations under the License.
 
 $(window).ready () ->
+	toggle = (row) ->
+		entry = row.find('.description')
+		full_description = entry.data('full-description')
+		short_description = entry.data('short-description')
 
-  toggle = (row) ->
-    entry = row.find('.description')
-    full_description = entry.data('full-description')
-    short_description = entry.data('short-description')
-    
-    if not entry.data("orig-height")
-      orig_height = entry.prop('scrollHeight')
-      entry.data("orig-height", orig_height)
+		if not entry.data("orig-height")
+			orig_height = entry.prop('scrollHeight')
+			entry.data("orig-height", orig_height)
 
-    if full_description 
-      if row.hasClass("expanded")
-        orig_height = entry.data("orig-height")
-        entry.animate({height: orig_height}, 500, () -> 
-          entry.text(short_description)   
-          row.removeClass("expanded")     
-        )
-        row.removeClass("expanded")     
-      else
-        $(".expanded").each () ->
-          toggle($(this))
+		if full_description
+			if row.hasClass("expanded")
+				orig_height = entry.data("orig-height")
+				entry.animate({height: orig_height}, 500, () ->
+					entry.text(short_description)
+					row.removeClass("expanded")
+				)
+				row.removeClass("expanded")
+			else
+				$(".expanded").each () ->
+					toggle($(this))
 
-        orig_height = entry.data("orig-height")
-        orig_width = entry.width()
+				orig_height = entry.data("orig-height")
+				orig_width = entry.width()
 
-        entry.height(orig_height)
-        entry.width(orig_width)
+				entry.height(orig_height)
+				entry.width(orig_width)
 
-        entry.html(full_description)
-        entry.animate({height: entry.prop('scrollHeight')}, 500, () -> 
-          entry.html(full_description)   
-          row.addClass("expanded")     
-        )
-        row.addClass("expanded")
+				entry.html(full_description)
+				entry.animate({height: entry.prop('scrollHeight')}, 500, () ->
+					entry.html(full_description)
+					row.addClass("expanded")
+				)
+				row.addClass("expanded")
 
 	$('.filter-bar').affix(0, { shadow: true })
 
