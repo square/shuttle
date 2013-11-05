@@ -3,9 +3,7 @@
 
 body.search {
   .filter-bar {
-    select {
-      text-transform: capitalize;
-    }
+    select { text-transform: capitalize; }
 
     .main {
       input[type="text"] { width: 865px; }
@@ -66,4 +64,5 @@ body.search {
       }
     }
   }
+  table a { text-decoration: underline; }
 }

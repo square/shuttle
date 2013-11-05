@@ -45,4 +45,4 @@ hr.divider
             - project_list.unshift ['all', nil]
             = select_tag 'project_id', options_for_select(project_list)
   
-  table.table.hover-rows#commits data-url=search_commits_url(format: 'json')
+  table.table#commits data-url=search_commits_url(format: 'json')
