@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 $(window).ready () ->
+
   toggle = (row) ->
     entry = row.find('.description')
     full_description = entry.data('full-description')
@@ -45,10 +46,11 @@ $(window).ready () ->
           entry.html(full_description)   
           row.addClass("expanded")     
         )
-        row.addClass("expanded")  
+        row.addClass("expanded")
 
+	$('.filter-bar').affix(0, { shadow: true })
 
-  $("table").find("input, select, button, a").click (e) -> 
+	$("table").find("input, select, button, a").click (e) ->
     e.stopPropagation()
 
   $(".datepicker").datepicker(
