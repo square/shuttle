@@ -118,13 +118,16 @@ hr.divider
                   = t("models.commit.priority.#{commit.priority}")
               - else
                 | -
-          td class=("centered" if !commit.description) 
-            - description = commit.description 
-            - full_description = nil
-            - if commit.description
-              - full_description = description.dup
-              if commit.user
-                - full_description << "<br><strong>Requested by " + mail_to(commit.user.email, commit.user.abbreviated_name) + "</strong>"
+          td class=("centered" if !commit.description)
+            ruby:
+              description = commit.description
+              full_description = nil
+              if commit.description
+                full_description = description.dup
+                if commit.user
+                  full_description << "<br><strong>Requested by " + mail_to(commit.user.email, commit.user.abbreviated_name) + "</strong>"
+                end
+              end
             div.description[data-full-description=full_description data-short-description=truncate(description || '-', length: 50)]
               = truncate(description || '-', length: 50)
 
