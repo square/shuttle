@@ -8,8 +8,9 @@ body.search {
     }
 
     .main {
-      input[type="text"] { width: 700px; }
-      input + input, input + select, select + input { 
+      input[type="text"] { width: 865px; }
+
+      input + input, input + select, select + input, select + select { 
         margin-left: 15px;
       }
       select {width: 150px; }
@@ -41,6 +42,14 @@ body.search {
       }
     }
 
+  }
+
+  &#search-translations {
+    .main > input[type="text"] { width: 535px; }
+  }
+
+  &#search-keys {
+    .main > input[type="text"] { width: 700px; }
   }
 
   &#search-keys {

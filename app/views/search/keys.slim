@@ -30,7 +30,9 @@ hr.divider
   .filter-bar 
     = form_tag(search_keys_url(format: 'json'), method: :get, id: 'key-search-form', class: 'filter form-inline') do
       .main
-        = text_field_tag 'filter', '', placeholder: 'Filter by Key', id: 'key-filter-field'
+        = text_field_tag 'filter', '', placeholder: 'Filter by Key', id: 'key-filter-field'    
+        - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+        = select_tag 'project_id', options_for_select(project_list)
         = submit_tag 'Search', class: 'primary'
         .pull-right#expand-search
           i.icon-angle-right
@@ -46,12 +48,6 @@ hr.divider
                         ['not ready', false]\
                       ]\
                     ), id: 'key-status-select'
-
-        .control-group 
-          = label_tag 'project_id', 'Projects', class: 'control-label'
-          .controls
-            - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-            = select_tag 'project_id', options_for_select(project_list)
           .controls
             = check_box_tag 'not_elastic_search', true
             | Search for exact matches
