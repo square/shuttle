@@ -43,13 +43,15 @@ class root.GlobalSearch
 
   addTranslation: (translation) ->
     tr = $('<tr/>').appendTo(@body)
-    tr.click () -> 
-      document.location = translation.url
     $('<td/>').text(translation.project.name).appendTo tr
-    $('<td/>').text(translation.id).appendTo tr
+    $('<a>', {
+      text: translation.id
+      href: translation.url
+    }).appendTo( $('<td/>').appendTo tr )
     $('<td/>').text(translation.source_locale.rfc5646).appendTo tr
     $('<td/>').text(translation.source_copy).appendTo tr
     $('<td/>').text(translation.locale.rfc5646).appendTo tr
+
     if translation.translated
       class_name = if translation.approved == true
           'text-success'
@@ -84,5 +86,4 @@ class root.GlobalSearch
     $('<th/>').text("Source").appendTo tr
     $('<th/>').text("To").appendTo tr
     $('<th/>').text("Translation").appendTo tr
-
     @body = $('<tbody/>').appendTo(@element)

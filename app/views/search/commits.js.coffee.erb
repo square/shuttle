@@ -35,10 +35,11 @@ $(window).ready ->
 
   addCommit = (commitTable, commit) ->
     tr = $('<tr/>').appendTo(commitTable)
-    tr.click () -> 
-      document.location = commit.url
 
-    $('<td/>').text(commit.revision).appendTo(tr)
+    $('<a>', {
+      text: commit.revision
+      href: commit.url
+    }).appendTo( $('<td/>').appendTo tr )
     $('<td/>').text(commit.project.name).appendTo(tr)
 
     klass = ''
