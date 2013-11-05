@@ -121,11 +121,11 @@ hr.divider
           td class=("centered" if !commit.description) 
             - description = commit.description 
             - full_description = nil
-            - if commit.user && commit.description
+            - if commit.description
               - full_description = description.dup
-              - full_description << "<br><strong>Requested by " + mail_to(commit.user.email, commit.user.abbreviated_name) + "</strong>"
-            div.description[data-full-description=full_description 
-                            data-short-description=truncate(description || '-', length: 50)]
+              if commit.user
+                - full_description << "<br><strong>Requested by " + mail_to(commit.user.email, commit.user.abbreviated_name) + "</strong>"
+            div.description[data-full-description=full_description data-short-description=truncate(description || '-', length: 50)]
               = truncate(description || '-', length: 50)
 
           td = "#{number_with_delimiter commit.translations_new(*@locales)}s (#{number_with_delimiter commit.words_new(*@locales)}w)"
