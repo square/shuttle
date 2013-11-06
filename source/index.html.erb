@@ -3,7 +3,7 @@
   <div id="navbar-container">
     <nav class="container full-size-only">
       <ul>
-        <li id="logo"><img alt="Shuttle" src="images/shuttle.png"></li>
+        <li id="logo"><a href="#content"><img alt="Shuttle" src="images/shuttle.png"></a></li>
 
         <li id="quicknav-container">&nbsp;</li>
 
@@ -179,13 +179,17 @@
 <script type="text/javascript" charset="utf-8">
   $(document).ready(function () {
     var navbar = $('#navbar-container');
+    var navbarAfter = navbar.next()
+    var navbarHeight = navbar.height();
     var navbarWidth = navbar.width();
     var navbarPosition = navbar.offset().top;
     $(window).scroll(function () {
       if ( navbarPosition < $(window).scrollTop() ) {
+        navbarAfter.css({'margin-top': navbarHeight})
         navbar.addClass('shadow');
         navbar.css({position: 'fixed', top: 0, width: navbarWidth})
       } else {
+        navbarAfter.css({'margin-top': 0})
         navbar.removeClass('shadow');
         navbar.css({position: 'static'})
       }
