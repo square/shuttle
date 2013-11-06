@@ -1,0 +1,187 @@
+//= require lightbox
+@import "compass";
+@import "compass/reset";
+@import "compass/layout";
+
+
+$base-font-size: 18px;
+$base-line-height: 30px;
+
+$button-font-size: 12px;
+$navbar-font-size: 12px;
+
+$h1-size: 32px;
+$h2-size: 26px;
+$h3-size: 16px;
+
+$hr-color: #ebebeb;
+
+$button-height: 32px;
+$button-radius: 4px;
+$button-background: #ffffff;
+$button-text: #000000;
+
+$navbar-horiz-margin: 10px;
+$navbar-height: 70px;
+$navbar-background: #ffffff;
+$navbar-text: #000000;
+$navbar-highlight-text: #2884b4;
+
+$hero-background: #2a2f42;
+$hero-h1-text: #ffffff;
+$hero-h3-text: #7b7f88;
+
+$footer-background: #363636;
+
+// Base
+@include sticky-footer(150px, "#content", "#content-footer", "#footer");
+
+body {
+  font-family: "Raleway", "Helvetica Neue", Helvetica, sans-serif;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
+  font-weight: 300;
+}
+strong {font-weight: 500;}
+h1 { font-size: $h1-size; };
+h2 { font-size: $h2-size; font-weight: 400; }
+h3 { font-size: $h3-size; font-weight: 800; letter-spacing: 1px; };
+hr { background-color: $hr-color; height: 1px; border: 0; }
+
+.container {
+  width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+input[type=button], .button {
+  @include box-sizing(border-box);
+  @include border-radius($button-radius);
+
+  background: $button-background;
+  height: $button-height;
+  
+  font-size: $button-font-size;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: $button-text;
+
+  text-transform: uppercase;
+  text-decoration: none !important;
+  padding: 15px 30px;
+
+  &:hover { background: darken($button-background, 5%); }
+  &:active { 
+    position: relative;
+    top: 1px;
+  }
+}
+
+// Navbar 
+#navbar-container {
+  background-color: $navbar-background;
+  &.shadow { @include box-shadow(0px 4px 5px rgba(0,0,0,0.4)); }
+  // $blur: 5px, $color: rgba(0,0,0,.4)
+  nav {
+    z-index: 99;
+    letter-spacing: 1px;
+    &>ul {
+      width: 100%;
+
+      @include display-box;
+      @include box-orient(horizontal);
+
+      &>li {
+        font-size: $navbar-font-size;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin: 0 $navbar-horiz-margin;
+        line-height: $navbar-height;
+        position: relative;
+        &.active a { color: $navbar-highlight-text !important; }
+
+        a, i { 
+          color: $navbar-text; 
+          text-decoration: none;
+          &:hover { 
+            color: $navbar-highlight-text !important;
+          }
+        }
+
+        &#logo {
+          margin-right: 40px;
+          text-transform: uppercase;
+          line-height: 60px;
+
+          img {
+            margin-top: 5px;
+            height: 27px;
+            vertical-align: middle;
+          }
+        }
+
+        &#quicknav-container {
+          position: relative;
+          @include box-flex(1);
+        }
+      }
+    }
+  }
+}
+
+// Hero container
+#hero-container {
+  @include box-sizing(border-box);
+  background-color: $hero-background;
+  text-align: center;
+  height: 280px;
+  padding-top: 60px;
+  h1 {
+    font-family: "Raleway", "SQMarket", "Helvetica Neue", Helvetica, sans-serif;
+    color: $hero-h1-text;
+  }
+  h3 {
+    color: $hero-h3-text; 
+    text-transform: uppercase; 
+    margin-top: 14px; 
+    margin-bottom: 50px; 
+  }
+}
+
+// Article
+article {
+  margin-top: 40px;
+
+  section {
+    @include display-box;
+    @include box-orient(horizontal); 
+    width: 100%;
+    .half { 
+      @include display-box;
+      @include box-orient(vertical); 
+      @include box-flex(1); 
+      @include box-pack(center);
+      @include box-align(center);
+      width: 100%;
+      padding: 40px 30px 40px 30px;
+      img { width: 100%; }
+      // margin-top: 20px; 
+      h2 { margin-bottom: 15px; }
+      p + p { margin-top: 15px; }
+    }
+  }
+}
+
+// Footer 
+#footer {
+  background-color: $footer-background;
+  text-align: center;
+  padding-top: 80px;
+  div + div { margin-top: 30px; }
+  a:not(.button) { 
+    font-size: 14px; 
+    color: #ffffff; 
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}

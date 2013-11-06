@@ -1,162 +1,208 @@
-<header>
-    <h1>Shuttle</h1>
+<div id="content">
+  <!-- Navbar --> 
+  <div id="navbar-container">
+    <nav class="container full-size-only">
+      <ul>
+        <li id="logo"><img alt="Shuttle" src="images/shuttle.png"></li>
 
-    <h2>Powerful cross-platform localization from
-        <a href="https://squareup.com">Square</a>.</h2>
-</header>
+        <li id="quicknav-container">&nbsp;</li>
 
-<nav id="menu-container">
-    <ul id="menu">
-        <li>
-            <a href="#dashboard"><i class="fa fa-check-square-o"></i>Project
-                Management</a>
-        </li>
-        <li>
-            <a href="#project-list"><i class="fa fa-code-fork"></i>Git
-                Integration</a>
-        </li>
-        <li>
-            <a href="#workbench"><i class="fa fa-columns"></i>Translator
-                Workbench</a>
-        </li>
-        <li>
-            <a href="#glossary"><i class="fa fa-comments-o"></i>Glossary</a>
-        </li>
-        <li>
-            <a href="#memory"><i class="fa fa-book"></i>Translation Memory</a>
-        </li>
-        <li>
-            <a href="#statistics"><i class="fa fa-bar-chart-o"></i>Statistics</a>
-        </li>
-    </ul>
-</nav>
+        <li> <a href="#dashboard">Management</a> </li>
+        <li> <a href="#project-list">Git</a> </li>
+        <li> <a href="#workbench">Workbench</a> </li>
+        <li> <a href="#glossary">Glossary</a> </li>
+        <li> <a href="#memory">Memory</a> </li>
+        <li> <a href="#statistics">Statistics</a> </li>
+      </ul>
+    </nav>
+  </div>
 
-<article>
+  <!-- Hero Block --> 
+  <div id="hero-container">
+    <div class="container">
+      <h1> Powerful cross-platform localization </h1>
+      <h3> Create for open-source by square</h3>
+      <a href="#" class="button">Start Using Shuttle </a>
+    </div> 
+  </div>
+
+  <!-- Content Container --> 
+  <article class="container"> 
+
     <section id="dashboard">
-        <h3>Project Management</h3>
-
+      <div class="half">
         <p>
-            <a href="images/dashboard.png" data-lightbox="dashboard" title="Project Management"><img src="images/dashboard.png" /></a>
-
-            Shuttle organizes translation work into separate commits among
-            different projects.
-            <strong>Commits are given a priority and due date</strong>, so
-            translators can focus their effort where it is needed most.
-            <strong>Project managers can track the progress of commits</strong>,
-            ensuring that localization is done on schedule.</p>
+          <a href="images/dashboard.png" data-lightbox="dashboard" title="Project Management"><img src="images/dashboard.png" /></a>
+        </p>
+      </div>
+      <div class="half">
+        <div> 
+          <h2> Project Management </h2>
+          <p> 
+              Shuttle organizes translation work into separate commits among
+              different projects. <strong>Commits are given a priority and due date</strong>, so
+              translators can focus their effort where it is needed most.
+              <strong>Project managers can track the progress of commits</strong>,
+              ensuring that localization is done on schedule.
+          </p>
+        </div>
+      </div>
     </section>
+
+    <hr> 
 
     <section id="project-list">
-        <h3>Git Integration</h3>
-
-        <p>
-            <a href="images/project-list.png" data-lightbox="project-list" title="Git Integration"><img src="images/project-list.png" /></a>
-
-            Shuttle checks out your project's Git repository and
-            <strong>automatically scans for localizable content</strong> and
-            imports it into its database. Translators can begin translation of
-            new content immediately, with no engineer intervention required.
-            When a commit is ready to be released or deployed,
-            <strong>Shuttle makes available a manifest of translated
-                strings</strong> in any of a variety of formats, to easily
-            integrate back into your project at build time.</p>
+      <div class="half">
+        <div> 
+          <h2> Git Integration</h2>
+          <p> 
+              Shuttle checks out your project's Git repository and
+              <strong>automatically scans for localizable content</strong> and
+              imports it into its database. Translators can begin translation of
+              new content immediately, with no engineer intervention required.
+              When a commit is ready to be released or deployed,
+              <strong>Shuttle makes available a manifest of translated
+                  strings</strong> in any of a variety of formats, to easily
+              integrate back into your project at build time.</p>
+          </p>
+        </div>
+      </div>
+      <div class="half">
+        <a href="images/project-list.png" data-lightbox="project-list" title="Git Integration"><img src="images/project-list.png" /></a>
+      </div>
     </section>
+
+    <hr> 
 
     <section id="workbench">
-        <h3>Translator Workbench</h3>
+      <div class="half">
+        <a href="images/workbench.png" data-lightbox="workbench" title="Translator Workbench"><img src="images/workbench.png" /></a>
+      </div>
+      <div class="half">
+        <div>
+          <h2> Translator Workbench</h2>
+          <p> The translator workbench is designed to make
+              <strong>translation and review as fast and accurate as
+                  possible</strong>. Translators have access to tools such as the
+              <a href="#glossary">glossary</a> and
+              <a href="#memory">translation memory</a> to help improve their
+              accuracy and ensure a consistent voice across translators and
+              projects.</p>
 
-        <p>
-            <a href="images/workbench.png" data-lightbox="workbench" title="Translator Workbench"><img src="images/workbench.png" /></a>
+          <p> Shuttle <strong>recognizes non-translatable substrings</strong> (such
+              as ERb escapes and HTML character entities) and
+              <strong>fences them out</strong>. It displays an error if
+              translators omit or mistype fenced tokens.</p>
 
-            The translator workbench is designed to make
-            <strong>translation and review as fast and accurate as
-                possible</strong>. Translators have access to tools such as the
-            <a href="#glossary">glossary</a> and
-            <a href="#memory">translation memory</a> to help improve their
-            accuracy and ensure a consistent voice across translators and
-            projects.</p>
-
-        <p>Shuttle <strong>recognizes non-translatable substrings</strong> (such
-            as ERb escapes and HTML character entities) and
-            <strong>fences them out</strong>. It displays an error if
-            translators omit or mistype fenced tokens.</p>
-
-        <p>Shuttle maintains typographical quality by ensuring translators use
-            curly quotes, em-dashes, and other non-ASCII characters when
-            appropriate.</p>
+          <p> Shuttle maintains typographical quality by ensuring translators use
+              curly quotes, em-dashes, and other non-ASCII characters when
+              appropriate.</p>
+        </div>
+      </div>
     </section>
+
+    <hr>
 
     <section id="glossary">
-        <h3>Glossary</h3>
-
-        <p>
-            <a href="images/glossary.png" data-lightbox="glossary" title="Glossary"><img src="images/glossary.png" /></a>
-
-            Reviewers and administrators can contribute to a
-            <strong>project glossary</strong> that
-            <strong>standardizes common terminology</strong> across projects and
-            translators. Reviewers maintain a corpus of commonly-used or
-            jargon-like terms and phrases, and translators contribute
-            standardized translations of these in their respective languages.
-            These terms are presented on the workbench when appropriate.</p>
+      <div class="half">
+        <div> 
+          <h2> Glossary </h2>
+          <p> Reviewers and administrators can contribute to a
+              <strong>project glossary</strong> that
+              <strong>standardizes common terminology</strong> across projects and
+              translators. Reviewers maintain a corpus of commonly-used or
+              jargon-like terms and phrases, and translators contribute
+              standardized translations of these in their respective languages.
+              These terms are presented on the workbench when appropriate.</p>
+        </div>
+      </div>
+      <div class="half">
+        <a href="images/glossary.png" data-lightbox="glossary" title="Glossary"><img src="images/glossary.png" /></a>
+      </div>
     </section>
+
+    <hr>
 
     <section id="memory">
-        <h3>Translation Memory</h3>
-
-        <p>
-            <a href="images/memory.png" data-lightbox="memory" title="Translation Memory"><img src="images/memory.png" /></a>
-
-            <strong>Shuttle maintains a complete memory of every translation
-                contributed</strong>, even if the source string is no longer
-            present. These translations contribute to a
-            <strong>suggestion engine</strong> to save translator time and
-            effort and ensure a consistent voice across time. Administrators can
-            cull bad translations from this memory.</p>
+      <div class="half">
+        <a href="images/memory.png" data-lightbox="memory" title="Translation Memory"><img src="images/memory.png" /></a>
+      </div>
+      <div class="half">
+        <div> 
+          <h2> Translator Memory</h2>
+          <p> <strong>Shuttle maintains a complete memory of every translation
+                  contributed</strong>, even if the source string is no longer
+              present. These translations contribute to a
+              <strong>suggestion engine</strong> to save translator time and
+              effort and ensure a consistent voice across time. Administrators can
+              cull bad translations from this memory.</p>
+        </div>
+      </div>
     </section>
+
+    <hr>
 
     <section id="statistics">
-        <h3>Statistics</h3>
-
-        <p>
-            <a href="images/stats.png" data-lightbox="statistics" title="Statistics"><img src="images/stats.png" /></a>
-
-            <strong>Shuttle displays statistics to help project managers budget
-                translation effort and track the improving speed of
-                translators.</strong> Users can track trends in the average
-            amount of elapsed time between when a commit is submitted for
-            translation and when it is fully translated and review, as well as
-            see periods of intensive translator demand, and which projects
-            require the most translation effort.</p>
+      <div class="half">
+        <div> 
+          <h2> Statistics </h2>
+          <p> <strong>Shuttle displays statistics to help project managers budget
+              translation effort and track the improving speed of
+              translators.</strong> Users can track trends in the average
+              amount of elapsed time between when a commit is submitted for
+              translation and when it is fully translated and review, as well as
+              see periods of intensive translator demand, and which projects
+              require the most translation effort.</p>
+        </div>
+      </div>
+      <div class="half">
+        <a href="images/stats.png" data-lightbox="statistics" title="Statistics"><img src="images/stats.png" /></a>
+      </div>
     </section>
 
-    <section id="cta">
-        <h1>
-            <a href="https://github.com/square/shuttle">Start using Shuttle.</a>
-        </h1>
+  </article>
+  <div id="content-footer"></div>
+</div>
 
-        <p>
-            See <a href="https://github.com/square">other Square open-source
-            projects.</a>
-        </p>
-    </section>
-</article>
-
-<footer>
-    <a href="https://squareup.com"><img src="images/jewel.png" /></a>
+<!-- Footer --> 
+<footer id="footer">
+  <div> 
+    <a href="https://github.com/square/shuttle" class="button">Start Using Shuttle </a>
+  </div> 
+  <div> 
+    <a href="https://github.com/square"> See other Square open-source projects </a>
+  </div>
 </footer>
 
 <% content_for :javascripts do %>
-    <script type="text/javascript" charset="utf-8">
-        $(document).ready(function () {
-            var menu = $('#menu-container');
-            var menuPosition = menu.offset().top;
-            $(window).scroll(function () {
-                if ($(window).scrollTop() > menuPosition && !menu.hasClass('fixed'))
-                    menu.addClass('fixed');
-                else if ($(window).scrollTop() < menuPosition && menu.hasClass('fixed'))
-                    menu.removeClass('fixed');
-            });
-        });
-    </script>
+
+<script type="text/javascript" charset="utf-8">
+  $(document).ready(function () {
+    var navbar = $('#navbar-container');
+    var navbarWidth = navbar.width();
+    var navbarPosition = navbar.offset().top;
+    $(window).scroll(function () {
+      if ( navbarPosition < $(window).scrollTop() ) {
+        navbar.addClass('shadow');
+        navbar.css({position: 'fixed', top: 0, width: navbarWidth})
+      } else {
+        navbar.removeClass('shadow');
+        navbar.css({position: 'static'})
+      }
+    });
+
+    $('a[href*=#]:not([href=#])').click(function() {
+      if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+        var target = $(this.hash);
+        target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+        if (target.length) {
+          $('html,body').animate({
+            scrollTop: target.offset().top - 110
+          }, 1000);
+          return false;
+        }
+      }
+    });
+  });
+</script>
 <% end %>
