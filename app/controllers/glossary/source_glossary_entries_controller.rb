@@ -60,7 +60,12 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
 
   def create
     @source_entry = SourceGlossaryEntry.create(create_params)
-    respond_with @source_entry, :location => glossary_url
+    if @source_entry.valid?
+      flash[:success] = "The glossary entry was successfully created"
+    else 
+      flash[:alert] = @source_entry.errors.full_messages
+    end
+    redirect_to glossary_url
   end
 
   # Displays a large-format glossary entry edit page.
@@ -107,7 +112,12 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
 
   def update
     @source_entry.update_attributes(update_params)
-    respond_with @source_entry, :location => glossary_url
+    if @source_entry.valid?
+      flash[:success] = "The glossary entry was successfully updated"
+    else 
+      flash.now[:alert] = @source_entry.errors.full_messages
+    end
+    respond_with @source_entry, location: glossary_url
   end
 
   # Removes a source glossary entry and all of its locale glossary entries.
@@ -125,7 +135,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # | `id` | The id of the source glossary entry. |
 
   def destroy
-    respond_with @source_entry.destroy(), :location => glossary_url
+    respond_with @source_entry.destroy(), location: glossary_url, flash: {alert: 'Successfully deleted glossary entry'} 
   end
 
   private
