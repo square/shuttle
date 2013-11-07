@@ -187,7 +187,7 @@ class TranslationItem
       this.setUnsaved()
       # show warnings
       this.checkForDumbCharacters(@copy_field.val())
-      this.warnForTokenParity(@translation.source_fences, @copy_field.val())
+      this.warnForTokenParity(@copy_field.val())
       return true
     
     # Set up @expand_link_button
