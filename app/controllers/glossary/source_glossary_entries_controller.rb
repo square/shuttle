@@ -19,7 +19,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
 
   before_filter :find_source_entry, except: [:index, :create]
 
-  respond_to :json, :only => [:index, :create]
+  respond_to :json, only: :index
   respond_to :html
   
 
@@ -60,7 +60,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
 
   def create
     @source_entry = SourceGlossaryEntry.create(create_params)
-    respond_with @source_entry, :location => glossary_sources_url
+    respond_with @source_entry, :location => glossary_url
   end
 
   # Displays a large-format glossary entry edit page.
