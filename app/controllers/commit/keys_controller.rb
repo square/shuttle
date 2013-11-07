@@ -72,8 +72,6 @@ class Commit::KeysController < ApplicationController
       from offset
       size limit
       sort { by :original_key_exact, 'asc' }
-
-      puts to_json
     end
 
     respond_with(@keys) do |format|

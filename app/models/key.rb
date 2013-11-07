@@ -222,6 +222,7 @@ class Key < ActiveRecord::Base
     # update_column doesn't run hooks and doesn't change the changes array so
     # we need to force-update update_commit_readiness
     update_commit_readiness(true) if !skip_readiness_hooks && ready != ready_was
+    tire.update_index
   end
 
   # @return [true, false] `true` if this Commit should now be marked as ready.
