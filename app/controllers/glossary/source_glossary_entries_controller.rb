@@ -60,7 +60,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
 
   def create
     @source_entry = SourceGlossaryEntry.create(create_params)
-    if @source_entry.valid?
+    if @source_entry.persisted?
       flash[:success] = "The glossary entry was successfully created"
     else 
       flash[:alert] = @source_entry.errors.full_messages
@@ -111,13 +111,13 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # | `due_date`    | A soft due date for the translation                       |
 
   def update
-    @source_entry.update_attributes(update_params)
-    if @source_entry.valid?
+    if @source_entry.update_attributes(update_params)
       flash[:success] = "The glossary entry was successfully updated"
+      redirect_to glossary_url
     else 
-      flash.now[:alert] = @source_entry.errors.full_messages
+      flash[:alert] = @source_entry.errors.full_messages
+      redirect_to edit_glossary_source_url(@source_entry)
     end
-    respond_with @source_entry, location: glossary_url
   end
 
   # Removes a source glossary entry and all of its locale glossary entries.

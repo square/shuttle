@@ -248,7 +248,7 @@ class TranslationItem
     # Set up @glossary_tips
     $('<p/>').addClass('glossary-tips')
       .appendTo(@glossary_tips).hide()
-    
+
     return @element
 
   # Moves focus to the next translation item in the list.
@@ -356,7 +356,7 @@ class TranslationItem
 
   # @private
   addNote: (note) ->
-    div = $('<p/>').addClass('translation-item-note alert').text(note.note).appendTo(@left)
+    div = $('<p/>').addClass('translation-item-note alert').text(note.note).appendTo(@glossary_tips)
     if note.replacement
       $('<strong/>').text(note.replacement + ': ').prependTo div
     else
