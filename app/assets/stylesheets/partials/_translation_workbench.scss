@@ -34,25 +34,32 @@
         span.controls {
           float: right;
         }
+        .notes {
+          display:-moz-box; /* Firefox */
+          display:-webkit-box; /* Safari and Chrome */
+          display:-ms-flexbox; /* Internet Explorer 10 */
+          display:box;
+          -moz-box-orient:horizontal;
+          -webkit-box-orient:horizontal;
+          box-orient:horizontal;
 
-        .half {
-          @include box-sizing;
-          padding: 10px 10px;
+          .half {
+            @include flex;
+            padding: 10px 10px;
 
-          width: 50%;
-          display: inline-block;
-
-          p.glossary-tips { color: $input-blue; } // TODO:
-          p.warning { color: $input-orange; } // TODO:
-          p.alert { color: $input-red; } // TODO:
-          p.token-parity-warning {}
-          p.glossary-tips, p.warning, p.alert {
-            font-size: 12px;
-            font-style: italic;
-            font-weight: 500;
-            line-height: 15px;
-            margin: 5px;
-          }
+            width: 100%;
+            p.glossary-tips { color: $input-blue; } // TODO:
+            p.warning { color: $input-orange; } // TODO:
+            p.alert { color: $input-red; } // TODO:
+            p.token-parity-warning {}
+            p.glossary-tips, p.warning, p.alert {
+              font-size: 12px;
+              font-style: italic;
+              font-weight: 500;
+              line-height: 15px;
+              margin: 5px;
+            }
+          }    
         }
       }
 

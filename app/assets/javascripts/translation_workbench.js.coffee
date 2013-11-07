@@ -110,14 +110,6 @@ class TranslationItem
 
   # @private
   build: ->
-    # TODO: 
-    ###### EXPAND BUTTON ######
-    # expand = $('<div/>').addClass('large-view pull-right').appendTo(@right)
-    # expand_link = $('<a/>').addClass('icon-external-link').attr('href', '#').appendTo(expand)
-    # expand_desc = $('<span/>').text("Go to full-screen view ").prependTo(expand).hide()
-    # expand_link.click (e) =>
-    # expand.hover (-> expand_desc.show()), -> expand_desc.hide()
-    
     context = {}
 
     switch @translation.approved
@@ -195,19 +187,17 @@ class TranslationItem
       this.setUnsaved()
       # show warnings
       this.checkForDumbCharacters(@copy_field.val())
-      this.warnForTokenParity(@translation.source_fences, @copy_field.val())
+      this.warnForTokenParity(@copy_field.val())
       return true
     
     # Set up @expand_link_button
     @expand_link_button.click (e) =>
       window.open @translation.edit_url, '_blank'
-      # expand_link.removeClass('icon-external-link').addClass 'icon-refresh'
-      # expand_desc.text "Reload any changes you made "
-      # expand_link.unbind('click').click =>
-      #   $.ajax (@translation.url + '.json'),
-      #          success: (translation) => this.refresh translation
-      #          success: (translation) => this.refresh translation
-      #          error: => new Flash('alert').text("Couldn't refresh a translation.");
+      @expand_link_button.find("i").removeClass('icon-edit').addClass 'icon-refresh'
+      @expand_link_button.unbind('click').click =>
+        $.ajax (@translation.url + '.json'),
+               success: (translation) => this.refresh translation
+               error: => new Flash('alert').text("Couldn't refresh a translation.");
       e.preventDefault(); e.stopPropagation(); return false
 
     # Set up @copy_source_button
@@ -348,7 +338,7 @@ class TranslationItem
   renderGlossaryTooltip: ->
     glossaryTips = []
     for term in @parent.glossary
-      if @element.find('.fenced-copy').text().toLowerCase().search(term[0].toLowerCase()) > -1
+      if @element.find('.source-copy').text().toLowerCase().search(term[0].toLowerCase()) == 0
         glossaryTips.push("<em>" + term[0] + "</em>: " + term[1])
 
     if glossaryTips.length == 0
