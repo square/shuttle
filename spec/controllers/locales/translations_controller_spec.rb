@@ -89,7 +89,6 @@ describe Locale::TranslationsController do
       it "should filter with no options" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json'
         response.status.should eql(200)
-        puts response.body
         JSON.parse(response.body).should eql([])
       end
 

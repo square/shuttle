@@ -104,7 +104,6 @@ class SearchController < ApplicationController
               from offset
               size limit
               sort { by :original_key, 'asc' }
-              puts to_json()
             end
           else
             @results = []
