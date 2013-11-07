@@ -338,7 +338,7 @@ class TranslationItem
   renderGlossaryTooltip: ->
     glossaryTips = []
     for term in @parent.glossary
-      if @element.find('.source-copy').text().toLowerCase().search(term[0].toLowerCase()) > -1
+      if @element.find('.source-copy').text().toLowerCase().search(term[0].toLowerCase()) == 0
         glossaryTips.push("<em>" + term[0] + "</em>: " + term[1])
 
     if glossaryTips.length == 0
