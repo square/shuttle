@@ -1,0 +1,126 @@
+@import "base/vars";
+
+.highlighter-container {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.tool-container {
+	background-color: $navbar-background;
+	background-size: 100% 100%;
+	border-radius: 3px;
+	box-shadow: 0px 0px 15px #000;
+	width: 90px;
+	position: absolute;	
+	top: -45px;
+	left: -60px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.tool-container.tool-top, .tool-container.tool-bottom {
+	height: 34px;
+}
+
+.tool-items {
+	height: 100%;	
+}
+
+.tool-top .tool-item, .tool-bottom .tool-item {
+	float: left;
+	border-left: 1px solid black;
+}
+
+.tool-left .tool-item, .tool-right .tool-item {
+	height: 34px;
+	border-top: 1px solid #e2dfdf;
+	border-bottom: 1px solid #9f9898;
+}
+
+.tool-item {
+	height: 100%;
+	display: block;				
+	width: 44px;
+	text-align: center;
+	color: $navbar-gray-text;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.tool-item > i {
+	display: inline-block;
+	margin-top: 10px;
+    color: white;
+}
+
+.tool-item:first-child {
+	border-left: none;
+}
+
+.tool-left .tool-item:first-child, .tool-right .tool-item:first-child {
+	border-top: 1px solid transparent;
+}
+
+.tool-item:last-child {
+	border-right: none;
+	border-bottom: none;
+}
+
+.tool-item.selected, .tool-item:hover  {
+	color: $navbar-highlight-text;
+}
+
+.tool-top .tool-item:last-child:hover, .tool-bottom .tool-item:last-child:hover {
+	border-top-right-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+
+.tool-top  .tool-item:first-child:hover, .tool-bottom  .tool-item:first-child:hover {
+	border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+}
+
+.tool-left .tool-item:last-child:hover, .tool-right .tool-item:last-child:hover {
+	border-bottom-right-radius: 4px;
+	border-bottom-left-radius: 4px;
+}
+
+.tool-left .tool-item:first-child:hover, .tool-right .tool-item:first-child:hover {
+	border-top-right-radius: 4px;
+	border-top-left-radius: 4px;
+}
+
+.tool-container .arrow {
+	width:0;
+	height:0;
+	position: absolute;	
+	border-width:7px;
+	border-style:solid;
+}
+
+.tool-container .arrow {
+	border-color: $navbar-background transparent transparent;
+	left: 50%;  
+	bottom: -14px;
+	margin-left: -7px;
+}
+
+.demo-link {
+	color: #89CDE4;
+	text-decoration: underline;
+	cursor: pointer;
+	margin-left: 30px;
+}
+
+.demo-link:hover {
+	text-decoration: none;
+	cursor: pointer;
+}
