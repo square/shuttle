@@ -89,11 +89,11 @@ class CommitsController < ApplicationController
         other_fields[:user_id] = current_user.id
 
         if already_submitted_revision?(@project, revision)
-          render json: {message: t('controllers.commits.create.already_submitted')}
+          render json: {alert: t('controllers.commits.create.already_submitted')}
         else
           CommitCreator.perform_once @project.id, revision, other_fields: other_fields
           record_submitted_revision @project, revision
-          render json: {message: t('controllers.commits.create.success', revision: revision)}
+          render json: {success: t('controllers.commits.create.success', revision: revision)}
         end
       end
     end
