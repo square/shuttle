@@ -39,7 +39,7 @@ module Localizer
 
       @translations.each do |translation|
         xpath                             = translation.key.key.sub(/^#{Regexp.escape translation.key.source}:/, '')
-        xml.xpath(xpath).first.inner_html = escape(process_copy(translation.copy))
+        xml.xpath(xpath).first.inner_html = escape(translation.copy)
       end
 
       # build a path, replacing the parent directory with the correct qualifiers
@@ -54,11 +54,6 @@ module Localizer
     end
 
     private
-
-    def process_copy(copy)
-      # fix bug with smart quotes in Roboto font
-      copy.gsub('’', "'")
-    end
 
     def escape(copy)
       copy.gsub(/[\\']/, "\\" => "\\\\", "'" => "\\'")
