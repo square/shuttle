@@ -54,7 +54,7 @@ module Importer
 
         context = find_comment(tag).try!(:content)
         receiver.add_string "#{file.path}:#{tag.path}",
-                            unescape(tag.content),
+                            unescape(strip(tag.content)),
                             context:      clean_comment(context),
                             original_key: tag['name']
       end
@@ -69,7 +69,7 @@ module Importer
         tag.xpath('item').each do |item_tag|
           context = find_comment(item_tag).try!(:content)
           receiver.add_string "#{file.path}:#{item_tag.path}",
-                              unescape(item_tag.content),
+                              unescape(strip(item_tag.content)),
                               context:      clean_comment(context || global_context),
                               original_key: tag['name']
         end
@@ -85,7 +85,7 @@ module Importer
         tag.xpath('item').each do |subtag|
           context = find_comment(subtag).try!(:content)
           receiver.add_string "#{file.path}:#{subtag.path}",
-                              unescape(subtag.content),
+                              unescape(strip(subtag.content)),
                               context:      clean_comment(context || global_context),
                               original_key: tag['name']
         end
@@ -103,6 +103,10 @@ module Importer
     end
 
     private
+
+    def strip(string)
+      string.gsub(/\s*\n+\s*/, ' ')
+    end
 
     def unescape(string)
       result = ''
