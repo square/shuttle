@@ -80,7 +80,14 @@ $(window).ready () ->
       $($(this).data('target')).addClass('disabled')
     return true
 
-  new SmartForm($('#new_commit'), () -> window.location.reload() )
+  new SmartForm $('#new_commit'), (notification) -> 
+    $("#add-translation").closeModal()
+    if notification.success 
+      new Flash('success').text(notification.success);
+    else if notification.alert
+      new Flash('alert').text(notification.alert);
+
+
   $('#new_commit_project_id').change () ->
     project = $(this).val()
     $('#new_commit').attr('action', '/projects/' + project + '/commits.json')

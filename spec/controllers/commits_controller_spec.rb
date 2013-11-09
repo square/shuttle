@@ -605,11 +605,11 @@ de:
     it "should not attempt to import the same revision twice in quick succession" do
       CommitCreator.should_receive(:perform_once).once
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
-      expect(JSON.parse(response.body)['message']).to include('has been received')
+      expect(JSON.parse(response.body)['success']).to include('has been received')
 
       CommitCreator.should_not_receive(:perform_once)
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
-      expect(JSON.parse(response.body)['message']).to include('already submitted')
+      expect(JSON.parse(response.body)['alert']).to include('already submitted')
     end
   end
 

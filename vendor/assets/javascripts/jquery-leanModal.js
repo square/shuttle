@@ -102,6 +102,10 @@
 
                   options = $.extend(defaults, options);
                   showModal($(this), options);
+                },
+
+                closeModal: function() { 
+                  close_modal($(this))
                 }
               });
 })(jQuery);

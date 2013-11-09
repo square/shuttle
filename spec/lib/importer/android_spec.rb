@@ -75,8 +75,12 @@ describe Importer::Android do
       @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[6]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello 'world'")
     end
 
+    it "should properly strip non-explicit new lines" do
+      @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[7]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello Hello World!!\n\nHello World.")
+    end 
+
     it "should add comments as context" do
-      k = @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[7]').first
+      k = @project.keys.for_key('/java/basic-hdpi/strings.xml:/resources/string[8]').first
       k.context.should eql("This is not a date format string. Rather, it is hint text in a field, presented to the merchant.")
     end
   end
