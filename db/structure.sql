@@ -57,6 +57,7 @@ CREATE TABLE commits (
     priority integer,
     user_id integer,
     completed_at timestamp without time zone,
+    exported boolean DEFAULT false NOT NULL,
     CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0)),
     CONSTRAINT commits_priority_check CHECK (((priority >= 0) AND (priority <= 3)))
 );
@@ -564,19 +565,19 @@ ALTER TABLE ONLY commits_keys
 
 
 --
--- Name: commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: commits_new_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY commits
-    ADD CONSTRAINT commits_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT commits_new_pkey PRIMARY KEY (id);
 
 
 --
--- Name: glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: glossary_entries_new_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT glossary_entries_new_pkey PRIMARY KEY (id);
 
 
 --
@@ -660,10 +661,10 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: commits_date; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: commits_date_new; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE INDEX commits_date ON commits USING btree (project_id, committed_at);
+CREATE INDEX commits_date_new ON commits USING btree (project_id, committed_at);
 
 
 --
@@ -674,17 +675,17 @@ CREATE INDEX commits_priority ON commits USING btree (priority, due_date);
 
 
 --
--- Name: commits_ready_date; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: commits_ready_date_new; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE INDEX commits_ready_date ON commits USING btree (project_id, ready, committed_at);
+CREATE INDEX commits_ready_date_new ON commits USING btree (project_id, ready, committed_at);
 
 
 --
--- Name: commits_rev; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: commits_rev_new; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE UNIQUE INDEX commits_rev ON commits USING btree (project_id, revision_raw);
+CREATE UNIQUE INDEX commits_rev_new ON commits USING btree (project_id, revision_raw);
 
 
 --
@@ -692,13 +693,6 @@ CREATE UNIQUE INDEX commits_rev ON commits USING btree (project_id, revision_raw
 --
 
 CREATE INDEX glossary_entries_sorted ON glossary_entries USING btree (rfc5646_locale, source_copy_prefix);
-
-
---
--- Name: glossary_source_copy_sha; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX glossary_source_copy_sha ON glossary_entries USING btree (source_copy_sha_raw, rfc5646_locale);
 
 
 --
@@ -748,6 +742,13 @@ CREATE INDEX slugs_for_record ON slugs USING btree (sluggable_type, sluggable_id
 --
 
 CREATE UNIQUE INDEX slugs_unique ON slugs USING btree (sluggable_type, lower((scope)::text), lower((slug)::text));
+
+
+--
+-- Name: source_copy_sha_new; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX source_copy_sha_new ON glossary_entries USING btree (source_copy_sha_raw, rfc5646_locale);
 
 
 --
@@ -823,6 +824,14 @@ ALTER TABLE ONLY commits_keys
 
 
 --
+-- Name: commits_keys_commit_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY commits_keys
+    ADD CONSTRAINT commits_keys_commit_id_fkey1 FOREIGN KEY (commit_id) REFERENCES commits(id) ON DELETE CASCADE;
+
+
+--
 -- Name: commits_keys_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -831,11 +840,11 @@ ALTER TABLE ONLY commits_keys
 
 
 --
--- Name: commits_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: commits_new_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY commits
-    ADD CONSTRAINT commits_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+    ADD CONSTRAINT commits_new_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 
 --
@@ -847,19 +856,19 @@ ALTER TABLE ONLY commits
 
 
 --
--- Name: glossary_entries_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: glossary_entries_new_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE SET NULL;
+    ADD CONSTRAINT glossary_entries_new_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE SET NULL;
 
 
 --
--- Name: glossary_entries_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: glossary_entries_new_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_translator_id_fkey FOREIGN KEY (translator_id) REFERENCES users(id) ON DELETE SET NULL;
+    ADD CONSTRAINT glossary_entries_new_translator_id_fkey FOREIGN KEY (translator_id) REFERENCES users(id) ON DELETE SET NULL;
 
 
 --
@@ -971,3 +980,5 @@ INSERT INTO schema_migrations (version) VALUES ('20130821011600');
 INSERT INTO schema_migrations (version) VALUES ('20130821011614');
 
 INSERT INTO schema_migrations (version) VALUES ('20131008220117');
+
+INSERT INTO schema_migrations (version) VALUES ('20131111213136');

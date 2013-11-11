@@ -101,6 +101,12 @@ class HomeController < ApplicationController
              ''
            end
 
+    # Filter by export status
+
+    unless params[:exported] == 'true'
+      @commits = @commits.where(exported: false)
+    end
+
     @newer = @offset >= 30
     @older = @commits.offset(@offset + 30).exists?
   end

@@ -61,9 +61,9 @@ hr.divider
           .controls
             = check_box_tag 'email', current_user.email, params[:email] == current_user.email
             | Only commits from me
-          /.controls
-            /= check_box_tag 'email', current_user.email, params[:email] == current_user.email
-            /| Include finished commits
+          .controls
+            = check_box_tag 'exported', 'true', params[:exported] == 'true'
+            | Include exported commits
 
   table.table.hover-rows#commits 
     thead

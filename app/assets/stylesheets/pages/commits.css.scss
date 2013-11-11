@@ -10,21 +10,14 @@ body.commits {
     margin-top: 0px;
   }
 
-  #filter {
-    padding: 15px 10px;
-    background-color: $off-blue;
-
-    select, input[type="text"] {
-      margin-left: 5px;
-      margin-right: 15px;
-    }
+  .filter-bar {
+    form { display: inline-block; }
     select {
       text-transform: capitalize;
-      width: 200px;
+      width: 150px;
     }
-    input[type="text"] {
-      width: 400px;
-    }
+    input[type="text"] { width: 500px; }
+    input[type="checkbox"] { margin-left: 30px; }
   }
 
   table#translations {

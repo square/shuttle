@@ -19,17 +19,21 @@
 hr.divider
 
 .border
-  #filter
+  .filter-bar#filter
     = form_tag(nil, method: 'GET', id: 'filter-form', class: 'filter') do
+      = text_field_tag 'filter', '', placeholder: 'Substring', id: 'filter-field'
       = select_tag 'status', options_for_select(\
           [\
             ['all', nil],\
             ['approved', 'approved'],\
             ['pending', 'pending']\
           ]\
-        ), id: 'filter-select' 
-      = text_field_tag 'filter', '', placeholder: 'Substring', id: 'filter-field'
+        ), id: 'filter-select'
       = submit_tag 'Filter', class: 'primary'
+
+    = form_for @commit, url: project_commit_url(@commit.project, @commit, format: 'json') do |f|
+      = f.check_box :exported
+      | Commit has been exported
 
   table.table.table-striped#translations[
       data-url=project_commit_keys_url(@project, @commit, format: 'json') 
