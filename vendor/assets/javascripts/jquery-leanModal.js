@@ -37,15 +37,20 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-(function($) {
-  var close_modal = function(modal) {
+(function ($) {
+  var close_modal = function (modal) {
     $("#lean_overlay").fadeOut(200);
     modal.css({ 'display': 'none' });
+    modal.trigger("leanModal.hidden")
   };
 
-  var showModal = function(modal, o) {
-    $("#lean_overlay").click(function() { close_modal(modal); });
-    $(o.closeButton).click(function() { close_modal(modal); });
+  var showModal = function (modal, o) {
+    $("#lean_overlay").click(function () {
+      close_modal(modal);
+    });
+    $(o.closeButton).click(function () {
+      close_modal(modal);
+    });
 
     var modal_height = modal.outerHeight();
     var modal_width = modal.outerWidth();
@@ -55,57 +60,57 @@
 
     modal.css({
 
-                'display':     'block',
-                'position':    'fixed',
-                'opacity':     0,
-                'z-index':     11000,
-                'left':        50 + '%',
-                'margin-left': -(modal_width / 2) + "px",
-                'top':         o.top + "px"
+      'display': 'block',
+      'position': 'fixed',
+      'opacity': 0,
+      'z-index': 11000,
+      'left': 50 + '%',
+      'margin-left': -(modal_width / 2) + "px",
+      'top': o.top + "px"
 
-              });
+    });
     modal.fadeTo(200, 1);
   };
 
   $.fn.extend({
-                leanModal: function(options) {
-                  var defaults = {
-                    top:         100,
-                    overlay:     0.5,
-                    closeButton: null
-                  };
+    leanModal: function (options) {
+      var defaults = {
+        top: 100,
+        overlay: 0.5,
+        closeButton: null
+      };
 
-                  var overlay = $("<div id='lean_overlay'></div>");
-                  $("body").append(overlay);
+      var overlay = $("<div id='lean_overlay'></div>");
+      $("body").append(overlay);
 
-                  options = $.extend(defaults, options);
-                  return this.each(function() {
-                    var o = options;
-                    $(this).click(function(e) {
-                      var modal_id = $(this).attr("href");
-                      var modal = $(modal_id);
-                      showModal(modal, o);
-                      e.preventDefault();
-                    });
-                  });
-                },
+      options = $.extend(defaults, options);
+      return this.each(function () {
+        var o = options;
+        $(this).click(function (e) {
+          var modal_id = $(this).attr("href");
+          var modal = $(modal_id);
+          showModal(modal, o);
+          e.preventDefault();
+        });
+      });
+    },
 
-                showModal: function(options) {
-                  var defaults = {
-                    top:         100,
-                    overlay:     0.5,
-                    closeButton: null
-                  };
+    showModal: function (options) {
+      var defaults = {
+        top: 100,
+        overlay: 0.5,
+        closeButton: null
+      };
 
-                  var overlay = $("<div id='lean_overlay'></div>");
-                  $("body").append(overlay);
+      var overlay = $("<div id='lean_overlay'></div>");
+      $("body").append(overlay);
 
-                  options = $.extend(defaults, options);
-                  showModal($(this), options);
-                },
+      options = $.extend(defaults, options);
+      showModal($(this), options);
+    },
 
-                closeModal: function() { 
-                  close_modal($(this))
-                }
-              });
+    closeModal: function () {
+      close_modal($(this))
+    }
+  });
 })(jQuery);

@@ -63,6 +63,7 @@
   background-color: $input-white;
   border: 1px solid $input-white-border;
   margin: 0;
+  &.alert { border: 1px solid red !important; }
 
   &[disabled], .disabled {
     background-color: $gray6 !important;

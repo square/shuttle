@@ -35,6 +35,7 @@
 //= require jquery-chosen
 //= require datepicker
 //= require twitter/typeahead
+//= require modernizr
 //= require xregexp
 //
 //= require d3
