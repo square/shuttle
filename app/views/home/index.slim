@@ -28,34 +28,42 @@
 
 hr.divider
 
-.border 
+.border
+  - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+  - project_list.unshift ['projects in my locales', 'my-locales'] if current_user.approved_locales.any?
+  - project_list.unshift ['all projects', nil]
+
   .filter-bar#filter
-    - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-    - project_list.unshift ['projects in my locales', 'my-locales'] if current_user.approved_locales.any?
-    - project_list.unshift ['all projects', nil]
     = form_tag({}, id: 'filter', method: 'get')
-      .control
-        = select_tag 'status', options_for_select(\
-          %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
-          @status\
-        )
-      .control
+      .main
+        = text_field_tag 'sha', @sha, placeholder: '9d613fz'
         = select_tag 'project_id', options_for_select(project_list, params[:project_id])
-      .control 
+
         - if current_user.approved_locales.any?
           - locales = current_user.approved_locales.map { |locale| [locale.name, locale.rfc5646] }
           - locales.unshift ['my locales', current_user.approved_locales.map(&:rfc5646).join(',')]
           - locales.unshift ['all locales', nil]
           = select_tag 'locales', options_for_select(locales, @locales.map(&:rfc5646).join(','))
-        - else 
-          = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: "Locale", class: 'locale-field'
-      .control
-        = text_field_tag 'sha', @sha, placeholder: "9d613f"
-      .control 
+        - else
+          = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: 'Locale', class: 'locale-field'
         = submit_tag 'Filter', class: 'primary'
-      .control 
-        = check_box_tag 'email', current_user.email, params[:email] == current_user.email
-        | Only commits from me
+        .pull-right#expand-search
+          i.icon-angle-right
+
+      .collapse
+        .control-group
+          = label_tag 'status', 'Project Status', class: 'control-label'
+          .controls
+            = select_tag 'status', options_for_select(\
+              %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
+              @status\
+            )
+          .controls
+            = check_box_tag 'email', current_user.email, params[:email] == current_user.email
+            | Only commits from me
+          .controls
+            = check_box_tag 'exported', 'true', params[:exported] == 'true'
+            | Include exported commits
 
   table.table.hover-rows#commits 
     thead
@@ -74,6 +82,7 @@ hr.divider
     tbody 
       - @commits.each do |commit|
         tr.row_class
+          / Project Status
           ruby: 
             if commit.loading?
               commit_state = 'commit-loading'
@@ -82,9 +91,12 @@ hr.divider
             else
               commit_state = 'commit-translating'
             end
-            
           td class=commit_state
+
+          / Project Name
           td = commit.project.name
+
+          / Project Due Date
           td.due-date class=("centered" if !commit.due_date)
             - if current_user.admin?
               = form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
@@ -104,6 +116,8 @@ hr.divider
                 span class="#{date_class}" = l(commit.due_date, format: :mon_day_year)
               - else 
                 | -
+
+          / Project Priority
           td.centered
             - if current_user.admin?
               = form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
@@ -118,6 +132,8 @@ hr.divider
                   = t("models.commit.priority.#{commit.priority}")
               - else
                 | -
+
+          / Project Description
           td class=("centered" if !commit.description)
             ruby:
               description = commit.description
@@ -127,11 +143,15 @@ hr.divider
                 if commit.user
                   full_description << "<br><strong>Requested by " + mail_to(commit.user.email, commit.user.abbreviated_name) + "</strong>"
                 end
+                full_description << "<br><strong>Created on #{commit.created_at.strftime('%B %d, %Y')}</strong>"
               end
             div.description[data-full-description=full_description data-short-description=truncate(description || '-', length: 50)]
               = truncate(description || '-', length: 50)
 
+          / Word Translation Count
           td = "#{number_with_delimiter commit.translations_new(*@locales)}s (#{number_with_delimiter commit.words_new(*@locales)}w)"
+
+          / Word Review Count
           td = "#{number_with_delimiter commit.translations_pending(*@locales)}s (#{number_with_delimiter commit.words_pending(*@locales)}w)"
           td class=("centered" if !commit.github_url and !commit.pull_request_url)
             - if commit.github_url or commit.pull_request_url
@@ -143,10 +163,14 @@ hr.divider
                 = link_to 'PR', commit.pull_request_url
             - else
               | -
+
+          / Links (Pull Request, Github)
           td 
             = link_to commit.revision[0, 6], project_commit_url(commit.project, commit)
+
+          / Translation Button
           - if current_user.translator?
-            - if current_user.role == "admin"
+            - if current_user.role == 'admin'
               td
                 - locale = commit.project.required_locales.any? ? commit.project.required_locales.first.rfc5646 : "fr"
                 input.submit.translate-link[
@@ -154,7 +178,7 @@ hr.divider
                   data-sha=commit.revision 
                   data-project=commit.project.to_param
                   data-locale=locale
-                  value="Translate"] 
+                  value="Translate"]
             - elsif current_user.approved_locales.any?
               td 
                 - locale = current_user.approved_locales.first
@@ -171,15 +195,15 @@ hr.divider
 .row 
   .pagination-links
     - if @older
-      = link_to "« older", \
+      = link_to '« older', \
         url_for(request.query_parameters.merge('offset' => @offset + 30)), \
-        class: "button default older"
+        class: 'button default older'
 
     | &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
     - if @newer
-      = link_to "newer »", \
+      = link_to 'newer »', \
         url_for(request.query_parameters.merge('offset' => @offset - 30)), \
-        class: "button default newer"
+        class: 'button default newer'
 
 
 
@@ -193,24 +217,24 @@ hr.divider
         .modal-body
           .half
             .control-group
-              = label_tag 'new_commit_project_id', Commit.human_attribute_name(:project_id), class: "control-label"
+              = label_tag 'new_commit_project_id', Commit.human_attribute_name(:project_id), class: 'control-label'
               .controls
                 = select_tag 'new_commit_project_id', options_for_select(projects.map { |pr| [pr.name, pr.to_param] }), required: true
             .control-group
-              = f.label :revision, class: "control-label"
+              = f.label :revision, class: 'control-label'
               .controls
                 = f.text_field :revision, required: true
             .control-group
-              = f.label :due_date, class: "control-label"
+              = f.label :due_date, class: 'control-label'
               .controls
-                = f.text_field :due_date, class: "datepicker"
+                = f.text_field :due_date, class: 'datepicker'
             .control-group
-              = f.label :pull_request_url, class: "control-label"
+              = f.label :pull_request_url, class: 'control-label'
               .controls
                 = f.text_field :pull_request_url
           .half
             .control-group
-              = f.label :description, class: "control-label"
+              = f.label :description, class: 'control-label'
               .controls
                 = f.text_area :description, rows: 7
             = f.submit class: 'primary'

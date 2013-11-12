@@ -13,6 +13,23 @@
 #    limitations under the License.
 
 $(window).ready ->
+  $("input[name='commit[exported]']").change ->
+    checkbox = $(this)
+    form = checkbox.closest('form')
+    authParam = $('meta[name=csrf-param]').attr('content')
+    authToken = $('meta[name=csrf-token]').attr('content')
+    data = form.serializeObject()
+    data['commit[exported]'] = checkbox.prop("checked")
+    data[authParam] = authToken
+
+    $.ajax form.attr('action'),
+      data: data,
+      type: 'PATCH',
+      success: ->
+        new Flash('success').text("Commit export status has been updated")
+      error: ->
+        new Flash('alert').text("Couldn't update commit export status")
+
   table = $('#translations')
   searchForm = $('#filter-form')
   makeURL = -> "#{table.data('url')}?#{searchForm.serialize()}"
