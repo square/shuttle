@@ -60,9 +60,20 @@ body.home {
   .pagination-links {
     width: 100%;
     font-size: 20px;
-    height: 40px;
     margin: 10px 0px;
-    .newer { float: right; }
-    .older { float: left; }
+    .pagination {
+      display:-moz-box; /* Firefox */
+      display:-webkit-box; /* Safari and Chrome */
+      display:-ms-flexbox; /* Internet Explorer 10 */
+      display:box;
+    }
+    .switch-page { width: 198px; }
+    .pages {
+      @include flex;
+      text-align: center;
+      .page + .page { margin-left: 8px; }
+    }
   }
+
+  .pagination-info { width: 100%; text-align: center; }
 }

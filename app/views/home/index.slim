@@ -195,6 +195,7 @@ hr.divider
 .row 
   .pagination-links
     = paginate @commits
+.row
   .pagination-info= page_entries_info(@commits)
 
 - if Project.count > 0
