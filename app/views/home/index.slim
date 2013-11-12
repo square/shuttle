@@ -36,7 +36,7 @@ hr.divider
   .filter-bar#filter
     = form_tag({}, id: 'filter', method: 'get')
       .main
-        = text_field_tag 'sha', @sha, placeholder: '9d613fz'
+        = text_field_tag 'sha', @sha, placeholder: '9d613f'
         = select_tag 'project_id', options_for_select(project_list, params[:project_id])
 
         - if current_user.approved_locales.any?
