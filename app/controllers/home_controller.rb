@@ -15,6 +15,9 @@
 # Contains landing pages appropriate for each of the User roles.
 
 class HomeController < ApplicationController
+  # Typical number of commits to show per page.
+  PER_PAGE = 30
+
   before_filter :authenticate_user!
   before_filter :translator_required, only: [:translators, :glossary]
   before_filter :reviewer_required, only: :reviewers
@@ -38,56 +41,59 @@ class HomeController < ApplicationController
 
   def index
     @offset = params[:offset].to_i
+    offset  = @offset
 
+    # Filter by status
     @status = params[:status]
     unless %w(uncompleted completed all).include?(@status)
       @status = 'uncompleted'
     end
+    status = @status
 
-    # Load commits
-
-    @commits = Commit.
-        includes(:user, project: :slugs).
-        by_priority_and_due_date.
-        offset(@offset).
-        limit(30)
-
-    # Filter by SHA prefix
-
-    if params[:sha].present? && params[:sha].match(/^[0-9A-F]+$/i)
-      @commits = @commits.with_sha_prefix(params[:sha].downcase)
-    end
+    limit    = params.fetch(:limit, PER_PAGE).to_i
+    exported = params[:exported] == 'true'
 
     # Filter by project
-
     params[:project_id] ||= 'my-locales' if current_user.approved_locales.any?
-    if params[:project_id] == 'my-locales'
-      projects = Project.scoped.to_a.select do |project|
-        (project.targeted_locales & current_user.approved_locales).any?
-      end
-      @commits = @commits.where(project_id: projects.map(&:id))
-    else
-      project_id = params[:project_id].to_i
-      if project_id > 0
-        @commits = @commits.where(project_id: project_id)
-      end
-    end
+    projects = if params[:project_id] == 'my-locales'
+                 Project.scoped.to_a.select do |project|
+                   (project.targeted_locales & current_user.approved_locales).any?
+                 end
+               else
+                 [Project.find_by_id(params[:project_id])].compact
+               end
 
-    # Filter by status
-
-    case @status
-      when 'uncompleted' then
-        @commits = @commits.where("ready IS FALSE OR loading IS TRUE")
-      when 'completed' then
-        @commits = @commits.where("ready IS TRUE OR loading IS TRUE")
-    end
+    # Filter by SHA
+    sha      = params[:sha].presence
+    sha = nil unless sha =~ /^[0-9A-F]+$/i
+    @sha = sha
 
     # Filter by user
-
     params[:email] ||= current_user.email if current_user.monitor? && !current_user.admin?
-    if params[:email].present?
-      user = User.find_by_email(params[:email])
-      @commits = @commits.where(user_id: user.id) if user
+    user = if params[:email].present?
+             User.find_by_email(params[:email])
+           else
+             nil
+           end
+
+    @commits = Commit.search(load: {include: [:user, project: :slugs]}) do
+      filter :prefix, revision: sha if sha
+      filter :term, project_id: projects.map(&:id) if projects.any?
+      filter :term, user_id: user.id if user
+      filter :term, exported: true if exported
+      case status
+        when 'uncompleted'
+          filter :term, ready: false
+        when 'completed'
+          filter :term, ready: true
+      end
+
+      from offset
+      size limit
+      sort do
+        by :priority, 'asc'
+        by :due_date, 'desc'
+      end
     end
 
     @locales = if params[:locales].present?
@@ -95,19 +101,5 @@ class HomeController < ApplicationController
                else
                  []
                end
-    @sha = if params[:sha].present?
-             params[:sha]
-           else
-             ''
-           end
-
-    # Filter by export status
-
-    unless params[:exported] == 'true'
-      @commits = @commits.where(exported: false)
-    end
-
-    @newer = @offset >= 30
-    @older = @commits.offset(@offset + 30).exists?
   end
 end

@@ -186,6 +186,8 @@ describe SearchController do
     let(:prefix3) { "abc111" }
 
     before :all do
+      reset_elastic_search
+
       @user = FactoryGirl.create(:user, role: "translator")
       @project1 = FactoryGirl.create(:project)
       @project2 = FactoryGirl.create(:project)
@@ -193,11 +195,14 @@ describe SearchController do
       2.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("123456")) }
       1.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("abc111")) }
       1.times { FactoryGirl.create(:commit, project: @project2, revision: finish_sha("abc111")) }
+
+      regenerate_elastic_search_indexes
     end
 
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
+      sleep 2
     end
 
     it "should return all commits if no filters are given" do

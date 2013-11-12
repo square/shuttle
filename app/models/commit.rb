@@ -67,7 +67,7 @@ require 'fileutils'
 # | `description`      | A user-submitted description of why we are localizing this commit. |
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
 
-class Commit < ActiveRecord::Base 
+class Commit < ActiveRecord::Base
   extend RedisMemoize
   include CommitTraverser
 
@@ -83,39 +83,51 @@ class Commit < ActiveRecord::Base
 
   include HasMetadataColumn
   has_metadata_column(
-    description:      {allow_nil: true},
-    pull_request_url: {allow_nil: true}
+      description:      {allow_nil: true},
+      pull_request_url: {allow_nil: true}
   )
 
+  include Tire::Model::Search
+  include Tire::Model::Callbacks
+  mapping do
+    indexes :project_id, type: 'integer'
+    indexes :user_id, type: 'integer'
+    indexes :priority, type: 'integer'
+    indexes :due_date, type: 'date'
+    indexes :created_at, type: 'date'
+    indexes :revision, as: 'revision', index: :not_analyzed
+    indexes :ready, type: 'boolean'
+  end
+
   validates :project,
-    presence: true
+            presence: true
   validates :revision_raw,
-    presence:   true,
-    uniqueness: {scope: :project_id, on: :create}
+            presence:   true,
+            uniqueness: {scope: :project_id, on: :create}
   validates :message,
-    presence: true,
-    length:   {maximum: 256}
+            presence: true,
+            length:   {maximum: 256}
   validates :committed_at,
-    presence:   true,
-    timeliness: {type: :time}
+            presence:   true,
+            timeliness: {type: :time}
   validates :priority,
-    numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3},
-    allow_nil:    true
+            numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3},
+            allow_nil:    true
   validates :due_date,
-    timeliness: {type: :date},
-    allow_nil:  true
+            timeliness: {type: :date},
+            allow_nil:  true
   validates :completed_at,
-    timeliness: {type: :date},
-    allow_nil:  true
+            timeliness: {type: :date},
+            allow_nil:  true
 
   attr_readonly :project_id, :revision_raw, :message, :committed_at
 
   extend GitObjectField
   git_object_field :revision,
-    git_type:        :commit,
-    repo:            ->(c) { c.project.try!(:repo) },
-    repo_must_exist: true,
-    scope:           :for_revision
+                   git_type:        :commit,
+                   repo:            ->(c) { c.project.try!(:repo) },
+                   repo_must_exist: true,
+                   scope:           :for_revision
 
   extend SetNilIfBlank
   set_nil_if_blank :description, :due_date, :pull_request_url
@@ -133,10 +145,7 @@ class Commit < ActiveRecord::Base
 
   attr_readonly :revision, :message
 
-  scope :by_priority_and_due_date, -> { order('due_date ASC, priority ASC') }
-  scope :with_sha_prefix, lambda { |sha| where("encode(revision_raw, 'hex') like ?", "#{sha}%") }
-
-  # Counts the total commits.  
+  # Counts the total commits.
   #
   # @return [Fixnum] The number of commits
 
@@ -164,26 +173,26 @@ class Commit < ActiveRecord::Base
 
     timespan = 30
 
-    last_date = Date.today
+    last_date  = Date.today
     first_date = Date.today - timespan.days
 
     commits = Commit.where("created_at >= :date", date: first_date).where("created_at <= :date", date: last_date).order('created_at ASC')
 
     i = 0
-    while first_date < last_date         
-      num_finished = 0 
+    while first_date < last_date
+      num_finished = 0
 
-      while i < commits.length and commits[i].created_at.utc.to_date == first_date 
+      while i < commits.length and commits[i].created_at.utc.to_date == first_date
         num_finished += 1
-        i += 1
-      end 
+        i            += 1
+      end
 
       daily_commits_created << [first_date.to_time.utc.to_i, num_finished]
       first_date += 1.day
-    end 
+    end
 
     return daily_commits_created
-  end 
+  end
 
 
   # Counts the number of commits finished every day for the past 30 days.  
@@ -195,52 +204,52 @@ class Commit < ActiveRecord::Base
 
     timespan = 30
 
-    last_date = Date.today
+    last_date  = Date.today
     first_date = Date.today - timespan.days
 
     commits = Commit.where("completed_at >= :date", date: first_date).where("completed_at <= :date", date: last_date).order('completed_at ASC')
 
     i = 0
-    while first_date < last_date         
-      num_finished = 0 
+    while first_date < last_date
+      num_finished = 0
 
-      while i < commits.length and commits[i].completed_at.utc.to_date == first_date 
+      while i < commits.length and commits[i].completed_at.utc.to_date == first_date
         num_finished += 1
-        i += 1
-      end 
+        i            += 1
+      end
 
       daily_commits_finished << [first_date.to_time.utc.to_i, num_finished]
       first_date += 1.day
-    end 
+    end
 
     return daily_commits_finished
-  end 
+  end
 
   # Calculates 
   # 
   # @return [Array<Fixnum>] An array containing the number of commits finished each day for the past 30 days.
-  
+
   def self.average_completion_time
     moving_average = []
 
     timespan = 30
-    window = 7
+    window   = 7
 
-    last_date = Date.today
+    last_date  = Date.today
     first_date = Date.today - timespan.days
 
     # Ensures that completed_at is not nil
-    commits = Commit.where("completed_at >= :date", date: first_date)
-                    .where("completed_at <= :date", date: last_date)
-                    .order('completed_at ASC')
+    commits    = Commit.where("completed_at >= :date", date: first_date).
+        where("completed_at <= :date", date: last_date).
+        order('completed_at ASC')
 
-    while first_date < last_date 
-      window_commits = commits.reject { |commit| commit.completed_at < first_date || commit.completed_at > first_date + window.days }
-      average_completion_time = window_commits.inject(0) { |total, commit| total += commit.time_to_complete }
-        .fdiv(window_commits.count.nonzero? || 1)
+    while first_date < last_date
+      window_commits          = commits.reject { |commit| commit.completed_at < first_date || commit.completed_at > first_date + window.days }
+      average_completion_time = window_commits.inject(0) { |total, commit| total += commit.time_to_complete }.
+          fdiv(window_commits.count.nonzero? || 1)
 
       # Add the average completion time
-      moving_average << [first_date.to_time.utc.to_i, average_completion_time]  
+      moving_average << [first_date.to_time.utc.to_i, average_completion_time]
       first_date += 1.day
     end
 
@@ -255,7 +264,7 @@ class Commit < ActiveRecord::Base
   # completed_at to be the current time.
 
   def recalculate_ready!
-    ready = !keys.where(ready: false).exists?
+    ready      = !keys.where(ready: false).exists?
     self.ready = ready
     if self.ready and self.completed_at.nil?
       self.completed_at = Time.current
@@ -290,7 +299,7 @@ class Commit < ActiveRecord::Base
   def import_strings(options={})
     raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
 
-    blobs = project.blobs.includes(:project) # preload blobs for performance
+    blobs  = project.blobs.includes(:project) # preload blobs for performance
 
     # add us as one of the workers, to prevent the commit from prematurely going
     # ready; let's just invent a job ID for us
@@ -418,7 +427,7 @@ class Commit < ActiveRecord::Base
   def translations_pending(*locales)
     locales = project.required_locales if locales.empty?
     translations.not_base.where('approved IS NOT TRUE').
-      where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
+        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
   end
   redis_memoize :translations_pending
 
@@ -432,7 +441,7 @@ class Commit < ActiveRecord::Base
   def words_pending(*locales)
     locales = project.required_locales if locales.empty?
     translations.not_base.where('approved IS NOT TRUE').
-      where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
+        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
   end
   redis_memoize :words_pending
 
@@ -472,7 +481,7 @@ class Commit < ActiveRecord::Base
     loading_was = self.loading
 
     Shuttle::Redis.srem "import:#{revision}", jid
-    loading = (Shuttle::Redis.scard("import:#{revision}") > 0)
+    loading      = (Shuttle::Redis.scard("import:#{revision}") > 0)
     self.loading = loading
     save!
 
