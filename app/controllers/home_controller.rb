@@ -55,7 +55,7 @@ class HomeController < ApplicationController
     # Filter by SHA prefix
 
     if params[:sha].present? && params[:sha].match(/^[0-9A-F]+$/i)
-      @commits = @commits.with_sha_prefix(params[:sha])
+      @commits = @commits.with_sha_prefix(params[:sha].downcase)
     end
 
     # Filter by project
