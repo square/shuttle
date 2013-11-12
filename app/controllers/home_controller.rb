@@ -40,7 +40,8 @@ class HomeController < ApplicationController
   # | `project_id` | A Project ID to filter by (default all Projects).                                                        |
 
   def index
-    @offset = params[:offset].to_i
+    page = Integer(params[:page]) rescue 1
+    @offset = (page - 1)*PER_PAGE
     offset  = @offset
 
     # Filter by status
