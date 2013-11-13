@@ -57,30 +57,26 @@ hr.divider
 .border 
   .filter-bar
     form
-      .control  
-        input type="text" name="filter" placeholder="Substring"
-      .control
-        - preselected_commit = params[:commit].present? ? @project.commits.for_revision(params[:commit]).first : nil
-        = select_tag 'commit' , options_for_select(\
-                                                  @project.commits\
-                                                    .order('committed_at DESC')\
-                                                    .map {|c| ["#{c.revision[0, 6]}: #{truncate c.message}", c.id]}\
-                                                    .unshift(['all commits', nil])\
-                                                  , preselected_commit.try!(:id))
-      .control                                                
-        = select_tag 'filter_source', options_for_select( [\
-                                                            [@locale.name, 'translated'],\
-                                                            [@project.base_locale.name, 'source']\
-                                                          ])
-      .control
-        = submit_tag 'Filter', class: 'primary'
-      .control
+      input type="text" name="filter" placeholder="Substring"
+      - preselected_commit = params[:commit].present? ? @project.commits.for_revision(params[:commit]).first : nil
+      = select_tag 'commit' , options_for_select(\
+                                                @project.commits\
+                                                  .order('committed_at DESC')\
+                                                  .map {|c| ["#{c.revision[0, 6]}: #{truncate c.message}", c.id]}\
+                                                  .unshift(['all commits', nil])\
+                                                , preselected_commit.try!(:id))
+      = select_tag 'filter_source', options_for_select( [\
+                                                          [@locale.name, 'translated'],\
+                                                          [@project.base_locale.name, 'source']\
+                                                        ])
+      = submit_tag 'Filter', class: 'primary'
+      .checkbox
         input type="checkbox" name="include_translated" value="true" checked=(@mode == 'review' ? 'checked' : nil)
         label for="include_translated" Translated
-      .control
+      .checkbox
         input type="checkbox" name="include_approved" value="true"
         label for="include_approved" Approved
-      .control
+      .checkbox
         input type="checkbox" name="include_new" value="true" checked=((@mode == 'translation' || @mode == 'review') ? 'checked' : nil)
         label for="include_new" New
     
