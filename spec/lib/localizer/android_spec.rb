@@ -102,7 +102,7 @@ describe Localizer::Android do
 	-->
   <string name="with_context">dd/MM/yyyy</string>
   <string name="attributed_string" formatted="false">Hallo!</string>
-  <string name="smart_quotes">‘guillemets\\'</string>
+  <string name="smart_quotes">‘guillemets’</string>
   <string-array name="attributed_array">
 	<item>Hallo</item>
 	<item formatted="false">Welt</item>
