@@ -64,19 +64,44 @@ hr.divider
           .controls
             = check_box_tag 'exported', 'true', params[:exported] == 'true'
             | Include exported commits
-
+  / if params[:sorting]
   table.table.hover-rows#commits 
     thead
       tr
         th 
         th Project
-        th Due Date
-        th Priority
+        th SHA
+        / Create Date
+        th
+          - if params[:sort] == 'create'
+            - if params[:asc_desc] == 'asc'
+              = link_to 'Created <i class="icon-caret-down"></i>'.html_safe, request.parameters.merge({sort: 'create', asc_desc: 'desc'})
+            - else
+              = link_to 'Created <i class="icon-caret-up"></i>'.html_safe, request.parameters.merge({sort: 'create', asc_desc: 'asc'})
+          - else
+            = link_to 'Created', request.parameters.except(:asc_desc).merge(sort: 'create')
+        / Due Date
+        th
+          - if params[:sort] == 'due'
+            - if params[:asc_desc] == 'desc'
+              = link_to 'Due Date <i class="icon-caret-up"></i>'.html_safe, request.parameters.merge({sort: 'due', asc_desc: 'asc'})
+            - else
+              = link_to 'Due Date <i class="icon-caret-down"></i>'.html_safe, request.parameters.merge({sort: 'due', asc_desc: 'desc'})
+          - else
+            = link_to 'Due Date', request.parameters.except(:asc_desc).merge(sort: 'due')
+        / Priority
+        th
+          - if params[:sort] == 'priority' || params[:sort].nil?
+            - if params[:asc_desc] == 'desc'
+              = link_to 'Priority <i class="icon-caret-up"></i>'.html_safe, request.parameters.merge({sort: 'priority', asc_desc: 'asc'})
+            - else
+              = link_to 'Priority <i class="icon-caret-down"></i>'.html_safe, request.parameters.merge({sort: 'priority', asc_desc: 'desc'})
+          - else
+            = link_to 'Priority', request.parameters.except(:asc_desc).merge(sort: 'priority')
+
         th Description
         th Translate
         th Review
-        th Links
-        th SHA
         - if current_user.translator?
           th 
     tbody 
@@ -95,6 +120,13 @@ hr.divider
 
           / Project Name
           td = commit.project.name
+
+          / Commit
+          td
+            = link_to commit.revision[0, 6], project_commit_url(commit.project, commit)
+
+          / Project Create Date
+          td.centered = commit.created_at.strftime('%m/%d/%Y')
 
           / Project Due Date
           td.due-date class=("centered" if !commit.due_date)
@@ -143,7 +175,14 @@ hr.divider
                 if commit.user
                   full_description << "<br><strong>Requested by " + mail_to(commit.user.email, commit.user.abbreviated_name) + "</strong>"
                 end
-                full_description << "<br><strong>Created on #{commit.created_at.strftime('%B %d, %Y')}</strong>"
+                if commit.github_url or commit.pull_request_url
+                  full_description << "<br><strong>Links: </strong>"
+                  full_description << ( link_to "Code", commit.github_url ) if commit.github_url
+                  if commit.pull_request_url
+                    full_description << " / " if commit.github_url
+                    full_description << ( link_to 'PR', commit.pull_request_url )
+                  end
+                end
               end
             div.description[data-full-description=full_description data-short-description=truncate(description || '-', length: 50)]
               = truncate(description || '-', length: 50)
@@ -153,20 +192,6 @@ hr.divider
 
           / Word Review Count
           td = "#{number_with_delimiter commit.translations_pending(*@locales)}s (#{number_with_delimiter commit.words_pending(*@locales)}w)"
-          td class=("centered" if !commit.github_url and !commit.pull_request_url)
-            - if commit.github_url or commit.pull_request_url
-              - if commit.github_url
-                = link_to "Code", commit.github_url
-              - if commit.pull_request_url
-                - if commit.github_url
-                  = " / "
-                = link_to 'PR', commit.pull_request_url
-            - else
-              | -
-
-          / Links (Pull Request, Github)
-          td 
-            = link_to commit.revision[0, 6], project_commit_url(commit.project, commit)
 
           / Translation Button
           - if current_user.translator?

@@ -77,6 +77,9 @@ class HomeController < ApplicationController
              nil
            end
 
+    sort_order = params[:sort]
+    asc_desc = params[:asc_desc]
+
     @commits = Commit.search(load: {include: [:user, project: :slugs]}) do
       filter :prefix, revision: sha if sha
       filter :term, project_id: projects.map(&:id) if projects.any?
@@ -91,9 +94,22 @@ class HomeController < ApplicationController
 
       from offset
       size limit
+
       sort do
-        by :priority, 'asc'
-        by :due_date, 'desc'
+        case sort_order
+          when 'due'
+            by :due_date, (asc_desc.nil? ? 'asc' : asc_desc)
+            by :priority, 'asc'
+            by :created_at, 'desc'
+          when 'create'
+            by :created_at, (asc_desc.nil? ? 'desc' : asc_desc)
+            by :priority, 'asc'
+            by :due_date, 'asc'
+          else
+            by :priority, (asc_desc.nil? ? 'asc' : asc_desc)
+            by :due_date, 'asc'
+            by :created_at, 'desc'
+        end
       end
     end
 
