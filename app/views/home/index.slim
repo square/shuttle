@@ -194,18 +194,9 @@ hr.divider
 
 .row 
   .pagination-links
-    - if @older
-      = link_to '« older', \
-        url_for(request.query_parameters.merge('offset' => @offset + 30)), \
-        class: 'button default older'
-
-    | &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-    - if @newer
-      = link_to 'newer »', \
-        url_for(request.query_parameters.merge('offset' => @offset - 30)), \
-        class: 'button default newer'
-
-
+    = paginate @commits
+.row
+  .pagination-info= page_entries_info(@commits)
 
 - if Project.count > 0
   .row

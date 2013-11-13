@@ -100,6 +100,9 @@ GEM
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
     json (1.8.1)
+    kaminari (0.14.1)
+      actionpack (>= 3.0.0)
+      activesupport (>= 3.0.0)
     less (2.4.0)
       commonjs (~> 0.2.7)
     less-rails (2.4.2)
@@ -268,6 +271,7 @@ DEPENDENCIES
   httparty
   jquery-rails
   json
+  kaminari
   less-rails
   libarchive
   mustache

@@ -17,3 +17,12 @@ Tire.configure do
 end
 
 Tire::Model::Search.index_prefix "shuttle_#{Rails.env}"
+
+# Tire <-> Kaminari compatibility; Kaminari needs to know the human name of the
+# model in order to display the page_entries_info block, but since Tire results
+# can be heterogeneous, there is no way to do this. So, we assume the first
+# result's type is representative of the entire result set.
+
+class Tire::Results::Collection
+  def model_name() first.class.model_name end
+end
