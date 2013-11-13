@@ -34,30 +34,47 @@ hr.divider
   - project_list.unshift ['all projects', nil]
 
   .filter-bar#filter
+    - if current_user.approved_locales.any?
+      - locales = current_user.approved_locales.map { |locale| [locale.name, locale.rfc5646] }
+      - locales.unshift ['my locales', current_user.approved_locales.map(&:rfc5646).join(',')]
+      - locales.unshift ['all locales', nil]
     = form_tag({}, id: 'filter', method: 'get')
       .main
         = text_field_tag 'sha', @sha, placeholder: '9d613f'
         = select_tag 'project_id', options_for_select(project_list, params[:project_id])
 
-        - if current_user.approved_locales.any?
-          - locales = current_user.approved_locales.map { |locale| [locale.name, locale.rfc5646] }
-          - locales.unshift ['my locales', current_user.approved_locales.map(&:rfc5646).join(',')]
-          - locales.unshift ['all locales', nil]
-          = select_tag 'locales', options_for_select(locales, @locales.map(&:rfc5646).join(','))
+        - if current_user.monitor?
+          = select_tag 'status', options_for_select(\
+            %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
+            @status\
+          )
         - else
-          = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: 'Locale', class: 'locale-field'
+          - if current_user.approved_locales.any?
+            = select_tag 'locales', options_for_select(locales, @locales.map(&:rfc5646).join(','))
+          - else
+            = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: 'Locale', class: 'locale-field'
+
         = submit_tag 'Filter', class: 'primary'
         .pull-right#expand-search
           i.icon-angle-right
 
       .collapse
         .control-group
-          = label_tag 'status', 'Project Status', class: 'control-label'
-          .controls
-            = select_tag 'status', options_for_select(\
-              %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
-              @status\
-            )
+          - if current_user.monitor?
+            = label_tag 'locales', 'Locales', class: 'control-label'
+            .controls
+              - if current_user.approved_locales.any?
+                = select_tag 'locales', options_for_select(locales, @locales.map(&:rfc5646).join(','))
+              - else
+                = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: 'Locale', class: 'locale-field'
+          - else
+            = label_tag 'status', 'Project Status', class: 'control-label'
+            .controls
+              = select_tag 'status', options_for_select(\
+                %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
+                @status\
+              )
+
           .controls
             = check_box_tag 'email', current_user.email, params[:email] == current_user.email
             | Only commits from me
