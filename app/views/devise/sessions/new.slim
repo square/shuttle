@@ -34,9 +34,9 @@
             url: session_path(resource_name), \
             html: {method: :post, class: 'four columns greywashed'}) do |f|
           div
-            = f.email_field :email, placeholder: "E-mail"
+            = f.email_field :email, placeholder: "E-mail", required: true
           div
-            = f.password_field :password, placeholder: "Password"
+            = f.password_field :password, placeholder: "Password", required: true
           div
             = f.submit "Login", class: 'submit sign-in'
           div 

@@ -5,9 +5,39 @@
   padding: 15px 10px;
   background-color: $off-blue;
   border-bottom: 1px solid $gray5;
-  .control {
-    display: inline-block;
-    margin-right: 15px;
+
+  input + input, input + select, select + input, select + select {
+    margin-left: 15px;
+  }
+
+  .main {
+
+  }
+
+  .collapse {
+    margin-top: 30px;
+    margin-left: 40px;
+    display: none;
+
+    .controls {
+      width: 480px;
+      input, select, .twitter-typeahead { width: 100%; }
+    }
+  }
+
+  #expand-search {
+    margin-right: 10px;
+    font-weight: 500;
+    font-size: 30px;
+    @include transition(all, 0.3s, ease);
+    &:hover {
+      cursor: pointer;
+      color: $dark-blue;
+    }
+    &.active {
+      color: $dark-blue;
+      @include transform(rotate(90deg));
+    }
   }
 }
 

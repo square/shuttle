@@ -3,21 +3,18 @@
 
 body.home { 
   .filter-bar {
-    select[name="status"] {
-      width: 225px;
+    .twitter-typeahead {
+      margin-left: 15px;
+      input + input { margin: 0px; }
     }
+    input[type="submit"] { margin-left: 15px; }
 
-    select[name="project_id"] {
-      width: 200px;
-    }
+    .main {
+      input[name="sha"] { width: 485px; text-transform: lowercase; }
+      select[name="locales"] { width: 150px; }
+      .twitter-typeahead { width: 150px; }
 
-    .locale-field {
-      width: 200px;
-    }
-
-    input[name="sha"] {
-      width: 175px;
-      text-transform: lowercase;
+      select[name="project_id"] { width: 200px; }
     }
   }
 
@@ -42,14 +39,14 @@ body.home {
           &.commit-loading { background-color: $commit-blue; }
           &.commit-ready { background-color: $commit-green; }
 
-          &.due-date {width: 110px;}
+          &.due-date { width: 110px;}
           &.due-date-very-soon { }
           &.due-date-soon { }
           &.centered { text-align: center; }
           
           select { width: 100%; }
           input[type="text"] { width: 110px; }
-          a {text-decoration: underline; }
+          a { text-decoration: underline; }
         }
       }
     }
@@ -60,21 +57,23 @@ body.home {
   .commit-priority-2 { color: #E9B039; font-weight: bold; }
   .commit-priority-3 { color: $input-green; font-weight: bold; }
 
-  .control-group {
-    label {
-      width: 120px;
-    }
-    .controls {
-      margin-left: 140px;
-    }
-  }
-
   .pagination-links {
     width: 100%;
     font-size: 20px;
-    height: 40px;
     margin: 10px 0px;
-    .newer { float: right; }
-    .older { float: left; }
+    .pagination {
+      display:-moz-box; /* Firefox */
+      display:-webkit-box; /* Safari and Chrome */
+      display:-ms-flexbox; /* Internet Explorer 10 */
+      display:box;
+    }
+    .switch-page { width: 198px; }
+    .pages {
+      @include flex;
+      text-align: center;
+      .page + .page { margin-left: 8px; }
+    }
   }
+
+  .pagination-info { width: 100%; text-align: center; }
 }

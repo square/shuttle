@@ -119,11 +119,18 @@ class SearchController < ApplicationController
       format.html
       format.json do
         return head(:unprocessable_entity) if params[:project_id].to_i < 0
-        @results = Commit.with_sha_prefix(params[:sha]).
-            limit(params.fetch(:limit, 50))
-        if params[:project_id].to_i > 0
-          @results = @results.joins(:project).where(projects: {id: params[:project_id]})
+
+        sha = params[:sha]
+        project_id = params[:project_id].to_i
+        limit = params.fetch(:limit, 50)
+
+        @results = Commit.search(load: {include: :project}) do
+          filter :prefix, revision: sha if sha
+          filter :term, project_id: project_id if project_id > 0
+          size limit
+          sort { by :created_at, 'desc' }
         end
+
         render json: decorate_commits(@results).to_json
       end
     end

@@ -17,7 +17,7 @@
 
 class CommitsController < ApplicationController
   # @private
-  COMMIT_ATTRIBUTES = [:revision, :description, :due_date, :pull_request_url, :priority]
+  COMMIT_ATTRIBUTES = [:exported, :revision, :description, :due_date, :pull_request_url, :priority]
 
   before_filter :authenticate_user!, except: [:manifest, :localize]
   before_filter :monitor_required, except: [:manifest, :localize]
@@ -125,7 +125,6 @@ class CommitsController < ApplicationController
     if !params[:commit]["due_date"].nil?
       params[:commit]["due_date"] = Date::strptime(params[:commit]["due_date"], "%m/%d/%Y")
     end
-    
     @commit.update_attributes commit_params
     respond_with @commit, location: project_commit_url(@project, @commit)
   end

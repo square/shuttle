@@ -19,8 +19,9 @@ gem 'tire'
 
 # VIEWS
 gem 'jquery-rails'
-gem 'font-awesome-rails', '< 4.0.0'
+gem 'font-awesome-rails', '3.2.1.3'
 gem 'twitter-typeahead-rails'
+gem 'kaminari'
 
 # UTILITIES
 gem 'json'

@@ -10,36 +10,7 @@ body.translation_units {
     .main {
       input[type="text"] { width: 700px; }
       select {width: 150px; }
-      input + input, input + select, select + input { 
-        margin-left: 15px;
-      }
-      #expand-search {
-        margin-right: 10px;
-        font-weight: 500;
-        font-size: 30px;
-        @include transition(all, 0.3s, ease);
-        &:hover {
-          cursor: pointer;
-          color: $dark-blue;
-        }
-        &.active {
-          color: $dark-blue;
-          @include transform(rotate(90deg));   
-        }
-      }
-
     }
-
-    .collapse {
-      margin-top: 30px;
-      margin-left: 40px;
-      display: none;
-      .controls {
-        width: 480px;
-        input, select, .twitter-typeahead { width: 100%; }
-      }
-    }
-
   }
 
 
