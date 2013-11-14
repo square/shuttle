@@ -81,7 +81,7 @@ class HomeController < ApplicationController
       filter :prefix, revision: sha if sha
       filter :term, project_id: projects.map(&:id) if projects.any?
       filter :term, user_id: user.id if user
-      filter :term, exported: true if exported
+      filter :term, exported: false unless exported
       case status
         when 'uncompleted'
           filter :term, ready: false
