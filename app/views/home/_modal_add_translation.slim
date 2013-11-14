@@ -1,0 +1,31 @@
+- if Project.count > 0
+  .row
+    .modal.twelve.columns#add-translation
+      a.close ×
+      - projects = Project.order('LOWER(name) ASC')
+      = form_for(Commit.new, url: project_commits_path(projects.first, format: 'json')) do |f|
+        h2 Translation Request
+        .modal-body
+          .half
+            .control-group
+              = label_tag 'new_commit_project_id', Commit.human_attribute_name(:project_id), class: 'control-label'
+              .controls
+                = select_tag 'new_commit_project_id', options_for_select(projects.map { |pr| [pr.name, pr.to_param] }), required: true
+            .control-group
+              = f.label :revision, class: 'control-label'
+              .controls
+                = f.text_field :revision, required: true
+            .control-group
+              = f.label :due_date, class: 'control-label'
+              .controls
+                = f.text_field :due_date, class: 'datepicker'
+            .control-group
+              = f.label :pull_request_url, class: 'control-label'
+              .controls
+                = f.text_field :pull_request_url
+          .half
+            .control-group
+              = f.label :description, class: 'control-label'
+              .controls
+                = f.text_area :description, rows: 7
+            = f.submit class: 'primary'
