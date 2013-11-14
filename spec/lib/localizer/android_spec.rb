@@ -27,8 +27,8 @@ describe Localizer::Android do
         '/java/basic-hdpi/strings.xml:string'              => 'Hallo!',
         '/java/basic-hdpi/strings.xml:excluded'            => 'Welt!',
         '/java/basic-hdpi/strings.xml:special_chars'       => '(de) Êtes-vous sûr ?',
-        '/java/basic-hdpi/strings.xml:quoted_escaped'      => "Hallo \\'Welt\\'",
-        '/java/basic-hdpi/strings.xml:unquoted_escaped'    => "Hallo 'Welt'",
+        '/java/basic-hdpi/strings.xml:quoted_escaped'      => "Hallo @ \\'Welt\\'",
+        '/java/basic-hdpi/strings.xml:unquoted_escaped'    => "Hallo @ 'Welt'",
         '/java/basic-hdpi/strings.xml:with_context'        => 'dd/MM/yyyy',
         '/java/basic-hdpi/strings.xml:attributed_string'   => 'Hallo!',
         '/java/basic-hdpi/strings.xml:smart_quotes'        => '‘guillemets’',
@@ -60,8 +60,8 @@ describe Localizer::Android do
   </plurals>
   <string name="excluded" translatable="false">World!</string>
   <string name="special_chars">Êtes-vous sûr\u00a0?</string>
-  <string name="quoted_escaped">"Hello \\'world\\'"</string>
-  <string name="unquoted_escaped">Hello \\'world\\'</string>
+  <string name="quoted_escaped">"Hello \\@ \\'world\\'"</string>
+  <string name="unquoted_escaped">Hello \\@ \\'world\\'</string>
   <!--
 	- This is not a date format string. Rather, it is hint text in a field,
 	- presented to the merchant.
@@ -94,8 +94,8 @@ describe Localizer::Android do
   </plurals>
   <string name="excluded" translatable="false">Welt!</string>
   <string name="special_chars">(de) Êtes-vous sûr ?</string>
-  <string name="quoted_escaped">Hallo \\\\\\'Welt\\\\\\'</string>
-  <string name="unquoted_escaped">Hallo \\'Welt\\'</string>
+  <string name="quoted_escaped">Hallo \\@ \\\\\\'Welt\\\\\\'</string>
+  <string name="unquoted_escaped">Hallo \\@ \\'Welt\\'</string>
   <!--
 	- This is not a date format string. Rather, it is hint text in a field,
 	- presented to the merchant.
