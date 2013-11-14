@@ -78,7 +78,7 @@ class HomeController < ApplicationController
            end
 
     sort_order = params[:sort]
-    asc_desc = params[:asc_desc]
+    direction = params[:direction]
 
     @commits = Commit.search(load: {include: [:user, project: :slugs]}) do
       filter :prefix, revision: sha if sha
@@ -98,15 +98,15 @@ class HomeController < ApplicationController
       sort do
         case sort_order
           when 'due'
-            by :due_date, (asc_desc.nil? ? 'asc' : asc_desc)
+            by :due_date, (direction.nil? ? 'asc' : direction)
             by :priority, 'asc'
             by :created_at, 'desc'
           when 'create'
-            by :created_at, (asc_desc.nil? ? 'desc' : asc_desc)
+            by :created_at, (direction.nil? ? 'desc' : direction)
             by :priority, 'asc'
             by :due_date, 'asc'
           else
-            by :priority, (asc_desc.nil? ? 'asc' : asc_desc)
+            by :priority, (direction.nil? ? 'asc' : direction)
             by :due_date, 'asc'
             by :created_at, 'desc'
         end

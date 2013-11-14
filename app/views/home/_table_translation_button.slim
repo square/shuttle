@@ -1,0 +1,22 @@
+- if current_user.translator?
+  - if current_user.role == 'admin'
+    td
+      - locale = commit.project.required_locales.any? ? commit.project.required_locales.first.rfc5646 : "fr"
+      input.submit.translate-link[
+        type="button"
+        data-sha=commit.revision
+        data-project=commit.project.to_param
+        data-locale=locale
+        value="Translate"]
+  - elsif current_user.approved_locales.any?
+    td
+      - locale = current_user.approved_locales.first
+      input.submit.translate-link[
+        type="button"
+        data-sha=commit.revision
+        data-project=commit.project.to_param
+        data-locale=locale.rfc5646
+        value="Translate"]
+  - else
+    td
+      button.submit disabled="disabled" No locales
