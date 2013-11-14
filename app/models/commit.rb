@@ -78,7 +78,8 @@ class Commit < ActiveRecord::Base
 
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
-  has_and_belongs_to_many :keys, -> { uniq }
+  has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
+  has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
 
   include HasMetadataColumn
