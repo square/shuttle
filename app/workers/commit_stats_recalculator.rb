@@ -18,6 +18,8 @@ require 'sidekiq_locking'
 # for a Commit.
 
 class CommitStatsRecalculator
+  extend NewRelic::Agent::MethodTracer
+
   include Sidekiq::Worker
   sidekiq_options queue: :low
 
@@ -44,11 +46,18 @@ class CommitStatsRecalculator
     commit.words_new
     commit.words_pending
 
-    ready_keys, not_ready_keys = commit.keys.includes(:project, :translations).partition(&:should_become_ready?)
+    ready_keys, not_ready_keys = nil, nil
+    self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/partition_keys']) do
+      ready_keys, not_ready_keys = commit.keys.includes(:project, :translations).partition(&:should_become_ready?)
+    end
 
-    ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
-    not_ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
-    commit.keys.includes(:commits_keys).each { |k| k.tire.update_index }
+    self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/update_key_readiness']) do
+      ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
+      not_ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
+    end
+    self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/update_key_index']) do
+      commit.keys.includes(:commits_keys).each { |k| k.tire.update_index }
+    end
 
     commit.keys.find_each { |k| KeyReadinessRecalculator.perform_once k.id } if should_recalculate_affected_commits
 
