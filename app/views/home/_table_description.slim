@@ -1,0 +1,19 @@
+ruby:
+  description = commit.description
+  full_description = nil
+  if commit.description
+    full_description = description.dup
+    if commit.user
+      full_description << tag("br") + content_tag(:strong, "Requested by: ") + mail_to(commit.user.email, commit.user.abbreviated_name)
+    end
+    if commit.github_url or commit.pull_request_url
+      full_description << tag("br") + content_tag(:Strong, "Links: ")
+      full_description << ( link_to "Code", commit.github_url ) if commit.github_url
+      if commit.pull_request_url
+        full_description << " / " if commit.github_url
+        full_description << ( link_to 'PR', commit.pull_request_url )
+      end
+    end
+  end
+div.description[data-full-description=full_description data-short-description=truncate(description || '-', length: 50)]
+  = truncate(description || '-', length: 50)

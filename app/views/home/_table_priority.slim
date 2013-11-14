@@ -1,0 +1,13 @@
+- if current_user.admin?
+  = form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
+    = f.select :priority, \
+                t('models.commit.priority').to_a.map(&:reverse).unshift(['-', nil]), \
+                {}, \
+                class: 'styled'
+- else
+  - if commit.priority
+    span class="commit-priority-#{commit.priority}"
+      | P
+      = t("models.commit.priority.#{commit.priority}")
+  - else
+    | -
