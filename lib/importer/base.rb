@@ -110,9 +110,10 @@ module Importer
           @commit.keys += @keys.to_a
         end
         # key.commits has been changed, need to update associated ES fields
-        @keys = Key.where(id: @keys.map(&:id)) # reload all of them to refresh the commits association
-        @keys.each { |k| k.tire.update_index }
-        Translation.where(key_id: @keys.map(&:id)).find_each { |t| t.tire.update_index }
+        # include the eager-loads necessary to make the ES import efficient
+        @keys = Key.where(id: @keys.map(&:id)).includes(:commits_keys) # reload all of them to refresh the commits association
+        Key.tire.index.import @keys
+        Translation.tire.index.import Translation.where(key_id: @keys.map(&:id)).includes(key: :commits_keys)
       end
 
       # cache the list of keys we know to be in this blob for later use

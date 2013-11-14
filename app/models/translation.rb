@@ -81,8 +81,7 @@ class Translation < ActiveRecord::Base
     indexes :created_at, type: 'date'
     indexes :translated, type: 'boolean'
     indexes :approved, type: 'integer', as: 'if approved==true then 1 elsif approved==false then 0 else nil end'
-    # it would be wonderful to someday figure out why Commit comes with a scope here
-    indexes :commit_ids, as: 'Commit.unscoped { send(:key).commits.map(&:id) }'
+    indexes :commit_ids, as: 'send(:key).commits_keys.map(&:commit_id)'
   end
 
   validates :key,
