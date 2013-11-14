@@ -54,6 +54,7 @@ require 'fileutils'
 # | `committed_at` | The time this commit was made.                                                                           |
 # | `message`      | The commit message.                                                                                      |
 # | `ready`        | If `true`, all Keys under this Commit are marked as ready.                                               |
+# | `exported`     | If `true`, monitor has already exported this commit and no longer needs it.                              |
 # | `revision`     | The SHA1 for this commit.                                                                                |
 # | `loading`      | If `true`, there is at least one {BlobImporter} processing this Commit.                                  |
 # | `priority`     | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
@@ -78,7 +79,8 @@ class Commit < ActiveRecord::Base
 
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
-  has_and_belongs_to_many :keys, -> { uniq }
+  has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
+  has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
 
   include HasMetadataColumn
@@ -97,6 +99,7 @@ class Commit < ActiveRecord::Base
     indexes :created_at, type: 'date'
     indexes :revision, as: 'revision', index: :not_analyzed
     indexes :ready, type: 'boolean'
+    indexes :exported, type: 'boolean'
   end
 
   validates :project,

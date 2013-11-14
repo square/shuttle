@@ -3,18 +3,20 @@
 
 body.home { 
   .filter-bar {
-    .twitter-typeahead {
-      margin-left: 15px;
-      input + input { margin: 0px; }
-    }
     input[type="submit"] { margin-left: 15px; }
 
     .main {
+      .twitter-typeahead {
+        margin-left: 15px;
+        input + input { margin: 0px; }
+      }
+
       input[name="sha"] { width: 485px; text-transform: lowercase; }
-      select[name="locales"] { width: 150px; }
-      .twitter-typeahead { width: 150px; }
+      select[name="locales"] { width: 200px; }
+      .twitter-typeahead { width: 200px; }
 
       select[name="project_id"] { width: 200px; }
+      select[name="status"] { width: 250px; }
     }
   }
 

@@ -5,10 +5,10 @@
   padding: 15px 10px;
   background-color: $off-blue;
   border-bottom: 1px solid $gray5;
+  .checkbox { display: inline; }
 
-  input + input, input + select, select + input, select + select {
-    margin-left: 15px;
-  }
+  .checkbox + .checkbox, input + .checkbox { margin-left: 15px; }
+  input + input, input + select, select + input, select + select { margin-left: 15px; }
 
   .main {
 

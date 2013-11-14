@@ -75,7 +75,8 @@
 class Key < ActiveRecord::Base
   belongs_to :project, inverse_of: :keys
   has_many :translations, inverse_of: :key, dependent: :delete_all
-  has_and_belongs_to_many :commits, -> { uniq }
+  has_many :commits_keys, inverse_of: :key, dependent: :delete_all
+  has_many :commits, through: :commits_keys
 
   include HasMetadataColumn
   has_metadata_column(
@@ -115,8 +116,7 @@ class Key < ActiveRecord::Base
     }
     indexes :project_id, type: 'integer'
     indexes :ready, type: 'boolean'
-    # it would be wonderful to someday figure out why Commit comes with a scope here
-    indexes :commit_ids, as: 'Commit.unscoped { commits.map(&:id) }'
+    indexes :commit_ids, as: 'commits_keys.map(&:commit_id)'
   end
 
   extend PrefixField
@@ -143,13 +143,13 @@ class Key < ActiveRecord::Base
 
   # TODO:
   def self.total_strings
-    Key.all.count
+    Key.count
   end
   # redis_memoize :total_strings
 
   # TODO:
   def self.total_strings_incomplete
-    Key.where("ready=false").count
+    Key.where(ready: false).count
   end 
   # redis_memoize :total_strings_incomplete
 

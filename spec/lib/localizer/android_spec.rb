@@ -24,20 +24,20 @@ describe Localizer::Android do
     @commit  = FactoryGirl.create(:commit, project: @project)
 
     {
-        '/java/basic-hdpi/strings.xml:/resources/string[1]'               => 'Hallo!',
-        '/java/basic-hdpi/strings.xml:/resources/string[2]'               => 'Welt!',
-        '/java/basic-hdpi/strings.xml:/resources/string[3]'               => '(de) Êtes-vous sûr ?',
-        '/java/basic-hdpi/strings.xml:/resources/string[4]'               => "Hallo \\'Welt\\'",
-        '/java/basic-hdpi/strings.xml:/resources/string[5]'               => "Hallo 'Welt'",
-        '/java/basic-hdpi/strings.xml:/resources/string[6]'               => 'dd/MM/yyyy',
-        '/java/basic-hdpi/strings.xml:/resources/string[7]'               => 'Hallo!',
-        '/java/basic-hdpi/strings.xml:/resources/string[8]'               => '‘guillemets’',
-        '/java/basic-hdpi/strings.xml:/resources/string-array[1]/item[1]' => 'Hallo',
-        '/java/basic-hdpi/strings.xml:/resources/string-array[1]/item[2]' => 'Welt',
-        '/java/basic-hdpi/strings.xml:/resources/string-array[2]/item[1]' => 'Hallo',
-        '/java/basic-hdpi/strings.xml:/resources/string-array[2]/item[2]' => 'Welt',
-        '/java/basic-hdpi/strings.xml:/resources/plurals/item[1]'         => 'Welt',
-        '/java/basic-hdpi/strings.xml:/resources/plurals/item[2]'         => 'Welten'
+        '/java/basic-hdpi/strings.xml:string'              => 'Hallo!',
+        '/java/basic-hdpi/strings.xml:excluded'            => 'Welt!',
+        '/java/basic-hdpi/strings.xml:special_chars'       => '(de) Êtes-vous sûr ?',
+        '/java/basic-hdpi/strings.xml:quoted_escaped'      => "Hallo @ \\'Welt\\'",
+        '/java/basic-hdpi/strings.xml:unquoted_escaped'    => "Hallo @ 'Welt'",
+        '/java/basic-hdpi/strings.xml:with_context'        => 'dd/MM/yyyy',
+        '/java/basic-hdpi/strings.xml:attributed_string'   => 'Hallo!',
+        '/java/basic-hdpi/strings.xml:smart_quotes'        => '‘guillemets’',
+        '/java/basic-hdpi/strings.xml:array[0]'            => 'Hallo',
+        '/java/basic-hdpi/strings.xml:array[1]'            => 'Welt',
+        '/java/basic-hdpi/strings.xml:attributed_array[0]' => 'Hallo',
+        '/java/basic-hdpi/strings.xml:attributed_array[1]' => 'Welt',
+        '/java/basic-hdpi/strings.xml:plural[one]'         => 'Welt',
+        '/java/basic-hdpi/strings.xml:plural[other]'       => 'Welten'
     }.each do |key, value|
       key_obj = FactoryGirl.create(:key, key: key, project: @project, source: '/java/basic-hdpi/strings.xml')
       FactoryGirl.create :translation, key: key_obj, copy: value, source_locale: @en, locale: @de
@@ -60,8 +60,8 @@ describe Localizer::Android do
   </plurals>
   <string name="excluded" translatable="false">World!</string>
   <string name="special_chars">Êtes-vous sûr\u00a0?</string>
-  <string name="quoted_escaped">"Hello \\'world\\'"</string>
-  <string name="unquoted_escaped">Hello \\'world\\'</string>
+  <string name="quoted_escaped">"Hello \\@ \\'world\\'"</string>
+  <string name="unquoted_escaped">Hello \\@ \\'world\\'</string>
   <!--
 	- This is not a date format string. Rather, it is hint text in a field,
 	- presented to the merchant.
@@ -94,15 +94,15 @@ describe Localizer::Android do
   </plurals>
   <string name="excluded" translatable="false">Welt!</string>
   <string name="special_chars">(de) Êtes-vous sûr ?</string>
-  <string name="quoted_escaped">Hallo \\\\\\'Welt\\\\\\'</string>
-  <string name="unquoted_escaped">Hallo \\'Welt\\'</string>
+  <string name="quoted_escaped">Hallo \\@ \\\\\\'Welt\\\\\\'</string>
+  <string name="unquoted_escaped">Hallo \\@ \\'Welt\\'</string>
   <!--
 	- This is not a date format string. Rather, it is hint text in a field,
 	- presented to the merchant.
 	-->
   <string name="with_context">dd/MM/yyyy</string>
   <string name="attributed_string" formatted="false">Hallo!</string>
-  <string name="smart_quotes">‘guillemets\\'</string>
+  <string name="smart_quotes">‘guillemets’</string>
   <string-array name="attributed_array">
 	<item>Hallo</item>
 	<item formatted="false">Welt</item>

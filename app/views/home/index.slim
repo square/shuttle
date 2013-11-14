@@ -29,7 +29,39 @@ hr.divider
 .border
   = render partial: 'filter_bar'
 
-  table.table.hover-rows#commits
+  .filter-bar#filter
+    = form_tag({}, id: 'filter', method: 'get')
+      .main
+        = text_field_tag 'sha', @sha, placeholder: '9d613f'
+        = select_tag 'project_id', options_for_select(project_list, params[:project_id])
+
+        - if current_user.approved_locales.any?
+          - locales = current_user.approved_locales.map { |locale| [locale.name, locale.rfc5646] }
+          - locales.unshift ['my locales', current_user.approved_locales.map(&:rfc5646).join(',')]
+          - locales.unshift ['all locales', nil]
+          = select_tag 'locales', options_for_select(locales, @locales.map(&:rfc5646).join(','))
+        - else
+          = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: 'Locale', class: 'locale-field'
+        = submit_tag 'Filter', class: 'primary'
+        .pull-right#expand-search
+          i.icon-angle-right
+
+      .collapse
+        .control-group
+          = label_tag 'status', 'Project Status', class: 'control-label'
+          .controls
+            = select_tag 'status', options_for_select(\
+              %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
+              @status\
+            )
+          .controls
+            = check_box_tag 'email', current_user.email, params[:email] == current_user.email
+            | Only commits from me
+          .controls
+            = check_box_tag 'exported', 'true', params[:exported] == 'true'
+            | Include exported commits
+
+  table.table.hover-rows#commits 
     thead
       tr
         / Project Status
