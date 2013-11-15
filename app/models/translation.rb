@@ -143,29 +143,23 @@ class Translation < ActiveRecord::Base
 
   # TODO:
   def self.total_words_new
-    sum = 0
-    Project.all.each do |project|
-      locales = project.required_locales
+    Project.all.inject(0) do |sum, project|
       sum += project.translations
                     .not_base
-                    .where(translated: false, rfc5646_locale: locales.map(&:rfc5646))
+                    .where(translated: false, rfc5646_locale: project.required_locales.map(&:rfc5646))
                     .sum(:words_count)
     end
-    sum
   end 
 
   # TODO:
   def self.total_words_pending
-    sum = 0
-    Project.all.each do |project|
-      locales = project.required_locales
+    Project.all.inject(0) do |sum, project|
       sum += project.translations
                     .not_base
                     .where('approved IS NOT TRUE')
-                    .where(translated: true, rfc5646_locale: locales.map(&:rfc5646))
+                    .where(translated: true, rfc5646_locale: project.required_locales.map(&:rfc5646))
                     .sum(:words_count)
     end
-    sum
   end 
 
   # TODO:

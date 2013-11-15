@@ -163,7 +163,7 @@ class Commit < ActiveRecord::Base
 
 
   def self.total_commits_incomplete
-    Commit.where("ready=false").count
+    Commit.where('ready=false').count
   end
 
 
@@ -179,8 +179,7 @@ class Commit < ActiveRecord::Base
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
-    commits = Commit.where("created_at >= :date", date: first_date)
-                    .where("created_at <= :date", date: last_date)
+    commits = Commit.where(created_at: first_date..last_date)
                     .order('created_at ASC')
     commits = commits.where(project_id: project_id) unless project_id.nil?
 
@@ -213,7 +212,7 @@ class Commit < ActiveRecord::Base
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
-    commits = Commit.where("completed_at >= :date", date: first_date).where("completed_at <= :date", date: last_date).order('completed_at ASC')
+    commits = Commit.where(completed_at: first_date..last_date).order('completed_at ASC')
 
     i = 0
     while first_date < last_date
@@ -244,9 +243,7 @@ class Commit < ActiveRecord::Base
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
-    # Ensures that completed_at is not nil
-    commits = Commit.where("completed_at >= :date", date: first_date)
-                    .where("completed_at <= :date", date: last_date)
+    commits = Commit.where(completed_at: first_date..last_date)
                     .order('completed_at ASC')
     commits = commits.where(project_id: project_id) unless project_id.nil?
 
