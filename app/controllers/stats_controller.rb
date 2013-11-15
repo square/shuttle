@@ -4,7 +4,8 @@ class StatsController < ApplicationController
   respond_to :json
   respond_to :html, only: :index 
 
-  def index 
+  def index
+    @top_projects = Translation.total_words_per_project.map { |t| { name: t[0], id: Project.find_by_name(t[0]).id } }[0..4]
     # Commit stats
     @total_commits = Commit.total_commits
     @total_commits_incomplete = Commit.total_commits_incomplete
@@ -31,8 +32,8 @@ class StatsController < ApplicationController
 
   def avg_completion_and_daily_creates
     respond_with(
-      average_completion_time: Commit.average_completion_time,
-      daily_creates: Commit.daily_commits_created
+      average_completion_time: Commit.average_completion_time(params['project_id']),
+      daily_creates: Commit.daily_commits_created(params['project_id'])
     )
   end 
 end
