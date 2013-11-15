@@ -163,7 +163,7 @@ class Commit < ActiveRecord::Base
 
 
   def self.total_commits_incomplete
-    Commit.where("ready=false").count
+    Commit.where('ready=false').count
   end
 
 
@@ -171,7 +171,7 @@ class Commit < ActiveRecord::Base
   #
   # @return [Array<Fixnum>] An array containing the number of commits created each day for the past 30 days.
 
-  def self.daily_commits_created
+  def self.daily_commits_created(project_id = nil)
     daily_commits_created = []
 
     timespan = 30
@@ -179,7 +179,9 @@ class Commit < ActiveRecord::Base
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
-    commits = Commit.where("created_at >= :date", date: first_date).where("created_at <= :date", date: last_date).order('created_at ASC')
+    commits = Commit.where(created_at: first_date..last_date)
+                    .order('created_at ASC')
+    commits = commits.where(project_id: project_id) unless project_id.nil?
 
     i = 0
     while first_date < last_date
@@ -210,7 +212,7 @@ class Commit < ActiveRecord::Base
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
-    commits = Commit.where("completed_at >= :date", date: first_date).where("completed_at <= :date", date: last_date).order('completed_at ASC')
+    commits = Commit.where(completed_at: first_date..last_date).order('completed_at ASC')
 
     i = 0
     while first_date < last_date
@@ -232,7 +234,7 @@ class Commit < ActiveRecord::Base
   # 
   # @return [Array<Fixnum>] An array containing the number of commits finished each day for the past 30 days.
 
-  def self.average_completion_time
+  def self.average_completion_time(project_id = nil)
     moving_average = []
 
     timespan = 30
@@ -241,10 +243,9 @@ class Commit < ActiveRecord::Base
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
-    # Ensures that completed_at is not nil
-    commits    = Commit.where("completed_at >= :date", date: first_date).
-        where("completed_at <= :date", date: last_date).
-        order('completed_at ASC')
+    commits = Commit.where(completed_at: first_date..last_date)
+                    .order('completed_at ASC')
+    commits = commits.where(project_id: project_id) unless project_id.nil?
 
     while first_date < last_date
       window_commits          = commits.reject { |commit| commit.completed_at < first_date || commit.completed_at > first_date + window.days }
