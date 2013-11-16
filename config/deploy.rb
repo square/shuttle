@@ -71,3 +71,11 @@ namespace :secret do
   end
 end
 before 'deploy:assets:precompile', 'secret:symlink'
+
+namespace :config do
+  task :symlink do
+    run "rm -Rf #{release_path}/config/database.yml"
+    run "ln -s #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+  end
+end
+before 'deploy:assets:precompile', 'config:symlink'
