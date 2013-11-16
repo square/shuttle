@@ -1,14 +1,14 @@
 source 'https://rubygems.org'
 
 # FRAMEWORK
-gem 'rails', '>= 4.0'
+gem 'rails', '4.0.1'
 gem 'configoro'
 
 # AUTHENTICATION
 gem 'devise'
 
 # MODELS
-gem 'pg', '< 0.14'
+gem 'pg'
 gem 'slugalicious'
 gem 'validates_timeliness'
 gem 'has_metadata_column'
@@ -19,7 +19,7 @@ gem 'tire'
 
 # VIEWS
 gem 'jquery-rails'
-gem 'font-awesome-rails', '3.2.1.3'
+gem 'font-awesome-rails'
 gem 'twitter-typeahead-rails'
 gem 'kaminari'
 
@@ -49,8 +49,7 @@ gem 'faker'
 
 # BACKGROUND JOBS
 gem 'sidekiq'
-# Versions below 1.3.0 cause Sidekiq dashboard to break
-gem 'slim', '>= 1.3.8'
+gem 'slim'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
 

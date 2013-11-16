@@ -54,7 +54,7 @@ class root.TranslateReviewList
       this.error("Locale is unavailable.")
       return
 
-    $('<i/>').addClass('icon-refresh spinning').appendTo @form
+    $('<i/>').addClass('fa fa-spinner spinning').appendTo @form
     $.ajax @url.replace('REPLACEME', locale),
          complete: =>
            @form.find('i').remove()

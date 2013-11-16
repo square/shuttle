@@ -43,11 +43,11 @@ hr.divider
         th STRING
         - @project.locale_requirements.each do |locale, required|
           - finished = @commit.all_translations_approved_for_locale?(locale)
-          th class=(required ? (finished ? "text-success" : "text-error") : nil)
+          th class=(required ? (finished ? 'text-success' : 'text-error') : nil)
             = locale.rfc5646
             - if finished
               |  
-              i.icon-ok
+              i.fa.fa-check-circle
             - else
               |  
-              i.icon-remove
+              i.fa.fa-circle-o

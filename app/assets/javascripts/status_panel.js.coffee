@@ -53,7 +53,7 @@ class Project
   reload: ->
     @dynamic_portion.empty()
     loading = $('<p/>').addClass('loading').appendTo(@dynamic_portion)
-    $('<i/>').addClass('icon-refresh spinning').appendTo loading
+    $('<i/>').addClass('fa fa-spinner spinning').appendTo loading
 
     $.ajax "#{@project.url}.json",
       success: (project) =>
@@ -61,7 +61,7 @@ class Project
         @renderCommits project.commits
       error: =>
         @dynamic_portion.empty()
-        $('<i/>').addClass('icon-exclamation-sign').appendTo @dynamic_portion
+        $('<i/>').addClass('fa fa-exclamation-circle').appendTo @dynamic_portion
 
   renderSummary: ->
     div = $('<div/>').addClass('project-summary')
@@ -104,7 +104,7 @@ class Project
   renderButtons: ->
     buttons = $('<span/>').addClass('buttons pull-right')
     edit = $('<a/>').attr({href: @project.edit_url, title: 'Edit'}).appendTo(buttons)
-    $('<i/>').addClass('icon-edit').appendTo edit
+    $('<i/>').addClass('fa fa-pencil-square-o').appendTo edit
     buttons
 
   renderCommits: (commits) ->
@@ -140,7 +140,7 @@ class Commit
 
     header = $('<div/>').appendTo(h3)
 
-    $('<a/>').addClass('icon-chevron-up toggle').attr('href', '#').appendTo(header)
+    $('<a/>').addClass('fa fa-chevron-up toggle').attr('href', '#').appendTo(header)
     header.append ' '
 
     link = $('<a/>').text("Commit ").attr({href: @commit.github_url, target: '_blank'}).appendTo(header)

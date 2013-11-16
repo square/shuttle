@@ -61,7 +61,7 @@ class root.KeyList
       $('<span/>').addClass(klass).text(locale).appendTo th
       th.append ' '
       if data.finished
-        $('<i/>').addClass('icon-ok').appendTo th
+        $('<i/>').addClass('fa fa-check').appendTo th
 
   reload: ->
     @scroll.reset()

@@ -24,7 +24,7 @@
           href="{{source_edit_url}}" 
           class="button default square glossary-table-edit-source"
         >
-          <i class="icon-edit"></i>
+          <i class="fa fa-pencil-square-o"></i>
         </a>
         {{/is_translator}}
 
@@ -50,7 +50,7 @@
               disabled 
             {{/is_reviewer}} {{/approved}}
           >
-            <i class="icon-edit"></i>
+            <i class="fa fa-pencil-square-o"></i>
           </button>
         {{/is_translator}}
 
@@ -59,14 +59,14 @@
             {{#rejected}} disabled {{/rejected}} 
             {{^locale_id}} disabled {{/locale_id}}
           >
-            <i class="icon-remove"></i>
+            <i class="fa fa-ban"></i>
           </button>
 
           <button class="button approve square glossary-table-approve-locale"
             {{#approved}} disabled {{/approved}} 
             {{^locale_id}} disabled {{/locale_id}}
           >
-            <i class="icon-ok"></i>
+            <i class="fa fa-check"></i>
           </button>
         {{/is_reviewer}}
 
