@@ -668,6 +668,13 @@ CREATE INDEX commits_date ON commits USING btree (project_id, committed_at);
 
 
 --
+-- Name: commits_keys_key_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX commits_keys_key_id ON commits_keys USING btree (key_id);
+
+
+--
 -- Name: commits_priority; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -974,3 +981,5 @@ INSERT INTO schema_migrations (version) VALUES ('20130821011614');
 INSERT INTO schema_migrations (version) VALUES ('20131008220117');
 
 INSERT INTO schema_migrations (version) VALUES ('20131111213136');
+
+INSERT INTO schema_migrations (version) VALUES ('20131116042827');

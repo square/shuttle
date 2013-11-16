@@ -64,7 +64,7 @@ class InfiniteScroll
   loadNextPage: ->
     unless @loading_more?
       @loading_more = $('<p/>').addClass('loading-more').text(" Loading more…")
-      $('<i/>').addClass('icon-refresh spinning').prependTo @loading_more
+      $('<i/>').addClass('fa fa-spinner spinning').prependTo @loading_more
       if (@scroller[0] == window)
         @loading_more.insertAfter(@element)
       else

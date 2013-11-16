@@ -83,7 +83,7 @@ class root.ArrayField
           if e.which == 13 || e.which == 9
             $(element).next().find("input[type='text']").focus()
             return false
-    remove = $('<a/>').addClass('icon-minus-sign').attr('href', '#').appendTo(div)
+    remove = $('<a/>').addClass('fa fa-minus-circle').attr('href', '#').appendTo(div)
     remove.click =>
       div.remove()
       false
@@ -180,7 +180,7 @@ class root.HashField
     key_field.change refreshName
     refreshName()
 
-    remove = $('<a/>').addClass('icon-minus-sign').attr('href', '#').appendTo(div)
+    remove = $('<a/>').addClass('fa fa-minus-circle').attr('href', '#').appendTo(div)
     remove.click =>
       div.remove()
       false

@@ -193,7 +193,7 @@ class TranslationItem
     # Set up @expand_link_button
     @expand_link_button.click (e) =>
       window.open @translation.edit_url, '_blank'
-      @expand_link_button.find("i").removeClass('icon-edit').addClass 'icon-refresh'
+      @expand_link_button.find("i").removeClass('fa-pencil-square-o').addClass 'fa-spinner'
       @expand_link_button.unbind('click').click =>
         $.ajax (@translation.url + '.json'),
                success: (translation) => this.refresh translation

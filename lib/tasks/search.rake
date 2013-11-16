@@ -32,7 +32,27 @@ namespace :search do
       index = klass.tire.index
       Tire::Tasks::Import.delete_index(index) if ENV['FORCE']
       Tire::Tasks::Import.create_index(index, klass)
-      Tire::Tasks::Import.import_model(index, klass, {})
+      unless [Key, Translation].include?(klass)
+        Tire::Tasks::Import.import_model(index, klass, {})
+      end
+    end
+
+    if klasses.include?(Key)
+      print "Importing keys (#{(Key.count/1000.0).ceil} batches)"
+      Key.includes(:commits_keys).find_in_batches do |keys|
+        print '.'
+        Key.tire.index.import keys
+      end
+      puts
+    end
+
+    if klasses.include?(Translation)
+      print "Importing translations (#{(Translation.count/1000.0).ceil} batches)"
+      Translation.includes(key: :commits_keys).find_in_batches do |translations|
+        print '.'
+        Translation.tire.index.import translations
+      end
+      puts
     end
   end
 end

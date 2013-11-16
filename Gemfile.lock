@@ -68,7 +68,7 @@ GEM
     configoro (1.3.0)
       activesupport
     connection_pool (1.1.0)
-    devise (3.2.0)
+    devise (3.2.1)
       bcrypt-ruby (~> 3.0)
       orm_adapter (~> 0.1)
       railties (>= 3.2.6, < 5)
@@ -86,7 +86,7 @@ GEM
       i18n (~> 0.5)
     find_or_create_on_scopes (1.4.0)
       activerecord (>= 3.1)
-    font-awesome-rails (3.2.1.3)
+    font-awesome-rails (4.0.3.0)
       railties (>= 3.2, < 5.0)
     has_metadata_column (1.1.2)
       boolean
@@ -140,7 +140,7 @@ GEM
     orm_adapter (0.5.0)
     parslet (1.5.0)
       blankslate (~> 2.0)
-    pg (0.13.2)
+    pg (0.17.0)
     polyglot (0.3.3)
     pry (0.9.12.3)
       coderay (~> 1.0)
@@ -211,7 +211,7 @@ GEM
     slim (2.0.2)
       temple (~> 0.6.6)
       tilt (>= 1.3.3, < 2.1)
-    slop (3.4.6)
+    slop (3.4.7)
     slugalicious (2.1.0)
       rails (>= 4.0)
       stringex
@@ -230,7 +230,7 @@ GEM
       squash_ruby
     squash_ruby (1.2.2)
       json
-    stringex (2.1.0)
+    stringex (2.1.1)
     temple (0.6.7)
     therubyracer (0.12.0)
       libv8 (~> 3.16.14.0)
@@ -285,7 +285,7 @@ DEPENDENCIES
   factory_girl_rails
   faker
   find_or_create_on_scopes
-  font-awesome-rails (= 3.2.1.3)
+  font-awesome-rails
   git!
   has_metadata_column
   hogan_assets
@@ -300,10 +300,10 @@ DEPENDENCIES
   newrelic_rpm
   nokogiri
   parslet
-  pg (< 0.14)
+  pg
   pry
   pry-nav
-  rails (>= 4.0)
+  rails (= 4.0.1)
   rails-observers
   redcarpet
   redis-mutex
@@ -313,7 +313,7 @@ DEPENDENCIES
   sass-rails
   sidekiq
   sinatra
-  slim (>= 1.3.8)
+  slim
   slugalicious
   sprockets-rails
   sql_origin

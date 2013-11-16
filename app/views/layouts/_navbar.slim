@@ -38,7 +38,7 @@ div id="navbar-container"
       - if current_user
         - if current_user.monitor?
           li.worker-status 
-            i.icon-circle
+            i.fa.fa-circle
             | &nbsp; Workers
         li: a href=destroy_user_session_url data-method='delete' Log Out
 - if (controller_name == "search" || controller_name == "translation_units")
