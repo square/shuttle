@@ -607,17 +607,17 @@ class Commit < ActiveRecord::Base
 
   def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
     # the readiness hooks were all disabled, so now we need to go through and
-    # calculate readiness and stats. since we could have altered the readiness
-    # of other commits associated with translations we just imported, we need to
-    # do this for all commits that could potentially be affected
-
-    # first we do it for this commit, so we can set loading to false ASAP
+    # calculate readiness and stats.
     CommitStatsRecalculator.new.perform id
 
-    # then we do it for everyone else
-    project.commits.find_each do |commit|
-      next if commit.id == id
-      CommitStatsRecalculator.perform_once commit.id, should_recalculate_affected_commits
-    end
+    # then we do it for every other commit that shares keys with this commit
+    #commit_ids = Set.new
+    #commits_keys.find_in_batches(batch_size: 100) do |cks|
+    #  commit_ids += CommitsKey.where(key_id: cks.map(&:key_id)).map(&:commit_id)
+    #end
+    #Commit.where(id: commit_ids.to_a).find_each do |commit|
+    #  next if commit.id == id
+    #  CommitStatsRecalculator.perform_once commit.id, should_recalculate_affected_commits
+    #end
   end
 end
