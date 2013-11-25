@@ -1,5 +1,5 @@
-set :rails_env, 'production'
+set :stage, :production
 
-role :web, 'ironweed.corp.squareup.com'
-role :app, 'ironweed.corp.squareup.com', 'ginger.corp.squareup.com'
-role :db, 'ironweed.corp.squareup.com', primary: true
+role :app, %w{square@ironweed.corp.squareup.com square@ginger.corp.squareup.com}
+role :web, %w{square@ironweed.corp.squareup.com}
+role :db,  %w{square@ironweed.corp.squareup.com}

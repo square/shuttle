@@ -1,5 +1,5 @@
-set :rails_env, 'staging'
+set :stage, :staging
 
-role :web, 'baltimore.corp.squareup.com'
-role :app, 'baltimore.corp.squareup.com'
-role :db, 'baltimore.corp.squareup.com', primary: true
+role :app, %w{square@baltimore.corp.squareup.com}
+role :web, %w{square@baltimore.corp.squareup.com}
+role :db,  %w{square@baltimore.corp.squareup.com}

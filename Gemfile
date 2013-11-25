@@ -51,7 +51,7 @@ gem 'faker'
 gem 'sidekiq'
 gem 'slim'
 gem 'sinatra', require: nil
-gem 'whenever', require: nil
+gem 'whenever', require: nil, github: 'phallstrom/whenever' # Cap 3 compatible version
 
 # REDIS
 gem 'redis-mutex'
@@ -91,5 +91,7 @@ gem 'squash_rails', require: 'squash/rails'
 gem 'newrelic_rpm'
 group :development do
   gem 'capistrano'
-  gem 'rvm-capistrano'
+  gem 'capistrano-rvm'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rails'
 end
