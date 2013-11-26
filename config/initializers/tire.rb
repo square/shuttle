@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'ostruct'
+
 Tire.configure do
   url Shuttle::Configuration.elasticsearch.url
 end
@@ -24,5 +26,5 @@ Tire::Model::Search.index_prefix "shuttle_#{Rails.env}"
 # result's type is representative of the entire result set.
 
 class Tire::Results::Collection
-  def model_name() first ? first.class.model_name : 'Record' end
+  def model_name() first ? first.class.model_name : OpenStruct.new(human: 'Record') end
 end
