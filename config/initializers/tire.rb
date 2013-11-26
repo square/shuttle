@@ -24,5 +24,5 @@ Tire::Model::Search.index_prefix "shuttle_#{Rails.env}"
 # result's type is representative of the entire result set.
 
 class Tire::Results::Collection
-  def model_name() first.class.model_name end
+  def model_name() first ? first.class.model_name : 'Record' end
 end
