@@ -55,7 +55,6 @@ class HomeController < ApplicationController
     exported = params[:exported] == 'true'
 
     # Filter by project
-    params[:project_id] ||= 'my-locales' if current_user.approved_locales.any?
     projects = if params[:project_id] == 'my-locales'
                  Project.scoped.to_a.select do |project|
                    (project.targeted_locales & current_user.approved_locales).any?
