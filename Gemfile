@@ -48,7 +48,7 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-gem 'sidekiq'
+gem 'sidekiq', github: 'mperham/sidekiq'
 gem 'slim'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil, github: 'phallstrom/whenever' # Cap 3 compatible version

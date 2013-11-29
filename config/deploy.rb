@@ -20,20 +20,6 @@ namespace :deploy do
   end
 
   after :finishing, 'deploy:cleanup'
-
-  before :publishing, :write_revision do
-    on roles(:app) do
-      execute %{echo "#{fetch :current_revision}" > #{release_path.join('REVISION')}}
-    end
-  end
-
-  after :finishing, :notify_squash do
-    on roles(:web), limit: 1 do
-      within release_path do
-        with rails_env: fetch(:rails_env) do
-          execute 'bin/rails', "runner 'Squash::Ruby.notify_deploy #{fetch(:rails_env).inspect}, #{fetch(:current_revision).inspect}, #{Socket.gethostname.inspect}'"
-        end
-      end
-    end
-  end
 end
+
+before 'deploy:publishing', 'squash:write_revision'

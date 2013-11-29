@@ -13,6 +13,17 @@ GIT
     git (1.2.6)
 
 GIT
+  remote: git://github.com/mperham/sidekiq.git
+  revision: 38cbcf37e5b4583ec12cf212346331c9a23aa5f5
+  specs:
+    sidekiq (2.17.0)
+      celluloid (>= 0.15.2)
+      connection_pool (>= 1.0.0)
+      json
+      redis (>= 3.0.4)
+      redis-namespace (>= 1.3.1)
+
+GIT
   remote: git://github.com/phallstrom/whenever.git
   revision: 83be4c51352c0c7262bc7b147bbc4fda8d80074d
   specs:
@@ -59,13 +70,15 @@ GEM
       i18n
       rake (>= 10.0.0)
       sshkit (>= 0.0.23)
-    capistrano-bundler (1.0.0)
-      capistrano (>= 3.0.0.pre)
+    capistrano-bundler (1.1.1)
+      capistrano (~> 3.0)
+      sshkit (>= 1.2.0)
     capistrano-rails (1.1.0)
       capistrano (>= 3.0.0)
       capistrano-bundler (>= 1.0.0)
-    capistrano-rvm (0.0.3)
-      capistrano
+    capistrano-rvm (0.1.0)
+      capistrano (~> 3.0)
+      sshkit (~> 1.2.0)
     celluloid (0.15.2)
       timers (~> 1.1.0)
     chronic (0.10.2)
@@ -80,8 +93,8 @@ GEM
     commonjs (0.2.7)
     configoro (1.3.0)
       activesupport
-    connection_pool (1.1.0)
-    devise (3.2.1)
+    connection_pool (1.2.0)
+    devise (3.2.2)
       bcrypt-ruby (~> 3.0)
       orm_adapter (~> 0.1)
       railties (>= 3.2.6, < 5)
@@ -133,7 +146,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     method_source (0.8.2)
-    mime-types (1.25)
+    mime-types (1.25.1)
     mini_portile (0.5.2)
     minitest (4.7.5)
     multi_json (1.8.2)
@@ -150,7 +163,7 @@ GEM
       blankslate (~> 2.0)
     pg (0.17.0)
     polyglot (0.3.3)
-    pry (0.9.12.3)
+    pry (0.9.12.4)
       coderay (~> 1.0)
       method_source (~> 0.8)
       slop (~> 3.4)
@@ -204,12 +217,6 @@ GEM
       railties (>= 4.0.0, < 5.0)
       sass (>= 3.1.10)
       sprockets-rails (~> 2.0.0)
-    sidekiq (2.16.1)
-      celluloid (>= 0.15.2)
-      connection_pool (>= 1.0.0)
-      json
-      redis (>= 3.0.4)
-      redis-namespace (>= 1.3.1)
     sinatra (1.4.4)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -221,7 +228,7 @@ GEM
     slugalicious (2.1.0)
       rails (>= 4.0)
       stringex
-    sprockets (2.10.0)
+    sprockets (2.10.1)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
@@ -232,15 +239,15 @@ GEM
       sprockets (~> 2.8)
     sql_origin (1.1.0)
       rails (>= 4.0)
-    squash_rails (1.2.0)
+    squash_rails (1.3.0)
       squash_ruby
-    squash_ruby (1.2.2)
+    squash_ruby (1.2.3)
       json
-    sshkit (1.1.0)
-      net-scp
+    sshkit (1.2.0)
+      net-scp (>= 1.1.2)
       net-ssh
       term-ansicolor
-    stringex (2.1.1)
+    stringex (2.1.2)
     temple (0.6.7)
     term-ansicolor (1.2.2)
       tins (~> 0.8)
@@ -323,7 +330,7 @@ DEPENDENCIES
   redis-namespace
   rspec-rails
   sass-rails
-  sidekiq
+  sidekiq!
   sinatra
   slim
   slugalicious
