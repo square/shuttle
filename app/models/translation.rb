@@ -229,6 +229,17 @@ class Translation < ActiveRecord::Base
     source_locale == locale
   end
 
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    state = case approved
+              when true then 'approved'
+              when false then 'rejected'
+              else translated? ? 'translated' : 'untranslated'
+            end
+    "#<#{self.class.to_s} #{id}: Key #{key_id} in #{rfc5646_locale} (#{state})>"
+  end
+
   private
 
   def valid_interpolations

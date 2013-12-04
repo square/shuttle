@@ -337,6 +337,12 @@ class Project < ActiveRecord::Base
     ProjectReadinessRecalculator.perform_once id
   end
 
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    "#<#{self.class.to_s} #{id}: #{name}>"
+  end
+
   private
 
   def repo_path

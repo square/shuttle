@@ -548,6 +548,17 @@ class Commit < ActiveRecord::Base
     end
   end
 
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    state = if loading?
+              'loading'
+            else
+              ready? ? 'ready' : 'not ready'
+            end
+    "#<#{self.class.to_s} #{id}: #{revision} (#{state})>"
+  end
+
   private
 
   def load_message

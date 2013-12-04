@@ -231,6 +231,13 @@ class Key < ActiveRecord::Base
     end
   end
 
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    state = ready? ? 'ready' : 'not ready'
+    "#<#{self.class.to_s} #{id}: #{key} (#{state})>"
+  end
+
   private
 
   def update_commit_readiness(force=false)

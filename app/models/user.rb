@@ -163,6 +163,9 @@ class User < ActiveRecord::Base
     as_json(options || {}).to_json
   end
 
-  private
-
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    "#<#{self.class.to_s} #{id}: #{email} (#{role})>"
+  end
 end
