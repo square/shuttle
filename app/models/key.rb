@@ -119,9 +119,6 @@ class Key < ActiveRecord::Base
     indexes :commit_ids, as: 'commits_keys.map(&:commit_id)'
   end
 
-  extend PrefixField
-  prefix_field :original_key, prefix_column: 'key_prefix', length: 10
-
   include Slugalicious
   slugged ->(key) { key.original_key[0, 50] }, scope: :project_id
 
@@ -139,7 +136,6 @@ class Key < ActiveRecord::Base
   attr_readonly :project_id, :key, :original_key, :source_copy
 
   scope :in_blob, ->(blob) { where(project_id: blob.project_id, sha_raw: blob.sha_raw) }
-  scope :by_key, -> { order('key_prefix ASC') }
 
   # TODO:
   def self.total_strings
@@ -163,7 +159,7 @@ class Key < ActiveRecord::Base
 
     options[:except] = Array.wrap(options[:except])
     options[:except] << :key_sha_raw << :searchable_key << :metadata
-    options[:except] << :key_prefix << :project_id
+    options[:except] << :project_id
     options[:except] << :source_copy_sha_raw
 
     super options

@@ -56,9 +56,6 @@ class SourceGlossaryEntry < ActiveRecord::Base
   extend SetNilIfBlank
   set_nil_if_blank :context, :notes, :due_date
 
-  extend PrefixField
-  prefix_field :source_copy
-
   validates :source_rfc5646_locale,
             presence: true
   validates :source_copy_sha,
