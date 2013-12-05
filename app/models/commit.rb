@@ -79,7 +79,7 @@ class Commit < ActiveRecord::Base
 
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
-  has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
+  has_many :commits_keys, inverse_of: :commit, dependent: :destroy
   has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
 
@@ -551,6 +551,17 @@ class Commit < ActiveRecord::Base
         msg ? Sidekiq.load_json(msg) : nil
       end.compact
     end
+  end
+
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    state = if loading?
+              'loading'
+            else
+              ready? ? 'ready' : 'not ready'
+            end
+    "#<#{self.class.to_s} #{id}: #{revision} (#{state})>"
   end
 
   private

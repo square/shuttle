@@ -74,4 +74,10 @@ class Blob < ActiveRecord::Base
   def blob
     project.repo.object(sha)
   end
+
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    "#<#{self.class.to_s} #{sha}>"
+  end
 end

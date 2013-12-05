@@ -74,8 +74,8 @@
 
 class Key < ActiveRecord::Base
   belongs_to :project, inverse_of: :keys
-  has_many :translations, inverse_of: :key, dependent: :delete_all
-  has_many :commits_keys, inverse_of: :key, dependent: :delete_all
+  has_many :translations, inverse_of: :key, dependent: :destroy
+  has_many :commits_keys, inverse_of: :key, dependent: :destroy
   has_many :commits, through: :commits_keys
 
   include HasMetadataColumn
@@ -119,9 +119,6 @@ class Key < ActiveRecord::Base
     indexes :commit_ids, as: 'commits_keys.map(&:commit_id)'
   end
 
-  extend PrefixField
-  prefix_field :original_key, prefix_column: 'key_prefix', length: 10
-
   include Slugalicious
   slugged ->(key) { key.original_key[0, 50] }, scope: :project_id
 
@@ -139,7 +136,6 @@ class Key < ActiveRecord::Base
   attr_readonly :project_id, :key, :original_key, :source_copy
 
   scope :in_blob, ->(blob) { where(project_id: blob.project_id, sha_raw: blob.sha_raw) }
-  scope :by_key, -> { order('key_prefix ASC') }
 
   # TODO:
   def self.total_strings
@@ -163,7 +159,7 @@ class Key < ActiveRecord::Base
 
     options[:except] = Array.wrap(options[:except])
     options[:except] << :key_sha_raw << :searchable_key << :metadata
-    options[:except] << :key_prefix << :project_id
+    options[:except] << :project_id
     options[:except] << :source_copy_sha_raw
 
     super options
@@ -233,6 +229,13 @@ class Key < ActiveRecord::Base
     else
       !translations.in_locale(*project.required_locales).where('approved IS NOT TRUE').exists?
     end
+  end
+
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    state = ready? ? 'ready' : 'not ready'
+    "#<#{self.class.to_s} #{id}: #{key} (#{state})>"
   end
 
   private

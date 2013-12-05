@@ -66,8 +66,8 @@ class Project < ActiveRecord::Base
   #   and add an error to the `repository_url` attribute if it cannot.
   attr_accessor :validate_repo_connectivity
 
-  has_many :commits, inverse_of: :project, dependent: :delete_all
-  has_many :keys, inverse_of: :project, dependent: :delete_all
+  has_many :commits, inverse_of: :project, dependent: :destroy
+  has_many :keys, inverse_of: :project, dependent: :destroy
   has_many :blobs, inverse_of: :project, dependent: :delete_all
   has_many :translations, through: :keys
 
@@ -335,6 +335,12 @@ class Project < ActiveRecord::Base
 
   def recalculate_commit_readiness
     ProjectReadinessRecalculator.perform_once id
+  end
+
+  # @private
+  def inspect(default_behavior=false)
+    return super() if default_behavior
+    "#<#{self.class.to_s} #{id}: #{name}>"
   end
 
   private

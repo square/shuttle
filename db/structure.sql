@@ -101,8 +101,6 @@ CREATE TABLE glossary_entries (
     translator_id integer,
     reviewer_id integer,
     metadata text,
-    searchable_copy tsvector,
-    searchable_source_copy tsvector,
     source_rfc5646_locale character varying(15) NOT NULL,
     rfc5646_locale character varying(15) NOT NULL,
     translated boolean DEFAULT false NOT NULL,
@@ -110,8 +108,7 @@ CREATE TABLE glossary_entries (
     key_sha_raw bytea,
     source_copy_sha_raw bytea,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    source_copy_prefix character(5) NOT NULL
+    updated_at timestamp without time zone
 );
 
 
@@ -144,8 +141,6 @@ CREATE TABLE keys (
     project_id integer NOT NULL,
     key_sha_raw bytea NOT NULL,
     source_copy_sha_raw bytea NOT NULL,
-    searchable_key tsvector,
-    key_prefix character(10),
     ready boolean DEFAULT true NOT NULL
 );
 
@@ -179,7 +174,6 @@ CREATE TABLE locale_glossary_entries (
     reviewer_id integer,
     source_glossary_entry_id integer,
     metadata text,
-    searchable_copy tsvector,
     rfc5646_locale character varying(15) NOT NULL,
     translated boolean DEFAULT false NOT NULL,
     approved boolean,
@@ -293,12 +287,10 @@ ALTER SEQUENCE slugs_id_seq OWNED BY slugs.id;
 CREATE TABLE source_glossary_entries (
     id integer NOT NULL,
     metadata text,
-    searchable_source_copy tsvector,
     source_rfc5646_locale character varying(15) DEFAULT 'en'::character varying NOT NULL,
     source_copy_sha_raw bytea,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    source_copy_prefix character(5) NOT NULL
+    updated_at timestamp without time zone
 );
 
 
@@ -363,8 +355,6 @@ CREATE TABLE translation_units (
     copy text,
     source_copy_sha_raw bytea NOT NULL,
     copy_sha_raw bytea NOT NULL,
-    searchable_source_copy tsvector,
-    searchable_copy tsvector,
     source_rfc5646_locale character varying(15) NOT NULL,
     rfc5646_locale character varying(15) NOT NULL,
     created_at timestamp without time zone
@@ -402,8 +392,6 @@ CREATE TABLE translations (
     reviewer_id integer,
     source_rfc5646_locale character varying(15) NOT NULL,
     rfc5646_locale character varying(15) NOT NULL,
-    searchable_copy tsvector,
-    searchable_source_copy tsvector,
     translated boolean DEFAULT false NOT NULL,
     approved boolean,
     created_at timestamp without time zone,
@@ -696,31 +684,10 @@ CREATE UNIQUE INDEX commits_rev ON commits USING btree (project_id, revision_raw
 
 
 --
--- Name: glossary_entries_sorted; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX glossary_entries_sorted ON glossary_entries USING btree (rfc5646_locale, source_copy_prefix);
-
-
---
 -- Name: glossary_source_copy_sha; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX glossary_source_copy_sha ON glossary_entries USING btree (source_copy_sha_raw, rfc5646_locale);
-
-
---
--- Name: keys_search; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX keys_search ON keys USING gin (searchable_key);
-
-
---
--- Name: keys_sorted; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX keys_sorted ON keys USING btree (project_id, key_prefix);
 
 
 --
@@ -756,20 +723,6 @@ CREATE INDEX slugs_for_record ON slugs USING btree (sluggable_type, sluggable_id
 --
 
 CREATE UNIQUE INDEX slugs_unique ON slugs USING btree (sluggable_type, lower((scope)::text), lower((slug)::text));
-
-
---
--- Name: translation_units_search; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX translation_units_search ON translation_units USING gin (searchable_copy);
-
-
---
--- Name: translation_units_source_search; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX translation_units_source_search ON translation_units USING gin (searchable_source_copy);
 
 
 --
@@ -983,3 +936,5 @@ INSERT INTO schema_migrations (version) VALUES ('20131008220117');
 INSERT INTO schema_migrations (version) VALUES ('20131111213136');
 
 INSERT INTO schema_migrations (version) VALUES ('20131116042827');
+
+INSERT INTO schema_migrations (version) VALUES ('20131204020552');
