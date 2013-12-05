@@ -74,8 +74,8 @@
 
 class Key < ActiveRecord::Base
   belongs_to :project, inverse_of: :keys
-  has_many :translations, inverse_of: :key, dependent: :delete_all
-  has_many :commits_keys, inverse_of: :key, dependent: :delete_all
+  has_many :translations, inverse_of: :key, dependent: :destroy
+  has_many :commits_keys, inverse_of: :key, dependent: :destroy
   has_many :commits, through: :commits_keys
 
   include HasMetadataColumn
