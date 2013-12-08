@@ -17,36 +17,36 @@ require 'spec_helper'
 describe Fencer::Printf do
   describe ".fence" do
     it "should correctly fence all examples from the printf documentation" do
-      Fencer::Printf.fence(%|printf ("Characters: %c %c \n", 'a', 65);|).
-          should eql('%1$c' => [21..22], '%2$c' => [24..25])
-      Fencer::Printf.fence(%|printf ("Decimals: %d %ld\n", 1977, 650000L);|).
-          should eql('%1$d' => [19..20], '%2$ld' => [22..24])
-      Fencer::Printf.fence(%|printf ("Preceding with blanks: %10d \n", 1977);|).
-          should eql('%1$10d' => [32..35])
-      Fencer::Printf.fence(%|printf ("Preceding with zeros: %010d \n", 1977);|).
-          should eql('%1$010d' => [31..35])
-      Fencer::Printf.fence(%|printf ("Some different radixes: %d %x %o %#x %#o \n", 100, 100, 100, 100, 100);|).
-          should eql(
+      expect(Fencer::Printf.fence(%|printf ("Characters: %c %c \n", 'a', 65);|)).
+          to eql('%1$c' => [21..22], '%2$c' => [24..25])
+      expect(Fencer::Printf.fence(%|printf ("Decimals: %d %ld\n", 1977, 650000L);|)).
+          to eql('%1$d' => [19..20], '%2$ld' => [22..24])
+      expect(Fencer::Printf.fence(%|printf ("Preceding with blanks: %10d \n", 1977);|)).
+          to eql('%1$10d' => [32..35])
+      expect(Fencer::Printf.fence(%|printf ("Preceding with zeros: %010d \n", 1977);|)).
+          to eql('%1$010d' => [31..35])
+      expect(Fencer::Printf.fence(%|printf ("Some different radixes: %d %x %o %#x %#o \n", 100, 100, 100, 100, 100);|)).
+          to eql(
                      '%1$d'  => [33..34],
                      '%2$x'  => [36..37],
                      '%3$o'  => [39..40],
                      '%4$#x' => [42..44],
                      '%5$#o' => [46..48]
                  )
-      Fencer::Printf.fence(%|printf ("floats: %4.2f %+.0e %E \n", 3.1416, 3.1416, 3.1416);|).
-          should eql("%1$4.2f" => [17..21], "%2$+.0e" => [23..27], "%3$E" => [29..30])
-      Fencer::Printf.fence(%|printf ("Width trick: %*d \n", 5, 10);|).
-          should eql("%1$*d" => [22..24])
-      Fencer::Printf.fence(%|printf ("%s \n", "A string");|).
-          should eql("%1$s" => [9..10])
-      Fencer::Printf.fence(%|printf("%1$d:%2$.*3$d:%4$.*3$d\n", hour, min, precision, sec);|).
-          should eql('%1$d' => [8..11], '%2$.*3$d' => [13..20], '%4$.*3$d' => [22..29])
-      Fencer::Printf.fence(%|printf("%10.10s", strperm (statbuf.st_mode));|).
-          should eql("%1$10.10s"=>[8..14])
-      Fencer::Printf.fence(%|printf(" %-8.8s", pwd->pw_name);|).
-          should eql("%1$-8.8s"=>[9..14])
-      Fencer::Printf.fence(%|printf("%9jd", (intmax_t) statbuf.st_size);|).
-          should eql("%1$9jd"=>[8..11])
+      expect(Fencer::Printf.fence(%|printf ("floats: %4.2f %+.0e %E \n", 3.1416, 3.1416, 3.1416);|)).
+          to eql("%1$4.2f" => [17..21], "%2$+.0e" => [23..27], "%3$E" => [29..30])
+      expect(Fencer::Printf.fence(%|printf ("Width trick: %*d \n", 5, 10);|)).
+          to eql("%1$*d" => [22..24])
+      expect(Fencer::Printf.fence(%|printf ("%s \n", "A string");|)).
+          to eql("%1$s" => [9..10])
+      expect(Fencer::Printf.fence(%|printf("%1$d:%2$.*3$d:%4$.*3$d\n", hour, min, precision, sec);|)).
+          to eql('%1$d' => [8..11], '%2$.*3$d' => [13..20], '%4$.*3$d' => [22..29])
+      expect(Fencer::Printf.fence(%|printf("%10.10s", strperm (statbuf.st_mode));|)).
+          to eql("%1$10.10s"=>[8..14])
+      expect(Fencer::Printf.fence(%|printf(" %-8.8s", pwd->pw_name);|)).
+          to eql("%1$-8.8s"=>[9..14])
+      expect(Fencer::Printf.fence(%|printf("%9jd", (intmax_t) statbuf.st_size);|)).
+          to eql("%1$9jd"=>[8..11])
     end
 
     it "should handle %% tokens interspersed with positional tokens and adjacent to printf format strings" do
@@ -56,8 +56,8 @@ describe Fencer::Printf do
       # also, the only non-positional format specifier that can be interspersed
       # with positional format specifiers is '%%'
 
-      Fencer::Printf.fence('My name is %2$s, and I am %1$u%% awesome. %%').
-          should eql('%2$s' => [11..14], '%1$u' => [26..29], '%3$%' => [30..31], '%4$%' => [42..43])
+      expect(Fencer::Printf.fence('My name is %2$s, and I am %1$u%% awesome. %%')).
+          to eql('%2$s' => [11..14], '%1$u' => [26..29], '%3$%' => [30..31], '%4$%' => [42..43])
     end
   end
 end

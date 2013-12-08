@@ -17,21 +17,21 @@ require 'spec_helper'
 describe LocaleField do
   it "should convert between an RFC 5646 code and a Locale" do
     t = FactoryGirl.build(:translation, rfc5646_locale: 'de-DE')
-    t.locale.rfc5646.should eql('de-DE')
+    expect(t.locale.rfc5646).to eql('de-DE')
     t.locale = Locale.from_rfc5646('fr-CA')
-    t.rfc5646_locale.should eql('fr-CA')
+    expect(t.rfc5646_locale).to eql('fr-CA')
   end
 
   it "should use a custom reader and writer" do
     pr = FactoryGirl.build(:project, targeted_rfc5646_locales: {'de-DE' => true, 'fr-CA' => false})
     lr = pr.locale_requirements
-    lr.keys.sort_by(&:rfc5646).should eql([Locale.from_rfc5646('de-DE'), Locale.from_rfc5646('fr-CA')])
+    expect(lr.keys.sort_by(&:rfc5646)).to eql([Locale.from_rfc5646('de-DE'), Locale.from_rfc5646('fr-CA')])
     pr.locale_requirements = {
         Locale.from_rfc5646('en-US') => true,
         Locale.from_rfc5646('zh-HK') => false
     }
-    pr.targeted_rfc5646_locales.
-        should eql(
+    expect(pr.targeted_rfc5646_locales).
+        to eql(
                    'en-US' => true,
                    'zh-HK' => false
                )
@@ -39,8 +39,8 @@ describe LocaleField do
 
   it "should use a custom from column" do
     pr = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
-    pr.base_locale.rfc5646.should eql('en-US')
+    expect(pr.base_locale.rfc5646).to eql('en-US')
     pr.base_locale = Locale.from_rfc5646('zh-HK')
-    pr.base_rfc5646_locale.should eql('zh-HK')
+    expect(pr.base_rfc5646_locale).to eql('zh-HK')
   end
 end

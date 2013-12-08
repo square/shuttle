@@ -24,18 +24,18 @@ describe DigestField do
   end
 
   it "should create a named scope using the :scope option" do
-    TranslationUnit.source_copy_matches('test').to_sql.
-        should eql("SELECT \"translation_units\".* FROM \"translation_units\"  WHERE (\"translation_units\".\"source_copy_sha_raw\" = E'\\\\237\\\\206\\\\320\\\\201\\\\210\\\\114\\\\175\\\\145\\\\232\\\\057\\\\352\\\\240\\\\305\\\\132\\\\320\\\\025\\\\243\\\\277\\\\117\\\\033\\\\053\\\\013\\\\202\\\\054\\\\321\\\\135\\\\154\\\\025\\\\260\\\\360\\\\012\\\\010'::bytea)")
-    TranslationUnit.source_copy_matches('test', 'test2').to_sql.
-        should eql("SELECT \"translation_units\".* FROM \"translation_units\"  WHERE (\"translation_units\".\"source_copy_sha_raw\" IN (E'\\\\237\\\\206\\\\320\\\\201\\\\210\\\\114\\\\175\\\\145\\\\232\\\\057\\\\352\\\\240\\\\305\\\\132\\\\320\\\\025\\\\243\\\\277\\\\117\\\\033\\\\053\\\\013\\\\202\\\\054\\\\321\\\\135\\\\154\\\\025\\\\260\\\\360\\\\012\\\\010'::bytea, E'\\\\140\\\\060\\\\072\\\\342\\\\053\\\\231\\\\210\\\\141\\\\274\\\\343\\\\262\\\\217\\\\063\\\\356\\\\301\\\\276\\\\165\\\\212\\\\041\\\\074\\\\206\\\\311\\\\074\\\\007\\\\155\\\\276\\\\237\\\\125\\\\214\\\\021\\\\307\\\\122'::bytea))")
+    expect(TranslationUnit.source_copy_matches('test').to_sql).
+        to eql("SELECT \"translation_units\".* FROM \"translation_units\"  WHERE (\"translation_units\".\"source_copy_sha_raw\" = E'\\\\237\\\\206\\\\320\\\\201\\\\210\\\\114\\\\175\\\\145\\\\232\\\\057\\\\352\\\\240\\\\305\\\\132\\\\320\\\\025\\\\243\\\\277\\\\117\\\\033\\\\053\\\\013\\\\202\\\\054\\\\321\\\\135\\\\154\\\\025\\\\260\\\\360\\\\012\\\\010'::bytea)")
+    expect(TranslationUnit.source_copy_matches('test', 'test2').to_sql).
+        to eql("SELECT \"translation_units\".* FROM \"translation_units\"  WHERE (\"translation_units\".\"source_copy_sha_raw\" IN (E'\\\\237\\\\206\\\\320\\\\201\\\\210\\\\114\\\\175\\\\145\\\\232\\\\057\\\\352\\\\240\\\\305\\\\132\\\\320\\\\025\\\\243\\\\277\\\\117\\\\033\\\\053\\\\013\\\\202\\\\054\\\\321\\\\135\\\\154\\\\025\\\\260\\\\360\\\\012\\\\010'::bytea, E'\\\\140\\\\060\\\\072\\\\342\\\\053\\\\231\\\\210\\\\141\\\\274\\\\343\\\\262\\\\217\\\\063\\\\356\\\\301\\\\276\\\\165\\\\212\\\\041\\\\074\\\\206\\\\311\\\\074\\\\007\\\\155\\\\276\\\\237\\\\125\\\\214\\\\021\\\\307\\\\122'::bytea))")
   end
 
   it "should automatically set the value from a different field" do
     k = FactoryGirl.build(:key, key: 'hello world')
-    k.should be_valid
-    k.key_sha_raw.should eql(Digest::SHA2.digest('hello world'))
+    expect(k).to be_valid
+    expect(k.key_sha_raw).to eql(Digest::SHA2.digest('hello world'))
     k.key = 'foo bar'
-    k.should be_valid
-    k.key_sha_raw.should eql(Digest::SHA2.digest('foo bar'))
+    expect(k).to be_valid
+    expect(k.key_sha_raw).to eql(Digest::SHA2.digest('foo bar'))
   end
 end

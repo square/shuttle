@@ -31,18 +31,18 @@ describe Key do
     it "should set ready to false for keys with unapproved required translations" do
       @en_translation.update_attribute :approved, false
       @key.recalculate_ready!
-      @key.should_not be_ready
+      expect(@key).not_to be_ready
     end
 
     it "should set ready to true for keys with all required translations approved" do
       @key.recalculate_ready!
-      @key.should be_ready
+      expect(@key).to be_ready
     end
 
     it "should not care about non-required translations" do
       @es_translation.update_attribute :approved, false
       @key.recalculate_ready!
-      @key.should be_ready
+      expect(@key).to be_ready
     end
   end
 
@@ -69,16 +69,16 @@ describe Key do
       key2.add_pending_translations
       key3.add_pending_translations
 
-      key1.translations.count.should eql(3)
-      key2.translations.count.should eql(3)
-      key3.translations.count.should eql(3)
+      expect(key1.translations.count).to eql(3)
+      expect(key2.translations.count).to eql(3)
+      expect(key3.translations.count).to eql(3)
 
-      key2.translations.not_base.all? do |trans|
+      expect(key2.translations.not_base.all? do |trans|
         trans.copy.nil? && trans.approved.nil?
-      end.should be_true
-      key3.translations.not_base.all? do |trans|
+      end).to be_true
+      expect(key3.translations.not_base.all? do |trans|
         trans.copy.nil? && trans.approved.nil?
-      end.should be_true
+      end).to be_true
     end
 
     it "should only import included keys" do
@@ -95,8 +95,8 @@ describe Key do
       included.add_pending_translations
       excluded.add_pending_translations
 
-      included.translations.count.should eql(3)
-      excluded.translations.count.should eql(1)
+      expect(included.translations.count).to eql(3)
+      expect(excluded.translations.count).to eql(1)
     end
 
     it "should skip excluded keys" do
@@ -112,8 +112,8 @@ describe Key do
       key.add_pending_translations
       excluded.add_pending_translations
 
-      key.translations.count.should eql(3)
-      excluded.translations.count.should eql(1)
+      expect(key.translations.count).to eql(3)
+      expect(excluded.translations.count).to eql(1)
     end
 
     it "should skip locale-specific excluded keys" do
@@ -129,9 +129,9 @@ describe Key do
       key.add_pending_translations
       excluded.add_pending_translations
 
-      key.translations.count.should eql(3)
-      excluded.translations.count.should eql(2)
-      excluded.translations.pluck(:rfc5646_locale).sort.should eql(%w(de en-US))
+      expect(key.translations.count).to eql(3)
+      expect(excluded.translations.count).to eql(2)
+      expect(excluded.translations.pluck(:rfc5646_locale).sort).to eql(%w(de en-US))
     end
 
     it "should skip non-matching locale-specific included keys" do
@@ -147,9 +147,9 @@ describe Key do
       included.add_pending_translations
       excluded.add_pending_translations
 
-      included.translations.count.should eql(3)
-      excluded.translations.count.should eql(2)
-      excluded.translations.pluck(:rfc5646_locale).sort.should eql(%w(de en-US))
+      expect(included.translations.count).to eql(3)
+      expect(excluded.translations.count).to eql(2)
+      expect(excluded.translations.pluck(:rfc5646_locale).sort).to eql(%w(de en-US))
     end
   end
 
@@ -168,8 +168,8 @@ describe Key do
       key.remove_excluded_pending_translations
       excluded.remove_excluded_pending_translations
 
-      key.translations.count.should eql(1)
-      excluded.translations.count.should eql(0)
+      expect(key.translations.count).to eql(1)
+      expect(excluded.translations.count).to eql(0)
     end
 
     it "should remove an empty translation with an excluded key" do
@@ -186,8 +186,8 @@ describe Key do
       included.remove_excluded_pending_translations
       excluded.remove_excluded_pending_translations
 
-      included.translations.count.should eql(1)
-      excluded.translations.count.should eql(0)
+      expect(included.translations.count).to eql(1)
+      expect(excluded.translations.count).to eql(0)
     end
 
     it "should remove an empty translation with an excluded key in a locale" do
@@ -204,9 +204,9 @@ describe Key do
       key.remove_excluded_pending_translations
       excluded.remove_excluded_pending_translations
 
-      key.translations.count.should eql(1)
-      excluded.translations.count.should eql(1)
-      excluded.translations.first.rfc5646_locale.should eql('en-US')
+      expect(key.translations.count).to eql(1)
+      expect(excluded.translations.count).to eql(1)
+      expect(excluded.translations.first.rfc5646_locale).to eql('en-US')
     end
 
     it "should not remove a translated translation not matching an included key" do
@@ -223,9 +223,9 @@ describe Key do
       included.remove_excluded_pending_translations
       excluded.remove_excluded_pending_translations
 
-      included.translations.count.should eql(1)
-      excluded.translations.count.should eql(1)
-      excluded.translations.first.rfc5646_locale.should eql('fr')
+      expect(included.translations.count).to eql(1)
+      expect(excluded.translations.count).to eql(1)
+      expect(excluded.translations.first.rfc5646_locale).to eql('fr')
     end
 
     it "should not remove a translated translation with an excluded key" do
@@ -242,9 +242,9 @@ describe Key do
       key.remove_excluded_pending_translations
       excluded.remove_excluded_pending_translations
 
-      key.translations.count.should eql(0)
-      excluded.translations.count.should eql(1)
-      excluded.translations.first.rfc5646_locale.should eql('fr')
+      expect(key.translations.count).to eql(0)
+      expect(excluded.translations.count).to eql(1)
+      expect(excluded.translations.first.rfc5646_locale).to eql('fr')
     end
   end
 

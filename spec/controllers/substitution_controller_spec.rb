@@ -20,39 +20,39 @@ describe SubstitutionController do
   describe '#convert' do
     it "should 404 if the from locale is invalid" do
       get :convert, from: 'wut is this', to: 'en-CA', string: 'What a colorful catalog.', format: 'json'
-      response.status.should eql(404)
-      response.body.should be_blank
+      expect(response.status).to eql(404)
+      expect(response.body).to be_blank
     end
 
     it "should 404 if the to locale is invalid" do
       get :convert, from: 'en-US', to: 'hello there', string: 'What a colorful catalog.', format: 'json'
-      response.status.should eql(404)
-      response.body.should be_blank
+      expect(response.status).to eql(404)
+      expect(response.body).to be_blank
     end
 
     it "should 400 if the string is not given" do
       get :convert, from: 'en-US', to: 'en-CA', format: 'json'
-      response.status.should eql(400)
-      response.body.should be_blank
+      expect(response.status).to eql(400)
+      expect(response.body).to be_blank
     end
 
     it "should 400 if the string is invalid" do
       get :convert, from: 'en-US', to: 'en-CA', string: {'hello' => 'world'}, format: 'json'
-      response.status.should eql(400)
-      response.body.should be_blank
+      expect(response.status).to eql(400)
+      expect(response.body).to be_blank
     end
 
     it "should 422 if the from and to locales are not convertible" do
       get :convert, from: 'en-US', to: 'fr-CA', string: 'What a colorful catalog.', format: 'json'
-      response.status.should eql(422)
-      response.body.should be_blank
+      expect(response.status).to eql(422)
+      expect(response.body).to be_blank
     end
 
     it "should return the JSON-formatted result object of the conversion" do
       get :convert, from: 'en-US', to: 'en-CA', string: 'What a colorful catalog.', format: 'json'
-      response.status.should eql(200)
-      JSON.parse(response.body).
-          should eql(
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body)).
+          to eql(
                      'string'      => 'What a colourful catalog.',
                      'suggestions' => [{
                                            'range'      => [17, 23],

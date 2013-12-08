@@ -28,19 +28,19 @@ describe LocalizePrecompiler do
       @commit.keys = [key]
       translation  = FactoryGirl.create(:translation, key: key, translated: true, approved: true)
       @commit.recalculate_ready!
-      @commit.should be_ready
-      Shuttle::Redis.exists(subject.key(@commit)).should be_false
+      expect(@commit).to be_ready
+      expect(Shuttle::Redis.exists(subject.key(@commit))).to be_false
       subject.perform(@commit.id)
-      Shuttle::Redis.exists(subject.key(@commit)).should be_true
+      expect(Shuttle::Redis.exists(subject.key(@commit))).to be_true
       # TODO (zb) : actually extract the tarball returned here and check its contents like the ios exporter spec
     end
 
     context "if an exception is thrown" do
       it "does not write an empty file" do
-        Shuttle::Redis.stub(:set).and_raise(RuntimeError)
-        Shuttle::Redis.exists(subject.key(@commit)).should be_false
+        allow(Shuttle::Redis).to receive(:set).and_raise(RuntimeError)
+        expect(Shuttle::Redis.exists(subject.key(@commit))).to be_false
         expect { subject.perform(@commit.id) }.to raise_error(RuntimeError)
-        Shuttle::Redis.exists(subject.key(@commit)).should be_false
+        expect(Shuttle::Redis.exists(subject.key(@commit))).to be_false
       end
     end
 

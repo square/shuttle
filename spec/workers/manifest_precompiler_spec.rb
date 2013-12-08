@@ -22,26 +22,26 @@ describe ManifestPrecompiler do
       @translation = FactoryGirl.create(:translation, key: @key, translated: true, approved: true, copy: "Foo", source_copy: "Bar")
       Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, @format)
       @commit.keys << @key
-      @translation.should be_present
+      expect(@translation).to be_present
       @commit.recalculate_ready!
-      @commit.should be_ready
+      expect(@commit).to be_ready
       @cache_key = ManifestPrecompiler.new.key(@commit, @format)
     end
 
     it "compiles a given commit and stores the files on disk" do
-      Shuttle::Redis.exists(@cache_key).should be_false
+      expect(Shuttle::Redis.exists(@cache_key)).to be_false
       ManifestPrecompiler.new.perform(@commit.id, @format)
-      Shuttle::Redis.exists(@cache_key).should be_true
-      Shuttle::Redis.get(@cache_key).should include(@translation.copy)
+      expect(Shuttle::Redis.exists(@cache_key)).to be_true
+      expect(Shuttle::Redis.get(@cache_key)).to include(@translation.copy)
     end
 
     context "if an exception is thrown" do
       it "does not write an empty file" do
         precompiler = ManifestPrecompiler.new
-        Shuttle::Redis.stub(:set).and_raise(RuntimeError)
-        Shuttle::Redis.exists(@cache_key).should be_false
+        allow(Shuttle::Redis).to receive(:set).and_raise(RuntimeError)
+        expect(Shuttle::Redis.exists(@cache_key)).to be_false
         expect { precompiler.perform(@commit.id, @format) }.to raise_error(RuntimeError)
-        Shuttle::Redis.exists(@cache_key).should be_false
+        expect(Shuttle::Redis.exists(@cache_key)).to be_false
       end
     end
 

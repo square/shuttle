@@ -82,9 +82,9 @@ describe CommitsController do
     context '[formats]' do
       it "should export a YAML file in one locale" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'yaml'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="fr.yaml"')
-        response.body.should eql(<<-YAML)
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="fr.yaml"')
+        expect(response.body).to eql(<<-YAML)
 ---
 fr:
   key1: Bonjour {name}! Avec anninas fromage {count} la bouches.
@@ -94,9 +94,9 @@ fr:
 
       it "should export a YAML file in all locales" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'yaml'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="manifest.yaml"')
-        response.body.should eql(<<-YAML)
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.yaml"')
+        expect(response.body).to eql(<<-YAML)
 ---
 en:
   key1: Hi {name}! You have {count} items.
@@ -109,9 +109,9 @@ fr:
 
       it "should export an Ember.js file in one locale" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'js'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="fr.js"')
-        response.body.should eql(<<-JS)
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="fr.js"')
+        expect(response.body).to eql(<<-JS)
 Ember.I18n.locales.translations.fr = {
   "key1": "Bonjour {name}! Avec anninas fromage {count} la bouches.",
   "key2": "Tu avec carté {count} itém has"
@@ -121,9 +121,9 @@ Ember.I18n.locales.translations.fr = {
 
       it "should export an Ember.js file in all locales" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="manifest.js"')
-        response.body.should eql(<<-JS)
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.js"')
+        expect(response.body).to eql(<<-JS)
 Ember.I18n.locales.translations.en = {
   "key1": "Hi {name}! You have {count} items.",
   "key2": "Your cart has {count} items"
@@ -137,17 +137,17 @@ Ember.I18n.locales.translations.fr = {
 
       it "should export a UTF-16 Strings file in one locale" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'strings'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="fr.strings"')
-        response.headers['Content-Type'].should eql('text/plain; charset=utf-16le')
-        response.body.encoding.to_s.should eql('UTF-16LE')
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="fr.strings"')
+        expect(response.headers['Content-Type']).to eql('text/plain; charset=utf-16le')
+        expect(response.body.encoding.to_s).to eql('UTF-16LE')
 
         body = response.body.encode('UTF-8')
-        body.should include(<<-C)
+        expect(body).to include(<<-C)
 /* Universal Greeting */
 "key1" = "Bonjour {name}! Avec anninas fromage {count} la bouches.";
         C
-        body.should include(<<-C)
+        expect(body).to include(<<-C)
 /* Shopping cart contents */
 "key2" = "Tu avec carté {count} itém has";
         C
@@ -155,29 +155,29 @@ Ember.I18n.locales.translations.fr = {
 
       it "should export a Java properties file in one locale" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'properties'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="fr.properties"')
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="fr.properties"')
 
-        response.body.should include(<<-C)
+        expect(response.body).to include(<<-C)
 key1=Bonjour {name}! Avec anninas fromage {count} la bouches.
         C
-        response.body.should include(<<-C)
+        expect(response.body).to include(<<-C)
 key2=Tu avec carté {count} itém has
         C
       end
 
       it "should export an iOS tarball manifest" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'ios'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="manifest.tar.gz"')
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.tar.gz"')
         # check body?
       end
 
       it "should export a Ruby file in one locale" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'rb'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="fr.rb"')
-        response.body.should eql(<<-RUBY)
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="fr.rb"')
+        expect(response.body).to eql(<<-RUBY)
 {"fr"=>
   {"key1"=>"Bonjour {name}! Avec anninas fromage {count} la bouches.",
    "key2"=>"Tu avec carté {count} itém has"}}
@@ -186,9 +186,9 @@ key2=Tu avec carté {count} itém has
 
       it "should export a Ruby file in all locales" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'rb'
-        response.status.should eql(200)
-        response.headers['Content-Disposition'].should eql('attachment; filename="manifest.rb"')
-        response.body.should eql(<<-RUBY)
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.rb"')
+        expect(response.body).to eql(<<-RUBY)
 {"en"=>
   {"key1"=>"Hi {name}! You have {count} items.",
    "key2"=>"Your cart has {count} items"},
@@ -201,16 +201,16 @@ key2=Tu avec carté {count} itém has
 
     it "should include a header with the git revision" do
       get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js'
-      response.headers['X-Git-Revision'].should eql(@commit.revision)
+      expect(response.headers['X-Git-Revision']).to eql(@commit.revision)
     end
 
     it "should use a cached manifest if available" do
       mime = Mime::Type.lookup('application/javascript')
       Shuttle::Redis.set ManifestPrecompiler.new.key(@commit, mime), "Ember.I18n.locales.translations.en = {};"
       get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js'
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="manifest.js"')
-      response.body.should eql("Ember.I18n.locales.translations.en = {};")
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.js"')
+      expect(response.body).to eql("Ember.I18n.locales.translations.en = {};")
       Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, mime)
     end
 
@@ -218,9 +218,9 @@ key2=Tu avec carté {count} itém has
       mime = Mime::Type.lookup('application/javascript')
       Shuttle::Redis.set ManifestPrecompiler.new.key(@commit, mime), "hello, world!"
       get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js', force: 'true'
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="manifest.js"')
-      response.body.should eql(<<-JS)
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.js"')
+      expect(response.body).to eql(<<-JS)
 Ember.I18n.locales.translations.en = {
   "key1": "Hi {name}! You have {count} items.",
   "key2": "Your cart has {count} items"
@@ -237,9 +237,9 @@ Ember.I18n.locales.translations.fr = {
       mime = Mime::Type.lookup('application/javascript')
       Shuttle::Redis.set ManifestPrecompiler.new.key(@commit, mime), "hello, world!"
       get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js'
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="manifest.js"')
-      response.body.should eql(<<-JS)
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.js"')
+      expect(response.body).to eql(<<-JS)
 Ember.I18n.locales.translations.en = {
   "key1": "Hi {name}! You have {count} items.",
   "key2": "Your cart has {count} items"
@@ -254,27 +254,27 @@ Ember.I18n.locales.translations.fr = {
 
     it "should 400 if an unknown locale is provided" do
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'sploops', format: 'yaml'
-      response.status.should eql(400)
+      expect(response.status).to eql(400)
     end
 
     it "should 404 if an incomplete locale is provided" do
       @commit.update_column :ready, false
 
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'yaml'
-      response.status.should eql(404)
+      expect(response.status).to eql(404)
     end
 
     it "should 404 if an invalid commit SHA is provided" do
       get :manifest, project_id: @project.to_param, id: 'deadbeef', format: 'yaml'
-      response.status.should eql(404)
+      expect(response.status).to eql(404)
     end
 
     it "should not 404 if the partial param is set" do
       @commit.update_column :ready, false
 
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'yaml', partial: 'true'
-      response.status.should eql(200)
-      response.body.should eql(<<-YAML)
+      expect(response.status).to eql(200)
+      expect(response.body).to eql(<<-YAML)
 ---
 fr:
   key1: Bonjour {name}! Avec anninas fromage {count} la bouches.
@@ -286,8 +286,8 @@ fr:
       @commit.update_attribute :ready, false
 
       get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'yaml', partial: 'true'
-      response.status.should eql(200)
-      response.body.should eql(<<-YAML)
+      expect(response.status).to eql(200)
+      expect(response.body).to eql(<<-YAML)
 ---
 en:
   key1: Hi {name}! You have {count} items.
@@ -383,26 +383,26 @@ de:
     before :each do
       pending "Bug in RSpec causes this test to fail"
 
-      Git::Base.any_instance.stub(:object).and_call_original
-      Git::Base.any_instance.stub(:object).with('2dc20c984283bede1f45863b8f3b4dd9b5b554cc^{tree}:file-en.svg').
+      allow_any_instance_of(Git::Base).to receive(:object).and_call_original
+      allow_any_instance_of(Git::Base).to receive(:object).with('2dc20c984283bede1f45863b8f3b4dd9b5b554cc^{tree}:file-en.svg').
           and_return(double('Git::Object::Blob', contents: @svg))
     end
 
     it "should create a tarball of localized files" do
       get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz'
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="localized.tar.gz"')
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
 
       entries = Hash.new
       Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
         while (entry = archive.next_header)
-          entry.should be_regular
+          expect(entry).to be_regular
           entries[entry.pathname] = archive.read_data
         end
       end
 
-      entries.size.should eql(2)
-      entries['file-de.svg'].should eql(<<-XML)
+      expect(entries.size).to eql(2)
+      expect(entries['file-de.svg']).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
@@ -412,7 +412,7 @@ de:
   </g>
 </svg>
       XML
-      entries['file-fr.svg'].should eql(<<-XML)
+      expect(entries['file-fr.svg']).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
@@ -426,19 +426,19 @@ de:
 
     it "should create a tarball of localized files in a specific locale" do
       get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz', locale: 'de'
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="localized.tar.gz"')
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
 
       entries = Hash.new
       Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
         while (entry = archive.next_header)
-          entry.should be_regular
+          expect(entry).to be_regular
           entries[entry.pathname] = archive.read_data
         end
       end
 
-      entries.size.should eql(1)
-      entries['file-de.svg'].should eql(<<-XML)
+      expect(entries.size).to eql(1)
+      expect(entries['file-de.svg']).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
@@ -452,19 +452,19 @@ de:
 
     it "should include non-required locales if partial param is set" do
       get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz', partial: true
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="localized.tar.gz"')
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
 
       entries = Hash.new
       Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
         while (entry = archive.next_header)
-          entry.should be_regular
+          expect(entry).to be_regular
           entries[entry.pathname] = archive.read_data
         end
       end
 
-      entries.size.should eql(3)
-      entries['file-zh.svg'].should eql(<<-XML)
+      expect(entries.size).to eql(3)
+      expect(entries['file-zh.svg']).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
@@ -481,9 +481,9 @@ de:
       Shuttle::Redis.set LocalizePrecompiler.new.key(@commit), smalltgz
 
       get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz'
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="localized.tar.gz"')
-      response.body.should eql(smalltgz)
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
+      expect(response.body).to eql(smalltgz)
 
       Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
     end
@@ -492,19 +492,19 @@ de:
       Shuttle::Redis.set LocalizePrecompiler.new.key(@commit), "hello, world!"
 
       get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz', force: 'true'
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="localized.tar.gz"')
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
 
       entries = Hash.new
       Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
         while (entry = archive.next_header)
-          entry.should be_regular
+          expect(entry).to be_regular
           entries[entry.pathname] = archive.read_data
         end
       end
 
-      entries.size.should eql(2)
-      entries['file-de.svg'].should eql(<<-XML)
+      expect(entries.size).to eql(2)
+      expect(entries['file-de.svg']).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
@@ -514,7 +514,7 @@ de:
   </g>
 </svg>
       XML
-      entries['file-fr.svg'].should eql(<<-XML)
+      expect(entries['file-fr.svg']).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
@@ -532,19 +532,19 @@ de:
       Shuttle::Redis.set LocalizePrecompiler.new.key(@commit), "hello, world!"
 
       get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz'
-      response.status.should eql(200)
-      response.headers['Content-Disposition'].should eql('attachment; filename="localized.tar.gz"')
+      expect(response.status).to eql(200)
+      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
 
       entries = Hash.new
       Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
         while (entry = archive.next_header)
-          entry.should be_regular
+          expect(entry).to be_regular
           entries[entry.pathname] = archive.read_data
         end
       end
 
-      entries.size.should eql(2)
-      entries['file-de.svg'].should eql(<<-XML)
+      expect(entries.size).to eql(2)
+      expect(entries['file-de.svg']).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
@@ -554,7 +554,7 @@ de:
   </g>
 </svg>
       XML
-      entries['file-fr.svg'].should eql(<<-XML)
+      expect(entries['file-fr.svg']).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
@@ -587,27 +587,27 @@ de:
 
     it "should strip the commit revision of whitespace" do
       post :create, project_id: @project.to_param, commit: {revision: "  HEAD     "}, format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
     end
 
     it "should associate the commit with the current user" do
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
-      @project.commits.first.user.should eql(@user)
+      expect(@project.commits.first.user).to eql(@user)
     end
 
     it "should allow the description, due date, and pull request URL to be set" do
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD', description: 'desc', pull_request_url: 'url', due_date: Date.today.tomorrow}, format: 'json'
-      @project.commits.first.description.should eql('desc')
-      @project.commits.first.pull_request_url.should eql('url')
-      @project.commits.first.due_date.should eql(Date.today.tomorrow)
+      expect(@project.commits.first.description).to eql('desc')
+      expect(@project.commits.first.pull_request_url).to eql('url')
+      expect(@project.commits.first.due_date).to eql(Date.today.tomorrow)
     end
 
     it "should not attempt to import the same revision twice in quick succession" do
-      CommitCreator.should_receive(:perform_once).once
+      expect(CommitCreator).to receive(:perform_once).once
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
       expect(JSON.parse(response.body)['success']).to include('has been received')
 
-      CommitCreator.should_not_receive(:perform_once)
+      expect(CommitCreator).not_to receive(:perform_once)
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
       expect(JSON.parse(response.body)['alert']).to include('already submitted')
     end
@@ -630,14 +630,14 @@ de:
     it "should require a monitor" do
       @user.update_attribute :role, 'translator'
       delete :destroy, project_id: @commit.project.to_param, id: @commit.to_param, format: 'json'
-      response.status.should eql(403)
-      -> { @commit.reload }.should_not raise_error
+      expect(response.status).to eql(403)
+      expect { @commit.reload }.not_to raise_error
     end
 
     it "should delete a commit" do
       delete :destroy, project_id: @commit.project.to_param, id: @commit.to_param, format: 'json'
-      response.status.should eql(204)
-      -> { @commit.reload }.should raise_error(ActiveRecord::RecordNotFound)
+      expect(response.status).to eql(204)
+      expect { @commit.reload }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 
@@ -650,8 +650,8 @@ de:
       bom.each { |b| io.putc b }
       file     = Compiler::File.new(io, 'UTF-16LE', 'foo.bar', "application/x-gzip; charset=utf-16le")
       response = controller.send(:extract_data, file)
-      response.bytes.to_a[0].should == bom[0]
-      response.bytes.to_a[1].should == bom[1]
+      expect(response.bytes.to_a[0]).to eq(bom[0])
+      expect(response.bytes.to_a[1]).to eq(bom[1])
     end
   end
 end

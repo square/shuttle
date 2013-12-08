@@ -70,7 +70,7 @@ describe Exporter::EmberModule do
   end
 
   it "should output translations in JavaScript format" do
-    subject.should eql(<<-JS)
+    expect(subject).to eql(<<-JS)
 module.exports = {
   "dialogue": {
     "gob": [
@@ -92,7 +92,7 @@ module.exports = {
     let(:target_locale) { Locale.from_rfc5646('de') }
 
     it "should output translations in JavaScript passing the default jshint checks" do
-      subject.should eql(<<-JS)
+      expect(subject).to eql(<<-JS)
 module.exports = {
   "dialogue": {
     "gob": [
@@ -146,7 +146,7 @@ module.exports = {
 
       io = StringIO.new
       Exporter::EmberModule.new(commit).export(io, en_CA)
-      io.string.should eql(<<-JS)
+      expect(io.string).to eql(<<-JS)
 module.exports = {
   "different": "Different, eh"
 };
@@ -175,7 +175,7 @@ module.exports = {
 
       io = StringIO.new
       Exporter::EmberModule.new(commit).export(io, ja)
-      io.string.should eql(<<-JS)
+      expect(io.string).to eql(<<-JS)
 module.exports = {
   "different": "異なる",
   "same": "Same"
@@ -219,7 +219,7 @@ module.exports = {
 
       io = StringIO.new
       Exporter::EmberModule.new(commit).export(io, ja_JP)
-      io.string.should eql(<<-JS)
+      expect(io.string).to eql(<<-JS)
 module.exports = {
   "different": "Different (ja-JP)"
 };
@@ -262,7 +262,7 @@ module.exports = {
 
       io = StringIO.new
       Exporter::EmberModule.new(commit).export(io, ja_JP)
-      io.string.should eql(<<-JS)
+      expect(io.string).to eql(<<-JS)
 module.exports = {
   "different": "Different (ja-JP)",
   "same": "Same (ja)"

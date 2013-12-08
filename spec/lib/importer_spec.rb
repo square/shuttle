@@ -29,33 +29,33 @@ describe Importer::Base do
     it "should not import keys under skipped paths" do
       @project.update_attribute :skip_paths, %w(config/locales/ruby_also/)
       @commit.import_strings
-      @commit.keys.for_key('root').should_not be_empty
-      @commit.keys.for_key('importer_path_skipped').should be_empty
+      expect(@commit.keys.for_key('root')).not_to be_empty
+      expect(@commit.keys.for_key('importer_path_skipped')).to be_empty
     end
 
     it "should not import keys under importer-specific skipped paths" do
       @project.update_attribute :skip_importer_paths, 'ruby' => %w(config/locales/ruby_also/)
       @commit.import_strings
-      @commit.keys.for_key('root').should_not be_empty
-      @commit.keys.for_key('rootrb').should_not be_empty
-      @commit.keys.for_key('importer_path_skipped').should_not be_empty
-      @commit.keys.for_key('importer_path_skippedrb').should be_empty
+      expect(@commit.keys.for_key('root')).not_to be_empty
+      expect(@commit.keys.for_key('rootrb')).not_to be_empty
+      expect(@commit.keys.for_key('importer_path_skipped')).not_to be_empty
+      expect(@commit.keys.for_key('importer_path_skippedrb')).to be_empty
     end
 
     it "should not import keys not under whitelisted paths" do
       @project.update_attribute :only_paths, %w(config/locales/ruby/)
       @commit.import_strings
-      @commit.keys.for_key('root').should_not be_empty
-      @commit.keys.for_key('importer_path_skipped').should be_empty
+      expect(@commit.keys.for_key('root')).not_to be_empty
+      expect(@commit.keys.for_key('importer_path_skipped')).to be_empty
     end
 
     it "should not import keys not under importer-specific whitelisted paths" do
       @project.update_attribute :only_importer_paths, 'ruby' => %w(config/locales/ruby/)
       @commit.import_strings
-      @commit.keys.for_key('root').should_not be_empty
-      @commit.keys.for_key('rootrb').should_not be_empty
-      @commit.keys.for_key('importer_path_skipped').should_not be_empty
-      @commit.keys.for_key('importer_path_skippedrb').should be_empty
+      expect(@commit.keys.for_key('root')).not_to be_empty
+      expect(@commit.keys.for_key('rootrb')).not_to be_empty
+      expect(@commit.keys.for_key('importer_path_skipped')).not_to be_empty
+      expect(@commit.keys.for_key('importer_path_skippedrb')).to be_empty
     end
   end
 
@@ -81,8 +81,8 @@ describe Importer::Base do
 
       @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      root_trans.reload.copy.should eql('root-de')
-      skipped_trans.reload.copy.should eql('old')
+      expect(root_trans.reload.copy).to eql('root-de')
+      expect(skipped_trans.reload.copy).to eql('old')
     end
 
     it "should not import translations under importer-specific skipped paths" do
@@ -98,8 +98,8 @@ describe Importer::Base do
 
       @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      not_skipped_trans.reload.copy.should eql('skipped-de')
-      skipped_trans.reload.copy.should eql('old')
+      expect(not_skipped_trans.reload.copy).to eql('skipped-de')
+      expect(skipped_trans.reload.copy).to eql('old')
     end
 
     it "should not import translations not under whitelisted paths" do
@@ -115,8 +115,8 @@ describe Importer::Base do
 
       @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      root_trans.reload.copy.should eql('root-de')
-      skipped_trans.reload.copy.should eql('old')
+      expect(root_trans.reload.copy).to eql('root-de')
+      expect(skipped_trans.reload.copy).to eql('old')
     end
 
     it "should not import translations not under importer-specific whitelisted paths" do
@@ -132,8 +132,8 @@ describe Importer::Base do
 
       @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      not_skipped_trans.reload.copy.should eql('skipped-de')
-      skipped_trans.reload.copy.should eql('old')
+      expect(not_skipped_trans.reload.copy).to eql('skipped-de')
+      expect(skipped_trans.reload.copy).to eql('old')
     end
 
     it "should only import translations from included keys" do
@@ -149,8 +149,8 @@ describe Importer::Base do
 
       @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      included.reload.copy.should eql('included-de')
-      excluded.reload.copy.should eql('old copy')
+      expect(included.reload.copy).to eql('included-de')
+      expect(excluded.reload.copy).to eql('old copy')
     end
 
     it "should not import translations from excluded keys" do
@@ -163,7 +163,7 @@ describe Importer::Base do
 
       @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      translation.reload.copy.should eql('old copy')
+      expect(translation.reload.copy).to eql('old copy')
     end
 
     it "should not import translations from locale-specific excluded keys" do
@@ -176,7 +176,7 @@ describe Importer::Base do
 
       @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      translation.reload.copy.should eql('old copy')
+      expect(translation.reload.copy).to eql('old copy')
     end
 
     it "should only import translations from locale-specific included keys" do
@@ -192,8 +192,8 @@ describe Importer::Base do
 
       @commit.import_strings locale: Locale.from_rfc5646('de-DE')
 
-      included.reload.copy.should eql('included-de')
-      excluded.reload.copy.should eql('old copy')
+      expect(included.reload.copy).to eql('included-de')
+      expect(excluded.reload.copy).to eql('old copy')
     end
   end
 end

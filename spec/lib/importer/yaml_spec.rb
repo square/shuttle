@@ -27,14 +27,14 @@ describe Importer::Yaml do
     end
 
     it "should import strings from YAML files" do
-      @project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
-      @project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
-      @project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
+      expect(@project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
+      expect(@project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
+      expect(@project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
     end
 
     it "should import string arrays" do
-      @project.keys.for_key('abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Feb')
-      @project.keys.for_key('abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Dec')
+      expect(@project.keys.for_key('abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Feb')
+      expect(@project.keys.for_key('abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Dec')
     end
   end
 end

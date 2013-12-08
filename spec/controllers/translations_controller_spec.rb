@@ -33,8 +33,8 @@ describe TranslationsController do
 
     it "should return information about a translation" do
       get :show, project_id: @project.to_param, key_id: @key.to_param, id: @translation.to_param, format: 'json'
-      response.status.should eql(200)
-      JSON.parse(response.body)['copy'].should eql('some copy here')
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body)['copy']).to eql('some copy here')
     end
   end
 
@@ -56,10 +56,10 @@ describe TranslationsController do
             id:          @translation.to_param,
             translation: {copy: 'hello!'},
             format:      'json'
-      response.status.should eql(200)
-      @translation.reload.copy.should eql('hello!')
-      @translation.should be_translated
-      @translation.translator.should eql(@user)
+      expect(response.status).to eql(200)
+      expect(@translation.reload.copy).to eql('hello!')
+      expect(@translation).to be_translated
+      expect(@translation.translator).to eql(@user)
 
       expect(@translation.translation_changes.count).to eq(1)
       change = @translation.translation_changes.first
@@ -81,12 +81,12 @@ describe TranslationsController do
               id:          @translation.to_param,
               translation: {copy: ''},
               format:      'json'
-        response.status.should eql(200)
-        @translation.reload.copy.should be_nil
-        @translation.should_not be_translated
-        @translation.approved.should be_nil
-        @translation.translator.should be_nil
-        @translation.reviewer.should be_nil
+        expect(response.status).to eql(200)
+        expect(@translation.reload.copy).to be_nil
+        expect(@translation).not_to be_translated
+        expect(@translation.approved).to be_nil
+        expect(@translation.translator).to be_nil
+        expect(@translation.reviewer).to be_nil
 
         expect(@translation.translation_changes.count).to eq(1)
         change = @translation.translation_changes.last.reload
@@ -107,10 +107,10 @@ describe TranslationsController do
               translation:  {copy: ''},
               blank_string: '1',
               format:       'json'
-        response.status.should eql(200)
-        @translation.reload.copy.should eql('')
-        @translation.should be_translated
-        @translation.translator.should eql(@user)
+        expect(response.status).to eql(200)
+        expect(@translation.reload.copy).to eql('')
+        expect(@translation).to be_translated
+        expect(@translation.translator).to eql(@user)
 
         expect(@translation.translation_changes.count).to eq(1)
         change = @translation.translation_changes.last
@@ -137,11 +137,11 @@ describe TranslationsController do
               translation: {copy: 'bye!'},
               format:      'json'
 
-        response.status.should eql(200)
-        @translation.reload.copy.should eql('bye!')
-        @translation.should be_approved
-        @translation.translator.should eql(@user)
-        @translation.reviewer.should eql(@user)
+        expect(response.status).to eql(200)
+        expect(@translation.reload.copy).to eql('bye!')
+        expect(@translation).to be_approved
+        expect(@translation.translator).to eql(@user)
+        expect(@translation.reviewer).to eql(@user)
 
         expect(@translation.translation_changes.count).to eq(1)
         change = @translation.translation_changes.last
@@ -158,11 +158,11 @@ describe TranslationsController do
               translation: {copy: 'bye!'},
               format:      'json'
 
-        response.status.should eql(200)
-        @translation.reload.copy.should eql('bye!')
-        @translation.should be_approved
-        @translation.translator.should eql(@user)
-        @translation.reviewer.should eql(@user)
+        expect(response.status).to eql(200)
+        expect(@translation.reload.copy).to eql('bye!')
+        expect(@translation).to be_approved
+        expect(@translation.translator).to eql(@user)
+        expect(@translation.reviewer).to eql(@user)
 
         expect(@translation.translation_changes.count).to eq(1)
         change = @translation.translation_changes.last
@@ -184,11 +184,11 @@ describe TranslationsController do
               translation: {copy: 'hello!'},
               format:      'json'
 
-        response.status.should eql(200)
-        @translation.reload.copy.should eql('hello!')
-        @translation.should be_approved
-        @translation.translator.should eql(translator)
-        @translation.reviewer.should eql(@user)
+        expect(response.status).to eql(200)
+        expect(@translation.reload.copy).to eql('hello!')
+        expect(@translation).to be_approved
+        expect(@translation.translator).to eql(translator)
+        expect(@translation.reviewer).to eql(@user)
 
         expect(@translation.translation_changes.count).to eq(1)
         change = @translation.translation_changes.last
@@ -212,9 +212,9 @@ describe TranslationsController do
               translation: {copy: 'bar'},
               format:      'json'
 
-        response.status.should eql(403)
-        @translation.reload.copy.should eql('foo')
-        @translation.should be_approved
+        expect(response.status).to eql(403)
+        expect(@translation.reload.copy).to eql('foo')
+        expect(@translation).to be_approved
         expect(@translation.translation_changes.count).to eq(0)
       end
 
@@ -232,9 +232,9 @@ describe TranslationsController do
               translation: {copy: 'bar'},
               format:      'json'
 
-        response.status.should eql(200)
-        @translation.reload.copy.should eql('bar')
-        @translation.should be_approved
+        expect(response.status).to eql(200)
+        expect(@translation.reload.copy).to eql('bar')
+        expect(@translation).to be_approved
 
         expect(@translation.translation_changes.count).to eq(1)
         change = @translation.translation_changes.last
@@ -257,9 +257,9 @@ describe TranslationsController do
               translation: {copy: 'bar'},
               format:      'json'
 
-        response.status.should eql(200)
-        @translation.reload.copy.should eql('bar')
-        @translation.should be_approved
+        expect(response.status).to eql(200)
+        expect(@translation.reload.copy).to eql('bar')
+        expect(@translation).to be_approved
 
         expect(@translation.translation_changes.count).to eq(1)
         change = @translation.translation_changes.last
@@ -287,8 +287,8 @@ describe TranslationsController do
             key_id:     @translation.key.to_param,
             id:         @translation.to_param
 
-      @translation.reload.approved.should eql(true)
-      @translation.reviewer.should eql(@user)
+      expect(@translation.reload.approved).to eql(true)
+      expect(@translation.reviewer).to eql(@user)
 
       expect(@translation.translation_changes.count).to eq(1)
       change = @translation.translation_changes.last
@@ -315,8 +315,8 @@ describe TranslationsController do
             key_id:     @translation.key.to_param,
             id:         @translation.to_param
 
-      @translation.reload.approved.should eql(false)
-      @translation.reviewer.should eql(@user)
+      expect(@translation.reload.approved).to eql(false)
+      expect(@translation.reviewer).to eql(@user)
 
       expect(@translation.translation_changes.count).to eq(1)
       change = @translation.translation_changes.last
@@ -333,7 +333,7 @@ describe TranslationsController do
     end
 
     before :each do
-      Locale.any_instance.stub(:fallbacks).and_return(
+      allow_any_instance_of(Locale).to receive(:fallbacks).and_return(
           %w(fr-CA fr en).map { |l| Locale.from_rfc5646 l }
       )
 
@@ -379,8 +379,8 @@ describe TranslationsController do
           key_id:     @original_translation.key.to_param,
           id:         @original_translation.to_param,
           format:     'json'
-      response.status.should eql(200)
-      JSON.parse(response.body)['copy'].should eql('same_locale_sc')
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body)['copy']).to eql('same_locale_sc')
     end
 
     it "should 2. respond with a translation of the 1st fallback locale with matching project/key and source copy" do
@@ -390,8 +390,8 @@ describe TranslationsController do
           key_id:     @original_translation.key.to_param,
           id:         @original_translation.to_param,
           format:     'json'
-      response.status.should eql(200)
-      JSON.parse(response.body)['copy'].should eql('fallback1_sc')
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body)['copy']).to eql('fallback1_sc')
     end
 
     it "should 3. respond with a translation of the 1st fallback locale with source copy" do
@@ -402,8 +402,8 @@ describe TranslationsController do
           key_id:     @original_translation.key.to_param,
           id:         @original_translation.to_param,
           format:     'json'
-      response.status.should eql(200)
-      JSON.parse(response.body)['copy'].should eql('fallback2_sc')
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body)['copy']).to eql('fallback2_sc')
     end
 
     it "should 6. respond with a 204" do
@@ -415,8 +415,8 @@ describe TranslationsController do
           key_id:     @original_translation.key.to_param,
           id:         @original_translation.to_param,
           format:     'json'
-      response.status.should eql(204)
-      response.body.should be_blank
+      expect(response.status).to eql(204)
+      expect(response.body).to be_blank
     end
   end
 end

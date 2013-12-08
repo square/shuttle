@@ -68,7 +68,7 @@ describe Exporter::Yaml do
     Exporter::Yaml.new(@commit).export(io, @target_locale)
     # normalize trailing spaces
     str = io.string.split("\n").map(&:rstrip).join("\n")
-    str.should eql(<<-YAML.chomp)
+    expect(str).to eql(<<-YAML.chomp)
 ---
 de-DE:
   dialogue:
@@ -106,7 +106,7 @@ de-DE:
 
       io = StringIO.new
       Exporter::Yaml.new(@commit).export(io, ja)
-      io.string.should eql(<<-YAML)
+      expect(io.string).to eql(<<-YAML)
 ---
 ja:
   different: 異なる
@@ -150,7 +150,7 @@ ja:
 
       io = StringIO.new
       Exporter::Yaml.new(@commit).export(io, ja_JP)
-      io.string.should eql(<<-YAML)
+      expect(io.string).to eql(<<-YAML)
 ---
 ja-JP:
   different: Different (ja-JP)
@@ -193,7 +193,7 @@ ja-JP:
 
       io = StringIO.new
       Exporter::Yaml.new(@commit).export(io, ja_JP)
-      io.string.should eql(<<-YAML)
+      expect(io.string).to eql(<<-YAML)
 ---
 ja-JP:
   different: Different (ja-JP)

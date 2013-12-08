@@ -79,8 +79,8 @@ describe Localizer::Android do
 
     Localizer::Android.new(@project, @commit.translations).localize input_file, output_file, @de
 
-    output_file.path.should eql('java/basic-de-rDE-hdpi/strings.xml')
-    output_file.content.should eql(<<-XML)
+    expect(output_file.path).to eql('java/basic-de-rDE-hdpi/strings.xml')
+    expect(output_file.content).to eql(<<-XML)
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="string">Hallo!</string>

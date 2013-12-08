@@ -18,87 +18,87 @@ describe Locale do
   describe '.from_rfc5646' do
     it "should recognize a simple locale subtag" do
       locale = Locale.from_rfc5646('de')
-      locale.iso639.should eql('de')
-      locale.script.should be_nil
-      locale.region.should be_nil
-      locale.variants.should eql([])
-      locale.extended_language.should be_nil
-      locale.extensions.should eql([])
+      expect(locale.iso639).to eql('de')
+      expect(locale.script).to be_nil
+      expect(locale.region).to be_nil
+      expect(locale.variants).to eql([])
+      expect(locale.extended_language).to be_nil
+      expect(locale.extensions).to eql([])
     end
 
     it "should recognize a locale + script subtag" do
       locale = Locale.from_rfc5646('zh-Hant')
-      locale.iso639.should eql('zh')
-      locale.script.should eql('Hant')
-      locale.region.should be_nil
-      locale.variants.should eql([])
-      locale.extended_language.should be_nil
-      locale.extensions.should eql([])
+      expect(locale.iso639).to eql('zh')
+      expect(locale.script).to eql('Hant')
+      expect(locale.region).to be_nil
+      expect(locale.variants).to eql([])
+      expect(locale.extended_language).to be_nil
+      expect(locale.extensions).to eql([])
     end
 
     it "should recognize a an extended locale subtag" do
       locale = Locale.from_rfc5646('zh-cmn-Hans-CN')
-      locale.iso639.should eql('zh')
-      locale.script.should eql('Hans')
-      locale.region.should eql('CN')
-      locale.variants.should eql([])
-      locale.extended_language.should eql('cmn')
-      locale.extensions.should eql([])
+      expect(locale.iso639).to eql('zh')
+      expect(locale.script).to eql('Hans')
+      expect(locale.region).to eql('CN')
+      expect(locale.variants).to eql([])
+      expect(locale.extended_language).to eql('cmn')
+      expect(locale.extensions).to eql([])
     end
 
     it "should recognize a locale-script-region subtag" do
       locale = Locale.from_rfc5646('zh-Hans-CN')
-      locale.iso639.should eql('zh')
-      locale.script.should eql('Hans')
-      locale.variants.should eql([])
-      locale.extended_language.should be_nil
-      locale.extensions.should eql([])
+      expect(locale.iso639).to eql('zh')
+      expect(locale.script).to eql('Hans')
+      expect(locale.variants).to eql([])
+      expect(locale.extended_language).to be_nil
+      expect(locale.extensions).to eql([])
     end
 
     it "should recognize a locale-variant subtag" do
       locale = Locale.from_rfc5646('sl-rozaj')
-      locale.iso639.should eql('sl')
-      locale.script.should be_nil
-      locale.region.should be_nil
-      locale.variants.should eql(%w(rozaj))
-      locale.extended_language.should be_nil
-      locale.extensions.should eql([])
+      expect(locale.iso639).to eql('sl')
+      expect(locale.script).to be_nil
+      expect(locale.region).to be_nil
+      expect(locale.variants).to eql(%w(rozaj))
+      expect(locale.extended_language).to be_nil
+      expect(locale.extensions).to eql([])
     end
 
     it "should recognize a locale-region-variant subtag" do
       locale = Locale.from_rfc5646('de-CH-1901')
-      locale.iso639.should eql('de')
-      locale.script.should be_nil
-      locale.region.should eql('CH')
-      locale.variants.should eql(%w(1901))
-      locale.extended_language.should be_nil
-      locale.extensions.should eql([])
+      expect(locale.iso639).to eql('de')
+      expect(locale.script).to be_nil
+      expect(locale.region).to eql('CH')
+      expect(locale.variants).to eql(%w(1901))
+      expect(locale.extended_language).to be_nil
+      expect(locale.extensions).to eql([])
     end
 
     it "should recognize a locale-script-region-variant subtag" do
       locale = Locale.from_rfc5646('hy-Latn-IT-arevela')
-      locale.iso639.should eql('hy')
-      locale.script.should eql('Latn')
-      locale.region.should eql('IT')
-      locale.variants.should eql(%w(arevela))
-      locale.extended_language.should be_nil
-      locale.extensions.should eql([])
+      expect(locale.iso639).to eql('hy')
+      expect(locale.script).to eql('Latn')
+      expect(locale.region).to eql('IT')
+      expect(locale.variants).to eql(%w(arevela))
+      expect(locale.extended_language).to be_nil
+      expect(locale.extensions).to eql([])
     end
 
     it "should recognize a locale-region subtag" do
       locale = Locale.from_rfc5646('de-DE')
-      locale.iso639.should eql('de')
-      locale.script.should be_nil
-      locale.region.should eql('DE')
-      locale.variants.should eql([])
-      locale.extended_language.should be_nil
-      locale.extensions.should eql([])
+      expect(locale.iso639).to eql('de')
+      expect(locale.script).to be_nil
+      expect(locale.region).to eql('DE')
+      expect(locale.variants).to eql([])
+      expect(locale.extended_language).to be_nil
+      expect(locale.extensions).to eql([])
     end
   end
 
   describe '#rfc5646' do
     it "should properly normalize locale component values" do
-      Locale.from_rfc5646('hy-Latn-IT-arevela-x-foobar').rfc5646.should eql('hy-Latn-IT-arevela')
+      expect(Locale.from_rfc5646('hy-Latn-IT-arevela-x-foobar').rfc5646).to eql('hy-Latn-IT-arevela')
     end
   end
 
@@ -130,34 +130,34 @@ describe Locale do
           'de-CH-x-phonebk'       => 'German (as spoken in Switzerland)',
           'az-Arab-x-AZE-derbend' => 'Azerbaijani (Arabic orthography)'
       }.each do |subtag, name|
-        Locale.from_rfc5646(subtag).name.should eql(name)
+        expect(Locale.from_rfc5646(subtag).name).to eql(name)
       end
     end
   end
 
   describe "#child_of?" do
     it "should claim that en-US is a child of en" do
-      Locale.from_rfc5646('en-US').child_of?(Locale.from_rfc5646('en')).should be_true
+      expect(Locale.from_rfc5646('en-US').child_of?(Locale.from_rfc5646('en'))).to be_true
     end
 
     it "should not claim that ja is a child of en" do
-      Locale.from_rfc5646('ja').child_of?(Locale.from_rfc5646('en')).should be_false
+      expect(Locale.from_rfc5646('ja').child_of?(Locale.from_rfc5646('en'))).to be_false
     end
 
     it "should claim that zh-cmn-Hans-CN is a child of zh-CN" do
-      Locale.from_rfc5646('zh-cmn-Hans-CN').child_of?(Locale.from_rfc5646('zh-CN')).should be_true
+      expect(Locale.from_rfc5646('zh-cmn-Hans-CN').child_of?(Locale.from_rfc5646('zh-CN'))).to be_true
     end
 
     it "should not claim that zh-cmn-Hans-CN is a child of zh-yue-Hans" do
-      Locale.from_rfc5646('zh-cmn-Hans-CN').child_of?(Locale.from_rfc5646('zh-yue-Hans')).should be_false
+      expect(Locale.from_rfc5646('zh-cmn-Hans-CN').child_of?(Locale.from_rfc5646('zh-yue-Hans'))).to be_false
     end
 
     it "should claim that sl-rozaj-biske is a child of sl-rozaj" do
-      Locale.from_rfc5646('sl-rozaj-biske').child_of?(Locale.from_rfc5646('sl-rozaj')).should be_true
+      expect(Locale.from_rfc5646('sl-rozaj-biske').child_of?(Locale.from_rfc5646('sl-rozaj'))).to be_true
     end
 
     it "should not claim that sl-rozaj-biske is a child of sl-nedis" do
-      Locale.from_rfc5646('en-rozaj-biske').child_of?(Locale.from_rfc5646('sl-nedis')).should be_false
+      expect(Locale.from_rfc5646('en-rozaj-biske').child_of?(Locale.from_rfc5646('sl-nedis'))).to be_false
     end
   end
 end

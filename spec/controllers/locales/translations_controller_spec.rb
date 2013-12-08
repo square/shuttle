@@ -88,57 +88,57 @@ describe Locale::TranslationsController do
 
       it "should filter with no options" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json'
-        response.status.should eql(200)
-        JSON.parse(response.body).should eql([])
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body)).to eql([])
       end
 
       it "should filter with include_translated = true" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json', include_translated: 'true'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |t| t['key']['key'] }.sort.
-            should eql([@translated.key.key].sort)
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |t| t['key']['key'] }.sort).
+            to eql([@translated.key.key].sort)
       end
 
       it "should filter with include_approved = true" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json', include_approved: 'true'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |t| t['key']['key'] }.sort.
-            should eql([@approved.key.key].sort)
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |t| t['key']['key'] }.sort).
+            to eql([@approved.key.key].sort)
       end
 
       it "should filter with include_new = true" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json', include_new: 'true'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |t| t['key']['key'] }.sort.
-            should eql([@new.key.key, @rejected.key.key].sort)
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |t| t['key']['key'] }.sort).
+            to eql([@new.key.key, @rejected.key.key].sort)
       end
 
       it "should filter with include_translated = true, include_new = true" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json', include_translated: 'true', include_new: 'true'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |t| t['key']['key'] }.sort.
-            should eql([@translated.key.key, @new.key.key, @rejected.key.key].sort)
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |t| t['key']['key'] }.sort).
+            to eql([@translated.key.key, @new.key.key, @rejected.key.key].sort)
       end
 
       it "should filter with include_approved = true, include_new = true" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json', include_approved: 'true', include_new: 'true'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |t| t['key']['key'] }.sort.
-            should eql([@approved.key.key, @new.key.key].sort)
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |t| t['key']['key'] }.sort).
+            to eql([@approved.key.key, @new.key.key].sort)
       end
 
       it "should filter with include_translated = true, include_approved = true" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json', include_translated: 'true', include_approved: 'true'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |t| t['key']['key'] }.sort.
-            should eql([@translated.key.key, @approved.key.key, @rejected.key.key].sort)
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |t| t['key']['key'] }.sort).
+            to eql([@translated.key.key, @approved.key.key, @rejected.key.key].sort)
       end
 
       it "should filter with include_translated = true, include_approved = true, include_new = true" do
         get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json', include_translated: 'true', include_approved: 'true', include_new: 'true'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |t| t['key']['key'] }.sort.
-            should eql([@translated.key.key, @approved.key.key, @rejected.key.key, @new.key.key].sort)
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |t| t['key']['key'] }.sort).
+            to eql([@translated.key.key, @approved.key.key, @rejected.key.key, @new.key.key].sort)
       end
     end
   end

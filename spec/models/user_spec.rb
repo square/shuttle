@@ -24,15 +24,15 @@ describe User do
   context "an admin user" do
     let(:role) {'admin'}
     it "#has_access_to_locale?() returns true if the user is an admin" do
-      user.has_access_to_locale?('fr').should be_true
-      user.has_access_to_locale?('jp').should be_true
+      expect(user.has_access_to_locale?('fr')).to be_true
+      expect(user.has_access_to_locale?('jp')).to be_true
     end
   end
   context "a translator" do
     let(:role) {'translator'}
     it "#has_access_to_locale?() returns true for non-admins only if they have access to that locale" do
-      user.has_access_to_locale?('fr').should be_true
-      user.has_access_to_locale?('jp').should be_false
+      expect(user.has_access_to_locale?('fr')).to be_true
+      expect(user.has_access_to_locale?('jp')).to be_false
     end
   end
 end

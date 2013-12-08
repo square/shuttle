@@ -27,17 +27,17 @@ describe Importer::Xib do
 
     it "should import strings from Xib files" do
       trans = @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIText').first.translations.find_by_rfc5646_locale('en-US')
-      trans.copy.should eql('text field text')
-      trans.key.context.should start_with('text field notes')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUISelectedTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('selected title')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIPlaceholder').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('placeholder text')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUINormalTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('button title')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUIHighlightedTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('highlighted title')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUIDisabledTitle').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('disabled title')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityLabel').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('accessibility label')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityHint').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('accessibility hint')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:12.IBSegmentTitles[0]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('segment 1')
-      @project.keys.for_key('/apple/en-US.lproj/example.xib:12.IBSegmentTitles[1]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('segment 2')
+      expect(trans.copy).to eql('text field text')
+      expect(trans.key.context).to start_with('text field notes')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUISelectedTitle').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('selected title')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIPlaceholder').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('placeholder text')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUINormalTitle').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('button title')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUIHighlightedTitle').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('highlighted title')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:8.IBUIDisabledTitle').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('disabled title')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityLabel').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('accessibility label')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:3.IBUIAccessibilityConfiguration.IBUIAccessibilityHint').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('accessibility hint')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:12.IBSegmentTitles[0]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('segment 1')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.xib:12.IBSegmentTitles[1]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('segment 2')
     end
   end
 end

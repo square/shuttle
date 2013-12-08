@@ -18,8 +18,8 @@ describe TranslationUnit do
   describe "#validations" do
     it "should require that the source and target locales be different" do
       tu = FactoryGirl.build(:translation_unit, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
-      tu.should_not be_valid
-      tu.errors[:rfc5646_locale].should eql(['invalid'])
+      expect(tu).not_to be_valid
+      expect(tu.errors[:rfc5646_locale]).to eql(['invalid'])
     end
   end
 
@@ -37,7 +37,7 @@ describe TranslationUnit do
                                 source_copy:           'something in english',
                                 source_rfc5646_locale: 'en',
                                 rfc5646_locale:        'de')
-      TranslationUnit.exact_matches(trans).first.should eql(@unit)
+      expect(TranslationUnit.exact_matches(trans).first).to eql(@unit)
     end
 
     it "should return nil if the source copy doesn't match" do
@@ -45,7 +45,7 @@ describe TranslationUnit do
                                 source_copy:           'something else in english',
                                 source_rfc5646_locale: 'en',
                                 rfc5646_locale:        'de')
-      TranslationUnit.exact_matches(trans).should be_empty
+      expect(TranslationUnit.exact_matches(trans)).to be_empty
     end
 
     it "should return nil if the locale doesn't match" do
@@ -53,7 +53,7 @@ describe TranslationUnit do
                                 source_copy:           'something in english',
                                 source_rfc5646_locale: 'en-US',
                                 rfc5646_locale:        'de')
-      TranslationUnit.exact_matches(trans).should be_empty
+      expect(TranslationUnit.exact_matches(trans)).to be_empty
     end
 
     it "should return a match if using a matching override locale" do
@@ -61,7 +61,7 @@ describe TranslationUnit do
                                 source_copy:           'something in english',
                                 source_rfc5646_locale: 'en',
                                 rfc5646_locale:        'de-DE')
-      TranslationUnit.exact_matches(trans, Locale.from_rfc5646('de')).first.should eql(@unit)
+      expect(TranslationUnit.exact_matches(trans, Locale.from_rfc5646('de')).first).to eql(@unit)
     end
 
     it "should return nil if the source locale doesn't match" do
@@ -69,7 +69,7 @@ describe TranslationUnit do
                                 source_copy:           'something in english',
                                 source_rfc5646_locale: 'en',
                                 rfc5646_locale:        'de-DE')
-      TranslationUnit.exact_matches(trans).should be_empty
+      expect(TranslationUnit.exact_matches(trans)).to be_empty
     end
   end
 
@@ -80,42 +80,42 @@ describe TranslationUnit do
 
     it "should create a new translation memory unit for the translation" do
       TranslationUnit.store @translation
-      TranslationUnit.source_copy_matches(@translation.source_copy).where(
+      expect(TranslationUnit.source_copy_matches(@translation.source_copy).where(
           rfc5646_locale:        @translation.locale.rfc5646,
           source_rfc5646_locale: @translation.source_locale.rfc5646
-      ).exists?.should be_true
+      ).exists?).to be_true
     end
 
     it "should update an existing translation memory unit" do
       TranslationUnit.store @translation
-      TranslationUnit.source_copy_matches(@translation.source_copy).where(
+      expect(TranslationUnit.source_copy_matches(@translation.source_copy).where(
           rfc5646_locale:        @translation.locale.rfc5646,
           source_rfc5646_locale: @translation.source_locale.rfc5646
-      ).count.should eql(1)
+      ).count).to eql(1)
 
       TranslationUnit.store @translation
-      TranslationUnit.source_copy_matches(@translation.source_copy).where(
+      expect(TranslationUnit.source_copy_matches(@translation.source_copy).where(
           rfc5646_locale:        @translation.locale.rfc5646,
           source_rfc5646_locale: @translation.source_locale.rfc5646
-      ).count.should eql(1)
+      ).count).to eql(1)
     end
 
     it "should not create a translation memory for an unapproved translation" do
       @translation.approved = false
       TranslationUnit.store @translation
-      TranslationUnit.source_copy_matches(@translation.source_copy).where(
+      expect(TranslationUnit.source_copy_matches(@translation.source_copy).where(
           rfc5646_locale:        @translation.locale.rfc5646,
           source_rfc5646_locale: @translation.source_locale.rfc5646
-      ).exists?.should be_false
+      ).exists?).to be_false
     end
 
     it "should not create a translation memory unit for a base translation" do
       @translation.rfc5646_locale = 'en'
       TranslationUnit.store @translation
-      TranslationUnit.source_copy_matches(@translation.source_copy).where(
+      expect(TranslationUnit.source_copy_matches(@translation.source_copy).where(
           rfc5646_locale:        @translation.locale.rfc5646,
           source_rfc5646_locale: @translation.source_locale.rfc5646
-      ).exists?.should be_false
+      ).exists?).to be_false
     end
   end
 end

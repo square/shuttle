@@ -40,8 +40,8 @@ describe CommitStatsRecalculator do
     Commit.flush_memoizations @commit
     CommitStatsRecalculator.new.perform(@commit.id)
 
-    @commit.reload.translations_total.should eql(4)
-    @commit.translations_done.should eql(2)
-    @commit.strings_total.should eql(2)
+    expect(@commit.reload.translations_total).to eql(4)
+    expect(@commit.translations_done).to eql(2)
+    expect(@commit.strings_total).to eql(2)
   end
 end

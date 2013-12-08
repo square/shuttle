@@ -17,30 +17,30 @@ require 'spec_helper'
 describe Fencer::Mustache do
   describe ".fence" do
     it "should fence a string with handlebars" do
-      Fencer::Mustache.fence("String with {{two}} {{tokens}}.").
-          should eql('{{two}}' => [12..18], '{{tokens}}' => [20..29])
+      expect(Fencer::Mustache.fence("String with {{two}} {{tokens}}.")).
+          to eql('{{two}}' => [12..18], '{{tokens}}' => [20..29])
     end
 
     it "should fence a string with triple handlebars" do
-      Fencer::Mustache.fence("String with {{{two}}} {{{tokens}}}.").
-          should eql('{{{two}}}' => [12..20], '{{{tokens}}}' => [22..33])
+      expect(Fencer::Mustache.fence("String with {{{two}}} {{{tokens}}}.")).
+          to eql('{{{two}}}' => [12..20], '{{{tokens}}}' => [22..33])
     end
 
     it "should fence special tokens" do
-      Fencer::Mustache.fence("String with {{#opening}} and {{/closing}} token.").
-          should eql('{{#opening}}' => [12..23], '{{/closing}}' => [29..40])
+      expect(Fencer::Mustache.fence("String with {{#opening}} and {{/closing}} token.")).
+          to eql('{{#opening}}' => [12..23], '{{/closing}}' => [29..40])
     end
   end
 
   describe ".valid?" do
     it "should return true for a string with valid interpolations" do
-      Fencer::Mustache.valid?("String with {{valid}} {{#foo}}interpolations{{/foo}}.").should be_true
+      expect(Fencer::Mustache.valid?("String with {{valid}} {{#foo}}interpolations{{/foo}}.")).to be_true
     end
 
     it "should return false for a string with invalid interpolations" do
-      Fencer::Mustache.valid?("String with {{invalid {{#foo}}interpolations{{/foo}}.").should be_false
-      Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations{{/bar}}.").should be_false
-      Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations.").should be_false
+      expect(Fencer::Mustache.valid?("String with {{invalid {{#foo}}interpolations{{/foo}}.")).to be_false
+      expect(Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations{{/bar}}.")).to be_false
+      expect(Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations.")).to be_false
     end
   end
 end
