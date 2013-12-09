@@ -26,14 +26,14 @@ describe Importer::Strings do
     end
 
     it "should import strings from .strings files" do
-      @project.keys.for_key('/apple/en-US.lproj/example.strings:dialogue.marta.1').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Te Quiero.')
-      @project.keys.for_key('/apple/en-US.lproj/example.strings:dialogue.gob.1').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('English, please.')
-      @project.keys.for_key('/apple/en-US.lproj/example.strings:dialogue.marta.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('I love you.')
-      @project.keys.for_key('/apple/en-US.lproj/example.strings:dialogue.gob.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Great. Now I'm late for work.")
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.strings:dialogue.marta.1').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Te Quiero.')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.strings:dialogue.gob.1').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('English, please.')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.strings:dialogue.marta.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('I love you.')
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.strings:dialogue.gob.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Great. Now I'm late for work.")
     end
 
     it "should properly unescape C string escapes" do
-      @project.keys.for_key("/apple/en-US.lproj/example.strings:Something\nwith\tescapes\\").first.translations.base.first.copy.should eql("Something\nwith\tescapes\\")
+      expect(@project.keys.for_key("/apple/en-US.lproj/example.strings:Something\nwith\tescapes\\").first.translations.base.first.copy).to eql("Something\nwith\tescapes\\")
     end
   end
 end

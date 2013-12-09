@@ -50,20 +50,20 @@ describe Commit::KeysController do
 
     it "should return the first 50 keys of a commit" do
       get :index, project_id: @project.to_param, commit_id: @commit.to_param, status: 'approved', format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       body = JSON.parse(response.body)
-      body.should be_kind_of(Array)
-      body.size.should eql(50)
-      body.map { |k| k['key'] }.should eql(@keys[0, 50].map(&:key))
-      body.map { |k| k['translations'].size }.should eql([2]*50)
+      expect(body).to be_kind_of(Array)
+      expect(body.size).to eql(50)
+      expect(body.map { |k| k['key'] }).to eql(@keys[0, 50].map(&:key))
+      expect(body.map { |k| k['translations'].size }).to eql([2]*50)
     end
 
     it "should accept an offset" do
       get :index, project_id: @project.to_param, commit_id: @commit.to_param, status: 'approved', format: 'json', offset: 50
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       body = JSON.parse(response.body)
-      body.size.should eql(1)
-      body.first['key'].should eql(@keys.last.key)
+      expect(body.size).to eql(1)
+      expect(body.first['key']).to eql(@keys.last.key)
     end
   end
 end

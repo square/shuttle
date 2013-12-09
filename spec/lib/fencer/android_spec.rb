@@ -17,23 +17,23 @@ require 'spec_helper'
 describe Fencer::Android do
   describe ".fence" do
     it "should fence a string with handlebars" do
-      Fencer::Android.fence("String with {two} {tokens}.").
-          should eql('{two}' => [12..16], '{tokens}' => [18..25])
+      expect(Fencer::Android.fence("String with {two} {tokens}.")).
+          to eql('{two}' => [12..16], '{tokens}' => [18..25])
     end
 
     it "should fence a string with double handlebars" do
-      Fencer::Android.fence("String with {{two}} {{tokens}}.").
-          should eql('{{two}}' => [12..18], '{{tokens}}' => [20..29])
+      expect(Fencer::Android.fence("String with {{two}} {{tokens}}.")).
+          to eql('{{two}}' => [12..18], '{{tokens}}' => [20..29])
     end
   end
 
   describe ".valid?" do
     it "should return true for a string that only contains a-z between { }" do
-      Fencer::Android.valid?("String with {two} {tokens}.").should be_true
+      expect(Fencer::Android.valid?("String with {two} {tokens}.")).to be_true
     end
 
     it "should return false for a string that only contains any other character between { }" do
-      Fencer::Android.valid?("String with {{two}} {tokens}.").should be_false
+      expect(Fencer::Android.valid?("String with {{two}} {tokens}.")).to be_false
     end
   end
 end

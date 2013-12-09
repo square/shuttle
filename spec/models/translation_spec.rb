@@ -79,15 +79,15 @@ describe Translation do
     context "[readiness recalculation]" do
       it "should recalculate the readiness of all affected commits when added" do
         FactoryGirl.create :translation, key: @key, rfc5646_locale: 'de', approved: true
-        @key.reload.should be_ready
-        @commit.reload.should be_ready
+        expect(@key.reload).to be_ready
+        expect(@commit.reload).to be_ready
       end
 
       it "should recalculate the readiness of all affected commits when modified" do
         trans = FactoryGirl.create(:translation, key: @key, rfc5646_locale: 'de', approved: true)
         trans.update_attribute :approved, false
-        @key.reload.should_not be_ready
-        @commit.reload.should_not be_ready
+        expect(@key.reload).not_to be_ready
+        expect(@commit.reload).not_to be_ready
       end
     end
 
@@ -95,30 +95,30 @@ describe Translation do
       it "should reset the reviewed state when the copy is changed" do
         trans = FactoryGirl.create(:translation, approved: true, reviewer: FactoryGirl.create(:user))
         trans.update_attribute :copy, "New copy"
-        trans.reviewer_id.should be_nil
-        trans.approved.should be_nil
+        expect(trans.reviewer_id).to be_nil
+        expect(trans.approved).to be_nil
       end
 
       it "should not reset the reviewed state when the copy is not changed" do
         trans = FactoryGirl.create(:translation, approved: true, reviewer: FactoryGirl.create(:user))
         trans.update_attribute :translator, FactoryGirl.create(:user)
-        trans.reviewer_id.should_not be_nil
-        trans.approved.should eql(true)
+        expect(trans.reviewer_id).not_to be_nil
+        expect(trans.approved).to eql(true)
       end
 
       it "should not reset the reviewed state if the reviewed state is changed along with the copy" do
         trans = FactoryGirl.create(:translation, approved: false, reviewer: FactoryGirl.create(:user))
         trans.update_attributes(copy: "New copy", approved: true)
-        trans.reviewer_id.should_not be_nil
-        trans.approved.should eql(true)
+        expect(trans.reviewer_id).not_to be_nil
+        expect(trans.approved).to eql(true)
       end
     end
 
     it "should set translated to true upon translation" do
       trans = FactoryGirl.create(:translation, copy: nil)
-      trans.should_not be_translated
+      expect(trans).not_to be_translated
       trans.update_attribute :copy, "foo"
-      trans.should be_translated
+      expect(trans).to be_translated
     end
 
     context "[automatically setting reviewed]" do
@@ -132,74 +132,74 @@ describe Translation do
         @translation.translator = @reviewer
         @translation.copy       = 'foobar'
         @translation.save!
-        @translation.should be_approved
-        @translation.reviewer.should eql(@reviewer)
+        expect(@translation).to be_approved
+        expect(@translation.reviewer).to eql(@reviewer)
       end
 
       it "should not mark as reviewed a translation not made by a reviewer" do
         @translation.translator = FactoryGirl.create(:user, role: 'translator')
         @translation.copy       = 'foobar'
         @translation.save!
-        @translation.approved.should be_nil
+        expect(@translation.approved).to be_nil
       end
 
       it "should not mark as reviewed a translation whose copy was not changed" do
         @translation.copy = 'foobar'
         @translation.save!
-        @translation.approved.should be_nil
+        expect(@translation.approved).to be_nil
 
         @translation.translator = @reviewer
         @translation.save!
-        @translation.approved.should be_nil
+        expect(@translation.approved).to be_nil
       end
 
       it "should not mark as reviewed a translation subsequently modified by a reviewer" do
         @translation.translator = @reviewer
         @translation.save!
-        @translation.approved.should be_nil
+        expect(@translation.approved).to be_nil
 
         @translation.copy = 'foobar'
         @translation.save!
-        @translation.approved.should be_nil
+        expect(@translation.approved).to be_nil
       end
 
       it "should not mark as reviewed a translation that was de-translated by a reviewer" do
         @translation.copy = 'foobar'
         @translation.save!
-        @translation.approved.should be_nil
+        expect(@translation.approved).to be_nil
 
         @translation.copy       = nil
         @translation.translator = @reviewer
         @translation.save!
-        @translation.approved.should be_nil
+        expect(@translation.approved).to be_nil
       end
     end
 
     context "[translation memory]" do
       it "should update the translation memory when not pre-approved" do
         translation = FactoryGirl.create(:translation, approved: nil)
-        TranslationUnit.exact_matches(translation).should be_empty
+        expect(TranslationUnit.exact_matches(translation)).to be_empty
       end
 
       it "should update the translation memory when pre-approved" do
         translation = FactoryGirl.create(:translation, approved: true)
         tu          = TranslationUnit.exact_matches(translation).first
-        tu.copy.should eql(translation.copy)
-        tu.locale.should eql(translation.locale)
+        expect(tu.copy).to eql(translation.copy)
+        expect(tu.locale).to eql(translation.locale)
       end
 
       it "should update the translation memory when approved" do
         translation = FactoryGirl.create(:translation, approved: nil)
         translation.update_attribute :approved, true
         tu = TranslationUnit.exact_matches(translation).first
-        tu.copy.should eql(translation.copy)
-        tu.locale.should eql(translation.locale)
+        expect(tu.copy).to eql(translation.copy)
+        expect(tu.locale).to eql(translation.locale)
       end
 
       it "should not update the translation memory when updated but not approved" do
         translation = FactoryGirl.create(:translation, approved: nil)
         translation.update_attribute :translator, FactoryGirl.create(:user)
-        TranslationUnit.exact_matches(translation).should be_empty
+        expect(TranslationUnit.exact_matches(translation)).to be_empty
       end
     end
 
@@ -226,31 +226,31 @@ describe Translation do
         @key2.recalculate_ready!
         @commit.recalculate_ready!
 
-        @commit.reload.should be_ready
-        Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit)).should be_true
-        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb)).should be_true
-        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml)).should be_true
+        expect(@commit.reload).to be_ready
+        expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit))).to be_true
+        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb))).to be_true
+        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml))).to be_true
       end
 
       it "should expire cached manifests when the copy of an approved translation is changed and the approval status is unchanged" do
         @trans1.update_attributes copy: "new copy", preserve_reviewed_status: true
-        Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit)).should be_false
-        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb)).should be_false
-        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml)).should be_false
+        expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit))).to be_false
+        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb))).to be_false
+        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml))).to be_false
       end
 
       it "should expire cached manifests when a translation is unapproved" do
         @trans1.update_attributes approved: false
-        Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit)).should be_false
-        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb)).should be_false
-        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml)).should be_false
+        expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit))).to be_false
+        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb))).to be_false
+        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml))).to be_false
       end
 
       it "should not expire cached manifests when some other attribute of an approved translation is changed" do
         @trans1.update_attribute :translator, FactoryGirl.create(:user)
-        Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit)).should be_true
-        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb)).should be_true
-        Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml)).should be_true
+        expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit))).to be_true
+        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb))).to be_true
+        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml))).to be_true
       end
     end
   end
@@ -258,19 +258,19 @@ describe Translation do
   context "[validations]" do
     it "should not allow untranslated translations to be approved" do
       trans = FactoryGirl.build(:translation, copy: nil, approved: true)
-      trans.should_not be_valid
-      trans.errors[:approved].should eql(["cannot be set when translation is pending"])
+      expect(trans).not_to be_valid
+      expect(trans.errors[:approved]).to eql(["cannot be set when translation is pending"])
     end
 
     it "should not allow untranslated translations to be rejected" do
       trans = FactoryGirl.build(:translation, copy: nil, approved: false)
-      trans.should_not be_valid
-      trans.errors[:approved].should eql(["cannot be set when translation is pending"])
+      expect(trans).not_to be_valid
+      expect(trans.errors[:approved]).to eql(["cannot be set when translation is pending"])
     end
 
     it "should allow translations with blank source copy" do
       trans = FactoryGirl.build(:translation, source_copy: "", copy: nil)
-      trans.should be_valid
+      expect(trans).to be_valid
     end
 
     context "[fencing]" do

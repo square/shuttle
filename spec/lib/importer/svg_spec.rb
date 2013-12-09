@@ -26,8 +26,8 @@ describe Importer::Svg do
     end
 
     it "should import strings from SVG files" do
-      @project.keys.for_key('/gfx/example-en-US.svg:/*/*[1]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Hello, world!')
-      @project.keys.for_key('/gfx/example-en-US.svg:/*/*[2]/*').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Grouped text')
+      expect(@project.keys.for_key('/gfx/example-en-US.svg:/*/*[1]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Hello, world!')
+      expect(@project.keys.for_key('/gfx/example-en-US.svg:/*/*[2]/*').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Grouped text')
     end
   end
 end

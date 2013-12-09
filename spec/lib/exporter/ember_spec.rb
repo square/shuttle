@@ -70,7 +70,7 @@ describe Exporter::Ember do
   end
 
   it "should output translations in JavaScript format" do
-    subject.should eql(<<-JS)
+    expect(subject).to eql(<<-JS)
 Ember.I18n.locales.translations["de-DE"] = {
   "dialogue": {
     "gob": [
@@ -92,7 +92,7 @@ Ember.I18n.locales.translations["de-DE"] = {
     let(:target_locale) { Locale.from_rfc5646('de') }
 
     it "should output translations in JavaScript passing the default jshint checks" do
-      subject.should eql(<<-JS)
+      expect(subject).to eql(<<-JS)
 Ember.I18n.locales.translations.de = {
   "dialogue": {
     "gob": [
@@ -146,7 +146,7 @@ Ember.I18n.locales.translations.de = {
 
       io = StringIO.new
       Exporter::Ember.new(commit).export(io, en_CA)
-      io.string.should eql(<<-JS)
+      expect(io.string).to eql(<<-JS)
 Ember.I18n.locales.translations["en-CA"] = {
   "different": "Different, eh"
 };
@@ -175,7 +175,7 @@ Ember.I18n.locales.translations["en-CA"] = {
 
       io = StringIO.new
       Exporter::Ember.new(commit).export(io, ja)
-      io.string.should eql(<<-JS)
+      expect(io.string).to eql(<<-JS)
 Ember.I18n.locales.translations.ja = {
   "different": "異なる",
   "same": "Same"
@@ -219,7 +219,7 @@ Ember.I18n.locales.translations.ja = {
 
       io = StringIO.new
       Exporter::Ember.new(commit).export(io, ja_JP)
-      io.string.should eql(<<-JS)
+      expect(io.string).to eql(<<-JS)
 Ember.I18n.locales.translations["ja-JP"] = {
   "different": "Different (ja-JP)"
 };
@@ -262,7 +262,7 @@ Ember.I18n.locales.translations["ja-JP"] = {
 
       io = StringIO.new
       Exporter::Ember.new(commit).export(io, ja_JP)
-      io.string.should eql(<<-JS)
+      expect(io.string).to eql(<<-JS)
 Ember.I18n.locales.translations["ja-JP"] = {
   "different": "Different (ja-JP)",
   "same": "Same (ja)"

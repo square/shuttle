@@ -49,58 +49,58 @@ describe SearchController do
 
     it "should search the copy field by default" do
       get :translations, query: 'term1', format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results = JSON.parse(response.body)
-      results.size.should eql(2)
-      results.each { |r| r['copy'].should eql('foo term1 bar') }
+      expect(results.size).to eql(2)
+      results.each { |r| expect(r['copy']).to eql('foo term1 bar') }
     end
 
     it "should search the source_copy field" do
       get :translations, query: 'term1', field: 'searchable_source_copy', format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results = JSON.parse(response.body)
-      results.size.should eql(2)
-      results.each { |r| r['source_copy'].should eql('foo term1 bar') }
+      expect(results.size).to eql(2)
+      results.each { |r| expect(r['source_copy']).to eql('foo term1 bar') }
     end
 
     it "should filter by target locale" do
       get :translations, query: 'term1', target_locales: 'fr', format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results = JSON.parse(response.body)
-      results.size.should eql(1)
-      results.first['copy'].should eql('foo term1 bar')
-      results.first['locale']['rfc5646'].should eql('fr')
+      expect(results.size).to eql(1)
+      expect(results.first['copy']).to eql('foo term1 bar')
+      expect(results.first['locale']['rfc5646']).to eql('fr')
     end
 
     it "should filter by more than one target locale" do
       get :translations, query: 'term1', target_locales: 'fr, en', format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results = JSON.parse(response.body)
-      results.size.should eql(2)
-      results.first['copy'].should eql('foo term1 bar')
-      results.first['locale']['rfc5646'].should eql('fr')
-      results.last['copy'].should eql('foo term1 bar')
-      results.last['locale']['rfc5646'].should eql('en')
+      expect(results.size).to eql(2)
+      expect(results.first['copy']).to eql('foo term1 bar')
+      expect(results.first['locale']['rfc5646']).to eql('fr')
+      expect(results.last['copy']).to eql('foo term1 bar')
+      expect(results.last['locale']['rfc5646']).to eql('en')
     end
 
     it "should respond with a 422 if the locale is unknown" do
       get :translations, query: 'term1', target_locales: 'fr, foobar?', format: 'json'
-      response.status.should eql(422)
-      response.body.should be_blank
+      expect(response.status).to eql(422)
+      expect(response.body).to be_blank
     end
 
     it "should accept a limit and offset" do
       get :translations, query: 'term1', offset: 0, limit: 1, format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results1 = JSON.parse(response.body)
-      results1.size.should eql(1)
+      expect(results1.size).to eql(1)
 
       get :translations, query: 'term1', offset: 1, limit: 1, format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results2 = JSON.parse(response.body)
-      results2.size.should eql(1)
+      expect(results2.size).to eql(1)
 
-      results1.first['id'].should_not eql(results2.first['id'])
+      expect(results1.first['id']).not_to eql(results2.first['id'])
     end
   end
 
@@ -123,55 +123,55 @@ describe SearchController do
 
     it "should return an empty result list if no query is given" do
       get :keys, keys: ' ', project_id: @project.id, format: 'json'
-      response.status.should eql(200)
-      response.body.should eql('[]')
+      expect(response.status).to eql(200)
+      expect(response.body).to eql('[]')
     end
 
     it "should search by key" do
       get :keys, filter: 't1', project_id: @project.id, format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results = JSON.parse(response.body)
-      results.size.should eql(5)
-      results.map { |r| r['original_key'] }.sort.should eql(%w(t1_n0 t1_n1 t1_n2 t1_n3 t1_n4))
+      expect(results.size).to eql(5)
+      expect(results.map { |r| r['original_key'] }.sort).to eql(%w(t1_n0 t1_n1 t1_n2 t1_n3 t1_n4))
     end
 
     it "should respond with a 422 if the project ID is not given" do
       get :keys, filter: 't1', format: 'json'
-      response.status.should eql(422)
-      response.body.should be_blank
+      expect(response.status).to eql(422)
+      expect(response.body).to be_blank
     end
 
     it "should accept a limit and offset" do
       get :keys, filter: 't1', project_id: @project.id, offset: 0, limit: 1, format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results1 = JSON.parse(response.body)
-      results1.size.should eql(1)
+      expect(results1.size).to eql(1)
 
       get :keys, filter: 't1', project_id: @project.id, offset: 1, limit: 1, format: 'json'
-      response.status.should eql(200)
+      expect(response.status).to eql(200)
       results2 = JSON.parse(response.body)
-      results2.size.should eql(1)
+      expect(results2.size).to eql(1)
 
-      results1.first['id'].should_not eql(results2.first['id'])
+      expect(results1.first['id']).not_to eql(results2.first['id'])
     end
 
     context "[?metadata=true]" do
       it "should return search metadata" do
         project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: {'en-US' => true, 'aa' => true, 'ja' => false})
         get :keys, project_id: project.id, metadata: 'true', format: 'json'
-        response.status.should eql(200)
-        JSON.parse(response.body).
-            should eql('locales' => %w(en-US aa ja).map { |l| Locale.from_rfc5646(l).as_json.recursively(&:stringify_keys!) })
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body)).
+            to eql('locales' => %w(en-US aa ja).map { |l| Locale.from_rfc5646(l).as_json.recursively(&:stringify_keys!) })
       end
 
       it "should respond with 404 if the project is not found" do
         get :keys, project_id: Project.maximum(:id) + 1, metadata: 'true', format: 'json'
-        response.status.should eql(404)
+        expect(response.status).to eql(404)
       end
 
       it "should respond with 422 if the project is not given" do
         get :keys, metadata: 'true', format: 'json'
-        response.status.should eql(422)
+        expect(response.status).to eql(422)
       end
     end
   end

@@ -34,9 +34,9 @@ describe ProjectsController do
     end
 
     it "should return 200 and create a github commit for the current user" do
-      response.status.should eql(200)
-      @project.commits.first.user.should eql(@user)
-      @project.commits.first.description.should eql('github webhook')
+      expect(response.status).to eql(200)
+      expect(@project.commits.first.user).to eql(@user)
+      expect(@project.commits.first.description).to eql('github webhook')
     end
   end
 end

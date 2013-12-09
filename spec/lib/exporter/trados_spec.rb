@@ -87,7 +87,7 @@ describe Exporter::Trados do
       strio    = StringIO.new
       exporter.export(strio, @de)
 
-      strio.string.should eql(<<-XML)
+      expect(strio.string).to eql(<<-XML)
 <TWBExportFile version="7.0" generator="TW4Win" build="8.3.0.863">
 <RTF Preamble>
 <FontTable>
@@ -124,7 +124,7 @@ describe Exporter::Trados do
       strio    = StringIO.new
       exporter.export(strio, @de)
 
-      strio.string.should eql(<<-XML)
+      expect(strio.string).to eql(<<-XML)
 <TWBExportFile version="7.0" generator="TW4Win" build="8.3.0.863">
 <RTF Preamble>
 <FontTable>
@@ -161,7 +161,7 @@ describe Exporter::Trados do
       strio    = StringIO.new
       exporter.export(strio, @de)
 
-      strio.string.should eql(<<-XML)
+      expect(strio.string).to eql(<<-XML)
 <TWBExportFile version="7.0" generator="TW4Win" build="8.3.0.863">
 <RTF Preamble>
 <FontTable>
@@ -198,7 +198,7 @@ describe Exporter::Trados do
       strio    = StringIO.new
       exporter.export(strio, @de)
 
-      strio.string.should eql(<<-XML)
+      expect(strio.string).to eql(<<-XML)
 <TWBExportFile version="7.0" generator="TW4Win" build="8.3.0.863">
 <RTF Preamble>
 <FontTable>

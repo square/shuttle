@@ -62,7 +62,7 @@ describe Localizer::Storyboard do
     entries = Hash.new
     Archive.read_open_memory(file.io.read, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
       while (entry = archive.next_header)
-        entry.should be_regular
+        expect(entry).to be_regular
         entries[entry.pathname] = archive.read_data.force_encoding('UTF-8')
       end
     end
@@ -73,8 +73,8 @@ describe Localizer::Storyboard do
     #entries['apple/de-DE.lproj/no-translations.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'no-translations.storyboard')))
     #TODO re-enable when enabling CopiesIosResourcesWithoutTranslations
 
-    entries.size.should == 2
-    entries['apple/de-DE.lproj/example.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.storyboard')))
-    entries['apple/de-DE.lproj/example3.storyboard'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example3-de.storyboard')))
+    expect(entries.size).to eq(2)
+    expect(entries['apple/de-DE.lproj/example.storyboard']).to eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.storyboard')))
+    expect(entries['apple/de-DE.lproj/example3.storyboard']).to eql(File.read(Rails.root.join('spec', 'fixtures', 'example3-de.storyboard')))
   end
 end

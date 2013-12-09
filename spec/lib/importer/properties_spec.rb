@@ -26,12 +26,12 @@ describe Importer::Properties do
     end
 
     it "should import strings from .properties files" do
-      @project.keys.for_key('user.does.not.have.permission.to.accept.this.payment').first.translations.find_by_rfc5646_locale('en-US').
-          copy.should eql('User does not have permission to accept this payment.')
-      @project.keys.for_key('user.does.not.have.permission.to.accept.payment.to.requested.user').first.translations.find_by_rfc5646_locale('en-US').
-          copy.should eql('User does not have permission to accept this payment to the requested user.')
-      @project.keys.for_key('app.not.found').first.translations.find_by_rfc5646_locale('en-US').
-          copy.should eql('App not found.')
+      expect(@project.keys.for_key('user.does.not.have.permission.to.accept.this.payment').first.translations.find_by_rfc5646_locale('en-US').
+          copy).to eql('User does not have permission to accept this payment.')
+      expect(@project.keys.for_key('user.does.not.have.permission.to.accept.payment.to.requested.user').first.translations.find_by_rfc5646_locale('en-US').
+          copy).to eql('User does not have permission to accept this payment to the requested user.')
+      expect(@project.keys.for_key('app.not.found').first.translations.find_by_rfc5646_locale('en-US').
+          copy).to eql('App not found.')
     end
   end
 end

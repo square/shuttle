@@ -17,24 +17,24 @@ require 'spec_helper'
 describe Fencer::Erb do
   describe ".fence" do
     it "should fence out ERb escapes" do
-      Fencer::Erb.fence('An <%= erb %> escape <%another%>.').
-          should eql('<%= erb %>' => [3..12], '<%another%>' => [21..31])
+      expect(Fencer::Erb.fence('An <%= erb %> escape <%another%>.')).
+          to eql('<%= erb %>' => [3..12], '<%another%>' => [21..31])
     end
 
     it "should properly fence ERb escapes with things that look like ERB escapes in them" do
       pending "Hey, did you know regular ERb doesn't support this either??"
-      Fencer::Erb.fence('A string <%= "with %> an" %> erb escape').
-          should eql('<%= "with %> an" %>' => [9..27])
+      expect(Fencer::Erb.fence('A string <%= "with %> an" %> erb escape')).
+          to eql('<%= "with %> an" %>' => [9..27])
     end
   end
 
   describe ".valid?" do
     it "should return true for a string with balanced interpolation delimiters" do
-      Fencer::Erb.valid?("String with <%= two %> <% tokens -%>.").should be_true
+      expect(Fencer::Erb.valid?("String with <%= two %> <% tokens -%>.")).to be_true
     end
 
     it "should return false for a string with unbalanced interpolation delimiters" do
-      Fencer::Erb.valid?("String with <%= two % > <% tokens -%>.").should be_false
+      expect(Fencer::Erb.valid?("String with <%= two % > <% tokens -%>.")).to be_false
     end
   end
 end

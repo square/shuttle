@@ -26,19 +26,19 @@ describe Importer::Ember do
     end
 
     it "should import strings from JS files" do
-      @project.keys.for_key('root_key').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
-      @project.keys.for_key('nested_key.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
-      @project.keys.for_key('nested_key.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
+      expect(@project.keys.for_key('root_key').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
+      expect(@project.keys.for_key('nested_key.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
+      expect(@project.keys.for_key('nested_key.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
     end
 
     it "should import strings from CoffeeScript files" do
-      @project.keys.for_key('root_key_coffee').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('root')
-      @project.keys.for_key('nested_key_coffee.one').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('one')
-      @project.keys.for_key('nested_key_coffee.2').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('two')
+      expect(@project.keys.for_key('root_key_coffee').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
+      expect(@project.keys.for_key('nested_key_coffee.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
+      expect(@project.keys.for_key('nested_key_coffee.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
     end
 
     it "should only import strings under the correct localization" do
-      @project.keys.for_key('appears_in_two_locales').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('English')
+      expect(@project.keys.for_key('appears_in_two_locales').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('English')
     end
   end
 
@@ -52,7 +52,7 @@ describe Importer::Ember do
                                     skip_imports:        Importer::Base.implementations.map(&:ident) - %w(ember))
       @commit  = @project.commit!('HEAD')
 
-      @project.keys.for_key('dot_notation').first.translations.find_by_rfc5646_locale('en').copy.should eql('foo')
+      expect(@project.keys.for_key('dot_notation').first.translations.find_by_rfc5646_locale('en').copy).to eql('foo')
     end
   end
 
@@ -66,7 +66,7 @@ describe Importer::Ember do
                                     skip_imports:        Importer::Base.implementations.map(&:ident) - %w(ember))
       @commit  = @project.commit!('HEAD')
 
-      @project.keys.for_key('complex').first.translations.find_by_rfc5646_locale('en-GB').copy.should eql('bar100')
+      expect(@project.keys.for_key('complex').first.translations.find_by_rfc5646_locale('en-GB').copy).to eql('bar100')
     end
   end
 end

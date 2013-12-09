@@ -78,18 +78,18 @@ describe Exporter::Strings do
     Exporter::Strings.new(@commit).export(io, @de)
 
     output = io.string.force_encoding('UTF-16').encode('UTF-8')
-    output.should include(<<-C)
+    expect(output).to include(<<-C)
 "dialogue.gob.2" = "Toll. Jetzt bin ich spät zur Arbeit.";
     C
-    output.should include(<<-C)
+    expect(output).to include(<<-C)
 /* Marta capitulates and repeats in English. */
 "dialogue.marta.2" = "Ich liebe dich.";
     C
-    output.should include(<<-C)
+    expect(output).to include(<<-C)
 /* GOB is being insensitive to her culture. */
 "dialogue.gob.1" = "Deutsch, bitte.";
     C
-    output.should include(<<-C)
+    expect(output).to include(<<-C)
 /* Marta is trying to be sincere and sweet. */
 "dialogue.marta.1" = "Te Quiero.";
     C
@@ -112,7 +112,7 @@ describe Exporter::Strings do
     Exporter::Strings.new(@commit).export(io, @de)
 
     output = io.string.force_encoding('UTF-16').encode('UTF-8')
-    output.should include(<<-C)
+    expect(output).to include(<<-C)
 "Lots of special characters." = "Lots\\n of \\"special\\" \\t characters.\\r";
     C
   end

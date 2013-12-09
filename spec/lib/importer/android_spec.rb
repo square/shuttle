@@ -19,24 +19,24 @@ require 'spec_helper'
 describe Importer::Android do
   describe "#import_file?" do
     it "should return false if it's not an XML file" do
-      Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values/hello.txt').send(:import_file?).should be_false
+      expect(Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values/hello.txt').send(:import_file?)).to be_false
     end
 
     it "should return false if it's in the wrong locale" do
-      Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values-fr-rFR/strings.xml').send(:import_file?, Locale.from_rfc5646('fr-CA')).should be_false
-      Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values/strings.xml').send(:import_file?, Locale.from_rfc5646('fr-CA')).should be_false
+      expect(Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values-fr-rFR/strings.xml').send(:import_file?, Locale.from_rfc5646('fr-CA'))).to be_false
+      expect(Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values/strings.xml').send(:import_file?, Locale.from_rfc5646('fr-CA'))).to be_false
     end
 
     it "should return true if locale is nil and the file is in the base resources directory" do
-      Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values/strings.xml').send(:import_file?).should be_true
+      expect(Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values/strings.xml').send(:import_file?)).to be_true
     end
 
     it "should return false if it's not named strings.xml" do
-      Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values/hello.xml').send(:import_file?).should be_false
+      expect(Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values/hello.xml').send(:import_file?)).to be_false
     end
 
     it "should return true if locale matches the directory locale" do
-      Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values-fr-rFR/strings.xml').send(:import_file?, Locale.from_rfc5646('fr-FR')).should be_true
+      expect(Importer::Android.new(FactoryGirl.create(:fake_blob), 'res/values-fr-rFR/strings.xml').send(:import_file?, Locale.from_rfc5646('fr-FR'))).to be_true
     end
   end
 
@@ -51,37 +51,37 @@ describe Importer::Android do
     end
 
     it "should import strings from XML files" do
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:string').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Hello!')
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:string').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Hello!')
     end
 
     it "should import string arrays" do
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:array[0]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Hello')
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:array[1]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('World')
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:array[0]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Hello')
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:array[1]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('World')
     end
 
     it "should import plurals" do
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:plural[one]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('world')
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:plural[other]').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('worlds')
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:plural[one]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('world')
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:plural[other]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('worlds')
     end
 
     it "should not import strings marked as untranslatable" do
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:excluded').should be_empty
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:excluded')).to be_empty
     end
 
     it "should properly escape strings" do
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:unicode_chars').first.translations.find_by_rfc5646_locale('en-US').copy.should eql('Êtes-vous sûr ?')
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:escaped_chars').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello\\\n@\\nworld!")
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:quoted_escaped').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello \\'world\\'")
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:unquoted_escaped').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello 'world'")
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:unicode_chars').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Êtes-vous sûr ?')
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:escaped_chars').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello\\\n@\\nworld!")
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:quoted_escaped').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello \\'world\\'")
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:unquoted_escaped').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello 'world'")
     end
 
     it "should properly strip non-explicit new lines" do
-      @project.keys.for_key('/java/basic-hdpi/strings.xml:implied_new_lines').first.translations.find_by_rfc5646_locale('en-US').copy.should eql("Hello Hello World!!\n\nHello World.")
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:implied_new_lines').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello Hello World!!\n\nHello World.")
     end 
 
     it "should add comments as context" do
       k = @project.keys.for_key('/java/basic-hdpi/strings.xml:with_context').first
-      k.context.should eql("This is not a date format string. Rather, it is hint text in a field, presented to the merchant.")
+      expect(k.context).to eql("This is not a date format string. Rather, it is hint text in a field, presented to the merchant.")
     end
   end
 end

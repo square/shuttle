@@ -51,7 +51,7 @@ describe Localizer::Xib do
     entries = Hash.new
     Archive.read_open_memory(file.io.read, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
       while (entry = archive.next_header)
-        entry.should be_regular
+        expect(entry).to be_regular
         entries[entry.pathname] = archive.read_data.force_encoding('UTF-8')
       end
     end
@@ -61,7 +61,7 @@ describe Localizer::Xib do
     #entries['apple/de-DE.lproj/no-translations.xib'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'no-translations.xib')))
     #TODO re-enable when enabling CopiesIosResourcesWithoutTranslations
 
-    entries.size.should == 1
-    entries['apple/de-DE.lproj/example.xib'].should eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.xib')))
+    expect(entries.size).to eq(1)
+    expect(entries['apple/de-DE.lproj/example.xib']).to eql(File.read(Rails.root.join('spec', 'fixtures', 'example-de.xib')))
   end
 end

@@ -17,7 +17,7 @@ require 'spec_helper'
 describe Commit do
   context "[validations]" do
     it "should truncate commit messages" do
-      FactoryGirl.create(:commit, message: 'a'*300).message.should eql('a'*253 + '...')
+      expect(FactoryGirl.create(:commit, message: 'a'*300).message).to eql('a'*253 + '...')
     end
   end
 
@@ -40,7 +40,7 @@ describe Commit do
       @commit.keys.last.recalculate_ready!
 
       @commit.recalculate_ready!
-      @commit.should_not be_ready
+      expect(@commit).not_to be_ready
     end
 
     it "completed_at should remain nil if not ready" do
@@ -50,19 +50,19 @@ describe Commit do
       @commit.keys.last.recalculate_ready!
 
       @commit.recalculate_ready!
-      @commit.should_not be_ready
-      @commit.completed_at.should be_nil
+      expect(@commit).not_to be_ready
+      expect(@commit.completed_at).to be_nil
     end 
 
     it "should set ready to true for commits with all ready keys" do
       @commit.keys << FactoryGirl.create(:key)
       @commit.recalculate_ready!
-      @commit.should be_ready
+      expect(@commit).to be_ready
     end
 
     it "should set ready to true for commits with no keys" do
       @commit.recalculate_ready!
-      @commit.should be_ready
+      expect(@commit).to be_ready
     end
 
     it "should set completed_at to current time when ready" do
@@ -70,23 +70,23 @@ describe Commit do
       start_time = Time.current
       @commit.keys << FactoryGirl.create(:key)      
       @commit.recalculate_ready!
-      @commit.should be_ready
+      expect(@commit).to be_ready
 
-      (@commit.completed_at).should be > start_time
+      expect(@commit.completed_at).to be > start_time
     end 
 
     it "should not change completed_at if commit goes from ready to unready." do
       @commit.keys << FactoryGirl.create(:key)
       @commit.recalculate_ready!
-      @commit.should be_ready
+      expect(@commit).to be_ready
       completed_time = @commit.completed_at
 
       FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
       @commit.keys.last.recalculate_ready!
       @commit.recalculate_ready!
 
-      @commit.should_not be_ready
-      (@commit.completed_at).should eql(completed_time)
+      expect(@commit).not_to be_ready
+      expect(@commit.completed_at).to eql(completed_time)
     end     
   end
 
@@ -96,9 +96,9 @@ describe Commit do
       before { @commit = FactoryGirl.create(:commit, ready: false) }
       context "if ready" do
         it "enqueues a webhook job if the state changed" do
-          @commit.should_not be_ready
+          expect(@commit).not_to be_ready
           @commit.ready = true
-          WebhookPinger.should_receive(:perform_once)
+          expect(WebhookPinger).to receive(:perform_once)
           @commit.save!
         end
 
@@ -106,7 +106,7 @@ describe Commit do
           @commit.ready = true
           @commit.save!
           @commit.ready = true
-          WebhookPinger.should_not_receive(:perform_once)
+          expect(WebhookPinger).not_to receive(:perform_once)
           @commit.save!
         end
 
@@ -117,12 +117,12 @@ describe Commit do
           @commit.ready = true
           @commit.save!
           @commit.ready = false
-          WebhookPinger.should_not_receive(:perform_once)
+          expect(WebhookPinger).not_to receive(:perform_once)
           @commit.save!
         end
 
         it "doesn't enqueue a webhook job if state has not changed" do
-          WebhookPinger.should_not_receive(:perform_once)
+          expect(WebhookPinger).not_to receive(:perform_once)
           @commit.save!
         end
       end
@@ -134,12 +134,12 @@ describe Commit do
         ActionMailer::Base.deliveries.clear
         @commit.loading = false
         @commit.save!
-        ActionMailer::Base.deliveries.size.should eql(1)
+        expect(ActionMailer::Base.deliveries.size).to eql(1)
         email = ActionMailer::Base.deliveries.first
-        email.to.should eql([Shuttle::Configuration.mailer.translators_list])
-        email.cc.should eql([@commit.user.email])
-        email.subject.should eql('[Shuttle] New commit ready for translation')
-        email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
+        expect(email.to).to eql([Shuttle::Configuration.mailer.translators_list])
+        expect(email.cc).to eql([@commit.user.email])
+        expect(email.subject).to eql('[Shuttle] New commit ready for translation')
+        expect(email.body.to_s).to include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
       end
 
       it "sends one email to the translators when loading changes to false if the commit has no user" do
@@ -147,11 +147,11 @@ describe Commit do
         ActionMailer::Base.deliveries.clear
         @commit.loading = false
         @commit.save!
-        ActionMailer::Base.deliveries.size.should eql(1)
+        expect(ActionMailer::Base.deliveries.size).to eql(1)
         email = ActionMailer::Base.deliveries.first
-        email.to.should eql([Shuttle::Configuration.mailer.translators_list])
-        email.subject.should eql('[Shuttle] New commit ready for translation')
-        email.body.to_s.should include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
+        expect(email.to).to eql([Shuttle::Configuration.mailer.translators_list])
+        expect(email.subject).to eql('[Shuttle] New commit ready for translation')
+        expect(email.body.to_s).to include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
       end
 
       it "sends an email when ready changes to true from false" do
@@ -172,34 +172,34 @@ describe Commit do
         @commit.project.only_importer_paths = {"Ember.js" => ["em_only_key_1", "em_only_key_2", "em_only_key_3"], "ERb File" => ["erb_only_key_1", "erb_only_key_2"]}
 
         @commit.save!
-        ActionMailer::Base.deliveries.size.should eql(1)
+        expect(ActionMailer::Base.deliveries.size).to eql(1)
         email = ActionMailer::Base.deliveries.first
-        email.to.should eql([@commit.user.email])
-        email.subject.should eql('[Shuttle] Finished translation of commit')
-        email.body.to_s.should include(@commit.revision.to_s)
+        expect(email.to).to eql([@commit.user.email])
+        expect(email.subject).to eql('[Shuttle] Finished translation of commit')
+        expect(email.body.to_s).to include(@commit.revision.to_s)
 
-        @commit.project.key_inclusions.each { |key| email.body.to_s.should include(key) }
-        @commit.project.key_exclusions.each { |key| email.body.to_s.should include(key) }
+        @commit.project.key_inclusions.each { |key| expect(email.body.to_s).to include(key) }
+        @commit.project.key_exclusions.each { |key| expect(email.body.to_s).to include(key) }
 
         @commit.project.key_locale_inclusions.each_key do |locale|
-          email.body.to_s.should include(locale + ":")
-          @commit.project.key_locale_inclusions[locale].each { |key| email.body.to_s.should include(key) }
+          expect(email.body.to_s).to include(locale + ":")
+          @commit.project.key_locale_inclusions[locale].each { |key| expect(email.body.to_s).to include(key) }
         end
         @commit.project.key_locale_exclusions.each_key do |locale|
-          email.body.to_s.should include(locale + ":")
-          @commit.project.key_locale_exclusions[locale].each { |key| email.body.to_s.should include(key) }
+          expect(email.body.to_s).to include(locale + ":")
+          @commit.project.key_locale_exclusions[locale].each { |key| expect(email.body.to_s).to include(key) }
         end
 
-        @commit.project.only_paths.each { |key| email.body.to_s.should include(key) }
-        @commit.project.skip_paths.each { |key| email.body.to_s.should include(key) }
+        @commit.project.only_paths.each { |key| expect(email.body.to_s).to include(key) }
+        @commit.project.skip_paths.each { |key| expect(email.body.to_s).to include(key) }
 
         @commit.project.skip_importer_paths.each_key do |path|
-          email.body.to_s.should include(path + ":")
-          @commit.project.skip_importer_paths[path].each { |key| email.body.to_s.should include(key) }
+          expect(email.body.to_s).to include(path + ":")
+          @commit.project.skip_importer_paths[path].each { |key| expect(email.body.to_s).to include(key) }
         end
         @commit.project.only_importer_paths.each_key do |path|
-          email.body.to_s.should include(path + ":")
-          @commit.project.only_importer_paths[path].each { |key| email.body.to_s.should include(key) }
+          expect(email.body.to_s).to include(path + ":")
+          @commit.project.only_importer_paths[path].each { |key| expect(email.body.to_s).to include(key) }
         end
       end
 
@@ -208,7 +208,7 @@ describe Commit do
         ActionMailer::Base.deliveries.clear
         @commit.ready = true
         @commit.save!
-        ActionMailer::Base.deliveries.should be_empty
+        expect(ActionMailer::Base.deliveries).to be_empty
       end
     end
 
@@ -216,7 +216,7 @@ describe Commit do
       Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
       project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       FactoryGirl.create :commit, project: project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc', skip_import: false
-      project.blobs.size.should eql(36) # should import all blobs
+      expect(project.blobs.size).to eql(36) # should import all blobs
     end
 
     it "should cache a localization when ready" do
@@ -233,12 +233,12 @@ describe Commit do
 
       commit.keys = [key1, key2]
       commit.recalculate_ready!
-      commit.should_not be_ready
-      Shuttle::Redis.exists(LocalizePrecompiler.new.key(commit)).should be_false
+      expect(commit).not_to be_ready
+      expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(commit))).to be_false
 
       trans2.update_attribute :approved, true
-      commit.reload.should be_ready
-      Shuttle::Redis.exists(LocalizePrecompiler.new.key(commit)).should be_true
+      expect(commit.reload).to be_ready
+      expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(commit))).to be_true
     end
 
     it "should cache manifests when ready" do
@@ -258,14 +258,14 @@ describe Commit do
 
       commit.keys = [key1, key2]
       commit.recalculate_ready!
-      commit.should_not be_ready
-      Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, rb)).should be_false
-      Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, yml)).should be_false
+      expect(commit).not_to be_ready
+      expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, rb))).to be_false
+      expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, yml))).to be_false
 
       trans2.update_attribute :approved, true
-      commit.reload.should be_ready
-      Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, rb)).should be_true
-      Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, yml)).should be_true
+      expect(commit.reload).to be_ready
+      expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, rb))).to be_true
+      expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, yml))).to be_true
     end
   end
 
@@ -294,13 +294,13 @@ describe Commit do
     it "should recalculate commit statistics correctly" do
       Commit.flush_memoizations @commit
 
-      @commit.translations_total.should eql(4)
-      @commit.translations_done.should eql(2)
-      @commit.translations_pending.should eql(1)
-      @commit.translations_new.should eql(1)
-      @commit.strings_total.should eql(2)
-      @commit.words_pending.should eql(19)
-      @commit.words_new.should eql(19)
+      expect(@commit.translations_total).to eql(4)
+      expect(@commit.translations_done).to eql(2)
+      expect(@commit.translations_pending).to eql(1)
+      expect(@commit.translations_new).to eql(1)
+      expect(@commit.strings_total).to eql(2)
+      expect(@commit.words_pending).to eql(19)
+      expect(@commit.words_new).to eql(19)
     end
   end
 
@@ -312,20 +312,20 @@ describe Commit do
 
     it "should call #import on all importer subclasses" do
       @project.commit! 'HEAD'
-      @project.keys.map(&:importer).uniq.sort.should eql(Importer::Base.implementations.map(&:ident).sort)
+      expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort)
     end
 
     it "should not call #import on any disabled importer subclasses" do
       @project.update_attribute :skip_imports, %w(ruby yaml)
       @project.commit! 'HEAD'
-      @project.keys.map(&:importer).uniq.sort.should eql(Importer::Base.implementations.map(&:ident).sort - %w(ruby yaml))
+      expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort - %w(ruby yaml))
       @project.update_attribute :skip_imports, []
     end
 
     it "should skip any importers for which #skip? returns true" do
-      Importer::Yaml.any_instance.stub(:skip?).and_return(true)
+      allow_any_instance_of(Importer::Yaml).to receive(:skip?).and_return(true)
       @project.commit! 'HEAD'
-      @project.keys.map(&:importer).uniq.sort.should eql(Importer::Base.implementations.map(&:ident).sort - %w(yaml))
+      expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort - %w(yaml))
     end
   end
 

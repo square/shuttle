@@ -20,7 +20,7 @@ describe TranslationUnitsController do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in FactoryGirl.create(:user, role: 'translator')
       get :index
-      response.should be_redirect
+      expect(response).to be_redirect
     end
 
     context "[pagination]" do
@@ -40,23 +40,23 @@ describe TranslationUnitsController do
   
       it "loads only 50 translation units per page" do
         get :index, field: 'searchable_source_copy', keyword: 'carried', format: 'json'
-        response.status.should eql(200)
-        assigns(:offset).should eql(0)
-        assigns(:translation_units).to_a.should eql(@trans_units_list[0,50])
+        expect(response.status).to eql(200)
+        expect(assigns(:offset)).to eql(0)
+        expect(assigns(:translation_units).to_a).to eql(@trans_units_list[0,50])
       end
   
       it "renders the first page of results if passed offset < 0" do
         get :index, field: 'searchable_source_copy', keyword: 'carried', offset: -1, format: 'json'
-        response.status.should eql(200)
-        assigns(:offset).should eql(0)
-        assigns(:translation_units).to_a.should eql(@trans_units_list[0,50])
+        expect(response.status).to eql(200)
+        expect(assigns(:offset)).to eql(0)
+        expect(assigns(:translation_units).to_a).to eql(@trans_units_list[0,50])
       end
   
       it "correctly lists the last page of results" do
         get :index, field: 'searchable_source_copy', keyword: 'carried', offset: 50, format: 'json'
-        response.status.should eql(200)
-        assigns(:offset).should eql(50)
-        assigns(:translation_units).to_a.should eql(@trans_units_list[50,1])
+        expect(response.status).to eql(200)
+        expect(assigns(:offset)).to eql(50)
+        expect(assigns(:translation_units).to_a).to eql(@trans_units_list[50,1])
       end
     end
 
@@ -80,20 +80,20 @@ describe TranslationUnitsController do
 
       it "should filter by source copy" do
         get :index, keyword: 'foo', field: 'searchable_source_copy', format: 'json'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |e| e['id'] }.should eql(@tus_source_foo.map(&:id))
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |e| e['id'] }).to eql(@tus_source_foo.map(&:id))
       end
 
       it "should filter by target copy" do
         get :index, keyword: 'foo', field: 'searchable_copy', format: 'json'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |e| e['id'] }.should eql(@tus_target_foo.map(&:id))
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |e| e['id'] }).to eql(@tus_target_foo.map(&:id))
       end
 
       it "should filter by target locale" do
         get :index, keyword: 'baz', field: 'searchable_source_copy', target_locales: 'fr', format: 'json'
-        response.status.should eql(200)
-        JSON.parse(response.body).map { |e| e['id'] }.should eql(@tus_target_foo.map(&:id))
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).map { |e| e['id'] }).to eql(@tus_target_foo.map(&:id))
       end
     end
   end
@@ -103,7 +103,7 @@ describe TranslationUnitsController do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in FactoryGirl.create(:user, role: 'translator')
       get :edit, id: FactoryGirl.create(:translation_unit).id
-      response.should be_redirect
+      expect(response).to be_redirect
     end
 
     context "[authenticated user]" do
@@ -119,13 +119,13 @@ describe TranslationUnitsController do
 
       it "should render a page where the user can edit a translation unit" do
         get :edit, id: @tu.id
-        response.status.should eql(200)
-        response.should render_template('edit')
+        expect(response.status).to eql(200)
+        expect(response).to render_template('edit')
       end
 
       it "should respond with a 404 if the translation unit doesn't exist" do
         get :edit, id: TranslationUnit.maximum(:id) + 1
-        response.status.should eql(404)
+        expect(response.status).to eql(404)
       end
     end
   end
@@ -137,7 +137,7 @@ describe TranslationUnitsController do
       put :update,
           id:               FactoryGirl.create(:translation_unit).id,
           translation_unit: {copy: 'new'}
-      response.should be_redirect
+      expect(response).to be_redirect
     end
 
     context "[authenticated user]" do
@@ -155,15 +155,15 @@ describe TranslationUnitsController do
         put :update,
             id:               @tu.id,
             translation_unit: {copy: 'new'}
-        response.should redirect_to(translation_units_url)
-        @tu.reload.copy.should eql('new')
+        expect(response).to redirect_to(translation_units_url)
+        expect(@tu.reload.copy).to eql('new')
       end
 
       it "should respond with a 404 if the translation unit doesn't exist" do
         put :update,
             id:               TranslationUnit.maximum(:id) + 1,
             translation_unit: {copy: 'new'}
-        response.status.should eql(404)
+        expect(response.status).to eql(404)
       end
 
       it "should respond with an error page if an invalid parameter value is provided" do
@@ -174,8 +174,8 @@ describe TranslationUnitsController do
         put :update,
             id:               @tu.id,
             translation_unit: {source_copy: 'hello'}
-        response.should_not be_success
-        -> { @tu.reload }.should_not change(@tu, :source_copy)
+        expect(response).not_to be_success
+        expect { @tu.reload }.not_to change(@tu, :source_copy)
       end
     end
   end
@@ -185,7 +185,7 @@ describe TranslationUnitsController do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in FactoryGirl.create(:user, role: 'translator')
       delete :destroy, id: FactoryGirl.create(:translation_unit).id
-      response.should be_redirect
+      expect(response).to be_redirect
     end
 
     context "[authenticated user]" do
@@ -201,13 +201,13 @@ describe TranslationUnitsController do
 
       it "should delete a translation unit" do
         delete :destroy, id: @tu.id
-        response.should redirect_to(translation_units_url)
-        -> { @tu.reload }.should raise_error(ActiveRecord::RecordNotFound)
+        expect(response).to redirect_to(translation_units_url)
+        expect { @tu.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
 
       it "should respond with a 404 if the translation unit doesn't exist" do
         delete :destroy, id: TranslationUnit.maximum(:id) + 1
-        response.status.should eql(404)
+        expect(response.status).to eql(404)
       end
     end
   end

@@ -94,38 +94,38 @@ describe Exporter::Ios do
     entries = Hash.new
     Archive.read_open_memory(io.string, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
       while (entry = archive.next_header)
-        entry.should be_regular
+        expect(entry).to be_regular
         contents = archive.read_data
         # contents.should start_with("\xFF\xFE") -- Some bug in Rspec prevents this from working. 
-        contents.bytes.to_a[0].should == 0xFF
-        contents.bytes.to_a[1].should == 0xFE
+        expect(contents.bytes.to_a[0]).to eq(0xFF)
+        expect(contents.bytes.to_a[1]).to eq(0xFE)
         entries[entry.pathname] = contents.force_encoding('UTF-16LE')
       end
     end
 
-    entries.size.should eql(2)
+    expect(entries.size).to eql(2)
 
     body = entries['Resources/de-DE.lproj/Localizable-en-US.strings'].encode('UTF-8')
-    body.should include(<<-C)
+    expect(body).to include(<<-C)
 /* This is a normal string. */
 "I'm a string!" = "Ich bin ein String!";
     C
-    body.should include(<<-C)
+    expect(body).to include(<<-C)
 /* This is also a normal string. */
 "I'm also a string!" = "Ich bin auch ein String!";
     C
 
     body = entries['Resources/de-DE.lproj/More.strings'].encode('UTF-8')
-    body.should include(<<-C)
+    expect(body).to include(<<-C)
 /* Saying hello. */
 "Hello, world!" = "Hallo, Welt!";
     C
-    body.should include(<<-C)
+    expect(body).to include(<<-C)
 /* Saying goodbye. */
 "Goodbye, cruel world." = "Auf Wiedersehen, grausamer Welt.";
     C
 
-    entries.should_not include('/Resources/en-US.lproj/Some.xib')
+    expect(entries).not_to include('/Resources/en-US.lproj/Some.xib')
   end
 
   describe ".valid?" do
