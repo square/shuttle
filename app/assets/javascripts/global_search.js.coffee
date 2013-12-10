@@ -49,7 +49,7 @@ class root.GlobalSearch
       href: translation.url
     }).appendTo( $('<td/>').appendTo tr )
     $('<td/>').text(translation.source_locale.rfc5646).appendTo tr
-    $('<td/>').text(translation.source_copy).appendTo tr
+    $('<td/>').addClass('translation-entry').text(translation.source_copy).appendTo tr
     $('<td/>').text(translation.locale.rfc5646).appendTo tr
 
     if translation.translated
@@ -59,9 +59,9 @@ class root.GlobalSearch
           'text-error'
         else
           'text-info'
-      $('<td/>').addClass(class_name).text(translation.copy).appendTo tr
+      $('<td/>').addClass('translation-entry').addClass(class_name).text(translation.copy).appendTo tr
     else
-      $('<td/>').addClass('muted').text("(untranslated)").appendTo tr
+      $('<td/>').addClass('translation-entry').addClass('muted').text("(untranslated)").appendTo tr
 
   # Sets or clears a table-wide informational message. Removes all rows from the
   # table.
