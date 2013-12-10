@@ -12,10 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-set :output, '/app/shuttle/shared/log/whenever.log'
+set :output, 'log/cron.log'
 
 every(30.minutes) { runner 'AutoImporter.perform_once' }
 
 # god damn it why must it come to this
-every(1.hour) { rake 'maintenance:fix_hung_commits' }
-every(1.hour) { rake 'maintenance:clear_stale_lockfiles' }
+every(:hour) { rake 'maintenance:fix_hung_commits' }
+every(:hour) { rake 'maintenance:clear_stale_lockfiles' }

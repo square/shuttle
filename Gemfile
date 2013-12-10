@@ -51,7 +51,7 @@ gem 'faker'
 gem 'sidekiq', github: 'mperham/sidekiq'
 gem 'slim'
 gem 'sinatra', require: nil
-gem 'whenever', require: nil, github: 'phallstrom/whenever' # Cap 3 compatible version
+gem 'whenever', github: 'javan/whenever' # Cap 3 compatibility
 
 # REDIS
 gem 'redis-mutex'
