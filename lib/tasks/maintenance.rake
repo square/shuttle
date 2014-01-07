@@ -43,9 +43,16 @@ namespace :maintenance do
 
   desc "Locates un-ready commits that probably should be ready and recalculates their stats"
   task recalculate_suspiciously_not_ready_commits: :environment do
-    Commit.where(loading: false, ready: false).find_each do |c|
+    start_time = Time.now
+    # if the commit isn't ready...
+    Commit.where(loading: false, ready: false).order('id DESC').find_each do |c|
+      # ... but it probably should be ready ...
       if c.translations_done == c.translations_total
-        CommitStatsRecalculator.perform_async c.id
+        # don't spend more than half an hour doing this so we don't get cron jobs stacking up
+        if Time.now - start_time <= 30.minutes
+          # recalculate the commit inline
+          CommitStatsRecalculator.new.perform(c.id)
+        end
       end
     end
   end
