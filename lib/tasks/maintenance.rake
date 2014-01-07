@@ -40,4 +40,13 @@ namespace :maintenance do
       FileUtils.rm_f lockfile
     end
   end
+
+  desc "Locates un-ready commits that probably should be ready and recalculates their stats"
+  task recalculate_suspiciously_not_ready_commits: :environment do
+    Commit.where(loading: false, ready: false).find_each do |c|
+      if c.translations_done == c.translations_total
+        CommitStatsRecalculator.perform_async c.id
+      end
+    end
+  end
 end
