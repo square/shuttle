@@ -91,7 +91,7 @@ gem 'squash_rails', require: 'squash/rails'
 gem 'newrelic_rpm'
 group :development do
   gem 'capistrano'
-  gem 'capistrano-rvm'
+  gem 'capistrano-rvm', '>= 0.1.0' # seems to really like 0.0.3
   gem 'capistrano-bundler'
   gem 'capistrano-rails'
 end

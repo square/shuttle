@@ -8,33 +8,33 @@ GIT
 
 GIT
   remote: git://github.com/RISCfuture/ruby-git.git
-  revision: 2da2ed301fc5d2f9cb3125bd78db0522b322ed84
+  revision: 4aae92a0dee4ef066d0566aacdbda444f09d71a6
   specs:
     git (1.2.6)
 
 GIT
   remote: git://github.com/javan/whenever.git
-  revision: 76218f1b92d935690cf6ecf746381878b864b60a
+  revision: 65321d59338319920a80ba1ae879d0f9fed41eac
   specs:
-    whenever (0.8.4)
+    whenever (0.9.0)
       activesupport (>= 2.3.4)
       chronic (>= 0.6.3)
 
 GIT
   remote: git://github.com/mperham/sidekiq.git
-  revision: 8eb3ba1b3481718fbc1419136c253db0dbf41490
+  revision: 6cd4e6a96e0b5f164679957ba7f1512d05c384ff
   specs:
-    sidekiq (2.17.1)
+    sidekiq (2.17.2)
       celluloid (>= 0.15.2)
       connection_pool (>= 1.0.0)
       json
-      redis (>= 3.0.4)
+      redis (>= 3.0.6)
       redis-namespace (>= 1.3.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    CFPropertyList (2.2.4)
+    CFPropertyList (2.2.6)
     actionmailer (4.0.2)
       actionpack (= 4.0.2)
       mail (~> 2.5.4)
@@ -112,9 +112,9 @@ GEM
       i18n (~> 0.5)
     find_or_create_on_scopes (1.4.0)
       activerecord (>= 3.1)
-    font-awesome-rails (4.0.3.0)
+    font-awesome-rails (4.0.3.1)
       railties (>= 3.2, < 5.0)
-    has_metadata_column (1.1.2)
+    has_metadata_column (1.1.3)
       boolean
       rails (>= 4.0)
     hashr (0.0.22)
@@ -155,13 +155,13 @@ GEM
     net-scp (1.1.2)
       net-ssh (>= 2.6.5)
     net-ssh (2.7.0)
-    newrelic_rpm (3.7.0.177)
-    nokogiri (1.6.0)
+    newrelic_rpm (3.7.1.182)
+    nokogiri (1.6.1)
       mini_portile (~> 0.5.0)
     orm_adapter (0.5.0)
     parslet (1.5.0)
       blankslate (~> 2.0)
-    pg (0.17.0)
+    pg (0.17.1)
     polyglot (0.3.3)
     pry (0.9.12.4)
       coderay (~> 1.0)
@@ -189,7 +189,7 @@ GEM
       activesupport (= 4.0.2)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
-    rake (10.1.0)
+    rake (10.1.1)
     redcarpet (3.0.0)
     redis (3.0.6)
     redis-classy (1.2.0)
@@ -205,14 +205,15 @@ GEM
     rspec-expectations (2.14.4)
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.4)
-    rspec-rails (2.14.0)
+    rspec-rails (2.14.1)
       actionpack (>= 3.0)
+      activemodel (>= 3.0)
       activesupport (>= 3.0)
       railties (>= 3.0)
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
       rspec-mocks (~> 2.14.0)
-    sass (3.2.12)
+    sass (3.2.13)
     sass-rails (4.0.1)
       railties (>= 4.0.0, < 5.0)
       sass (>= 3.1.10)
@@ -239,9 +240,9 @@ GEM
       sprockets (~> 2.8)
     sql_origin (1.1.0)
       rails (>= 4.0)
-    squash_rails (1.3.0)
+    squash_rails (1.3.1)
       squash_ruby
-    squash_ruby (1.2.3)
+    squash_ruby (1.3.0)
       json
     sshkit (1.2.0)
       net-scp (>= 1.1.2)
@@ -278,7 +279,7 @@ GEM
       railties (>= 3.1)
     tzinfo (0.3.38)
     uea-stemmer (0.10.1)
-    uglifier (2.3.2)
+    uglifier (2.4.0)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
     unicode_scanner (1.0.0)
@@ -296,7 +297,7 @@ DEPENDENCIES
   capistrano
   capistrano-bundler
   capistrano-rails
-  capistrano-rvm
+  capistrano-rvm (>= 0.1.0)
   coffee-rails
   coffee-script
   composite_primary_keys!
