@@ -1,3 +1,4 @@
 ---
+repository_root: /app/shuttle/repo
 disabled: false
 skip_ssl_verification: true
