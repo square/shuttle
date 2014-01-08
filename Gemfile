@@ -25,7 +25,7 @@ gem 'kaminari'
 
 # UTILITIES
 gem 'json'
-gem 'git', github: 'RISCfuture/ruby-git'
+gem 'git', github: 'RISCfuture/ruby-git', ref: '14d05318c3c22352564dfb3acf45ee1a29a09864' # Fixes mirror issue
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
