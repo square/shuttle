@@ -71,7 +71,7 @@ class Locale::TranslationsController < ApplicationController
         end
         query { string query_terms.join(' '), default_operator: 'AND' } if query_terms.present?
 
-        sort { by :created_at, 'desc' }
+        sort { by :created_at, 'asc' }
         from offset
         size limit
 
