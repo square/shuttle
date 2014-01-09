@@ -23,4 +23,4 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-Shuttle::Application.config.secret_key_base = 'YOUR_TOKEN:994835e8731f1e95f5e1586cb81f7c40'
+Shuttle::Application.config.secret_key_base = 'YOUR_TOKEN:994835e8731f1e95f5e1586cb81f7c40' #TODO

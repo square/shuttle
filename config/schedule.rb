@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-set :output, '/app/shuttle/shared/log/whenever.log'
+set :output, 'log/whenever.log'
 
 every(30.minutes) { runner 'AutoImporter.perform_once' }
 
