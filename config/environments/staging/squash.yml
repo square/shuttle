@@ -1,4 +1,5 @@
 ---
 repository_root: /app/shuttle/repo
+mirrored_repository: true
 disabled: false
 skip_ssl_verification: true
