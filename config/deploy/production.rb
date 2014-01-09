@@ -1,5 +1,11 @@
 set :stage, :production
 
-role :app, %w{square@ironweed.corp.squareup.com square@ginger.corp.squareup.com square@shuttle-web01.corp.squareup.com square@shuttle-web02.corp.squareup.com square@shuttle-worker01.corp.squareup.com square@shuttle-worker02.corp.squareup.com square@shuttle-worker03.corp.squareup.com square@shuttle-worker04.corp.squareup.com square@shuttle-worker05.corp.squareup.com}
-role :web, %w{square@shuttle-web01.corp.squareup.com square@shuttle-web02.corp.squareup.com}
-role :db,  %w{square@ironweed.corp.squareup.com}
+worker_boxes = (1..5).map { |i| "square@shuttle-worker#{i.to_s.rjust(2, '0')}.corp.squareup.com" }
+web_boxes    = (1..2).map { |i| "square@shuttle-web#{i.to_s.rjust(2, '0')}.corp.squareup.com" }
+db_boxes     = %w{square@ironweed.corp.squareup.com}
+
+role :app, web_boxes + worker_boxes + db_boxes
+role :web, web_boxes
+role :db, db_boxes
+role :sidekiq, worker_boxes
+role :cron, worker_boxes.first
