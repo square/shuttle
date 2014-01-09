@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 # FRAMEWORK
 gem 'rails', '4.0.2'
 gem 'configoro'
+gem 'dalli'
 
 # AUTHENTICATION
 gem 'devise'

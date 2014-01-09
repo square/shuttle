@@ -11,6 +11,9 @@ set :current_revision, `git rev-parse #{fetch :branch}`.chomp
 set :rvm_type, :system
 set :rvm_ruby_version, "2.0.0-p353@#{fetch :application}"
 
+set :whenever_roles, :cron
+set :sidekiq_role, :sidekiq
+
 namespace :deploy do
   desc 'Restart application'
   task :restart do
