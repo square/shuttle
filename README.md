@@ -36,7 +36,7 @@ Getting Started
 
 ### Starting the server
 
-Developing for Shuttle requires Ruby 1.9.3, PostgreSQL, Redis, and a modern
+Developing for Shuttle requires Ruby 1.9.3, PostgreSQL, Redis, Tidy, and a modern
 version of libarchive. To run Shuttle for the first time:
 
 1. Clone this project.
