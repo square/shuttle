@@ -1,4 +1,4 @@
-# Copyright 2013 Square Inc.
+# Copyright 2014 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -143,5 +143,4 @@ $(document).ready () ->
     when "forgot-password" then display_forgot_password(300)
     else 
   # else if window.location.hash.substr(1) == "forgot-password"
-    
     
