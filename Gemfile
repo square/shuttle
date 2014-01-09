@@ -86,7 +86,7 @@ group :development, :test do
 end
 
 # SQUARE
-gem 'squash_ruby', require: 'squash/ruby'
+gem 'squash_ruby', '>= 1.4.0', require: 'squash/ruby'
 gem 'squash_rails', require: 'squash/rails'
 gem 'newrelic_rpm'
 group :development do
