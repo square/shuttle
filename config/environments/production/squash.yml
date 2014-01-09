@@ -1,4 +1,4 @@
 ---
-repository_root: /app/shuttle/repo
+revision_file: /app/shuttle/current/REVISION
 mirrored_repository: true
 disabled: false
