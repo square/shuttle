@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
-bundler_version="1.3.5"
 source "$HOME/.rvm/scripts/rvm"
+export LC_CTYPE=en_US.UTF-8
+export LANG=en_US.UTF-8
 RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
 
 ensure_dependency() {
     brew update && brew install $1 || die "failed to install $1 with homebrew, please do it yourself."
 }
 
-
 function install_bundler_if_needed() {
     echo "Checking for Bundler ${bundler_version}..."
-    if ! gem list --installed bundler --version "${bundler_version}" > /dev/null; then
-        gem install bundler --version "${bundler_version}"
+    if gem list --installed bundler > /dev/null; then
+        gem update bundler
+    else
+        gem install bundler
     fi
 }
 
@@ -22,19 +24,19 @@ function update_gems_if_needed() {
 }
 
 function prepare_database() {
-    dropdb shuttle_test || true
-    dropuser shuttle || true
-    createuser -D -R -S shuttle || true
-    createdb -O squash shuttle_test
-    psql -U shuttle -f db/structure.sql shuttle_test
+    dropdb -h 127.0.0.1 shuttle_test || true
+    dropuser -h 127.0.0.1 shuttle || true
+    createuser -D -R -S -h 127.0.0.1 shuttle || true
+    createdb -h 127.0.0.1 -O shuttle shuttle_test
+    psql -h 127.0.0.1 -U shuttle -f db/structure.sql shuttle_test
 }
 
 function run_specs() {
-    bundle exec rspec ${RUN_LIST} || exit 1
+    bin/bundle exec rspec ${RUN_LIST}
 }
 
 function run_jasmine() {
-    bundle exec rake guard:jasmine -t || exit 1
+    bin/bundle exec rake guard:jasmine -t
 }
 
 function prepare() {
