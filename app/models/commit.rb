@@ -142,14 +142,7 @@ class Commit < ActiveRecord::Base
     obj.message = obj.message.truncate(256) if obj.message
   end
 
-  before_save(on: :create) do |commit|
-    begin
-      commit.author = commit.commit.author.name
-      commit.author_email = commit.commit.author.email
-    rescue
-      # Don't set the author if commit doesn't exist
-    end
-  end
+  before_create :set_author
 
   after_commit(on: :create) do |commit|
     CommitImporter.perform_once(commit.id) unless commit.skip_import
@@ -580,6 +573,15 @@ class Commit < ActiveRecord::Base
   def load_message
     self.message ||= commit!.message
     true
+  end
+
+  def set_author
+    begin
+      self.author = commit.author.name
+      self.author_email = commit.author.email
+    rescue
+      # Don't set the author if commit doesn't exist
+    end
   end
 
   def compile_and_cache_or_clear(force=false)
