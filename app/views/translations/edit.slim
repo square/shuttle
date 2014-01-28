@@ -43,6 +43,10 @@ hr.divider
           .controls
             = check_box_tag 'blank_string', '1', (@translation.translated? && @translation.copy.blank? ? 'checked' : nil)
             | The translation is a blank string
+        .control-group
+          = f.label :notes, 'Notes', class: "control-label"
+          .controls
+            = f.text_area :notes, autocomplete: 'off', rows: 7, class: "resize"
 
       - if @translation.translation_changes.present?
         fieldset

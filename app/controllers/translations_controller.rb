@@ -276,6 +276,6 @@ class TranslationsController < ApplicationController
   end
 
   def translation_params
-    params.require(:translation).permit(:copy)
+    params.require(:translation).permit(:copy, :notes)
   end
 end
