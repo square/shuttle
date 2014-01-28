@@ -1,4 +1,4 @@
-# Copyright 2013 Square Inc.
+# Copyright 2014 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -58,7 +58,8 @@ class Translation < ActiveRecord::Base
   include HasMetadataColumn
   has_metadata_column(
       source_copy:  {allow_blank: true},
-      copy:         {allow_nil: true}
+      copy:         {allow_nil: true},
+      notes:        {allow_nil: true, length: { maximum: 1024 }}
   )
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }

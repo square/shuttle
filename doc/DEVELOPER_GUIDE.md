@@ -240,9 +240,9 @@ settings. The post body will contain something like
 
 ```` json
 {
-    "commit_revision"=>"b902bacd58d386e7d3a55e67c8dcbaf19a3cd9c8",
-    "project_name"=>"Help Center",
-    "ready"=>"true"
+    "commit_revision": "b902bacd58d386e7d3a55e67c8dcbaf19a3cd9c8",
+    "project_name": "Help Center",
+    "ready": "true"
 }
 ````
 
