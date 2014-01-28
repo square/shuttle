@@ -3,6 +3,9 @@ ruby:
   full_description = nil
   if commit.description
     full_description = description.dup
+    if commit.author
+      full_description << tag("br") + content_tag(:strong, "Authored by: ") + mail_to(commit.author_email, commit.author)
+    end
     if commit.user
       full_description << tag("br") + content_tag(:strong, "Requested by: ") + mail_to(commit.user.email, commit.user.abbreviated_name)
     end

@@ -86,6 +86,8 @@ class Commit < ActiveRecord::Base
   include HasMetadataColumn
   has_metadata_column(
       description:      {allow_nil: true},
+      author:           {allow_nil: true}, 
+      author_email:     {allow_nil: true},
       pull_request_url: {allow_nil: true}
   )
 
@@ -138,6 +140,15 @@ class Commit < ActiveRecord::Base
   before_validation :load_message, on: :create
   before_validation(on: :create) do |obj|
     obj.message = obj.message.truncate(256) if obj.message
+  end
+
+  before_save(on: :create) do |commit|
+    begin
+      commit.author = commit.commit.author.name
+      commit.author_email = commit.commit.author.email
+    rescue
+      # Don't set the author if commit doesn't exist
+    end
   end
 
   after_commit(on: :create) do |commit|
