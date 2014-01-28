@@ -59,7 +59,7 @@ class Translation < ActiveRecord::Base
   has_metadata_column(
       source_copy:  {allow_blank: true},
       copy:         {allow_nil: true},
-      notes:        {allow_nil: true}
+      notes:        {allow_nil: true, length: { maximum: 1024 }}
   )
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }
