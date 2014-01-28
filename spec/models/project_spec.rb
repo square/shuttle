@@ -37,8 +37,9 @@ describe Project do
       @commit_obj = double('Git::Object::Commit',
                            sha:     'a4b6dd88498817d4947730c7964a1a14c8f13d91',
                            message: 'foo',
-                           author:  double('Git::Author', date: Time.now))
+                           author:  double('Git::Author', name: "Sancho Sample", email: 'sancho@example.com', date: Time.now))
       allow_any_instance_of(Commit).to receive(:import_strings)
+      allow_any_instance_of(Commit).to receive(:commit).and_return(@commit_obj)
     end
 
     it "should return an existing commit" do
