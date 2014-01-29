@@ -33,6 +33,8 @@ class CommitStatsRecalculator
   #   translations are imported.
 
   def perform(commit_id, should_recalculate_affected_commits=false)
+    return
+
     commit = Commit.find(commit_id)
     Commit.flush_memoizations(commit)
 
