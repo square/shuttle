@@ -6,8 +6,6 @@ set :deploy_to, "/app/#{fetch :application}"
 set :linked_files, %w{config/database.yml data/secret_token tmp/sidekiq.pid}
 set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos}
 
-set :current_revision, `git rev-parse #{fetch :branch}`.chomp
-
 set :rvm_type, :system
 set :rvm_ruby_version, "2.0.0-p353@#{fetch :application}"
 
