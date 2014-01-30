@@ -33,8 +33,6 @@ class CommitStatsRecalculator
   #   translations are imported.
 
   def perform(commit_id, should_recalculate_affected_commits=false)
-    return
-
     commit = Commit.find(commit_id)
     Commit.flush_memoizations(commit)
 
@@ -57,9 +55,9 @@ class CommitStatsRecalculator
       ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
       not_ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
     end
-    self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/update_key_index']) do
-      Key.tire.index.import commit.keys.includes(:commits_keys) # include the eager-loads necessary to make the ES import efficient
-    end
+    #self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/update_key_index']) do
+    #  Key.tire.index.import commit.keys.includes(:commits_keys) # include the eager-loads necessary to make the ES import efficient
+    #end
 
     commit.keys.find_each { |k| KeyReadinessRecalculator.perform_once k.id } if should_recalculate_affected_commits
 
