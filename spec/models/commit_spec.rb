@@ -43,10 +43,10 @@ describe Commit do
       @commit = @project.commit!('HEAD')
     end
 
-    before(:each) { 
-      @commit.keys.each(&:destroy) 
+    before :each do
+      @commit.keys.each(&:destroy)
       @commit.update_attribute(:completed_at, nil)
-    }
+    end
 
     it "should set ready to false for commits with unready keys" do
       @commit.keys << FactoryGirl.create(:key)

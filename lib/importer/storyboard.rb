@@ -48,7 +48,6 @@ module Importer
       pageViewController segment splitViewController state tabBarController
       tabBarItem tableViewController tableViewSection textField viewController )
 
-
     def self.fencers() %w(Printf) end
 
     protected

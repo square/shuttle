@@ -72,7 +72,7 @@ module Fencer
       return tokens
     end
 
-    # Verifies using Nokogiri that the HTML is valid.
+    # Verifies that the HTML is valid.
 
     def valid?(string)
       wrapped_str = HTML_TEMPLATE.sub('%{string}', string)
