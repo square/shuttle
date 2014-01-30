@@ -110,10 +110,23 @@ module Importer
           @commit.keys += @keys.to_a
         end
         # key.commits has been changed, need to update associated ES fields
-        # include the eager-loads necessary to make the ES import efficient
-        @keys = Key.where(id: @keys.map(&:id)).includes(:commits_keys) # reload all of them to refresh the commits association
+        # load the translations associated with each commit
+        @keys = Key.where(id: @keys.map(&:id)).includes(:translations)
+        # preload commits_keys by loading all possible commit ids
+        commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: @keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
+          hsh[key_id.to_i] ||= Array.new
+          hsh[key_id.to_i] << commit_id.to_i
+          hsh
+        end
+        # organize them into their keys add add this new commit
+        @keys.each do |key|
+          key.batched_commit_ids = commits_by_key[key.id] || Array.new
+          key.batched_commit_ids << @commit
+        end
+        # and run the import
         Key.tire.index.import @keys
-        Translation.tire.index.import Translation.where(key_id: @keys.map(&:id)).includes(key: :commits_keys)
+        # now update translations with the keys still having the cached commit ids
+        Translation.tire.index.import @keys.map(&:translations).flatten
       end
 
       # cache the list of keys we know to be in this blob for later use
@@ -215,7 +228,8 @@ module Importer
               source_copy:          value,
               importer:             self.class.ident,
               fencers:              self.class.fencers,
-              skip_readiness_hooks: true)
+              skip_readiness_hooks: true,
+              batched_commit_ids:   []) # we'll fill this out later
       )
       @keys << key
 
