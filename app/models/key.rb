@@ -98,6 +98,9 @@ class Key < ActiveRecord::Base
   #   processing a large batch of Keys.
   attr_accessor :skip_readiness_hooks
 
+  # @private
+  attr_accessor :batched_commit_ids
+
   def apply_readiness_hooks?() !skip_readiness_hooks end
   private :apply_readiness_hooks?
 
@@ -116,7 +119,7 @@ class Key < ActiveRecord::Base
     }
     indexes :project_id, type: 'integer'
     indexes :ready, type: 'boolean'
-    indexes :commit_ids, as: 'commits_keys.map(&:commit_id)'
+    indexes :commit_ids, as: 'batched_commit_ids || commits_keys.pluck(:commit_id)'
   end
 
   include Slugalicious
