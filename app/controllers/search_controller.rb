@@ -33,7 +33,7 @@ class SearchController < ApplicationController
           target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
           return head(:unprocessable_entity) unless target_locales.all?
         end
-        @results = Translation.search(load: {include: {key: [:slugs, :project]}}) do
+        @results = Translation.search(load: {include: {key: :project}}) do
           if target_locales
             if target_locales.size > 1
               locale_filters = target_locales.map do |locale|
@@ -89,7 +89,7 @@ class SearchController < ApplicationController
           not_elastic  = params[:not_elastic_search] 
 
           if query_filter.present?
-            @results = Key.search(load: {include: [:translations, :project, :slugs]}) do
+            @results = Key.search(load: {include: [:translations, :project]}) do
               if not_elastic
                 filter :term, original_key_exact: query_filter                  
               else 

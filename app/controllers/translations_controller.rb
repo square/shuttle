@@ -268,7 +268,7 @@ class TranslationsController < ApplicationController
   end
 
   def find_key
-    @key = Key.find_from_slug!(params[:key_id], @project.id.to_s)
+    @key = @project.keys.find_by_id!(params[:key_id])
   end
 
   def find_translation
