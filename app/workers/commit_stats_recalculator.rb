@@ -55,9 +55,19 @@ class CommitStatsRecalculator
       ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
       not_ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
     end
-    #self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/update_key_index']) do
-    #  Key.tire.index.import commit.keys.includes(:commits_keys) # include the eager-loads necessary to make the ES import efficient
-    #end
+    self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/update_key_index']) do
+      commit.keys.find_in_batches do |keys|
+        commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
+          hsh[commit_id.to_i] ||= Array.new
+          hsh[commit_id.to_i] << key_id.to_i
+          hsh
+        end
+        keys.each do |key|
+          key.batched_commit_ids = commits_by_key[key.id]
+        end
+        Key.tire.index.import keys
+      end
+    end
 
     commit.keys.find_each { |k| KeyReadinessRecalculator.perform_once k.id } if should_recalculate_affected_commits
 
