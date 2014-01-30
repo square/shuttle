@@ -622,7 +622,7 @@ de:
     end
 
     before :each do
-      @commit                        = @project.commit!('HEAD')
+      @commit                        = @project.commit!('HEAD', skip_import: true)
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end

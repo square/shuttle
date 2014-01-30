@@ -122,9 +122,6 @@ class Key < ActiveRecord::Base
     indexes :commit_ids, as: 'batched_commit_ids || commits_keys.pluck(:commit_id)'
   end
 
-  include Slugalicious
-  slugged ->(key) { key.original_key[0, 50] }, scope: :project_id
-
   after_commit :add_or_remove_translations, on: :create, if: :apply_readiness_hooks?
   after_update :update_commit_readiness, if: :apply_readiness_hooks?
 
@@ -167,9 +164,6 @@ class Key < ActiveRecord::Base
 
     super options
   end
-
-  # @private
-  def to_param() slug end
 
   # @return [Class] The {Importer::Base} subclass that performed the import.
   def importer_class() Importer::Base.find_by_ident(importer) end

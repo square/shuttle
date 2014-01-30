@@ -56,7 +56,7 @@ class Commit::KeysController < ApplicationController
     status       = params[:status]
     commit_id    = @commit.id
 
-    @keys = Key.search(load: {include: [:translations, :slugs]}) do
+    @keys = Key.search(load: {include: [:translations]}) do
       query { string "commit_ids:\"#{commit_id}\"" }
 
       if query_filter.present?
