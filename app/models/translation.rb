@@ -246,19 +246,15 @@ class Translation < ActiveRecord::Base
   def valid_interpolations
     return unless copy.present? && copy_changed?
     return if base_translation? #TODO should we provide some kind of warning to the engineer?
+    return if key.fencers.empty?
 
     validating_copy = copy.dup
 
-    # Remove fences from the copy as we validate them, so that they don't
-    # interfere with futre validations
-    key.fencers.each do |fencer|
-      fencer_module = Fencer.const_get(fencer)
-      unless fencer_module.valid?(validating_copy)
-        errors.add(:copy, :invalid_interpolations, fencer: I18n.t("fencer.#{fencer}"))
-        break
-      end
-      fences = fencer_module.fence(validating_copy).values.flatten.sort_by(&:first).reverse
-      fences.each { |fence| validating_copy[fence] = '' }
+    # Only validates for the first fencer
+    fencer = key.fencers.first
+    fencer_module = Fencer.const_get(fencer)
+    unless fencer_module.valid?(validating_copy)
+      errors.add(:copy, :invalid_interpolations, fencer: I18n.t("fencer.#{fencer}"))
     end
   end
 

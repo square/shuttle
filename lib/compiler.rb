@@ -48,34 +48,36 @@ class Compiler
   def manifest(format, options={})
     raise CommitNotReadyError if !@commit.ready? && !options[:partial]
 
-    if options[:locale]
-      locale = Locale.from_rfc5646(options[:locale])
-      raise UnknownLocaleError unless locale
+    if options[:locale].present?
+      locales = options[:locale].split(',')
+      locales.map! { |locale| Locale.from_rfc5646(locale) }
+      raise UnknownLocaleError if locales.any?(&:nil?)
     else
-      locale = nil
+      locales = []
     end
 
     exporter = Exporter::Base.find_by_format(format)
     raise UnknownExporterError unless exporter
 
-    if !options[:force] && locale.nil? && (data = cached_manifest(format))
+    if !options[:force] && locales.empty? && (data = cached_manifest(format))
       return File.new(
           StringIO.new(data),
           exporter.character_encoding,
-          "#{locale.try!(:rfc5646) || 'manifest'}.#{exporter.file_extension}",
+          "manifest.#{exporter.file_extension}",
           exporter.mime_type
       )
     end
 
     io = StringIO.new
     exporter = exporter.new(@commit)
-    exporter.export io, *locales_for_export(locale, options[:partial])
+    exporter.export io, *locales_for_export(*locales, options[:partial])
     io.rewind
 
+    filename = locales.size == 1 ? locales.first.rfc5646 : 'manifest'
     return File.new(
         io,
         exporter.class.character_encoding,
-        "#{locale.try!(:rfc5646) || 'manifest'}.#{exporter.class.file_extension}",
+        "#{filename}.#{exporter.class.file_extension}",
         exporter.class.mime_type
     )
   end
@@ -127,9 +129,9 @@ class Compiler
 
   private
 
-  def locales_for_export(locale, partial)
-    if locale
-      Array.wrap(locale)
+  def locales_for_export(*locales, partial)
+    if locales.any?
+      locales
     else
       (partial ? @commit.project.targeted_locales : @commit.project.required_locales) - [@commit.project.base_locale]
     end
