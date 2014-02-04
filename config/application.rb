@@ -56,7 +56,7 @@ module Shuttle
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
     config.generators do |g|
-      g.template_engine :erector
+      g.template_engine :slim
       g.test_framework :rspec, fixture: true, views: false
       g.integration_tool :rspec
       g.fixture_replacement :factory_girl, dir: 'spec/factories'

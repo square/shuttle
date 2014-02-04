@@ -22,6 +22,7 @@ gem 'jquery-rails'
 gem 'font-awesome-rails'
 gem 'twitter-typeahead-rails'
 gem 'kaminari'
+gem 'slim-rails'
 
 # UTILITIES
 gem 'json'
@@ -49,7 +50,6 @@ gem 'faker'
 
 # BACKGROUND JOBS
 gem 'sidekiq'
-gem 'slim'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
 
