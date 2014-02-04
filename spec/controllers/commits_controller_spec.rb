@@ -92,6 +92,21 @@ fr:
         YAML
       end
 
+      it "should export a YAML file in the multiple locales" do
+        get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'en,fr', format: 'yaml'
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.yaml"')
+        expect(response.body).to eql(<<-YAML)
+---
+en:
+  key1: Hi {name}! You have {count} items.
+  key2: Your cart has {count} items
+fr:
+  key1: Bonjour {name}! Avec anninas fromage {count} la bouches.
+  key2: Tu avec carté {count} itém has
+        YAML
+      end
+
       it "should export a YAML file in all locales" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'yaml'
         expect(response.status).to eql(200)
@@ -112,6 +127,22 @@ fr:
         expect(response.status).to eql(200)
         expect(response.headers['Content-Disposition']).to eql('attachment; filename="fr.js"')
         expect(response.body).to eql(<<-JS)
+Ember.I18n.locales.translations.fr = {
+  "key1": "Bonjour {name}! Avec anninas fromage {count} la bouches.",
+  "key2": "Tu avec carté {count} itém has"
+};
+        JS
+      end
+
+      it "should export an Ember.js file in multiple locales" do
+        get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'en,fr', format: 'js'
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.js"')
+        expect(response.body).to eql(<<-JS)
+Ember.I18n.locales.translations.en = {
+  "key1": "Hi {name}! You have {count} items.",
+  "key2": "Your cart has {count} items"
+};
 Ember.I18n.locales.translations.fr = {
   "key1": "Bonjour {name}! Avec anninas fromage {count} la bouches.",
   "key2": "Tu avec carté {count} itém has"
@@ -179,6 +210,20 @@ key2=Tu avec carté {count} itém has
         expect(response.headers['Content-Disposition']).to eql('attachment; filename="fr.rb"')
         expect(response.body).to eql(<<-RUBY)
 {"fr"=>
+  {"key1"=>"Bonjour {name}! Avec anninas fromage {count} la bouches.",
+   "key2"=>"Tu avec carté {count} itém has"}}
+        RUBY
+      end
+
+      it "should export a Ruby file in multiple locales" do
+        get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'en,fr', format: 'rb'
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.rb"')
+        expect(response.body).to eql(<<-RUBY)
+{"en"=>
+  {"key1"=>"Hi {name}! You have {count} items.",
+   "key2"=>"Your cart has {count} items"},
+ "fr"=>
   {"key1"=>"Bonjour {name}! Avec anninas fromage {count} la bouches.",
    "key2"=>"Tu avec carté {count} itém has"}}
         RUBY
