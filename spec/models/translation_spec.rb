@@ -283,16 +283,16 @@ describe Translation do
         expect(trans.errors[:copy]).to eql(["has an invalid {android} interpolation"])
       end
 
-      it "should apply the fencers in reverse order" do
+      it "should only perform validations on the first fencer" do
         key   = FactoryGirl.create(:key, fencers: %w(Erb Html))
         trans = FactoryGirl.create(:translation, key: key)
 
         trans.copy = "<<%= foo %>em>baz</<%= foo %>em>"
         expect(trans).to be_valid
 
+        # Only checks the first validation 
         trans.copy = "<<%= foo %>em>baz</<%= foo %>b>"
-        expect(trans).not_to be_valid
-        expect(trans.errors[:copy]).to eql(["has an invalid <HTML> interpolation"])
+        expect(trans).to be_valid
 
         trans.copy = "<<%= foo %>em>baz</<%= foo >em>"
         expect(trans).not_to be_valid
