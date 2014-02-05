@@ -27,6 +27,12 @@ Shuttle::Application.routes.draw do
   # API
   post 'api/1.0/strings' => 'api/v1#strings'
 
+  # IN-CONTEXT TRANSLATION
+  constraints(key_id: /[^\s]+/) do
+    get '/projects/:project_id/commits/:commit_id/keys/:key_id/translations/:id' => 'incontext/translations#show', as: :incontext_translation
+    get '/projects/:project_id/commits/:commit_id/keys/:key_id/translations/:id/edit' => 'incontext/translations#edit', as: :edit_incontext_translation
+  end
+
   # REST
   resources :projects do
     resources :commits, only: [:show, :create, :update, :destroy] do

@@ -45,4 +45,7 @@ Shuttle::Application.configure do
 
   # Add stack traces to SQL logs
   #config.after_initialize { SQLOrigin.append_to_log }
+  config.use_ssl = true
+  config.force_ssl = true
+  config.ssl_port = 3001
 end
