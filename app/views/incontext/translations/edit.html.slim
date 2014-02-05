@@ -1,0 +1,36 @@
+doctype html
+html lang="en"
+  head
+    = csrf_meta_tags
+    script src="http://code.jquery.com/jquery-1.10.1.min.js"
+
+    sass:
+      textarea.success
+        background-color: #dfd
+      textarea.error
+        background-color: #fdd
+
+  body
+    = form_for([@project, @key, @translation], format: 'json') do |f|
+      = f.text_area :copy, placeholder: @translation.source_copy
+
+    coffee:
+      form = $('form.edit_translation')
+      copy_field = $('#translation_copy')
+
+      copy_field.change (e) ->
+        copy_field.attr 'disabled', 'disabled'
+        data = { 'translation[copy]': $('#translation_copy').val() }
+        data[$('meta[name=csrf-param]').attr('content')] = $('meta[name=csrf-token]').attr('content')
+
+        $.ajax form.attr('action'),
+          type: 'PATCH'
+          data: data
+          complete: ->
+            copy_field.removeAttr 'disabled'
+          success: ->
+            console.debug arguments
+            copy_field.removeClass('error').addClass 'success'
+          error: ->
+            console.debug arguments
+            copy_field.removeClass('success').addClass 'error'
