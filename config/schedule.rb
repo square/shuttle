@@ -15,6 +15,7 @@
 set :output, 'log/whenever.log'
 
 every(30.minutes) { runner 'AutoImporter.perform_once' }
+every(30.minutes) { rake 'branches:update' }
 
 # god damn it why must it come to this
 every(:hour) { rake 'maintenance:fix_hung_commits' }

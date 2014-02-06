@@ -409,4 +409,51 @@ describe Project do
       expect(commit.reload).not_to be_ready
     end
   end
+
+  describe '#update_touchdown_branch' do
+    before :each do
+      Project.delete_all
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      # delete an existing translated branch, if it exists
+      system 'git', 'push', @project.repository_url, ':refs/heads/translated'
+    end
+
+    it "should do nothing unless watched_branches and touchdown_branch are set" do
+      @project.watched_branches = []
+      @project.touchdown_branch = nil
+
+      @project.update_touchdown_branch
+
+      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
+          to eql('translated')
+    end
+
+    it "should advance the touchdown branch to the most recently translated watched branch commit" do
+      @project.watched_branches = %w(master)
+      @project.touchdown_branch = 'translated'
+
+      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
+      c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+      CommitStatsRecalculator.new.perform(c.id)
+      expect(c.reload).to be_ready
+
+      @project.update_touchdown_branch
+
+      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
+          to eql('d82287c47388278d54433cfb2383c7ad496d9827')
+    end
+
+    it "should do nothing if none of the commits in the watched branch are translated" do
+      @project.watched_branches = %w(master)
+      @project.touchdown_branch = 'translated'
+
+      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
+      expect(c).not_to be_ready
+
+      @project.update_touchdown_branch
+
+      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
+          to eql('translated')
+    end
+  end
 end

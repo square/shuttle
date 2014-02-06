@@ -1,7 +1,6 @@
 Introduction
 ============
 
-
 Shuttle is Square's translation platform and libraries. It scans a project for
 localizable content, presents that content to the translators, and then
 reintegrates translated strings back into a the project at deploy time. Shuttle
@@ -242,6 +241,30 @@ settings. The post body will contain something like
     "ready": "true"
 }
 ````
+
+### Integrating Shuttle into a branch-based deploy pipeline
+
+Shuttle projects have two settings, "watched branches" and "touchdown branch,"
+used to build branch-based workflows that integrate with CI or CD. Let's assume
+that you land all pull requests on the "master" branch, and master is always
+considered ready for continuous integration. Let's further you had a CI machine
+that watches master, and updates a "green" branch when specs pass. Presumably,
+your CD machine would then watch the green branch and deploy when it's updated.
+
+Now you want to add Shuttle to this pipeline. If you wanted to add Shuttle
+before the CI step, you would set "watched branches" to `master` and "touchdown
+branch" to, say, `translated`. You'd then set your CI machine to watch
+`translated` instead of `master`.
+
+**Important note:** The _first_ of the watched branches is considered to be
+paired with the touchdown branch. Only commits on that first watched branch will
+advance the touchdown branch when translated. Other watched branches can be used
+to, e.g., continuously translate an in-progress feature branch, but these
+branches will not affect the touchdown branch when translated.
+
+If you wanted to add Shuttle _after_ the CI step, you would set "watched
+branches" to `green` and "touchdown branch" to, say, `deployable`. You'd then
+set your CD machine to watch `deployable` instead of `green`.
 
 Tuning Shuttle
 ==============
