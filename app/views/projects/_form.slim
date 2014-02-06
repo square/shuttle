@@ -101,7 +101,16 @@
             / = f.text_field :watched_branches
             / .list-field
             = f.content_tag_field 'div', :watched_branches, class: 'array-field', 'data-value' => @project.watched_branches.to_json
-            / p.help-block New commits that appear on any of these branches will be automatically imported.
+            p.help-block New commits that appear on any of these branches will be automatically imported.
+
+        .control-group
+          = f.label :touchdown_branch, class: 'control-label'
+          .controls
+            = f.text_field :touchdown_branch
+            p.help-block
+              | Any time a commit from the <strong>first</strong> watched branch
+              |  finishes translation, the head of this branch will be advanced
+              |  to that commit. See the developer guide for more information.
       fieldset 
         legend Precompilation and Caching
 

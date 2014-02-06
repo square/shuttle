@@ -19,6 +19,18 @@ require 'file_mutex'
 # locales* that must be satisfied before a given Commit of the Project is
 # approved for release.
 #
+# Branch-based workflows
+# ----------------------
+#
+# Shuttle supports automated branch-based workflows through two attributes,
+# `watched_branches` and `touchdown_branch`. Shuttle automatically imports
+# commits from `watched_branches`. The first watched branch is "special"; when
+# a commit is translated on this branch, the `touchdown_branch` is advanced to
+# that commit.
+#
+# To learn how to use these features to integrate Shuttle into your deploy
+# pipeline, see the DEVELOPER_GUIDE.md file.
+#
 # Associations
 # ============
 #
@@ -57,6 +69,7 @@ require 'file_mutex'
 # | `cache_localization`     | If `true`, a precompiled localization will be generated and cached for each new Commit once it is ready.                                                                                     |
 # | `cache_manifest_formats` | A precompiled manifest will be generated and cached for each exporter in this list (referenced by format parameter). Included exporters must be {Exporter::Base.multilingual? multilingual}. |
 # | `watched_branches`       | A list of branches to automatically import new Commits from.                                                                                                                                 |
+# | `touchdown_branch`       | If this is set, Squash will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch. |
 
 class Project < ActiveRecord::Base
   # The directory where repositories are checked out.
@@ -92,6 +105,7 @@ class Project < ActiveRecord::Base
       cache_manifest_formats:   {type: Array, default: []},
 
       watched_branches:         {type: Array, default: []},
+      touchdown_branch:         {allow_nil: true},
 
       webhook_url:              {type: String, allow_nil: true}
   )
@@ -341,6 +355,34 @@ class Project < ActiveRecord::Base
   def inspect(default_behavior=false)
     return super() if default_behavior
     "#<#{self.class.to_s} #{id}: #{name}>"
+  end
+
+  # Updates the `touchdown_branch` head to be the latest translated commit in
+  # the first `watched_branches` branch. Does nothing if either of those fields
+  # are not set.
+
+  def update_touchdown_branch
+    return unless watched_branches.present? && touchdown_branch.present?
+
+    found_commit = nil
+    offset = 0
+    until found_commit
+      log = repo.object(watched_branches.first).log(50).skip(offset)
+      break if log.size.zero?
+      db_commits = commits.for_revision(log.map(&:sha)).where(ready: true).to_a
+      log.each do |log_commit|
+        if db_commits.detect { |dbc| dbc.revision == log_commit.sha }
+          found_commit = log_commit
+          break
+        end
+      end
+      offset += log.size
+    end
+
+    if found_commit
+      system 'git', "--git-dir=#{Shellwords.escape repo_path}", 'update-ref', "refs/heads/#{touchdown_branch}", found_commit.sha
+      system 'git', "--git-dir=#{Shellwords.escape repo_path}", 'push', '-f', repository_url, (["refs/heads/#{touchdown_branch}"]*2).join(':')
+    end
   end
 
   private
