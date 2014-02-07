@@ -4,6 +4,10 @@ ignored_exception_classes:
 - ActionController::MethodNotAllowed
 - ActionController::ActionNotFound
 - Sidekiq::Shutdown
+- Redis::TimeoutError
+- PG::TRDeadlockDetected
+- PG::UnableToSend
+- PG::ConnectionBad
 ignored_exception_messages:
   SignalException:
   - SIGTERM
