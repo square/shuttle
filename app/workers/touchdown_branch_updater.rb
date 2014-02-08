@@ -12,11 +12,20 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-set :output, 'log/whenever.log'
+# Periodic Sidekiq worker that updates the touchdown branch for a given
+# {Project}.
 
-every(30.minutes) { runner 'AutoImporter.perform_once' }
+class TouchdownBranchUpdater
+  include Sidekiq::Worker
+  sidekiq_options queue: :low
 
-# god damn it why must it come to this
-every(:hour) { rake 'maintenance:fix_hung_commits' }
-every(:hour) { rake 'maintenance:clear_stale_lockfiles' }
-every(:hour) { rake 'maintenance:recalculate_suspiciously_not_ready_commits' }
+  # Runs this worker.
+  #
+  # @param [Fixnum] project_id The ID of a Project.
+
+  def perform(project_id)
+    Project.find(project_id).update_touchdown_branch
+  end
+
+  include SidekiqLocking
+end
