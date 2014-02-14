@@ -75,8 +75,8 @@ Shuttle::Application.configure do
   # application.js.coffee, application.css, and all non-JS/CSS in app/assets folder are already added.
   config.assets.precompile                 += %w(
     vendor/assets/images/**/*.png
-    app/assets/javascript/incontext.js.coffee.erb
-    app/assets/stylesheets/incontext.css.scss
+    incontext.js
+    incontext.css
   )
 
   # Ignore bad email addresses and do not raise email delivery errors.
