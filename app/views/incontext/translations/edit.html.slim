@@ -1,0 +1,22 @@
+doctype html
+html lang="en"
+  head
+    = csrf_meta_tags
+    = stylesheet_link_tag "incontext", :media => "all"
+
+  body
+    = form_for [@project, @key, @translation], format: 'json', html: { 'data-translation-key' => @key.key }  do |f|
+      .control-group
+        = f.label :copy, @translation.locale.name, class: "control-label"
+        .controls
+          = f.text_area :copy, autocomplete: 'off', rows: 3
+      .control-group
+        = f.label :notes, 'Notes', class: "control-label"
+        .controls
+          = f.text_area :notes, autocomplete: 'off', rows: 3
+      .form-actions
+        = f.submit class: 'primary', value: 'Save'
+
+    = javascript_include_tag "incontext"
+
+

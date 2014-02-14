@@ -159,7 +159,7 @@
         
         .space-group        
           = f.label :key_locale_inclusions, class: 'control-label'
-          p.help-block List the keys that must be translated. If at least one inclusion is given, keys not matching will not be translated. UNIX-style globs are supported."
+          p.help-block List the keys that must be translated. If at least one inclusion is given, keys not matching will not be translated. UNIX-style globs are supported.
           .controls
             = f.content_tag_field 'div', :key_locale_inclusions, class: 'hash-field', 'data-value' => @project.key_locale_inclusions.to_json
           

@@ -1,0 +1,45 @@
+# Copyright 2014 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+#= require jquery
+
+form = $('form.edit_translation')
+translationKey = form.data('translation-key')
+
+submit = form.find('input[type="submit"]')
+copyField = form.find('textarea[name="translation[copy]"]')
+notesField = form.find('textarea[name="translation[notes]"]')
+
+submit.click (e) ->
+  data = {
+    'translation[copy]'   : copyField.val()
+    'translation[notes]'  : notesField.val()
+  }
+  data[$('meta[name=csrf-param]').attr('content')] = $('meta[name=csrf-token]').attr('content')
+  parent.postMessage
+      type: 'start-update'
+      key: translationKey
+    , "*"
+
+  $.ajax form.attr('action'),
+      type: 'PATCH'
+      data: data
+    .done (data) ->
+      parent.postMessage
+          type: 'finish-update'
+          key: translationKey
+          copy: data.copy
+        , "*"
+
+  return false
