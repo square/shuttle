@@ -364,6 +364,8 @@ class Project < ActiveRecord::Base
   def update_touchdown_branch
     return unless watched_branches.present? && touchdown_branch.present?
 
+    repo.fetch
+
     found_commit = nil
     offset = 0
     until found_commit
