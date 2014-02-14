@@ -270,6 +270,7 @@ class Project < ActiveRecord::Base
   # @param [String] key A key to test.
   # @param [Locale] locale A locale that a Translation could be in.
   # @return [true, false] Whether such a Translation should _not_ be created.
+  # @see Commit#skip_key?
 
   def skip_key?(key, locale)
     return true if key_exclusions.any? { |exclusion| File.fnmatch(exclusion, key) }
