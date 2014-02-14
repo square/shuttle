@@ -167,11 +167,11 @@ In addition to the usual helpers (in `app/helpers`), there are view mixins under
 JavaScript files are organized into four possible locations:
 
 * Third-party JavaScript libraries are in `vendor/assets/javascripts` and
-  loaded in the `application.js` manifest.
+  loaded in the `application.js.coffee` manifest.
 * JavaScript modules or helpers that are not specific to a particular page or
-  site area are in `lib/assets/javascripts` and also loaded in `application.js`.
+  site area are in `lib/assets/javascripts` and also loaded in `application.js.coffee`.
 * JavaScript modules or helpers specific to a particular area of the site are in
-  `app/assets/javascripts` and also loaded in `application.js`.
+  `app/assets/javascripts` and also loaded in `application.js.coffee`.
 * Small JavaScript snippets, glue code, or other code intended to add dynamic
   behavior to a specific page is in a `.js` file named the same as, and placed
   alongside, the `.html.rb` view file. For example, if

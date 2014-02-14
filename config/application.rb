@@ -61,8 +61,6 @@ module Shuttle
       g.integration_tool :rspec
       g.fixture_replacement :factory_girl, dir: 'spec/factories'
     end
-
-    config.use_ssl = false
   end
 end
 
