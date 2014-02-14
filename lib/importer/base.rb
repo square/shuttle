@@ -218,10 +218,6 @@ module Importer
 
     # @private
     def add_string(key, value, options={})
-      #if @blob.project.skip_key?(key, @blob.project.base_locale)
-      #  log_skip key, "skip_key? returned true for #{@blob.project.base_locale.inspect}"
-      #  return
-      #end
       key = @blob.project.keys.for_key(key).source_copy_matches(value).create_or_update!(
           options.reverse_merge(
               key:                  key,
@@ -231,7 +227,7 @@ module Importer
               skip_readiness_hooks: true,
               batched_commit_ids:   []) # we'll fill this out later
       )
-      @keys << key
+      @keys << key unless skip_key?(key)
 
       key.translations.in_locale(@blob.project.base_locale).create_or_update!(
           source_copy:              value,
@@ -372,6 +368,21 @@ module Importer
     def process_blob_for_translation_extraction(locale)
       file.locale = locale
       import_strings Receiver.new(self, locale)
+    end
+
+    # Determines if we should skip this key using both the normal key exclusions
+    # and the .shuttle.yml key exclusions
+    def skip_key?(key)
+      skip_key_due_to_project_settings?(key) || skip_key_due_to_branch_settings?(key)
+    end
+
+    def skip_key_due_to_project_settings?(key)
+      @blob.project.skip_key?(key.key, @blob.project.base_locale)
+    end
+
+    def skip_key_due_to_branch_settings?(key)
+      return false unless @commit
+      @commit.skip_key?(key.key)
     end
 
     def utf8_encode(string)
