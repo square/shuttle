@@ -2,35 +2,21 @@ doctype html
 html lang="en"
   head
     = csrf_meta_tags
-    script src="https://code.jquery.com/jquery-1.10.1.min.js"
-
-    sass:
-      textarea.success
-        background-color: #dfd
-      textarea.error
-        background-color: #fdd
+    = stylesheet_link_tag "incontext", :media => "all"
 
   body
-    = form_for([@project, @key, @translation], format: 'json') do |f|
-      = f.text_area :copy, placeholder: @translation.source_copy
+    = form_for [@project, @key, @translation], format: 'json', html: { 'data-translation-key' => @key.key }  do |f|
+      .control-group
+        = f.label :copy, @translation.locale.name, class: "control-label"
+        .controls
+          = f.text_area :copy, autocomplete: 'off', rows: 3
+      .control-group
+        = f.label :notes, 'Notes', class: "control-label"
+        .controls
+          = f.text_area :notes, autocomplete: 'off', rows: 3
+      .form-actions
+        = f.submit class: 'primary', value: 'Save'
 
-    coffee:
-      form = $('form.edit_translation')
-      copy_field = $('#translation_copy')
+    = javascript_include_tag "incontext"
 
-      copy_field.change (e) ->
-        copy_field.attr 'disabled', 'disabled'
-        data = { 'translation[copy]': $('#translation_copy').val() }
-        data[$('meta[name=csrf-param]').attr('content')] = $('meta[name=csrf-token]').attr('content')
 
-        $.ajax form.attr('action'),
-          type: 'PATCH'
-          data: data
-          complete: ->
-            copy_field.removeAttr 'disabled'
-          success: ->
-            console.debug arguments
-            copy_field.removeClass('error').addClass 'success'
-          error: ->
-            console.debug arguments
-            copy_field.removeClass('success').addClass 'error'
