@@ -24,7 +24,7 @@ class TouchdownBranchUpdater
   # @param [Fixnum] project_id The ID of a Project.
 
   def perform(project_id)
-    Project.find(project_id).update_touchdown_branch
+    Project.find_by_id(project_id).try!(:update_touchdown_branch)
   end
 
   include SidekiqLocking
