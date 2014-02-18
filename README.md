@@ -272,6 +272,41 @@ localizers (rather than exporters) also record metadata about where in the
 file the string came from. A localizer (under `lib/localizer`) recreates
 the original file and substitutes translated copy using the source information.
 
+### Key inclusion and exclusion lists
+
+Certain keys can be excluded by a blacklist or whitelist system. These settings
+are spread about a couple of different places:
+
+**Project-global key exclusions and inclusions**: The `key_exclusions` and
+`key_inclusions` metadata fields on Project are used to control global key
+whitelisting or blacklisting. Only one or the other should be set.
+
+**Locale-specific key exclusions and inclusions**: The `key_locale_exclusions`
+and `key_locale_inclusions` metadata fields on Project are used to control key
+whitelisting or blacklisting on a locale-by-locale basis. For each locale, only
+a whitelist or a blacklist should be set.
+
+**Commit-specific key exclusions**: If a particular commit has a `.shuttle.yml`
+file in the project root, it is read and the value `key_exclusions` key is used
+to further filter keys. It should be an array of keys or UNIX-style globs. This
+allows developers to exclude keys on a certain branch until that branch is ready
+for translation. Note that Keys belong to a Project and have a many-to-many
+relationship with Commits. Therefore, keys matching a commit-specific exclusion
+will still be imported, but will simply not be associated with the commit
+currently being processed. Because of this, no locale-specific exclusions are
+supported in this manner.
+
+**Project-global path filtering**: The `only_paths` and `skip_paths` metadata
+fields on Project are used to prevent the importer from descending into certain
+paths.
+
+**Importer-specific path filtering**: The `only_importer_paths` and
+`skip_importer_paths` metadata fields on Project are used to prevent certain
+importers from descending into specific paths.
+
+See {Project#skip_key?}, {Project#skip_path?}, and {Commit#skip_key?} for more
+information.
+
 Fencing
 -------
 

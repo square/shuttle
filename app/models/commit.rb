@@ -148,6 +148,7 @@ class Commit < ActiveRecord::Base
     CommitImporter.perform_once(commit.id) unless commit.skip_import
   end
   after_commit :compile_and_cache_or_clear, on: :update
+  after_commit :update_touchdown_branch, on: :update
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -547,6 +548,31 @@ class Commit < ActiveRecord::Base
     (cached_jids & actual_jids).empty? # none of the cached JIDs actually exist anymore
   end
 
+  # Returns whether we should skip a key for this particular commit, given the
+  # contents of the `.shuttle.yml` file for this commit.
+  #
+  # @param [String] key The key to potentially skip.
+  # @return [true, false] Whether the key should not be associated with this
+  # commit.
+  # @see Project#skip_key?
+
+  def skip_key?(key)
+    key_exclusions = Rails.cache.fetch("commit:#{revision}:exclusions") do
+      blob = commit.gtree.blobs['.shuttle.yml']
+      return unless blob
+      settings = YAML.load(blob.contents)
+      settings['key_exclusions']
+    end
+
+    if key_exclusions.kind_of?(Array)
+      return true if key_exclusions.any? { |exclusion| File.fnmatch(exclusion, key) }
+    end
+
+    return false
+  rescue Psych::SyntaxError
+    return false
+  end
+
   # @private Shanghai'd from Sidekiq::Web
   def self.workers
     Sidekiq.redis do |conn|
@@ -600,6 +626,10 @@ class Commit < ActiveRecord::Base
         ManifestPrecompiler.perform_once id, format
       end
     end
+  end
+
+  def update_touchdown_branch
+    TouchdownBranchUpdater.perform_once id
   end
 
   def import_blob(path, blob, options={})

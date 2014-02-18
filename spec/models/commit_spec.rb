@@ -398,4 +398,26 @@ describe Commit do
       expect(@commit.all_translations_approved_for_locale?(Locale.from_rfc5646('de'))).to be_false
     end
   end
+
+  describe "#skip_key?" do
+    before :all do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+    end
+
+    it "should return true if the commit has a .shuttle.yml file given an excluded key" do
+      @commit = @project.commit!('339d381517fef6cabde59a373c8757d35af87558')
+      expect(@commit.skip_key?('commit_excluded_1')).to be_true
+    end
+
+    it "should return false if the commit has a .shuttle.yml file given a non-excluded key" do
+      @commit = @project.commit!('339d381517fef6cabde59a373c8757d35af87558')
+      expect(@commit.skip_key?('other_key')).to be_false
+    end
+
+    it "should return false if the commit does not have a .shuttle.yml file" do
+      @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
+      expect(@commit.skip_key?('commit_excluded_1')).to be_false
+    end
+  end
 end
