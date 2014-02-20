@@ -383,6 +383,8 @@ class Project < ActiveRecord::Base
     end
 
     if found_commit
+      Rails.logger.info "[Project#update_touchdown_branch] Updating #{inspect} branch #{touchdown_branch} to #{found_commit.sha}"
+
       system 'git', "--git-dir=#{Shellwords.escape repo_path}", 'update-ref', "refs/heads/#{touchdown_branch}", found_commit.sha
       system 'git', "--git-dir=#{Shellwords.escape repo_path}", 'push', '-f', repository_url, (["refs/heads/#{touchdown_branch}"]*2).join(':')
     end
