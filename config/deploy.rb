@@ -1,5 +1,5 @@
 set :application, 'shuttle'
-set :repo_url, 'https://git.squareup.com/intl/shuttle.git'
+set :repo_url, 'https://stash.corp.squareup.com/scm/intl/shuttle.git'
 
 set :deploy_to, "/app/#{fetch :application}"
 
