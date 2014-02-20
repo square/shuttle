@@ -27,10 +27,12 @@ class CommitImporter
   #   base translations.
 
   def perform(commit_id, options={})
-    locale = options[:locale] ? Locale.from_rfc5646(options[:locale]) : nil
+    options.symbolize_keys!
 
+    locale = options[:locale] ? Locale.from_rfc5646(options[:locale]) : nil
+    force = options[:force] ? true : nil
     commit = Commit.find(commit_id)
-    commit.import_strings(locale: locale)
+    commit.import_strings(locale: locale, force: force)
   end
 
   include SidekiqLocking
