@@ -273,6 +273,7 @@ class Commit < ActiveRecord::Base
   # completed_at to be the current time.
 
   def recalculate_ready!
+    puts 'HERE!!!!!!'
     ready      = !keys.where(ready: false).exists?
     self.ready = ready
     if self.ready and self.completed_at.nil?
@@ -280,6 +281,7 @@ class Commit < ActiveRecord::Base
     end
     save!
     compile_and_cache_or_clear(ready)
+    puts 'DONE!!!!!!!'
   end
 
   # Returns `true` if all Translations applying to this commit have been

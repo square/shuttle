@@ -25,7 +25,8 @@ class CommitsController < ApplicationController
   before_filter :find_project
   before_filter :find_commit, except: [:create, :manifest, :localize]
 
-  respond_to :html, :json, only: [:show, :create, :update, :destroy, :import, :sync, :match, :redo, :clear]
+  respond_to :html, :json, only: [:show, :create, :update, :destroy, :import,
+                                  :sync, :match, :redo, :clear, :recalculate]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -244,6 +245,27 @@ class CommitsController < ApplicationController
 
   def clear
     @commit.clear_workers!
+    respond_with @commit, location: project_commit_url(@project, @commit)
+  end
+
+  # Recalculates the readiness of a commit.  This method should be used
+  # to fix commits that are "red" but should be "green"
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:project_id/commits/:id/recalculate`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def recalculate
+    @commit.recalculate_ready!
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
