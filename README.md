@@ -64,7 +64,7 @@ version of libarchive. To run Shuttle for the first time:
 
         brew install redis elasticsearch
 
-   and follow the post-install instructions.
+   and start them, following the post-install instructions for each of them.
 6. You’ll need to run Bundler: `bundle install`
 7. Run `rake db:migrate db:seed` to seed the database.
 8. Run `RAILS_ENV=test rake db:migrate` to setup the test database.

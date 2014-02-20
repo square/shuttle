@@ -11,7 +11,14 @@
   h1 Commit Status
   - if current_user.monitor?
     .pull-right  
+      button.default.square href='#settings' rel='modal': i.fa.fa-cogs
       button.danger href=project_commit_url(@project, @commit) data-method='DELETE' data-confirm='Are you sure you want to delete this commit?' Delete
+    /- if @commit.loading?
+    /  .pull-right
+    /    = button_to 'Clear Workers', clear_project_commit_url(@project, @commit)
+    /- else
+    /  .pull-right
+    /    = button_to 'Reimport', redo_project_commit_path(@project, @commit)
 
   h6
     strong #{@commit.revision}
@@ -51,3 +58,28 @@ hr.divider
             - else
               |  
               i.fa.fa-circle-o
+
+/ Settings Modal
+.row
+  .modal.eight.columns#settings
+    a.close ×
+    h2 Commit Tools
+    .modal-body
+      .control-group
+        label.description-label
+          | Use this if you need to manually reimport a commit
+        .controls
+          = button_to 'Reimport', redo_project_commit_path(@project, @commit)
+      - if current_user.admin? and @commit.loading?
+        .control-group
+          label.description-label
+            | Use this to clear workers for hanging commits
+          .controls
+            = button_to 'Clear Workers', clear_project_commit_url(@project, @commit)
+
+      .control-group
+        label.description-label
+          | Use this if all translations are done but commit is still red
+        .controls
+          = button_to 'Recalculate', recalculate_project_commit_path(@project, @commit)
+

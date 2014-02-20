@@ -20,12 +20,14 @@ class CommitsController < ApplicationController
   COMMIT_ATTRIBUTES = [:exported, :revision, :description, :due_date, :pull_request_url, :priority]
 
   before_filter :authenticate_user!, except: [:manifest, :localize]
-  before_filter :monitor_required, except: [:manifest, :localize]
-  before_filter :monitor_required, only: :destroy
+  before_filter :monitor_required, except: [:show, :manifest, :localize]
+  before_filter :admin_required, only: :clear
+
   before_filter :find_project
   before_filter :find_commit, except: [:create, :manifest, :localize]
 
-  respond_to :html, :json, only: [:show, :create, :update, :destroy, :import, :sync, :match, :redo]
+  respond_to :html, :json, only: [:show, :create, :update, :destroy, :import,
+                                  :sync, :match, :redo, :clear, :recalculate]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -220,8 +222,52 @@ class CommitsController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def redo
-    CommitImporter.perform_once @commit.id
-    respond_with @commit, location: nil
+    @commit.update_attribute(:loading, true)
+    CommitImporter.perform_once @commit.id, force: true
+    respond_with @commit, location: project_commit_url(@project, @commit)
+  end
+
+  # Removes all workers from the loading list, marks the Commit as not loading,
+  # and recalculates Commit statistics if the Commit was previously loading.
+  # This method should be used to fix "stuck" Commits.
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:project_id/commits/:id/clear`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def clear
+    @commit.clear_workers!
+    respond_with @commit, location: project_commit_url(@project, @commit)
+  end
+
+  # Recalculates the readiness of a commit.  This method should be used
+  # to fix commits that are "red" but should be "green"
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:project_id/commits/:id/recalculate`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def recalculate
+    @commit.recalculate_ready!
+    respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
   # Renders a digest of all translated strings applying to a revision. The
