@@ -29,9 +29,153 @@ describe Commit do
     end
 
     context "[before_save]" do
+      before(:each) { Timecop.freeze(Time.now) }
+      after(:each) { Timecop.return }
+
+      it "should set loading at" do
+        old_time = Time.now
+        commit = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user))
+        Timecop.freeze(3.days.from_now)
+        commit.loading = false
+        commit.save!
+        expect(commit.loaded_at.to_time).to eql(old_time + 3.days)
+      end
+    end
+
+    context "[before_create]" do
       it "should save the commit's author" do
         expect(@commit.author).to eql('Rick Song')
         expect(@commit.author_email).to eql('ricksong@squareup.com')
+      end
+    end
+  end
+
+  context "[stats]" do
+    context "[callbacks]" do
+      before :all do
+        Timecop.freeze(Time.now)
+        @created_at = Time.now
+        @commit = FactoryGirl.create(:commit, created_at: @created_at, loading: true, user: FactoryGirl.create(:user))
+        Timecop.freeze(3.hours.from_now)
+        @commit.loading = false
+        @commit.save!
+        Timecop.freeze(3.hours.from_now)
+        @commit.recalculate_ready!
+      end
+
+      after(:all) { Timecop.return }
+
+      it "should correctly compute the time to load" do
+        expect(@commit.loaded_at.to_time).to eql(@created_at + 3.hours)
+        expect(@commit.time_to_load).to eq(3.hours)
+      end
+
+      it "should correctly compute the time to translate" do
+        expect(@commit.completed_at.to_time).to eql(@created_at + 6.hours)
+        expect(@commit.time_to_translate).to eq(3.hours)
+      end
+
+      it "should correctly compute the time to complete" do
+        expect(@commit.completed_at.to_time).to eql(@created_at + 6.hours)
+        expect(@commit.time_to_complete).to eq(6.hours)
+      end
+    end
+
+    context "[metrics]" do
+      before :all do
+        timespan = 30
+        Timecop.freeze(Time.now)
+        @last_date  = Date.today
+        @first_date = Date.today - timespan.days
+
+        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+        @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+        # Note that we include 1 day outside of boundary.  This is to verify that these metrics don't capture
+        # dates outside of window.
+        ((@first_date - 1.day)...@last_date).each do |date|
+          FactoryGirl.create(
+              :commit,
+              project: @project,
+              created_at: date,
+              loaded_at: date + 1.day,
+              completed_at: date + 2.days,
+          )
+
+        end
+
+        # Create an "anomalous" commit (a commit that belongs to a separate project)to also test for how they handle
+        # for date filters
+        FactoryGirl.create(
+            :commit,
+            created_at: @first_date,
+            loaded_at: @first_date + (0.5).days,
+            completed_at: @first_date + 1.day,
+        )
+      end
+      after(:all) { Timecop.return }
+
+      it "should correctly compute daily commits created metric for one project" do
+        expect(Commit.daily_commits_created(@project.id)).to eql(
+          (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
+            daily_finishes << [ cur_date.to_time.to_i, 1 ]
+          end
+        )
+      end
+
+      it "should correctly compute daily commits finished metric for one project" do
+        expect(Commit.daily_commits_finished(@project.id)).to eql(
+            (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
+              if cur_date == @first_date
+                daily_finishes << [ cur_date.to_time.to_i, 0 ]
+              else
+                daily_finishes << [ cur_date.to_time.to_i, 1 ]
+              end
+            end
+        )
+      end
+
+      it "should correctly compute average completion metric for one project" do
+        expect(Commit.average_completion_time(@project.id)).to eql(
+             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+               mv_avg << [ cur_date.to_time.to_i, 2.day.to_f, 1.day.to_f, 1.day.to_f ]
+             end
+         )
+      end
+
+      it "should correctly compute daily commits created metric for all projects" do
+        expect(Commit.daily_commits_created).to eql(
+            (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
+              if cur_date == @first_date
+                daily_finishes << [ cur_date.to_time.to_i, 2 ]
+              else
+                daily_finishes << [ cur_date.to_time.to_i, 1 ]
+              end
+            end
+         )
+      end
+
+      it "should correctly compute daily commits finished metric for all projects" do
+        expect(Commit.daily_commits_finished).to eql(
+            (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
+              case cur_date
+                when @first_date then daily_finishes << [ cur_date.to_time.to_i, 0 ]
+                when @first_date + 1 then daily_finishes << [ cur_date.to_time.to_i, 2 ]
+                else daily_finishes << [ cur_date.to_time.to_i, 1 ]
+              end
+            end
+        )
+      end
+
+      it "should correctly compute average completion metric for all projects" do
+        expect(Commit.average_completion_time).to eql(
+            (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+              case cur_date
+                when @first_date then mv_avg << [ cur_date.to_time.to_i, 13.days/7.0, 6.day/7.0, 1.day.to_f ]
+                when @first_date + 1 then mv_avg << [ cur_date.to_time.to_i, 15.days/8.0, 7.days/8.0, 1.day.to_f ]
+                else mv_avg << [ cur_date.to_time.to_i, 2.day.to_f, 1.day.to_f, 1.day.to_f ]
+              end
+            end
+        )
       end
     end
   end
@@ -81,13 +225,17 @@ describe Commit do
     end
 
     it "should set completed_at to current time when ready" do
-      # Approximation since its impossible to check actual time.
-      start_time = Time.current
-      @commit.keys << FactoryGirl.create(:key)      
+      Timecop.freeze(Time.now)
+      start_time = Time.now
+
+      @commit.keys << FactoryGirl.create(:key)
+      Timecop.freeze(1.day.from_now)
+
       @commit.recalculate_ready!
       expect(@commit).to be_ready
 
-      expect(@commit.completed_at).to be > start_time
+      expect(@commit.completed_at).to eql(start_time + 1.day)
+      Timecop.return
     end 
 
     it "should not change completed_at if commit goes from ready to unready." do

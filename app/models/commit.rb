@@ -142,8 +142,8 @@ class Commit < ActiveRecord::Base
     obj.message = obj.message.truncate(256) if obj.message
   end
 
+  before_save :set_loaded_at
   before_create :set_author
-
   after_commit(on: :create) do |commit|
     CommitImporter.perform_once(commit.id) unless commit.skip_import
   end
@@ -369,6 +369,33 @@ class Commit < ActiveRecord::Base
     super options
   end
 
+  # Computes the time to load a commit using the
+  # created_at time and the loaded_at time.
+  #
+  # @return [timestamp] The time it took to load a commit.
+
+  def time_to_load
+    if self.loaded_at
+      self.loaded_at - self.created_at
+    else
+      nil
+    end
+  end
+  redis_memoize :time_to_load
+
+  # Computes the time to translate a commit using the
+  # loaded_at time and the completed_at time.
+  #
+  # @return [timestamp] The time it took to translate a commit.
+
+  def time_to_translate
+    if self.completed_at and self.loaded_at
+      self.completed_at - self.loaded_at
+    else
+      nil
+    end
+  end
+  redis_memoize :time_to_translate
 
   # Computes the time to complete a commit using the 
   # created_at time and the completed_at time.
@@ -376,12 +403,13 @@ class Commit < ActiveRecord::Base
   # @return [timestamp] The time it took to complete a commit. 
 
   def time_to_complete
-    if !self.completed_at.nil?
+    if self.completed_at
       self.completed_at - self.created_at
     else
       nil
     end
   end
+  redis_memoize :time_to_complete
 
   # @return [Fixnum] The number of approved Translations across all required
   #   under this Commit.
@@ -491,6 +519,7 @@ class Commit < ActiveRecord::Base
 
     Shuttle::Redis.srem "import:#{revision}", jid
     loading      = (Shuttle::Redis.scard("import:#{revision}") > 0)
+
     self.loading = loading
     save!
 
@@ -594,6 +623,10 @@ class Commit < ActiveRecord::Base
   def load_message
     self.message ||= commit!.message
     true
+  end
+
+  def set_loaded_at
+    self.loaded_at ||= Time.current if self.loading_was && !self.loading
   end
 
   def set_author
