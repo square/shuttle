@@ -629,7 +629,7 @@ class Commit < ActiveRecord::Base
   end
 
   def update_touchdown_branch
-    TouchdownBranchUpdater.perform_once id
+    TouchdownBranchUpdater.perform_once project_id
   end
 
   def import_blob(path, blob, options={})
