@@ -176,32 +176,21 @@ class Commit < ActiveRecord::Base
   #
   # @return [Array<Fixnum>] An array containing the number of commits created each day for the past 30 days.
 
-  def self.daily_commits_created(project_id = nil)
-    daily_commits_created = []
-
+  def self.daily_commits_created(project_id=nil)
     timespan = 30
 
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
-    commits = Commit.where(created_at: first_date..last_date)
-                    .order('created_at ASC')
-    commits = commits.where(project_id: project_id) unless project_id.nil?
+    commits = Commit.where(created_at: first_date..last_date).order('created_at ASC')
+    commits = commits.where(project_id: project_id) if project_id
 
-    i = 0
-    while first_date < last_date
-      num_finished = 0
-
-      while i < commits.length and commits[i].created_at.utc.to_date == first_date
-        num_finished += 1
-        i            += 1
-      end
-
-      daily_commits_created << [first_date.to_time.utc.to_i, num_finished]
-      first_date += 1.day
+    (first_date...last_date).reduce([]) do |daily_creates , cur_date|
+      daily_creates << [
+          cur_date.to_time.utc.to_i,
+          commits.select { |c| c.created_at.utc.to_date == cur_date }.count
+      ]
     end
-
-    return daily_commits_created
   end
 
 
@@ -209,60 +198,93 @@ class Commit < ActiveRecord::Base
   #
   # @return [Array<Fixnum>] An array containing the number of commits finished each day for the past 30 days.
 
-  def self.daily_commits_finished
-    daily_commits_finished = []
-
+  def self.daily_commits_finished(project_id=nil)
     timespan = 30
 
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
     commits = Commit.where(completed_at: first_date..last_date).order('completed_at ASC')
+    commits = commits.where(project_id: project_id) if project_id
 
-    i = 0
-    while first_date < last_date
-      num_finished = 0
-
-      while i < commits.length and commits[i].completed_at.utc.to_date == first_date
-        num_finished += 1
-        i            += 1
-      end
-
-      daily_commits_finished << [first_date.to_time.utc.to_i, num_finished]
-      first_date += 1.day
+    (first_date...last_date).reduce([]) do |daily_finishes, cur_date|
+      daily_finishes << [
+          cur_date.to_time.utc.to_i,
+          commits.select { |c| c.completed_at.utc.to_date == cur_date }.count
+      ]
     end
-
-    return daily_commits_finished
   end
 
-  # Calculates 
-  # 
-  # @return [Array<Fixnum>] An array containing the number of commits finished each day for the past 30 days.
+  # Calculates a 7-day moving average for completion times of commits.
+  #
+  # @return [Array<Float>] An array containing a 7-day moving average of completion times for the past 30 days.
 
-  def self.average_completion_time(project_id = nil)
-    moving_average = []
-
+  def self.average_load_time(project_id = nil)
     timespan = 30
     window   = 7
 
     last_date  = Date.today
     first_date = Date.today - timespan.days
 
-    commits = Commit.where(completed_at: first_date..last_date)
-                    .order('completed_at ASC')
-    commits = commits.where(project_id: project_id) unless project_id.nil?
+    commits = Commit.where(completed_at: first_date..last_date).order('completed_at ASC')
+    commits = commits.where(project_id: project_id) if project_id
 
-    while first_date < last_date
-      window_commits          = commits.reject { |commit| commit.completed_at < first_date || commit.completed_at > first_date + window.days }
-      average_completion_time = window_commits.inject(0) { |total, commit| total += commit.time_to_complete }.
-          fdiv(window_commits.count.nonzero? || 1)
+    (first_date...last_date).reduce([]) do |moving_avg, cur_date|
+      window_commits          = commits.reject { |commit| commit.completed_at < cur_date || commit.completed_at > cur_date + window.days }
+      average_load_time = window_commits.inject(0) { |total, commit| total += commit.time_to_load }
+                                        .fdiv(window_commits.count.nonzero? || 1)
+
+      # Add the average loading time
+      moving_avg << [cur_date.to_time.utc.to_i, average_load_time]
+    end
+  end
+
+  # Calculates a 7-day moving average for completion times of commits.
+  #
+  # @return [Array<Float>] An array containing a 7-day moving average of completion times for the past 30 days.
+
+  def self.average_translation_time(project_id = nil)
+    timespan = 30
+    window   = 7
+
+    last_date  = Date.today
+    first_date = Date.today - timespan.days
+
+    commits = Commit.where(completed_at: first_date..last_date).order('completed_at ASC')
+    commits = commits.where(project_id: project_id) if project_id
+
+    (first_date...last_date).reduce([]) do |moving_avg, cur_date|
+      window_commits          = commits.reject { |commit| commit.completed_at < cur_date || commit.completed_at > cur_date + window.days }
+      average_translation_time = window_commits.inject(0) { |total, commit| total += commit.time_to_translate }
+                                               .fdiv(window_commits.count.nonzero? || 1)
+
+      # Add the average translation time
+      moving_avg << [cur_date.to_time.utc.to_i, average_translation_time]
+    end
+  end
+
+  # Calculates a 7-day moving average for completion times of commits.
+  # 
+  # @return [Array<Float>] An array containing a 7-day moving average of completion times for the past 30 days.
+
+  def self.average_completion_time(project_id = nil)
+    timespan = 30
+    window   = 7
+
+    last_date  = Date.today
+    first_date = Date.today - timespan.days
+
+    commits = Commit.where(completed_at: first_date..last_date).order('completed_at ASC')
+    commits = commits.where(project_id: project_id) if project_id
+
+    (first_date...last_date).reduce([]) do |moving_avg, cur_date|
+      window_commits          = commits.reject { |commit| commit.completed_at < cur_date || commit.completed_at > cur_date + window.days }
+      average_completion_time = window_commits.inject(0) { |total, commit| total += commit.time_to_complete }
+                                              .fdiv(window_commits.count.nonzero? || 1)
 
       # Add the average completion time
-      moving_average << [first_date.to_time.utc.to_i, average_completion_time]
-      first_date += 1.day
+      moving_avg << [cur_date.to_time.utc.to_i, average_completion_time]
     end
-
-    return moving_average
   end
 
   # @private
@@ -381,7 +403,6 @@ class Commit < ActiveRecord::Base
       nil
     end
   end
-  redis_memoize :time_to_load
 
   # Computes the time to translate a commit using the
   # loaded_at time and the completed_at time.
@@ -395,7 +416,6 @@ class Commit < ActiveRecord::Base
       nil
     end
   end
-  redis_memoize :time_to_translate
 
   # Computes the time to complete a commit using the 
   # created_at time and the completed_at time.
@@ -409,7 +429,6 @@ class Commit < ActiveRecord::Base
       nil
     end
   end
-  redis_memoize :time_to_complete
 
   # @return [Fixnum] The number of approved Translations across all required
   #   under this Commit.

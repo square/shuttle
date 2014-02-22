@@ -134,10 +134,26 @@ describe Commit do
         )
       end
 
+      it "should correctly compute average load metric for one project" do
+        expect(Commit.average_load_time(@project.id)).to eql(
+             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+               mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
+             end
+         )
+      end
+
+      it "should correctly compute average translation metric for one project" do
+        expect(Commit.average_translation_time(@project.id)).to eql(
+             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+               mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
+             end
+         )
+      end
+
       it "should correctly compute average completion metric for one project" do
         expect(Commit.average_completion_time(@project.id)).to eql(
              (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-               mv_avg << [ cur_date.to_time.to_i, 2.day.to_f, 1.day.to_f, 1.day.to_f ]
+               mv_avg << [ cur_date.to_time.to_i, 2.day.to_f ]
              end
          )
       end
@@ -166,17 +182,40 @@ describe Commit do
         )
       end
 
-      it "should correctly compute average completion metric for all projects" do
-        expect(Commit.average_completion_time).to eql(
+      it "should correctly compute average load metric for all projects" do
+        expect(Commit.average_load_time).to eql(
             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
               case cur_date
-                when @first_date then mv_avg << [ cur_date.to_time.to_i, 13.days/7.0, 6.day/7.0, 1.day.to_f ]
-                when @first_date + 1 then mv_avg << [ cur_date.to_time.to_i, 15.days/8.0, 7.days/8.0, 1.day.to_f ]
-                else mv_avg << [ cur_date.to_time.to_i, 2.day.to_f, 1.day.to_f, 1.day.to_f ]
+                when @first_date then mv_avg << [ cur_date.to_time.to_i, 6.day/7.0 ]
+                when @first_date + 1 then mv_avg << [ cur_date.to_time.to_i, 7.days/8.0 ]
+                else mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
               end
             end
         )
       end
+      it "should correctly compute average translation metric for all projects" do
+        expect(Commit.average_translation_time).to eql(
+            (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+              case cur_date
+                when @first_date then mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
+                when @first_date + 1 then mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
+                else mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
+              end
+            end
+        )
+      end
+      it "should correctly compute average completion metric for all projects" do
+        expect(Commit.average_completion_time).to eql(
+            (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+              case cur_date
+                when @first_date then mv_avg << [ cur_date.to_time.to_i, 13.days/7.0 ]
+                when @first_date + 1 then mv_avg << [ cur_date.to_time.to_i, 15.days/8.0 ]
+                else mv_avg << [ cur_date.to_time.to_i, 2.day.to_f ]
+              end
+            end
+        )
+      end
+
     end
   end
 
