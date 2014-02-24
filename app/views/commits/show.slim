@@ -13,15 +13,17 @@
     .pull-right  
       button.default.square href='#settings' rel='modal': i.fa.fa-cogs
       button.danger href=project_commit_url(@project, @commit) data-method='DELETE' data-confirm='Are you sure you want to delete this commit?' Delete
-    /- if @commit.loading?
-    /  .pull-right
-    /    = button_to 'Clear Workers', clear_project_commit_url(@project, @commit)
-    /- else
-    /  .pull-right
-    /    = button_to 'Reimport', redo_project_commit_path(@project, @commit)
 
   h6
-    strong #{@commit.revision}
+    strong
+      - if @commit.completed_at
+        = "Completed since #{time_ago_in_words(@commit.completed_at)}"
+      - elsif @commit.loaded_at
+        = "Translating since #{time_ago_in_words(@commit.loaded_at)}"
+      - else
+        = "Loading since #{time_ago_in_words(@commit.created_at)}"
+      | &nbsp;/&nbsp;
+      = "#{@commit.revision[0, 6]} (Currently #{@commit.loading? ? 'Loading' : @commit.ready? ? 'Ready' : 'Translating'})"
 
 hr.divider
 
