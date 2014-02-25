@@ -58,6 +58,7 @@ CREATE TABLE commits (
     user_id integer,
     completed_at timestamp without time zone,
     exported boolean DEFAULT false NOT NULL,
+    loaded_at timestamp without time zone,
     CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0)),
     CONSTRAINT commits_priority_check CHECK (((priority >= 0) AND (priority <= 3)))
 );
@@ -938,3 +939,5 @@ INSERT INTO schema_migrations (version) VALUES ('20131111213136');
 INSERT INTO schema_migrations (version) VALUES ('20131116042827');
 
 INSERT INTO schema_migrations (version) VALUES ('20131204020552');
+
+INSERT INTO schema_migrations (version) VALUES ('20140219040119');

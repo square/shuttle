@@ -38,31 +38,15 @@ class StatsController < ApplicationController
     respond_with Translation.total_words_per_project
   end
 
-  # Returns the average commit completion time by day.
+  # Returns {#daily_commits_created}, {#average_load_time}, {#average_translation_time},
+  # and {#average_completion_time} for a project.
 
-  def average_completion_time
-    respond_with Commit.average_completion_time
-  end
-
-  # Returns the daily number of commits created by day.
-
-  def daily_commits_created
-    respond_with Commit.daily_commits_created
-  end
-
-  # Returns the daily number of commits completed by day.
-
-  def daily_commits_finished
-    respond_with Commit.daily_commits_finished
-  end
-
-  # Returns {#daily_commits_created} and {#average_completion_time} for a
-  # project.
-
-  def avg_completion_and_daily_creates
+  def translation_metrics
     respond_with(
-        average_completion_time: Commit.average_completion_time(params['project_id']),
-        daily_creates:           Commit.daily_commits_created(params['project_id'])
+        average_load_time:        Commit.average_load_time(params['project_id']),
+        average_translation_time: Commit.average_translation_time(params['project_id']),
+        average_completion_time:  Commit.average_completion_time(params['project_id']),
+        daily_creates:            Commit.daily_commits_created(params['project_id'])
     )
   end
 end
