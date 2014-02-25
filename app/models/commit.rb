@@ -231,7 +231,7 @@ class Commit < ActiveRecord::Base
 
     (first_date...last_date).reduce([]) do |moving_avg, cur_date|
       window_commits          = commits.reject { |commit| commit.completed_at < cur_date || commit.completed_at > cur_date + window.days }
-      average_load_time = window_commits.inject(0) { |total, commit| total += commit.time_to_load }
+      average_load_time = window_commits.inject(0) { |total, commit| total += (commit.time_to_load || 0) }
                                         .fdiv(window_commits.count.nonzero? || 1)
 
       # Add the average loading time
@@ -255,7 +255,7 @@ class Commit < ActiveRecord::Base
 
     (first_date...last_date).reduce([]) do |moving_avg, cur_date|
       window_commits          = commits.reject { |commit| commit.completed_at < cur_date || commit.completed_at > cur_date + window.days }
-      average_translation_time = window_commits.inject(0) { |total, commit| total += commit.time_to_translate }
+      average_translation_time = window_commits.inject(0) { |total, commit| total += (commit.time_to_translate || 0) }
                                                .fdiv(window_commits.count.nonzero? || 1)
 
       # Add the average translation time
@@ -279,7 +279,7 @@ class Commit < ActiveRecord::Base
 
     (first_date...last_date).reduce([]) do |moving_avg, cur_date|
       window_commits          = commits.reject { |commit| commit.completed_at < cur_date || commit.completed_at > cur_date + window.days }
-      average_completion_time = window_commits.inject(0) { |total, commit| total += commit.time_to_complete }
+      average_completion_time = window_commits.inject(0) { |total, commit| total += (commit.time_to_complete || 0) }
                                               .fdiv(window_commits.count.nonzero? || 1)
 
       # Add the average completion time

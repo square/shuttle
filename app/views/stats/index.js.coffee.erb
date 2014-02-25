@@ -34,15 +34,25 @@ $(window).ready () ->
 				"values": project_data["daily_creates"]
 			},
 			{
-				"key": "Average Time per Commit (in hours)",
+				"key": "Average Load Time per Commit ",
+				"values": project_data["average_load_time"]
+			},
+			{
+				"key": "Average Translation Time per Commit",
+				"values": project_data["average_translation_time"]
+			},
+			{
+				"key": "Average Completion per Commit",
 				"values": project_data["average_completion_time"]
 			}
 		].map((series) ->
 			series.values = series.values.map((d) -> return {x: d[0] * 1000, y: d[1] })
 			return series
 		)
-		formatted_data[1].values = formatted_data[1].values.map (d) ->
-			return {x: d.x, y: d.y / (3600) } # In Hours
+		for i in [1..3]
+			formatted_data[i].values = formatted_data[i].values.map (d) ->
+				return {x: d.x, y: d.y / (3600) } # In Hours
+
 		return formatted_data
 
 	# GENERATE GRAPHS
@@ -76,14 +86,9 @@ $(window).ready () ->
 			)
 			.x((d, i) ->
 					i)
-			.tooltipContent((key, x, y, e, graph) ->
-					if e.series.originalKey == "Number of Commits Created"
-						return "<h3>#{x}</h3> <p> #{y} commits created </p>"
-					else
-						return "<h3>#{x}</h3> <p> Average commit took #{y} hours to complete </p>"
-				)
+			.useInteractiveGuideline(true)
+			.color(d3.scale.category10().range())
 
-			chart.color([ "#4296c2", "#ffc05d", ])
 			chart.xAxis.tickFormat((d) ->
 				dx = data[0].values[d] and data[0].values[d].x or 0
 				(if dx then d3.time.format("%x")(new Date(dx)) else "")
@@ -94,8 +99,6 @@ $(window).ready () ->
 			chart.y2Axis.tickFormat((d) ->
 				return d3.format(",.2f")(d)
 			)
-
-			chart.bars.forceY([0]).padData false
 
 			d3element.datum(data)
 							 .transition().duration(500)
@@ -118,7 +121,7 @@ $(window).ready () ->
 		error: =>
 			error("Unable to retrieve words per project stats")
 
-	$.ajax "<%= stats_avg_completion_and_daily_creates_url %>",
+	$.ajax "<%= stats_translation_metrics_url %>",
 		type: 'GET'
 		dataType: 'json'
 		success: (project_data) =>
@@ -129,7 +132,7 @@ $(window).ready () ->
 			error("Unable to retrieve commit time stats")
 
 	<% @top_projects.each_with_index do |top_project, i| %>
-		$.ajax "<%= stats_avg_completion_and_daily_creates_url %>",
+		$.ajax "<%= stats_translation_metrics_url %>",
 			type: 'GET'
 			data: { project_id: <%= top_project[:id] %> }
 			dataType: 'json'
@@ -143,7 +146,7 @@ $(window).ready () ->
 
 	$('select[name="project"]').change ->
 		$("#project_commit_time_chart_4 svg").empty()
-		$.ajax "<%= stats_avg_completion_and_daily_creates_url %>",
+		$.ajax "<%= stats_translation_metrics_url %>",
 			type: 'GET'
 			data: { project_id: $(this).val() }
 			dataType: 'json'

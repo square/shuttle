@@ -73,10 +73,7 @@ Shuttle::Application.routes.draw do
   # STATS PAGES
   get 'stats' => 'stats#index'
   get 'stats/words_per_project' => 'stats#words_per_project'
-  get 'stats/average_completion_time' => 'stats#average_completion_time'
-  get 'stats/daily_commits_created' => 'stats#daily_commits_created'
-  get 'stats/daily_commits_finished' => 'stats#daily_commits_finished'
-  get 'stats/avg_completion_and_daily_creates' => 'stats#avg_completion_and_daily_creates'
+  get 'stats/translation_metrics' => 'stats#translation_metrics'
 
   # GLOSSARY PAGES
   get 'glossary' => 'glossary#index', as: :glossary
