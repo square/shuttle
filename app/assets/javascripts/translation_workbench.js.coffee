@@ -153,6 +153,7 @@ class TranslationItem
     @element = $(HoganTemplates['translationworkbench/translation_item'].render(context)) 
 
     @copy_field = @element.find('.translation-area').first()
+    @source_copy = @element.find('.source-copy')
 
     @expand_link_button = @element.find('.expand-link').first()
     @copy_source_button = @element.find('.copy-source').first()
@@ -164,6 +165,12 @@ class TranslationItem
     @alerts = @element.find('div.alerts').first()
     @glossary_tips = @element.find('div.tips').first()
     
+    # Set up @source_copy
+    @source_copy.highlighter(
+      selector: '.highlighter-container'
+      minWords: 1
+    )
+
     # Set up @copy_field
     @copy_field.focus () =>
       # select entire range when focused
@@ -390,12 +397,22 @@ class root.TranslationWorkbench
   # @param [Object] options Addditional options. These are passed to the
   #   `TranslationItem` constructor.
   #
-  constructor: (@list, @filter, @url, @glossary, @options) ->
+  constructor: (@list, @filter, @url, @search_url, @glossary, @options) ->
+    @highlighter = $(HoganTemplates['translationworkbench/translation_tooltip'].render()) 
+    @highlighter.find('.tool-item.hide').click =>
+      @highlighter.hide()
+    @highlighter.find('.tool-item.search').click =>
+      if window.getSelection().toString().length > 0
+        window.open "#{@search_url}?query=#{encodeURIComponent(window.getSelection().toString())}",
+          "_blank", 'toolbar=0,location=0,menubar=0,height=800,width=1280,left=0'
+
     @items = []
     @scroll = @list.infiniteScroll (=> @makeURL()),
       windowScroll: true
       renderer: (items) =>
+        @highlighter.appendTo @list
         @addItems items
+
     @filter.submit => 
       @search() 
       return false

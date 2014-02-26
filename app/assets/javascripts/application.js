@@ -33,6 +33,8 @@
 //= require jquery-leanModal
 //= require jquery-qtip
 //= require jquery-chosen
+//= require jquery-highlighter
+//= require purl
 //= require datepicker
 //= require twitter/typeahead
 //= require modernizr
