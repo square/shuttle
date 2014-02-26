@@ -84,10 +84,9 @@ class CommitsController < ApplicationController
 
   def create
     revision = params[:commit][:revision].strip
-
     respond_to do |format|
       format.json do
-        other_fields           = params[:commit].stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
+        other_fields           = commit_params.stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
         other_fields[:user_id] = current_user.id
 
         if already_submitted_revision?(@project, revision)
@@ -124,9 +123,6 @@ class CommitsController < ApplicationController
   # | `commit` | Parameterized hash of Commit fields. |
 
   def update
-    if !params[:commit]["due_date"].nil?
-      params[:commit]["due_date"] = Date::strptime(params[:commit]["due_date"], "%m/%d/%Y")
-    end
     @commit.update_attributes commit_params
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
@@ -434,6 +430,9 @@ class CommitsController < ApplicationController
   end
 
   def commit_params
+    if params[:commit]["due_date"]
+      params[:commit]["due_date"] = DateTime::strptime(params[:commit]["due_date"], "%m/%d/%Y")
+    end
     params.require(:commit).permit(*COMMIT_ATTRIBUTES)
   end
 
