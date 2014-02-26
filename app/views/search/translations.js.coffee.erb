@@ -18,28 +18,35 @@ $(window).ready ->
       $("#expand-search").removeClass("active")
       $(".collapse").data("toggle", false)
       $(".collapse").slideUp()
-    else 
+    else
       $("#expand-search").addClass("active")
       $(".collapse").data("toggle", true)
       $(".collapse").slideDown()
 
   translationSearchForm = $('#translation-search-form')
+  for own param, val of $.url().param()
+    translationSearchForm.find("[name=#{param}]").val(val.trim())
+
   table = $('#translations')
   $('select[name="translator_id"]').chosen
     width: "100%"
 
   sr = new GlobalSearch(table, table.data('url'))
 
-  makeURL = -> "#{table.data('url')}?#{translationSearchForm.serialize()}"
+  makeURL = ->
+    "#{table.data('url')}?#{translationSearchForm.serialize()}"
   scroll = table.infiniteScroll makeURL,
     windowScroll: true
     renderer: (translations) =>
       for translation in translations
-        do (translation) -> sr.addTranslation(translation)
+        do (translation) ->
+          sr.addTranslation(translation)
     dataSourceOptions: {type: 'GET'}
 
   sr.scroll = scroll
 
   translationSearchForm.submit ->
+    # ONLY HTML5
+    window.history.pushState("params", "", "?#{translationSearchForm.serialize()}")
     sr.refresh()
     false
