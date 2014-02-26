@@ -103,7 +103,6 @@ GEM
     configoro (1.3.0)
       activesupport
     connection_pool (1.2.0)
-    dalli (2.7.0)
     devise (3.2.3)
       bcrypt-ruby (~> 3.0)
       orm_adapter (~> 0.1)
@@ -180,6 +179,8 @@ GEM
     pry-nav (0.2.3)
       pry (~> 0.9.10)
     rack (1.5.2)
+    rack-cache (1.2)
+      rack (>= 0.4)
     rack-protection (1.5.2)
       rack
     rack-test (0.6.2)
@@ -202,12 +203,28 @@ GEM
     rake (10.1.1)
     redcarpet (3.1.1)
     redis (3.0.7)
+    redis-actionpack (4.0.0)
+      actionpack (~> 4)
+      redis-rack (~> 1.5.0)
+      redis-store (~> 1.1.0)
+    redis-activesupport (4.0.0)
+      activesupport (~> 4)
+      redis-store (~> 1.1.0)
     redis-classy (1.2.0)
       redis-namespace (~> 1.0)
     redis-mutex (2.1.1)
       redis-classy (~> 1.2)
     redis-namespace (1.4.1)
       redis (~> 3.0.4)
+    redis-rack (1.5.0)
+      rack (~> 1.5)
+      redis-store (~> 1.1.0)
+    redis-rails (4.0.0)
+      redis-actionpack (~> 4)
+      redis-activesupport (~> 4)
+      redis-store (~> 1.1.0)
+    redis-store (1.1.4)
+      redis (>= 2.2)
     ref (1.0.5)
     rest-client (1.6.7)
       mime-types (>= 1.16)
@@ -316,7 +333,6 @@ DEPENDENCIES
   coffee-script
   composite_primary_keys!
   configoro
-  dalli
   devise
   factory_girl_rails
   faker
@@ -339,11 +355,13 @@ DEPENDENCIES
   pg
   pry
   pry-nav
+  rack-cache
   rails (= 4.0.3)
   rails-observers
   redcarpet
   redis-mutex
   redis-namespace
+  redis-rails
   rspec-rails
   sass-rails
   sidekiq!
