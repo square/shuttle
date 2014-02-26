@@ -186,7 +186,6 @@
                 $(document).bind('mouseup.highlighter', function (e) {
                     if ( window.getSelection().toString().length == 0 ) {
                         $(settings.selector).hide();
-                        isDown = true;
                     }
 
                     if (isDown) {
@@ -218,7 +217,7 @@
                         insertSpanAfterSelection(2);
                     }, 300);
                 });
-                $(document).bind('mousedown.highlighter', function (e) {
+                $(this).bind('mousedown.highlighter', function (e) {
                     if ( $(e.target).parents().index($(settings.selector)) == -1 ) {
                       $(settings.selector).hide();
                       isDown = true;
