@@ -54,11 +54,17 @@ $(window).ready ->
           else if translation.approved == false
             'text-error'
           else
-            ''
+            'muted'
+
+          copy = if translation.translated == false
+            "(not yet translated)"
+          else if /\A\s*\z/.test(translation.copy)
+            "(blank string)"
+          else
+            translation.copy[0..30]
+
           td = $('<td/>').appendTo(tr)
-          if translation.copy 
-            $('<a/>').text(translation.copy[0..30]).attr('href', translation.url)
-                     .addClass(klass).appendTo(td)
+          $('<a/>').attr('href', translation.url).addClass(klass).text(copy).appendTo(td)
         else
           td = $('<td/>').appendTo(tr)
 
