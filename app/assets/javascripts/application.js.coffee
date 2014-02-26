@@ -33,6 +33,8 @@
 #= require jquery-leanModal
 #= require jquery-qtip
 #= require jquery-chosen
+#= require jquery-highlighter
+#= require purl
 #= require datepicker
 #= require twitter/typeahead
 #= require modernizr
@@ -61,4 +63,3 @@ $(document).ready ->
   $("a[rel*=modal]").leanModal closeButton: ".close"
   $("button[rel*=modal]").leanModal closeButton: ".close"
   $("textarea.resize").autosize()
-
