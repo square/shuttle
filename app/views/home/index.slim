@@ -126,10 +126,10 @@ hr.divider
             - if commit.loading?
               td Importing
             - elsif commit.ready?
-              td Ready for download
+              td Ready for Download
             - else
               - strings_remaining = commit.translations_pending(*@locales) + commit.translations_new(*@locales)
-              td = "Translating #{pluralize(strings_remaining, 'string')}"
+              td = "Translating #{pluralize(strings_remaining, 'String')}"
 
           / Translation/Monitor Button
           = render partial: 'table_action_button', locals: { commit: commit }
@@ -138,6 +138,10 @@ hr.divider
   .pagination-links
     = paginate @commits
 .row
-  .pagination-info = page_entries_info(@commits)
+  .pagination-info
+    = page_entries_info(@commits)
+    - unless params[:show_autoimport] == 'true'
+      | &nbsp;(Hiding auto-imported commits)
+
 
 = render partial: 'modal_add_translation'
