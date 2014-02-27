@@ -55,11 +55,14 @@ hr.divider
           th class=(required ? (finished ? 'text-success' : 'text-error') : nil)
             = locale.rfc5646
             - if finished
-              |  
+              | &nbsp;
               i.fa.fa-check-circle
             - else
-              |  
+              | &nbsp;
               i.fa.fa-circle-o
+              - if required
+                | &nbsp;&nbsp;-&nbsp;&nbsp;#{(@commit.fraction_done(locale) * 100).round(2)}%
+
 
 / Settings Modal
 .row

@@ -1,4 +1,4 @@
-- if current_user.admin?
+- if current_user.admin? or current_user.monitor?
   = form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
     = f.text_field  :due_date, \
                     value: (f.object.due_date.strftime('%m/%d/%Y') if !f.object.due_date.nil?),\
@@ -14,5 +14,4 @@
                       nil
                     end
     span class="#{date_class}" = l(commit.due_date, format: :mon_day_year)
-  - else
-    | -
+

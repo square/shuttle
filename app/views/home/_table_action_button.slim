@@ -18,5 +18,6 @@
         data-locale=locale.rfc5646
         value="Translate"]
   - else
-    td
-      button.submit disabled="disabled" No locales
+    td: button.submit disabled="disabled" No locales
+- elsif current_user.monitor?
+    td: button.submit href=project_commit_url(commit.project, commit) Monitor

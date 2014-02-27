@@ -113,8 +113,8 @@ hr.divider
           / Word Review Count
           td = "#{number_with_delimiter commit.translations_pending(*@locales)}s (#{number_with_delimiter commit.words_pending(*@locales)}w)"
 
-          / Translation Button
-          = render partial: 'table_translation_button', locals: { commit: commit }
+          / Translation/Monitor Button
+          = render partial: 'table_action_button', locals: { commit: commit }
 
 .row 
   .pagination-links

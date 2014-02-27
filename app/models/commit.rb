@@ -433,24 +433,27 @@ class Commit < ActiveRecord::Base
   # @return [Fixnum] The number of approved Translations across all required
   #   under this Commit.
 
-  def translations_done
-    translations.not_base.where(approved: true, rfc5646_locale: project.required_locales.map(&:rfc5646)).count
+  def translations_done(*locales)
+    locales = project.required_locales if locales.empty?
+    translations.not_base.where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).count
   end
   redis_memoize :translations_done
 
   # @return [Fixnum] The number of Translations across all required locales
   #   under this Commit.
 
-  def translations_total
-    translations.not_base.where(rfc5646_locale: project.required_locales.map(&:rfc5646)).count
+  def translations_total(*locales)
+    locales = project.required_locales if locales.empty?
+    translations.not_base.where(rfc5646_locale: locales.map(&:rfc5646)).count
   end
   redis_memoize :translations_total
 
   # @return [Float] The fraction of Translations under this Commit that are
   #   approved, across all required locales.
 
-  def fraction_done
-    translations_done/translations_total.to_f
+  def fraction_done(*locales)
+    locales = project.required_locales if locales.empty?
+    translations_done(*locales)/translations_total(*locales).to_f
   end
 
   # @return [Fixnum] The total number of translatable base strings applying to
