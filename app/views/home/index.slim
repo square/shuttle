@@ -124,7 +124,7 @@ hr.divider
           - else
             / Progress
             - if commit.loading?
-              td Importing (#{pluralize(commit.list_workers.count, 'Worker')})
+              td Importing (#{pluralize(commit.list_workers.count, 'Job')})
             - elsif commit.ready?
               td Ready for Download
             - else
