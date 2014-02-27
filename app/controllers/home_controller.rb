@@ -69,7 +69,8 @@ class HomeController < ApplicationController
     @sha = sha
 
     # Filter by user
-    params[:email] ||= current_user.email if current_user.monitor? && !current_user.admin?
+    # Changed for Jim Kingdon.  Testing feature.  Make it such that all users can see all commits.
+    # params[:email] ||= current_user.email if current_user.monitor? && !current_user.admin?
     user = if params[:email].present?
              User.find_by_email(params[:email])
            else
