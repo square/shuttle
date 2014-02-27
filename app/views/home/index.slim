@@ -78,16 +78,25 @@ hr.divider
             = link_to 'Priority', request.parameters.except(:direction).merge(sort: 'priority')
 
         th Description
-        th Translate
-        th Review
-        / Translation Button
+
         - if current_user.translator?
-          th 
+          th Translate
+          th Review
+
+        - else
+          th Progress
+
+        / Translation/Monitor Button
+        - if current_user.translator? or current_user.monitor?
+          th
     tbody 
       - @commits.each do |commit|
         tr.row_class
           / Project Status
           td class=(if commit.loading? then 'commit-loading' else (commit.ready? ? 'commit-ready' : 'commit-translating') end)
+
+          /- if not current_user.translator?
+          /  td =(if commit.loading? then 'Loading' else (commit.ready? ? 'Ready' : 'Translating') end)
 
           / Project Name
           td = commit.project.name
@@ -107,11 +116,20 @@ hr.divider
           / Project Description
           td class=('centered' if !commit.description) = render partial: 'table_description', locals: { commit: commit }
 
-          / Word Translation Count
-          td = "#{number_with_delimiter commit.translations_new(*@locales)}s (#{number_with_delimiter commit.words_new(*@locales)}w)"
-
-          / Word Review Count
-          td = "#{number_with_delimiter commit.translations_pending(*@locales)}s (#{number_with_delimiter commit.words_pending(*@locales)}w)"
+          - if current_user.translator?
+            / Word Translation Count
+            td = "#{number_with_delimiter commit.translations_new(*@locales)}s (#{number_with_delimiter commit.words_new(*@locales)}w)"
+            / Word Review Count
+            td = "#{number_with_delimiter commit.translations_pending(*@locales)}s (#{number_with_delimiter commit.words_pending(*@locales)}w)"
+          - else
+            / Progress
+            - if commit.loading?
+              td Currently loading
+            - elsif commit.ready?
+              td Ready for download
+            - else
+              - strings_remaining = commit.translations_pending(*@locales) + commit.translations_new(*@locales)
+              td = "#{pluralize(strings_remaining, 'string')} require translation"
 
           / Translation/Monitor Button
           = render partial: 'table_action_button', locals: { commit: commit }
