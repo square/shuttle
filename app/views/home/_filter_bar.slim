@@ -28,7 +28,7 @@
 
       = submit_tag 'Filter', class: 'primary'
       .pull-right#expand-search
-        i.fa.fa-angle-right
+        i.fa.fa-chevron-right
 
     .collapse
       .control-group
@@ -53,3 +53,6 @@
         .controls
           = check_box_tag 'exported', 'true', params[:exported] == 'true'
           | Include exported commits
+        .controls
+          = check_box_tag 'show_autoimport', 'true', params[:show_autoimport] == 'true'
+          | Show auto-imported commits

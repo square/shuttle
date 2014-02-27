@@ -53,6 +53,7 @@ class HomeController < ApplicationController
 
     limit    = params.fetch(:limit, PER_PAGE).to_i
     exported = params[:exported] == 'true'
+    show_autoimport = params[:show_autoimport] == 'true'
 
     # Filter by project
     projects = if params[:project_id] == 'my-locales'
@@ -85,6 +86,9 @@ class HomeController < ApplicationController
       filter :term, project_id: projects.map(&:id) if projects.any?
       filter :term, user_id: user.id if user
       filter :term, exported: false unless exported
+
+      filter :exists, field: :user_id unless show_autoimport
+
       case status
         when 'uncompleted'
           filter :term, ready: false
