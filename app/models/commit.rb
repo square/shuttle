@@ -553,6 +553,10 @@ class Commit < ActiveRecord::Base
     update_stats_at_end_of_loading if loading_was && !loading
   end
 
+  def list_workers
+    Shuttle::Redis.smembers("import:#{revision}")
+  end
+
   # Removes all workers from the loading list, marks the Commit as not loading,
   # and recalculates Commit statistics if the Commit was previously loading.
   # This method should be used to fix "stuck" Commits.
