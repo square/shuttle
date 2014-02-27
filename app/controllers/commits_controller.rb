@@ -430,9 +430,7 @@ class CommitsController < ApplicationController
   end
 
   def commit_params
-    unless params[:commit]["due_date"].empty?
-      params[:commit]["due_date"] = DateTime::strptime(params[:commit]["due_date"], "%m/%d/%Y")
-    end
+    params[:commit]["due_date"] = DateTime::strptime(params[:commit]["due_date"], "%m/%d/%Y") rescue ''
     params.require(:commit).permit(*COMMIT_ATTRIBUTES)
   end
 

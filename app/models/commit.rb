@@ -548,6 +548,8 @@ class Commit < ActiveRecord::Base
     update_stats_at_end_of_loading if loading_was && !loading
   end
 
+  # Returns all workers from the loading list
+
   def list_workers
     Shuttle::Redis.smembers("import:#{revision}")
   end
