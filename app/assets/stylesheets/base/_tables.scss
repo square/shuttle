@@ -26,13 +26,16 @@
   }
 
   #expand-search {
+    margin-top: 3px;
     margin-right: 10px;
     font-weight: 500;
     font-size: 30px;
+    opacity: 0.6;
     @include transition(all, 0.3s, ease);
     &:hover {
       cursor: pointer;
       color: $dark-blue;
+      opacity: 1.0;
     }
     &.active {
       color: $dark-blue;
