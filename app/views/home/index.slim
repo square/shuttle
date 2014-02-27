@@ -124,12 +124,12 @@ hr.divider
           - else
             / Progress
             - if commit.loading?
-              td Currently loading
+              td Importing
             - elsif commit.ready?
               td Ready for download
             - else
               - strings_remaining = commit.translations_pending(*@locales) + commit.translations_new(*@locales)
-              td = "#{pluralize(strings_remaining, 'string')} require translation"
+              td = "Translating #{pluralize(strings_remaining, 'string')}"
 
           / Translation/Monitor Button
           = render partial: 'table_action_button', locals: { commit: commit }
