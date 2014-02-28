@@ -25,7 +25,7 @@ describe 'Authentication' do
       expect(page).to have_content 'Sign up for Shuttle'
     end
 
-    it 'lets you register a non-square account' do
+    it 'lets you register a non-square account but doesn\'t send confirmation e-mail' do
       non_square_user = FactoryGirl.build(:user)
 
       visit new_user_session_path + '#sign-up'
@@ -46,7 +46,7 @@ describe 'Authentication' do
       expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
 
-    it 'lets you register a square account' do
+    it 'lets you register a square account and sends confirmation e-mail' do
       square_user = FactoryGirl.build(:user, email: 'test@squareup.com')
 
       visit new_user_session_path + '#sign-up'
