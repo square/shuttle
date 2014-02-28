@@ -22,6 +22,9 @@ class RegistrationsController < Devise::RegistrationsController
 
     if resource.save
       if resource.active_for_authentication?
+        if Mail::Address.new(@_params[:user][:email]).domain == 'squareup.com'
+
+        end
         set_flash_message :notice, :signed_up if is_navigational_format?
         sign_up(resource_name, resource)
         respond_with resource, :location => after_sign_up_path_for(resource)

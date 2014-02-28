@@ -53,6 +53,9 @@ RSpec.configure do |config|
   config.infer_base_class_for_anonymous_controllers = false
 
   config.include Devise::TestHelpers, type: :controller
+  config.include Capybara::DSL
+
+  Capybara.javascript_driver = :webkit
 
   config.before :each do
     # Clear out Redis

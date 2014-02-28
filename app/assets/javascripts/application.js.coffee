@@ -50,7 +50,6 @@
 #= require dynamic_search_field
 #= require data_source_builder
 #= require fencer
-#= require form_with_errors
 #= require infinite_scroll
 #= require live_update
 #= require smart_form
