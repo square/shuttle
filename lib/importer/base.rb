@@ -114,14 +114,14 @@ module Importer
         @keys = Key.where(id: @keys.map(&:id)).includes(:translations)
         # preload commits_keys by loading all possible commit ids
         commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: @keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
-          hsh[key_id.to_i] ||= Array.new
+          hsh[key_id.to_i] ||= Set.new
           hsh[key_id.to_i] << commit_id.to_i
           hsh
         end
         # organize them into their keys add add this new commit
         @keys.each do |key|
-          key.batched_commit_ids = commits_by_key[key.id] || Array.new
-          key.batched_commit_ids << @commit
+          key.batched_commit_ids = commits_by_key[key.id] || Set.new
+          key.batched_commit_ids << @commit.id
         end
         # and run the import
         Key.tire.index.import @keys
