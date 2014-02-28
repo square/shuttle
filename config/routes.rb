@@ -18,7 +18,10 @@ Shuttle::Application.routes.draw do
   get 'users/password/new', to: redirect('/users/sign_in#forgot-password')
   
   # AUTHENTICATION
-  devise_for :users, controllers: {registrations: 'registrations'}
+  devise_for :users, controllers: {
+      registrations: 'registrations',
+      passwords: 'passwords'
+  }
 
   # API
   post 'api/1.0/strings' => 'api/v1#strings'

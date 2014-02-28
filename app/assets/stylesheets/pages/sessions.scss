@@ -4,7 +4,7 @@
 
 $form-radius-size: 4px;
 
-body.sessions {
+body.sessions, body.passwords {
   background-image: image-url('login-background.jpg');
   background-color: $gray3;
   background-repeat: no-repeat;

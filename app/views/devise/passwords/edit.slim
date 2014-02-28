@@ -29,19 +29,17 @@
     .body-portion
       .row.active
         .three.columns &nbsp;
-        = form_for(resource, 
-                  as: resource_name, 
-                  url: password_path(resource_name), 
-                  html: {method: :patch, class: 'form-horizontal'}) do |f|
+        = form_for(resource, url: user_password_path, html: {method: :patch, class: 'four columns greywashed'}) do |f|
+          = f.hidden_field :reset_password_token
           div
-            = f.password_field :password
+            = f.password_field :password, placeholder: "Password", required: true
           div
-            = f.password_field :password_confirmation
+            = f.password_field :password_confirmation, placeholder: "E-mail", required: true
           div
             = f.submit "Change my password", class: 'submit sign-in'
           div 
-            a href="#sign-up" Sign in to Shuttle
-            a href="#sign-up" Sign up for Shuttle
+            a href="#{new_user_session_path}" Sign in to Shuttle
+
         .three.columns &nbsp;
       
         
