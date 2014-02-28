@@ -8,11 +8,11 @@
   true
 
 .header
-  h1 Commit Status
   - if current_user.monitor?
-    .pull-right  
+    .pull-right
       button.default.square href='#settings' rel='modal': i.fa.fa-cogs
       button.danger href=project_commit_url(@project, @commit) data-method='DELETE' data-confirm='Are you sure you want to delete this commit?' Delete
+  h1 Commit Status
 
   h6
     strong

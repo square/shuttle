@@ -30,14 +30,14 @@ hr.divider
   .filter-bar 
     = form_tag(translation_units_url, method: :get, id: 'translation-units-search-form', class: 'filter form-inline') do
       .main
+        .pull-right#expand-search
+          i.fa.fa-chevron-right
         = text_field_tag 'keyword', '', id: 'search-field', placeholder: 'Search Query'
         = select_tag 'field', options_for_select([\
                                        %w(source searchable_source_copy),\
                                        %w(translation searchable_copy),\
                                    ]), id: 'field-select', class: 'span2'
         = submit_tag 'Search', class: 'primary'
-        .pull-right#expand-search
-          i.fa.fa-chevron-right
 
       .collapse 
 
