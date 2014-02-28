@@ -55,28 +55,24 @@ html lang="en"
 
     - if flash[:alert]
       -if flash[:alert].is_a?(Array)
-        - flash[:alert] = flash[:alert].map(&:capitalize)
         javascript:
           $(document).ready(function() { 
             errors = JSON.parse("#{flash[:alert]}".replace(/&quot;/ig, '"'))
             new Flash('alert').list(errors.shift(), errors);
           });
       - else
-        - flash[:alert] = flash[:alert].capitalize
         javascript:
           $(document).ready(function() { 
             new Flash('alert').text("#{escape_javascript raw(flash[:alert]) }");
           });
 
     - if flash[:notice]
-      - flash[:notice] = flash[:notice].capitalize
       javascript:
         $(document).ready(function() { 
           $(window).oneTime(250, function() { new Flash('notice' ).text("#{escape_javascript raw(flash[:notice]) }");})
         });
 
     - if flash[:success]
-      - flash[:success] = flash[:success].capitalize
       javascript:
         $(document).ready(function() { 
           $(window).oneTime(500, function() { new Flash('success').text("#{escape_javascript raw(flash[:success]) }");}) 
