@@ -64,7 +64,7 @@
 class User < ActiveRecord::Base
   ROLES = %w(monitor translator reviewer admin)
 
-  devise :database_authenticatable, :registerable,
+  devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :trackable, :validatable
 
   has_many :authored_translations, class_name: 'Translation', foreign_key: 'translator_id', inverse_of: :translator, dependent: :nullify
@@ -86,6 +86,10 @@ class User < ActiveRecord::Base
       last_sign_in_at:          {type: Time, allow_nil: true},
       current_sign_in_ip:       {type: String, allow_nil: true},
       last_sign_in_ip:          {type: String, allow_nil: true},
+
+      confirmed_at:             {type: Time, allow_nil: true},
+      confirmation_sent_at:     {type: Time, allow_nil: true},
+
       locked_at:                {type: Time, allow_nil: true},
       reset_password_sent_at:   {type: Time, allow_nil: true},
 
@@ -104,6 +108,12 @@ class User < ActiveRecord::Base
 
   extend SetNilIfBlank
   set_nil_if_blank :role
+
+  before_save :activate_user
+
+  def activate_user
+    self.confirmed_at ||= Time.now.utc if self.role.present?
+  end
 
   # @private Used by Devise.
   def active_for_authentication?() super && role? end

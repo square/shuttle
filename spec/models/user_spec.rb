@@ -21,18 +21,28 @@ describe User do
     user.approved_rfc5646_locales = %w(en fr)
     user
   end
-  context "an admin user" do
+
+  context 'an admin user' do
     let(:role) {'admin'}
-    it "#has_access_to_locale?() returns true if the user is an admin" do
+    it '#has_access_to_locale?() returns true if the user is an admin' do
       expect(user.has_access_to_locale?('fr')).to be_true
       expect(user.has_access_to_locale?('jp')).to be_true
     end
   end
-  context "a translator" do
+  context 'a translator' do
     let(:role) {'translator'}
-    it "#has_access_to_locale?() returns true for non-admins only if they have access to that locale" do
+    it '#has_access_to_locale?() returns true for non-admins only if they have access to that locale' do
       expect(user.has_access_to_locale?('fr')).to be_true
       expect(user.has_access_to_locale?('jp')).to be_false
+    end
+  end
+
+  context 'unauthorized user' do
+    let(:role) { nil }
+    it 'authorizes user when role is no longer nil' do
+      expect(user.confirmed_at).to be_nil
+      user.update_attribute(:role, 'monitor')
+      expect(user.confirmed_at).to_not be_nil
     end
   end
 end
