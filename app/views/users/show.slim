@@ -49,13 +49,16 @@ hr.divider
           label.control-label Signed Up
           .controls
             p = "#{l @user.created_at, format: :short_full}"
-            / (#{time_ago_in_words @user.created_at} ago)
+
+        .control-group
+          label.control-label Confirmed On
+          .controls
+            p = "#{l @user.confirmed_at, format: :short_full}"
 
         .control-group
           label.control-label Last Updated
           .controls
             p = "#{l @user.updated_at, format: :short_full}"
-            / (#{time_ago_in_words @user.updated_at} ago)
 
       fieldset 
         legend Languages
