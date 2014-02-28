@@ -27,20 +27,20 @@
 
 / Status Line
 .header
-  h1 =@project.name
   .pull-right.locale-select
     - if current_user.role == "admin"
       input.locale-field type="text" placeholder="locale"
-    - else 
-      select 
+    - else
+      select
         - current_user.approved_locales.each do |locale|
           option value=locale.rfc5646 = locale.name
     - commit = params[:commit].present? ? @project.commits.for_revision(params[:commit]).first : nil
-    button.submit.translate-link [ 
-                data-sha=commit.revision 
+    button.submit.translate-link [
+                data-sha=commit.revision
                 data-project=commit.project.to_param
                 ] Translate
-    
+  h1 =@project.name
+
   h6
     strong 
       - if (commit = @project.commits.order('committed_at DESC').first)

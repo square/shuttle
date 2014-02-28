@@ -12,6 +12,9 @@
       end
 
     .main
+      .pull-right#expand-search
+        i.fa.fa-chevron-right
+
       = text_field_tag 'sha', @sha, placeholder: '9d613f'
       = select_tag 'project_id', options_for_select(project_list, params[:project_id])
 
@@ -27,8 +30,6 @@
           = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: 'Locale', class: 'locale-field'
 
       = submit_tag 'Filter', class: 'primary'
-      .pull-right#expand-search
-        i.fa.fa-chevron-right
 
     .collapse
       .control-group

@@ -8,10 +8,10 @@
   true
 
 .header
-  h1 = @user.name
-  - unless @user.admin? || @user == current_user
-    .pull-right  
+  - unless @user.admin?
+    .pull-right
       button.submit href=become_user_url(@user) data-method='POST' Impersonate
+  h1 = @user.name
 
 hr.divider
 
