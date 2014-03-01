@@ -140,8 +140,8 @@ hr.divider
 .row
   .pagination-info
     = page_entries_info(@commits)
-    - unless params[:show_autoimport] == 'true'
-      | &nbsp;(Hiding auto-imported commits)
+    | &nbsp;
+    a#expand-filters = @filters
 
 
 = render partial: 'modal_add_translation'

@@ -53,7 +53,7 @@
           | Only commits from me
         .controls
           = check_box_tag 'exported', 'true', params[:exported] == 'true'
-          | Include exported commits
+          | Show exported commits
         .controls
           = check_box_tag 'show_autoimport', 'true', params[:show_autoimport] == 'true'
           | Show auto-imported commits

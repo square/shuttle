@@ -54,6 +54,13 @@ class HomeController < ApplicationController
     limit    = params.fetch(:limit, PER_PAGE).to_i
     exported = params[:exported] == 'true'
     show_autoimport = params[:show_autoimport] == 'true'
+    #@filters = ''
+    case
+      when (exported and show_autoimport) then @filters = ''
+      when (exported) then @filters = '(Hiding auto-imported commits)'
+      when (show_autoimport) then @filters = '(Hiding exported commits)'
+      else @filters = '(Hiding exported and auto-imported commits)'
+    end
 
     # Filter by project
     projects = if params[:project_id] == 'my-locales'
