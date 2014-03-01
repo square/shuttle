@@ -14,6 +14,6 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-p Welcome to Shuttle, #{@resource.email}!
+p Welcome to Shuttle, #{@resource.first_name}!
 p You can confirm your account email through the link below:
 p = link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token)
