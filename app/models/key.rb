@@ -119,7 +119,7 @@ class Key < ActiveRecord::Base
     }
     indexes :project_id, type: 'integer'
     indexes :ready, type: 'boolean'
-    indexes :commit_ids, as: 'batched_commit_ids || commits_keys.pluck(:commit_id)'
+    indexes :commit_ids, as: 'batched_commit_ids.try!(:to_a) || commits_keys.pluck(:commit_id)'
   end
 
   after_commit :add_or_remove_translations, on: :create, if: :apply_readiness_hooks?

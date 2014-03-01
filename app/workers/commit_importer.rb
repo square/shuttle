@@ -22,9 +22,11 @@ class CommitImporter
   #
   # @param [Fixnum] commit_id The ID of a Commit.
   # @param [Hash] options Additional options.
-  # @option options [String] locale The RFC 5646 code of a locale to import
+  # @option options [String] :locale The RFC 5646 code of a locale to import
   #   existing translations from. If `nil`, the base locale is imported as
   #   base translations.
+  # @option options [true, false] :force If `false`, skips blobs that have
+  #   already been imported in prior commits.
 
   def perform(commit_id, options={})
     options.symbolize_keys!
