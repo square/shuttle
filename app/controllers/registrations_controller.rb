@@ -19,8 +19,7 @@ class RegistrationsController < Devise::RegistrationsController
 
   def create
     build_resource(sign_up_params)
-    is_square = Mail::Address.new(@_params[:user][:email]).domain == 'squareup.com'
-    is_square ? resource.role = 'monitor' : resource.skip_confirmation!
+    resource.skip_confirmation! unless Mail::Address.new(@_params[:user][:email]).domain == 'squareup.com'
 
     if resource.save
       if resource.active_for_authentication?

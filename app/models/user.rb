@@ -115,6 +115,11 @@ class User < ActiveRecord::Base
     self.confirmed_at ||= Time.now.utc if self.role.present?
   end
 
+  def after_confirmation
+    self.role = 'monitor'
+    save
+  end
+
   # @private Used by Devise.
   def active_for_authentication?() super && role? end
 
