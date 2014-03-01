@@ -141,7 +141,7 @@ hr.divider
   .pagination-info
     = page_entries_info(@commits)
     | &nbsp;
-    = @filters
+    a#expand-filters = @filters
 
 
 = render partial: 'modal_add_translation'
