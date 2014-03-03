@@ -13,6 +13,9 @@
 #    limitations under the License.
 
 $(window).ready ->
+  table = $('#translations')
+  searchForm = $('#filter-form')
+
   $("input[name='commit[exported]']").change ->
     checkbox = $(this)
     form = checkbox.closest('form')
@@ -30,8 +33,12 @@ $(window).ready ->
       error: ->
         new Flash('alert').text("Couldn't update commit export status")
 
-  table = $('#translations')
-  searchForm = $('#filter-form')
+  prefillForm = () ->
+    for own param, val of $.url().param()
+      searchForm.find("[name=#{param}]").val(val.trim())
+
+  prefillForm()
+
   makeURL = -> "#{table.data('url')}?#{searchForm.serialize()}"
   localeOrder = table.data('locales').split(',')
 
@@ -75,6 +82,15 @@ $(window).ready ->
         do (key) -> addKey(key)
 
   searchForm.submit ->
+    table.find('tbody').empty()
+    scroll.reset()
+    # ONLY HTML5
+    window.history.pushState("params", "", "?#{searchForm.serialize()}")
+    scroll.loadNextPage()
+    false
+
+  window.onpopstate =  (e) ->
+    prefillForm()
     table.find('tbody').empty()
     scroll.reset()
     scroll.loadNextPage()
