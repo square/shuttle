@@ -34,8 +34,11 @@ $(window).ready ->
         new Flash('alert').text("Couldn't update commit export status")
 
   prefillForm = () ->
-    for own param, val of $.url().param()
-      searchForm.find("[name=#{param}]").val(val.trim())
+    if $.isEmptyObject($.url().param())
+      searchForm.trigger('reset')
+    else
+      for own param, val of $.url().param()
+        searchForm.find("[name=#{param}]").val(val.trim())
 
   prefillForm()
 
@@ -89,9 +92,11 @@ $(window).ready ->
     scroll.loadNextPage()
     false
 
-  window.onpopstate =  (e) ->
-    prefillForm()
-    table.find('tbody').empty()
-    scroll.reset()
-    scroll.loadNextPage()
-    false
+  window.addEventListener 'load', ->
+    setTimeout ->
+      window.onpopstate =  (e) ->
+        prefillForm()
+        table.find('tbody').empty()
+        scroll.reset()
+        scroll.loadNextPage()
+    , 0
