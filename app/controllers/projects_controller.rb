@@ -16,7 +16,7 @@
 
 class ProjectsController < ApplicationController
   before_filter :authenticate_user!
-  before_filter :monitor_required, only: [:new, :create, :edit, :update]
+  before_filter :monitor_required, only: [:new, :create, :edit, :update, :update_touchdown]
   before_filter :find_project, except: [:index, :new, :create]
 
   before_filter(only: [:create, :update]) do
@@ -171,6 +171,30 @@ class ProjectsController < ApplicationController
     @project.update_attributes project_params
     flash[:success] = t('controllers.projects.update.success', project: @project.name)
     respond_with @project, location: projects_url
+  end
+
+
+  # Updates the touchdown branch of a project.  Used to force update
+  # the touchdown branch.
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:id/update-touchdown`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                   |
+  # |:-----|:------------------|
+  # | `id` | A Project's slug. |
+
+  def update_touchdown
+    @project.try!(:update_touchdown_branch)
+    flash[:success] = t('controllers.projects.update_touchdown.success', project: @project.name)
+    respond_with @project, location: request.referer
+  rescue
+    redirect_to root_path
   end
 
   # Receives a github webhook and triggers a new import for the latest commit.

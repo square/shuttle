@@ -164,6 +164,8 @@ en:
         up_to_date: "%{project} is already up to date."
       destroy:
         gone: "%{project} has been removed."
+      update_touchdown:
+        success: "%{project}'s touchdown branch was updated."
     translations:
       update:
         success: Translation updated.

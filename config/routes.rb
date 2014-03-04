@@ -47,6 +47,7 @@ Shuttle::Application.routes.draw do
     end
 
     member do
+      post 'update-touchdown' => 'projects#update_touchdown', as: :update_touchdown
       post 'pull-request-builder' => 'projects#github_webhook'
     end
   end
