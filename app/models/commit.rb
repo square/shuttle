@@ -148,7 +148,7 @@ class Commit < ActiveRecord::Base
     CommitImporter.perform_once(commit.id) unless commit.skip_import
   end
   after_commit :compile_and_cache_or_clear, on: :update
-  after_commit :update_touchdown_branch, on: :update
+  after_update :update_touchdown_branch
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -685,7 +685,7 @@ class Commit < ActiveRecord::Base
   end
 
   def update_touchdown_branch
-    TouchdownBranchUpdater.perform_once project_id
+    TouchdownBranchUpdater.perform_async project_id
   end
 
   def import_blob(path, blob, options={})
