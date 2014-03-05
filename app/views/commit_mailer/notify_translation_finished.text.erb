@@ -1,6 +1,7 @@
 Translation of commit <%= @commit.revision[0,6] %> on <%= @commit.project.name %> is finished on Shuttle!
 
 SHA: <%= @commit.revision %>
+Link: <%= project_commit_url(@commit.project, @commit) %>
 <% if not @commit.project.key_inclusions.empty? %>
 
 Only translate keys containing these substrings:
@@ -53,5 +54,6 @@ Don’t search for strings under these paths using these importers:
 <%= @commit.project.only_importer_paths[importer].join("\n").indent(4) %>
 <% end %>
 <% end %>
+
 Sincerely,
 The Shuttle Automated Mailer
