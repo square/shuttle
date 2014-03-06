@@ -11,7 +11,7 @@ ruby:
     full_description << tag("br") + content_tag(:strong, "Authored by: ") + mail_to(commit.author_email, commit.author)
   end
   if commit.user
-    full_description << tag("br") + content_tag(:strong, "Requested by: ") + mail_to(commit.user.email, commit.user.abbreviated_name)
+    full_description << tag("br") + content_tag(:strong, "Requested by: ") + mail_to(commit.user.email, commit.user.name)
   end
   if commit.github_url or commit.pull_request_url
     full_description << tag("br") + content_tag(:Strong, "Links: ")
