@@ -365,7 +365,13 @@ class Project < ActiveRecord::Base
   def update_touchdown_branch
     return unless watched_branches.present? && touchdown_branch.present?
 
-    repo.fetch
+    retried = false
+    begin
+      repo.fetch
+    rescue Git::GitExecuteError
+      FileUtils.rm_rf repo_directory
+      repo.fetch
+    end
 
     found_commit = nil
     offset = 0
@@ -383,8 +389,8 @@ class Project < ActiveRecord::Base
     end
 
     if found_commit
-      system 'git', "--git-dir=#{Shellwords.escape repo_path}", 'update-ref', "refs/heads/#{touchdown_branch}", found_commit.sha
-      system 'git', "--git-dir=#{Shellwords.escape repo_path}", 'push', '-f', repository_url, (["refs/heads/#{touchdown_branch}"]*2).join(':')
+      system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'update-ref', "refs/heads/#{touchdown_branch}", found_commit.sha
+      system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'push', '-f', repository_url, (["refs/heads/#{touchdown_branch}"]*2).join(':')
     end
   end
 
