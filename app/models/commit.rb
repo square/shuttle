@@ -694,7 +694,11 @@ class Commit < ActiveRecord::Base
 
     blob_object = if options[:blobs]
                     begin
-                      options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                      options[:blobs].detect { |b| b.sha == blob.sha } || begin
+                        blob = project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                        options[:blobs] << blob
+                        blob
+                      end
                     rescue ActiveRecord::RecordNotUnique
                       project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
                     end
