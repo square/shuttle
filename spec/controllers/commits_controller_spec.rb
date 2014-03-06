@@ -641,10 +641,10 @@ de:
     end
 
     it "should allow the description, due date, and pull request URL to be set" do
-      post :create, project_id: @project.to_param, commit: {revision: 'HEAD', description: 'desc', pull_request_url: 'url', due_date: Date.today.tomorrow}, format: 'json'
+      post :create, project_id: @project.to_param, commit: {revision: 'HEAD', description: 'desc', pull_request_url: 'url', due_date: '1/1/2100'}, format: 'json'
       expect(@project.commits.first.description).to eql('desc')
       expect(@project.commits.first.pull_request_url).to eql('url')
-      expect(@project.commits.first.due_date).to eql(Date.today.tomorrow)
+      expect(@project.commits.first.due_date).to eql(Date.civil(2100, 1, 1))
     end
 
     it "should not attempt to import the same revision twice in quick succession" do
