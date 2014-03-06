@@ -53,6 +53,9 @@ module Importer
     class_attribute :implementations
     self.implementations = []
 
+    # @return [true, false] If `true`, Sidekiq workers will be run inline.
+    attr_accessor :inline
+
     # @private
     def self.inherited(subclass)
       self.implementations << subclass
@@ -98,39 +101,11 @@ module Importer
     # corresponding Translation records.
 
     def import
-      load_contents
-
-      @keys = Set.new
-      Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
-        process_blob_for_string_extraction
+      if @blob.keys_cached? && @commit
+        import_by_using_cached_keys
+      else
+        import_by_parsing_blob
       end
-      if @commit
-        Commit.transaction do
-          @keys -= @commit.keys
-          @commit.keys += @keys.to_a
-        end
-        # key.commits has been changed, need to update associated ES fields
-        # load the translations associated with each commit
-        @keys = Key.where(id: @keys.map(&:id)).includes(:translations)
-        # preload commits_keys by loading all possible commit ids
-        commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: @keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
-          hsh[key_id.to_i] ||= Set.new
-          hsh[key_id.to_i] << commit_id.to_i
-          hsh
-        end
-        # organize them into their keys add add this new commit
-        @keys.each do |key|
-          key.batched_commit_ids = commits_by_key[key.id] || Set.new
-          key.batched_commit_ids << @commit.id
-        end
-        # and run the import
-        Key.tire.index.import @keys
-        # now update translations with the keys still having the cached commit ids
-        Translation.tire.index.import @keys.map(&:translations).flatten
-      end
-
-      # cache the list of keys we know to be in this blob for later use
-      Shuttle::Redis.set "keys_for_blob:#{self.class.ident}:#{@blob.sha}", @keys.map(&:id).join(',')
     end
 
     # Scans the blob for localizable strings, assumes their values are of a
@@ -218,28 +193,7 @@ module Importer
 
     # @private
     def add_string(key, value, options={})
-      key = @blob.project.keys.for_key(key).source_copy_matches(value).create_or_update!(
-          options.reverse_merge(
-              key:                  key,
-              source_copy:          value,
-              importer:             self.class.ident,
-              fencers:              self.class.fencers,
-              skip_readiness_hooks: true,
-              batched_commit_ids:   []) # we'll fill this out later
-      )
-      @keys << key unless skip_key?(key)
-
-      key.translations.in_locale(@blob.project.base_locale).create_or_update!(
-          source_copy:              value,
-          copy:                     value,
-          approved:                 true,
-          source_rfc5646_locale:    @blob.project.base_rfc5646_locale,
-          rfc5646_locale:           @blob.project.base_rfc5646_locale,
-          skip_readiness_hooks:     true,
-          preserve_reviewed_status: true)
-
-      # add additional pending translations if necessary
-      key.add_pending_translations
+      @keys << {key: key, value: value, options: options}
     end
 
     # @private
@@ -328,6 +282,33 @@ module Importer
       end
     end
 
+    def import_by_parsing_blob
+      load_contents
+
+      @keys = Array.new
+
+      # first load the list of keys we'll need to create
+      Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
+        process_blob_for_string_extraction
+      end
+
+      # then spawn jobs to create those keys
+      @keys.in_groups_of(100, false) do |keys|
+        if inline
+          KeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+        else
+          jid = KeyCreator.perform_async(@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys)
+          @commit.add_worker! jid if @commit
+        end
+      end
+    end
+
+    # Used when this blob was imported as part of an earlier commit; just
+    # associates the cached list of keys for that blob with the new commit
+    def import_by_using_cached_keys
+      KeyCreator.update_key_associations @blob.keys, @commit
+    end
+
     # array indexes are stored in brackets
     def extract_array(ary, key, &block)
       ary.each_with_index do |value, index|
@@ -355,12 +336,6 @@ module Importer
     end
 
     def process_blob_for_string_extraction
-      keys = Shuttle::Redis.get("keys_for_blob:#{self.class.ident}:#{@blob.sha}")
-      if keys.present?
-        @keys = Key.where(id: keys.split(',').map(&:to_i))
-        return
-      end
-
       file.locale = nil
       import_strings Receiver.new(self)
     end
@@ -368,21 +343,6 @@ module Importer
     def process_blob_for_translation_extraction(locale)
       file.locale = locale
       import_strings Receiver.new(self, locale)
-    end
-
-    # Determines if we should skip this key using both the normal key exclusions
-    # and the .shuttle.yml key exclusions
-    def skip_key?(key)
-      skip_key_due_to_project_settings?(key) || skip_key_due_to_branch_settings?(key)
-    end
-
-    def skip_key_due_to_project_settings?(key)
-      @blob.project.skip_key?(key.key, @blob.project.base_locale)
-    end
-
-    def skip_key_due_to_branch_settings?(key)
-      return false unless @commit
-      @commit.skip_key?(key.key)
     end
 
     def utf8_encode(string)

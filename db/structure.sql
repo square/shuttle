@@ -35,7 +35,19 @@ SET default_with_oids = false;
 CREATE TABLE blobs (
     project_id integer NOT NULL,
     sha_raw bytea NOT NULL,
-    metadata text
+    metadata text,
+    keys_cached boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: blobs_keys; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE blobs_keys (
+    project_id integer NOT NULL,
+    sha_raw bytea NOT NULL,
+    key_id integer NOT NULL
 );
 
 
@@ -435,6 +447,7 @@ CREATE TABLE users (
     role character varying(50) DEFAULT NULL::character varying,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
+    confirmation_token character varying(255),
     CONSTRAINT users_email_check CHECK ((char_length((email)::text) > 0)),
     CONSTRAINT users_failed_attempts_check CHECK ((failed_attempts >= 0)),
     CONSTRAINT users_sign_in_count_check CHECK ((sign_in_count >= 0))
@@ -535,6 +548,14 @@ ALTER TABLE ONLY translations ALTER COLUMN id SET DEFAULT nextval('translations_
 --
 
 ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+
+--
+-- Name: blobs_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY blobs_keys
+    ADD CONSTRAINT blobs_keys_pkey PRIMARY KEY (project_id, sha_raw, key_id);
 
 
 --
@@ -692,6 +713,13 @@ CREATE UNIQUE INDEX glossary_source_copy_sha ON glossary_entries USING btree (so
 
 
 --
+-- Name: index_users_on_confirmation_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_users_on_confirmation_token ON users USING btree (confirmation_token);
+
+
+--
 -- Name: keys_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -766,6 +794,30 @@ CREATE UNIQUE INDEX users_reset_token ON users USING btree (reset_password_token
 --
 
 CREATE UNIQUE INDEX users_unlock_token ON users USING btree (unlock_token);
+
+
+--
+-- Name: blobs_keys_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_keys
+    ADD CONSTRAINT blobs_keys_key_id_fkey FOREIGN KEY (key_id) REFERENCES keys(id) ON DELETE CASCADE;
+
+
+--
+-- Name: blobs_keys_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_keys
+    ADD CONSTRAINT blobs_keys_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: blobs_keys_project_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_keys
+    ADD CONSTRAINT blobs_keys_project_id_fkey1 FOREIGN KEY (project_id, sha_raw) REFERENCES blobs(project_id, sha_raw) ON DELETE CASCADE;
 
 
 --
@@ -941,3 +993,7 @@ INSERT INTO schema_migrations (version) VALUES ('20131116042827');
 INSERT INTO schema_migrations (version) VALUES ('20131204020552');
 
 INSERT INTO schema_migrations (version) VALUES ('20140219040119');
+
+INSERT INTO schema_migrations (version) VALUES ('20140228025058');
+
+INSERT INTO schema_migrations (version) VALUES ('20140306064700');

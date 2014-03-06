@@ -699,7 +699,11 @@ class Commit < ActiveRecord::Base
 
     blob_object = if options[:blobs]
                     begin
-                      options[:blobs].detect { |b| b.sha == blob.sha } || project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                      options[:blobs].detect { |b| b.sha == blob.sha } || begin
+                        blob = project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
+                        options[:blobs] << blob
+                        blob
+                      end
                     rescue ActiveRecord::RecordNotUnique
                       project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
                     end
@@ -710,7 +714,10 @@ class Commit < ActiveRecord::Base
     imps.each do |importer|
       importer = importer.new(blob_object, path, self)
 
-      Shuttle::Redis.del("keys_for_blob:#{importer.class.ident}:#{blob.sha}") if options[:force]
+      if options[:force]
+        blob_object.keys.clear
+        blob_object.update_column :keys_cached, false
+      end
 
       if importer.skip?(options[:locale])
         #Importer::SKIP_LOG.info "commit=#{revision} blob=#{blob.sha} path=#{blob_path} importer=#{importer.class.ident} #skip? returned true for #{options[:locale].inspect}"

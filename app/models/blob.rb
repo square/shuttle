@@ -29,11 +29,13 @@
 # |       |                                  |
 # |:------|:---------------------------------|
 # | `sha` | The Git identifier for the blob. |
+# | `keys_cached` | If true, a previous import has already imported the Keys associated with this Blob. |
 
 class Blob < ActiveRecord::Base
   self.primary_keys = :project_id, :sha_raw
 
   belongs_to :project, inverse_of: :blobs
+  has_and_belongs_to_many :keys, -> { uniq }, foreign_key: [:project_id, :sha_raw]
 
   extend GitObjectField
   git_object_field :sha,
@@ -63,9 +65,12 @@ class Blob < ActiveRecord::Base
   #   default it's the Project's base locale).
   # @option options [Commit, nil] commit If given, new Keys will be added to
   #   this Commit's `keys` association.
+  # @option options [true, false] inline If `true`, Sidekiq workers will be run
+  #   synchronously.
 
   def import_strings(importer, path, options={})
     importer = importer.new(self, path, options[:commit])
+    importer.inline = options[:inline]
     options[:locale] ? importer.import_locale(options[:locale]) : importer.import
   end
 
