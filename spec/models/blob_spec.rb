@@ -22,17 +22,19 @@ describe Blob do
     end
 
     it "should call #import on an importer subclass" do
-      imp = Importer::Base.implementations
+      imp      = Importer::Base.implementations
       instance = double(imp.to_s, :skip? => false)
       expect(imp).to receive(:new).once.with(@blob, 'some/path', nil).and_return(instance)
+      allow(instance).to receive(:inline=)
       expect(instance).to receive(:import).once
       @blob.import_strings imp, 'some/path'
     end
 
     it "should pass a commit if given using :commit" do
-      commit = FactoryGirl.create(:commit, project: @project)
-      imp = Importer::Base.implementations.first
+      commit   = FactoryGirl.create(:commit, project: @project)
+      imp      = Importer::Base.implementations.first
       instance = double(imp.to_s, :skip? => false)
+      allow(instance).to receive(:inline=)
       expect(imp).to receive(:new).once.with(@blob, 'some/path', commit).and_return(instance)
       expect(instance).to receive(:import).once
       @blob.import_strings imp, 'some/path', commit: commit

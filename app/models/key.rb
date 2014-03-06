@@ -77,6 +77,7 @@ class Key < ActiveRecord::Base
   has_many :translations, inverse_of: :key, dependent: :destroy
   has_many :commits_keys, inverse_of: :key, dependent: :destroy
   has_many :commits, through: :commits_keys
+  has_and_belongs_to_many :blobs, -> { uniq }, association_foreign_key: [:project_id, :sha_raw]
 
   include HasMetadataColumn
   has_metadata_column(
