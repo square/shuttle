@@ -44,7 +44,7 @@ class KeyCreator
 
     Blob.transaction do
       @blob.keys(true).clear
-      @blob.keys = key_objects
+      @blob.keys = key_objects.uniq
       @blob.update_column :keys_cached, true
     end
 
