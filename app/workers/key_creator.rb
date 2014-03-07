@@ -43,7 +43,7 @@ class KeyCreator
     end
 
     Blob.transaction do
-      @blob.keys.clear
+      @blob.keys(true).clear
       @blob.keys = key_objects
       @blob.update_column :keys_cached, true
     end
