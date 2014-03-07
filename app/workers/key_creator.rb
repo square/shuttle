@@ -42,8 +42,11 @@ class KeyCreator
       add_string key[:key], key[:value], (key[:options] || {})
     end
 
-    @blob.keys = key_objects
-    @blob.update_column :keys_cached, true
+    Blob.transaction do
+      @blob.keys.clear
+      @blob.keys = key_objects
+      @blob.update_column :keys_cached, true
+    end
 
     if @commit
       key_objects.reject! { |key| skip_key?(key) }
