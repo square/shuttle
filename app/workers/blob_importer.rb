@@ -30,7 +30,6 @@ class BlobImporter
   #   base translations.
 
   def perform(importer, project_id, sha, path, commit_id, rfc5646_locale)
-    begin
       commit  = Commit.find_by_id(commit_id)
       locale  = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
       project = Project.find(project_id)
@@ -51,9 +50,7 @@ class BlobImporter
                           locale: locale,
                           inline: jid.nil?
 
-    ensure
-      commit.try! :remove_worker!, jid
-    end
+    commit.remove_worker! jid
   end
 
   include SidekiqLocking

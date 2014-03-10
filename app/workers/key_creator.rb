@@ -53,8 +53,7 @@ class KeyCreator
       self.class.update_key_associations key_objects, @commit
     end
 
-  ensure
-    @commit.try! :remove_worker!, jid
+    @commit.remove_worker! jid
   end
 
   # Given a set of keys, bulk-updates their commits-keys associations and
