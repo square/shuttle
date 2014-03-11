@@ -663,7 +663,7 @@ class Commit < ActiveRecord::Base
 
       if options[:force]
         blob_object.blobs_keys.delete_all
-        blob_object.update_column :keys_cached, false
+        blob_object.update_column :loading, true
       end
 
       if importer.skip?(options[:locale])
