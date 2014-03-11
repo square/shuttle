@@ -131,3 +131,23 @@ $(window).ready () ->
   $('tbody tr').click () ->
     toggle($(this))
 
+  filter_form = $('#filter')
+  email_filter = filter_form.find('input[name=email]')
+  exported_filter = filter_form.find('input[name=exported]')
+  autoimport_filter = filter_form.find('input[name=show_autoimport]')
+
+  email_filter.prop 'checked', $.cookie('home_email_filter') != 'false'
+  exported_filter.prop 'checked', $.cookie('home_exported_filter') != 'false'
+  autoimport_filter.prop 'checked', $.cookie('home_autoimport_filter') != 'false'
+
+  console.log($.cookie('home_email_filter') != 'false')
+  console.log($.cookie('home_email_filter') != 'false')
+
+  filter_form.submit ->
+    if email_filter.is(':checked')
+      $.cookie 'home_email_filter', email_filter.val(), expires: 7
+    else
+      $.cookie 'home_email_filter', email_filter.is(':checked'), expires: 7
+
+    $.cookie 'home_exported_filter', exported_filter.is(':checked'), expires: 7
+    $.cookie 'home_autoimport_filter', autoimport_filter.is(':checked'), expires: 7

@@ -8,6 +8,9 @@ body.commits {
     margin-left: 30px;
     line-height: 10px;
     margin-top: 0px;
+    span.separator {
+      color: $input-red;
+    }
   }
 
   .filter-bar {

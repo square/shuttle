@@ -1,6 +1,6 @@
 # Copyright 2014 Square Inc.
 #
-#    Licensed under the Apache License, Version 2.0 (the "License");
+#    Licensed under the Apache License, Version 2.0 (the "License")
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
 #
@@ -44,12 +44,12 @@ class root.GlossaryList
       @sourceLocale, @targetLocales,
       @settingsModal, @addEntryModal,
       @userRole, @approvedLocales) ->
-    if $.cookie('sourceLocale')?
-      @sourceLocale = Locale.from_rfc5646($.cookie('sourceLocale'))
+    if $.cookie('glossaryList_sourceLocale')?
+      @sourceLocale = Locale.from_rfc5646($.cookie('glossaryList_sourceLocale'))
     else
       @sourceLocale = Locale.from_rfc5646(@sourceLocale)
-    if $.cookie('targetLocales')?
-      @targetLocales = JSON.parse($.cookie('targetLocales'))
+    if $.cookie('glossaryList_targetLocales')?
+      @targetLocales = JSON.parse($.cookie('glossaryList_targetLocales'))
     else
       @targetLocales = @approvedLocales
 
@@ -66,7 +66,7 @@ class root.GlossaryList
   # @param [String] message The message that will be flashed.
   #
   error: (message) ->
-    new Flash('alert').text(message);
+    new Flash('alert').text(message)
 
   # @private
   setupGlossary: ->
@@ -132,11 +132,11 @@ class root.GlossaryList
           locale != ""
       )
 
-      $.cookie('sourceLocale', @sourceLocale.rfc5646(), { expires: 1 });
-      $.cookie('targetLocales', JSON.stringify(@targetLocales), { expires: 1 });
+      $.cookie('glossaryList_sourceLocale', @sourceLocale.rfc5646(), { expires: 1 })
+      $.cookie('glossaryList_targetLocales', JSON.stringify(@targetLocales), { expires: 1 })
 
-      $("#lean_overlay").fadeOut(200);
-      @settingsModal.css({ 'display': 'none' });
+      $("#lean_overlay").fadeOut(200)
+      @settingsModal.css({ 'display': 'none' })
       this.reloadGlossary()
       return false
 

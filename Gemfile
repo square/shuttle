@@ -3,6 +3,9 @@ source 'https://rubygems.org'
 # FRAMEWORK
 gem 'rails', '4.0.3'
 gem 'configoro'
+gem 'redis-rails'
+gem 'rack-cache', require: 'rack/cache'
+gem 'boolean'
 
 # AUTHENTICATION
 gem 'devise'

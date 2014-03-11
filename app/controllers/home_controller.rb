@@ -53,8 +53,11 @@ class HomeController < ApplicationController
 
     limit    = params.fetch(:limit, PER_PAGE).to_i
     exported = params[:exported] == 'true'
+    exported = cookies[:home_exported_filter] == 'true' if cookies[:home_email_filter]
+
     show_autoimport = params[:show_autoimport] == 'true'
-    #@filters = ''
+    show_autoimport = cookies[:home_autoimport_filter] == 'true' if cookies[:home_autoimport_filter]
+
     case
       when (exported and show_autoimport) then @filters = ''
       when (exported) then @filters = '(Hiding auto-imported commits)'
@@ -84,6 +87,9 @@ class HomeController < ApplicationController
            else
              nil
            end
+    if cookies[:home_email_filter] and cookies[:home_email_filter] != 'false'
+      user = User.find_by_email(cookies[:home_email_filter])
+    end
 
     sort_order = params[:sort]
     direction = params[:direction]
