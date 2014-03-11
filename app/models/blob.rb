@@ -26,16 +26,19 @@
 # Fields
 # ======
 #
-# |       |                                  |
-# |:------|:---------------------------------|
-# | `sha` | The Git identifier for the blob. |
-# | `keys_cached` | If true, a previous import has already imported the Keys associated with this Blob. |
+# |           |                                                                                                                                                                                                 |
+# |:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+# | `sha`     | The Git identifier for the blob.                                                               re                                                                                                 |
+# | `loading` | If `true`, one or more workers is currently importing {Key Keys} for this blob. This defaults to `true` to ensure that a Blob's Keys are loaded at least once before the cached result is used. |
 
 class Blob < ActiveRecord::Base
+  include SidekiqWorkerTracking
+
   self.primary_keys = :project_id, :sha_raw
 
   belongs_to :project, inverse_of: :blobs
-  has_and_belongs_to_many :keys, -> { uniq }, foreign_key: [:project_id, :sha_raw]
+  has_many :blobs_keys, foreign_key: [:project_id, :sha_raw], inverse_of: :blob, dependent: :delete_all
+  has_many :keys, through: :blobs_keys
 
   extend GitObjectField
   git_object_field :sha,

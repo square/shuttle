@@ -36,7 +36,7 @@ CREATE TABLE blobs (
     project_id integer NOT NULL,
     sha_raw bytea NOT NULL,
     metadata text,
-    keys_cached boolean DEFAULT false NOT NULL
+    loading boolean DEFAULT true NOT NULL
 );
 
 
@@ -997,3 +997,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140219040119');
 INSERT INTO schema_migrations (version) VALUES ('20140228025058');
 
 INSERT INTO schema_migrations (version) VALUES ('20140306064700');
+
+INSERT INTO schema_migrations (version) VALUES ('20140311011156');

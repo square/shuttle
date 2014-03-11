@@ -21,10 +21,10 @@ class CommitsKey < ActiveRecord::Base
   belongs_to :commit, inverse_of: :commits_keys
   belongs_to :key, inverse_of: :commits_keys
 
-  validates :commit_id, :key_id,
-            presence: true
-  validates :key_id,
-            uniqueness: {scope: :commit_id}
+  #validates :commit_id, :key_id,
+  #          presence: true
+  #validates :key_id,
+  #          uniqueness: {scope: :commit_id}
 
   #after_create :add_to_commit_index
   #after_destroy :remove_from_commit_index

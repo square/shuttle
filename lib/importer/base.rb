@@ -101,7 +101,7 @@ module Importer
     # corresponding Translation records.
 
     def import
-      if @blob.keys_cached? && @commit
+      if !@blob.loading? && @commit
         import_by_using_cached_keys
       else
         import_by_parsing_blob
@@ -298,7 +298,8 @@ module Importer
           KeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
         else
           jid = KeyCreator.perform_async(@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys)
-          @commit.add_worker! jid if @commit
+          @blob.add_worker! jid
+          @commit.add_worker!(jid) if @commit
         end
       end
     end
