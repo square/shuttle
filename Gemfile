@@ -53,6 +53,7 @@ gem 'faker'
 
 # BACKGROUND JOBS
 gem 'sidekiq'
+gem 'sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
 
