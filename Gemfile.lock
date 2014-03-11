@@ -30,6 +30,13 @@ GIT
       chronic (>= 0.6.3)
 
 GIT
+  remote: git://github.com/mhfs/sidekiq-failures.git
+  revision: 7ac352caa1365cc4424ee24ecd358b42f1c7be79
+  specs:
+    sidekiq-failures (0.3.0)
+      sidekiq (>= 2.14.0)
+
+GIT
   remote: git://github.com/mperham/sidekiq.git
   revision: d28cbf91359016d13b77ac875620899de958c18e
   specs:
@@ -379,6 +386,7 @@ DEPENDENCIES
   rspec-rails
   sass-rails
   sidekiq!
+  sidekiq-failures!
   sinatra
   slim-rails
   slugalicious

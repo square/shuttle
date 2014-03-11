@@ -53,6 +53,7 @@ gem 'faker'
 
 # BACKGROUND JOBS
 gem 'sidekiq', github: 'mperham/sidekiq'
+gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', github: 'javan/whenever' # Cap 3 compatibility
 
