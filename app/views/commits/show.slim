@@ -1,3 +1,5 @@
+- content_for :shuttle_title do
+  = "Commit #{@commit.revision[0, 6]} - Shuttle"
 - content_for :file_name do
   = 'views/commits/show'
 - content_for :class do

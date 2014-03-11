@@ -12,6 +12,8 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
+- content_for :shuttle_title do
+  = "Translation #{@translation.source_copy} - Shuttle"
 - content_for :file_name do
   = 'views/translations/show'
 - content_for :class do

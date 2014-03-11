@@ -11,7 +11,11 @@
 /    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
-
+- content_for :shuttle_title do
+  - if @project
+    = "#{@project.name} Commits - Shuttle"
+  - else
+    = "Dashboard - Shuttle"
 - content_for :file_name do
   = 'views/home/index'
 - content_for :class do

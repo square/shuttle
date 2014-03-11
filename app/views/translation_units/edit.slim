@@ -11,7 +11,8 @@
 /    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
-
+- content_for :shuttle_title do
+  = "Translation Memory #{@translation_unit.id}- Shuttle"
 - content_for :file_name do
   = 'views/translation_units/edit'
 - content_for :class do
