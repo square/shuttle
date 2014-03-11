@@ -100,6 +100,8 @@ class HomeController < ApplicationController
                  [Project.find_by_id(projects)].compact
                end
 
+    @project = projects.first if projects.length == 1
+
     # Filter by SHA
     sha      = params[:sha].presence
     sha = nil unless sha =~ /^[0-9A-F]+$/i
