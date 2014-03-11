@@ -30,26 +30,34 @@ class BlobImporter
   #   base translations.
 
   def perform(importer, project_id, sha, path, commit_id, rfc5646_locale)
-      commit  = Commit.find_by_id(commit_id)
-      locale  = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
-      project = Project.find(project_id)
-      blob    = project.blobs.with_sha(sha).first!
+    commit  = Commit.find_by_id(commit_id)
+    locale  = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
+    project = Project.find(project_id)
+    blob    = project.blobs.with_sha(sha).first!
 
-      if blob.blob.nil?
-        # for whatever reason sometimes the blob is not accessible; try again in
-        # 5 minutes
-        commit.add_worker! BlobImporter.perform_in(5.minutes, importer, project_id, sha, path, commit_id, rfc5646_locale)
-        return
-      end
+    if blob.blob.nil?
+      # for whatever reason sometimes the blob is not accessible; try again in
+      # 5 minutes
+      new_jid = BlobImporter.perform_in(5.minutes, importer, project_id, sha, path, commit_id, rfc5646_locale)
 
-      importer = Importer::Base.find_by_ident(importer)
+      blob.add_worker! new_jid
+      commit.add_worker! new_jid
 
-      blob.import_strings importer,
-                          path,
-                          commit: commit,
-                          locale: locale,
-                          inline: jid.nil?
+      commit.remove_worker! jid
+      blob.remove_worker! jid
 
+      return
+    end
+
+    importer = Importer::Base.find_by_ident(importer)
+
+    blob.import_strings importer,
+                        path,
+                        commit: commit,
+                        locale: locale,
+                        inline: jid.nil?
+
+    blob.remove_worker! jid
     commit.remove_worker! jid
   end
 

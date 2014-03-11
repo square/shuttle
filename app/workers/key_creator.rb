@@ -42,17 +42,14 @@ class KeyCreator
       add_string key[:key], key[:value], (key[:options] || {})
     end
 
-    Blob.transaction do
-      @blob.keys(true).clear
-      @blob.keys = key_objects.uniq
-      @blob.update_column :keys_cached, true
-    end
+    key_objects.map(&:id).uniq.each { |k| @blob.blobs_keys.where(key_id: k).find_or_create! }
 
     if @commit
       key_objects.reject! { |key| skip_key?(key) }
       self.class.update_key_associations key_objects, @commit
     end
 
+    @blob.remove_worker! jid
     @commit.remove_worker! jid
   end
 
@@ -63,10 +60,7 @@ class KeyCreator
   # @param [Commit] commit A Commit these keys are associated with.
 
   def self.update_key_associations(keys, commit)
-    Commit.transaction do
-      keys        -= commit.keys
-      commit.keys += keys
-    end
+    keys.map(&:id).uniq.each { |k| commit.commits_keys.where(key_id: k).find_or_create! }
 
     # key.commits has been changed, need to update associated ES fields
     # load the translations associated with each commit

@@ -71,6 +71,7 @@ require 'fileutils'
 class Commit < ActiveRecord::Base
   extend RedisMemoize
   include CommitTraverser
+  include SidekiqWorkerTracking
 
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
@@ -149,6 +150,7 @@ class Commit < ActiveRecord::Base
   end
   after_commit :compile_and_cache_or_clear, on: :update
   after_update :update_touchdown_branch
+  after_update :update_stats_at_end_of_loading
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -520,58 +522,6 @@ class Commit < ActiveRecord::Base
   end
   redis_memoize :words_new
 
-  # Adds a worker to the loading list. This commit, if not already loading,
-  # will be marked as loading until this and all other added workers call
-  # {#remove_worker!}.
-  #
-  # @param [String] jid A unique identifier for this worker.
-
-  def add_worker!(jid)
-    self.loading = true
-    save!
-    Shuttle::Redis.sadd "import:#{revision}", jid
-  end
-
-  # Removes a worker from the loading list. This Commit will not be marked as
-  # loading if this was the last worker. Also recalculates Commit statistics if
-  # this was the last worker.
-  #
-  # @param [String] jid A unique identifier for this worker.
-  # @see #add_worker!
-
-  def remove_worker!(jid)
-    loading_was = self.loading
-
-    unless Shuttle::Redis.srem("import:#{revision}", jid)
-      Squash::Ruby.record "Failed to remove worker", revision: revision, commit: self, jid: jid
-    end
-    loading      = (Shuttle::Redis.scard("import:#{revision}") > 0)
-
-    self.loading = loading
-    save!
-
-    update_stats_at_end_of_loading if loading_was && !loading
-  end
-
-  # Returns all workers from the loading list
-
-  def list_workers
-    Shuttle::Redis.smembers("import:#{revision}")
-  end
-
-  # Removes all workers from the loading list, marks the Commit as not loading,
-  # and recalculates Commit statistics if the Commit was previously loading.
-  # This method should be used to fix "stuck" Commits.
-
-  def clear_workers!
-    Shuttle::Redis.del "import:#{revision}"
-    if loading?
-      self.loading = false
-      save!
-      update_stats_at_end_of_loading if loading_was && !loading
-    end
-  end
-
   # Returns whether a translator's work is entirely done for this Commit.
   #
   # @param [Locale] locale The locale the translator is working in.
@@ -690,7 +640,7 @@ class Commit < ActiveRecord::Base
   end
 
   def update_touchdown_branch
-    TouchdownBranchUpdater.perform_async project_id
+    TouchdownBranchUpdater.perform_async(project_id) if ready_changed?
   end
 
   def import_blob(path, blob, options={})
@@ -715,7 +665,7 @@ class Commit < ActiveRecord::Base
       importer = importer.new(blob_object, path, self)
 
       if options[:force]
-        blob_object.keys.clear
+        blob_object.blobs_keys.delete_all
         blob_object.update_column :keys_cached, false
       end
 
@@ -727,24 +677,19 @@ class Commit < ActiveRecord::Base
       if options[:inline]
         BlobImporter.new.perform importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
       else
-        add_worker! BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646))
+        jid = BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646))
+        blob_object.add_worker! jid
+        add_worker! jid
       end
     end
   end
 
   def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
+    # update stats when it's done loading
+    return unless !loading? && loading_was
+
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
     CommitStatsRecalculator.new.perform id
-
-    # then we do it for every other commit that shares keys with this commit
-    #commit_ids = Set.new
-    #commits_keys.find_in_batches(batch_size: 100) do |cks|
-    #  commit_ids += CommitsKey.where(key_id: cks.map(&:key_id)).map(&:commit_id)
-    #end
-    #Commit.where(id: commit_ids.to_a).find_each do |commit|
-    #  next if commit.id == id
-    #  CommitStatsRecalculator.perform_once commit.id, should_recalculate_affected_commits
-    #end
   end
 end

@@ -69,7 +69,7 @@ require 'file_mutex'
 # | `cache_localization`     | If `true`, a precompiled localization will be generated and cached for each new Commit once it is ready.                                                                                     |
 # | `cache_manifest_formats` | A precompiled manifest will be generated and cached for each exporter in this list (referenced by format parameter). Included exporters must be {Exporter::Base.multilingual? multilingual}. |
 # | `watched_branches`       | A list of branches to automatically import new Commits from.                                                                                                                                 |
-# | `touchdown_branch`       | If this is set, Squash will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch. |
+# | `touchdown_branch`       | If this is set, Squash will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch.                                   |
 
 class Project < ActiveRecord::Base
   # The directory where repositories are checked out.
