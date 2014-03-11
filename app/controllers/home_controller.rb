@@ -45,18 +45,36 @@ class HomeController < ApplicationController
     offset  = @offset
 
     # Filter by status
-    @status = params[:status]
+    @status = if params[:status].present?
+                params[:status]
+              elsif cookies[:home_status_filter].present?
+                cookies[:home_status_filter]
+              else
+                'uncompleted'
+              end
+
     unless %w(uncompleted completed all).include?(@status)
       @status = 'uncompleted'
     end
     status = @status
 
     limit    = params.fetch(:limit, PER_PAGE).to_i
-    exported = params[:exported] == 'true'
-    exported = cookies[:home_exported_filter] == 'true' if cookies[:home_email_filter]
 
-    show_autoimport = params[:show_autoimport] == 'true'
-    show_autoimport = cookies[:home_autoimport_filter] == 'true' if cookies[:home_autoimport_filter]
+    exported = if params[:exported].present?
+                 params[:exported] == 'true'
+               elsif cookies[:home_email_filter].present?
+                 cookies[:home_exported_filter] == 'true'
+               else
+                 false
+               end
+
+    show_autoimport = if params[:show_autoimport].present?
+                        params[:show_autoimport] == 'true'
+                      elsif cookies[:home_autoimport_filter].present?
+                        cookies[:home_autoimport_filter] == 'true'
+                      else
+                        false
+                      end
 
     case
       when (exported and show_autoimport) then @filters = ''
@@ -66,12 +84,20 @@ class HomeController < ApplicationController
     end
 
     # Filter by project
-    projects = if params[:project_id] == 'my-locales'
+    projects = if params[:project_id].present?
+                 params[:project_id]
+               elsif cookies[:home_project_filter].present?
+                 cookies[:home_project_filter]
+               else
+                 nil
+               end
+
+    projects = if projects == 'my-locales'
                  Project.scoped.to_a.select do |project|
                    (project.targeted_locales & current_user.approved_locales).any?
                  end
                else
-                 [Project.find_by_id(params[:project_id])].compact
+                 [Project.find_by_id(projects)].compact
                end
 
     # Filter by SHA
@@ -82,14 +108,14 @@ class HomeController < ApplicationController
     # Filter by user
     # Changed for Jim Kingdon.  Testing feature.  Make it such that all users can see all commits.
     # params[:email] ||= current_user.email if current_user.monitor? && !current_user.admin?
-    user = if params[:email].present?
-             User.find_by_email(params[:email])
-           else
-             nil
-           end
-    if cookies[:home_email_filter] and cookies[:home_email_filter] != 'false'
-      user = User.find_by_email(cookies[:home_email_filter])
-    end
+    user =  if params[:email].present?
+              User.find_by_email(params[:email])
+            elsif cookies[:home_email_filter].present? and cookies[:home_email_filter] != 'false'
+              User.find_by_email(cookies[:home_email_filter])
+            else
+              nil
+            end
+    @filters = '(Only showing my commits)' if user
 
     sort_order = params[:sort]
     direction = params[:direction]
