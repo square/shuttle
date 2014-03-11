@@ -16,19 +16,22 @@
 
   h6
     strong
-      - if @commit.completed_at
-        = "Completed since #{time_ago_in_words(@commit.completed_at)}"
-      - elsif @commit.loaded_at
-        = "Translating since #{time_ago_in_words(@commit.loaded_at)}"
-      - else
-        = "Loading since #{time_ago_in_words(@commit.created_at)}"
-      | &nbsp;/&nbsp;
+      = "#{@commit.revision[0, 6]}"
+      span.separator &nbsp;/&nbsp;
       - if @commit.loading?
         - current_status = "Loading with #{pluralize(@commit.list_workers.count, 'Job')}"
       - else
         - current_status = (@commit.ready? ? 'Ready' : 'Translating')
-
-      = "#{@commit.revision[0, 6]} (Currently #{current_status})"
+      = "Currently #{current_status}"
+      span.separator &nbsp;/&nbsp;
+      - if @commit.completed_at
+        = "First Completed #{time_ago_in_words(@commit.completed_at)} ago"
+      - elsif @commit.loaded_at
+        = "First Loaded #{time_ago_in_words(@commit.loaded_at)} ago"
+      - else
+        = "First Created #{time_ago_in_words(@commit.created_at)} ago"
+      span.separator &nbsp;/&nbsp;
+      = "Found #{@commit.keys.count} Keys"
 
 hr.divider
 

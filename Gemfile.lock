@@ -336,6 +336,7 @@ PLATFORMS
 
 DEPENDENCIES
   CFPropertyList
+  boolean
   capistrano
   capistrano-bundler
   capistrano-rails
