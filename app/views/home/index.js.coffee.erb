@@ -135,13 +135,20 @@ $(window).ready () ->
   email_filter = filter_form.find('input[name=email]')
   exported_filter = filter_form.find('input[name=exported]')
   autoimport_filter = filter_form.find('input[name=show_autoimport]')
+  status_filter = filter_form.find('select[name=status]')
+  project_filter = filter_form.find('select[name=project_id]')
 
-  email_filter.prop 'checked', $.cookie('home_email_filter') != 'false'
-  exported_filter.prop 'checked', $.cookie('home_exported_filter') != 'false'
-  autoimport_filter.prop 'checked', $.cookie('home_autoimport_filter') != 'false'
+  if $.cookie('home_email_filter') and not $.url().param('email')?
+    email_filter.prop 'checked', $.cookie('home_email_filter') != 'false'
+  if $.cookie('home_exported_filter') and not $.url().param('exported')?
+    exported_filter.prop 'checked', $.cookie('home_exported_filter') != 'false'
+  if $.cookie('home_autoimport_filter') and not $.url().param('show_autoimport')?
+    autoimport_filter.prop 'checked', $.cookie('home_autoimport_filter') != 'false'
+  if $.cookie('home_status_filter') and not $.url().param('status')?
+    status_filter.val($.cookie('home_status_filter'))
+  if $.cookie('home_project_filter') and not $.url().param('project_id')?
+    project_filter.val($.cookie('home_project_filter'))
 
-  console.log($.cookie('home_email_filter') != 'false')
-  console.log($.cookie('home_email_filter') != 'false')
 
   filter_form.submit ->
     if email_filter.is(':checked')
@@ -151,3 +158,5 @@ $(window).ready () ->
 
     $.cookie 'home_exported_filter', exported_filter.is(':checked'), expires: 7
     $.cookie 'home_autoimport_filter', autoimport_filter.is(':checked'), expires: 7
+    $.cookie 'home_status_filter', status_filter.val(), expires: 7
+    $.cookie 'home_project_filter', project_filter.val(), expires: 7
