@@ -83,6 +83,16 @@ class Blob < ActiveRecord::Base
     project.repo.object(sha)
   end
 
+  # Same as {#blob}, but fetches the repository of the blob SHA isn't found.
+  #
+  # @return [Git::Object::Blob] The Git blob this Blob represents.
+
+  def blob!
+    project.repo do |r|
+      r.object(sha) || (r.fetch && r.object(sha))
+    end
+  end
+
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
