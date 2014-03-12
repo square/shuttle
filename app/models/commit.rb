@@ -677,9 +677,10 @@ class Commit < ActiveRecord::Base
       if options[:inline]
         BlobImporter.new.perform importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
       else
-        jid = BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646))
-        blob_object.add_worker! jid
-        add_worker! jid
+        shuttle_jid = SecureRandom.uuid
+        blob_object.add_worker! shuttle_jid
+        add_worker! shuttle_jid
+        BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646), shuttle_jid)
       end
     end
   end

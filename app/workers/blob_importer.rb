@@ -29,7 +29,7 @@ class BlobImporter
   #   existing translations from. If `nil`, the base locale is imported as
   #   base translations.
 
-  def perform(importer, project_id, sha, path, commit_id, rfc5646_locale)
+  def perform(importer, project_id, sha, path, commit_id, rfc5646_locale, shuttle_jid=nil)
     commit  = Commit.find_by_id(commit_id)
     locale  = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
     project = Project.find(project_id)
@@ -38,14 +38,7 @@ class BlobImporter
     if blob.blob!.nil?
       # for whatever reason sometimes the blob is not accessible; try again in
       # 5 minutes
-      new_jid = BlobImporter.perform_in(5.minutes, importer, project_id, sha, path, commit_id, rfc5646_locale)
-
-      blob.add_worker! new_jid
-      commit.add_worker! new_jid
-
-      commit.remove_worker! jid
-      blob.remove_worker! jid
-
+      BlobImporter.perform_in(5.minutes, importer, project_id, sha, path, commit_id, rfc5646_locale, shuttle_jid)
       return
     end
 
@@ -57,8 +50,8 @@ class BlobImporter
                         locale: locale,
                         inline: jid.nil?
 
-    blob.remove_worker! jid
-    commit.remove_worker! jid
+    blob.remove_worker! shuttle_jid
+    commit.remove_worker! shuttle_jid
   end
 
   include SidekiqLocking

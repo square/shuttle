@@ -297,9 +297,10 @@ module Importer
         if inline
           KeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
         else
-          jid = KeyCreator.perform_async(@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys)
-          @blob.add_worker! jid
-          @commit.add_worker!(jid) if @commit
+          shuttle_jid = SecureRandom.uuid
+          @blob.add_worker! shuttle_jid
+          @commit.add_worker!(shuttle_jid) if @commit
+          KeyCreator.perform_async(@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys, shuttle_jid)
         end
       end
     end

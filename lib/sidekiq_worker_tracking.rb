@@ -43,6 +43,10 @@ module SidekiqWorkerTracking
   # @see #add_worker!
 
   def remove_worker!(jid)
+    if jid.nil?
+      return
+    end
+
     unless Shuttle::Redis.srem(worker_set_key, jid)
       Squash::Ruby.record "Failed to remove worker", object: self, jid: jid, unimportant: true
     end
