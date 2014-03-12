@@ -35,7 +35,7 @@ class BlobImporter
     project = Project.find(project_id)
     blob    = project.blobs.with_sha(sha).first!
 
-    if blob.blob.nil?
+    if blob.blob!.nil?
       # for whatever reason sometimes the blob is not accessible; try again in
       # 5 minutes
       new_jid = BlobImporter.perform_in(5.minutes, importer, project_id, sha, path, commit_id, rfc5646_locale)

@@ -275,7 +275,7 @@ module Importer
     private
 
     def load_contents
-      if (contents = utf8_encode(@blob.blob.contents))
+      if (contents = utf8_encode(@blob.blob!.contents))
         @file.contents = contents.encode('UTF-8')
       else
         raise "Invalid #{self.class.encoding.to_s} encoding"

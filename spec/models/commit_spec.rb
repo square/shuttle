@@ -53,6 +53,7 @@ describe Commit do
   context "[stats]" do
     context "[callbacks]" do
       before :all do
+        Project.delete_all
         Timecop.freeze(Time.now)
         @created_at = Time.now
         @commit = FactoryGirl.create(:commit, created_at: @created_at, loading: true, user: FactoryGirl.create(:user))
@@ -84,11 +85,11 @@ describe Commit do
     context "[metrics]" do
       before :all do
         timespan = 30
-        Timecop.freeze(Time.now)
+        Timecop.freeze(Time.now.beginning_of_year)
         @last_date  = Date.today
         @first_date = Date.today - timespan.days
 
-        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+        Project.delete_all
         @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
         # Note that we include 1 day outside of boundary.  This is to verify that these metrics don't capture
         # dates outside of window.
