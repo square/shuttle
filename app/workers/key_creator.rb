@@ -31,7 +31,7 @@ class KeyCreator
   #   that imported these keys.
   # @param [Array<Hash>] keys An array of key data.
 
-  def perform(project_id, sha, commit_id, importer, keys)
+  def perform(project_id, sha, commit_id, importer, keys, shuttle_jid=nil)
     @blob     = Blob.where(project_id: project_id).with_sha(sha).first!
     @commit   = Commit.find(commit_id) if commit_id
     @importer = Importer::Base.find_by_ident(importer)
@@ -47,10 +47,10 @@ class KeyCreator
     if @commit
       key_objects.reject! { |key| skip_key?(key) }
       self.class.update_key_associations key_objects, @commit
+      @commit.remove_worker! shuttle_jid
     end
 
-    @blob.remove_worker! jid
-    @commit.remove_worker! jid
+    @blob.remove_worker! shuttle_jid
   end
 
   # Given a set of keys, bulk-updates their commits-keys associations and

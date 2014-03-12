@@ -43,6 +43,10 @@ module SidekiqWorkerTracking
   # @see #add_worker!
 
   def remove_worker!(jid)
+    if jid.nil?
+      return
+    end
+    
     Shuttle::Redis.srem worker_set_key, jid
     loading = (Shuttle::Redis.scard(worker_set_key) > 0)
 
