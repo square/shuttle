@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 $(document).ready () ->
-
   # Default source/target locales
   sourceLocale = JSON.parse("<%= escape_javascript @source_locale.to_json %>")
   targetLocales = JSON.parse("<%= escape_javascript @target_locales.to_json %>")
