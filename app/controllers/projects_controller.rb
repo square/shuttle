@@ -170,7 +170,7 @@ class ProjectsController < ApplicationController
   def update
     @project.update_attributes project_params
     flash[:success] = t('controllers.projects.update.success', project: @project.name)
-    respond_with @project, location: projects_url
+    respond_with @project, location: edit_project_url(@project)
   end
 
   # Receives a github webhook and triggers a new import for the latest commit.
