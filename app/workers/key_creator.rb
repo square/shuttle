@@ -47,10 +47,10 @@ class KeyCreator
     if @commit
       key_objects.reject! { |key| skip_key?(key) }
       self.class.update_key_associations key_objects, @commit
-      @commit.remove_worker! shuttle_jid
     end
 
     @blob.remove_worker! shuttle_jid
+    @commit.remove_worker! shuttle_jid if @commit
   end
 
   # Given a set of keys, bulk-updates their commits-keys associations and

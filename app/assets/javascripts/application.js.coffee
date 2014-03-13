@@ -58,7 +58,7 @@
 #= require_tree ./application 
 
 $(document).ready ->
-  $('.filter-bar').affix(0, { shadow: true })
+  $('.filter-bar').affix(0, { shadow: true }) if $('.filter-bar').length > 0
   # enable leanModal on all modal links
   $("a[rel*=modal]").leanModal closeButton: ".close"
   $("button[rel*=modal]").leanModal closeButton: ".close"
