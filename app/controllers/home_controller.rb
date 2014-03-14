@@ -104,7 +104,7 @@ class HomeController < ApplicationController
 
     # Filter by SHA
     sha      = params[:sha].presence
-    sha = nil unless sha =~ /^[0-9A-F]+$/i
+    sha = sha =~ /^[0-9A-F]+$/i ? sha.downcase : nil
     @sha = sha
 
     # Filter by user
