@@ -3,7 +3,7 @@
     .modal.twelve.columns#add-translation
       a.close ×
       - projects = Project.order('LOWER(name) ASC')
-      - cur_project = cookies[:home_new_commit_project] ? cookies[:home_new_commit_project] : project.first
+      - cur_project = cookies[:home_new_commit_project] ? cookies[:home_new_commit_project] : projects.first
       = form_for(Commit.new, url: project_commits_path(cur_project, format: 'json')) do |f|
         h2 Translation Request
         .modal-body
