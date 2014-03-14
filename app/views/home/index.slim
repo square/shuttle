@@ -24,8 +24,9 @@
   = [controller_name, action_name].join('-')
 
 .header
-  .pull-right
-    button.primary href='#add-translation' rel='modal' disabled=Project.count.zero? Request Translation
+  - if current_user.monitor?
+    .pull-right
+      button.primary href='#add-translation' rel='modal' disabled=Project.count.zero? Request Translation
   h1 Dashboard
 
 hr.divider
