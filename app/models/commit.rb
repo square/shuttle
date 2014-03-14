@@ -150,7 +150,7 @@ class Commit < ActiveRecord::Base
   end
   after_commit :compile_and_cache_or_clear, on: :update
   after_update :update_touchdown_branch
-  after_update :update_stats_at_end_of_loading
+  after_commit :update_stats_at_end_of_loading, on: :update, if: :loading_state_changed?
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -685,10 +685,11 @@ class Commit < ActiveRecord::Base
     end
   end
 
-  def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
-    # update stats when it's done loading
-    return unless !loading? && loading_was
+  def loading_state_changed?
+    previous_changes.include?('loading') && previous_changes['loading'].first && !previous_changes['loading'].last
+  end
 
+  def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
     CommitStatsRecalculator.new.perform id
