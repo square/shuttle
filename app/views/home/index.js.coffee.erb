@@ -105,6 +105,7 @@ $(window).ready () ->
   $('#new_commit_project_id').change () ->
     project = $(this).val()
     $('#new_commit').attr('action', '/projects/' + project + '/commits.json')
+    $.cookie 'home_new_commit_project', project, expires: 7
 
   $('.edit_commit select, .edit_commit input[type="text"]').change () ->
     select = $(this)
@@ -130,6 +131,7 @@ $(window).ready () ->
     toggle($(this))
 
   filter_form = $('#filter')
+
   email_filter = filter_form.find('input[name=email]')
   exported_filter = filter_form.find('input[name=exported]')
   autoimport_filter = filter_form.find('input[name=show_autoimport]')
@@ -146,6 +148,8 @@ $(window).ready () ->
     status_filter.val($.cookie('home_status_filter'))
   if $.cookie('home_project_filter') and not $.url().param('project_id')?
     project_filter.val($.cookie('home_project_filter'))
+  if $.cookie('home_new_commit_project')
+    $('#new_commit_project_id').val($.cookie('home_new_commit_project'))
 
 
   filter_form.submit ->
