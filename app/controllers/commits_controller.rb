@@ -317,6 +317,8 @@ class CommitsController < ApplicationController
               type:     file.mime_type
     file.close
 
+  rescue Compiler::CommitLoadingError
+    render text: 'Commit still loading', status: :not_found
   rescue Compiler::CommitNotReadyError
     render text: 'Commit not ready', status: :not_found
   rescue Compiler::UnknownLocaleError
@@ -380,6 +382,8 @@ class CommitsController < ApplicationController
 
     file.close
 
+  rescue Compiler::CommitLoadingError
+    render text: 'Commit still loading', status: :not_found
   rescue Compiler::CommitNotReadyError
     render text: 'Commit not ready', status: :not_found
   rescue Compiler::UnknownLocaleError
