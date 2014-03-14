@@ -46,6 +46,7 @@ class Compiler
   #   `format`.
 
   def manifest(format, options={})
+    raise CommitLoadingError if @commit.loading?
     raise CommitNotReadyError if !@commit.ready? && !options[:partial]
 
     if options[:locale].present?
@@ -178,6 +179,9 @@ class Compiler
       io.close if io.respond_to?(:close)
     end
   end
+
+  # Raised when a Commit is still loading.
+  class CommitLoadingError < StandardError; end
 
   # Raised when a Commit is not marked as ready.
   class CommitNotReadyError < StandardError; end
