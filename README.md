@@ -39,7 +39,10 @@ Getting Started
 Developing for Shuttle requires Ruby 1.9.3, PostgreSQL, Redis, Tidy, and a modern
 version of libarchive. To run Shuttle for the first time:
 
-1. Clone this project.
+1. Clone this project. You can run `brew bundle` to install all dependencies available 
+   via Homebrew, which are specified in the `Brewfile`, or install them sequentially
+   specified below.
+
 2. Install a modern version of libarchive, one that supports the GNU tar format.
    (The version that comes with Mac OS X does not.) On OS X, you can run
 
