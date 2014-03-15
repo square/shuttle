@@ -13,6 +13,8 @@
 #    limitations under the License.
 
 $(window).ready ->
+  firstTime = true
+
   $("#expand-search").click () ->
     if $(".collapse").data("toggle")
       $("#expand-search").removeClass("active")
@@ -24,8 +26,18 @@ $(window).ready ->
       $(".collapse").slideDown()
 
   translationSearchForm = $('#translation-search-form')
-  for own param, val of $.url().param()
-    translationSearchForm.find("[name=#{param}]").val(val.trim())
+  prefillForm = ->
+    translationSearchForm.find('[name]')
+      .not('meta')
+      .not('[type=hidden]')
+      .not('[type=submit]').each (i, elt) ->
+        prefillVal = $.url().param( $(elt).attr('name') )
+        if $(elt).is('select') and !prefillVal
+          $(elt).prop('selectedIndex', 0)
+        else
+          $(elt).val(prefillVal)
+
+  prefillForm()
 
   table = $('#translations')
   $('select[name="translator_id"]').chosen
@@ -45,8 +57,16 @@ $(window).ready ->
 
   sr.scroll = scroll
 
+  renewSearch = ->
+    prefillForm()
+    sr.refresh()
+
   translationSearchForm.submit ->
     # ONLY HTML5
     window.history.pushState("params", "", "?#{translationSearchForm.serialize()}")
     sr.refresh()
     false
+
+  window.onpopstate = ->
+    renewSearch() unless firstTime
+    firstTime = false

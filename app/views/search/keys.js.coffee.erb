@@ -22,9 +22,10 @@ $(window).ready ->
       $("#expand-search").addClass("active")
       $(".collapse").data("toggle", true)
       $(".collapse").slideDown()
-  
+
   # Methods
   localeOrder = []
+
   formatTable = (keyTable, locales) ->
     keyTable.empty()
     thead = $('<thead/>').appendTo(keyTable)
@@ -71,10 +72,19 @@ $(window).ready ->
   # Window on-ready
   keyTable = $('#keys')
   keySearchForm = $('#key-search-form')
-  makeKeyURL = -> "#{keyTable.data('url')}?#{keySearchForm.serialize()}"
-  formatTable(keyTable, null)
+  prefillForm = ->
+    keySearchForm.find('[name]')
+    .not('meta')
+    .not('[type=hidden]')
+    .not('[type=submit]').each (i, elt) ->
+      prefillVal = $.url().param( $(elt).attr('name') )
+      if $(elt).is('select') and !prefillVal
+        $(elt).prop('selectedIndex', 0)
+      else
+        $(elt).val(prefillVal)
+  prefillForm()
 
-  localeOrder = []
+  makeKeyURL = -> "#{keyTable.data('url')}?#{keySearchForm.serialize()}"
 
   keyScroll = keyTable.infiniteScroll makeKeyURL,
     windowScroll: true
@@ -82,17 +92,24 @@ $(window).ready ->
       for key in keys
         do (key) -> addKey(keyTable, key)
 
-  keySearchForm.submit ->
-    keyScroll.reset()
+  submitSearch = ->
     $.ajax keyTable.data('url'),
       data: keySearchForm.serialize() + '&metadata=true'
       success: (metadata) ->
+        keyScroll.reset()
         # record the order of locales for consistency
         localeOrder = (locale.rfc5646 for locale in metadata.locales)
         formatTable(keyTable, metadata.locales)
         keyScroll.loadNextPage()
 
       error: ->
-        new Flash('alert').text("Couldn't load search results");
-        
+        new Flash('alert').text("Couldn't load search results")
+
+  keySearchForm.submit ->
+    window.history.pushState("params", "", "?#{keySearchForm.serialize()}")
+    submitSearch()
     false
+
+  window.onpopstate = ->
+    prefillForm()
+    submitSearch()
