@@ -17,7 +17,7 @@
   = 'views/stats/index'
 - content_for :class do
   = controller_name
-- content_for :id do 
+- content_for :id do
   = [controller_name, action_name].join('-')
 - content_for :footer do
   true
@@ -35,39 +35,38 @@ hr.divider
     #all_commit_time_chart
       svg
 table.table.stats-table
-  thead 
-    tr 
+  thead
+    tr
       th
         h1 = number_with_delimiter(@total_words, :delimiter => ',')
         = 'Word'.pluralize(@total_words) + ' Submitted'
-      th 
+      th
         h1 = number_with_delimiter(@total_words_new, :delimiter => ',')
         = 'Word'.pluralize(@total_words_new) + ' Awaiting Translation'
-      th 
+      th
         h1 = number_with_delimiter(@total_words_pending, :delimiter => ',')
         = 'Word'.pluralize(@total_words_pending) + ' Awaiting Review'
 
 .row.stats-charts
   .eight.columns
-    div: h3 = @top_projects[0][:name]
+    div: h3 = @top_projects[0] && @top_projects[0][:name]
     #project_commit_time_chart_0
       svg
   .eight.columns
-    div: h3 = @top_projects[1][:name]
+    div: h3 = @top_projects[1] && @top_projects[1][:name]
     #project_commit_time_chart_1
       svg
 .row.stats-charts
   .eight.columns
-    div: h3 = @top_projects[2][:name]
+    div: h3 = @top_projects[2] && @top_projects[2][:name]
     #project_commit_time_chart_2
       svg
   .eight.columns
-    div: h3 = @top_projects[3][:name]
+    div: h3 = @top_projects[3] && @top_projects[3][:name]
     #project_commit_time_chart_3
       svg
-= select_tag 'project', options_for_select(Project.all.map {|p| [p.name, p.id]}, @top_projects[4][:id])
+= select_tag 'project', options_for_select(Project.all.map {|p| [p.name, p.id]}, @top_projects[4] && @top_projects[4][:id])
 .row.stats-charts
   .sixteen.columns
     #project_commit_time_chart_4
       svg
-
