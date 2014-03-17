@@ -48,9 +48,9 @@
             padding: 10px 10px;
 
             width: 100%;
-            p.glossary-tips { color: $input-blue; } // TODO:
-            p.warning { color: $input-orange; } // TODO:
-            p.alert { color: $input-red; } // TODO:
+            p.glossary-tips { color: $input-blue; }
+            p.warning { color: $input-orange; }
+            p.alert { color: $input-red; }
             p.token-parity-warning {}
             p.glossary-tips, p.warning, p.alert {
               font-size: 12px;
@@ -95,10 +95,10 @@
             }
 
             &.approved {
-              color: $input-green; // TODO:
+              color: $input-green;
             }
             &.rejected {
-              color: $input-red; // TODO:
+              color: $input-red;
             }
 
             dt { float: left; width: 100px; }

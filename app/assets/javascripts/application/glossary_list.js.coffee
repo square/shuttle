@@ -120,8 +120,6 @@ class root.GlossaryList
         return text_field
     )
 
-    # TODO: RELOAD WHEN CLOSE LATER.
-
     @settingsModal.find("button.save").click => 
       @targetLocales = $.map( 
         @settingsModal.find(".locale-field"), 
@@ -280,7 +278,6 @@ class root.GlossaryList
         @glossaryTable.find("input, textarea, button, a").click (e) -> 
           e.stopPropagation()
 
-        # TODO HERE!!
         new TableAccordion(@glossaryTable)
 
       error: => this.error "Couldn’t load glossary list."
