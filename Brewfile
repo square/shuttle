@@ -1,6 +1,6 @@
 update
-upgrade
 install libarchive
 install postgresql
-install redis elasticsearch
+install redis
+install elasticsearch
 install qt
