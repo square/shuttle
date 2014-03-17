@@ -61,6 +61,8 @@ class SearchController < ApplicationController
               else
                 query { match 'copy', query_filter, operator: 'and' }
             end
+          else
+            sort { by :id, 'desc' }
           end
         end
         render json: decorate_translations(@results).to_json
@@ -87,25 +89,24 @@ class SearchController < ApplicationController
           limit        = params.fetch(:limit, PER_PAGE)
           not_elastic  = params[:not_elastic_search] 
 
-          if query_filter.present?
-            @results = Key.search(load: {include: [:translations, :project]}) do
+          @results = Key.search(load: {include: [:translations, :project]}) do
+            if query_filter.present?
               if not_elastic
-                filter :term, original_key_exact: query_filter                  
-              else 
-                query { string "original_key:\"#{query_filter}\"" }
-              end 
-              filter :term, project_id: id
-
-              unless status.blank?
-                filter :term, ready: status
-              end 
-              
-              from offset
-              size limit
+                filter :term, original_key_exact: query_filter
+              else
+                query { match 'original_key', query_filter, operator: 'and' }
+              end
+            else
               sort { by :original_key, 'asc' }
             end
-          else
-            @results = []
+            filter :term, project_id: id
+
+            unless status.blank?
+              filter :term, ready: status
+            end
+
+            from offset
+            size limit
           end
           render json: decorate_keys(@results).to_json
         end
