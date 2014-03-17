@@ -44,7 +44,6 @@ class SearchController < ApplicationController
               filter :term, rfc5646_locale: target_locales.map(&:rfc5646)[0]
             end
           end
-          sort { by :id, 'desc' }
           size limit
           from offset
 
@@ -58,9 +57,9 @@ class SearchController < ApplicationController
           if query_filter.present?
             case field
               when 'searchable_source_copy' then
-                query { string "source_copy:\"#{query_filter}\"" }
+                query { match 'source_copy', query_filter, operator: 'and' }
               else
-                query { string "copy:\"#{query_filter}\"" }
+                query { match 'copy', query_filter, operator: 'and' }
             end
           end
         end
