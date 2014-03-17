@@ -60,7 +60,9 @@ class Commit::KeysController < ApplicationController
       query { string "commit_ids:\"#{commit_id}\"" }
 
       if query_filter.present?
-        filter :prefix, original_key_exact: query_filter
+        query { match 'original_key', query_filter, operator: 'and' }
+      else
+        sort { by :original_key_exact, 'asc' }
       end
 
       case status
@@ -71,7 +73,6 @@ class Commit::KeysController < ApplicationController
       end
       from offset
       size limit
-      sort { by :original_key_exact, 'asc' }
     end
 
     respond_with(@keys) do |format|
