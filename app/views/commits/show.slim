@@ -40,7 +40,7 @@ hr.divider
 .border
   .filter-bar#filter
     = form_tag(nil, method: 'GET', id: 'filter-form', class: 'filter') do
-      = text_field_tag 'filter', '', placeholder: 'Substring', id: 'filter-field'
+      = text_field_tag 'filter', '', placeholder: 'Filter by Key', id: 'filter-field'
       = select_tag 'status', options_for_select(\
           [\
             ['all', nil],\
