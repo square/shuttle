@@ -67,6 +67,5 @@ hr.divider
       .form-actions
         = f.submit class: 'primary', value: 'Update'
         - if current_user.try!(:admin?)
-          / TODO: CHANGE TO MODAL 
           button.danger href=glossary_source_url(@source_entry) data-method='DELETE' data-confirm='Deleting a source glossary entry cannot be undone' Delete
           / = link_to "Delete Entry", id: 'btn-confirm-delete', class: "btn btn-danger", :'data-target'=>'#confirm-delete-modal', :'data-toggle'=>'modal'
