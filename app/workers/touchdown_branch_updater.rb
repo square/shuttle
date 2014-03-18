@@ -17,7 +17,7 @@
 
 class TouchdownBranchUpdater
   include Sidekiq::Worker
-  sidekiq_options queue: :low
+  sidekiq_options queue: :low, failures: :exhausted
 
   # Runs this worker.
   #

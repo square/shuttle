@@ -21,7 +21,7 @@ class CommitStatsRecalculator
   extend NewRelic::Agent::MethodTracer
 
   include Sidekiq::Worker
-  sidekiq_options queue: :low
+  sidekiq_options queue: :low, failures: :exhausted
 
   # Executes this worker.
   #
