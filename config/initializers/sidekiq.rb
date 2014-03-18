@@ -33,17 +33,19 @@ module Sidekiq::Util
 end
 
 configure_sidekiq = -> do
+  redis_config = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
+      merge(url: Shuttle::Redis.client.id)
+  Redis.current = ConnectionPool.new(size: (Sidekiq.server? ? 25 : 5)) { Redis.new(redis_config) }
+
   Sidekiq.configure_client do |config|
-    config.redis = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
-        merge(url: Shuttle::Redis.client.id)
+    config.redis = Redis.current
   end
   Sidekiq.configure_server do |config|
-    config.redis = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
-        merge(url: Shuttle::Redis.client.id)
+    config.redis = Redis.current
+
     config.server_middleware do |chain|
       chain.add ::Squash::Sidekiq
     end
-
   end
 end
 
