@@ -20,3 +20,4 @@ production:
   database: shuttle_production
   pool: 30
   host: localhost
+  reconnect: true
