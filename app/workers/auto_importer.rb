@@ -18,7 +18,7 @@
 
 class AutoImporter
   include Sidekiq::Worker
-  sidekiq_options queue: :low, failures: :exhausted
+  sidekiq_options queue: :low
 
   # Runs this worker.
 

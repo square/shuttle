@@ -20,7 +20,7 @@ require 'sidekiq_locking'
 
 class LocalizePrecompiler
   include Sidekiq::Worker
-  sidekiq_options queue: :low, failures: :exhausted
+  sidekiq_options queue: :low
 
   # Executes this worker.
   #

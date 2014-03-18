@@ -18,7 +18,7 @@
 
 class ProjectReadinessRecalculator
   include Sidekiq::Worker
-  sidekiq_options queue: :high, failures: :exhausted
+  sidekiq_options queue: :high
 
   # Executes this worker.
   #
