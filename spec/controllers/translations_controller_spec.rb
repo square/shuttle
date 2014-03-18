@@ -373,7 +373,7 @@ describe TranslationsController do
       sign_in @user
     end
 
-    it "should 1. respond with a translation with matching locale and source copy" do
+    it "should 1. respond with a translation unit with matching locale and source copy" do
       get :match,
           project_id: @project.to_param,
           key_id:     @original_translation.key.to_param,
@@ -383,7 +383,29 @@ describe TranslationsController do
       expect(JSON.parse(response.body)['copy']).to eql('same_locale_sc')
     end
 
-    it "should 2. respond with a translation of the 1st fallback locale with matching project/key and source copy" do
+    it "should 2. respond with the newest translation unit with matching locale and source copy (if there are duplicates)" do
+      Timecop.freeze(Time.now + 5.hours)
+      duplicate_key = FactoryGirl.create(:key,
+                                         project: @project,
+                                         key: 'duplicate_key')
+      FactoryGirl.create(:translation,
+                         source_copy: 'hello123',
+                         key: duplicate_key,
+                         rfc5646_locale: 'fr-CA',
+                         copy: 'duplicate_locale_sc',
+                         translated: true,
+                         approved: true)
+
+      get :match,
+          project_id: @project.to_param,
+          key_id:     @original_translation.key.to_param,
+          id:         @original_translation.to_param,
+          format:     'json'
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body)['copy']).to eql('duplicate_locale_sc')
+    end
+
+    it "should 3. respond with the translation unit of the 1st fallback locale with matching project/key and source copy" do
       TranslationUnit.exact_matches(@same_locale_sc).delete_all
       get :match,
           project_id: @project.to_param,
@@ -394,7 +416,7 @@ describe TranslationsController do
       expect(JSON.parse(response.body)['copy']).to eql('fallback1_sc')
     end
 
-    it "should 3. respond with a translation of the 1st fallback locale with source copy" do
+    it "should 4. respond with the translation unit of the 1st fallback locale with source copy" do
       TranslationUnit.exact_matches(@same_locale_sc).delete_all
       TranslationUnit.exact_matches(@fallback1_sc).delete_all
       get :match,
@@ -406,7 +428,7 @@ describe TranslationsController do
       expect(JSON.parse(response.body)['copy']).to eql('fallback2_sc')
     end
 
-    it "should 6. respond with a 204" do
+    it "should 5. respond with a 204" do
       TranslationUnit.exact_matches(@same_locale_sc).delete_all
       TranslationUnit.exact_matches(@fallback1_sc).delete_all
       TranslationUnit.exact_matches(@fallback2_sc).delete_all

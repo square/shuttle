@@ -211,18 +211,18 @@ class TranslationsController < ApplicationController
     end
   end
 
-  # Returns the first eligible Translation that meets the following
+  # Returns the first eligible Translation Unit that meets the following
   # requirements:
   #
   # * in the same locale,
   # * and has the same source copy.
   #
-  # If multiple Translations match, priority is given to the most recently
-  # updated Translation. If no Translations match in the same locale,
+  # If multiple Translation Units match, priority is given to the most recently
+  # updated Translation. If no Translation Units match in the same locale,
   # {Locale#fallbacks fallback} locales are tried in order. Under each
-  # fallback locale, a Translation is located that shares the same project, same
+  # fallback locale, a Translation Unit is located that shares the same project, same
   # key, and same source copy. If no match is found, that same fallback locale
-  # is searched for a Translation with the same source copy, priority given to
+  # is searched for a Translation Unit with the same source copy, priority given to
   # the most recently modified Translation. If no match is found, the next more
   # general fallback locale is attempted.
   #
@@ -249,10 +249,8 @@ class TranslationsController < ApplicationController
 
   def match
     @translation.locale.fallbacks.each do |fallback|
-      matches = TranslationUnit.exact_matches(@translation, fallback).limit(2)
-      if matches.size == 1
-        @match = matches.first
-      end
+      @match = TranslationUnit.exact_matches(@translation, fallback).
+          order('created_at DESC').first
       break if @match
     end
 
