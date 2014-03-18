@@ -57,19 +57,25 @@ class Commit::KeysController < ApplicationController
     commit_id    = @commit.id
 
     @keys = Key.search(load: {include: [:translations]}) do
-      query { string "commit_ids:\"#{commit_id}\"" }
-
       if query_filter.present?
-        query { match 'original_key', query_filter, operator: 'and' }
+        query do
+          match 'original_key', query_filter, operator: 'and'
+        end
       else
         sort { by :original_key_exact, 'asc' }
       end
 
       case status
         when 'approved'
-          filter :term, ready: 1
+          filter :and,
+                 {term: {commit_ids: commit_id}},
+                 {term: {ready: 1}}
         when 'pending'
-          filter :term, ready: 0
+          filter :and,
+                 {term: {commit_ids: commit_id}},
+                 {term: {ready: 0}}
+        else
+          filter :term, commit_ids: commit_id
       end
       from offset
       size limit
