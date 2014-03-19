@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+source 'https://0858cb81:19556f67@www.mikeperham.com/rubygems/'
 
 # FRAMEWORK
 gem 'rails', '4.0.3'
@@ -52,7 +53,7 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-gem 'sidekiq', github: 'mperham/sidekiq'
+gem 'sidekiq-pro'
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', github: 'javan/whenever' # Cap 3 compatibility

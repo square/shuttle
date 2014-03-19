@@ -104,7 +104,7 @@ Shuttle::Application.routes.draw do
   get 'reviewers' => 'home#reviewers', as: :reviewers
   root to: 'home#index'
 
-  require 'sidekiq/web'
+  require 'sidekiq/pro/web'
   constraint = lambda { |request| request.env['warden'].authenticate? and request.env['warden'].user.admin? }
   constraints(constraint) { mount Sidekiq::Web => '/sidekiq' }
 

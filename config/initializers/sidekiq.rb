@@ -41,6 +41,7 @@ configure_sidekiq = -> do
     config.redis = Redis.current
   end
   Sidekiq.configure_server do |config|
+    require 'sidekiq/pro/reliable_fetch'
     config.redis = Redis.current
 
     config.server_middleware do |chain|
