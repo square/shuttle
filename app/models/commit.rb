@@ -380,6 +380,9 @@ class Commit < ActiveRecord::Base
     elsif project.repository_url =~ /^git@git\.squareup\.com:([^\/]+)\/(.+)\.git$/ ||
         project.repository_url =~ /^https:\/\/git\.squareup\.com\/([^\/]+)\/(.+)\.git$/ # git.squareup.com
       "https://git.squareup.com/#{$1}/#{$2}/commit/#{revision}"
+    elsif project.repository_url =~ /^ssh:\/\/(?:git@)?git\.corp\.squareup.com\/([^\/]+)\/(.+)\.git$/ ||
+        project.repository_url =~ /^https:\/\/(?:\w+@)?stash\.corp\.squareup\.com\/scm\/([^\/]+)\/(.+)\.git$/ # stash.corp.squareup.com
+      "https://stash.corp.squareup.com/projects/#{$1.upcase}/repos/#{$2}/commits/#{revision}"
     end
   end
 
