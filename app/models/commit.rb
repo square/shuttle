@@ -45,6 +45,7 @@ require 'fileutils'
 # | `user`         | The {User} that submitted this Commit for translation. |
 # | `keys`         | All the {Key Keys} found in this Commit.               |
 # | `translations` | The {Translation Translations} found in this Commit.   |
+# | `blobs`        | The {Blob Blobs} found in this Commit.                 |
 #
 # Properties
 # ==========
@@ -68,11 +69,13 @@ require 'fileutils'
 # |:-------------------|:-------------------------------------------------------------------|
 # | `description`      | A user-submitted description of why we are localizing this commit. |
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
+# | `author`           | The name of the commit author.                                     |
+# | `author_email`     | The email address of the commit author.                            |
+# | `import_batch_id`  | The ID of the Sidekiq batch of import jobs.                        |
 
 class Commit < ActiveRecord::Base
   extend RedisMemoize
   include CommitTraverser
-  include SidekiqWorkerTracking
 
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
@@ -81,16 +84,19 @@ class Commit < ActiveRecord::Base
 
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
-  has_many :commits_keys, inverse_of: :commit, dependent: :destroy
+  has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
   has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
+  has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
+  has_many :blobs, through: :blobs_commits
 
   include HasMetadataColumn
   has_metadata_column(
       description:      {allow_nil: true},
-      author:           {allow_nil: true}, 
+      author:           {allow_nil: true},
       author_email:     {allow_nil: true},
-      pull_request_url: {allow_nil: true}
+      pull_request_url: {allow_nil: true},
+      import_batch_id:  {allow_nil: true}
   )
 
   include Tire::Model::Search
@@ -146,9 +152,7 @@ class Commit < ActiveRecord::Base
 
   before_save :set_loaded_at
   before_create :set_author
-  after_commit(on: :create) do |commit|
-    CommitImporter.perform_once(commit.id) unless commit.skip_import
-  end
+  after_commit :initial_import, on: :create
   after_commit :compile_and_cache_or_clear, on: :update
   after_update :update_touchdown_branch
   after_commit :update_stats_at_end_of_loading, on: :update, if: :loading_state_changed?
@@ -333,22 +337,17 @@ class Commit < ActiveRecord::Base
   def import_strings(options={})
     raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
 
-    blobs  = project.blobs.includes(:project) # preload blobs for performance
+    import_batch.jobs do
+      update_attribute :loading, true
+      blobs = project.blobs.includes(:project) # preload blobs for performance
 
-    # add us as one of the workers, to prevent the commit from prematurely going
-    # ready; let's just invent a job ID for us
-    job_id = SecureRandom.uuid
-    add_worker! job_id
-
-    # clear out existing keys so that we can import all new keys
-    keys.clear unless options[:locale]
-    # perform the recursive import
-    traverse(commit!) do |path, blob|
-      import_blob path, blob, options.merge(blobs: blobs)
+      # clear out existing keys so that we can import all new keys
+      commits_keys.delete_all unless options[:locale]
+      # perform the recursive import
+      traverse(commit!) do |path, blob|
+        import_blob path, blob, options.merge(blobs: blobs)
+      end
     end
-
-    # this will also kick of stats recalculation for inline imports
-    remove_worker! job_id
   end
 
   # Returns a commit object used to interact with Git.
@@ -549,14 +548,32 @@ class Commit < ActiveRecord::Base
   # @private
   def redis_memoize_key() to_param end
 
-  # @return [true, false] True if there are cached Sidekiq job IDs of
-  #   in-progress BlobImporters that do not actually exist anymore.
+  # @return [Sidekiq::Batch, nil] The batch of Sidekiq workers performing the
+  #   current import, if any.
 
-  def broken?
-    cached_jids = Shuttle::Redis.smembers("import:#{revision}")
-    return false if cached_jids.empty?
-    actual_jids = self.class.workers.map { |w| w['jid'] }
-    (cached_jids & actual_jids).empty? # none of the cached JIDs actually exist anymore
+  def import_batch
+    if import_batch_id
+      Sidekiq::Batch.new(import_batch_id)
+    else
+      batch             = Sidekiq::Batch.new
+      batch.description = "Import Commit #{id} (#{revision})"
+      batch.on :success, ImportFinisher, commit_id: id
+      update_attribute :import_batch_id, batch.bid
+      batch
+    end
+  rescue Sidekiq::Batch::NoSuchBatch
+    update_attribute :import_batch_id, nil
+    retry
+  end
+
+  # @return [Sidekiq::Batch::Status, nil] Information about the batch of Sidekiq
+  #   workers performing the current import, if any.
+
+  def import_batch_status
+    import_batch_id ? Sidekiq::Batch::Status.new(import_batch_id) : nil
+  rescue Sidekiq::Batch::NoSuchBatch
+    update_attribute :import_batch_id, nil
+    retry
   end
 
   # Returns whether we should skip a key for this particular commit, given the
@@ -668,7 +685,14 @@ class Commit < ActiveRecord::Base
     imps.each do |importer|
       importer = importer.new(blob_object, path, self)
 
-      if options[:force]
+      # we can't do a force import on a loading blob -- if we delete all the
+      # blobs_keys while another sidekiq job is doing the import, when that job
+      # finishes the blob will unset loading, even though the former job is still
+      # adding keys to the blob. at this point a third import (with force=false)
+      # might start, see the blob as not loading, and then do a fast import of
+      # the cached keys (even though not all keys have been loaded by the second
+      # import).
+      if options[:force] && !loading?
         blob_object.blobs_keys.delete_all
         blob_object.update_column :loading, true
       end
@@ -681,10 +705,7 @@ class Commit < ActiveRecord::Base
       if options[:inline]
         BlobImporter.new.perform importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
       else
-        shuttle_jid = SecureRandom.uuid
-        blob_object.add_worker! shuttle_jid
-        add_worker! shuttle_jid
-        BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646), shuttle_jid)
+        BlobImporter.perform_once importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
       end
     end
   end
@@ -699,5 +720,16 @@ class Commit < ActiveRecord::Base
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
     CommitStatsRecalculator.new.perform id
+  end
+
+  #TODO there's a bug in Rails core that causes this to be run on update as well
+  # as create. sigh.
+  def initial_import
+    return if @_start_transaction_state[:id] # fix bug in Rails core
+    unless skip_import || loading?
+      import_batch.jobs do
+        CommitImporter.perform_once id
+      end
+    end
   end
 end

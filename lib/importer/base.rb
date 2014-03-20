@@ -95,6 +95,10 @@ module Importer
       @blob   = blob
       @commit = commit
       @file   = File.new(path, nil, nil)
+
+      if @commit
+        blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
+      end
     end
 
     # Scans the Blob for localizable strings, and creates or updates
@@ -283,6 +287,8 @@ module Importer
     end
 
     def import_by_parsing_blob
+      @blob.update_attribute :loading, true
+
       load_contents
 
       @keys = Array.new
@@ -293,14 +299,20 @@ module Importer
       end
 
       # then spawn jobs to create those keys
-      @keys.in_groups_of(100, false) do |keys|
-        if inline
+      if inline
+        @keys.in_groups_of(100, false) do |keys|
           KeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
-        else
-          shuttle_jid = SecureRandom.uuid
-          @blob.add_worker! shuttle_jid
-          @commit.add_worker!(shuttle_jid) if @commit
-          KeyCreator.perform_async(@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys, shuttle_jid)
+        end
+      elsif @commit
+        bulk_args = @keys.in_groups_of(100, false).map do |keys|
+          [@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys]
+        end
+        @commit.import_batch.jobs do
+          Sidekiq::Client.push_bulk 'class' => KeyCreator, 'args' => bulk_args
+        end
+      else
+        @keys.in_groups_of(100, false) do |keys|
+          KeyCreator.perform_async @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
         end
       end
     end
@@ -308,7 +320,7 @@ module Importer
     # Used when this blob was imported as part of an earlier commit; just
     # associates the cached list of keys for that blob with the new commit
     def import_by_using_cached_keys
-      KeyCreator.update_key_associations @blob.keys, @commit
+      KeyCreator.update_key_associations @blob.keys.to_a, @commit
     end
 
     # array indexes are stored in brackets

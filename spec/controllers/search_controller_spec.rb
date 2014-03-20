@@ -77,10 +77,11 @@ describe SearchController do
       expect(response.status).to eql(200)
       results = JSON.parse(response.body)
       expect(results.size).to eql(2)
-      expect(results.first['copy']).to eql('foo term1 bar')
-      expect(results.first['locale']['rfc5646']).to eql('fr')
+      results.sort_by! { |r| r['locale']['rfc5646'] }
       expect(results.last['copy']).to eql('foo term1 bar')
-      expect(results.last['locale']['rfc5646']).to eql('en')
+      expect(results.last['locale']['rfc5646']).to eql('fr')
+      expect(results.first['copy']).to eql('foo term1 bar')
+      expect(results.first['locale']['rfc5646']).to eql('en')
     end
 
     it "should respond with a 422 if the locale is unknown" do

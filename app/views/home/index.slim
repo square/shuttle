@@ -129,12 +129,17 @@ hr.divider
           - else
             / Progress
             - if commit.loading?
-              td Importing (#{pluralize(commit.list_workers.count, 'Job')})
+              td
+                | Importing
+                - if commit.import_batch_status
+                  |  (#{pluralize_with_delimiter commit.import_batch_status.pending, 'Job'} Remaining)
+                - else
+                  |  (stalled!)
             - elsif commit.ready?
               td Ready for Download
             - else
               - strings_remaining = commit.translations_pending(*@locales) + commit.translations_new(*@locales)
-              td = "Translating #{pluralize(strings_remaining, 'String')}"
+              td = "Translating #{pluralize_with_delimiter strings_remaining, 'String'}"
 
           / Translation/Monitor Button
           = render partial: 'table_action_button', locals: { commit: commit }

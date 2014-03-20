@@ -41,6 +41,17 @@ CREATE TABLE blobs (
 
 
 --
+-- Name: blobs_commits; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE blobs_commits (
+    project_id integer NOT NULL,
+    sha_raw bytea NOT NULL,
+    commit_id integer NOT NULL
+);
+
+
+--
 -- Name: blobs_keys; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -551,6 +562,14 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 
 
 --
+-- Name: blobs_commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY blobs_commits
+    ADD CONSTRAINT blobs_commits_pkey PRIMARY KEY (project_id, sha_raw, commit_id);
+
+
+--
 -- Name: blobs_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -797,6 +816,22 @@ CREATE UNIQUE INDEX users_unlock_token ON users USING btree (unlock_token);
 
 
 --
+-- Name: blobs_commits_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_commits
+    ADD CONSTRAINT blobs_commits_commit_id_fkey FOREIGN KEY (commit_id) REFERENCES commits(id) ON DELETE CASCADE;
+
+
+--
+-- Name: blobs_commits_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_commits
+    ADD CONSTRAINT blobs_commits_project_id_fkey FOREIGN KEY (project_id, sha_raw) REFERENCES blobs(project_id, sha_raw) ON DELETE CASCADE;
+
+
+--
 -- Name: blobs_keys_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -999,3 +1034,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140228025058');
 INSERT INTO schema_migrations (version) VALUES ('20140306064700');
 
 INSERT INTO schema_migrations (version) VALUES ('20140311011156');
+
+INSERT INTO schema_migrations (version) VALUES ('20140320053508');
