@@ -95,7 +95,8 @@ Shuttle::Application.routes.draw do
   root to: 'home#index'
 
   require 'sidekiq/web'
-  constraint = lambda { |request| request.env['warden'].authenticate? and request.env['warden'].user.monitor? }
+  require 'sidekiq/pro/web' rescue nil
+  constraint = lambda { |request| request.env['warden'].authenticate? and request.env['warden'].user.admin? }
   constraints(constraint) { mount Sidekiq::Web => '/sidekiq' }
 
   get '/queue_status' => proc {
