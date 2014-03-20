@@ -50,6 +50,7 @@
 # | `project`      | The {Project} this Key belongs to.                                        |
 # | `translations` | The {Translation Translations} of this Key's copy into different locales. |
 # | `commits`      | The {Commit Commits} this Key can be found in.                            |
+# | `blobs`        | The {Blob Blobs} this Key can be found in.                                |
 #
 # Fields
 # ======

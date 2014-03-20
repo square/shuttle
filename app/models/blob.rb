@@ -22,13 +22,14 @@
 # |           |                                                      |
 # |:----------|:-----------------------------------------------------|
 # | `project` | The {Project} whose repository this blob belongs to. |
+# | `keys`    | The {Key Keys} found in this blob.                   |
 #
 # Fields
 # ======
 #
 # |           |                                                                                                                                                                                                 |
 # |:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-# | `sha`     | The Git identifier for the blob.                                                               re                                                                                                 |
+# | `sha`     | The Git identifier for the blob.                                                                                                                                                                |
 # | `loading` | If `true`, one or more workers is currently importing {Key Keys} for this blob. This defaults to `true` to ensure that a Blob's Keys are loaded at least once before the cached result is used. |
 
 class Blob < ActiveRecord::Base
