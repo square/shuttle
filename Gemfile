@@ -56,7 +56,7 @@ gem 'faker'
 gem 'sidekiq-pro'
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
-gem 'whenever', github: 'javan/whenever' # Cap 3 compatibility
+gem 'whenever', require: nil
 
 # REDIS
 gem 'redis-mutex'
