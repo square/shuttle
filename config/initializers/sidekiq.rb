@@ -20,9 +20,13 @@ module Sidekiq::Util
 end
 
 configure_sidekiq = -> do
+  redis_config  = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
+      merge(url: Shuttle::Redis.client.id)
+  size          = Sidekiq.server? ? Shuttle::Configuration.sidekiq.server_pool_size : Shuttle::Configuration.sidekiq.client_pool_size
+  Redis.current = ConnectionPool.new(size: size) { Redis.new(redis_config) }
+
   Sidekiq.configure_client do |config|
-    config.redis = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
-        merge(url: Shuttle::Redis.client.id)
+    config.redis = Redis.current
   end
   Sidekiq.configure_server do |config|
     begin
@@ -30,9 +34,7 @@ configure_sidekiq = -> do
     rescue LoadError
       # no sidekiq pro
     end
-
-    config.redis = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
-        merge(url: Shuttle::Redis.client.id)
+    config.redis = Redis.current
   end
 end
 
