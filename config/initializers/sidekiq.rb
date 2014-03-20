@@ -25,6 +25,12 @@ configure_sidekiq = -> do
         merge(url: Shuttle::Redis.client.id)
   end
   Sidekiq.configure_server do |config|
+    begin
+      require 'sidekiq/pro/reliable_fetch'
+    rescue LoadError
+      # no sidekiq pro
+    end
+
     config.redis = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
         merge(url: Shuttle::Redis.client.id)
   end
