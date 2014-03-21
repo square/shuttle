@@ -66,10 +66,10 @@ Shuttle::Application.configure do
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
 
   # Use a different cache store in production.
-  config.cache_store                       = :redis_store, 'redis://baltimore.corp.squareup.com:6379/0/shuttle_rails', {expires_in: 90.minutes}
+  config.cache_store                       = :redis_store, 'redis://localhost:6379/0/shuttle_rails', {expires_in: 90.minutes}
   config.action_dispatch.rack_cache        = {
-      metastore:   'redis://baltimore.corp.squareup.com:6379/0/metastore',
-      entitystore: 'redis://baltimore.corp.squareup.com:6379/0/entitystore'
+      metastore:   'redis://localhost:6379/0/metastore',
+      entitystore: 'redis://localhost:6379/0/entitystore'
   }
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
