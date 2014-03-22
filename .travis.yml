@@ -1,4 +1,5 @@
-install: libarchive
+before_install:
+- sudo apt-get install -qq libarchive
 language: ruby
 rvm:
 - 1.9.3
