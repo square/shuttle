@@ -345,6 +345,14 @@ describe Commit do
         expect(email.body.to_s).to include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
       end
 
+      it "does not send an email if the commit was previously ready" do
+        @commit = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user), completed_at: 1.day.ago)
+        ActionMailer::Base.deliveries.clear
+        @commit.loading = false
+        @commit.save!
+        expect(ActionMailer::Base.deliveries.size).to be_zero
+      end
+
       it "sends one email to the translators when loading changes to false if the commit has no user" do
         @commit = FactoryGirl.create(:commit, loading: true)
         ActionMailer::Base.deliveries.clear
