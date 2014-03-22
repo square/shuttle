@@ -121,12 +121,6 @@ describe SearchController do
       sleep(2)
     end
 
-    it "should return an empty result list if no query is given" do
-      get :keys, keys: ' ', project_id: @project.id, format: 'json'
-      expect(response.status).to eql(200)
-      expect(response.body).to eql('[]')
-    end
-
     it "should search by key" do
       get :keys, filter: 't1', project_id: @project.id, format: 'json'
       expect(response.status).to eql(200)

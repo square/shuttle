@@ -687,6 +687,8 @@ class Commit < ActiveRecord::Base
   end
 
   def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
+    return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
+
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
     CommitStatsRecalculator.new.perform id
