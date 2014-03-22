@@ -19,7 +19,7 @@ describe Commit do
     before :all do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
+      @commit  = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
     end
 
     context "[validations]" do
@@ -34,7 +34,7 @@ describe Commit do
 
       it "should set loading at" do
         old_time = Time.now
-        commit = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user))
+        commit   = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user))
         Timecop.freeze(3.days.from_now)
         commit.loading = false
         commit.save!
@@ -56,7 +56,7 @@ describe Commit do
         Project.delete_all
         Timecop.freeze(Time.now)
         @created_at = Time.now
-        @commit = FactoryGirl.create(:commit, created_at: @created_at, loading: true, user: FactoryGirl.create(:user))
+        @commit     = FactoryGirl.create(:commit, created_at: @created_at, loading: true, user: FactoryGirl.create(:user))
         Timecop.freeze(3.hours.from_now)
         @commit.loading = false
         @commit.save!
@@ -96,9 +96,9 @@ describe Commit do
         ((@first_date - 1.day)...@last_date).each do |date|
           FactoryGirl.create(
               :commit,
-              project: @project,
-              created_at: date,
-              loaded_at: date + 1.day,
+              project:      @project,
+              created_at:   date,
+              loaded_at:    date + 1.day,
               completed_at: date + 2.days,
           )
 
@@ -108,8 +108,8 @@ describe Commit do
         # for date filters
         FactoryGirl.create(
             :commit,
-            created_at: @first_date,
-            loaded_at: @first_date + (0.5).days,
+            created_at:   @first_date,
+            loaded_at:    @first_date + (0.5).days,
             completed_at: @first_date + 1.day,
         )
       end
@@ -117,104 +117,116 @@ describe Commit do
 
       it "should correctly compute daily commits created metric for one project" do
         expect(Commit.daily_commits_created(@project.id)).to eql(
-          (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
-            daily_finishes << [ cur_date.to_time.to_i, 1 ]
-          end
-        )
+                                                                 (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
+                                                                   daily_finishes << [cur_date.to_time.to_i, 1]
+                                                                 end
+                                                             )
       end
 
       it "should correctly compute daily commits finished metric for one project" do
         expect(Commit.daily_commits_finished(@project.id)).to eql(
-            (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
-              if cur_date == @first_date
-                daily_finishes << [ cur_date.to_time.to_i, 0 ]
-              else
-                daily_finishes << [ cur_date.to_time.to_i, 1 ]
-              end
-            end
-        )
+                                                                  (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
+                                                                    if cur_date == @first_date
+                                                                      daily_finishes << [cur_date.to_time.to_i, 0]
+                                                                    else
+                                                                      daily_finishes << [cur_date.to_time.to_i, 1]
+                                                                    end
+                                                                  end
+                                                              )
       end
 
       it "should correctly compute average load metric for one project" do
         expect(Commit.average_load_time(@project.id)).to eql(
-             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-               mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
-             end
-         )
+                                                             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+                                                               mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
+                                                             end
+                                                         )
       end
 
       it "should correctly compute average translation metric for one project" do
         expect(Commit.average_translation_time(@project.id)).to eql(
-             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-               mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
-             end
-         )
+                                                                    (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+                                                                      mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
+                                                                    end
+                                                                )
       end
 
       it "should correctly compute average completion metric for one project" do
         expect(Commit.average_completion_time(@project.id)).to eql(
-             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-               mv_avg << [ cur_date.to_time.to_i, 2.day.to_f ]
-             end
-         )
+                                                                   (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+                                                                     mv_avg << [cur_date.to_time.to_i, 2.day.to_f]
+                                                                   end
+                                                               )
       end
 
       it "should correctly compute daily commits created metric for all projects" do
         expect(Commit.daily_commits_created).to eql(
-            (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
-              if cur_date == @first_date
-                daily_finishes << [ cur_date.to_time.to_i, 2 ]
-              else
-                daily_finishes << [ cur_date.to_time.to_i, 1 ]
-              end
-            end
-         )
+                                                    (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
+                                                      if cur_date == @first_date
+                                                        daily_finishes << [cur_date.to_time.to_i, 2]
+                                                      else
+                                                        daily_finishes << [cur_date.to_time.to_i, 1]
+                                                      end
+                                                    end
+                                                )
       end
 
       it "should correctly compute daily commits finished metric for all projects" do
         expect(Commit.daily_commits_finished).to eql(
-            (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
-              case cur_date
-                when @first_date then daily_finishes << [ cur_date.to_time.to_i, 0 ]
-                when @first_date + 1 then daily_finishes << [ cur_date.to_time.to_i, 2 ]
-                else daily_finishes << [ cur_date.to_time.to_i, 1 ]
-              end
-            end
-        )
+                                                     (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
+                                                       case cur_date
+                                                         when @first_date then
+                                                           daily_finishes << [cur_date.to_time.to_i, 0]
+                                                         when @first_date + 1 then
+                                                           daily_finishes << [cur_date.to_time.to_i, 2]
+                                                         else
+                                                           daily_finishes << [cur_date.to_time.to_i, 1]
+                                                       end
+                                                     end
+                                                 )
       end
 
       it "should correctly compute average load metric for all projects" do
         expect(Commit.average_load_time).to eql(
-            (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-              case cur_date
-                when @first_date then mv_avg << [ cur_date.to_time.to_i, 6.day/7.0 ]
-                when @first_date + 1 then mv_avg << [ cur_date.to_time.to_i, 7.days/8.0 ]
-                else mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
-              end
-            end
-        )
+                                                (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+                                                  case cur_date
+                                                    when @first_date then
+                                                      mv_avg << [cur_date.to_time.to_i, 6.day/7.0]
+                                                    when @first_date + 1 then
+                                                      mv_avg << [cur_date.to_time.to_i, 7.days/8.0]
+                                                    else
+                                                      mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
+                                                  end
+                                                end
+                                            )
       end
       it "should correctly compute average translation metric for all projects" do
         expect(Commit.average_translation_time).to eql(
-            (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-              case cur_date
-                when @first_date then mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
-                when @first_date + 1 then mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
-                else mv_avg << [ cur_date.to_time.to_i, 1.day.to_f ]
-              end
-            end
-        )
+                                                       (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+                                                         case cur_date
+                                                           when @first_date then
+                                                             mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
+                                                           when @first_date + 1 then
+                                                             mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
+                                                           else
+                                                             mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
+                                                         end
+                                                       end
+                                                   )
       end
       it "should correctly compute average completion metric for all projects" do
         expect(Commit.average_completion_time).to eql(
-            (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-              case cur_date
-                when @first_date then mv_avg << [ cur_date.to_time.to_i, 13.days/7.0 ]
-                when @first_date + 1 then mv_avg << [ cur_date.to_time.to_i, 15.days/8.0 ]
-                else mv_avg << [ cur_date.to_time.to_i, 2.day.to_f ]
-              end
-            end
-        )
+                                                      (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
+                                                        case cur_date
+                                                          when @first_date then
+                                                            mv_avg << [cur_date.to_time.to_i, 13.days/7.0]
+                                                          when @first_date + 1 then
+                                                            mv_avg << [cur_date.to_time.to_i, 15.days/8.0]
+                                                          else
+                                                            mv_avg << [cur_date.to_time.to_i, 2.day.to_f]
+                                                        end
+                                                      end
+                                                  )
       end
 
     end
@@ -224,7 +236,7 @@ describe Commit do
     before :all do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @commit = @project.commit!('HEAD')
+      @commit  = @project.commit!('HEAD')
     end
 
     before :each do
@@ -251,7 +263,7 @@ describe Commit do
       @commit.recalculate_ready!
       expect(@commit).not_to be_ready
       expect(@commit.completed_at).to be_nil
-    end 
+    end
 
     it "should set ready to true for commits with all ready keys" do
       @commit.keys << FactoryGirl.create(:key)
@@ -276,7 +288,7 @@ describe Commit do
 
       expect(@commit.completed_at).to eql(start_time + 1.day)
       Timecop.return
-    end 
+    end
 
     it "should not change completed_at if commit goes from ready to unready." do
       @commit.keys << FactoryGirl.create(:key)
@@ -290,7 +302,7 @@ describe Commit do
 
       expect(@commit).not_to be_ready
       expect(@commit.completed_at).to eql(completed_time)
-    end     
+    end
   end
 
   context "[hooks]" do
