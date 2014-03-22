@@ -24,15 +24,15 @@ describe SearchController do
 
       %w(term1 term2).each do |term|
         %w(source_copy copy).each do |field|
-          other_field = (field == 'copy' ? 'source_copy' : 'copy')
-          locale_field = (field == 'copy' ? :rfc5646_locale : :source_rfc5646_locale)
+          other_field        = (field == 'copy' ? 'source_copy' : 'copy')
+          locale_field       = (field == 'copy' ? :rfc5646_locale : :source_rfc5646_locale)
           other_locale_field = (field == 'copy' ? :source_rfc5646_locale : :rfc5646_locale)
           %w(en fr).each do |locale|
             other_locale = (locale == 'en' ? 'fr' : 'en')
             FactoryGirl.create :translation,
-                               field => "foo #{term} bar",
-                               other_field => 'something else',
-                               locale_field => locale,
+                               field              => "foo #{term} bar",
+                               other_field        => 'something else',
+                               locale_field       => locale,
                                other_locale_field => other_locale
           end
         end
@@ -107,24 +107,18 @@ describe SearchController do
   describe '#keys' do
     before :all do
       reset_elastic_search
-      @user = FactoryGirl.create(:user, role: 'translator')
+      @user    = FactoryGirl.create(:user, role: 'translator')
       @project = FactoryGirl.create(:project)
 
       5.times { |i| FactoryGirl.create :key, project: @project, key: "t1_n#{i}" }
-      5.times { |i| FactoryGirl.create :key, project: @project, key: "t2_n#{i}"
-      regenerate_elastic_search_indexes}
+      5.times { |i| FactoryGirl.create :key, project: @project, key: "t2_n#{i}" }
+      regenerate_elastic_search_indexes
     end
 
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
       sleep(2)
-    end
-
-    it "should return an empty result list if no query is given" do
-      get :keys, keys: ' ', project_id: @project.id, format: 'json'
-      expect(response.status).to eql(200)
-      expect(response.body).to eql('[]')
     end
 
     it "should search by key" do
@@ -188,7 +182,7 @@ describe SearchController do
     before :all do
       reset_elastic_search
 
-      @user = FactoryGirl.create(:user, role: "translator")
+      @user     = FactoryGirl.create(:user, role: "translator")
       @project1 = FactoryGirl.create(:project)
       @project2 = FactoryGirl.create(:project)
       2.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("abcdef")) }
@@ -226,7 +220,7 @@ describe SearchController do
     end
 
     it "should filter according to project_id if given" do
-      get :commits, project_id: @project1.id, format:'json'
+      get :commits, project_id: @project1.id, format: 'json'
       expect(response.status).to eq(200)
       results = JSON.parse(response.body)
       expect(results.size).to eq(5)

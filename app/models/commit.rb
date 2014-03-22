@@ -59,6 +59,7 @@ require 'fileutils'
 # | `loading`      | If `true`, there is at least one {BlobImporter} processing this Commit.                                  |
 # | `priority`     | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
 # | `due_date`     | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
+# | `completed_at` | The date this Commit completed translation.                                                              |
 #
 # Metadata
 # ========
@@ -693,6 +694,8 @@ class Commit < ActiveRecord::Base
   end
 
   def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
+    return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
+
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
     CommitStatsRecalculator.new.perform id

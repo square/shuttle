@@ -24,13 +24,14 @@ class CommitObserver < ActiveRecord::Observer
   end
 
   private
+
   def ping_webhook(commit)
     return unless commit.ready_changed? && commit.ready?
     WebhookPinger.perform_once commit.id
   end
 
   def send_email(commit)
-    if commit.loading_was == true && commit.loading == false
+    if commit.loading_was == true && commit.loading == false && !commit.completed_at
       CommitMailer.notify_translators(commit).deliver
     end
     if commit.ready_was == false && commit.ready == true && commit.loading == false

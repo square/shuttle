@@ -430,7 +430,7 @@ de:
 
       allow_any_instance_of(Git::Base).to receive(:object).and_call_original
       allow_any_instance_of(Git::Base).to receive(:object).with('2dc20c984283bede1f45863b8f3b4dd9b5b554cc^{tree}:file-en.svg').
-          and_return(double('Git::Object::Blob', contents: @svg))
+                                              and_return(double('Git::Object::Blob', contents: @svg))
     end
 
     it "should create a tarball of localized files" do
