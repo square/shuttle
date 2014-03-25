@@ -13,11 +13,6 @@
 #    limitations under the License.
 
 namespace :maintenance do
-  desc "Locate hung commits and clear their worker queue"
-  task fix_hung_commits: :environment do
-    Commit.where(loading: true).select(&:broken?).each(&:clear_workers!)
-  end
-
   desc "Locates lockfiles that no longer refer to active processes and clears them"
   task clear_stale_lockfiles: :environment do
     workers      = Shuttle::Redis.smembers('workers').select { |w| w.start_with? Socket.gethostname }

@@ -49,7 +49,7 @@ module SidekiqLocking
     end
 
     def mutex(*args)
-      Redis::Mutex.new(lock_name(*args), :expire => 1.hour)
+      Redis::Mutex.new(lock_name(*args), expire: 1.hour)
     end
   end
 end

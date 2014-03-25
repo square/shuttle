@@ -550,6 +550,26 @@ describe Commit do
       @project.commit! 'HEAD'
       expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort - %w(yaml))
     end
+
+    it "should remove appropriate keys when reimporting after changed settings" do
+      commit = @project.commit!('HEAD')
+      expect(commit.keys.map(&:original_key)).to include('root')
+
+      @project.update_attribute :key_exclusions, %w(roo*)
+      commit.import_strings
+      expect(commit.keys(true).map(&:original_key)).not_to include('root')
+    end
+
+    it "should only associate relevant keys with a new commit when cached blob importing is being use3d" do
+      @project.update_attribute :key_exclusions, %w(skip_me)
+      commit      = @project.commit!('HEAD')
+      blob        = commit.blobs.first
+      red_herring = FactoryGirl.create(:key, key: 'skip_me')
+      FactoryGirl.create :blobs_key, key: red_herring, blob: blob
+
+      commit.import_strings
+      expect(commit.keys(true)).not_to include(red_herring)
+    end
   end
 
   describe "#all_translations_entered_for_locale?" do

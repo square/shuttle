@@ -21,10 +21,14 @@
       = "#{@commit.revision[0, 6]}"
       span.separator &nbsp;/&nbsp;
       - if @commit.loading?
-        - current_status = "Loading with #{pluralize(@commit.list_workers.count, 'Job')}"
+        - if @commit.import_batch_status
+          | Currently Loading With #{pluralize_with_delimiter @commit.import_batch_status.pending, 'Job'} Remaining
+        - else
+          | Loading Stalled!
+      - elsif @commit.ready?
+        | Currently Ready
       - else
-        - current_status = (@commit.ready? ? 'Ready' : 'Translating')
-      = "Currently #{current_status}"
+        | Currently Translating
       span.separator &nbsp;/&nbsp;
       - if @commit.completed_at
         = "First Completed #{time_ago_in_words(@commit.completed_at)} ago"
@@ -85,12 +89,6 @@ hr.divider
           | Use this if you need to manually reimport a commit
         .controls
           = button_to 'Reimport', redo_project_commit_path(@project, @commit)
-      - if current_user.admin? and @commit.loading?
-        .control-group
-          label.description-label
-            | Use this to clear workers for hanging commits
-          .controls
-            = button_to 'Clear Workers', clear_project_commit_url(@project, @commit)
 
       .control-group
         label.description-label
