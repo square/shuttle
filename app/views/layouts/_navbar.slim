@@ -37,7 +37,7 @@ div id="navbar-container"
       li id="quicknav-container" &nbsp;
       - if current_user
         - if current_user.monitor?
-          li.worker-status 
+          li.worker-status class=('clickable' if current_user.admin?)
             i.fa.fa-circle
             | &nbsp; Workers
         li: a href=destroy_user_session_url data-method='delete' Log Out

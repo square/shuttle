@@ -14,7 +14,7 @@
 
 
 $(document).ready((->
-  $('.worker-status').click () -> 
+  $('.worker-status.clickable').click () ->
     window.location = "/sidekiq"
 
   checkWorkerStatus = ->

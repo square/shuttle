@@ -8,7 +8,7 @@
   background-color: darken($navbar-background, 5%);
   color: $gray3;
 
-  &:hover {
+  &.clickable:hover {
     box-shadow: inset 0 4px 5px darken($navbar-background, 15%);
     background-color: darken($navbar-background, 10%);
     cursor: pointer;
