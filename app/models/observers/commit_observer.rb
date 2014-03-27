@@ -15,9 +15,14 @@
 # This observer on the {Commit} model...
 #
 # 1. Checks if a webhook should be fired, and enqueues the appropriate job if so.
-# 2. Sends an email to the translators alerting them of the new commit, if it has finished loading.
+# 2. Checks if the build status should be updated, and enqueues the appropriate job if so.
+# 3. Sends an email to the translators alerting them of the new commit, if it has finished loading.
 
 class CommitObserver < ActiveRecord::Observer
+  def after_save(commit)
+    update_build_status(commit)
+  end
+
   def after_update(commit)
     ping_webhook(commit)
     send_email(commit)
@@ -28,6 +33,13 @@ class CommitObserver < ActiveRecord::Observer
   def ping_webhook(commit)
     return unless commit.ready_changed? && commit.ready?
     WebhookPinger.perform_once commit.id
+  end
+
+  def update_build_status(commit)
+    return unless commit.project.build_status_url
+    if commit.id_changed? or commit.ready_changed? or commit.loading_changed?
+      BuildStatusUpdater.perform_once commit.id
+    end
   end
 
   def send_email(commit)

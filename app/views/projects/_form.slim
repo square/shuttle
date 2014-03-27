@@ -43,6 +43,24 @@
               |  and 
               tt ready
               |  status.
+        .control-group
+          = f.label :build_status_url, class: 'control-label'
+          .controls
+            = f.text_field :build_status_url, class: 'tooltip-parent', :'data-tooltip' => '#build_status_url_tooltip'
+            .tooltip#build_status_url_tooltip
+              | This URL will be posted to when a commit's status is changed.
+                It is used to update the build status of a commit and is primarily meant
+                to integrate with Stash.  HTTP Post body will contain
+              tt state
+              | ,
+              tt key
+              | ,
+              tt name
+              | ,
+              tt url
+              |  and,
+              tt description
+              |  .
 
       fieldset 
         legend Locale Settings
