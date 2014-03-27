@@ -33,6 +33,7 @@ gem 'git', github: 'RISCfuture/ruby-git', ref: '14d05318c3c22352564dfb3acf45ee1a
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
+gem 'similar_text', '~> 0.0.4'
 
 # IMPORTING
 gem 'therubyracer', platform: :mri, require: 'v8'
