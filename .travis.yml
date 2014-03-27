@@ -1,0 +1,13 @@
+before_install:
+- sudo apt-get install -qq libarchive-dev
+- psql -c 'create database travis_ci_test;' -U postgres
+- cp config/database.travis.yml config/database.yml
+addons:
+  postgresql: '9.3'
+services:
+- redis
+- elasticsearch
+language: ruby
+rvm:
+- 1.9.3
+- 2.0.0
