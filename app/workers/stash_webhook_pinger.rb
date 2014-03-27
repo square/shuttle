@@ -16,7 +16,7 @@
 # let it know what the current status of the commit is.  Looks up the
 # build status URL for the {Project} and performs an HTTP post with the status information.
 
-class BuildStatusUpdater
+class StashWebhookPinger
   include Sidekiq::Worker
   include Rails.application.routes.url_helpers
 
@@ -28,8 +28,8 @@ class BuildStatusUpdater
 
   def perform(commit_id)
     commit = Commit.find(commit_id)
-    if commit.project.build_status_url.present?
-      build_status_url = "#{commit.project.build_status_url.sub(/\/$/, '')}/#{commit.revision}"
+    if commit.project.stash_webhook_url.present?
+      stash_webhook_url = "#{commit.project.stash_webhook_url.sub(/\/$/, '')}/#{commit.revision}"
       post_parameters = {
           key: 'SHUTTLE',
           name: "SHUTTLE-#{commit.revision[0..6]}",
@@ -53,7 +53,7 @@ class BuildStatusUpdater
           )
       end
 
-      HTTParty.post(build_status_url, { timeout: 5, body: post_parameters })
+      HTTParty.post(stash_webhook_url, { timeout: 5, body: post_parameters })
     end
   end
 

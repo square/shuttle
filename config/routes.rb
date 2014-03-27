@@ -47,7 +47,8 @@ Shuttle::Application.routes.draw do
     end
 
     member do
-      post 'pull-request-builder' => 'projects#github_webhook'
+      post 'github-pull-request-builder' => 'projects#github_webhook'
+      post 'stash-pull-request-builder' => 'projects#stash_webhook'
     end
   end
 

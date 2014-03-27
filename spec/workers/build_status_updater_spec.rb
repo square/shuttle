@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 require 'spec_helper'
-describe BuildStatusUpdater do
+describe StashWebhookPinger do
   include Rails.application.routes.url_helpers
 
   before(:each) do
@@ -25,16 +25,16 @@ describe BuildStatusUpdater do
   end
 
   describe "#perform" do
-    subject { BuildStatusUpdater.new }
+    subject { StashWebhookPinger.new }
 
     context "on_perform" do
       before(:each) do
         @commit = FactoryGirl.create(:commit)
       end
 
-      it "sends an http request to the project build_status_url if one is defined" do
+      it "sends an http request to the project stash_webhook_url if one is defined" do
         url = "http://www.example.com"
-        @commit.project.build_status_url = url
+        @commit.project.stash_webhook_url = url
         @commit.project.save!
         expect(HTTParty).to receive(:post).with(
                                 "#{url}/#{@commit.revision}",
@@ -43,18 +43,18 @@ describe BuildStatusUpdater do
         subject.perform(@commit.id)
       end
 
-      it "doesnt send anything if no build_status_url is defined on the project" do
-        expect(@commit.project.build_status_url).to be_blank
+      it "doesnt send anything if no stash_webhook_url is defined on the project" do
+        expect(@commit.project.stash_webhook_url).to be_blank
         expect(HTTParty).not_to receive(:post)
         subject.perform(@commit.id)
       end
     end
 
     context "on_create" do
-      it "sends an http request to the project build_status_url when a commit is first created" do
+      it "sends an http request to the project stash_webhook_url when a commit is first created" do
         @commit = FactoryGirl.build(:commit, ready: false, loading: true)
         @url = "http://www.example.com"
-        @commit.project.build_status_url = @url
+        @commit.project.stash_webhook_url = @url
         @commit.project.save!
 
         expect(HTTParty).to receive(:post).with("#{@url}/#{@commit.revision}", hash_including(body: {
@@ -73,7 +73,7 @@ describe BuildStatusUpdater do
     before(:each) do
       @commit = FactoryGirl.build(:commit, ready: false, loading: true)
       @url = "http://www.example.com"
-      @commit.project.build_status_url = @url
+      @commit.project.stash_webhook_url = @url
       @commit.project.save!
       @commit.save!
     end

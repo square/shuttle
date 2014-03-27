@@ -20,25 +20,25 @@
 
 class CommitObserver < ActiveRecord::Observer
   def after_save(commit)
-    update_build_status(commit)
+    ping_stash_webhook(commit)
   end
 
   def after_update(commit)
-    ping_webhook(commit)
+    ping_github_webhook(commit)
     send_email(commit)
   end
 
   private
 
-  def ping_webhook(commit)
+  def ping_github_webhook(commit)
     return unless commit.ready_changed? && commit.ready?
-    WebhookPinger.perform_once commit.id
+    GithubWebhookPinger.perform_once commit.id
   end
 
-  def update_build_status(commit)
-    return unless commit.project.build_status_url
+  def ping_stash_webhook(commit)
+    return unless commit.project.stash_webhook_url
     if commit.id_changed? or commit.ready_changed? or commit.loading_changed?
-      BuildStatusUpdater.perform_once commit.id
+      StashWebhookPinger.perform_once commit.id
     end
   end
 
