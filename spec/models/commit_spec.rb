@@ -313,7 +313,7 @@ describe Commit do
         it "enqueues a webhook job if the state changed" do
           expect(@commit).not_to be_ready
           @commit.ready = true
-          expect(WebhookPinger).to receive(:perform_once)
+          expect(GithubWebhookPinger).to receive(:perform_once)
           @commit.save!
         end
 
@@ -321,7 +321,7 @@ describe Commit do
           @commit.ready = true
           @commit.save!
           @commit.ready = true
-          expect(WebhookPinger).not_to receive(:perform_once)
+          expect(GithubWebhookPinger).not_to receive(:perform_once)
           @commit.save!
         end
 
@@ -332,12 +332,12 @@ describe Commit do
           @commit.ready = true
           @commit.save!
           @commit.ready = false
-          expect(WebhookPinger).not_to receive(:perform_once)
+          expect(GithubWebhookPinger).not_to receive(:perform_once)
           @commit.save!
         end
 
         it "doesn't enqueue a webhook job if state has not changed" do
-          expect(WebhookPinger).not_to receive(:perform_once)
+          expect(GithubWebhookPinger).not_to receive(:perform_once)
           @commit.save!
         end
       end

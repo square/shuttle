@@ -76,11 +76,12 @@ describe SearchController do
       get :translations, query: 'term1', target_locales: 'fr, en', format: 'json'
       expect(response.status).to eql(200)
       results = JSON.parse(response.body)
-      expect(results.size).to eql(2)
+      # Ensure ordering since ElasticSearch does not guarantee ordering
+      results.sort_by! { |r| r['locale']['rfc5646'] }
       expect(results.first['copy']).to eql('foo term1 bar')
-      expect(results.first['locale']['rfc5646']).to eql('fr')
+      expect(results.first['locale']['rfc5646']).to eql('en')
       expect(results.last['copy']).to eql('foo term1 bar')
-      expect(results.last['locale']['rfc5646']).to eql('en')
+      expect(results.last['locale']['rfc5646']).to eql('fr')
     end
 
     it "should respond with a 422 if the locale is unknown" do

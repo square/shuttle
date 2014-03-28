@@ -13,22 +13,22 @@
 #    limitations under the License.
 
 require 'spec_helper'
-describe WebhookPinger do
+describe GithubWebhookPinger do
   before(:each) do
     @commit = FactoryGirl.create(:commit)
   end
 
   describe "#perform" do
-    subject { WebhookPinger.new }
+    subject { GithubWebhookPinger.new }
     it "sends an http request to the project webhook_url if one is defined" do
       url = "http://www.example.com"
-      @commit.project.webhook_url = url
+      @commit.project.github_webhook_url = url
       @commit.project.save!
       expect(HTTParty).to receive(:post).with(url, anything())
       subject.perform(@commit.id)
     end
     it "doesnt send anything if no webhook_url is defined on the project" do
-      expect(@commit.project.webhook_url).to be_blank
+      expect(@commit.project.github_webhook_url).to be_blank
       expect(HTTParty).not_to receive(:post)
       subject.perform(@commit.id)
     end
