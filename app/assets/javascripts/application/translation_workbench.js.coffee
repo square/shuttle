@@ -110,10 +110,14 @@ class TranslationItem
 
 
   loadFuzzyMatches: ->
+    @fuzzy_matches.append($('<dt/>').text('Fuzzy Matches'))
+    @fuzzy_matches.append($('<dd/>').text('Loading fuzzy matches'))
     $.ajax @translation.fuzzy_match_url,
       success: (matches) =>
         @fuzzy_matches.empty()
         @fuzzy_matches.append($('<dt/>').text('Fuzzy Matches'))
+        if matches.length == 0
+          @fuzzy_matches.append($('<dd/>').text('No fuzzy matches found :('))
         for match in matches
           do (match) =>
             match_percentage = $('<span/>').addClass("match-percentage").text("(#{match.match_percentage.toString()[0..4]}%) ")
