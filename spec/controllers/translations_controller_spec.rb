@@ -422,19 +422,18 @@ describe TranslationsController do
 
   describe "#fuzzy_match" do
     before :all do
-      @project = FactoryGirl.create(:project)
-      @user = FactoryGirl.create(:user, role: 'reviewer')
-      @project = FactoryGirl.create(:project)
+      @user = FactoryGirl.create(:user, role: 'translator')
     end
 
     before :each do
+      Translation.destroy_all
+
       reset_elastic_search
-      @original_key = FactoryGirl.create(:key, project: @project, key: 'original_translation')
-      @another_key = FactoryGirl.create(:key, project: @project, key: 'almost_translation')
-      @original_translation = FactoryGirl.create :translation,
-                                                 key: @original_key,
-                                                 source_copy: 'original_translation',
-                                                 copy: nil
+      @translation = FactoryGirl.create :translation,
+                                        source_copy: 'foo bar 1',
+                                        copy: 'something else',
+                                        source_rfc5646_locale: 'en',
+                                        rfc5646_locale: 'fr'
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
@@ -442,31 +441,89 @@ describe TranslationsController do
 
     it "should return potential fuzzy matches" do
       FactoryGirl.create :translation,
-                         key: @another_key,
-                         source_copy: 'almost_translation',
-                         copy: 'foreign_language'
+                         source_copy: 'foo bar 2',
+                         copy: 'something else',
+                         source_rfc5646_locale: 'en',
+                         rfc5646_locale: 'fr'
       regenerate_elastic_search_indexes
+      sleep(2)
 
       get :fuzzy_match,
-          project_id: @project.to_param,
-          key_id: @original_translation.key.to_param,
-          id: @original_translation.to_param,
+          project_id: @translation.key.project.to_param,
+          key_id: @translation.key.to_param,
+          id: @translation.to_param,
           format: 'json'
 
       expect(response.status).to eql(200)
-      expect(JSON.parse(response.body).length).to eql(1)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(2)
     end
 
     it "should not return matches where the copy is nil" do
-      pending
+      FactoryGirl.create :translation,
+                         source_copy: 'foo bar 2',
+                         copy: nil,
+                         source_rfc5646_locale: 'en',
+                         rfc5646_locale: 'fr'
+
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      get :fuzzy_match,
+          project_id: @translation.key.project.to_param,
+          key_id: @translation.key.to_param,
+          id: @translation.to_param,
+          format: 'json'
+
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(1)
     end
 
     it "should return at most 5 fuzzy matches" do
-      pending
+      (1..10).each do |i|
+        FactoryGirl.create :translation,
+                           source_copy: "foo bar #{i}",
+                           copy: 'something else',
+                           source_rfc5646_locale: 'en',
+                           rfc5646_locale: 'fr'
+      end
+
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      get :fuzzy_match,
+          project_id: @translation.key.project.to_param,
+          key_id: @translation.key.to_param,
+          id: @translation.to_param,
+          format: 'json'
+
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(5)
     end
 
     it "should sort fuzzy_matches by match_percentage" do
-      pending
+      (10..50).step(10).each do |i|
+        FactoryGirl.create :translation,
+                           source_copy: "foo bar #{'a' * i}",
+                           copy: 'something else',
+                           source_rfc5646_locale: 'en',
+                           rfc5646_locale: 'fr'
+      end
+
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      get :fuzzy_match,
+          project_id: @translation.key.project.to_param,
+          key_id: @translation.key.to_param,
+          id: @translation.to_param,
+          format: 'json'
+
+      expect(response.status).to eql(200)
+      sorted_results = JSON.parse(response.body).map { |r| r['match_percentage'] }
+      expect(sorted_results).to eql(sorted_results.sort.reverse)
     end
   end
 end
