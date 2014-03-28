@@ -56,8 +56,10 @@ class StashWebhookPinger
               description: 'Currently translating',
           )
       end
+      headers = { 'Content-Type' => 'application/json',
+                  'Accept' => 'application/json' }
 
-      HTTParty.post(stash_webhook_url, { timeout: 5, body: post_parameters })
+      HTTParty.post(stash_webhook_url, { timeout: 5, body: post_parameters.to_json, headers: headers })
     end
   end
 

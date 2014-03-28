@@ -235,11 +235,8 @@ class ProjectsController < ApplicationController
 
   def stash_webhook
     revision = params[:sha]
-
-    unless already_submitted_revision?(@project, revision)
-      other_fields = { description: 'Requested due to a Pull Request on Stash.' }
-      CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-    end
+    other_fields = { description: 'Requested due to a Pull Request on Stash.' }
+    CommitCreator.perform_once @project.id, revision, other_fields: other_fields
     render status: :ok, text: 'Success'
   end
 
