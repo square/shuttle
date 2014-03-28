@@ -15,7 +15,7 @@
 # Controller for working with {Project Projects}.
 
 class ProjectsController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :authenticate_user!, except: [:stash_webhook]
   before_filter :monitor_required, only: [:new, :create, :edit, :update]
   before_filter :find_project, except: [:index, :new, :create]
 
