@@ -120,6 +120,15 @@
             &.rejected {
               color: $input-red;
             }
+            &.fuzzy-matches {
+              .match-percentage {
+                color: $input-red;
+              }
+              dd + dd {
+                margin-top: 5px;
+              }
+            }
+
 
             dt {
               float: left;
@@ -127,14 +136,6 @@
             }
             dd {
               margin: 0px 0px 0px 100px;
-            }
-            .fuzzy-matches {
-              .match-percentage {
-                color: $input-red;
-              }
-              dd + dd {
-                margin-top: 8px;
-              }
             }
           }
         }
