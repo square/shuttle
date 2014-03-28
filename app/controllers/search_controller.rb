@@ -57,9 +57,9 @@ class SearchController < ApplicationController
           if query_filter.present?
             case field
               when 'searchable_source_copy' then
-                query { match 'source_copy', query_filter, operator: 'and' }
+                query { match 'source_copy', query_filter, operator: 'or' }
               else
-                query { match 'copy', query_filter, operator: 'and' }
+                query { match 'copy', query_filter, operator: 'or' }
             end
           else
             sort { by :id, 'desc' }

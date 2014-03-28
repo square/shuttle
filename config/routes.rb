@@ -50,7 +50,7 @@ Shuttle::Application.routes.draw do
     resources :keys, only: [] do
       resources :translations, only: [:show, :new, :create, :edit, :update] do
         member do
-          get :match
+          get :match, :fuzzy_match
           put :approve, :reject
         end
       end
