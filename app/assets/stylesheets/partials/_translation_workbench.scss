@@ -102,7 +102,11 @@
             }
 
             dt { float: left; width: 100px; }
-            dd { margin: 0px 0px 0px 100px; }
+            dd {
+              margin: 0px 0px 0px 100px;
+              .match-percentage { color: $input-red; }
+            }
+            dd + dd { margin-top: 8px; }
           }
 
         }
