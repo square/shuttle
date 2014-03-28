@@ -33,7 +33,10 @@ class StashWebhookPinger
       post_parameters = {
           key: 'SHUTTLE',
           name: "SHUTTLE-#{commit.revision[0..6]}",
-          url: project_commit_url(commit.project, commit),
+          url: project_commit_url(commit.project,
+                                  commit,
+                                  host: Shuttle::Configuration.worker.default_url_options.host,
+                                  port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
       }
       case
         when commit.ready?

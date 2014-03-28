@@ -60,7 +60,10 @@ describe StashWebhookPinger do
         expect(HTTParty).to receive(:post).with("#{@url}/#{@commit.revision}", hash_including(body: {
             key: 'SHUTTLE',
             name: "SHUTTLE-#{@commit.revision[0..6]}",
-            url: project_commit_url(@commit.project, @commit),
+            url: project_commit_url(@commit.project,
+                                    @commit,
+                                    host: Shuttle::Configuration.worker.default_url_options.host,
+                                    port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
             state: 'INPROGRESS',
             description: 'Currently loading',
         }))
@@ -82,7 +85,10 @@ describe StashWebhookPinger do
       expect(HTTParty).to receive(:post).with("#{@url}/#{@commit.revision}", hash_including(body: {
           key: 'SHUTTLE',
           name: "SHUTTLE-#{@commit.revision[0..6]}",
-          url: project_commit_url(@commit.project, @commit),
+          url: project_commit_url(@commit.project,
+                                  @commit,
+                                  host: Shuttle::Configuration.worker.default_url_options.host,
+                                  port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
           state: 'INPROGRESS',
           description: 'Currently translating',
       }))
@@ -95,7 +101,10 @@ describe StashWebhookPinger do
       expect(HTTParty).to receive(:post).with("#{@url}/#{@commit.revision}", hash_including(body: {
           key: 'SHUTTLE',
           name: "SHUTTLE-#{@commit.revision[0..6]}",
-          url: project_commit_url(@commit.project, @commit),
+          url: project_commit_url(@commit.project,
+                                  @commit,
+                                  host: Shuttle::Configuration.worker.default_url_options.host,
+                                  port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
           state: 'SUCCESSFUL',
           description: 'Translations completed',
       }))
