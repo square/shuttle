@@ -11,18 +11,33 @@
     .eight.columns {
       @include box-sizing;
 
-      &.left { padding: 10px 10px 10px 20px; }
-      &.right { padding: 10px 20px 10px 10px; }
+      &.left {
+        padding: 10px 10px 10px 20px;
+      }
+      &.right {
+        padding: 10px 20px 10px 10px;
+      }
 
       .translation-side {
         padding: 10px;
         min-height: 240px;
 
         textarea.translation-area {
-          &.approved { color: $input-green; font-weight: 500; }
-          &.rejected { color: $input-red; font-weight: 500; }
-          &.translated{ color: $input-blue; font-weight: 500; }
-          &.unsaved { color: black; }
+          &.approved {
+            color: $input-green;
+            font-weight: 500;
+          }
+          &.rejected {
+            color: $input-red;
+            font-weight: 500;
+          }
+          &.translated {
+            color: $input-blue;
+            font-weight: 500;
+          }
+          &.unsaved {
+            color: black;
+          }
           width: 100%;
           min-height: 150px;
         }
@@ -35,23 +50,30 @@
           float: right;
         }
         .notes {
-          display:-moz-box; /* Firefox */
-          display:-webkit-box; /* Safari and Chrome */
-          display:-ms-flexbox; /* Internet Explorer 10 */
-          display:box;
-          -moz-box-orient:horizontal;
-          -webkit-box-orient:horizontal;
-          box-orient:horizontal;
+          display: -moz-box; /* Firefox */
+          display: -webkit-box; /* Safari and Chrome */
+          display: -ms-flexbox; /* Internet Explorer 10 */
+          display: box;
+          -moz-box-orient: horizontal;
+          -webkit-box-orient: horizontal;
+          box-orient: horizontal;
 
           .half {
             @include flex;
             padding: 10px 10px;
 
             width: 100%;
-            p.glossary-tips { color: $input-blue; }
-            p.warning { color: $input-orange; }
-            p.alert { color: $input-red; }
-            p.token-parity-warning {}
+            p.glossary-tips {
+              color: $input-blue;
+            }
+            p.warning {
+              color: $input-orange;
+            }
+            p.alert {
+              color: $input-red;
+            }
+            p.token-parity-warning {
+            }
             p.glossary-tips, p.warning, p.alert {
               font-size: 12px;
               font-style: italic;
@@ -59,15 +81,14 @@
               line-height: 15px;
               margin: 5px;
             }
-          }    
+          }
         }
       }
 
-      
       .info-side {
         padding: 10px;
         min-height: 240px;
-        position: relative; 
+        position: relative;
 
         background-color: $gray6;
         p.source-copy {
@@ -81,8 +102,7 @@
         p.context {
           margin-left: 30px;
           margin-bottom: 110px;
-          
-          
+
         }
 
         .additional-info {
@@ -101,18 +121,29 @@
               color: $input-red;
             }
 
-            dt { float: left; width: 100px; }
-            dd { margin: 0px 0px 0px 100px; }
+            dt {
+              float: left;
+              width: 100px;
+            }
+            dd {
+              margin: 0px 0px 0px 100px;
+            }
+            .fuzzy-matches {
+              .match-percentage {
+                color: $input-red;
+              }
+              dd + dd {
+                margin-top: 8px;
+              }
+            }
           }
-
+        }
+      }
+      &:not(:last-of-type) {
+        .entry-spacer {
+          margin: 0px 20px;
+          border-bottom: 1px solid $gray5;
         }
       }
     }
-    &:not(:last-of-type) {
-      .entry-spacer {
-        margin: 0px 20px;
-        border-bottom: 1px solid $gray5;
-      }
-    }
   }
-}

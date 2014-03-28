@@ -25,8 +25,8 @@ class TranslationsController < ApplicationController
   before_filter :find_key
   before_filter :find_translation
 
-  respond_to :html, :json, except: :match
-  respond_to :json, only: :match
+  respond_to :html, :json, except: [:match, :fuzzy_match]
+  respond_to :json, only: [:match, :fuzzy_match]
 
   # Displays a large-format translation view page.
   #
@@ -120,8 +120,8 @@ class TranslationsController < ApplicationController
       @translation.copy = nil if @translation.copy.blank?
       if @translation.copy.nil?
         @translation.translator = nil
-        @translation.approved   = nil
-        @translation.reviewer   = nil
+        @translation.approved = nil
+        @translation.reviewer = nil
       end
     end
 
@@ -134,8 +134,8 @@ class TranslationsController < ApplicationController
       # if the current user is a reviewer, treat this as an approve action; this
       # makes tabbing through fields act as approval in the front-end
       if current_user.reviewer?
-        @translation.reviewer                 = current_user
-        @translation.approved                 = true
+        @translation.reviewer = current_user
+        @translation.approved = true
         @translation.preserve_reviewed_status = true
         @translation.save
       end
@@ -149,7 +149,7 @@ class TranslationsController < ApplicationController
           render json: @translation.errors, status: :unprocessable_entity
         end
       end
-      format.html { redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: {success: t('controllers.translations.update.success') }}
+      format.html { redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { success: t('controllers.translations.update.success') } }
     end
   end
 
@@ -259,7 +259,51 @@ class TranslationsController < ApplicationController
     return head(:no_content) unless @match
     respond_with @match, location: project_key_translation_url(@project, @key, @translation)
   end
+
   #TODO return all matches, show popup
+
+  # Returns up to 5 best fuzzy matching Translations that meets the following
+  # requirements:
+  #
+  # * in the same locale,
+  #
+  # If multiple Translations match, priority is given to the most closely
+  # matching Translations.
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:project_id/keys/:key_id/translations/:id/fuzzy_match`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                                    |
+  # |:-------------|:-----------------------------------|
+  # | `project_id` | The slug of a Project.             |
+  # | `key_id`     | The slug of a Key in that project. |
+  # | `id`         | The ID of a Translation.           |
+  #
+
+  def fuzzy_match
+    respond_to do |format|
+      format.json do
+        limit = 5
+        query_filter = @translation.source_copy
+        target_locale = @translation.rfc5646_locale
+        @results = Translation.search(load: { include: { key: :project } }) do
+          # TODO: Remove duplicate where source_copy, copy are same
+          filter :and,
+                 { term: { rfc5646_locale: target_locale } },
+                 { not: { missing: { field: 'copy' } } }
+
+          size limit
+          query { match 'source_copy', query_filter, operator: 'or' }
+        end
+        render json: decorate_fuzzy_match(@results, query_filter).to_json
+      end
+    end
+  end
 
   private
 
@@ -277,5 +321,16 @@ class TranslationsController < ApplicationController
 
   def translation_params
     params.require(:translation).permit(:copy, :notes)
+  end
+
+  def decorate_fuzzy_match(translations, source_copy)
+    translations = translations.map do |translation|
+      {
+          source_copy: translation.source_copy,
+          copy: translation.copy,
+          match_percentage: source_copy.similar(translation.source_copy)
+      }
+    end
+    translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
   end
 end

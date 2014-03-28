@@ -108,6 +108,20 @@ class TranslationItem
         @copy_field[0].selectionStart = 0
         @copy_field[0].selectionEnd = match.copy.length
 
+
+  loadFuzzyMatches: ->
+    $.ajax @translation.fuzzy_match_url,
+      success: (matches) =>
+        @fuzzy_matches.empty()
+        @fuzzy_matches.append($('<dt/>').text('Fuzzy Matches'))
+        for match in matches
+          do (match) =>
+            match_percentage = $('<span/>').addClass("match-percentage").text("(#{match.match_percentage.toString()[0..4]}%) ")
+            match_element = $('<a/>').text(match.copy).prepend(match_percentage)
+            match_element.click =>
+              @copy_field.val match.copy
+            @fuzzy_matches.append($('<dd/>').append(match_element))
+
   # @private
   build: ->
     context = {}
@@ -164,6 +178,7 @@ class TranslationItem
 
     @alerts = @element.find('div.alerts').first()
     @glossary_tips = @element.find('div.tips').first()
+    @fuzzy_matches = @element.find('div.item.fuzzy-matches').first()
     
     # Set up @source_copy
     @source_copy.highlighter(
@@ -176,9 +191,10 @@ class TranslationItem
       # select entire range when focused
       @copy_field[0].selectionStart = 0
       @copy_field[0].selectionEnd = @copy_field.val().length
-      this.loadSuggestion()
-      this.hideOtherGlossaryTooltips()
-      this.renderGlossaryTooltip()
+      @loadSuggestion()
+      @loadFuzzyMatches()
+      @hideOtherGlossaryTooltips()
+      @renderGlossaryTooltip()
 
     @copy_field.keydown (e) =>
       # hitting enter saves the field
@@ -394,7 +410,7 @@ class root.TranslationWorkbench
   # @param [jQuery Object] filter The element containing the filter form.
   # @param [String] url The URL to load translations from.
   # @param [Array] glossary A JSON-decoded list of glossary entries.
-  # @param [Object] options Addditional options. These are passed to the
+  # @param [Object] options Additional options. These are passed to the
   #   `TranslationItem` constructor.
   #
   constructor: (@list, @filter, @url, @search_url, @glossary, @options) ->

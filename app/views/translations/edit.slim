@@ -116,12 +116,14 @@ hr.divider
           .item
             dt Importer
             dd = @translation.key.importer_name
-          .item
-            dt Fencers
-            dd = @translation.key.fencers.map { |f| I18n.t("fencer.#{f}") }.to_sentence
-          .item
-            dt Source
-            dd = @translation.key.source
+          - if @translation.key.fencers.present?
+            .item
+              dt Fencers
+              dd = @translation.key.fencers.map { |f| I18n.t("fencer.#{f}") }.to_sentence
+          - if @translation.key.source.present?
+            .item
+              dt Source
+              dd = @translation.key.source
           - if @translation.translator
             .item
               dt Translator
