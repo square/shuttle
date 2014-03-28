@@ -30,6 +30,7 @@ class StashWebhookPinger
     commit = Commit.find(commit_id)
     if commit.project.stash_webhook_url.present?
       stash_webhook_url = "#{commit.project.stash_webhook_url.sub(/\/$/, '')}/#{commit.revision}"
+
       post_parameters = {
           key: 'SHUTTLE',
           name: "SHUTTLE-#{commit.revision[0..6]}",
@@ -38,6 +39,15 @@ class StashWebhookPinger
                                   host: Shuttle::Configuration.worker.default_url_options.host,
                                   port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
       }
+      headers = {
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json',
+      }
+      auth = {
+          username: Shuttle::Configuration.stash.username,
+          password: Shuttle::Configuration.stash.password,
+      }
+
       case
         when commit.ready?
           post_parameters.merge!(
@@ -55,10 +65,11 @@ class StashWebhookPinger
               description: 'Currently translating',
           )
       end
-      headers = { 'Content-Type' => 'application/json',
-                  'Accept' => 'application/json' }
 
-      HTTParty.post(stash_webhook_url, { timeout: 5, body: post_parameters.to_json, headers: headers })
+      HTTParty.post(stash_webhook_url, { timeout: 5,
+                                         body: post_parameters.to_json,
+                                         headers: headers,
+                                         basic_auth: auth })
     end
   end
 
