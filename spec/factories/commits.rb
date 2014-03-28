@@ -15,7 +15,6 @@
 FactoryGirl.define do
   factory :commit do
     association :project
-    #sequence(:revision) { |i| i.to_s(16).rjust(40, '0') }
     sequence(:revision) { rand(16**40).to_s(16).rjust(40, '0') }
     message "Fixed nil error in foo_controller.rb"
     committed_at { Time.now }

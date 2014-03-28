@@ -107,11 +107,13 @@ class Project < ActiveRecord::Base
       watched_branches:         {type: Array, default: []},
       touchdown_branch:         {allow_nil: true},
 
-      webhook_url:              {type: String, allow_nil: true}
+      github_webhook_url:       {type: String, allow_nil: true},
+      stash_webhook_url:        {type: String, allow_nil: true}
   )
 
   extend SetNilIfBlank
-  set_nil_if_blank :webhook_url
+  set_nil_if_blank :github_webhook_url
+  set_nil_if_blank :stash_webhook_url
 
   include Slugalicious
   slugged :name

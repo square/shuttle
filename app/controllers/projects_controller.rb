@@ -178,7 +178,7 @@ class ProjectsController < ApplicationController
   # Routes
   # ------
   #
-  # * `POST /projects/:id/pull-request-builder`
+  # * `POST /projects/:id/github-pull-request-builder`
   #
   # Path Parameters
   # ---------------
@@ -210,6 +210,39 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # Receives a stash webhook and triggers a new import for the latest commit.
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:id/stash-pull-request-builder`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                   |
+  # |:-----|:------------------|
+  # | `id` | A Project's slug. |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |           |                                                          |
+  # |:----------|----------------------------------------------------------|
+  # | `ref`     | The ref of the SHA that needs to be built                |
+  # | `sha`     | The SHA of the commit that should be built               |
+  # | `type`    | Whether it was a pull request or push that triggered it  |
+
+  def stash_webhook
+    revision = params[:sha]
+
+    unless already_submitted_revision?(@project, revision)
+      other_fields = { description: 'Requested due to a Pull Request on Stash.' }
+      CommitCreator.perform_once @project.id, revision, other_fields: other_fields
+    end
+    render status: :ok, text: 'Success'
+  end
+
   private
 
   def find_project
@@ -235,7 +268,7 @@ class ProjectsController < ApplicationController
     
     project_params = params[:project].to_hash.slice(*%w(
         name repository_url base_rfc5646_locale due_date cache_localization
-        webhook_url skip_imports cache_manifest_formats key_exclusions
+        github_webhook_url stash_webhook_url skip_imports cache_manifest_formats key_exclusions
         key_inclusions skip_paths only_paths watched_branches touchdown_branch
         key_locale_exclusions key_locale_inclusions
         only_importer_paths skip_importer_paths

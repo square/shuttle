@@ -27,7 +27,8 @@ en:
         name: name
         repository_url: repository URL
         base_rfc5646_locale: source locale
-        webhook_url: webhook URL
+        github_webhook_url: github webhook URL
+        stash_webhook_url: stash webhook URL
         targeted_rfc5646_locales: targeted localizations
         skip_imports: Don’t use these importers
         only_importer_paths: Only search for strings under these paths using these importers

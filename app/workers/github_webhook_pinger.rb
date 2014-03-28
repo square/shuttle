@@ -16,7 +16,7 @@
 # services know. Looks up the webhook URL for the {Project} and perform an HTTP
 # post with the commit information.
 
-class WebhookPinger
+class GithubWebhookPinger
   include Sidekiq::Worker
   sidekiq_options queue: :low
 
@@ -26,9 +26,9 @@ class WebhookPinger
 
   def perform(commit_id)
     commit = Commit.find(commit_id)
-    if commit.project.webhook_url.present?
+    if commit.project.github_webhook_url.present?
       post_parameters = {commit_revision: commit.revision, project_name: commit.project.name, ready: commit.ready?}
-      HTTParty.post(commit.project.webhook_url, {timeout: 5, body: post_parameters })
+      HTTParty.post(commit.project.github_webhook_url, {timeout: 5, body: post_parameters })
     end
   end
 

@@ -32,10 +32,10 @@
               |  the GitHub website URL.
 
         .control-group
-          = f.label :webhook_url, class: 'control-label'
+          = f.label :github_webhook_url, class: 'control-label'
           .controls
-            = f.text_field :webhook_url, class: 'tooltip-parent', :'data-tooltip' => '#webhook_url_tooltip'
-            .tooltip#webhook_url_tooltip
+            = f.text_field :github_webhook_url, class: 'tooltip-parent', :'data-tooltip' => '#github_webhook_url_tooltip'
+            .tooltip#github_webhook_url_tooltip
               | This URL will be posted to when a commit is marked as 'ready'. HTTP Post body will contain 
               tt commit_revision
               | , 
@@ -43,6 +43,24 @@
               |  and 
               tt ready
               |  status.
+        .control-group
+          = f.label :stash_webhook_url, class: 'control-label'
+          .controls
+            = f.text_field :stash_webhook_url, class: 'tooltip-parent', :'data-tooltip' => '#stash_webhook_url_tooltip'
+            .tooltip#stash_webhook_url_tooltip
+              | This URL will be posted to when a commit's status is changed.
+                It is used to update the build status of a commit and is primarily meant
+                to integrate with Stash.  HTTP Post body will contain
+              tt state
+              | ,
+              tt key
+              | ,
+              tt name
+              | ,
+              tt url
+              |  and,
+              tt description
+              |  .
 
       fieldset 
         legend Locale Settings
