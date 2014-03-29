@@ -134,7 +134,7 @@ class TranslationItem
             match_element.mouseenter ->
               match_element.prettyTextDiff
                 diffContainer: match_wrapper.find('.diff')
-              match_wrapper.find('.diff').prepend(Array(18).join('&nbsp;'))
+              match_wrapper.find('.diff').prepend($('<span/>').addClass("match-percentage").text("Source Diff: "))
             match_element.mouseleave ->
               match_wrapper.find('.diff').empty()
 
