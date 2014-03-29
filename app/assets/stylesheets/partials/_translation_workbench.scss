@@ -127,6 +127,15 @@
               dd + dd {
                 margin-top: 5px;
               }
+              .diff {color:$gray3;}
+              ins {
+                background-color: $background-green;
+                text-decoration: none;
+              }
+
+              del {
+                background-color: $background-red;
+              }
             }
 
 
