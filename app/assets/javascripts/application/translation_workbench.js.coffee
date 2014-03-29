@@ -122,17 +122,23 @@ class TranslationItem
           do (match) =>
             match_percentage = $('<span/>').addClass("match-percentage").text("(#{match.match_percentage.toString()[0..4]}%) ")
             match_element = $('<a/>').append(match_percentage)
-            match_element.append($('<span/>').addClass('fuzzy-matched-copy').text(match.copy))
-            match_element.append($('<span/>').addClass('changed').text(match.source_copy).hide())
-            match_element.append($('<span/>').addClass('original').text(@translation.source_copy).hide())
-            match_element.append($('<div/>').addClass('diff'))
+                                     .append($('<span/>').addClass('fuzzy-matched-copy').text(match.copy))
+                                     .append($('<span/>').addClass('changed').text(match.source_copy).hide())
+                                     .append($('<span/>').addClass('original').text(@translation.source_copy).hide())
+            match_wrapper = $('<dd/>').append(match_element)
+                                      .append($('<div/>').addClass('diff'))
+
             match_element.click =>
               @copy_field.val match.copy
+
             match_element.mouseenter ->
-              $(this).prettyTextDiff()
+              match_element.prettyTextDiff
+                diffContainer: match_wrapper.find('.diff')
+              match_wrapper.find('.diff').prepend(Array(18).join('&nbsp;'))
             match_element.mouseleave ->
-              $(this).find('.diff').empty()
-            @fuzzy_matches.append($('<dd/>').append(match_element))
+              match_wrapper.find('.diff').empty()
+
+            @fuzzy_matches.append(match_wrapper)
 
   # @private
   build: ->
