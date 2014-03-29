@@ -127,14 +127,17 @@
               dd + dd {
                 margin-top: 5px;
               }
-              .diff {color:$gray3;}
+              .diff {
+                color: $gray2;
+                text-decoration: none !important;
+              }
               ins {
-                background-color: $background-green;
+                background-color: darken($background-green, 8%);
                 text-decoration: none;
               }
 
               del {
-                background-color: $background-red;
+                background-color: darken($background-red, 8%);
               }
             }
 
