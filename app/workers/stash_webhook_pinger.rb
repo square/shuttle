@@ -36,7 +36,8 @@ class StashWebhookPinger
           url: project_commit_url(commit.project,
                                   commit,
                                   host: Shuttle::Configuration.worker.default_url_options.host,
-                                  port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
+                                  port: Shuttle::Configuration.worker.default_url_options['port'],
+                                  protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http' ),
       }
       case
         when commit.ready?
