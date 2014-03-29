@@ -330,7 +330,7 @@ class TranslationsController < ApplicationController
           copy: translation.copy,
           match_percentage: source_copy.similar(translation.source_copy)
       }
-    end
+    end.reject { |t| t[:match_percentage] < 60 }
     translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
   end
 end

@@ -503,7 +503,7 @@ describe TranslationsController do
       expect(results.size).to eql(5)
     end
 
-    it "should sort fuzzy_matches by match_percentage" do
+    it "should sort fuzzy_matches by match_percentage and ensure greater than 60" do
       (10..50).step(10).each do |i|
         FactoryGirl.create :translation,
                            source_copy: "foo bar #{'a' * i}",
@@ -523,6 +523,7 @@ describe TranslationsController do
 
       expect(response.status).to eql(200)
       sorted_results = JSON.parse(response.body).map { |r| r['match_percentage'] }
+      sorted_results.each { |r| expect(r).to be >= 60 }
       expect(sorted_results).to eql(sorted_results.sort.reverse)
     end
   end
