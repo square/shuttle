@@ -39,6 +39,9 @@
 #= require twitter/typeahead
 #= require modernizr
 #= require xregexp
+#= require diff_match_patch.js
+#= require jquery-prettyTextDiff.js
+
 #
 #= require d3
 #= require nvd3
