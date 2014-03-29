@@ -63,10 +63,11 @@ describe StashWebhookPinger do
             url: project_commit_url(@commit.project,
                                     @commit,
                                     host: Shuttle::Configuration.worker.default_url_options.host,
-                                    port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
+                                    port: Shuttle::Configuration.worker.default_url_options['port'],
+                                    protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'),
             state: 'INPROGRESS',
             description: 'Currently loading',
-        }))
+        }.to_json))
         @commit.save!
       end
     end
@@ -88,10 +89,11 @@ describe StashWebhookPinger do
           url: project_commit_url(@commit.project,
                                   @commit,
                                   host: Shuttle::Configuration.worker.default_url_options.host,
-                                  port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
+                                  port: Shuttle::Configuration.worker.default_url_options['port'],
+                                  protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'),
           state: 'INPROGRESS',
           description: 'Currently translating',
-      }))
+      }.to_json))
 
       @commit.loading = false
       @commit.save!
@@ -104,10 +106,11 @@ describe StashWebhookPinger do
           url: project_commit_url(@commit.project,
                                   @commit,
                                   host: Shuttle::Configuration.worker.default_url_options.host,
-                                  port: Shuttle::Configuration.worker.default_url_options['port'] || 80),
+                                  port: Shuttle::Configuration.worker.default_url_options['port'],
+                                  protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'),
           state: 'SUCCESSFUL',
           description: 'Translations completed',
-      }))
+      }.to_json))
       @commit.loading = false
       @commit.ready = true
       @commit.save!
