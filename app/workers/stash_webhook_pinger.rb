@@ -18,7 +18,6 @@
 
 class StashWebhookPinger
   include Sidekiq::Worker
-  include Rails.application.routes.url_helpers
 
   sidekiq_options queue: :low
 
@@ -28,39 +27,7 @@ class StashWebhookPinger
 
   def perform(commit_id)
     commit = Commit.find(commit_id)
-    if commit.project.stash_webhook_url.present?
-      stash_webhook_url = "#{commit.project.stash_webhook_url.sub(/\/$/, '')}/#{commit.revision}"
-      post_parameters = {
-          key: 'SHUTTLE',
-          name: "SHUTTLE-#{commit.revision[0..6]}",
-          url: project_commit_url(commit.project,
-                                  commit,
-                                  host: Shuttle::Configuration.worker.default_url_options.host,
-                                  port: Shuttle::Configuration.worker.default_url_options['port'],
-                                  protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http' ),
-      }
-      case
-        when commit.ready?
-          post_parameters.merge!(
-              state: 'SUCCESSFUL',
-              description: 'Translations completed',
-          )
-        when commit.loading?
-          post_parameters.merge!(
-              state: 'INPROGRESS',
-              description: 'Currently loading',
-          )
-        else
-          post_parameters.merge!(
-              state: 'INPROGRESS',
-              description: 'Currently translating',
-          )
-      end
-      headers = { 'Content-Type' => 'application/json',
-                  'Accept' => 'application/json' }
-
-      HTTParty.post(stash_webhook_url, { timeout: 5, body: post_parameters.to_json, headers: headers })
-    end
+    StashWebhookHelper.new.ping(commit)
   end
 
   include SidekiqLocking
