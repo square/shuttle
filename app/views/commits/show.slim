@@ -13,7 +13,21 @@
   - if current_user.monitor?
     .pull-right
       button.default.square href='#settings' rel='modal': i.fa.fa-cogs
-      button.danger href=project_commit_url(@project, @commit) data-method='DELETE' data-confirm='Are you sure you want to delete this commit?' Delete
+      - if @format and @commit.ready?
+        button.primary href=manifest_project_commit_url(@project, @commit, @format) Download #{@format}
+      - elsif @commit.ready?
+        button.primary.disabled.tooltip-parent[
+          data-tooltip='#missing_format_tooltip'
+          data-tooltip-show='mouseover'
+          data-tooltip-hide='mouseout'
+          data-tooltip-position-at='bottom middle'
+          data-tooltip-position-my='top middle'
+        ]
+          | Missing Format
+        .tooltip#missing_format_tooltip
+          | You must enable at least one cached format to use this feature
+      - else
+        button.primary.disabled Translating
   h1 Commit Status
 
   h6
@@ -97,4 +111,10 @@ hr.divider
           | Use this if all translations are done but commit is still red
         .controls
           = button_to 'Recalculate', recalculate_project_commit_path(@project, @commit)
+
+      .control-group
+        label.description-label
+          | Delete this commit
+        .controls
+          button.danger href=project_commit_url(@project, @commit) data-method='DELETE' data-confirm='Are you sure you want to delete this commit?' Delete
 
