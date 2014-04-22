@@ -119,8 +119,10 @@ class HomeController < ApplicationController
             end
     @filters = '(Only showing my commits)' if user
 
-    sort_order = params[:sort]
-    direction = params[:direction]
+    sort_order = params[:sort].present? ? params[:sort] : cookies[:home_sort]
+    direction = params[:direction].present? ? params[:direction] : cookies[:home_direction]
+    @sort_order = sort_order
+    @direction = direction
 
     @commits = Commit.search(load: {include: [:user, project: :slugs]}) do
       filter :prefix, revision: sha if sha

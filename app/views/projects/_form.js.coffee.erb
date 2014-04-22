@@ -13,18 +13,6 @@
 #    limitations under the License.
 
 $(document).ready () ->
-  setupToolTips = () -> 
-    $(".tooltip-parent").each () -> 
-      $(this).qtip(
-        content:
-          text: $($(this).data("tooltip"))
-        position: 
-          my: 'bottom left'
-          at: 'top right'
-        show: 'focus'
-        hide: 'blur'
-      )
-
   setupLocaleField = () ->
     $("#project_required_rfc5646_locales, #project_other_rfc5646_locales").arrayField(
       renderer: (container, name, value) ->
@@ -89,9 +77,7 @@ $(document).ready () ->
         valueField.arrayField()
     )
 
-
-  setupToolTips()
-  if (window.localesLoaded) 
+  if (window.localesLoaded)
     setupLocaleField()
     setupKeyFields()
     setupPathFields()

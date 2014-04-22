@@ -70,7 +70,6 @@ class TranslationUnit < ActiveRecord::Base
         source_rfc5646_locale: translation.source_rfc5646_locale,
         rfc5646_locale:        locale.rfc5646
     )
-
   }
 
   # Stores an approved Translation's source and translated copy into the

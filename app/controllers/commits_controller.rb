@@ -47,6 +47,7 @@ class CommitsController < ApplicationController
     respond_with @commit do |format|
       format.json { render json: decorate(@commit).to_json }
       format.html do
+        @format = @project.cache_manifest_formats.first
         @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
           hsh[locale.rfc5646] = {
               required: required,

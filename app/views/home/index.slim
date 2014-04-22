@@ -43,8 +43,8 @@ hr.divider
         th SHA
         / Create Date
         th
-          - if params[:sort] == 'create'
-            - if params[:direction] == 'asc'
+          - if @sort_order == 'create'
+            - if @direction == 'asc'
               = link_to request.parameters.merge({sort: 'create', direction: 'desc'}) do
                 | Created &nbsp;
                 i.fa.fa-caret-down
@@ -56,8 +56,8 @@ hr.divider
             = link_to 'Created', request.parameters.except(:direction).merge(sort: 'create')
         / Due Date
         th
-          - if params[:sort] == 'due'
-            - if params[:direction] == 'desc'
+          - if @sort_order == 'due'
+            - if @direction == 'desc'
               = link_to request.parameters.merge({sort: 'due', direction: 'asc'}) do
                 | Due Date&nbsp;
                 i.fa.fa-caret-up
@@ -69,8 +69,8 @@ hr.divider
             = link_to 'Due Date', request.parameters.except(:direction).merge(sort: 'due')
         / Priority
         th
-          - if params[:sort] == 'priority' || params[:sort].nil?
-            - if params[:direction] == 'desc'
+          - if @sort_order == 'priority' || @sort_order.nil?
+            - if @direction == 'desc'
               = link_to request.parameters.merge({sort: 'priority', direction: 'asc'}) do
                 | Priority &nbsp;
                 i.fa.fa-caret-up

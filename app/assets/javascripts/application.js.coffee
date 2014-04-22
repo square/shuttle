@@ -66,3 +66,25 @@ $(document).ready ->
   $("a[rel*=modal]").leanModal closeButton: ".close"
   $("button[rel*=modal]").leanModal closeButton: ".close"
   $("textarea.resize").autosize()
+
+  $(".tooltip-parent").each () ->
+    tooltip_settings = {
+      content:
+        text: $($(this).data("tooltip"))
+      position:
+        my: 'bottom left'
+        at: 'top right'
+      show: 'focus'
+      hide: 'blur'
+    }
+
+    if $(this).data('tooltip-show')
+      tooltip_settings.show = $(this).data('tooltip-show')
+    if $(this).data('tooltip-hide')
+      tooltip_settings.hide = $(this).data('tooltip-hide')
+    if $(this).data('tooltip-position-at')
+      tooltip_settings.position.at = $(this).data('tooltip-position-at')
+    if $(this).data('tooltip-position-my')
+      tooltip_settings.position.my = $(this).data('tooltip-position-my')
+
+    $(this).qtip(tooltip_settings)
