@@ -13,10 +13,21 @@
   - if current_user.monitor?
     .pull-right
       button.default.square href='#settings' rel='modal': i.fa.fa-cogs
-      - if @format
-        button.primary href=manifest_project_commit_url(@project, @commit, @format) Download
+      - if @format and @commit.ready?
+        button.primary href=manifest_project_commit_url(@project, @commit, @format) Download #{@format}
+      - elsif @commit.ready?
+        button.primary.disabled.tooltip-parent[
+          data-tooltip='#missing_format_tooltip'
+          data-tooltip-show='mouseover'
+          data-tooltip-hide='mouseout'
+          data-tooltip-position-at='bottom middle'
+          data-tooltip-position-my='top middle'
+        ]
+          | Missing Format
+        .tooltip#missing_format_tooltip
+          | You must enable at least one cached format to use this feature
       - else
-        button.primary.disabled Missing Format
+        button.primary.disabled Translating
   h1 Commit Status
 
   h6
