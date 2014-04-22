@@ -13,6 +13,11 @@
 #    limitations under the License.
 
 $(window).ready () ->
+  if $.url().param('sort')
+    $.cookie 'home_sort', $.url().param('sort'), expires: 7
+  if $.url().param('direction')
+    $.cookie 'home_direction', $.url().param('direction'), expires: 7
+
   expand_filter_bar = () ->
     if $(".collapse").data("toggle")
       $("#expand-search").removeClass("active")
