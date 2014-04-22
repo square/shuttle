@@ -60,7 +60,7 @@ namespace :maintenance do
   desc "Cleans old commits from Shuttle"
   task clean_old_commits: :environment do
     Project.all.each do |p|
-      p.commits.where(ready: true, loading: false).order('created_at DESC').offset(100).find_each do |c|
+      p.commits.where(ready: true, loading: false).order('created_at DESC').offset(250).each do |c|
         StashWebhookHelper.new.ping(c, true)
         c.destroy
       end
