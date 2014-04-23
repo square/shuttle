@@ -30,7 +30,7 @@ Shuttle::Application.routes.draw do
   resources :projects do
     resources :commits, only: [:show, :create, :update, :destroy] do
       member do
-        post :import, :sync, :redo, :clear, :recalculate
+        post :import, :sync, :redo, :clear, :recalculate, :ping_stash
         get :manifest, :localize
       end
 

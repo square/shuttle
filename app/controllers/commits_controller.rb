@@ -27,7 +27,7 @@ class CommitsController < ApplicationController
   before_filter :find_commit, except: [:create, :manifest, :localize]
 
   respond_to :html, :json, only: [:show, :create, :update, :destroy, :import,
-                                  :sync, :match, :redo, :clear, :recalculate]
+                                  :sync, :match, :redo, :clear, :recalculate, :ping_stash]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -264,6 +264,27 @@ class CommitsController < ApplicationController
 
   def recalculate
     @commit.recalculate_ready!
+    respond_with @commit, location: project_commit_url(@project, @commit)
+  end
+
+  # Recalculates the readiness of a commit.  This method should be used
+  # to fix commits that are "red" but should be "green"
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:project_id/commits/:id/recalculate`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def ping_stash
+    StashWebhookPinger.new.perform(@commit.id)
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
