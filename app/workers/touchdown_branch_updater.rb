@@ -23,7 +23,9 @@ class TouchdownBranchUpdater
   #
   # @param [Fixnum] project_id The ID of a Project.
 
-  def perform(project_id)
+  def perform(project_id, commit_id)
+    commit = Commit.find_by_id(commit_id)
+    logger.info "[TouchdownBranchUpdater] Started for project #{project_id} due to commit #{commit_id} (#{commit.try!(:revision)})"
     Project.find_by_id(project_id).try!(:update_touchdown_branch)
   end
 

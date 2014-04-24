@@ -661,7 +661,7 @@ class Commit < ActiveRecord::Base
   end
 
   def update_touchdown_branch
-    TouchdownBranchUpdater.perform_async(project_id) if ready_changed?
+    TouchdownBranchUpdater.perform_async(project_id, id) if ready_changed?
   end
 
   def import_blob(path, blob, options={})
