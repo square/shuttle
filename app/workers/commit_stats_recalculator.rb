@@ -59,7 +59,7 @@ class CommitStatsRecalculator
         hsh
       end
       # now set batched_commit_ids for each key
-      keys.each { |key| key.batched_commit_ids = commits_by_key[key.id] }
+      keys.each { |key| key.batched_commit_ids = commits_by_key[key.id] || Set.new }
       # and run the import
       Key.tire.index.import keys
     end
