@@ -18,8 +18,6 @@ require 'sidekiq_locking'
 # for a Commit.
 
 class CommitStatsRecalculator
-  extend NewRelic::Agent::MethodTracer
-
   include Sidekiq::Worker
   sidekiq_options queue: :low
 
@@ -46,30 +44,24 @@ class CommitStatsRecalculator
     commit.words_new
     commit.words_pending
 
-    ready_keys, not_ready_keys = nil, nil
-    self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/partition_keys']) do
-      ready_keys, not_ready_keys = commit.keys.includes(:project, :translations).partition(&:should_become_ready?)
-    end
+    ready_keys, not_ready_keys = commit.keys.includes(:project, :translations).partition(&:should_become_ready?)
 
-    self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/update_key_readiness']) do
-      ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
-      not_ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
-    end
-    self.class.trace_execution_scoped(['Custom/CommitStatsRecalculator/update_key_index']) do
-      # the ES mapping loads all the commits_keys, this is slow
-      # we can preload all the commits_keys for all commits, and partition them into
-      # the correct commits
-      commit.keys.find_in_batches do |keys|
-        commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
-          hsh[commit_id.to_i] ||= Array.new
-          hsh[commit_id.to_i] << key_id.to_i
-          hsh
-        end
-        # now set batched_commit_ids for each key
-        keys.each { |key| key.batched_commit_ids = commits_by_key[key.id] }
-        # and run the import
-        Key.tire.index.import keys
+    ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
+    not_ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
+
+    # the ES mapping loads all the commits_keys, this is slow
+    # we can preload all the commits_keys for all commits, and partition them into
+    # the correct commits
+    commit.keys.find_in_batches do |keys|
+      commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
+        hsh[key_id.to_i] ||= Set.new
+        hsh[key_id.to_i] << commit_id.to_i
+        hsh
       end
+      # now set batched_commit_ids for each key
+      keys.each { |key| key.batched_commit_ids = commits_by_key[key.id] }
+      # and run the import
+      Key.tire.index.import keys
     end
 
     commit.keys.find_each { |k| KeyReadinessRecalculator.perform_once k.id } if should_recalculate_affected_commits
