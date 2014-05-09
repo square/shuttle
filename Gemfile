@@ -97,7 +97,7 @@ end
 # SQUARE
 gem 'squash_ruby', '>= 1.4.0', require: 'squash/ruby'
 gem 'squash_rails', require: 'squash/rails', github: 'SquareSquash/rails', ref: 'e3c4207d2b90d27fa9ff4ba72c50ba354f507163' # deploy issue
-gem 'newrelic_rpm'
+gem 'newrelic_rpm', '>= 3.7.3'
 group :development do
   gem 'capistrano'
   gem 'capistrano-rvm', '>= 0.1.0' # seems to really like 0.0.3
