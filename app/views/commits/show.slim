@@ -28,12 +28,13 @@
           | You must enable at least one cached format to use this feature
       - else
         button.primary.disabled Translating
-  h1 Commit Status
+  h1
+    | #{@commit.project.name}
+    strong &nbsp;>&nbsp;
+    | Commit #{@commit.revision[0, 6]}
 
   h6
     strong
-      = "#{@commit.revision[0, 6]}"
-      span.separator &nbsp;/&nbsp;
       - if @commit.loading?
         - if @commit.import_batch_status
           | Currently Loading With #{pluralize_with_delimiter @commit.import_batch_status.pending, 'Job'} Remaining
@@ -44,14 +45,14 @@
       - else
         | Currently Translating
       span.separator &nbsp;/&nbsp;
+      = "Found #{@commit.keys.count} Keys"
+      span.separator &nbsp;/&nbsp;
       - if @commit.completed_at
         = "First Completed #{time_ago_in_words(@commit.completed_at)} ago"
       - elsif @commit.loaded_at
         = "First Loaded #{time_ago_in_words(@commit.loaded_at)} ago"
       - else
         = "First Created #{time_ago_in_words(@commit.created_at)} ago"
-      span.separator &nbsp;/&nbsp;
-      = "Found #{@commit.keys.count} Keys"
 
 hr.divider
 
