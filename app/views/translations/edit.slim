@@ -34,54 +34,23 @@ hr.divider
   .entry.row
     / Edit Side
     .eight.columns.edit-side
-      fieldset 
+      fieldset
         legend = @translation.locale.name
 
         .control-group
-          = f.label :copy, @translation.locale.name, class: "control-label"
-          .controls 
-            = f.text_area :copy, autocomplete: 'off', rows: 7, class: "resize"
-          .controls
-            = check_box_tag 'blank_string', '1', (@translation.translated? && @translation.copy.blank? ? 'checked' : nil)
-            | The translation is a blank string
+          = f.text_area :copy, autocomplete: 'off', rows: 15, class: 'resize'
+
         .control-group
-          = f.label :notes, 'Notes', class: "control-label"
+          label.control-label Fuzzy Matches
           .controls
-            = f.text_area :notes, autocomplete: 'off', rows: 7, class: "resize"
+            .fuzzy-matches
 
-      - if @translation.translation_changes.present?
-        fieldset
-          legend History
+      fieldset
+        / TODO: Partial: Will be Issues
+        legend Notes
 
-          .translation-history
-            - @translation.translation_changes.reverse.each do |change|
-              .history-entry
-                strong = change.user.present? ? change.user.name : "(Automatic)"
-                .pull-right: strong = change.created_at.strftime("%l:%M %P, %B %-d, %Y")              
-
-                - if change.diff["approved"].present?
-                  .change 
-                    - if change.diff["copy"].present?
-                      .change-state class=TranslationChange.style(change.diff["approved"][0])
-                        = change.transition_from
-                      .arrow 
-                      .change-state class=TranslationChange.style(change.diff["approved"][1])
-                        = change.transition_to
-
-                .change.copy
-                  - if change.diff["copy"].present?
-                    .change-state[
-                        data-full=(change.full_copy_from ? change.full_copy_from : "None")
-                        data-compact=(change.compact_copy_from ? change.compact_copy_from : "None")
-                      ]
-                      = change.compact_copy_from ? change.compact_copy_from : "None"
-                    .arrow
-                      i.fa.fa-double-angle-right.text-error
-                    .change-state[
-                        data-full=(change.full_copy_to ? change.full_copy_to : "None")
-                        data-compact=(change.compact_copy_to ? change.compact_copy_to : "None")
-                      ]
-                      = change.compact_copy_to ? change.compact_copy_to : "None"
+        .control-group
+          = f.text_area :notes, autocomplete: 'off', rows: 7, class: 'resize'
 
       .form-actions
         = f.submit class: 'primary', value: 'Save'
@@ -95,10 +64,8 @@ hr.divider
         legend = @translation.source_locale.name
 
         .control-group
-          label.control-label English
-          .controls 
-            textarea.resize readonly="readonly" rows=7 
-              = @translation.source_copy
+          textarea.resize readonly="readonly" rows=15
+            = @translation.source_copy
 
       fieldset.activity
         legend Activity
@@ -142,3 +109,36 @@ hr.divider
               - elsif @translation.approved == true
                 | Approved
 
+      - if @translation.translation_changes.present?
+        fieldset
+          legend History
+
+          .translation-history
+            - @translation.translation_changes.reverse.each do |change|
+              .history-entry
+                strong = change.user.present? ? change.user.name : "(Automatic)"
+                .pull-right: strong = change.created_at.strftime("%l:%M %P, %B %-d, %Y")
+
+                - if change.diff["approved"].present?
+                  .change
+                    - if change.diff["copy"].present?
+                      .change-state class=TranslationChange.style(change.diff["approved"][0])
+                        = change.transition_from
+                      .arrow
+                      .change-state class=TranslationChange.style(change.diff["approved"][1])
+                        = change.transition_to
+
+                .change.copy
+                  - if change.diff["copy"].present?
+                    .change-state[
+                      data-full=(change.full_copy_from ? change.full_copy_from : "None")
+                      data-compact=(change.compact_copy_from ? change.compact_copy_from : "None")
+                      ]
+                      = change.compact_copy_from ? change.compact_copy_from : "None"
+                    .arrow
+                      i.fa.fa-double-angle-right.text-error
+                    .change-state[
+                      data-full=(change.full_copy_to ? change.full_copy_to : "None")
+                      data-compact=(change.compact_copy_to ? change.compact_copy_to : "None")
+                      ]
+                      = change.compact_copy_to ? change.compact_copy_to : "None"

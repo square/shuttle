@@ -9,6 +9,10 @@ body.translations {
     position: relative;
   }
 
+  .control-group {
+    textarea { width: 100%; }
+  }
+
   .copy-source {
     position: absolute;
     top: 25px;
@@ -18,6 +22,28 @@ body.translations {
       position: absolute !important;
       top: 24px !important;
       right: 30px !important;
+    }
+  }
+
+  .fuzzy-matches {
+    min-height: 30px;
+    .match-percentage {
+      color: $input-red;
+    }
+    dd + dd {
+      margin-top: 5px;
+    }
+    .diff {
+      color: $gray2;
+      text-decoration: none !important;
+    }
+    ins {
+      background-color: darken($background-green, 8%);
+      text-decoration: none;
+    }
+
+    del {
+      background-color: darken($background-red, 8%);
     }
   }
 
