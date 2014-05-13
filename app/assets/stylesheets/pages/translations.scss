@@ -25,8 +25,19 @@ body.translations {
     }
   }
 
+  .well {
+    padding: 5px 10px;
+    background-color: #fbfcfc;
+    border: 1px solid #d3d9de;
+    min-height: 300px;
+    .highlight {
+      background-color: yellow;
+    }
+  }
+
   .fuzzy-matches {
     min-height: 30px;
+    padding-top: 9px;
     .match-percentage {
       color: $input-red;
     }

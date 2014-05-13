@@ -64,8 +64,9 @@ hr.divider
         legend = @translation.source_locale.name
 
         .control-group
-          textarea.resize readonly="readonly" rows=15
-            = @translation.source_copy
+          #source_copy.well
+            span.highlight
+              = @translation.source_copy
 
       fieldset.activity
         legend Activity

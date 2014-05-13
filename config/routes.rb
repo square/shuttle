@@ -73,6 +73,7 @@ Shuttle::Application.routes.draw do
   get 'search/translations' => 'search#translations', as: :search_translations
   get 'search/keys' => 'search#keys', as: :search_keys
   get 'search/commits' => 'search#commits', as: :search_commits
+  get 'search/fuzzy_matches' => 'search#fuzzy_matches', as: :search_fuzzy_matches
 
   # STATS PAGES
   get 'stats' => 'stats#index'

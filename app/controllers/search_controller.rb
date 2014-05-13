@@ -136,6 +136,47 @@ class SearchController < ApplicationController
     end
   end
 
+  # Returns up to 5 best fuzzy matching Translations that meets the following
+  # requirements:
+  #
+  # * in the same locale,
+  #
+  # If multiple Translations match, priority is given to the most closely
+  # matching Translations.
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /search/fuzzy_matches`
+  #
+  # Query Parameters
+  #
+  # |               |                                                                               |
+  # |:--------------|:------------------------------------------------------------------------------|
+  # | `source_copy` | The source copy that will be used to search for fuzzy matches.                |
+  # | `locale`      | The RFC 5646 identifier for the target locale.                                |
+
+  def fuzzy_matches
+    respond_to do |format|
+      format.json do
+        limit = 5
+        query_filter = params[:source_copy] || ''
+        target_locale = params[:locale] || ''
+
+        @results = TranslationUnit.search(load: true) do
+          # TODO: Remove duplicate where source_copy, copy are same
+          filter :and,
+                 { term: { rfc5646_locale: target_locale } },
+                 { not: { missing: { field: 'copy' } } }
+
+          size limit
+          query { match 'source_copy', query_filter, operator: 'or' }
+        end
+        render json: decorate_fuzzy_match(@results, query_filter).to_json
+      end
+    end
+  end
+
   private
 
   def decorate_translations(translations)
@@ -182,5 +223,16 @@ class SearchController < ApplicationController
           project: commit.project
       )
     end
+  end
+
+  def decorate_fuzzy_match(translations, source_copy)
+    translations = translations.map do |translation|
+      {
+        source_copy: translation.source_copy,
+        copy: translation.copy,
+        match_percentage: source_copy.similar(translation.source_copy)
+      }
+    end.reject { |t| t[:match_percentage] < 60 }
+    translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
   end
 end
