@@ -33,14 +33,15 @@
 #= require jquery-leanModal
 #= require jquery-qtip
 #= require jquery-chosen
+#= require jquery-highlight
 #= require jquery-highlighter
+#= require jquery-prettyTextDiff
 #= require purl
 #= require datepicker
 #= require twitter/typeahead
 #= require modernizr
 #= require xregexp
 #= require diff_match_patch.js
-#= require jquery-prettyTextDiff.js
 
 #
 #= require d3
