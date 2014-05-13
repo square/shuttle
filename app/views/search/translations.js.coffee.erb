@@ -15,6 +15,8 @@
 $(window).ready ->
   firstTime = true
 
+  $(".datepicker").datepicker(autoclose: true)
+
   $("#expand-search").click () ->
     if $(".collapse").data("toggle")
       $("#expand-search").removeClass("active")
