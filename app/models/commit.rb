@@ -68,11 +68,13 @@ require 'fileutils'
 # |:-------------------|:-------------------------------------------------------------------|
 # | `description`      | A user-submitted description of why we are localizing this commit. |
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
+# | `import_errors`    | Array of import errors that happened during the import process.    |
 
 class Commit < ActiveRecord::Base
   extend RedisMemoize
   include CommitTraverser
   include SidekiqWorkerTracking
+  include ImportErrors
 
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
@@ -90,7 +92,8 @@ class Commit < ActiveRecord::Base
       description:      {allow_nil: true},
       author:           {allow_nil: true}, 
       author_email:     {allow_nil: true},
-      pull_request_url: {allow_nil: true}
+      pull_request_url: {allow_nil: true},
+      import_errors:    {type: Array, default: []}
   )
 
   include Tire::Model::Search
@@ -298,8 +301,9 @@ class Commit < ActiveRecord::Base
   # completed_at to be the current time.
 
   def recalculate_ready!
-    ready      = !keys.where(ready: false).exists?
-    self.ready = ready
+    keys_are_ready = !keys.where(ready: false).exists?
+    no_errors_exist = import_errors.blank? && import_errors_in_redis.blank?
+    self.ready     = keys_are_ready && no_errors_exist
     if self.ready and self.completed_at.nil?
       self.completed_at = Time.current
     end
@@ -332,6 +336,8 @@ class Commit < ActiveRecord::Base
 
   def import_strings(options={})
     raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
+
+    clear_import_errors # clear out any previous import errors
 
     blobs  = project.blobs.includes(:project) # preload blobs for performance
 

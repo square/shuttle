@@ -26,6 +26,7 @@ class CommitObserver < ActiveRecord::Observer
   def after_update(commit)
     ping_github_webhook(commit)
     send_email(commit)
+    handle_import_errors(commit)
   end
 
   private
@@ -43,11 +44,18 @@ class CommitObserver < ActiveRecord::Observer
   end
 
   def send_email(commit)
-    if commit.loading_was == true && commit.loading == false && !commit.completed_at
+    if commit.loading_was == true && commit.loading == false && !commit.completed_at && commit.import_errors.blank? && commit.import_errors_in_redis.blank?
       CommitMailer.notify_translators(commit).deliver
     end
     if commit.ready_was == false && commit.ready == true && commit.loading == false
       CommitMailer.notify_translation_finished(commit).deliver
+    end
+  end
+
+  def handle_import_errors(commit)
+    if commit.loading_was == true && commit.loading == false && commit.import_errors_in_redis.present?
+      commit.copy_import_errors_from_redis_to_sql_db
+      CommitMailer.notify_submitter_of_import_errors(commit).deliver
     end
   end
 end

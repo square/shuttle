@@ -17,24 +17,43 @@ require 'spec_helper'
 
 describe Importer::Yaml do
   context "[importing]" do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
-      @project = FactoryGirl.create(:project,
-                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
-                                    only_paths:     %w(config/locales/),
-                                    skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
-      @commit  = @project.commit!('HEAD')
+    context "[repo with valid files]" do
+      before :all do
+        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+        @project = FactoryGirl.create(:project,
+                                      repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                      only_paths:     %w(config/locales/),
+                                      skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
+        @commit  = @project.commit!('HEAD')
+      end
+
+      it "should import strings from YAML files" do
+        expect(@project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
+        expect(@project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
+        expect(@project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
+      end
+
+      it "should import string arrays" do
+        expect(@project.keys.for_key('abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Feb')
+        expect(@project.keys.for_key('abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Dec')
+      end
     end
 
-    it "should import strings from YAML files" do
-      expect(@project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
-      expect(@project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
-      expect(@project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
-    end
+    context "[repo with broken files]" do
+      before :each do
+        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s).delete_all
+        @project = FactoryGirl.create(:project,
+                                      repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
+                                      only_paths:     %w(config/locales/),
+                                      skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
+        @commit  = @project.commit!('HEAD').reload
+      end
 
-    it "should import string arrays" do
-      expect(@project.keys.for_key('abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Feb')
-      expect(@project.keys.for_key('abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Dec')
+      it "should add error to commit" do
+        expected_errors = [["/config/locales/ruby/broken.yml", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1"]]
+        expect(@commit.import_errors_in_redis).to eql(expected_errors)
+        expect(@commit.import_errors).to eql(expected_errors)
+      end
     end
   end
 end

@@ -276,3 +276,5 @@ en:
         subject: "[Shuttle] New commit ready for translation"
       notify_translation_finished:
         subject: "[Shuttle] Finished translation of commit"
+      notify_submitter_of_import_errors:
+        subject: "[Shuttle] Error(s) occurred during the import"

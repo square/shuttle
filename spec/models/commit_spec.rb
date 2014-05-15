@@ -48,6 +48,25 @@ describe Commit do
         expect(@commit.author_email).to eql('ricksong@squareup.com')
       end
     end
+
+    context "[after import]" do
+      before(:each) do
+        @commit = FactoryGirl.create(:commit, loading: true)
+        ActionMailer::Base.deliveries.clear
+        @commit.user = FactoryGirl.create(:user)
+      end
+
+      it "should not send an email if commit doesnt have import errors" do
+        @commit.update_attributes(loading: false, ready: true)
+        expect(ActionMailer::Base.deliveries.map(&:subject)).not_to include("[Shuttle] Error(s) occurred during the import")
+      end
+
+      it "should email if commit has import errors" do
+        @commit.add_import_error_in_redis("some/fake/file.yaml", "some fake error")
+        @commit.update_attributes(loading: false, ready: false)
+        expect(ActionMailer::Base.deliveries.map(&:subject)).to include("[Shuttle] Error(s) occurred during the import")
+      end
+    end
   end
 
   context "[stats]" do
@@ -303,6 +322,26 @@ describe Commit do
       expect(@commit).not_to be_ready
       expect(@commit.completed_at).to eql(completed_time)
     end
+
+    it "should not set ready if there are import errors in redis" do
+      @commit.recalculate_ready!
+      expect(@commit).to be_ready
+
+      @commit.add_import_error_in_redis 'some/file.yml', "Some Fake Error"
+      @commit.recalculate_ready!
+
+      expect(@commit).to_not be_ready
+    end
+
+    it "should not set ready if there are import errors in postgres" do
+      @commit.recalculate_ready!
+      expect(@commit).to be_ready
+
+      @commit.update_attributes(import_errors: [['some/file.yml', "Some Fake Error"]])
+      @commit.recalculate_ready!
+
+      expect(@commit).to_not be_ready
+    end
   end
 
   context "[hooks]" do
@@ -549,6 +588,19 @@ describe Commit do
       allow_any_instance_of(Importer::Yaml).to receive(:skip?).and_return(true)
       @project.commit! 'HEAD'
       expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort - %w(yaml))
+    end
+
+    it "clears the previous import errors" do
+      commit = @project.commit!('HEAD', skip_import: true)
+      commit.add_import_error_in_redis("fakefile", "fake error")
+      commit.update_attributes(loading: true)
+      commit.update_attributes(loading: false)
+      expect(commit.import_errors_in_redis).to eql([["fakefile", "fake error"]])
+      expect(commit.import_errors).to eql([["fakefile", "fake error"]])
+      commit.import_strings
+      commit.reload
+      expect(commit.import_errors_in_redis).to eql([])
+      expect(commit.import_errors).to eql([])
     end
   end
 
