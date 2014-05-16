@@ -56,8 +56,18 @@ hr.divider
         .control-group 
           = label_tag 'translator_id', 'Translator', class: 'control-label'
           .controls
-            = select_tag 'translator_id', options_for_select(User.order('email ASC').map { |u| [u.name, u.id] }.unshift(['Anyone', nil]))        
+            = select_tag 'translator_id', options_for_select(User.order('email ASC').map { |u| [u.name, u.id] }.unshift(['Anyone', nil]))
 
-  
+        .control-group
+          = label_tag 'start_date', 'Start Date', class: 'control-label'
+          .controls
+            = text_field_tag 'start_date', '', class: 'datepicker'
+
+        .control-group
+          = label_tag 'end_date', 'End Date', class: 'control-label'
+          .controls
+            = text_field_tag 'end_date', '', class: 'datepicker'
+
+
   / translation_grid
   table.table#translations data-url=search_translations_url(format: 'json')

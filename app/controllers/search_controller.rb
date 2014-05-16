@@ -29,6 +29,10 @@ class SearchController < ApplicationController
         query_filter  = params[:query]
         field         = params[:field]
         translator_id = params[:translator_id].to_i
+
+        start_date    = Date.strptime(params[:start_date], "%m/%d/%Y") rescue nil
+        end_date      = Date.strptime(params[:end_date], "%m/%d/%Y") rescue nil
+
         if params[:target_locales].present?
           target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
           return head(:unprocessable_entity) unless target_locales.all?
@@ -52,6 +56,14 @@ class SearchController < ApplicationController
           end
           if translator_id and translator_id > 0
             filter :term, translator_id: translator_id
+          end
+
+          if start_date
+            filter :range, updated_at: { gte: start_date }
+          end
+
+          if end_date
+            filter :range, updated_at: { lte: end_date }
           end
 
           if query_filter.present?
