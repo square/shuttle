@@ -80,6 +80,7 @@ class Translation < ActiveRecord::Base
     indexes :translator_id, type: 'integer'
     indexes :rfc5646_locale, type: 'string'
     indexes :created_at, type: 'date'
+    indexes :updated_at, type: 'date'
     indexes :translated, type: 'boolean'
     indexes :approved, type: 'integer', as: 'if approved==true then 1 elsif approved==false then 0 else nil end'
     indexes :commit_ids, as: 'send(:key).batched_commit_ids.try!(:to_a) || send(:key).commits_keys.pluck(:commit_id)'

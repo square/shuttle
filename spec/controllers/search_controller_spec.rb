@@ -20,7 +20,10 @@ describe SearchController do
   describe "#translations" do
     before :all do
       reset_elastic_search
+      update_date = DateTime.new(2014, 1, 1)
       @user = FactoryGirl.create(:user, role: 'translator')
+      @start_date = (update_date - 1.day).strftime('%m/%d/%Y')
+      @end_date = (update_date + 1.day).strftime('%m/%d/%Y')
 
       %w(term1 term2).each do |term|
         %w(source_copy copy).each do |field|
@@ -33,7 +36,9 @@ describe SearchController do
                                field              => "foo #{term} bar",
                                other_field        => 'something else',
                                locale_field       => locale,
-                               other_locale_field => other_locale
+                               other_locale_field => other_locale,
+                               :updated_at        => update_date,
+                               :translator        => @user
           end
         end
       end
@@ -82,6 +87,42 @@ describe SearchController do
       expect(results.first['locale']['rfc5646']).to eql('en')
       expect(results.last['copy']).to eql('foo term1 bar')
       expect(results.last['locale']['rfc5646']).to eql('fr')
+    end
+
+    it "should filter by translator" do
+      get :translations, translator_id: @user.id, format: 'json'
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(8)
+
+      get :translations, translator_id: @user.id + 1, format: 'json'
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(0)
+    end
+
+    it "should filter by start date" do
+      get :translations, start_date: @start_date, format: 'json'
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(8)
+
+      get :translations, start_date: @end_date, format: 'json'
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(0)
+    end
+
+    it "should filter by end date" do
+      get :translations, end_date: @end_date, format: 'json'
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(8)
+
+      get :translations, end_date: @start_date, format: 'json'
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(0)
     end
 
     it "should respond with a 422 if the locale is unknown" do
