@@ -77,11 +77,29 @@ $(document).ready () ->
         valueField.arrayField()
     )
 
+  $('.flipswitch-checkbox').each (i) ->
+    id = $(this).attr('id')
+    checked_elt = $("##{id}-checked")
+    unchecked_elt = $("##{id}-unchecked")
+
+    if $(this).is(':checked')
+      unchecked_elt.hide()
+    else
+      checked_elt.hide()
+
+    $(this).on 'change', ->
+      if $(this).is(':checked')
+        unchecked_elt.fadeOut ->
+          checked_elt.fadeIn()
+      else
+        checked_elt.fadeOut ->
+          unchecked_elt.fadeIn()
+
   if (window.localesLoaded)
     setupLocaleField()
     setupKeyFields()
     setupPathFields()
   else 
-    $(document).bind('locales_loaded', setupLocaleField);
-    $(document).bind('locales_loaded', setupKeyFields);
-    $(document).bind('locales_loaded', setupPathFields);
+    $(document).bind('locales_loaded', setupLocaleField)
+    $(document).bind('locales_loaded', setupKeyFields)
+    $(document).bind('locales_loaded', setupPathFields)
