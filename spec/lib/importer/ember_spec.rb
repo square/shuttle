@@ -54,10 +54,9 @@ describe Importer::Ember do
       end
 
       it "should add error to commit" do
-        expected_errors = [["/ember-broken/en-US.js", "Unexpected identifier at <eval>:2:12"],
-                           ["/ember-broken/en-US.coffee", "[stdin]:2:5: error: unexpected this this is some invalid javascript code ^^^^"]]
-        expect(@commit.import_errors_in_redis).to eql(expected_errors)
-        expect(@commit.import_errors).to eql(expected_errors)
+        expect(@commit.import_errors_in_redis).to eql([])
+        expect(@commit.import_errors).to eql([["/ember-broken/en-US.js", "Unexpected identifier at <eval>:2:12"],
+                                              ["/ember-broken/en-US.coffee", "[stdin]:2:5: error: unexpected this this is some invalid javascript code ^^^^"]])
       end
     end
   end

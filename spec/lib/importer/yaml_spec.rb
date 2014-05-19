@@ -50,9 +50,8 @@ describe Importer::Yaml do
       end
 
       it "should add error to commit" do
-        expected_errors = [["/config/locales/ruby/broken.yml", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1"]]
-        expect(@commit.import_errors_in_redis).to eql(expected_errors)
-        expect(@commit.import_errors).to eql(expected_errors)
+        expect(@commit.import_errors_in_redis).to eql([])
+        expect(@commit.import_errors).to eql([["/config/locales/ruby/broken.yml", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1"]])
       end
     end
   end

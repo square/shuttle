@@ -35,10 +35,7 @@ module ImportErrors
 
   # Copies import errors from Redis to SQL database
   def copy_import_errors_from_redis_to_sql_db
-    old_metadata = JSON.parse(metadata) rescue {}
-    old_metadata[:import_errors] = import_errors_in_redis
-    update_column(:metadata, old_metadata.to_json)
-    reload
+    self.import_errors = import_errors_in_redis
   end
 
   # Removes all previous import errors from redis and postgres.
@@ -47,14 +44,14 @@ module ImportErrors
     update_attributes(import_errors: [])
   end
 
+  # Removes all previous import errors from redis.
+  def clear_import_errors_in_redis
+    Shuttle::Redis.del(import_errors_redis_key)
+  end
+
   private
 
   def import_errors_redis_key
     "commit:#{revision}:import_errors"
-  end
-
-  # Removes all previous import errors from redis.
-  def clear_import_errors_in_redis
-    Shuttle::Redis.del(import_errors_redis_key)
   end
 end
