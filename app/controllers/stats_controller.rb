@@ -17,36 +17,62 @@
 class StatsController < ApplicationController
   before_filter :authenticate_user!
 
-  respond_to :json
-  respond_to :html, only: :index
+  respond_to :html
 
   # Displays the statistics page.
-
   def index
-    @top_projects             = Translation.total_words_per_project.map { |t| {name: t[0], id: Project.find_by_name(t[0]).id} }[0..4]
-    # Commit stats
-    @total_commits            = Commit.total_commits
-    @total_commits_incomplete = Commit.total_commits_incomplete
-    @total_words              = Translation.total_words
-    @total_words_new          = Translation.total_words_new
-    @total_words_pending      = Translation.total_words_pending
+    metrics = DailyMetric.
+      where(date: (30.days.ago)...Date.today)
+
+    this_week_metrics = DailyMetric.
+      where(date: (1.week.ago)...Date.today)
+    last_week_metrics = DailyMetric.
+      where(date: (2.weeks.ago)...(1.week.ago))
+
+    @words_per_project   = decorate_words_per_project(Translation.total_words_per_project)
+    @average_load_time   = decorate_avg_load_time(metrics)
+    @num_commits_loaded  = decorate_num_commits_loaded(metrics)
+
+    @num_words_created_per_language = decorate_num_words_created_per_language(this_week_metrics)
+    @num_words_completed_per_language = decorate_num_words_completed_per_language(last_week_metrics)
+
+    @num_commits_loaded_this_week = this_week_metrics.
+      reduce(0) { |total, m| total + m.num_commits_loaded }
+    @num_commits_completed_this_week = this_week_metrics.
+      reduce(0) { |total, m| total + m.num_commits_completed }
+
+    @num_commits_loaded_last_week = last_week_metrics.
+      reduce(0) { |total, m| total + m.num_commits_loaded }
+    @num_commits_completed_last_week = last_week_metrics.
+      reduce(0) { |total, m| total + m.num_commits_completed }
+
+
   end
 
-  # Returns the number of words per project.
+  private
 
-  def words_per_project
-    respond_with Translation.total_words_per_project
+  def decorate_num_words_created_per_language(metrics)
+    metrics.each_with_object({}) do |m, hash|
+      hash.merge!(m.num_words_created_per_language) { |k, first, second| first + second }
+    end.map { |k, v| {label: k, value: v} }
   end
 
-  # Returns {#daily_commits_created}, {#average_load_time}, {#average_translation_time},
-  # and {#average_completion_time} for a project.
+  def decorate_num_words_completed_per_language(metrics)
+    metrics.each_with_object({}) do |m, hash|
+      hash.merge!(m.num_words_completed_per_language) { |k, first, second| first + second }
+    end.map { |k, v| {label: k, value: v} }
+  end
 
-  def translation_metrics
-    respond_with(
-        average_load_time:        Commit.average_load_time(params['project_id']),
-        average_translation_time: Commit.average_translation_time(params['project_id']),
-        average_completion_time:  Commit.average_completion_time(params['project_id']),
-        daily_creates:            Commit.daily_commits_created(params['project_id'])
-    )
+  def decorate_words_per_project(metrics)
+    metrics.map { |m| {key: m[0], y: m[1]} }
+  end
+
+  def decorate_avg_load_time(metrics)
+    # Convert to [Timestamp, Load Time (in hours)]
+    metrics.map { |m| {x: m.date.to_time.to_i * 1000, y: m.avg_load_time / 3600} }
+  end
+
+  def decorate_num_commits_loaded(metrics)
+    metrics.map { |m| {x: m.date.to_time.to_i * 1000, y: m.num_commits_loaded} }
   end
 end

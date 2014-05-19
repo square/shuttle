@@ -29,44 +29,33 @@ hr.divider
 
 .row.stats-charts
   .six.columns
-    #word_distribution_chart
-      svg
+    svg#word_distribution_chart
   .ten.columns
-    #all_commit_time_chart
-      svg
+    svg#commit_load_chart
 table.table.stats-table
   thead
     tr
       th
-        h1 = number_with_delimiter(@total_words, :delimiter => ',')
-        = 'Word'.pluralize(@total_words) + ' Submitted'
+        h1 = number_with_delimiter(@num_commits_loaded_this_week, :delimiter => ',')
+        | Commits Created
+        br
+        span.text-success &nbsp;This Week
       th
-        h1 = number_with_delimiter(@total_words_new, :delimiter => ',')
-        = 'Word'.pluralize(@total_words_new) + ' Awaiting Translation'
+        h1 = number_with_delimiter(@num_commits_completed_this_week, :delimiter => ',')
+        | Commits Completed
+        br
+        span.text-success &nbsp;This Week
       th
-        h1 = number_with_delimiter(@total_words_pending, :delimiter => ',')
-        = 'Word'.pluralize(@total_words_pending) + ' Awaiting Review'
+        h1 = number_with_delimiter(@num_commits_loaded_last_week, :delimiter => ',')
+        | Commits Created
+        br
+        span.text-error &nbsp;Last Week
+      th
+        h1 = number_with_delimiter(@num_commits_completed_last_week, :delimiter => ',')
+        | Commits Completed
+        br
+        span.text-error &nbsp;Last Week
 
-.row.stats-charts
-  .eight.columns
-    div: h3 = @top_projects[0] && @top_projects[0][:name]
-    #project_commit_time_chart_0
-      svg
-  .eight.columns
-    div: h3 = @top_projects[1] && @top_projects[1][:name]
-    #project_commit_time_chart_1
-      svg
-.row.stats-charts
-  .eight.columns
-    div: h3 = @top_projects[2] && @top_projects[2][:name]
-    #project_commit_time_chart_2
-      svg
-  .eight.columns
-    div: h3 = @top_projects[3] && @top_projects[3][:name]
-    #project_commit_time_chart_3
-      svg
-= select_tag 'project', options_for_select(Project.all.map {|p| [p.name, p.id]}, @top_projects[4] && @top_projects[4][:id])
-.row.stats-charts
+.row
   .sixteen.columns
-    #project_commit_time_chart_4
-      svg
+    svg#translation_language_chart

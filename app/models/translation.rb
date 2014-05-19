@@ -137,40 +137,13 @@ class Translation < ActiveRecord::Base
 
   tracked_attributes.each { |a| attr_accessor :"#{a}_actually_was" }
 
-  # TODO:
-  def self.total_words 
-    Translation.not_base.sum(:words_count)
-  end 
-
-  # TODO:
-  def self.total_words_new
-    Project.all.inject(0) do |sum, project|
-      sum += project.translations
-                    .not_base
-                    .where(translated: false, rfc5646_locale: project.required_locales.map(&:rfc5646))
-                    .sum(:words_count)
-    end
-  end 
-
-  # TODO:
-  def self.total_words_pending
-    Project.all.inject(0) do |sum, project|
-      sum += project.translations
-                    .not_base
-                    .where('approved IS NOT TRUE')
-                    .where(translated: true, rfc5646_locale: project.required_locales.map(&:rfc5646))
-                    .sum(:words_count)
-    end
-  end 
-
-  # TODO:
+  # TODO: Fold this into DailyMetric?
   def self.total_words_per_project
     Translation.not_base.joins(key: :project)
       .select("sum(words_count), projects.name").group("projects.name")
       .order("sum DESC")
       .map { |t| [t.name, t.sum] }
-  end 
-
+  end
 
   # Method used to cached the current state of the Translation
   # Required before making changes to a Translation that will be saved
