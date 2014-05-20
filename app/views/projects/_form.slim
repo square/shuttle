@@ -157,57 +157,66 @@
 
 
     .eight.columns.right-side
+      .flipswitch
+        input#key-flipswitch.flipswitch-checkbox checked=@project.key_inclusions.empty? name="project[use_key_exclusions]" type="checkbox"
+          label.flipswitch-label for="key-flipswitch"
+            .flipswitch-inner
+            .flipswitch-switch
+      fieldset
+        legend Key Filtering
 
-      fieldset 
-        legend Key Whitelisting and Blacklisting
-        
-        .space-group
+        .space-group#key-flipswitch-unchecked
           = f.label :key_inclusions, class: 'control-label'
           p.help-block List the keys that must be translated. If at least one inclusion is given, keys not matching will not be translated. UNIX-style globs are supported.
-          .controls 
+          .controls
             = f.content_tag_field 'div', :key_inclusions, class: 'array-field', 'data-value' => @project.key_inclusions.to_json
-          
         
-        .space-group        
+        .space-group#key-flipswitch-checked
           = f.label :key_exclusions, class: 'control-label'
           p.help-block List the keys you do not want to be translated. UNIX-style globs are supported.
           .controls
             = f.content_tag_field 'div', :key_exclusions, class: 'array-field', 'data-value' => @project.key_exclusions.to_json
-          
+
+      fieldset
+        legend Locale Key Filtering
         
-        .space-group        
+        .space-group
           = f.label :key_locale_inclusions, class: 'control-label'
           p.help-block List the keys that must be translated. If at least one inclusion is given, keys not matching will not be translated. UNIX-style globs are supported.
           .controls
             = f.content_tag_field 'div', :key_locale_inclusions, class: 'hash-field', 'data-value' => @project.key_locale_inclusions.to_json
           
         
-        .space-group        
+        .space-group
           = f.label :key_locale_exclusions, class: 'control-label'
           p.help-block List the keys you do not want to be translated. UNIX-style globs are supported.
           .controls
             = f.content_tag_field 'div', :key_locale_exclusions, class: 'hash-field', 'data-value' => @project.key_locale_exclusions.to_json
 
-          
-      
 
-
+      .flipswitch
+        input#path-flipswitch.flipswitch-checkbox checked=@project.only_paths.empty? name="project[use_skip_paths]" type="checkbox"
+          label.flipswitch-label for="path-flipswitch"
+            .flipswitch-inner
+            .flipswitch-switch
       fieldset 
-        legend Path Whitelisting and Blacklisting
-        
-        .space-group        
+        legend Path Filtering
+
+        .space-group#path-flipswitch-unchecked
           = f.label :only_paths, class: 'control-label'
           p.help-block List paths that importers will search for strings. Paths not in this list will not be searched.
           .controls
             = f.content_tag_field 'div', :only_paths, class: 'array-field', 'data-value' => @project.only_paths.to_json
         
         
-        .space-group        
+        .space-group#path-flipswitch-checked
           = f.label :skip_paths, class: 'control-label'
           p.help-block List paths you do not want any importers to scan under for strings.
           .controls
             = f.content_tag_field 'div', :skip_paths, class: 'array-field', 'data-value' => @project.skip_paths.to_json
-          
+
+      fieldset
+        legend Importer Path Filtering
         
         .space-group        
           = f.label :only_importer_paths, class: 'control-label'
@@ -223,7 +232,7 @@
             = f.content_tag_field 'div', :skip_importer_paths, class: 'hash-field', 'data-value' => @project.skip_importer_paths.to_json
 
   .form-actions
-    = f.submit class: 'primary', value: 'save'
+    = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
     button.default href=projects_url Cancel           
           
 - content_for :javascript do 

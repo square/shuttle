@@ -15,8 +15,6 @@
 require 'spec_helper'
 
 describe ProjectsController do
-  pending "Write specs" #TODO
-
   describe '#github_webhook' do
     before :all do
       @user = FactoryGirl.create(:user, role: 'monitor')
