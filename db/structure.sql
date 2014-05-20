@@ -64,6 +64,39 @@ CREATE TABLE blobs_keys (
 
 
 --
+-- Name: comments; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE comments (
+    id integer NOT NULL,
+    user_id integer,
+    issue_id integer NOT NULL,
+    content text,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: comments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE comments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: comments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE comments_id_seq OWNED BY comments.id;
+
+
+--
 -- Name: commits; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -186,6 +219,44 @@ CREATE SEQUENCE glossary_entries_id_seq
 --
 
 ALTER SEQUENCE glossary_entries_id_seq OWNED BY glossary_entries.id;
+
+
+--
+-- Name: issues; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE issues (
+    id integer NOT NULL,
+    user_id integer,
+    updater_id integer,
+    translation_id integer NOT NULL,
+    summary character varying(255),
+    description text,
+    priority integer,
+    kind integer,
+    status integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: issues_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE issues_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: issues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE issues_id_seq OWNED BY issues.id;
 
 
 --
@@ -536,6 +607,13 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY comments ALTER COLUMN id SET DEFAULT nextval('comments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY commits ALTER COLUMN id SET DEFAULT nextval('commits_id_seq'::regclass);
 
 
@@ -551,6 +629,13 @@ ALTER TABLE ONLY daily_metrics ALTER COLUMN id SET DEFAULT nextval('daily_metric
 --
 
 ALTER TABLE ONLY glossary_entries ALTER COLUMN id SET DEFAULT nextval('glossary_entries_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::regclass);
 
 
 --
@@ -641,6 +726,14 @@ ALTER TABLE ONLY blobs
 
 
 --
+-- Name: comments_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY comments
+    ADD CONSTRAINT comments_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: commits_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -670,6 +763,14 @@ ALTER TABLE ONLY daily_metrics
 
 ALTER TABLE ONLY glossary_entries
     ADD CONSTRAINT glossary_entries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: issues_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY issues
+    ADD CONSTRAINT issues_pkey PRIMARY KEY (id);
 
 
 --
@@ -753,6 +854,20 @@ ALTER TABLE ONLY users
 
 
 --
+-- Name: comments_issue; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX comments_issue ON comments USING btree (issue_id);
+
+
+--
+-- Name: comments_user; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX comments_user ON comments USING btree (user_id);
+
+
+--
 -- Name: commits_date; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -813,6 +928,27 @@ CREATE INDEX index_blobs_on_project_id_and_sha_raw_and_errored ON blobs USING bt
 --
 
 CREATE UNIQUE INDEX index_users_on_confirmation_token ON users USING btree (confirmation_token);
+
+
+--
+-- Name: issues_translation; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX issues_translation ON issues USING btree (translation_id);
+
+
+--
+-- Name: issues_updater; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX issues_updater ON issues USING btree (updater_id);
+
+
+--
+-- Name: issues_user; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX issues_user ON issues USING btree (user_id);
 
 
 --
@@ -934,6 +1070,22 @@ ALTER TABLE ONLY blobs
 
 
 --
+-- Name: comments_issue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY comments
+    ADD CONSTRAINT comments_issue_id_fkey FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
+
+
+--
+-- Name: comments_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY comments
+    ADD CONSTRAINT comments_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
 -- Name: commits_keys_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -979,6 +1131,30 @@ ALTER TABLE ONLY glossary_entries
 
 ALTER TABLE ONLY glossary_entries
     ADD CONSTRAINT glossary_entries_translator_id_fkey FOREIGN KEY (translator_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: issues_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY issues
+    ADD CONSTRAINT issues_translation_id_fkey FOREIGN KEY (translation_id) REFERENCES translations(id) ON DELETE CASCADE;
+
+
+--
+-- Name: issues_updater_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY issues
+    ADD CONSTRAINT issues_updater_id_fkey FOREIGN KEY (updater_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: issues_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY issues
+    ADD CONSTRAINT issues_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
 
 
 --
@@ -1126,3 +1302,7 @@ INSERT INTO schema_migrations (version) VALUES ('20140521010749');
 INSERT INTO schema_migrations (version) VALUES ('20140523201654');
 
 INSERT INTO schema_migrations (version) VALUES ('20140523201726');
+
+INSERT INTO schema_migrations (version) VALUES ('20140521213501');
+
+INSERT INTO schema_migrations (version) VALUES ('20140522002732');

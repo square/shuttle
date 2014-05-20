@@ -44,6 +44,7 @@
 #= require modernizr
 #= require xregexp
 #= require diff_match_patch.js
+#= require spin.js
 #= require dropzone
 #
 #= require d3

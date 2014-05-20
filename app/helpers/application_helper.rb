@@ -42,5 +42,4 @@ module ApplicationHelper
 
     image_path "country-flags/#{country.downcase}.png"
   end
-
 end

@@ -199,11 +199,32 @@ en:
         reviewer: reviewer
         admin: administrator
     commit:
+      unknown_user: "Unknown User"
       priority:
         0: P0
         1: P1
         2: P2
         3: P3
+    issue:
+      unknown_user: "Unknown User"
+      priority:
+        -1: Unprioritized
+        0: P0 (Show Stopper)
+        1: P1 (Critical)
+        2: P2 (Default)
+        3: P3
+      kind:
+        1: Needs More Context
+        2: Typo
+        3: Code Syntax Issue
+        4: Mistranslation
+        5: Truncation
+        6: Other
+      status:
+        1: Open
+        2: In progress
+        3: Resolved
+        4: IceBox
   fencer:
     Android: "{android}"
     Erb: "<%= ERb %>"
@@ -286,6 +307,14 @@ en:
         subject: "[Shuttle] Finished translation of commit"
       notify_submitter_of_import_errors:
         subject: "[Shuttle] Error(s) occurred during the import"
+    issue:
+      issue_created:
+        subject: "[Shuttle] %{name} reported a new issue. Issue Summary: '%{summary}'"
+      issue_updated:
+        subject: "[Shuttle] %{name} updated an issue. Issue Summary: '%{summary}'"
+    comment:
+      comment_created:
+        subject: "[Shuttle] %{name} wrote a new comment to an issue: '%{content}'."
     screenshot:
       request_screenshot:
         subject: "[Shuttle] Requesting screenshots for commit %{sha}"

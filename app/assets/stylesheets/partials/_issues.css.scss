@@ -1,0 +1,101 @@
+// VARS
+$status-red: #FF0000;
+$status-green: #40C20F;
+$status-blue: #66B2FF;
+$status-yellow: #E4DB00;
+
+#issues {
+  padding-top: 30px;
+  margin-top: 70px;
+
+  legend {
+    margin-bottom:30px;
+  }
+
+  .issue-wrapper {
+    .status {
+      &.status-1 { color: $status-red; }
+      &.status-2 { color: $status-yellow; }
+      &.status-3 { color: $status-green }
+      &.status-4 { color: $status-blue; }
+
+      padding: 0 5px;
+    }
+
+    .top-bar {
+      border-bottom: 1px solid $gray5;
+      margin-bottom: 15px;
+    }
+  }
+
+  .issues-table {
+    border: 1px solid $gray6;
+  }
+
+  .issue-wrapper {
+    padding: 30px 10px;
+  }
+
+  .new-issue-wrapper, .edit-issue-wrapper, .new-comment-wrapper {
+    position: relative;
+  }
+
+  .hide-new-issue-wrapper, .hide-edit-issue-wrapper {
+    margin-left: 180px;
+  }
+
+  .hide-new-comment-wrapper {
+    margin-top: -37px;
+    float: left;
+    margin-left: 90px;
+  }
+
+  .comment {
+    padding:10px;
+    border-top: 1px solid $gray5;
+    .info {
+      font-size: 12px;
+    }
+  }
+
+  .errors {
+    color: $flash-red
+  }
+
+  .info {
+    color: $gray4;
+  }
+
+  button {
+    margin: 0;
+    &.hide {
+      display: none // to take precedence
+    }
+  }
+
+  .control-group {
+    margin-bottom: 5px;
+    .controls {
+      min-height: 30px;
+    }
+    div.controls {
+      padding-top: 9px;
+    }
+  }
+
+  select {
+    padding-right: 35px;
+  }
+
+  .overlayed {
+    opacity: 0.4;
+  }
+  
+  .loading-overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+  }
+}

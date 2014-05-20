@@ -1,0 +1,42 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- issue_wrapper_id = "issue-wrapper-#{issue.id}"
+
+.issue-wrapper id="#{issue_wrapper_id}"
+  .top-bar
+    strong.pull-right
+      | Status:
+      span class="status status-#{issue.status}"
+        = t("models.issue.status")[issue.status]
+    .info
+      strong = issue.user_name
+      |  reported this issue on #{l issue.created_at, format: :full}
+
+  .show-issue-wrapper class="#{'hide' if issue.errors.any?}"
+    = render partial: 'issues/show', locals: { project: project, key: key, translation: translation, issue: issue }
+    = button_tag 'Update Issue', \
+                 'data-show-on-click' => "##{issue_wrapper_id} .edit-issue-wrapper", \
+                 'data-hide-on-click' => "##{issue_wrapper_id} .show-issue-wrapper", \
+                  class: "small default toggle-button"
+
+  .edit-issue-wrapper.loading-overlayable class="#{'hide' if issue.errors.blank?}"
+    = render partial: 'issues/edit', locals: { project: project, key: key, translation: translation, issue: issue }
+    = button_tag 'Cancel', \
+                 'data-show-on-click' => "##{issue_wrapper_id} .show-issue-wrapper", \
+                 'data-hide-on-click' => "##{issue_wrapper_id} .edit-issue-wrapper", \
+                  class: "small default toggle-button hide-edit-issue-wrapper"
+
+  .issue-comments-wrapper
+    = render partial: 'comments/index', locals: {issue: issue, comment: Comment.new}

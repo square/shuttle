@@ -147,3 +147,5 @@ hr.divider
                       data-compact=(change.compact_copy_to ? change.compact_copy_to : "None")
                       ]
                       = change.compact_copy_to ? change.compact_copy_to : "None"
+
+= render partial: 'issues/index', locals: {project: @project, key: @key, translation: @translation, issues: @issues, issue: @issue}
