@@ -3,6 +3,7 @@
 --
 
 SET statement_timeout = 0;
+SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -103,6 +104,38 @@ CREATE TABLE commits_keys (
     commit_id integer NOT NULL,
     key_id integer NOT NULL
 );
+
+
+--
+-- Name: daily_metrics; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE daily_metrics (
+    id integer NOT NULL,
+    metadata text,
+    date date NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: daily_metrics_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE daily_metrics_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: daily_metrics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE daily_metrics_id_seq OWNED BY daily_metrics.id;
 
 
 --
@@ -484,6 +517,13 @@ ALTER TABLE ONLY commits ALTER COLUMN id SET DEFAULT nextval('commits_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY daily_metrics ALTER COLUMN id SET DEFAULT nextval('daily_metrics_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY glossary_entries ALTER COLUMN id SET DEFAULT nextval('glossary_entries_id_seq'::regclass);
 
 
@@ -580,6 +620,14 @@ ALTER TABLE ONLY commits_keys
 
 ALTER TABLE ONLY commits
     ADD CONSTRAINT commits_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: daily_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY daily_metrics
+    ADD CONSTRAINT daily_metrics_pkey PRIMARY KEY (id);
 
 
 --
@@ -703,6 +751,13 @@ CREATE INDEX commits_ready_date ON commits USING btree (project_id, ready, commi
 --
 
 CREATE UNIQUE INDEX commits_rev ON commits USING btree (project_id, revision_raw);
+
+
+--
+-- Name: daily_metrics_date; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX daily_metrics_date ON daily_metrics USING btree (date);
 
 
 --
@@ -999,3 +1054,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140228025058');
 INSERT INTO schema_migrations (version) VALUES ('20140306064700');
 
 INSERT INTO schema_migrations (version) VALUES ('20140311011156');
+
+INSERT INTO schema_migrations (version) VALUES ('20140518040822');
