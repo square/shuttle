@@ -31,8 +31,8 @@ $(document).ready ->
             match_percentage = $('<span/>').addClass("match-percentage").text("(#{match.match_percentage.toString()[0..4]}%) ")
             match_element = $('<a/>').append(match_percentage)
                                      .append($('<span/>').addClass('fuzzy-matched-copy').text(match.copy))
-                                     .append($('<span/>').addClass('changed').text(match.source_copy).hide())
-                                     .append($('<span/>').addClass('original').text(source_copy).hide())
+                                     .append($('<span/>').addClass('changed').text(source_copy).hide())
+                                     .append($('<span/>').addClass('original').text(match.source_copy).hide())
 
             match_wrapper = $('<dd/>').append(match_element)
                                       .append($('<div/>').addClass('diff'))
