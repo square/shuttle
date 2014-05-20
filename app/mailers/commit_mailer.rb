@@ -44,4 +44,17 @@ class CommitMailer < ActionMailer::Base
       mail to: @commit.user.email, subject: t('mailer.commit.notify_translation_finished.subject')
     end
   end
+
+  # Notifies the user who submitted the Commit that error(s) occured during import.
+  # An email will only be sent if the Commit has a User associated with it.
+  #
+  # @param [Commit] commit The Commit that has been imported.
+  # @return [Mail::Message] The email to be delivered.
+
+  def notify_submitter_of_import_errors(commit)
+    @commit = commit
+    if @commit.user.try!(:email)
+      mail to: @commit.user.email, subject: t('mailer.commit.notify_submitter_of_import_errors.subject')
+    end
+  end
 end

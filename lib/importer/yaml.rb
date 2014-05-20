@@ -31,6 +31,7 @@ module Importer
         yml = YAML.load(file.contents)
       rescue Exception => err
         log_skip nil, "Invalid YAML file: #{err}"
+        @commit.add_import_error_in_redis(file.path, err) if @commit
         return
       end
 
