@@ -16,29 +16,48 @@ require 'spec_helper'
 
 describe Importer::Ember do
   context "[importing]" do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
-      @project = FactoryGirl.create(:project,
-                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
-                                    only_paths:     %w(ember/),
-                                    skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
-      @commit  = @project.commit!('HEAD')
+    context "[repo with valid files]" do
+      before :all do
+        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+        @project = FactoryGirl.create(:project,
+                                      repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                      only_paths:     %w(ember/),
+                                      skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
+        @commit  = @project.commit!('HEAD')
+      end
+
+      it "should import strings from JS files" do
+        expect(@project.keys.for_key('root_key').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
+        expect(@project.keys.for_key('nested_key.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
+        expect(@project.keys.for_key('nested_key.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
+      end
+
+      it "should import strings from CoffeeScript files" do
+        expect(@project.keys.for_key('root_key_coffee').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
+        expect(@project.keys.for_key('nested_key_coffee.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
+        expect(@project.keys.for_key('nested_key_coffee.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
+      end
+
+      it "should only import strings under the correct localization" do
+        expect(@project.keys.for_key('appears_in_two_locales').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('English')
+      end
     end
 
-    it "should import strings from JS files" do
-      expect(@project.keys.for_key('root_key').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
-      expect(@project.keys.for_key('nested_key.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
-      expect(@project.keys.for_key('nested_key.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
-    end
+    context "[repo with broken files]" do
+      before :each do
+        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s).delete_all
+        @project = FactoryGirl.create(:project,
+                                      repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
+                                      only_paths:     %w(ember-broken/),
+                                      skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
+        @commit  = @project.commit!('HEAD').reload
+      end
 
-    it "should import strings from CoffeeScript files" do
-      expect(@project.keys.for_key('root_key_coffee').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
-      expect(@project.keys.for_key('nested_key_coffee.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
-      expect(@project.keys.for_key('nested_key_coffee.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
-    end
-
-    it "should only import strings under the correct localization" do
-      expect(@project.keys.for_key('appears_in_two_locales').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('English')
+      it "should add error to commit" do
+        expect(@commit.import_errors_in_redis).to eql([])
+        expect(@commit.import_errors).to eql([["/ember-broken/en-US.js", "Unexpected identifier at <eval>:2:12"],
+                                              ["/ember-broken/en-US.coffee", "[stdin]:2:5: error: unexpected this this is some invalid javascript code ^^^^"]])
+      end
     end
   end
 

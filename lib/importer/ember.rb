@@ -46,6 +46,9 @@ module Importer
       context.eval("Ember.I18n.locales.translations").to_hash
       hash = context.eval("Ember.I18n.locales.translations")[rfc].to_hash.except('CLDRDefaultLanguage')
       extract_hash(hash) { |key, value| receiver.add_string key, value }
+    rescue Exception => err
+      log_skip nil, "Invalid CoffeeScript file: #{err}"
+      @commit.add_import_error_in_redis(file.path, err) if @commit
     end
 
     def has_translations_for_locale?(file, locale)

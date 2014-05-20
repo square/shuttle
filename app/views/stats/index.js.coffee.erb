@@ -13,147 +13,101 @@
 #    limitations under the License.
 
 $(window).ready () ->
-	# ERROR MESSAGE
-	error = (message) ->
-		new Flash('alert').text(message);
+  commit_load_chart = d3.select('#commit_load_chart').style('height', '350px')
+  word_distribution_chart = d3.select('#word_distribution_chart').style('height', '350px')
+  translation_language_chart = d3.select('#translation_language_chart').style('height', '400px')
 
-	# FORMAT GRAPH DATA
-	formatPieChartData = (project_data) ->
-		formatted_data = []
-		for project in project_data
-			formatted_data.push
-				key: project[0]
-				y: project[1]
-		return formatted_data
+  # GENERATE GRAPHS
+  generatePieChart = (d3element, data) ->
+    nv.addGraph ->
+      chart = nv.models.pieChart()
+      .x( (d) -> d.key )
+      .y( (d) -> d.y )
+      .donut(true)
+      .showLabels(true)
+      .showLegend(false)
+      .tooltipContent((key, y, e, graph) ->
+        return '<h6>' + key + '</h6>' +
+            '<p>' + numberWithDelimiter(parseFloat(y.replace(",", "")).toFixed()) + ' words </p>'
+      )
 
-	formatLineBarChartData = (project_data) ->
-		formatted_data = [
-			{
-				"key": "Number of Commits Created",
-				"bar": true,
-				"values": project_data["daily_creates"]
-			},
-			{
-				"key": "Average Commit Load Time (in hours)",
-				"values": project_data["average_load_time"]
-			},
-			{
-				"key": "Average Commit Translation Time (in hours)",
-				"values": project_data["average_translation_time"]
-			},
-			{
-				"key": "Average Commit Completion Time (in hours)",
-				"values": project_data["average_completion_time"]
-			}
-		].map((series) ->
-			series.values = series.values.map((d) -> return {x: d[0] * 1000, y: d[1] })
-			return series
-		)
-		for i in [1..3]
-			formatted_data[i].values = formatted_data[i].values.map (d) ->
-				return {x: d.x, y: d.y / (3600) } # In Hours
+      chart.color([ "#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#FDBF6F", "#FF7F00", "#CAB2D6",
+                    "#6A3D9A"])
 
-		return formatted_data
+      d3element.datum(data).transition().call(chart)
+      nv.utils.windowResize(chart.update)
+      chart
 
-	# GENERATE GRAPHS
-	generatePieChart = (d3element, data) ->
-		nv.addGraph () =>
-			chart = nv.models.pieChart()
-											 .x((d) -> return d.key)
-											 .y((d) -> return d.y)
-											 .donut(true)
-											 .showLabels(true)
-											 .showLegend(false)
-											 .tooltipContent((key, y, e, graph) ->
-										     return '<h3>' + key + '</h3>' +
-										            '<p>' + numberWithDelimiter(parseFloat(y.replace(",","")).toFixed()) + ' words </p>'
-											 )
+  generateLineBarChart = (d3element, data) ->
+    nv.addGraph ->
+      chart = nv.models.linePlusBarChart().margin(
+        top: 30
+        right: 60
+        bottom: 50
+        left: 70
+      )
+      .x( (d, i) -> i)
+      .useInteractiveGuideline(true)
+      .color(d3.scale.category10().range())
 
-			chart.color([ "#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#FDBF6F", "#FF7F00", "#CAB2D6",
-			              "#6A3D9A"])
-			d3element.datum(data)
-							 .transition().duration(1200)
-							 .call(chart)
-			return chart
+      chart.xAxis.tickFormat((d) ->
+        dx = data[0].values[d] and data[0].values[d].x or 0
+        (if dx then d3.time.format("%x")(new Date(dx)) else "")
+      )
+      .showMaxMin(false)
 
-	generateLineBarChart = (d3element, data) ->
-		nv.addGraph =>
-			chart = nv.models.linePlusBarChart().margin(
-				top: 30
-				right: 60
-				bottom: 50
-				left: 70
-			)
-			.x((d, i) ->
-					i)
-			.useInteractiveGuideline(true)
-			.color(d3.scale.category10().range())
+      chart.y1Axis.tickFormat(d3.format(",d"))
+      chart.y2Axis.tickFormat( (d) -> d3.format(",.2f")(d) )
 
-			chart.xAxis.tickFormat((d) ->
-				dx = data[0].values[d] and data[0].values[d].x or 0
-				(if dx then d3.time.format("%x")(new Date(dx)) else "")
-			)
-			.showMaxMin(false)
+      d3element.datum(data).transition().call(chart)
 
-			chart.y1Axis.tickFormat(d3.format(",f"))
-			chart.y2Axis.tickFormat((d) ->
-				return d3.format(",.2f")(d)
-			)
+      nv.utils.windowResize(chart.update)
+      chart
 
-			d3element.datum(data)
-							 .transition().duration(500)
-							 .call(chart)
+  generateHorizontalBarChart = (d3element, data) ->
+    nv.addGraph ->
+      chart = nv.models.multiBarHorizontalChart().margin(
+        top: 30
+        right: 50
+        bottom: 50
+        left: 100
+      )
+      .x( (d) -> d.label )
+      .y( (d) -> d.value )
+      .showValues(true)
+      .tooltips(false)
+      .showControls(false)
+      .transitionDuration(350)
 
-			nv.utils.windowResize(chart.update)
+      chart.valueFormat(d3.format(',d'))
+      chart.yAxis.tickFormat(d3.format(',d'))
 
-			chart.dispatch.on "stateChange", (e) ->
-				nv.log "New State:", JSON.stringify(e)
-			return chart
+      d3element.datum(data).call(chart)
+      nv.utils.windowResize(chart.update)
+      chart
 
-	# REQUEST FOR GRAPHS
-	$.ajax "<%= stats_words_per_project_url %>",
-		type: 'GET'
-		dataType: 'json'
-		success: (project_data) =>
-			if not $.isEmptyObject(project_data)
-				formatted_data = formatPieChartData(project_data)
-				generatePieChart(d3.select("#word_distribution_chart svg"), formatted_data)
-		error: =>
-			error("Unable to retrieve words per project stats")
+  generateLineBarChart(commit_load_chart, [
+    {
+      "key"     : "Number of Commits Created",
+      "bar"     : true,
+      "values"  : <%= @num_commits_loaded.to_json %>
+    },
+    {
+      "key"     : "Average Commit Load Time (in hours)",
+      "values"  : <%= @average_load_time.to_json %>
+    }
+  ])
 
-	$.ajax "<%= stats_translation_metrics_url %>",
-		type: 'GET'
-		dataType: 'json'
-		success: (project_data) =>
-			if not $.isEmptyObject(project_data)
-				formatted_data = formatLineBarChartData(project_data)
-				generateLineBarChart(d3.select("#all_commit_time_chart svg"), formatted_data)
-		error: =>
-			error("Unable to retrieve commit time stats")
-
-	<% @top_projects.each_with_index do |top_project, i| %>
-		$.ajax "<%= stats_translation_metrics_url %>",
-			type: 'GET'
-			data: { project_id: <%= top_project[:id] %> }
-			dataType: 'json'
-			success: (project_data) =>
-				if not $.isEmptyObject(project_data)
-					formatted_data = formatLineBarChartData(project_data)
-					generateLineBarChart(d3.select("#project_commit_time_chart_<%= i %> svg"), formatted_data)
-			error: =>
-				error("Unable to retrieve commit time stats")
-	<% end %>
-
-	$('select[name="project"]').change ->
-		$("#project_commit_time_chart_4 svg").empty()
-		$.ajax "<%= stats_translation_metrics_url %>",
-			type: 'GET'
-			data: { project_id: $(this).val() }
-			dataType: 'json'
-			success: (project_data) =>
-				if not $.isEmptyObject(project_data)
-					formatted_data = formatLineBarChartData(project_data)
-					generateLineBarChart(d3.select("#project_commit_time_chart_4 svg"), formatted_data)
-			error: =>
-				error("Unable to retrieve commit time stats")
-
+  generatePieChart(word_distribution_chart, <%= @words_per_project.to_json %>)
+  generateHorizontalBarChart(translation_language_chart, [
+    {
+      "key"     : "Words Created"
+      "color"   : "#d62728"
+      "values"  : <%= @num_words_created_per_language.to_json %>
+    },
+    {
+      "key"     : "Words Completed"
+      "color"   : "#1f77b4"
+      "values"  : <%= @num_words_completed_per_language.to_json %>
+    }
+  ])

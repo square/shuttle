@@ -48,187 +48,48 @@ describe Commit do
         expect(@commit.author_email).to eql('ricksong@squareup.com')
       end
     end
-  end
 
-  context "[stats]" do
-    context "[callbacks]" do
-      before :all do
-        Project.delete_all
-        Timecop.freeze(Time.now)
-        @created_at = Time.now
-        @commit     = FactoryGirl.create(:commit, created_at: @created_at, loading: true, user: FactoryGirl.create(:user))
-        Timecop.freeze(3.hours.from_now)
-        @commit.loading = false
-        @commit.save!
-        Timecop.freeze(3.hours.from_now)
-        @commit.recalculate_ready!
+    context "[after import]" do
+      before(:each) do
+        @commit = FactoryGirl.create(:commit, loading: true)
+        ActionMailer::Base.deliveries.clear
+        @commit.user = FactoryGirl.create(:user)
       end
 
-      after(:all) { Timecop.return }
-
-      it "should correctly compute the time to load" do
-        expect(@commit.loaded_at.to_time).to eql(@created_at + 3.hours)
-        expect(@commit.time_to_load).to eq(3.hours)
+      it "should not send an email if commit doesnt have import errors" do
+        @commit.update_attributes(loading: false, ready: true)
+        expect(ActionMailer::Base.deliveries.map(&:subject)).not_to include("[Shuttle] Error(s) occurred during the import")
       end
 
-      it "should correctly compute the time to translate" do
-        expect(@commit.completed_at.to_time).to eql(@created_at + 6.hours)
-        expect(@commit.time_to_translate).to eq(3.hours)
-      end
-
-      it "should correctly compute the time to complete" do
-        expect(@commit.completed_at.to_time).to eql(@created_at + 6.hours)
-        expect(@commit.time_to_complete).to eq(6.hours)
+      it "should email if commit has import errors" do
+        @commit.add_import_error_in_redis("some/fake/file.yaml", "some fake error")
+        @commit.update_attributes(loading: false, ready: false)
+        expect(ActionMailer::Base.deliveries.map(&:subject)).to include("[Shuttle] Error(s) occurred during the import")
       end
     end
+  end
 
-    context "[metrics]" do
-      before :all do
-        timespan = 30
-        Timecop.freeze(Time.now.beginning_of_year)
-        @last_date  = Date.today
-        @first_date = Date.today - timespan.days
+  context "[callbacks]" do
+    before :all do
+      Project.delete_all
+      Timecop.freeze(Time.now)
+      @created_at = Time.now
+      @commit     = FactoryGirl.create(:commit, created_at: @created_at, loading: true)
+      Timecop.freeze(3.hours.from_now)
+      @commit.loading = false
+      @commit.save!
+      Timecop.freeze(3.hours.from_now)
+      @commit.recalculate_ready!
+    end
 
-        Project.delete_all
-        @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-        # Note that we include 1 day outside of boundary.  This is to verify that these metrics don't capture
-        # dates outside of window.
-        ((@first_date - 1.day)...@last_date).each do |date|
-          FactoryGirl.create(
-              :commit,
-              project:      @project,
-              created_at:   date,
-              loaded_at:    date + 1.day,
-              completed_at: date + 2.days,
-          )
+    after(:all) { Timecop.return }
 
-        end
+    it "should persist the loaded_at time" do
+      expect(@commit.loaded_at.to_time).to eql(@created_at + 3.hours)
+    end
 
-        # Create an "anomalous" commit (a commit that belongs to a separate project)to also test for how they handle
-        # for date filters
-        FactoryGirl.create(
-            :commit,
-            created_at:   @first_date,
-            loaded_at:    @first_date + (0.5).days,
-            completed_at: @first_date + 1.day,
-        )
-      end
-      after(:all) { Timecop.return }
-
-      it "should correctly compute daily commits created metric for one project" do
-        expect(Commit.daily_commits_created(@project.id)).to eql(
-                                                                 (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
-                                                                   daily_finishes << [cur_date.to_time.to_i, 1]
-                                                                 end
-                                                             )
-      end
-
-      it "should correctly compute daily commits finished metric for one project" do
-        expect(Commit.daily_commits_finished(@project.id)).to eql(
-                                                                  (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
-                                                                    if cur_date == @first_date
-                                                                      daily_finishes << [cur_date.to_time.to_i, 0]
-                                                                    else
-                                                                      daily_finishes << [cur_date.to_time.to_i, 1]
-                                                                    end
-                                                                  end
-                                                              )
-      end
-
-      it "should correctly compute average load metric for one project" do
-        expect(Commit.average_load_time(@project.id)).to eql(
-                                                             (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-                                                               mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
-                                                             end
-                                                         )
-      end
-
-      it "should correctly compute average translation metric for one project" do
-        expect(Commit.average_translation_time(@project.id)).to eql(
-                                                                    (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-                                                                      mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
-                                                                    end
-                                                                )
-      end
-
-      it "should correctly compute average completion metric for one project" do
-        expect(Commit.average_completion_time(@project.id)).to eql(
-                                                                   (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-                                                                     mv_avg << [cur_date.to_time.to_i, 2.day.to_f]
-                                                                   end
-                                                               )
-      end
-
-      it "should correctly compute daily commits created metric for all projects" do
-        expect(Commit.daily_commits_created).to eql(
-                                                    (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
-                                                      if cur_date == @first_date
-                                                        daily_finishes << [cur_date.to_time.to_i, 2]
-                                                      else
-                                                        daily_finishes << [cur_date.to_time.to_i, 1]
-                                                      end
-                                                    end
-                                                )
-      end
-
-      it "should correctly compute daily commits finished metric for all projects" do
-        expect(Commit.daily_commits_finished).to eql(
-                                                     (@first_date...@last_date).inject([]) do |daily_finishes, cur_date|
-                                                       case cur_date
-                                                         when @first_date then
-                                                           daily_finishes << [cur_date.to_time.to_i, 0]
-                                                         when @first_date + 1 then
-                                                           daily_finishes << [cur_date.to_time.to_i, 2]
-                                                         else
-                                                           daily_finishes << [cur_date.to_time.to_i, 1]
-                                                       end
-                                                     end
-                                                 )
-      end
-
-      it "should correctly compute average load metric for all projects" do
-        expect(Commit.average_load_time).to eql(
-                                                (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-                                                  case cur_date
-                                                    when @first_date then
-                                                      mv_avg << [cur_date.to_time.to_i, 6.day/7.0]
-                                                    when @first_date + 1 then
-                                                      mv_avg << [cur_date.to_time.to_i, 7.days/8.0]
-                                                    else
-                                                      mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
-                                                  end
-                                                end
-                                            )
-      end
-      it "should correctly compute average translation metric for all projects" do
-        expect(Commit.average_translation_time).to eql(
-                                                       (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-                                                         case cur_date
-                                                           when @first_date then
-                                                             mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
-                                                           when @first_date + 1 then
-                                                             mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
-                                                           else
-                                                             mv_avg << [cur_date.to_time.to_i, 1.day.to_f]
-                                                         end
-                                                       end
-                                                   )
-      end
-      it "should correctly compute average completion metric for all projects" do
-        expect(Commit.average_completion_time).to eql(
-                                                      (@first_date...@last_date).inject([]) do |mv_avg, cur_date|
-                                                        case cur_date
-                                                          when @first_date then
-                                                            mv_avg << [cur_date.to_time.to_i, 13.days/7.0]
-                                                          when @first_date + 1 then
-                                                            mv_avg << [cur_date.to_time.to_i, 15.days/8.0]
-                                                          else
-                                                            mv_avg << [cur_date.to_time.to_i, 2.day.to_f]
-                                                        end
-                                                      end
-                                                  )
-      end
-
+    it "should persist the completed_at time" do
+      expect(@commit.completed_at.to_time).to eql(@created_at + 6.hours)
     end
   end
 
@@ -302,6 +163,26 @@ describe Commit do
 
       expect(@commit).not_to be_ready
       expect(@commit.completed_at).to eql(completed_time)
+    end
+
+    it "should not set ready if there are import errors in redis" do
+      @commit.recalculate_ready!
+      expect(@commit).to be_ready
+
+      @commit.add_import_error_in_redis 'some/file.yml', "Some Fake Error"
+      @commit.recalculate_ready!
+
+      expect(@commit).to_not be_ready
+    end
+
+    it "should not set ready if there are import errors in postgres" do
+      @commit.recalculate_ready!
+      expect(@commit).to be_ready
+
+      @commit.update_attributes(import_errors: [['some/file.yml', "Some Fake Error"]])
+      @commit.recalculate_ready!
+
+      expect(@commit).to_not be_ready
     end
   end
 
@@ -549,6 +430,19 @@ describe Commit do
       allow_any_instance_of(Importer::Yaml).to receive(:skip?).and_return(true)
       @project.commit! 'HEAD'
       expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort - %w(yaml))
+    end
+
+    it "clears the previous import errors" do
+      commit = @project.commit!('HEAD', skip_import: true)
+      commit.add_import_error_in_redis("fakefile", "fake error")
+      commit.update_attributes(loading: true)
+      commit.update_attributes(loading: false)
+      expect(commit.import_errors_in_redis).to eql([])
+      expect(commit.import_errors).to eql([["fakefile", "fake error"]])
+      commit.import_strings
+      commit.reload
+      expect(commit.import_errors_in_redis).to eql([])
+      expect(commit.import_errors).to eql([])
     end
 
     it "should remove appropriate keys when reimporting after changed settings" do

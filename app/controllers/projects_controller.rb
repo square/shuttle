@@ -262,6 +262,18 @@ class ProjectsController < ApplicationController
     targeted_rfc5646_locales = targeted_rfc5646_locales.merge(
       Hash[params[:project][:other_rfc5646_locales].map {|locale| [locale, false]}]
     )
+
+    if params[:use_key_exclusions]
+      params[:project][:key_inclusions] = []
+    else
+      params[:project][:key_exclusions] = []
+    end
+
+    if params[:use_skip_paths]
+      params[:project][:only_paths] = []
+    else
+      params[:project][:skip_paths] = []
+    end
     
     project_params = params[:project].to_hash.slice(*%w(
         name repository_url base_rfc5646_locale due_date cache_localization

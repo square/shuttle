@@ -90,14 +90,13 @@ class Project < ActiveRecord::Base
       targeted_rfc5646_locales: {presence: true, type: Hash, default: {'en' => true}},
 
       skip_imports:             {type: Array, default: []},
-
       key_exclusions:           {type: Array, default: [], allow_nil: false},
       key_inclusions:           {type: Array, default: [], allow_nil: false},
       key_locale_exclusions:    {type: Hash, default: {}, allow_nil: false},
       key_locale_inclusions:    {type: Hash, default: {}, allow_nil: false},
 
-      only_paths:               {type: Array, default: [], allow_nil: false},
       skip_paths:               {type: Array, default: [], allow_nil: false},
+      only_paths:               {type: Array, default: [], allow_nil: false},
       skip_importer_paths:      {type: Hash, default: {}, allow_nil: false},
       only_importer_paths:      {type: Hash, default: {}, allow_nil: false},
 

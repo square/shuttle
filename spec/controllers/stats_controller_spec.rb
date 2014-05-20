@@ -15,9 +15,4 @@
 require 'spec_helper'
 
 describe StatsController do
-  before :all do 
-    
-  end 
-
-  pending "Require Monitor" #TODO
 end

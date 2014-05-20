@@ -1,0 +1,100 @@
+#!/bin/bash
+
+author_name=${GIT_AUTHOR_NAME}
+if [[ -z "$author_name" ]]; then
+  author_name=$(git config user.name)
+fi
+
+author_email=${GIT_AUTHOR_EMAIL}
+if [[ -z "$author_email" ]]; then
+  author_email=$(git config user.email)
+fi
+
+commiter_name=${GIT_COMMITTER_NAME}
+if [[ -z "$commiter_name" ]]; then
+  commiter_name=$(git config user.name)
+fi
+
+commiter_email=${GIT_COMMITTER_EMAIL}
+if [[ -z "$commiter_email" ]]; then
+  commiter_email=$(git config user.email)
+fi
+
+if [[ "$author_name" == "Square" || "$author_email" == "github@squareup.com" || "$author_email" == "git@squareup.com" || "$commiter_name" == "Square" || "$commiter_email" == "github@squareup.com" || "$commiter_email" == "git@squareup.com" ]]; then
+  echo "Error: You must commit as a user other than '$author_name <$author_email>'."
+  echo
+  echo "Use a tool such as \`pair' from config_files to set your"
+  echo "git commit author name and email as you and your pair(s) name:"
+  echo
+  echo "  $ pair adam jane"
+  echo "  Adam West and Jane Smith <git+adam+jane@squareup.com>"
+  exit 1
+fi
+
+# A pre-commit hook which removes trailing whitespace and appends a newline
+# to known text files which are missing one.
+#
+# See http://eng.wealthfront.com/2011/03/corrective-action-with-gits-pre-commit.html
+files=$(git diff-index --name-status --cached HEAD | grep -v ^D | cut -c3-)
+if [ "$files" != "" ]; then
+  for f in $files; do
+    # Only examine known text files
+    if [[ "$f" =~ [.](conf|css|erb|feature|html|js|json|log|properties|rb|java|ru|txt|xml|yml|)$ ]]; then
+      # Add a linebreak to the file if it doesn't have one
+      if [ "$(tail -c1 $f)" != '' ]; then
+        echo >> "$f"
+        git add "$f"
+      fi
+
+      # Remove trailing whitespace if it exists
+      if grep -q "[[:blank:]]$" "$f"; then
+        sed -i "" -e $'s/[ \t]*$//g' "$f"
+        git add "$f"
+      fi
+    fi
+  done
+fi
+
+# Find the .go files that are being modified by this change. Exclude the
+# auto-generated .pb.go files which have known lint errors.
+gofiles=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$')
+if [ "${GO_SKIP_PRECOMMIT_CHECKS}" != "1" -a -n "${gofiles}" ]; then
+  if [ -z "$(which goimports)" ]; then
+    echo 'Please install goimports:'
+    echo '  go get code.google.com/p/go.tools/cmd/goimports'
+    exit 1
+  fi
+
+  # Check for formatting errors.
+  unformatted=$(goimports -l ${gofiles})
+  if [ -n "${unformatted}" ]; then
+    # Some files are not gofmt'd. Print message and fail.
+    echo -e "\nGo files must be formatted with goimports. Please run:"
+    for fn in ${unformatted}; do
+      echo "  goimports -w $fn"
+    done
+    exit 1
+  fi
+fi
+
+# Find the changed java files that do not contain either type of copyright
+# header found in the java style guide
+# https://wiki.corp.squareup.com/display/ENG/Java+Style+Guide#JavaStyleGuide-Comments
+
+if [ "${JAVA_WANT_COPYRIGHT_CHECKS}" == "1" ]; then
+  # Find all .java files that are being modified by this change.
+  javafiles=$(git diff --cached --name-only --diff-filter=ACM | grep '.java$')
+  # Find java files that don't contain a substring of all our copyright notices.
+  no_copyright=$(grep -L 'Square, Inc' $javafiles)
+
+  if [ -n "${no_copyright}" ]; then
+    echo -e "\nSquare Java code must contain Copyright notices, and a java"
+    echo -e "file you committed did not contain a copyright notice. \n"
+    echo -e "Files:"
+    echo -e ${no_copyright}
+    echo -e "\nSee https://wiki.corp.squareup.com/display/ENG/Java+Style+Guide#JavaStyleGuide-Comments"
+    echo -e "for a refresher on what the java copyrights are.\n"
+    echo -e "Unset JAVA_WANT_COPYRIGHT_CHECKS=1 to continue on regardless.\n"
+    exit 1
+  fi
+fi

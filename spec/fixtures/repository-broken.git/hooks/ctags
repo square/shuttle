@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# All our macs havs ctags, but they may not have exuberant ctags, which we need
+# here. There's probably a more robust way of checking which version is
+# installed, but this one uses a shell builtin and so is fast.
+#
+# You can install exuberant ctags with `brew install ctags`. See also
+# https://github.com/square/maximum-awesome .
+if [ "$(command -v ctags)" != "/usr/bin/ctags" ]; then
+  rm -f .git/tags
+  ctags --tag-relative -Rf.git/tags --exclude=.git --languages=-javascript,sql
+fi
