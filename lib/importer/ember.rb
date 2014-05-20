@@ -44,8 +44,8 @@ module Importer
       hash = extract_hash_from_file(contents, rfc)
 
       extract_hash(hash) { |key, value| receiver.add_string key, value }
-    rescue Exception => err
-      log_skip nil, "Invalid CoffeeScript file: #{err}"
+    rescue ExecJS::Error, V8::Error => err
+      log_skip nil, "Invalid Ember file: #{err}"
       @commit.add_import_error_in_redis(file.path, err) if @commit
     end
 
