@@ -385,6 +385,7 @@ describe TranslationsController do
 
     it "should 2. respond with the newest translation unit with matching locale and source copy (if there are duplicates)" do
       Timecop.freeze(Time.now + 5.hours)
+
       duplicate_key = FactoryGirl.create(:key,
                                          project: @project,
                                          key: 'duplicate_key')
@@ -403,6 +404,8 @@ describe TranslationsController do
           format:     'json'
       expect(response.status).to eql(200)
       expect(JSON.parse(response.body)['copy']).to eql('duplicate_locale_sc')
+
+      Timecop.return
     end
 
     it "should 3. respond with the translation unit of the 1st fallback locale with matching project/key and source copy" do

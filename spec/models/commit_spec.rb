@@ -97,7 +97,7 @@ describe Commit do
     before :all do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @commit  = @project.commit!('HEAD')
+      @commit  = @project.commit!('HEAD', skip_import: true)
     end
 
     before :each do
