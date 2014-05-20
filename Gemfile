@@ -78,12 +78,16 @@ end
 group :test do
   gem 'rspec-rails'
   gem 'factory_girl_rails'
-  gem 'capybara'
-  gem 'capybara-webkit'
   gem 'timecop'
   gem 'pry'
   gem 'pry-nav'
 end
+
+group :acceptance do
+  gem 'capybara'
+  gem 'capybara-webkit'
+end
+
 
 gem 'sql_origin', groups: [:development, :test]
 

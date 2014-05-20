@@ -14,7 +14,7 @@
 
 require 'spec_helper'
 
-describe 'Authentication' do
+describe 'Authentication', capybara: true do
   include ActionView::Helpers
 
   before(:each) do
