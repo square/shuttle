@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'strscan'
+require 'importer/ember'
 
 module Importer
 
