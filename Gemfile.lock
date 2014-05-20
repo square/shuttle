@@ -248,6 +248,7 @@ GEM
       rails (>= 4.0)
     stringex (2.2.0)
     temple (0.6.7)
+    test_after_commit (0.2.3)
     therubyracer (0.12.1)
       libv8 (~> 3.16.14.0)
       ref
@@ -340,6 +341,7 @@ DEPENDENCIES
   slugalicious
   sprockets-rails
   sql_origin
+  test_after_commit
   therubyracer
   timecop
   tire
