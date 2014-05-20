@@ -25,36 +25,47 @@ module Importer
     protected
 
     def import_file?(locale=nil)
-      %W(#{locale_to_use(locale).rfc5646}.js #{locale_to_use(locale).rfc5646}.coffee).include?(::File.basename(file.path))
+      %W(
+          #{locale_to_use(locale).rfc5646}.js
+          #{locale_to_use(locale).rfc5646}.coffee
+      ).include?(::File.basename(file.path))
     end
 
     def import_strings(receiver)
       rfc = locale_to_use(receiver.locale).rfc5646
 
-      unless has_translations_for_locale?(file, rfc)
+      unless has_translations_for_locale?(rfc)
         log_skip nil, "No translations for #{rfc}"
         return
       end
 
       contents = file.contents
       contents = CoffeeScript.compile(contents) if ::File.extname(file.path) == '.coffee'
-      context  = V8::Context.new
-      context['Ember'] = {'I18n' => {'locales' => {'translations' => {}}}}
-      context.eval contents
+      hash = extract_hash_from_file(contents, rfc)
 
-      context.eval("Ember.I18n.locales.translations")
-      context.eval("Ember.I18n.locales.translations").to_hash
-      hash = context.eval("Ember.I18n.locales.translations")[rfc].to_hash.except('CLDRDefaultLanguage')
       extract_hash(hash) { |key, value| receiver.add_string key, value }
     rescue Exception => err
       log_skip nil, "Invalid CoffeeScript file: #{err}"
       @commit.add_import_error_in_redis(file.path, err) if @commit
     end
 
-    def has_translations_for_locale?(file, locale)
+    def has_translations_for_locale?(locale)
       contents = file.contents
       contents.include?(%(Ember.I18n.locales.translations["#{locale}"])) ||
         contents.include?(%(Ember.I18n.locales.translations.#{locale}))
+    end
+
+    private
+
+    def extract_hash_from_file(contents, rfc)
+      context  = V8::Context.new
+      context['Ember'] = {'I18n' => {'locales' => {'translations' => {}}}}
+      context.eval contents
+
+      context.eval("Ember.I18n.locales.translations")
+      context.eval("Ember.I18n.locales.translations").to_hash
+
+      context.eval("Ember.I18n.locales.translations")[rfc].to_hash.except('CLDRDefaultLanguage')
     end
   end
 end

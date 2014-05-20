@@ -19,9 +19,7 @@ module Importer
   # Parses localizable strings from JavaScript/CoffeeScript files with Ember
   # I18n string hashes.
 
-  class EmberModule < Base
-    def self.fencers() %w(Mustache Html) end
-
+  class EmberModule < Ember
     protected
 
     def import_file?(locale=nil)
@@ -31,29 +29,20 @@ module Importer
       ).include?(::File.basename(file.path))
     end
 
-    def import_strings(receiver)
-      rfc = locale_to_use(receiver.locale).rfc5646
+    def has_translations_for_locale?(_)
+      file.contents.include?('module.exports')
+    end
 
-      unless has_translations?
-        log_skip nil, "No translations"
-        return
-      end
+    private
 
-      contents          = file.contents
-      contents          = CoffeeScript.compile(contents) if ::File.extname(file.path) == '.coffee'
+    def extract_hash_from_file(contents, rfc)
       context           = V8::Context.new
       context['module'] = {'exports' => {}}
       context.eval contents
 
       context.eval('module.exports')
 
-      hash = context.eval('module.exports').to_hash
-      extract_hash(hash) { |key, value| receiver.add_string key, value }
-    end
-
-    def has_translations?
-      contents = file.contents
-      contents.include?('module.exports')
+      context.eval('module.exports').to_hash
     end
   end
 end
