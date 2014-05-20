@@ -45,6 +45,7 @@ require 'fileutils'
 # | `user`         | The {User} that submitted this Commit for translation. |
 # | `keys`         | All the {Key Keys} found in this Commit.               |
 # | `translations` | The {Translation Translations} found in this Commit.   |
+# | `blobs`        | The {Blob Blobs} found in this Commit.                 |
 #
 # Properties
 # ==========
@@ -86,6 +87,8 @@ class Commit < ActiveRecord::Base
   has_many :commits_keys, inverse_of: :commit, dependent: :destroy
   has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
+  has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
+  has_many :blobs, through: :blobs_commits
 
   include HasMetadataColumn
   has_metadata_column(
@@ -229,7 +232,7 @@ class Commit < ActiveRecord::Base
     add_worker! job_id
 
     # clear out existing keys so that we can import all new keys
-    keys.clear unless options[:locale]
+    commits_keys.delete_all unless options[:locale]
     # perform the recursive import
     traverse(commit!) do |path, blob|
       import_blob path, blob, options.merge(blobs: blobs)
@@ -511,7 +514,14 @@ class Commit < ActiveRecord::Base
     imps.each do |importer|
       importer = importer.new(blob_object, path, self)
 
-      if options[:force]
+      # we can't do a force import on a loading blob -- if we delete all the
+      # blobs_keys while another sidekiq job is doing the import, when that job
+      # finishes the blob will unset loading, even though the former job is still
+      # adding keys to the blob. at this point a third import (with force=false)
+      # might start, see the blob as not loading, and then do a fast import of
+      # the cached keys (even though not all keys have been loaded by the second
+      # import).
+      if options[:force] && !loading?
         blob_object.blobs_keys.delete_all
         blob_object.update_column :loading, true
       end

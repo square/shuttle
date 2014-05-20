@@ -79,4 +79,3 @@ def regenerate_elastic_search_indexes
     Tire::Tasks::Import.import_model(model.tire.index, model, {})
   end
 end
-

@@ -23,6 +23,7 @@
 # |:----------|:-----------------------------------------------------|
 # | `project` | The {Project} whose repository this blob belongs to. |
 # | `keys`    | The {Key Keys} found in this blob.                   |
+# | `commits` | The {Commit Commits} with this blob.                 |
 #
 # Fields
 # ======
@@ -40,6 +41,8 @@ class Blob < ActiveRecord::Base
   belongs_to :project, inverse_of: :blobs
   has_many :blobs_keys, foreign_key: [:project_id, :sha_raw], inverse_of: :blob, dependent: :delete_all
   has_many :keys, through: :blobs_keys
+  has_many :blobs_commits, foreign_key: [:project_id, :sha_raw], inverse_of: :blob, dependent: :delete_all
+  has_many :commits, through: :blobs_commits
 
   extend GitObjectField
   git_object_field :sha,
@@ -97,6 +100,7 @@ class Blob < ActiveRecord::Base
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
-    "#<#{self.class.to_s} #{sha}>"
+    state = loading? ? 'loading' : 'cached'
+    "#<#{self.class.to_s} #{sha} (#{state})>"
   end
 end
