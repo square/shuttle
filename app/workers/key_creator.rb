@@ -45,7 +45,6 @@ class KeyCreator
     key_objects.map(&:id).uniq.each { |k| @blob.blobs_keys.where(key_id: k).find_or_create! }
 
     if @commit
-      key_objects.reject! { |key| skip_key?(key) }
       self.class.update_key_associations key_objects, @commit
     end
 
@@ -60,6 +59,7 @@ class KeyCreator
   # @param [Commit] commit A Commit these keys are associated with.
 
   def self.update_key_associations(keys, commit)
+    keys.reject! { |key| skip_key?(key, commit) }
     keys.map(&:id).uniq.each { |k| commit.commits_keys.where(key_id: k).find_or_create! }
 
     # key.commits has been changed, need to update associated ES fields
@@ -112,16 +112,15 @@ class KeyCreator
 
   # Determines if we should skip this key using both the normal key exclusions
   # and the .shuttle.yml key exclusions
-  def skip_key?(key)
-    skip_key_due_to_project_settings?(key) || skip_key_due_to_branch_settings?(key)
+  def self.skip_key?(key, commit)
+    skip_key_due_to_project_settings?(key, commit.project) || skip_key_due_to_branch_settings?(key, commit)
   end
 
-  def skip_key_due_to_project_settings?(key)
-    @blob.project.skip_key?(key.key, @blob.project.base_locale)
+  def self.skip_key_due_to_project_settings?(key, project)
+    project.skip_key?(key.key, project.base_locale)
   end
 
-  def skip_key_due_to_branch_settings?(key)
-    return false unless @commit
-    @commit.skip_key?(key.key)
+  def self.skip_key_due_to_branch_settings?(key, commit)
+    commit.skip_key?(key.key)
   end
 end

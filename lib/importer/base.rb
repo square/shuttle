@@ -95,6 +95,10 @@ module Importer
       @blob   = blob
       @commit = commit
       @file   = File.new(path, nil, nil)
+
+      if @commit
+        blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
+      end
     end
 
     # Scans the Blob for localizable strings, and creates or updates
@@ -283,6 +287,8 @@ module Importer
     end
 
     def import_by_parsing_blob
+      @blob.update_attribute :loading, true
+
       load_contents
 
       @keys = Array.new
@@ -308,7 +314,7 @@ module Importer
     # Used when this blob was imported as part of an earlier commit; just
     # associates the cached list of keys for that blob with the new commit
     def import_by_using_cached_keys
-      KeyCreator.update_key_associations @blob.keys, @commit
+      KeyCreator.update_key_associations @blob.keys.to_a, @commit
     end
 
     # array indexes are stored in brackets

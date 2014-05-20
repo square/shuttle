@@ -3,6 +3,7 @@
 --
 
 SET statement_timeout = 0;
+SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -37,6 +38,17 @@ CREATE TABLE blobs (
     sha_raw bytea NOT NULL,
     metadata text,
     loading boolean DEFAULT true NOT NULL
+);
+
+
+--
+-- Name: blobs_commits; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE blobs_commits (
+    project_id integer NOT NULL,
+    sha_raw bytea NOT NULL,
+    commit_id integer NOT NULL
 );
 
 
@@ -103,6 +115,38 @@ CREATE TABLE commits_keys (
     commit_id integer NOT NULL,
     key_id integer NOT NULL
 );
+
+
+--
+-- Name: daily_metrics; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE daily_metrics (
+    id integer NOT NULL,
+    metadata text,
+    date date NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: daily_metrics_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE daily_metrics_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: daily_metrics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE daily_metrics_id_seq OWNED BY daily_metrics.id;
 
 
 --
@@ -484,6 +528,13 @@ ALTER TABLE ONLY commits ALTER COLUMN id SET DEFAULT nextval('commits_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY daily_metrics ALTER COLUMN id SET DEFAULT nextval('daily_metrics_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY glossary_entries ALTER COLUMN id SET DEFAULT nextval('glossary_entries_id_seq'::regclass);
 
 
@@ -551,6 +602,14 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 
 
 --
+-- Name: blobs_commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY blobs_commits
+    ADD CONSTRAINT blobs_commits_pkey PRIMARY KEY (project_id, sha_raw, commit_id);
+
+
+--
 -- Name: blobs_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -580,6 +639,14 @@ ALTER TABLE ONLY commits_keys
 
 ALTER TABLE ONLY commits
     ADD CONSTRAINT commits_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: daily_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY daily_metrics
+    ADD CONSTRAINT daily_metrics_pkey PRIMARY KEY (id);
 
 
 --
@@ -706,6 +773,13 @@ CREATE UNIQUE INDEX commits_rev ON commits USING btree (project_id, revision_raw
 
 
 --
+-- Name: daily_metrics_date; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX daily_metrics_date ON daily_metrics USING btree (date);
+
+
+--
 -- Name: glossary_source_copy_sha; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -794,6 +868,22 @@ CREATE UNIQUE INDEX users_reset_token ON users USING btree (reset_password_token
 --
 
 CREATE UNIQUE INDEX users_unlock_token ON users USING btree (unlock_token);
+
+
+--
+-- Name: blobs_commits_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_commits
+    ADD CONSTRAINT blobs_commits_commit_id_fkey FOREIGN KEY (commit_id) REFERENCES commits(id) ON DELETE CASCADE;
+
+
+--
+-- Name: blobs_commits_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_commits
+    ADD CONSTRAINT blobs_commits_project_id_fkey FOREIGN KEY (project_id, sha_raw) REFERENCES blobs(project_id, sha_raw) ON DELETE CASCADE;
 
 
 --
@@ -999,3 +1089,7 @@ INSERT INTO schema_migrations (version) VALUES ('20140228025058');
 INSERT INTO schema_migrations (version) VALUES ('20140306064700');
 
 INSERT INTO schema_migrations (version) VALUES ('20140311011156');
+
+INSERT INTO schema_migrations (version) VALUES ('20140320053508');
+
+INSERT INTO schema_migrations (version) VALUES ('20140518040822');

@@ -20,6 +20,8 @@ describe SearchController do
   describe "#translations" do
     before :all do
       reset_elastic_search
+      Translation.delete_all
+
       update_date = DateTime.new(2014, 1, 1)
       @user = FactoryGirl.create(:user, role: 'translator')
       @start_date = (update_date - 1.day).strftime('%m/%d/%Y')

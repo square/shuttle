@@ -45,6 +45,7 @@ require 'fileutils'
 # | `user`         | The {User} that submitted this Commit for translation. |
 # | `keys`         | All the {Key Keys} found in this Commit.               |
 # | `translations` | The {Translation Translations} found in this Commit.   |
+# | `blobs`        | The {Blob Blobs} found in this Commit.                 |
 #
 # Properties
 # ==========
@@ -86,6 +87,8 @@ class Commit < ActiveRecord::Base
   has_many :commits_keys, inverse_of: :commit, dependent: :destroy
   has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
+  has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
+  has_many :blobs, through: :blobs_commits
 
   include HasMetadataColumn
   has_metadata_column(
@@ -155,6 +158,7 @@ class Commit < ActiveRecord::Base
   after_commit :compile_and_cache_or_clear, on: :update
   after_update :update_touchdown_branch
   after_commit :update_stats_at_end_of_loading, on: :update, if: :loading_state_changed?
+  after_commit :mark_blobs_as_not_loading, on: :update, if: :loading_state_changed?
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -229,7 +233,7 @@ class Commit < ActiveRecord::Base
     add_worker! job_id
 
     # clear out existing keys so that we can import all new keys
-    keys.clear unless options[:locale]
+    commits_keys.delete_all unless options[:locale]
     # perform the recursive import
     traverse(commit!) do |path, blob|
       import_blob path, blob, options.merge(blobs: blobs)
@@ -511,7 +515,14 @@ class Commit < ActiveRecord::Base
     imps.each do |importer|
       importer = importer.new(blob_object, path, self)
 
-      if options[:force]
+      # we can't do a force import on a loading blob -- if we delete all the
+      # blobs_keys while another sidekiq job is doing the import, when that job
+      # finishes the blob will unset loading, even though the former job is still
+      # adding keys to the blob. at this point a third import (with force=false)
+      # might start, see the blob as not loading, and then do a fast import of
+      # the cached keys (even though not all keys have been loaded by the second
+      # import).
+      if options[:force] && !loading?
         blob_object.blobs_keys.delete_all
         blob_object.update_column :loading, true
       end
@@ -533,7 +544,8 @@ class Commit < ActiveRecord::Base
   end
 
   def loading_state_changed?
-    previous_changes.include?('loading') && previous_changes['loading'].first && !previous_changes['loading'].last
+    (loading_was && !loading?) ||
+        (previous_changes.include?('loading') && previous_changes['loading'].first && !previous_changes['loading'].last)
   end
 
   def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
@@ -542,5 +554,15 @@ class Commit < ActiveRecord::Base
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
     CommitStatsRecalculator.new.perform id
+  end
+
+  # Sets all blobs for this commit as no longer loading once the import is
+  # complete.
+  def mark_blobs_as_not_loading
+    return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
+
+    # commit.blobs.update_all loading: false
+    blob_shas = blobs_commits.pluck(:sha_raw)
+    Blob.where(project_id: project_id, sha_raw: blob_shas).update_all loading: false
   end
 end
