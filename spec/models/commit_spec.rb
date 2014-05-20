@@ -444,6 +444,13 @@ describe Commit do
       expect(commit.import_errors_in_redis).to eql([])
       expect(commit.import_errors).to eql([])
     end
+
+    it "should set all blobs as no longer loading" do
+      Blob.delete_all
+      @project.commit!('HEAD')
+      expect(Blob.where(loading: false).count).to eql(Blob.count)
+    end
+
     it "should remove appropriate keys when reimporting after changed settings" do
       commit = @project.commit!('HEAD')
       expect(commit.keys.map(&:original_key)).to include('root')

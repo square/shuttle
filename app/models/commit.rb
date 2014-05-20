@@ -158,6 +158,7 @@ class Commit < ActiveRecord::Base
   after_commit :compile_and_cache_or_clear, on: :update
   after_update :update_touchdown_branch
   after_commit :update_stats_at_end_of_loading, on: :update, if: :loading_state_changed?
+  after_commit :mark_blobs_as_not_loading, on: :update, if: :loading_state_changed?
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -543,7 +544,8 @@ class Commit < ActiveRecord::Base
   end
 
   def loading_state_changed?
-    previous_changes.include?('loading') && previous_changes['loading'].first && !previous_changes['loading'].last
+    (loading_was && !loading?) ||
+        (previous_changes.include?('loading') && previous_changes['loading'].first && !previous_changes['loading'].last)
   end
 
   def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
@@ -552,5 +554,15 @@ class Commit < ActiveRecord::Base
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
     CommitStatsRecalculator.new.perform id
+  end
+
+  # Sets all blobs for this commit as no longer loading once the import is
+  # complete.
+  def mark_blobs_as_not_loading
+    return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
+
+    # commit.blobs.update_all loading: false
+    blob_shas = blobs_commits.pluck(:sha_raw)
+    Blob.where(project_id: project_id, sha_raw: blob_shas).update_all loading: false
   end
 end
