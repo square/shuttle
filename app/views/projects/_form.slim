@@ -99,7 +99,7 @@
           = f.label :skip_imports, "Skip These Importers", class: 'control-label'
             / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
           = hidden_field_tag 'project[skip_imports][]', ''
-          - Importer::Base.implementations.each_with_index do |importer, index|
+          - Importer::Base.implementations.sort_by(&:human_name).each_with_index do |importer, index|
             .controls.checkboxes
               = label_tag "project_skip_imports_#{index}", class: 'checkbox'
                 = importer.human_name
@@ -149,7 +149,7 @@
           = f.label :cache_manifest_formats, class: 'control-label'
           / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
           = hidden_field_tag 'project[cache_manifest_formats][]', ''
-          - Exporter::Base.implementations.select(&:multilingual?).each_with_index do |importer, index|
+          - Exporter::Base.implementations.select(&:multilingual?).sort_by(&:human_name).each_with_index do |importer, index|
             .controls.checkboxes
               = label_tag "project_cache_manifest_formats_#{index}", class: 'checkbox'
                 = importer.human_name
