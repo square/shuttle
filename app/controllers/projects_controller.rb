@@ -48,7 +48,7 @@ class ProjectsController < ApplicationController
   # * `GET /projects`
 
   def index
-    @projects = Project.order('created_at DESC')
+    @projects = Project.order('LOWER(name)')
     respond_with(@projects) do |format|
       format.json do
         if params[:offset].to_i > 0
