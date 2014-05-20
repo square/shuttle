@@ -20,3 +20,4 @@ every(30.minutes) { runner 'AutoImporter.perform_once' }
 every(:hour) { rake 'maintenance:fix_hung_commits' }
 every(:hour) { rake 'maintenance:clear_stale_lockfiles' }
 every(:hour) { rake 'maintenance:recalculate_suspiciously_not_ready_commits' }
+every(:day, at: '12:00 am')  { rake 'metrics:update' }

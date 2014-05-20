@@ -1,15 +1,12 @@
 @import "base/vars";
 @import "css3-mixins";
 
-body.stats { 
-  .nvtooltip {
-
-  }
-
-  .stats-charts {
-    svg {
-      height: 350px;
-    }
+body.stats {
+  .nvtooltip h6 {
+    font-weight: bold;
+    text-align: center;
+    padding: 4px 14px 0px 14px;
+    margin-bottom: 0;
   }
 
   .stats-table {

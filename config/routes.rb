@@ -77,8 +77,6 @@ Shuttle::Application.routes.draw do
 
   # STATS PAGES
   get 'stats' => 'stats#index'
-  get 'stats/words_per_project' => 'stats#words_per_project'
-  get 'stats/translation_metrics' => 'stats#translation_metrics'
 
   # GLOSSARY PAGES
   get 'glossary' => 'glossary#index', as: :glossary
