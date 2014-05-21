@@ -76,7 +76,7 @@ describe Importer::Ember do
     end
   end
 
-  context "[robust implementation" do
+  context "[robust implementation]" do
     it "should be more robust than just a JSON parser" do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
