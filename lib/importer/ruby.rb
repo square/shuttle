@@ -12,12 +12,35 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'open3'
+
 module Importer
 
   # Parses translatable strings from Ruby i18n `.rb` files.
 
   class Ruby < Base
     def self.fencers() %w(RubyI18n) end
+
+    def self.sandboxed_ruby(code)
+      output = nil
+      status = nil
+
+      Timeout.timeout(5) do
+        Open3.popen3('ruby') do |stdin, stdout, stderr, thread|
+          stdin << "require 'yaml'\n"
+          stdin << "def __eval\n"
+          stdin << code
+          stdin << "end\n"
+          stdin << "puts __eval.to_yaml\n"
+          stdin.close
+
+          status = thread.value
+          output = stdout.read.chomp
+        end
+      end
+
+      return status, (status.success? ? YAML.load(output) : nil)
+    end
 
     protected
 
@@ -27,11 +50,22 @@ module Importer
     end
 
     def import_strings(receiver)
-      output = nil
-      Thread.start do
-        $SAFE  = 4
-        output = eval(file.contents)
-      end.join
+      status, output = nil
+
+      begin
+        status, output = self.class.sandboxed_ruby(file.contents)
+      rescue Timeout::Error
+        log_skip nil, "Interpreter timeout"
+        return
+      rescue Psych::SyntaxError
+        log_skip nil, "Invalid YAML representation"
+        return
+      end
+
+      unless status.success?
+        log_skip nil, "Unsuccessful interpreter exit"
+        return
+      end
 
       locale = locale_to_use(receiver.locale).rfc5646
 
