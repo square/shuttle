@@ -81,6 +81,7 @@ group :test do
   gem 'timecop'
   gem 'pry'
   gem 'pry-nav'
+  gem 'test_after_commit'
 end
 
 group :acceptance do
