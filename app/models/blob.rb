@@ -98,7 +98,6 @@ class Blob < ActiveRecord::Base
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
-    state = loading? ? 'loading' : 'cached'
-    "#<#{self.class.to_s} #{sha} (#{state})>"
+    "#<#{self.class.to_s} #{sha} (#{parsed? ? 'parsed' : 'not parsed'}, #{errored? ? 'errored' : 'not errored'})>"
   end
 end

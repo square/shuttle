@@ -40,7 +40,6 @@ module ImportErrors
 
   # Removes all previous import errors from redis and postgres.
   def clear_import_errors
-    clear_import_errors_in_redis
     update_attributes(import_errors: [])
   end
 

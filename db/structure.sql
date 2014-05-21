@@ -3,6 +3,7 @@
 --
 
 SET statement_timeout = 0;
+SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -36,7 +37,8 @@ CREATE TABLE blobs (
     project_id integer NOT NULL,
     sha_raw bytea NOT NULL,
     metadata text,
-    loading boolean DEFAULT true NOT NULL
+    parsed boolean DEFAULT false NOT NULL,
+    errored boolean DEFAULT false NOT NULL
 );
 
 
@@ -786,6 +788,13 @@ CREATE UNIQUE INDEX glossary_source_copy_sha ON glossary_entries USING btree (so
 
 
 --
+-- Name: index_blobs_on_project_id_and_sha_raw_and_errored; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_blobs_on_project_id_and_sha_raw_and_errored ON blobs USING btree (project_id, sha_raw, errored);
+
+
+--
 -- Name: index_users_on_confirmation_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1092,3 +1101,7 @@ INSERT INTO schema_migrations (version) VALUES ('20140311011156');
 INSERT INTO schema_migrations (version) VALUES ('20140320053508');
 
 INSERT INTO schema_migrations (version) VALUES ('20140518040822');
+
+INSERT INTO schema_migrations (version) VALUES ('20140520233119');
+
+INSERT INTO schema_migrations (version) VALUES ('20140521010749');

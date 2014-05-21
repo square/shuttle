@@ -30,7 +30,6 @@ class CommitObserver < ActiveRecord::Observer
   def after_update(commit)
     ping_github_webhook(commit)
     send_email(commit)
-    cleanup_import_errors(commit)
   end
 
   private
@@ -60,12 +59,6 @@ class CommitObserver < ActiveRecord::Observer
     if commit.loading_was == true && commit.loading == false && commit.import_errors_in_redis.present?
       commit.copy_import_errors_from_redis_to_sql_db
       CommitMailer.notify_submitter_of_import_errors(commit).deliver
-    end
-  end
-
-  def cleanup_import_errors(commit)
-    if commit.loading_was == true && commit.loading == false && commit.import_errors.present? && commit.import_errors == commit.import_errors_in_redis
-      commit.clear_import_errors_in_redis
     end
   end
 end
