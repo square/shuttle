@@ -3,7 +3,6 @@
 --
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -37,7 +36,7 @@ CREATE TABLE blobs (
     project_id integer NOT NULL,
     sha_raw bytea NOT NULL,
     metadata text,
-    loading boolean DEFAULT true NOT NULL
+    parsed boolean DEFAULT false NOT NULL
 );
 
 
@@ -1093,3 +1092,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140311011156');
 INSERT INTO schema_migrations (version) VALUES ('20140320053508');
 
 INSERT INTO schema_migrations (version) VALUES ('20140518040822');
+
+INSERT INTO schema_migrations (version) VALUES ('20140520233119');

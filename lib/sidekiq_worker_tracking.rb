@@ -44,8 +44,7 @@ module SidekiqWorkerTracking
   # @param [String] jid A unique identifier for this worker.
 
   def add_worker!(jid)
-    self.loading = true
-    save!
+    self.update!(loading: true) if self.respond_to?(:loading=)
     Shuttle::Redis.sadd worker_set_key, jid
   end
 
@@ -57,15 +56,14 @@ module SidekiqWorkerTracking
   # @see #add_worker!
 
   def remove_worker!(jid)
-    if jid.nil?
-      return
-    end
+    return if jid.nil?
     
     Shuttle::Redis.srem worker_set_key, jid
-    loading = (Shuttle::Redis.scard(worker_set_key) > 0)
 
-    self.loading = loading
-    save!
+    if self.respond_to?(:loading=)
+      loading = (Shuttle::Redis.scard(worker_set_key) > 0)
+      self.update!(loading: loading)
+    end
   end
 
   # Returns all workers from the loading list
@@ -80,10 +78,7 @@ module SidekiqWorkerTracking
 
   def clear_workers!
     Shuttle::Redis.del worker_set_key
-    if loading?
-      self.loading = false
-      save!
-    end
+    self.update!(loading: false) if self.respond_to?(:loading=)
   end
 
   private

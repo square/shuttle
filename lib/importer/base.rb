@@ -105,7 +105,7 @@ module Importer
     # corresponding Translation records.
 
     def import
-      if !@blob.loading? && @commit
+      if @blob.parsed? && @commit
         import_by_using_cached_keys
       else
         import_by_parsing_blob
@@ -287,8 +287,6 @@ module Importer
     end
 
     def import_by_parsing_blob
-      @blob.update_attribute :loading, true
-
       load_contents
 
       @keys = Array.new

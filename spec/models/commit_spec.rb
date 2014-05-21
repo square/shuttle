@@ -445,10 +445,10 @@ describe Commit do
       expect(commit.import_errors).to eql([])
     end
 
-    it "should set all blobs as no longer loading" do
+    it "should set all blobs as parsed" do
       Blob.delete_all
       @project.commit!('HEAD')
-      expect(Blob.where(loading: false).count).to eql(Blob.count)
+      expect(Blob.where(parsed: false).count).to be_zero
     end
 
     it "should remove appropriate keys when reimporting after changed settings" do
