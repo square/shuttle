@@ -97,7 +97,7 @@ describe Commit do
     before :all do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @commit  = @project.commit!('HEAD')
+      @commit  = @project.commit!('HEAD', skip_import: true)
     end
 
     before :each do
@@ -443,6 +443,32 @@ describe Commit do
       commit.reload
       expect(commit.import_errors_in_redis).to eql([])
       expect(commit.import_errors).to eql([])
+    end
+
+    it "should set all blobs as no longer loading" do
+      Blob.delete_all
+      @project.commit!('HEAD')
+      expect(Blob.where(loading: false).count).to eql(Blob.count)
+    end
+
+    it "should remove appropriate keys when reimporting after changed settings" do
+      commit = @project.commit!('HEAD')
+      expect(commit.keys.map(&:original_key)).to include('root')
+
+      @project.update_attribute :key_exclusions, %w(roo*)
+      commit.import_strings
+      expect(commit.keys(true).map(&:original_key)).not_to include('root')
+    end
+
+    it "should only associate relevant keys with a new commit when cached blob importing is being used" do
+      @project.update_attribute :key_exclusions, %w(skip_me)
+      commit      = @project.commit!('HEAD')
+      blob        = commit.blobs.first
+      red_herring = FactoryGirl.create(:key, key: 'skip_me')
+      FactoryGirl.create :blobs_key, key: red_herring, blob: blob
+
+      commit.import_strings
+      expect(commit.keys(true)).not_to include(red_herring)
     end
 
     it "should remove appropriate keys when reimporting after changed settings" do

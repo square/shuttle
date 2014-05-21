@@ -96,14 +96,14 @@
 
         / Skip Imports
         .control-group 
-          = f.label :skip_imports, "Skip These Importers", class: 'control-label'
+          = f.label :use_imports, "Use These Importers", class: 'control-label'
             / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
-          = hidden_field_tag 'project[skip_imports][]', ''
-          - Importer::Base.implementations.each_with_index do |importer, index|
+          = hidden_field_tag 'project[use_imports][]', ''
+          - Importer::Base.implementations.sort_by(&:human_name).each_with_index do |importer, index|
             .controls.checkboxes
-              = label_tag "project_skip_imports_#{index}", class: 'checkbox'
+              = label_tag "project_use_imports_#{index}", class: 'checkbox'
                 = importer.human_name
-              = check_box_tag "project[skip_imports][]", importer.ident, @project.skip_imports.include?(importer.ident), id: "project_skip_imports_#{index}"
+              = check_box_tag "project[use_imports][]", importer.ident, !@project.skip_imports.include?(importer.ident), id: "project_use_imports_#{index}"
           / p.help-block
           / | A comma-delimited list of locales to target. Include 
           / - if PseudoTranslator.supported_rfc5646_locales.count > 1
@@ -149,7 +149,7 @@
           = f.label :cache_manifest_formats, class: 'control-label'
           / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
           = hidden_field_tag 'project[cache_manifest_formats][]', ''
-          - Exporter::Base.implementations.select(&:multilingual?).each_with_index do |importer, index|
+          - Exporter::Base.implementations.select(&:multilingual?).sort_by(&:human_name).each_with_index do |importer, index|
             .controls.checkboxes
               = label_tag "project_cache_manifest_formats_#{index}", class: 'checkbox'
                 = importer.human_name

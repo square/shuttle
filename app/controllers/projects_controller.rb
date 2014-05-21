@@ -48,7 +48,7 @@ class ProjectsController < ApplicationController
   # * `GET /projects`
 
   def index
-    @projects = Project.order('created_at DESC')
+    @projects = Project.order('LOWER(name)')
     respond_with(@projects) do |format|
       format.json do
         if params[:offset].to_i > 0
@@ -262,6 +262,8 @@ class ProjectsController < ApplicationController
     targeted_rfc5646_locales = targeted_rfc5646_locales.merge(
       Hash[params[:project][:other_rfc5646_locales].map {|locale| [locale, false]}]
     )
+
+    params[:project][:skip_imports] = Importer::Base.implementations.map(&:ident) - params[:project][:use_imports]
 
     if params[:use_key_exclusions]
       params[:project][:key_inclusions] = []

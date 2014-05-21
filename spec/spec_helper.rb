@@ -53,9 +53,13 @@ RSpec.configure do |config|
   config.infer_base_class_for_anonymous_controllers = false
 
   config.include Devise::TestHelpers, type: :controller
-  config.include Capybara::DSL
 
-  Capybara.javascript_driver = :webkit
+  if ENV['RAILS_ENV'] == 'acceptance'
+    config.include Capybara::DSL
+    Capybara.javascript_driver = :webkit
+  else
+    config.filter_run_excluding :capybara => true
+  end
 
   config.before :each do
     # Clear out Redis
@@ -79,4 +83,3 @@ def regenerate_elastic_search_indexes
     Tire::Tasks::Import.import_model(model.tire.index, model, {})
   end
 end
-

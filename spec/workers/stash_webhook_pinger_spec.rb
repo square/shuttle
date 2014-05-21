@@ -96,6 +96,9 @@ describe StashWebhookPinger do
       }.to_json))
 
       @commit.loading = false
+      # force commit not to be ready
+      @commit.keys << FactoryGirl.create(:key, project: @commit.project)
+      FactoryGirl.create :translation, key: @commit.keys.first, copy: nil
       @commit.save!
     end
 
@@ -112,7 +115,7 @@ describe StashWebhookPinger do
           description: 'Translations completed',
       }.to_json))
       @commit.loading = false
-      @commit.ready = true
+      @commit.ready = true # redundant since CSR will do this anyway
       @commit.save!
     end
   end
