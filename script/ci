@@ -45,6 +45,7 @@ function run_jasmine() {
 
 function prepare() {
   ensure_dependency "libarchive" &&
+  ensure_dependency "libarchive-devel" &&
   install_bundler_if_needed &&
   update_gems_if_needed &&
   prepare_database
