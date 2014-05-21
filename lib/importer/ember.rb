@@ -46,7 +46,7 @@ module Importer
       extract_hash(hash) { |key, value| receiver.add_string key, value }
     rescue ExecJS::Error, V8::Error => err
       log_skip nil, "Invalid Ember file: #{err}"
-      @commit.add_import_error_in_redis(file.path, err) if @commit
+      handle_import_error(err)
     end
 
     def has_translations_for_locale?(locale)

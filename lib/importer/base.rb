@@ -105,7 +105,7 @@ module Importer
     # corresponding Translation records.
 
     def import
-      if !@blob.loading? && @commit
+      if @blob.parsed? && @commit
         import_by_using_cached_keys
       else
         import_by_parsing_blob
@@ -287,8 +287,6 @@ module Importer
     end
 
     def import_by_parsing_blob
-      @blob.update_attribute :loading, true
-
       load_contents
 
       @keys = Array.new
@@ -395,6 +393,11 @@ module Importer
 
     def log_skip(key, reason)
       Importer::SKIP_LOG.info "commit=#{@commit.try!(:revision)} blob=#{@blob.sha} file=#{file.path} key=#{key} #{reason}"
+    end
+
+    def handle_import_error(err)
+      @blob.update_column :errored, true
+      @commit.add_import_error_in_redis(file.path, err) if @commit
     end
 
     File = Struct.new(:path, :contents, :locale)

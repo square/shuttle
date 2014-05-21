@@ -55,8 +55,9 @@ describe Importer::Ember do
 
       it "should add error to commit" do
         expect(@commit.import_errors_in_redis).to eql([])
-        expect(@commit.import_errors).to eql([["/ember-broken/en-US.js", "Unexpected identifier at <eval>:2:12"],
-                                              ["/ember-broken/en-US.coffee", "[stdin]:2:5: error: unexpected this this is some invalid javascript code ^^^^"]])
+        expect(@commit.import_errors.sort).to eql([["/ember-broken/en-US.js", "Unexpected identifier at <eval>:2:12"],
+                                                   ["/ember-broken/en-US.coffee", "[stdin]:2:5: error: unexpected this this is some invalid javascript code ^^^^"]].sort)
+        expect(@commit.blobs.where(errored: true).count).to eql(1) # these 2 files have the same contents, so they map to the same blob
       end
     end
   end

@@ -158,7 +158,7 @@ class Commit < ActiveRecord::Base
   after_commit :compile_and_cache_or_clear, on: :update
   after_update :update_touchdown_branch
   after_commit :update_stats_at_end_of_loading, on: :update, if: :loading_state_changed?
-  after_commit :mark_blobs_as_not_loading, on: :update, if: :loading_state_changed?
+  after_commit :mark_blobs_as_parsed, on: :update, if: :loading_state_changed?
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -522,9 +522,9 @@ class Commit < ActiveRecord::Base
       # might start, see the blob as not loading, and then do a fast import of
       # the cached keys (even though not all keys have been loaded by the second
       # import).
-      if options[:force] && !loading?
+      if options[:force] && blob_object.parsed?
         blob_object.blobs_keys.delete_all
-        blob_object.update_column :loading, true
+        blob_object.update_column :parsed, false
       end
 
       if importer.skip?(options[:locale])
@@ -556,13 +556,12 @@ class Commit < ActiveRecord::Base
     CommitStatsRecalculator.new.perform id
   end
 
-  # Sets all blobs for this commit as no longer loading once the import is
+  # Sets all blobs for this commit as parsed once the import is
   # complete.
-  def mark_blobs_as_not_loading
+  def mark_blobs_as_parsed
     return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
 
-    # commit.blobs.update_all loading: false
     blob_shas = blobs_commits.pluck(:sha_raw)
-    Blob.where(project_id: project_id, sha_raw: blob_shas).update_all loading: false
+    Blob.where(project_id: project_id, sha_raw: blob_shas, errored: false).update_all parsed: true
   end
 end
