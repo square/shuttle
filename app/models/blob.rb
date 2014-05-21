@@ -28,10 +28,11 @@
 # Fields
 # ======
 #
-# |           |                                                                                                                                                                                                 |
-# |:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-# | `sha`     | The Git identifier for the blob.                                                                                                                                                                |
-# | `loading` | If `true`, one or more workers is currently importing {Key Keys} for this blob. This defaults to `true` to ensure that a Blob's Keys are loaded at least once before the cached result is used. |
+# |           |                                                                                                                                                                         |
+# |:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+# | `sha`     | The Git identifier for the blob.                                                                                                                                        |
+# | `parsed`  | If `true`, at least one worker finished parsing the {Key Keys} for this blob. Set to true when {Commit commit} import is finished if parsing the blob didn't error out. |
+# | `errored` | If `true`, parsing this blob has failed. Defaults to false.                                                                                                             |
 
 class Blob < ActiveRecord::Base
   self.primary_keys = :project_id, :sha_raw
