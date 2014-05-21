@@ -815,13 +815,6 @@ CREATE INDEX projects_name ON projects USING btree (lower((name)::text));
 
 
 --
--- Name: projects_repo; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX projects_repo ON projects USING btree (lower((repository_url)::text));
-
-
---
 -- Name: slugs_for_record; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1102,5 +1095,7 @@ INSERT INTO schema_migrations (version) VALUES ('20140320053508');
 INSERT INTO schema_migrations (version) VALUES ('20140518040822');
 
 INSERT INTO schema_migrations (version) VALUES ('20140520233119');
+
+INSERT INTO schema_migrations (version) VALUES ('20140521001017');
 
 INSERT INTO schema_migrations (version) VALUES ('20140521010749');
