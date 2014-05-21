@@ -263,6 +263,8 @@ class ProjectsController < ApplicationController
       Hash[params[:project][:other_rfc5646_locales].map {|locale| [locale, false]}]
     )
 
+    params[:project][:skip_imports] = Importer::Base.implementations.map(&:ident) - params[:project][:use_imports]
+
     if params[:use_key_exclusions]
       params[:project][:key_inclusions] = []
     else
