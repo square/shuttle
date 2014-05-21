@@ -7,29 +7,11 @@ RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
 
 ensure_dependency() {
   if hash apt-get 2>/dev/null; then
-    sudo apt-get install $1
+    yes | sudo apt-get install $1
   elif hash yum 2>/dev/null; then
-    sudo yum install $1
+    yes | sudo yum install $1
   elif hash brew 2>/dev/null; then
-    brew install $1
-  fi
-}
-
-ensure_phantomjs() {
-  if hash apt-get 2>/dev/null; then
-    sudo apt-get install build-essential chrpath git-core libssl-dev libfontconfig1-dev
-    git clone git://github.com/ariya/phantomjs.git
-    cd phantomjs
-    git checkout 1.9
-    ./build.sh --confirm
-  elif hash yum 2>/dev/null; then
-    sudo yum install gcc gcc-c++ make git openssl-devel freetype-devel fontconfig-devel
-    git clone git://github.com/ariya/phantomjs.git
-    cd phantomjs
-    git checkout 1.9
-    ./build.sh --confirm
-  elif hash brew 2>/dev/null; then
-    brew install phantomjs
+    yes | brew install $1
   fi
 }
 
@@ -44,7 +26,7 @@ function install_bundler_if_needed() {
 
 function update_gems_if_needed() {
   echo "Installing gems..."
-  bin/bundle
+  bin/bundle check || bin/bundle install
 }
 
 function prepare_database() {
@@ -64,9 +46,7 @@ function run_jasmine() {
 }
 
 function prepare() {
-  ensure_phantomjs &&
   ensure_dependency "libarchive" &&
-  ensure_dependency "qt" &&
   install_bundler_if_needed &&
   update_gems_if_needed &&
   prepare_database
