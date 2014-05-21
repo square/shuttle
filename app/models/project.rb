@@ -181,6 +181,8 @@ class Project < ActiveRecord::Base
     else
       return @repo
     end
+  rescue Git::GitExecuteError
+    raise "Repo not ready: #{$!.to_s}"
   end
 
   # Attempts to find or create a Commit object corresponding to a SHA or other
@@ -407,9 +409,6 @@ class Project < ActiveRecord::Base
 
   def clone_repo
     Git.clone repository_url, repo_directory, path: REPOS_DIRECTORY.to_s, mirror: true
-  rescue Git::GitExecuteError
-    Rails.logger.error $!
-    return nil
   end
 
   def can_clone_repo
