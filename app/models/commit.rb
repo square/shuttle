@@ -561,8 +561,7 @@ class Commit < ActiveRecord::Base
   def mark_blobs_as_parsed
     return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
 
-    # commit.blobs.update_all parsed: true
     blob_shas = blobs_commits.pluck(:sha_raw)
-    Blob.where(project_id: project_id, sha_raw: blob_shas).update_all parsed: true
+    Blob.where(project_id: project_id, sha_raw: blob_shas, errored: false).update_all parsed: true
   end
 end

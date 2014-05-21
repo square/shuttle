@@ -395,6 +395,11 @@ module Importer
       Importer::SKIP_LOG.info "commit=#{@commit.try!(:revision)} blob=#{@blob.sha} file=#{file.path} key=#{key} #{reason}"
     end
 
+    def handle_import_error(err)
+      @blob.update_column :errored, true
+      @commit.add_import_error_in_redis(file.path, err) if @commit
+    end
+
     File = Struct.new(:path, :contents, :locale)
 
     class Receiver
