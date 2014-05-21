@@ -85,11 +85,11 @@ group :test do
   gem 'test_after_commit'
 end
 
+# Include these gems if you're running acceptance tests.
 group :acceptance do
-  gem 'capybara'
-  gem 'capybara-webkit'
+  # gem 'capybara'
+  # gem 'capybara-webkit'
 end
-
 
 gem 'sql_origin', groups: [:development, :test]
 

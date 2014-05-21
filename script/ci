@@ -6,9 +6,7 @@ export LANG=en_US.UTF-8
 RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
 
 ensure_dependency() {
-  if hash apt-get 2>/dev/null; then
-    yes | sudo apt-get install $1
-  elif hash yum 2>/dev/null; then
+  if hash yum 2>/dev/null; then
     yes | sudo yum install $1
   elif hash brew 2>/dev/null; then
     yes | brew install $1
