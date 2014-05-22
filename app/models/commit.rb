@@ -182,6 +182,12 @@ class Commit < ActiveRecord::Base
   # @private
   def to_param() revision end
 
+  # Displays the revision prefix (i.e. first 6 characters of SHA)
+  # of a commit
+  def revision_prefix
+    revision[0, 6]
+  end
+
   # Calculates the value of the `ready` field and saves the record.
   # If this is the first time a commit has been marked as ready, sets 
   # completed_at to be the current time.

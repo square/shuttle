@@ -1,0 +1,39 @@
+- content_for :shuttle_title do
+  = "Commit #{@commit.revision_prefix} - Shuttle"
+- content_for :file_name do
+  = 'views/commits/show'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+= render layout: 'commits/layout' do
+  .nine.columns.sidebar-main
+    fieldset
+      legend Commit Tools
+
+      .control-group.wide-label
+        label
+          | Manually reimport a commit
+        .controls
+          button.primary href=redo_project_commit_path(@project, @commit) data-method='POST' Reimport
+
+      .control-group.wide-label
+        label
+          | Recalculate commit progress
+        .controls
+          button.primary href=recalculate_project_commit_path(@project, @commit) data-method='POST' Recalculate
+
+      .control-group.wide-label
+        label
+          | Ping stash to update build status
+        .controls
+          button.primary href=ping_stash_project_commit_path(@project, @commit) data-method='POST' Ping Stash
+
+      .control-group.wide-label
+        label
+          | Delete this commit
+        .controls
+          button.danger href=project_commit_url(@project, @commit) data-method='DELETE' data-confirm='Are you sure you want to delete this commit?' Delete

@@ -26,7 +26,7 @@ class CommitsController < ApplicationController
   before_filter :find_project
   before_filter :find_commit, except: [:create, :manifest, :localize]
 
-  respond_to :html, :json, only: [:show, :create, :update, :destroy, :import,
+  respond_to :html, :json, only: [:show, :tools, :search, :create, :update, :destroy, :import,
                                   :sync, :match, :redo, :clear, :recalculate, :ping_stash]
 
   # Renders JSON information about a Commit and its translation progress.
@@ -54,6 +54,57 @@ class CommitsController < ApplicationController
               required: required,
               targeted: true,
               finished: @commit.translations.where('approved IS NOT TRUE AND rfc5646_locale = ?', locale.rfc5646).first.nil?
+          }
+          hsh
+        end
+      end
+    end
+  end
+
+  # Renders a list of tools that can be used for a commit
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:project_id/commits/:id`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def tools
+    respond_with @commit
+  end
+
+  # Renders a table displaying all keys belonging to a commit and a search bar that
+  # enables users to search the commit for specific keys
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:project_id/commits/:id/search`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def search
+    respond_with @commit do |format|
+      format.html do
+        @format = @project.cache_manifest_formats.first
+        @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
+          hsh[locale.rfc5646] = {
+            required: required,
+            targeted: true,
+            finished: @commit.translations.where('approved IS NOT TRUE AND rfc5646_locale = ?', locale.rfc5646).first.nil?
           }
           hsh
         end
@@ -125,6 +176,7 @@ class CommitsController < ApplicationController
 
   def update
     @commit.update_attributes commit_params
+    flash[:success] = t('controllers.commits.update.success', sha: @commit.revision_prefix)
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
@@ -149,7 +201,7 @@ class CommitsController < ApplicationController
     Commit.tire.index.refresh
     
     respond_with(@commit) do |format|
-      format.html { redirect_to root_url, notice: t('controllers.commits.destroy.deleted', sha: @commit.revision[0, 6]) }
+      format.html { redirect_to root_url, notice: t('controllers.commits.destroy.deleted', sha: @commit.revision_prefix) }
     end
   end
 
@@ -221,6 +273,7 @@ class CommitsController < ApplicationController
   def redo
     @commit.update_attribute(:loading, true)
     CommitImporter.perform_once @commit.id, force: true
+    flash[:success] = t('controllers.commits.redo.success', sha: @commit.revision_prefix)
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
@@ -264,6 +317,7 @@ class CommitsController < ApplicationController
 
   def recalculate
     @commit.recalculate_ready!
+    flash[:success] = t('controllers.commits.recalculate.success', sha: @commit.revision_prefix)
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
@@ -285,6 +339,7 @@ class CommitsController < ApplicationController
 
   def ping_stash
     StashWebhookPinger.new.perform(@commit.id)
+    flash[:success] = t('controllers.commits.stash.success', sha: @commit.revision_prefix)
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
