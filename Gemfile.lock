@@ -259,7 +259,10 @@ GEM
     slugalicious (2.1.0)
       rails (>= 4.0)
       stringex
-    sprockets (2.11.0)
+    spring (1.1.3)
+    spring-commands-rspec (1.0.2)
+      spring (>= 0.9.1)
+    sprockets (2.10.1)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
@@ -373,6 +376,8 @@ DEPENDENCIES
   sinatra
   slim-rails
   slugalicious
+  spring
+  spring-commands-rspec
   sprockets-rails
   sql_origin
   squash_rails!

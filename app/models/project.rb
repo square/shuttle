@@ -128,8 +128,7 @@ class Project < ActiveRecord::Base
             presence: true,
             length:   {maximum: 256}
   validates :repository_url,
-            presence:   true,
-            uniqueness: {case_sensitive: false}
+            presence:   true
   validates :api_key,
             presence: true
             #uniqueness: true,

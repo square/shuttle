@@ -95,6 +95,8 @@ gem 'sql_origin', groups: [:development, :test]
 
 # Doesn't work in Rails 4
 group :development, :test do
+  gem 'spring'
+  gem 'spring-commands-rspec'
   #gem 'jasminerice'
   #gem 'guard-jasmine'
 end

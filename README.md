@@ -1,5 +1,6 @@
-Shuttle: Magic localization dust
+Shuttle: Magic localization dust [![Build Status](https://travis-ci.org/square/shuttle.png)](https://travis-ci.org/square/shuttle)
 ================================
+
 
 Shuttle is a website allowing for the automatic extraction and reintegration of
 localizable strings in a code base. In addition, it provides a workflow for
