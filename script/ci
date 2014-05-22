@@ -6,14 +6,14 @@ export LANG=en_US.UTF-8
 RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
 
 function install_libarchive() {
-  wget "http://www.libarchive.org/downloads/libarchive-3.1.2.tar.gz"
+  curl -O "http://www.libarchive.org/downloads/libarchive-3.1.2.tar.gz"
   tar -zxf libarchive-3.1.2.tar.gz
   (cd libarchive-3.1.2 && ./configure && make && sudo make install)
   for file in /usr/local/lib/libarchive*; do sudo ln -s "$file" "/usr/lib64/${file##*/}"; done
 }
 
 function install_elasticsearch() {
-  wget "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.2.tar.gz" -O elasticsearch.tar.gz
+  curl -o elasticsearch.tar.gz https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.2.tar.gz
 
   tar -xf elasticsearch.tar.gz
   rm elasticsearch.tar.gz

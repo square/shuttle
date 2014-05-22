@@ -1,6 +1,8 @@
 set :application, 'shuttle'
 set :repo_url, 'https://stash.corp.squareup.com/scm/intl/shuttle.git'
 
+set :branch, 'deployable'
+
 set :deploy_to, "/app/#{fetch :application}"
 
 set :linked_files, %w{config/database.yml config/environments/production/stash.yml data/secret_token tmp/sidekiq.pid}
