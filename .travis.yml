@@ -12,3 +12,12 @@ language: ruby
 rvm:
 - 1.9.3
 - 2.0.0
+env: 
+  - TESTFOLDER=spec/models
+  - TESTFOLDER=spec/controllers
+  - TESTFOLDER=spec/lib
+  - TESTFOLDER=spec/workers
+  - TESTFOLDER=spec/mailers
+script: 
+  - bundle exec rake db:test:prepare
+  - bundle exec rspec $TESTFOLDER

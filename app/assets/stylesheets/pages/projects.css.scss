@@ -6,7 +6,19 @@ body.projects {
     button, input, select {vertical-align: top;}
     input, select { width: 200px; }
   }
-  
+
+  .flipswitch-inner:before {
+    content: "BLACKLIST";
+    padding-left: 8px;
+    background-color: #666666; color: #FFFFFF;
+  }
+
+  .flipswitch-inner:after {
+    content: "WHITELIST";
+    padding-right: 8px;
+    background-color: #F0F0F0; color: #666666;
+    text-align: right;
+  }
 
   table {
     thead {
@@ -112,19 +124,4 @@ body.projects {
     } 
   }
 
-}
-
-#projects-edit {
-  .flipswitch-inner:before {
-    content: "BLACKLIST";
-    padding-left: 8px;
-    background-color: #666666; color: #FFFFFF;
-  }
-
-  .flipswitch-inner:after {
-    content: "WHITELIST";
-    padding-right: 8px;
-    background-color: #F0F0F0; color: #666666;
-    text-align: right;
-  }
 }
