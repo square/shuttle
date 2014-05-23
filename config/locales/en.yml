@@ -141,18 +141,26 @@ en:
       reviewer_required: You must be a reviewer to do that.
       admin_required: You must be an administrator to do that.
     commits:
+      create:
+        success: Your commit %{revision} has been received and is being processed.
+        already_submitted: You have already submitted that revision for translation. Once it is loaded from the repository, it will appear on Shuttle and the import process will begin.
+      update:
+        success: Commit %{sha} has been successfully updated.
       export:
         invalid_format: Not a valid export format.
       base:
         unknown_locale: You must specify a known locale to import.
       import:
         done: Import completed.
+      recalculate:
+        success: Commit %{sha} has been successfully recalculated.
+      redo:
+        success: Commit %{sha} will be reimported momentarily.
       destroy:
         deleted: Commit %{sha} has been removed.
-      create:
-        success: Your commit %{revision} has been received and is being processed.
-        already_submitted: You have already submitted that revision for translation. Once it is loaded from the repository, it will appear on Shuttle and the import process will begin.
-    locale:        
+      stash:
+        success: Stash has been successfully pinged for commit %{sha}.
+    locale:
       projects:
         locale_access_required: You don't have permission to access that locale.
     projects:

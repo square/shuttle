@@ -25,7 +25,10 @@
 
 / Status Line
 .header
-  h1 Translation #{@translation.id}
+  h1
+    | #{@translation.key.project.name}
+    strong &nbsp;>&nbsp;
+    | Translation #{@translation.id}
 
 hr.divider
 

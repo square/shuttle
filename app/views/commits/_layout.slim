@@ -1,0 +1,69 @@
+
+.header
+  - if current_user.monitor?
+    .pull-right
+      - if @format and @commit.ready?
+        button.primary href=manifest_project_commit_url(@project, @commit, @format) Download #{@format}
+      - elsif @commit.ready?
+        button.primary.disabled.tooltip-parent[
+          data-tooltip='#missing_format_tooltip'
+          data-tooltip-show='mouseover'
+          data-tooltip-hide='mouseout'
+          data-tooltip-position-at='bottom middle'
+          data-tooltip-position-my='top middle'
+        ]
+          | Missing Format
+        .tooltip#missing_format_tooltip
+          | You must enable at least one cached format to use this feature
+      - else
+        button.primary.disabled Translating
+  h1
+    | #{@commit.project.name}
+    strong &nbsp;>&nbsp;
+    | Commit #{@commit.revision_prefix}
+
+  h6
+    strong
+      - if @commit.loading?
+        - current_status = "Loading with #{pluralize(@commit.list_workers.count, 'Job')}"
+      - else
+        - current_status = (@commit.ready? ? 'Ready' : 'Translating')
+      = "Currently #{current_status}"
+      span.separator &nbsp;/&nbsp;
+      = "Found #{@commit.keys.count} Keys"
+      span.separator &nbsp;/&nbsp;
+      - if @commit.completed_at
+        = "First Completed #{time_ago_in_words(@commit.completed_at)} ago"
+      - elsif @commit.loaded_at
+        = "First Loaded #{time_ago_in_words(@commit.loaded_at)} ago"
+      - else
+        = "First Created #{time_ago_in_words(@commit.created_at)} ago"
+
+  hr.divider
+
+  .row
+    .three.columns.sidebar
+      ul
+        li class=('active' if action_name == 'show')
+          a href=project_commit_path(@project, @commit) Settings
+        li class=('active' if action_name == 'tools')
+          a href=tools_project_commit_path(@project, @commit) Tools
+        li class=('active' if action_name == 'search')
+          a href=search_project_commit_path(@project, @commit) Strings
+
+        li.divider
+
+        li.progress-bar
+          dl: dt Track Progress
+
+        - @project.locale_requirements.each do |locale, required|
+          - finished = @commit.all_translations_approved_for_locale?(locale)
+          li.progress-bar
+            dl
+              dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+                = locale.rfc5646
+                strong = (finished ? '100%' : "#{(@commit.fraction_done(locale) * 100).round(2)}%")
+              dd
+                span class=(finished ? 'finished' : 'inprogress') style="width: #{(@commit.fraction_done(locale) * 100).round(2)}%;"
+
+    = yield
