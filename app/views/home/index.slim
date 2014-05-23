@@ -107,7 +107,7 @@ hr.divider
           td = commit.project.name
 
           / Commit
-          td = link_to commit.revision[0, 6], project_commit_url(commit.project, commit)
+          td = link_to commit.revision_prefix, project_commit_url(commit.project, commit)
 
           / Project Create Date
           td.centered = commit.created_at.strftime('%m/%d/%Y')

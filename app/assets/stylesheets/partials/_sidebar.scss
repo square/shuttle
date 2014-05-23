@@ -1,0 +1,68 @@
+.sidebar {
+  border-right: $gray5 solid 1px;
+  min-height: 600px;
+
+  ul {
+    li {
+      a {
+        margin-right: -1px;
+        padding: 10px 10px 10px 50px;
+        display: block;
+        height: 100%;
+        text-transform: uppercase;
+        font-size: 15px;
+        letter-spacing: 1px;
+        &:hover { text-decoration: none; border-right: transparentize($dark-blue, 0.5) solid 5px; }
+      }
+
+      &.active {
+        a {
+          cursor: default;
+          pointer-events: none;
+          color: black;
+          font-weight: bold;
+          border-right: lighten($dark-blue, 5%) solid 5px;
+        }
+      }
+
+      &.divider {
+        border-bottom: $gray5 solid 1px;
+        margin-top: 40px;
+        margin-bottom: 40px;
+      }
+
+      &.progress-bar {
+        dl {
+          @include box-sizing(border-box);
+          padding: 10px 30px;
+          dt {
+            text-transform: uppercase;
+            strong {
+              float: right;
+            }
+          }
+          dd {
+            margin: 5px 0 10px;
+            background-color: $gray5;
+            display: block;
+            border-radius: 5px;
+
+            span {
+              &.finished { background-color: $input-green; }
+              &.inprogress { background-color: $input-red; }
+              border-radius: 5px;
+              height: 7px;
+              min-width: 4px;
+              display: block;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.sidebar-main {
+  padding-left: 30px;
+  @include box-sizing(border-box);
+}

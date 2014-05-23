@@ -13,6 +13,8 @@ body.commits {
     }
   }
 
+  .form-action { margin-top: 40px; }
+
   .filter-bar {
     form { display: inline-block; }
     select {
@@ -77,23 +79,6 @@ body.commits {
   p.loading-more {
     margin-top: 40px;
     text-align: center;
-  }
-
-  .control-group {
-    margin-bottom: 15px;
-    label {
-      width: 400px;
-      text-transform: none;
-    }
-
-    .controls {
-      margin-left: 400px;
-    }
-
-    input[type="submit"], button {
-      float: none;
-      width: 170px;
-    }
   }
 }
 

@@ -1,0 +1,43 @@
+- content_for :shuttle_title do
+  = "Commit #{@commit.revision_prefix} - Shuttle"
+- content_for :file_name do
+  = 'views/commits/search'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+= render layout: 'commits/layout' do
+  .thirteen.columns.sidebar-main
+    .border
+      .filter-bar#filter
+        = form_tag(nil, method: 'GET', id: 'filter-form', class: 'filter') do
+          = text_field_tag 'filter', '', placeholder: 'Filter by Key', id: 'filter-field'
+          = select_tag 'status', options_for_select(\
+              [\
+                ['all', nil],\
+                ['approved', 'approved'],\
+                ['pending', 'pending']\
+              ]\
+            ), id: 'filter-select'
+          = submit_tag 'Filter', class: 'primary'
+
+      table.table.table-striped#translations[
+          data-url=project_commit_keys_url(@project, @commit, format: 'json')
+          data-locales=@project.targeted_rfc5646_locales.keys.join(',') ]
+        thead
+          tr
+            th STRING
+            - @project.locale_requirements.each do |locale, required|
+              - finished = @commit.all_translations_approved_for_locale?(locale)
+              th class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+                = locale.rfc5646
+                - if finished
+                  | &nbsp;
+                  i.fa.fa-check-circle
+                - else
+                  | &nbsp;
+                  i.fa.fa-circle-o
+

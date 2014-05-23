@@ -76,16 +76,19 @@ legend {
     width: 160px;
     padding-top: 9px;
     text-align: left;
+  }
+  .control-label {
     text-transform: capitalize;
   }
+
   .controls {
     margin-left: 180px;
-    & + .controls {
-      margin-top: 15px;
-    }
+    & + .controls { margin-top: 15px; }
+    & > * { width: 100%; }
+    form.button_to div > * { width: 100%; }
 
     select { margin-top: 0px; }
-
+    input[type="checkbox"] { margin-top: 0px; }
     input + input {
       margin-top: 8px;
     }
@@ -100,6 +103,13 @@ legend {
     }
 
 
+  }
+
+  &.wide-label {
+    label { width: 400px; }
+    .controls {
+      margin-left: 400px;
+    }
   }
 }
 
