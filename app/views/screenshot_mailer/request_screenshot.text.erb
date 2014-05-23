@@ -1,0 +1,7 @@
+<%= @user.name %> has requested screenshots for your commit <%= @commit.revision_prefix %> on <%= @project.name %>.
+
+You can add screenshots to your commit here:
+<%= gallery_project_commit_url(@project, @commit) %>
+
+Sincerely,
+The Shuttle Automated Mailer

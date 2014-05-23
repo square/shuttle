@@ -6,7 +6,7 @@ class StashWebhookHelper
       stash_webhook_url = "#{commit.project.stash_webhook_url.sub(/\/$/, '')}/#{commit.revision}"
       post_parameters = {
           key: 'SHUTTLE',
-          name: "SHUTTLE-#{commit.revision[0..6]}",
+          name: "SHUTTLE-#{commit.revision_prefix}",
           url: project_commit_url(commit.project,
                                   commit,
                                   host: Shuttle::Configuration.worker.default_url_options.host,

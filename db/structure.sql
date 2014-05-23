@@ -303,6 +303,21 @@ CREATE TABLE schema_migrations (
 
 
 --
+-- Name: screenshots; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE screenshots (
+    commit_id integer NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    image_file_name character varying(255),
+    image_content_type character varying(255),
+    image_file_size integer,
+    image_updated_at timestamp without time zone
+);
+
+
+--
 -- Name: slugs; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -999,6 +1014,14 @@ ALTER TABLE ONLY locale_glossary_entries
 
 
 --
+-- Name: screenshots_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY screenshots
+    ADD CONSTRAINT screenshots_commit_id_fkey FOREIGN KEY (commit_id) REFERENCES commits(id) ON DELETE CASCADE;
+
+
+--
 -- Name: translation_changes_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1099,3 +1122,7 @@ INSERT INTO schema_migrations (version) VALUES ('20140520233119');
 INSERT INTO schema_migrations (version) VALUES ('20140521001017');
 
 INSERT INTO schema_migrations (version) VALUES ('20140521010749');
+
+INSERT INTO schema_migrations (version) VALUES ('20140523201654');
+
+INSERT INTO schema_migrations (version) VALUES ('20140523201726');

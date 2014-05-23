@@ -25,6 +25,27 @@ body.commits {
     input[type="checkbox"] { margin-left: 30px; }
   }
 
+  .dropzone {
+    min-height: 300px;
+    &:not(.dz-started) .dz-message {
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      flex-direction: column;
+      text-align: center;
+      strong {
+        text-transform: uppercase;
+        margin-bottom: 5px;
+      }
+    }
+  }
+
+  #screenshot-gallery {
+    display: flex;
+    justify-content: center;
+  }
+
   table#translations {
     table-layout: fixed;
 

@@ -1,0 +1,6 @@
+storage: :s3
+s3_credentials:
+  access_key_id: CHANGE_THIS
+  secret_access_key: CHANGE_THIS
+bucket: CHANGE_THIS
+use_timestamp: false

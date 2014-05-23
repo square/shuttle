@@ -52,7 +52,7 @@ class Locale::TranslationsController < ApplicationController
     offset       = params[:offset].to_i
     limit        = PER_PAGE
     query_filter = params[:filter]
-    commit_id    = params[:commit]
+    commit_id    = @project.commits.for_revision(params[:commit]).first.try(:id)
     locale       = @locale
     project_id   = @project.id
 

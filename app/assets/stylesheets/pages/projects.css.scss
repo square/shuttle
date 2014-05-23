@@ -48,16 +48,13 @@ body.projects {
   }
   
   &#projects-show {
+    .locale-select {
+      select[name='commit'] { width: 300px; }
+    }
+
     .filter-bar {
-      input[type="text"] {
-        width: 300px;
-      }
-      select[name="commit"] {
-        width: 250px;
-      }
-      select[name="filter_source"] {
-        width: 150px;
-      }
+      input[type="text"] { width: 400px; }
+      select[name="filter_source"] { width: 150px; }
     }
   }
 

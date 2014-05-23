@@ -13,15 +13,38 @@
 #    limitations under the License.
 
 $(document).ready ->
-  locale_select = $(".locale-select").find(".locale-field, select")
-  locale_select.val "<%= @locale.rfc5646 %>"
+  locale_field = $('#locale-field')
+  commit_select = $("select[name='commit']")
+  translate_link = $("#translate-link")
+  gallery_link = $('#gallery-link')
 
-  $(".translate-link").click () ->
-    project = $(this).data('project')
-    sha = $(this).data('sha')
-    locale = locale_select.val()
-    url = '/locales/' + encodeURIComponent(locale) + '/projects/' + encodeURIComponent(project) + '?commit=' + sha
+  locale_field.val "<%= @locale.rfc5646 %>"
+
+  translate_link.click () ->
+    commit_sha = commit_select.val()
+    locale = locale_field.val()
+    url = '/locales/' + encodeURIComponent(locale) + '/projects/<%= @project.to_param %>'
+    url += "?commit=#{commit_sha}" if commit_sha
     window.location = url
+
+  gallery_link.click () ->
+    commit_sha = commit_select.val()
+    if commit_sha
+      window.open "/projects/<%= @project.to_param %>/commits/#{commit_sha}/gallery"
+    else
+      new Flash('alert').text('Need to select a commit to view screenshots')
+
+  expand_filter_bar = () ->
+    if $(".collapse").data("toggle")
+      $("#expand-search").removeClass("active")
+      $(".collapse").data("toggle", false)
+      $(".collapse").slideUp()
+    else
+      $("#expand-search").addClass("active")
+      $(".collapse").data("toggle", true)
+      $(".collapse").slideDown()
+
+  $("#expand-search").click expand_filter_bar
 
   new TranslationWorkbench(
     $(".translation-workbench"),
@@ -34,4 +57,7 @@ $(document).ready ->
       word_substitute_url: <%= @word_substitute_url ? @word_substitute_url.inspect : 'null' %>
     }
   )
+
+  $(".filter-bar form").submit ->
+    window.history.pushState("params", "", "?#{$(this).serialize()}")
 

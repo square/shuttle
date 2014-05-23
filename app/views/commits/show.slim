@@ -1,3 +1,17 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
 - content_for :shuttle_title do
   = "Commit #{@commit.revision_prefix} - Shuttle"
 - content_for :file_name do
@@ -10,33 +24,35 @@
   true
 
 = render layout: 'commits/layout' do
-  .nine.columns.sidebar-main
-    = form_for @commit, url: project_commit_url(@project, @commit) do |f|
-      fieldset
-        legend General Settings
+  = form_for @commit, url: project_commit_url(@project, @commit) do |f|
+    fieldset
+      legend General Settings
+      .nine.columns
 
         .control-group
           = f.label :due_date, class: 'control-label'
           .controls
             = f.text_field  :due_date, \
-                            value: (f.object.due_date.strftime('%m/%d/%Y') if !f.object.due_date.nil?),\
-                            class: 'datepicker'
+                            value: (f.object.due_date.strftime('%m/%d/%Y') if f.object.due_date.present?),\
+                            class: 'datepicker',
+                            disabled: !current_user.monitor?
 
         .control-group
           = f.label :pull_request_url, class: 'control-label'
           .controls
-            = f.text_field :pull_request_url
+            = f.text_field :pull_request_url, disabled: (true unless current_user.monitor?)
 
         .control-group
           = f.label :description, class: 'control-label'
           .controls
-            = f.text_area :description, rows: 7
+            = f.text_area :description, rows: 7, disabled: (true unless current_user.monitor?)
 
         .control-group
           .controls
-            = f.check_box :exported
+            = f.check_box :exported, disabled: (true unless current_user.monitor?)
             | This commit has been exported
 
-        .control-group.wide-label.form-action
-          .controls
-            = f.submit class: 'primary', value: 'Update', name: nil
+        - if current_user.monitor?
+          .control-group.wide-label.form-action
+            .controls
+              = f.submit class: 'primary', value: 'Update', name: nil

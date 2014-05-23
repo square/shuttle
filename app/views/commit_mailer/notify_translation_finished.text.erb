@@ -1,4 +1,4 @@
-Translation of commit <%= @commit.revision[0,6] %> on <%= @commit.project.name %> is finished on Shuttle!
+Translation of commit <%= @commit.revision_prefix %> on <%= @commit.project.name %> is finished on Shuttle!
 
 SHA: <%= @commit.revision %>
 Link: <%= project_commit_url(@commit.project, @commit) %>

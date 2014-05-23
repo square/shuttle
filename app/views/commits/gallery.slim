@@ -1,0 +1,52 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :shuttle_title do
+  = "Commit #{@commit.revision_prefix} - Shuttle"
+- content_for :file_name do
+  = 'views/commits/gallery'
+- content_for :class do
+  = controller_name
+- content_for :id do 
+  = [controller_name, action_name].join('-')
+- content_for :footer do
+  true
+
+= render layout: 'commits/layout' do
+  fieldset
+    - if current_user.monitor?
+      .fieldset-button
+        button.primary href='#upload-screenshot' rel='modal' Upload Screenshot
+    - elsif current_user.translator?
+      .fieldset-button
+        = button_tag 'Request Screenshot', id: 'request-screenshot', type: 'button'
+    legend Gallery
+
+    #screenshot-gallery
+      - if @commit.screenshots.present?
+        - @commit.screenshots.each do |screenshot|
+          a.hide href=screenshot.image.url title=screenshot.image_file_name
+            - screenshot_url = @commit.screenshots.length > 1 ? screenshot.image.url(:thumb) : screenshot.image.url
+            = image_tag screenshot_url, alt: screenshot.image_file_name
+      - else
+        .text-error No screenshots available
+
+- if current_user.monitor?
+  .row
+    .modal.twelve.columns#upload-screenshot
+      a.close ×
+      fieldset
+        legend Upload Screenshot
+        = form_tag project_commit_screenshots_url(@project, @commit), id: 'screenshot-dropzone', class: 'dropzone'
+      button.pull-right#process-queue disabled=true Upload Screenshots
