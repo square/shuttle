@@ -264,14 +264,14 @@ class ProjectsController < ApplicationController
     )
 
     params[:project][:skip_imports] = Importer::Base.implementations.map(&:ident) - params[:project][:use_imports]
-
-    if params[:use_key_exclusions]
+    
+    if params[:project][:use_key_exclusions]
       params[:project][:key_inclusions] = []
     else
       params[:project][:key_exclusions] = []
     end
 
-    if params[:use_skip_paths]
+    if params[:project][:use_skip_paths]
       params[:project][:only_paths] = []
     else
       params[:project][:skip_paths] = []
