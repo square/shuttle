@@ -105,6 +105,8 @@ Shuttle::Application.configure do
       host:     'shuttle.squareup.com'
   }
 
+  config.paperclip_defaults = Shuttle::Configuration.paperclip.to_hash
+
   config.use_ssl = true
 
   config.action_mailer.delivery_method = :smtp

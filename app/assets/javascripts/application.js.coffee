@@ -27,22 +27,25 @@
 #= require jquery
 #= require jquery-ui
 #= require jquery-autosize
+#= require jquery-chosen
 #= require jquery-cookie
 #= require jquery_ujs
 #= require jquery-timers
 #= require jquery-leanModal
 #= require jquery-qtip
-#= require jquery-chosen
 #= require jquery-highlight
 #= require jquery-highlighter
 #= require jquery-prettyTextDiff
+#= require jquery-gallery
+#= require jquery-swipebox
 #= require purl
 #= require datepicker
 #= require twitter/typeahead
 #= require modernizr
 #= require xregexp
 #= require diff_match_patch.js
-
+#= require spin.js
+#= require dropzone
 #
 #= require d3
 #= require nvd3
@@ -59,12 +62,13 @@
 #= require smart_form
 #
 #= require_tree ../templates
-#= require_tree ./application 
+#= require_tree ./application
+
+Dropzone.autoDiscover = false
 
 $(document).ready ->
   $('.filter-bar').affix(0, { shadow: true }) if $('.filter-bar').length > 0
   # enable leanModal on all modal links
-  $("a[rel*=modal]").leanModal closeButton: ".close"
   $("button[rel*=modal]").leanModal closeButton: ".close"
   $("textarea.resize").autosize()
 

@@ -1,4 +1,4 @@
-Shuttle: Magic localization dust [![Build Status](https://travis-ci.org/square/shuttle.png)](https://travis-ci.org/square/shuttle)
+Shuttle: Magic localization dust [![Build Status](https://travis-ci.org/square/shuttle.svg?branch=master)](https://travis-ci.org/square/shuttle)
 ================================
 
 

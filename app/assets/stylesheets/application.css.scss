@@ -11,9 +11,12 @@
  *= require reset
  *
  *= require jquery-qtip
+ *= require jquery-gallery
+ *= require jquery-swipebox
  *= require font-awesome
  *= require nvd3
  *= require css3-mixins
+ *= require dropzone/basic
  *
  *= require_self
  *= require_tree ./pages
@@ -51,3 +54,4 @@
 @import "partials/translation_workbench";
 @import "partials/worker_status";
 @import "partials/highlighter";
+@import "partials/issues";

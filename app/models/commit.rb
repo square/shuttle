@@ -71,6 +71,8 @@ require 'fileutils'
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
 # | `import_batch_id`  | The ID of the Sidekiq batch of import jobs.                        |
 # | `import_errors`    | Array of import errors that happened during the import process.    |
+# | `author`           | The name of the commit author.                                     |
+# | `author_email`     | The email address of the commit author.                            |
 
 class Commit < ActiveRecord::Base
   extend RedisMemoize
@@ -85,6 +87,7 @@ class Commit < ActiveRecord::Base
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
   has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
+  has_many :screenshots, inverse_of: :commit, dependent: :destroy
   has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
   has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all

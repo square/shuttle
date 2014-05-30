@@ -44,7 +44,8 @@ $flash-animation-duration: 0.5s;
     float: right;
     font-weight: bold;
     opacity: 0.5;
-    &:hover { 
+    &:hover {
+      text-decoration: none;
       color: black;
       opacity: 1; 
     }

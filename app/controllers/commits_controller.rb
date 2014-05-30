@@ -20,12 +20,12 @@ class CommitsController < ApplicationController
   COMMIT_ATTRIBUTES = [:exported, :revision, :description, :due_date, :pull_request_url, :priority]
 
   before_filter :authenticate_user!, except: [:manifest, :localize]
-  before_filter :monitor_required, except: [:show, :manifest, :localize]
+  before_filter :monitor_required, except: [:show, :search, :gallery, :manifest, :localize]
 
   before_filter :find_project
   before_filter :find_commit, except: [:create, :manifest, :localize]
 
-  respond_to :html, :json, only: [:show, :tools, :search, :create, :update, :destroy, :import,
+  respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :import,
                                   :sync, :match, :redo, :recalculate, :ping_stash]
 
   # Renders JSON information about a Commit and its translation progress.
@@ -76,6 +76,25 @@ class CommitsController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def tools
+    respond_with @commit
+  end
+
+  # Renders all screenshots for a commit and a drag + drop interface to upload screenshots
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:project_id/commits/:id`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def gallery
     respond_with @commit
   end
 

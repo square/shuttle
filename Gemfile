@@ -25,6 +25,7 @@ gem 'tire'
 gem 'jquery-rails'
 gem 'font-awesome-rails'
 gem 'twitter-typeahead-rails'
+gem 'dropzonejs-rails'
 gem 'kaminari'
 gem 'slim-rails'
 
@@ -35,6 +36,8 @@ gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
 gem 'similar_text', '~> 0.0.4'
+gem 'paperclip'
+gem 'aws-sdk', '~> 1.5.7'
 
 # IMPORTING
 gem 'therubyracer', platform: :mri, require: 'v8'
@@ -65,7 +68,7 @@ gem 'redis-namespace'
 
 # ASSETS
 gem 'sprockets-rails'
-gem 'sass-rails'
+gem 'sass-rails', '4.0.3' # bugfix for sass 3.3 (in)compatibility
 gem 'coffee-rails'
 gem 'uglifier'
 gem 'less-rails'
@@ -97,6 +100,7 @@ gem 'sql_origin', groups: [:development, :test]
 group :development, :test do
   gem 'spring'
   gem 'spring-commands-rspec'
+  gem 'mailcatcher'
   #gem 'jasminerice'
   #gem 'guard-jasmine'
 end

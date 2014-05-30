@@ -41,6 +41,12 @@ body {
 
   .pull-right {
     padding-top: 10px;
+    select {
+      margin-top: 0px;
+      & + select {
+        margin-left: 2px;
+      }
+    }
   }
 
   h6 {

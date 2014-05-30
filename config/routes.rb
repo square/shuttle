@@ -41,10 +41,15 @@ Shuttle::Application.routes.draw do
     resources :commits, only: [:show, :create, :update, :destroy] do
       member do
         post :import, :sync, :redo, :recalculate, :ping_stash
-        get :manifest, :localize, :search, :tools
+        get :manifest, :localize, :search, :tools, :gallery
       end
 
       resources :keys, only: [:index, :show], controller: 'commit/keys'
+      resources :screenshots, only: [:create] do
+        collection do
+          post :request, to: :request_screenshots
+        end
+      end
     end
 
     resources :keys, only: [] do
@@ -54,12 +59,20 @@ Shuttle::Application.routes.draw do
           put :approve, :reject
         end
       end
+
+      resources :translations, only: [] do
+        resources :issues, only: [:create, :update]
+      end
     end
 
     member do
       post 'github-pull-request-builder' => 'projects#github_webhook'
       post 'stash-pull-request-builder' => 'projects#stash_webhook'
     end
+  end
+
+  resources :issues, only: [] do
+    resources :comments, only: [:create]
   end
 
   resources :locales, only: :index do

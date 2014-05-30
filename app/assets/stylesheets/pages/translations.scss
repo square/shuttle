@@ -2,11 +2,13 @@
 @import "css3-mixins";
 
 body.translations {
-  .eight.columns {
-    margin-top: -30px;
-    padding: 30px;
-    @include box-sizing;
-    position: relative;
+  .eight, .sixteen {
+    &.columns {
+      margin-top: -30px;
+      padding: 30px;
+      @include box-sizing;
+      position: relative;
+    }
   }
 
   .control-group {
