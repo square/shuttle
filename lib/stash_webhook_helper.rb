@@ -15,6 +15,8 @@ class StashWebhookHelper
       }
       headers = { 'Content-Type' => 'application/json',
                   'Accept' => 'application/json' }
+
+      # This is only used for Production (since Staging should never ping Stash)
       auth = {
           username: Shuttle::Configuration.stash.username,
           password: Shuttle::Configuration.stash.password,
