@@ -1,0 +1,15 @@
+<%= @issue.user_name %> reported a new issue on <%= l @issue.created_at, format: :full %>:
+
+Summary: <%= @issue.summary %>
+
+Priority: <%= t("models.issue.priority")[@issue.priority] %>
+
+Description: <%= @issue.description %>
+
+Kind: <%= t("models.issue.kind")[@issue.kind] %>
+
+<%= link_to 'Click here to view the issue.',
+            project_key_translation_url(@project, @key, @translation) + "#issue-wrapper-#{@issue.id}" %>
+
+Sincerely,
+The Shuttle Automated Mailer

@@ -49,12 +49,20 @@ Shuttle::Application.routes.draw do
           put :approve, :reject
         end
       end
+
+      resources :translations, only: [] do
+        resources :issues, only: [:create, :update]
+      end
     end
 
     member do
       post 'github-pull-request-builder' => 'projects#github_webhook'
       post 'stash-pull-request-builder' => 'projects#stash_webhook'
     end
+  end
+
+  resources :issues, only: [] do
+    resources :comments, only: [:create]
   end
 
   resources :locales, only: :index do

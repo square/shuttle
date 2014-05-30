@@ -30,6 +30,7 @@ require 'digest/sha2'
 # | `key`        | The {Key} whose string this is a translation of. |
 # | `translator` | The {User} who performed the translation.        |
 # | `reviewer`   | The {User} who reviewed the translation.         |
+# | `issues`     | The {Issue Issues} under the translation.        |
 #
 # Properties
 # ==========
@@ -54,6 +55,7 @@ class Translation < ActiveRecord::Base
   belongs_to :translator, class_name: 'User', foreign_key: 'translator_id', inverse_of: :authored_translations
   belongs_to :reviewer, class_name: 'User', foreign_key: 'reviewer_id', inverse_of: :reviewed_translations
   has_many :translation_changes, inverse_of: :translation, dependent: :delete_all
+  has_many :issues, inverse_of: :translation, dependent: :delete_all
 
   include HasMetadataColumn
   has_metadata_column(

@@ -95,3 +95,5 @@ hr.divider
               | Rejected
             - elsif @translation.approved == true
               | Approved
+
+= render partial: 'issues/index', locals: {project: @project, key: @key, translation: @translation, issues: @issues, issue: @issue}

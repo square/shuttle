@@ -24,9 +24,10 @@ class TranslationsController < ApplicationController
   before_filter :find_project
   before_filter :find_key
   before_filter :find_translation
+  before_filter :find_issues, only: [:show, :edit]
 
-  respond_to :html, :json, except: [:match, :fuzzy_match]
-  respond_to :json, only: [:match, :fuzzy_match]
+  respond_to :html, except: [:match, :fuzzy_match]
+  respond_to :json, only: [:show, :match, :fuzzy_match]
 
   # Displays a large-format translation view page.
   #
@@ -69,8 +70,6 @@ class TranslationsController < ApplicationController
   def edit
     respond_with @translation, location: project_key_translation_url(@project, @key, @translation)
   end
-
-  respond_to :json
 
   # Updates a Translation with new translated copy. If the translated copy is
   # blank, the translation will be considered to have been "erased" (marked as
@@ -315,6 +314,11 @@ class TranslationsController < ApplicationController
 
   def find_translation
     @translation = @key.translations.where(rfc5646_locale: params[:id]).first!
+  end
+
+  def find_issues
+    @issues = @translation.issues.includes(:user, comments: :user)
+    @issue = Issue.new
   end
 
   def translation_params
