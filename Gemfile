@@ -57,6 +57,7 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
+gem 'sidekiq', '<3.0.0'
 gem 'sidekiq-pro'
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
