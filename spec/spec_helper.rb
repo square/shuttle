@@ -18,6 +18,7 @@ require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 require 'rspec/autorun'
 
+require 'paperclip/matchers'
 require 'sidekiq/testing/inline'
 
 # Requires supporting ruby files with custom matchers and macros, etc,
@@ -53,6 +54,7 @@ RSpec.configure do |config|
   config.infer_base_class_for_anonymous_controllers = false
 
   config.include Devise::TestHelpers, type: :controller
+  config.include Paperclip::Shoulda::Matchers
 
   if ENV['RAILS_ENV'] == 'acceptance'
     config.include Capybara::DSL

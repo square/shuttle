@@ -76,13 +76,23 @@ class Locale::ProjectsController < ApplicationController
         .map(&:as_translation_json)
         .compact
 
+    @mode = params[:mode] || begin
+      case current_user.role
+        when 'translator' then
+          'translation'
+        else
+          'review'
+        end
+      end
+
     respond_with @project
   end
 
   private
 
   def find_locale
-    unless (@locale = Locale.from_rfc5646(params[:locale_id]))
+    @locale = Locale.from_rfc5646(params[:locale_id])
+    unless @locale
       respond_to do |format|
         format.any { head :not_found }
       end
@@ -105,13 +115,13 @@ class Locale::ProjectsController < ApplicationController
 
   def locale_access_required
     if current_user.has_access_to_locale?(params[:locale_id])
-      return true
+      true
     else
       respond_to do |format|
         format.html { redirect_to root_url, alert: t('controllers.locale.projects.locale_access_required') }
         format.any { head :forbidden }
       end
-      return false
+      false
     end
   end
 end

@@ -28,8 +28,10 @@ form#new_project {
 fieldset {
   padding: 20px 0px 50px 0px;
   width: 100%;
-  @include transition(height);
-//  @include transition-duration(250ms);
+  .fieldset-button {
+    float: right;
+    margin-top: -66px;
+  }
 }
 
 legend {

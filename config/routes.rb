@@ -31,10 +31,15 @@ Shuttle::Application.routes.draw do
     resources :commits, only: [:show, :create, :update, :destroy] do
       member do
         post :import, :sync, :redo, :clear, :recalculate, :ping_stash
-        get :manifest, :localize, :search, :tools
+        get :manifest, :localize, :search, :tools, :gallery
       end
 
       resources :keys, only: [:index, :show], controller: 'commit/keys'
+      resources :screenshots, only: [:create] do
+        collection do
+          post :request, to: :request_screenshots
+        end
+      end
     end
 
     resources :keys, only: [] do

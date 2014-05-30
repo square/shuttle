@@ -1,0 +1,70 @@
+# Copyright 2014 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+$(window).ready ->
+  $('#screenshot-dropzone').dropzone
+    init: ->
+      dropzone = this
+      upload_btn = $('#process-queue')
+
+      dropzone.on 'success', ->
+        $.ajax
+          url: "",
+          context: document.body,
+          success: (s)->
+            $(this).html(s)
+            new Flash('success').text("Screenshots have been successfully uploaded")
+
+      dropzone.on 'addedfile', ->
+        upload_btn.attr('disabled', false)
+
+      dropzone.on 'removedfile', ->
+        if dropzone.files.length < 1
+          upload_btn.attr('disabled', true)
+
+      upload_btn.click ->
+        dropzone.processQueue()
+        upload_btn.attr('disabled', true)
+        false
+
+    paramName: 'screenshot[image]'
+    maxFilesize: 5
+    dictDefaultMessage: '<strong>Drop files here to upload</strong><br>(or click)'
+    addRemoveLinks: true
+    autoProcessQueue: false
+    parallelUploads: 10
+
+
+  $('#request-screenshot').click ->
+    $.ajax
+      url: "<%= request_project_commit_screenshots_url(@project, @commit) %>"
+      type: 'POST'
+      dataType: 'html'
+      success: ->
+        new Flash('success').text('<%= t('mailer.screenshot.request_screenshot.success', sha: @commit.revision_prefix) %>')
+
+  gallery = $("#screenshot-gallery").justifiedGallery(
+    sizeRangeSuffixes:
+      lt100: ''
+      lt240: ''
+      lt320: ''
+      lt500: ''
+      lt640: ''
+      lt1024: ''
+    maxRowHeight: -1
+  ).on "jg.complete", ->
+    $("#screenshot-gallery a").removeClass('hide').swipebox()
+
+
+

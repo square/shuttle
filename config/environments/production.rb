@@ -97,5 +97,7 @@ Shuttle::Application.configure do
       host:     'YOUR_HOST'
   }
 
+  config.paperclip_defaults = Shuttle::Configuration.paperclip.to_hash
+
   config.use_ssl = true
 end

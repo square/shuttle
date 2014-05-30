@@ -286,3 +286,7 @@ en:
         subject: "[Shuttle] Finished translation of commit"
       notify_submitter_of_import_errors:
         subject: "[Shuttle] Error(s) occurred during the import"
+    screenshot:
+      request_screenshot:
+        subject: "[Shuttle] Requesting screenshots for commit %{sha}"
+        success: "Successfully requested screenshots for commit %{sha}"
