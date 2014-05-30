@@ -56,7 +56,7 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-gem 'sidekiq'
+gem 'sidekiq', '<3.0.0'
 gem 'sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
@@ -67,7 +67,7 @@ gem 'redis-namespace'
 
 # ASSETS
 gem 'sprockets-rails'
-gem 'sass-rails'
+gem 'sass-rails', '4.0.3' # bugfix for sass 3.3 (in)compatibility
 gem 'coffee-rails'
 gem 'uglifier'
 gem 'less-rails'
