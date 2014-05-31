@@ -1,2 +1,2 @@
-Rails.application.config.paperclip_defaults = Shuttle::Configuration.paperclip.to_hash
+Paperclip::Attachment.default_options.merge! Shuttle::Configuration.paperclip.to_symbolized_hash
 
