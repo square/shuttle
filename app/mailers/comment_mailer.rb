@@ -31,7 +31,7 @@ class CommentMailer < ActionMailer::Base
     @project = @key.project
 
     mail to: related_peoples_emails(@comment, @issue, @translation),
-         subject: t('mailer.comment.comment_created.subject', name: @comment.user_name, content: truncate(@comment.content, length: 50))
+         subject: t('mailer.comment.comment_created.subject', name: @comment.user_name, content: truncate(@comment.content, length: 50, escape: false))
   end
 
   private
