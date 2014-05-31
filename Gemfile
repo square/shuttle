@@ -37,7 +37,7 @@ gem 'unicode_scanner'
 gem 'httparty'
 gem 'similar_text', '~> 0.0.4'
 gem 'paperclip'
-gem 'aws-sdk', '~> 1.5.7'
+gem 'aws-sdk'
 
 # IMPORTING
 gem 'therubyracer', platform: :mri, require: 'v8'
