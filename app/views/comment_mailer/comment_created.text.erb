@@ -2,7 +2,7 @@
 
 <%= @comment.content %>
 
-<%= link_to 'Click here to view the comment', project_key_translation_url(@project, @key, @translation) + "#comment-#{@comment.id}" %>
+View the comment: <%= project_key_translation_url(@project, @key, @translation) + "#comment-#{@comment.id}" %>
 
 Sincerely,
 The Shuttle Automated Mailer
