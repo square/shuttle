@@ -309,12 +309,12 @@ en:
         subject: "[Shuttle] Error(s) occurred during the import"
     issue:
       issue_created:
-        subject: "[Shuttle] %{name} reported a new issue. Issue Summary: '%{summary}'"
+        subject: "[Shuttle] %{name} reported a new issue. Issue Summary: %{summary}."
       issue_updated:
-        subject: "[Shuttle] %{name} updated an issue. Issue Summary: '%{summary}'"
+        subject: "[Shuttle] %{name} updated an issue. Issue Summary: %{summary}."
     comment:
       comment_created:
-        subject: "[Shuttle] %{name} wrote a new comment to an issue: '%{content}'."
+        subject: "[Shuttle] %{name} wrote a new comment to an issue: %{content}."
     screenshot:
       request_screenshot:
         subject: "[Shuttle] Requesting screenshots for commit %{sha}"
