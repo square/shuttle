@@ -3,7 +3,6 @@
 --
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -385,8 +384,28 @@ CREATE TABLE screenshots (
     image_file_name character varying(255),
     image_content_type character varying(255),
     image_file_size integer,
-    image_updated_at timestamp without time zone
+    image_updated_at timestamp without time zone,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: screenshots_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE screenshots_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: screenshots_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE screenshots_id_seq OWNED BY screenshots.id;
 
 
 --
@@ -664,6 +683,13 @@ ALTER TABLE ONLY projects ALTER COLUMN id SET DEFAULT nextval('projects_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY screenshots ALTER COLUMN id SET DEFAULT nextval('screenshots_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY slugs ALTER COLUMN id SET DEFAULT nextval('slugs_id_seq'::regclass);
 
 
@@ -804,6 +830,14 @@ ALTER TABLE ONLY projects
 
 ALTER TABLE ONLY projects
     ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: screenshots_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY screenshots
+    ADD CONSTRAINT screenshots_pkey PRIMARY KEY (id);
 
 
 --
@@ -1307,3 +1341,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140522002732');
 INSERT INTO schema_migrations (version) VALUES ('20140523201654');
 
 INSERT INTO schema_migrations (version) VALUES ('20140523201726');
+
+INSERT INTO schema_migrations (version) VALUES ('20140531020536');
