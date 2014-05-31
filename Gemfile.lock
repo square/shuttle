@@ -43,11 +43,9 @@ GEM
       tzinfo (~> 0.3.37)
     ansi (1.4.3)
     arel (4.0.2)
-    aws-sdk (1.5.8)
-      httparty (~> 0.7)
+    aws-sdk (1.42.0)
       json (~> 1.4)
       nokogiri (>= 1.4.4)
-      uuidtools (~> 2.1)
     bcrypt (3.1.7)
     blankslate (2.1.2.4)
     boolean (1.0.1)
@@ -322,7 +320,6 @@ GEM
       execjs (>= 0.3.0)
       json (>= 1.8.0)
     unicode_scanner (1.0.0)
-    uuidtools (2.1.4)
     validates_timeliness (3.0.14)
       timeliness (~> 0.3.6)
     warden (1.2.3)
@@ -339,7 +336,7 @@ PLATFORMS
 
 DEPENDENCIES
   CFPropertyList
-  aws-sdk (~> 1.5.7)
+  aws-sdk
   boolean
   capybara
   capybara-webkit
