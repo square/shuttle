@@ -31,7 +31,7 @@ module Shuttle
 
     # Custom directories with classes and modules you want to be autoloadable.
     config.autoload_paths << config.root.join('lib')
-    config.autoload_paths << config.root.join('app', 'models', 'concerns')      #RAILS4 remove
+    config.autoload_paths << config.root.join('app', 'models', 'concerns') #RAILS4 remove
     config.autoload_paths << config.root.join('app', 'controllers', 'concerns') #RAILS4 remove
     config.autoload_paths << config.root.join('app', 'models', 'observers')
 
@@ -61,6 +61,10 @@ module Shuttle
       g.integration_tool :rspec
       g.fixture_replacement :factory_girl, dir: 'spec/factories'
     end
+
+    # Precompile additional assets.
+    # application.js.coffee, application.css, and all non-JS/CSS in app/assets folder are already added.
+    config.assets.precompile += %w(*.png *.gif *.jpg)
   end
 end
 
