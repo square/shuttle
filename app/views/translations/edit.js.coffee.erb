@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 $(document).ready ->
-
   find_fuzzy_matches = (source_copy, locale) ->
     fuzzy_matches = $('.fuzzy-matches').first()
     fuzzy_matches.empty()
@@ -54,9 +53,17 @@ $(document).ready ->
 
   current_selection = source_copy
 
+  blankString = $("input[name=blank_string]")
   copy_field = $("#translation_copy")
   source_copy_field = $("#source_copy")
 
+  blankString.checked = true  if copy_field.val().match(/^\s*$/)
+  blankString.change ->
+    $("#translation_copy").val ""  if blankString[0].checked
+
+  copy_field.keyup ->
+    blankString[0].checked = copy_field.val().match(/^\s*$/)
+    true
   $(".copy-source").click ->
     copy_field.val "<%= escape_javascript @translation.source_copy %>"
     false
