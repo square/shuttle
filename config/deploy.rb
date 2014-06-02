@@ -8,6 +8,7 @@ set :deploy_to, "/app/#{fetch :application}"
 set :linked_files, %w{  config/database.yml
                         config/environments/staging/paperclip.yml
                         config/environments/production/paperclip.yml
+                        config/environments/production/stash.yml
                         data/secret_token
                         tmp/sidekiq.pid  }
 set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos}
