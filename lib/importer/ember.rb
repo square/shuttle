@@ -44,7 +44,10 @@ module Importer
       hash = extract_hash_from_file(contents, rfc)
 
       extract_hash(hash) { |key, value| receiver.add_string key, value }
-    rescue ExecJS::Error, V8::Error => err
+    # TODO: We need to move this over to NodeJS instead.  RubyRacer has an issue where ExecJS will randomly fail with a ProgramError.
+    # RuntimeError catches for syntax issues though which is most likely what we're interested in.
+    # https://github.com/sstephenson/execjs/blob/master/lib/execjs/ruby_racer_runtime.rb
+    rescue ExecJS::RuntimeError, V8::Error => err
       log_skip nil, "Invalid Ember file: #{err}"
       handle_import_error(err)
     end

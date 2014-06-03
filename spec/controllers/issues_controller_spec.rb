@@ -61,7 +61,7 @@ describe IssuesController do
         expect(response.body).to include("id=\\\"issue-#{issue.id}\\\"")
 
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: 'this is a unique summary'")
+        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: this is a unique summary")
       end
     end
 
@@ -102,7 +102,7 @@ describe IssuesController do
         expect(response.body).to include("$('#issues #issue-wrapper-#{@issue.id}').replaceWith")
 
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: 'updated summary'")
+        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: updated summary")
       end
     end
 
