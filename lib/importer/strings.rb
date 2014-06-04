@@ -19,6 +19,8 @@ module Importer
   # Parses translatable strings from Cocoa/Objective-C .strings files.
 
   class Strings < Base
+    include IosCommon
+
     def self.fencers() %w(Printf) end
 
     protected
@@ -31,9 +33,14 @@ module Importer
 
     def import_strings(receiver)
       file.contents.scan(/(?:\/*\*\s*(.+?)\s*\*\/)?\s*"(.+?)"\s*=\s*"(.+?)";/um).each do |(context, key, value)|
-        receiver.add_string "#{file.path}:#{unescape(key)}", unescape(value),
-                            context:      context,
-                            original_key: unescape(key)
+        unless value.start_with?(DO_NOT_LOCALIZE_TOKEN)
+          receiver.add_string "#{file.path}:#{unescape(key)}", unescape(value),
+                              context:      context,
+                              original_key: unescape(key)
+        else
+          log_skip key, "Value contains DNL token"
+          next
+        end
       end
     end
 
