@@ -422,6 +422,7 @@ DEPENDENCIES
   sql_origin
   squash_rails!
   squash_ruby (>= 1.4.0)
+  stringex (= 2.2.0)
   test_after_commit
   therubyracer
   timecop
