@@ -12,6 +12,7 @@ gem 'devise'
 
 # MODELS
 gem 'pg'
+gem 'stringex', '2.2.0' # 2.5.2 forces config.enforce_available_locales to true for some stupid reason
 gem 'slugalicious'
 gem 'validates_timeliness'
 gem 'has_metadata_column'
