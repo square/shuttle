@@ -65,6 +65,7 @@ describe Commit do
         @commit.add_import_error_in_redis("some/fake/file.yaml", "some fake error")
         @commit.update_attributes(loading: false, ready: false)
         expect(ActionMailer::Base.deliveries.map(&:subject)).to include("[Shuttle] Error(s) occurred during the import")
+        expect(ActionMailer::Base.deliveries.select { |email| email.subject == "[Shuttle] Error(s) occurred during the import"}.first.to).to eql([@commit.user.email, @commit.author_email].compact.uniq)
       end
     end
   end

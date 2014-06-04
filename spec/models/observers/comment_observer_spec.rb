@@ -29,7 +29,7 @@ describe Comment do
         email = ActionMailer::Base.deliveries.first
         expected_email_list = [Shuttle::Configuration.mailer.translators_list, "first_commenter@test.com", "second_commenter@test.com", @issue.user.email, @issue.updater.email]
         expect(email.to.sort).to eql(expected_email_list.sort)
-        expect(email.subject).to eql("[Shuttle] Sancho Sample wrote a new comment to an issue: 'This is awesome'.")
+        expect(email.subject).to eql("[Shuttle] Sancho Sample wrote a new comment to an issue: This is awesome")
         expect(email.body.to_s).to include("wrote a new comment")
         expect(email.body.to_s).to include("http://test.host/projects/#{@issue.translation.key.project.to_param}/keys/#{@issue.translation.key.to_param}/translations/#{@issue.translation.to_param}#comment-#{@comment.id}")
       end
