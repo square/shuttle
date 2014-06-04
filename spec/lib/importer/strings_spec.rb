@@ -35,5 +35,16 @@ describe Importer::Strings do
     it "should properly unescape C string escapes" do
       expect(@project.keys.for_key("/apple/en-US.lproj/example.strings:Something\nwith\tescapes\\").first.translations.base.first.copy).to eql("Something\nwith\tescapes\\")
     end
+
+    it "should still import strings that end with <DNL>" do
+      expect(@project.keys.for_key('/apple/en-US.lproj/example.strings:quote.charlie.1').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("I'm a patriot. You've gotta give me that.<DNL>")
+    end
+
+    it "should not import strings that start with <DNL>" do
+      expect(@project.keys.for_key('/apple/en-US.lproj/no-translations.strings:dialogue.charlie.1').first).to be_nil
+      expect(@project.keys.for_key('/apple/en-US.lproj/no-translations.strings:dialogue.dennis.1').first).to be_nil
+      expect(@project.keys.for_key('/apple/en-US.lproj/no-translations.strings:dialogue.charlie.2').first).to be_nil
+      expect(@project.keys.for_key('/apple/en-US.lproj/no-translations.strings:dialogue.dennis.2').first).to be_nil
+    end
   end
 end
