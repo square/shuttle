@@ -31,7 +31,7 @@ describe Issue do
         email = ActionMailer::Base.deliveries.first
         expected_email_list = [Shuttle::Configuration.mailer.translators_list, @user.email]
         expect(email.to.sort).to eql(expected_email_list.sort)
-        expect(email.subject).to eql("[Shuttle] Sancho Sample reported a new issue. Issue Summary: 'Some fake issue'")
+        expect(email.subject).to eql("[Shuttle] Sancho Sample reported a new issue. Issue Summary: Some fake issue")
         expect(email.body.to_s).to include("reported a new issue")
         expect(email.body.to_s).to include("http://test.host/projects/#{@translation.key.project.to_param}/keys/#{@translation.key.to_param}/translations/#{@translation.to_param}#issue-wrapper-#{@issue.id}")
       end
@@ -47,7 +47,7 @@ describe Issue do
         expect(ActionMailer::Base.deliveries.size).to eql(1)
 
         email = ActionMailer::Base.deliveries.first
-        expect(email.subject).to eql("[Shuttle] Sancho Sample updated an issue. Issue Summary: 'Some fake issue'")
+        expect(email.subject).to eql("[Shuttle] Sancho Sample updated an issue. Issue Summary: Some fake issue")
         expect(email.body.to_s).to include("updated an issue")
         expect(email.body.to_s).to include("Was: Open")
         expect(email.body.to_s).to include("Is: In progress")

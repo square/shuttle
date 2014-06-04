@@ -53,8 +53,9 @@ class CommitMailer < ActionMailer::Base
 
   def notify_submitter_of_import_errors(commit)
     @commit = commit
-    if @commit.user.try!(:email)
-      mail to: @commit.user.email, subject: t('mailer.commit.notify_submitter_of_import_errors.subject')
+    submitter_emails = [@commit.author_email, @commit.user.try!(:email)].compact.uniq
+    if submitter_emails.present?
+      mail to: submitter_emails, subject: t('mailer.commit.notify_submitter_of_import_errors.subject')
     end
   end
 end

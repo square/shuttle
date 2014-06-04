@@ -58,7 +58,7 @@ describe CommentsController do
         expect(response.body).to include("id=\\\"comment-#{comment.id}\\\"")
 
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar wrote a new comment to an issue: 'this is a comment'.")
+        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar wrote a new comment to an issue: this is a comment")
       end
     end
 
