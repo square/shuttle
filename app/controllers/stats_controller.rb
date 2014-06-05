@@ -22,12 +22,16 @@ class StatsController < ApplicationController
   # Displays the statistics page.
   def index
     metrics = DailyMetric.
-      where(date: (30.days.ago)...Date.today)
+      where(date: (30.days.ago)...Date.today).
+      order(:date)
 
     this_week_metrics = DailyMetric.
-      where(date: (1.week.ago)...Date.today)
+      where(date: (1.week.ago)...Date.today).
+      order(:date)
+      
     last_week_metrics = DailyMetric.
-      where(date: (2.weeks.ago)...(1.week.ago))
+      where(date: (2.weeks.ago)...(1.week.ago)).
+      order(:date)
 
     @words_per_project   = decorate_words_per_project(Translation.total_words_per_project)
     @average_load_time   = decorate_avg_load_time(metrics)
