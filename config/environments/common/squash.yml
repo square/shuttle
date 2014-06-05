@@ -8,11 +8,21 @@ ignored_exception_classes:
 - PG::TRDeadlockDetected
 - PG::UnableToSend
 - PG::ConnectionBad
+- Git::GitExecuteError
+- Errno::EHOSTUNREACH
+- Redis::CannotConnectError
+- Tire::Search::SearchRequestFailed
+- Errno::ECONNREFUSED
+- Net::ReadTimeout
 ignored_exception_messages:
   SignalException:
   - SIGTERM
   NoMethodError:
   - !ruby/regexp '/undefined method `.+?'' for #<Sidekiq::Shutdown.+?>/'
+  RuntimeError:
+  - Repo not ready
+  Redis::CommandError:
+  - ERR max number of clients reached
 disabled: true
 api_host: "https://squash.corp.squareup.com"
 api_key: 2b4eea87-a79c-4b1e-87b1-f7cca7cd0cfd
