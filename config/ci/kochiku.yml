@@ -5,6 +5,8 @@ targets:
 - type: specs
   glob: spec/**/*_spec.rb
   workers: 8
+  queue_override: linux
 - type: jasmine
   glob: "spec/**/*.{js,coffee}"
   workers: 1
+  queue_override: linux

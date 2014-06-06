@@ -65,8 +65,8 @@ function run_jasmine() {
 }
 
 function prepare() {
-  install_elasticsearch && 
-  install_libarchive &&
+  install_elasticsearch 
+  install_libarchive
   install_bundler_if_needed &&
   update_gems_if_needed &&
   prepare_database
@@ -75,6 +75,7 @@ function prepare() {
 prepare
 start_elasticsearch
 
+set -ex
 case "${TEST_RUNNER}" in
   jasmine)
     run_jasmine
