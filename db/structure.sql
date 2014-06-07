@@ -236,7 +236,8 @@ CREATE TABLE issues (
     kind integer,
     status integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    subscribed_emails text
 );
 
 
@@ -1343,3 +1344,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140523201654');
 INSERT INTO schema_migrations (version) VALUES ('20140523201726');
 
 INSERT INTO schema_migrations (version) VALUES ('20140531020536');
+
+INSERT INTO schema_migrations (version) VALUES ('20140606111509');

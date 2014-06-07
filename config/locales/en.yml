@@ -82,7 +82,7 @@ en:
       inclusion: not acceptable
       incorrect_type: incorrect type
       invalid: invalid
-      invalid_email: not a valid email address
+      invalid_email: "%{email} is not a valid email address"
       less_than: must be less than %{count}
       less_than_or_equal_to: must be less than or equal to %{count}
       not_a_number: not a number

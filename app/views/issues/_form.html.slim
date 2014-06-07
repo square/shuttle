@@ -20,11 +20,6 @@
         ul
           - issue.errors.full_messages.each do |msg|
             li = msg
-  - unless issue.new_record?
-    .control-group
-      = f.label :status, class: 'control-label'
-      .controls
-        = f.select :status, t('models.issue.status').to_a.map(&:reverse)
   .control-group
     = f.label :summary, class: 'control-label'
     .controls
@@ -41,6 +36,15 @@
     = f.label :description, class: 'control-label'
     .controls
       = f.text_area :description
+  .control-group
+    = f.label :subscribed_emails, class: 'control-label'
+    .controls
+      = f.text_field :subscribed_emails, value: issue.subscribed_emails.join(", "), placeholder: "person1@example.com, person2@example.com"
+  - unless issue.new_record?
+    .control-group
+      = f.label :status, class: 'control-label'
+      .controls
+        = f.select :status, t('models.issue.status').to_a.map(&:reverse)
   .control-group
     .controls
       = f.submit

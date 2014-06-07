@@ -42,39 +42,48 @@ describe IssuesController do
     subject { xhr :post, :create, params }
 
     context "with valid issue arguments" do
-      let(:extra_params) { {issue: { summary: "this is a unique summary", description: "my description", priority: 1, kind: 1 } } }
+      [ { issue: { summary: "this is a unique summary", description: "my description", priority: 1, kind: 1, subscribed_emails: "a@b.com, c@d.com, a@b.com" } },
+        { issue: { summary: "this is a unique summary", description: "my description", priority: 1, kind: 1 } }
+      ].each do |extra_params|
+        let(:extra_params) { extra_params }
 
-      it "creates the issue; renders javascript code to replace the #issues that includes the new issue; and response doesn't include errors; sends issue_created email" do
-        expect(Issue.count).to eql(0)
-        subject
-        expect(Issue.count).to eql(1)
-        issue = Issue.last
-        expect(issue.summary).to eql("this is a unique summary")
-        expect(issue.description).to eql("my description")
-        expect(issue.status).to eql(Issue::Status::OPEN)
-        expect(issue.translation_id).to eql(@translation.id)
+        it "creates the issue; renders javascript code to replace the #issues that includes the new issue; and response doesn't include errors; sends issue_created email" do
+          expect(Issue.count).to eql(0)
+          subject
+          expect(Issue.count).to eql(1)
+          issue = Issue.last
+          expect(issue.summary).to eql("this is a unique summary")
+          expect(issue.description).to eql("my description")
+          expect(issue.status).to eql(Issue::Status::OPEN)
+          expect(issue.translation_id).to eql(@translation.id)
 
-        expect(response).to be_success
-        expect(response.body).to_not include("Errors:")
-        expect(response.body).to include("$('#issues').replaceWith")
-        expect(response.body).to include("id=\\\"issues\\\"")
-        expect(response.body).to include("id=\\\"issue-#{issue.id}\\\"")
+          expect(response).to be_success
+          expect(response.body).to_not include("Errors:")
+          expect(response.body).to include("$('#issues').replaceWith")
+          expect(response.body).to include("id=\\\"issues\\\"")
+          expect(response.body).to include("id=\\\"issue-#{issue.id}\\\"")
 
-        expect(ActionMailer::Base.deliveries.size).to eql(1)
-        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: this is a unique summary")
+          expect(ActionMailer::Base.deliveries.size).to eql(1)
+          expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: this is a unique summary")
+        end
       end
     end
 
     context "with invalid issue arguments" do
-      let(:extra_params) { { issue: { summary: "some fake summary" } } }
+      let(:extra_params) { { issue: { subscribed_emails: "a@b.com,  a@b.com  ,  abc xyz, abc@abc, abc.com" } } }
 
       it "doesn't create an issue; response includes the errors; doesn't send an email" do
         subject
         expect(Issue.count).to eql(0)
         expect(response).to be_success
         expect(response.body).to include("Errors:")
+        expect(response.body).to include('Summary can’t be blank')
         expect(response.body).to include('Description can’t be blank')
-
+        expect(response.body).to include('Priority not a number')
+        expect(response.body).to include('Kind not a number')
+        expect(response.body).to include('Subscribed email abc xyz is not a valid email address')
+        expect(response.body).to include('Subscribed email abc@abc is not a valid email address')
+        expect(response.body).to include('Subscribed email abc.com is not a valid email address')
         expect(ActionMailer::Base.deliveries.size).to eql(0)
       end
     end
@@ -89,25 +98,30 @@ describe IssuesController do
     subject { xhr :patch, :update, params }
 
     context "with valid issue arguments" do
-      let(:extra_params) { { id: @issue.id, issue: { summary: "updated summary" } } }
+      let(:extra_params) { { id: @issue.id, issue: { summary: "this is a unique summary updated", description: "my description updated", priority: 2, kind: 2, status: Issue::Status::RESOLVED, subscribed_emails: "a@b.com, c@d.com" } } }
 
       it "updates the issue; renders javascript code to replace the updated #issue-someID; and response doesn't include errors; sends issue_updated email" do
         subject
         @issue.reload
         expect(Issue.count).to eql(1)
-        expect(@issue.summary).to eql("updated summary")
+        expect(@issue.summary).to eql("this is a unique summary updated")
+        expect(@issue.description).to eql("my description updated")
+        expect(@issue.priority).to eql(2)
+        expect(@issue.kind).to eql(2)
+        expect(@issue.status).to eql(Issue::Status::RESOLVED)
+        expect(@issue.subscribed_emails).to eql(%w(a@b.com c@d.com))
 
         expect(response).to be_success
         expect(response.body).to_not include("Errors:")
         expect(response.body).to include("$('#issues #issue-wrapper-#{@issue.id}').replaceWith")
 
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: updated summary")
+        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: this is a unique summary updated")
       end
     end
 
     context "with invalid issue arguments" do
-      let(:extra_params) { { id: @issue.id, issue: { status: "wrong status"} } }
+      let(:extra_params) { { id: @issue.id, issue: { status: "wrong status", subscribed_emails: "xyz" } } }
 
       it "doesn't update an issue; response includes the errors; doesn't send an email" do
         subject
@@ -118,6 +132,7 @@ describe IssuesController do
         expect(response).to be_success
         expect(response.body).to include("Errors:")
         expect(response.body).to include('Status not a number')
+        expect(response.body).to include('Subscribed email xyz is not a valid email address')
 
         expect(ActionMailer::Base.deliveries.size).to eql(0)
       end

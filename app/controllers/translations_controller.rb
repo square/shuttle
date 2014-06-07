@@ -317,7 +317,7 @@ class TranslationsController < ApplicationController
   end
 
   def find_issues
-    @issues = @translation.issues.includes(:user, comments: :user)
+    @issues = @translation.issues.includes(:user, comments: :user).order('issues.created_at DESC')
     @issue = Issue.new
   end
 

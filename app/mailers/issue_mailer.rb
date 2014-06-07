@@ -46,7 +46,6 @@ class IssueMailer < ActionMailer::Base
     @project = @key.project
 
     @translatable_fields = %w(priority kind status)
-    @fields_to_skip = %w(created_at updated_at)
 
     mail to: related_peoples_emails(@issue, @translation),
          subject: t('mailer.issue.issue_updated.subject', name: @issue.updater.name, summary: truncate(@issue.summary, length: 50, escape: false))
@@ -61,11 +60,15 @@ class IssueMailer < ActionMailer::Base
   # @return [Array<String>] Array of emails of people who are associated with this issue.
 
   def related_peoples_emails(issue, translation)
+    last_commit = translation.key.commits.last
+
     emails = [Shuttle::Configuration.mailer.translators_list,
               issue.user.try!(:email),
               issue.updater.try!(:email),
-              translation.key.commits.last.try!(:user).try!(:email)] +
-             issue.comments.includes(:user).map { |comment| comment.user.try!(:email) }
+              last_commit.try!(:user).try!(:email),
+              last_commit.try!(:author_email)] +
+         issue.subscribed_emails +
+         issue.comments.includes(:user).map { |comment| comment.user.try!(:email) }
 
     emails.compact.uniq
   end

@@ -35,6 +35,11 @@
       = issue.description_was
   .control-group
     label.control-label
+      | Subscribed Emails
+    .controls
+      = issue.subscribed_emails_was.blank? ? 'None' : issue.subscribed_emails_was.join(", ")
+  .control-group
+    label.control-label
       | Reporter
     .controls
       = issue.user_name

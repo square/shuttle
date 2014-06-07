@@ -12,19 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# This observer on the {Issue} model.
-#
-# 1. Sends an email to relevant people alerting them of a new issue.
-# 2. Sends an email to relevant people alerting them of an updated issue.
-
-class IssueObserver < ActiveRecord::Observer
-  def after_create(issue)
-    IssueMailer.issue_created(issue).deliver
+class AddSubscribedEmailsFieldToIssues < ActiveRecord::Migration
+  def up
+    execute "ALTER TABLE issues ADD COLUMN subscribed_emails TEXT"
   end
 
-  def after_update(issue)
-    if (issue.changed - Issue::SKIPPED_FIELDS_FOR_EMAIL_ON_UPDATE).present?
-      IssueMailer.issue_updated(issue).deliver
-    end
+  def down
+    execute "ALTER TABLE issues DROP COLUMN subscribed_emails"
   end
 end

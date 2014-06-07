@@ -30,13 +30,14 @@
 # Properties
 # ==========
 #
-# |               |                                                                                                                     |
-# |:--------------|:--------------------------------------------------------------------------------------------------------------------|
-# | `summary`     | A brief summary of the issue.                                                                                       |
-# | `description` | Detailed description of the issue.                                                                                  |
-# | `priority`    | An integer in range [-1..3] that represent the priority of the issue.                                               |
-# | `kind`        | An integer in range [1..6] that represents the kind of the issue.                                                   |
-# | `status`      | An integer in range [1..4] that represents the state of the issue. (Ex: 1 represents 'Open'). Set to 1 on creation. |
+# |                     |                                                                                                                     |
+# |:--------------------|:--------------------------------------------------------------------------------------------------------------------|
+# | `summary`           | A brief summary of the issue.                                                                                       |
+# | `description`       | Detailed description of the issue.                                                                                  |
+# | `priority`          | An integer in range [-1..3] that represent the priority of the issue.                                               |
+# | `kind`              | An integer in range [1..6] that represents the kind of the issue.                                                   |
+# | `status`            | An integer in range [1..4] that represents the state of the issue. (Ex: 1 represents 'Open'). Set to 1 on creation. |
+# | `subscribed_emails` | An array email addresses to notify after an issue is created or updated.                                            |
 
 class Issue < ActiveRecord::Base
 
@@ -46,6 +47,8 @@ class Issue < ActiveRecord::Base
     RESOLVED = 3
     ICEBOX = 4
   end
+
+  SKIPPED_FIELDS_FOR_EMAIL_ON_UPDATE = %w(created_at updated_at)
 
   belongs_to :translation, inverse_of: :issues
   belongs_to :user, inverse_of: :issues
@@ -61,6 +64,33 @@ class Issue < ActiveRecord::Base
   validates :status, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 4}
 
   before_validation(on: :create) { self.status = Status::OPEN }
+
+  # ===== START subscribed_emails =====
+  serialize :subscribed_emails, Array
+  validate :subscribed_emails_format
+
+  def subscribed_emails=(emails)
+    if !emails
+      emails = []
+    elsif emails.is_a?(String)
+      emails = emails.split(",")
+    end
+    emails = emails.map(&:strip).map(&:presence).compact.uniq
+    write_attribute(:subscribed_emails, emails)
+  end
+
+  def subscribed_emails_format
+    if subscribed_emails
+      subscribed_emails.each do |email|
+        unless email =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i
+          errors.add(:subscribed_email, I18n.t('errors.messages.invalid_email', email: email))
+        end
+      end
+    end
+  end
+
+  private :subscribed_emails_format
+  # ===== END subscribed_emails =====
 
   def user_name
     user.try!(:name) || t('models.issue.unknown_user')

@@ -44,10 +44,15 @@ class CommentMailer < ActionMailer::Base
   # @return [Array<String>] Array of emails of people who are associated with this comment.
 
   def related_peoples_emails(comment, issue, translation)
+    last_commit = translation.key.commits.last
+
     emails = [Shuttle::Configuration.mailer.translators_list,
               comment.user.try!(:email),
               issue.user.try!(:email),
-              issue.updater.try!(:email)] +
+              issue.updater.try!(:email),
+              last_commit.try!(:user).try!(:email),
+              last_commit.try!(:author_email)] +
+        issue.subscribed_emails +
         issue.comments.includes(:user).map { |comment| comment.user.try!(:email) }
 
     emails.compact.uniq
