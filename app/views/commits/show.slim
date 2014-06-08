@@ -45,7 +45,11 @@
         .control-group
           = f.label :description, class: 'control-label'
           .controls
-            = f.text_area :description, rows: 7, disabled: (true unless current_user.monitor?)
+            = f.text_area :description, rows: 7, disabled: (true unless current_user.monitor?), \
+                          placeholder: 'Short description or link to a JIRA ticket', \ 
+                          class: 'tooltip-parent', :'data-tooltip' => '#description_tooltip'
+            .tooltip#description_tooltip
+              | Consider adding a link to your JIRA ticket or a short description
 
         .control-group
           .controls
