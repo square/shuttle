@@ -28,5 +28,5 @@
             .control-group
               = f.label :description, class: 'control-label'
               .controls
-                = f.text_area :description, rows: 7
+                = f.text_area :description, rows: 7, placeholder: 'Short description or link to a JIRA ticket'
             = f.submit class: 'primary'

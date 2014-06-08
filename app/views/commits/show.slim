@@ -45,7 +45,7 @@
         .control-group
           = f.label :description, class: 'control-label'
           .controls
-            = f.text_area :description, rows: 7, disabled: (true unless current_user.monitor?)
+            = f.text_area :description, rows: 7, disabled: (true unless current_user.monitor?), placeholder: 'Short description or link to a JIRA ticket'
 
         .control-group
           .controls
