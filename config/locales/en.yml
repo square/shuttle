@@ -208,7 +208,7 @@ en:
     issue:
       unknown_user: "Unknown User"
       priority:
-        -1: Unprioritized
+        none: "Unprioritized"
         0: P0 (Show Stopper)
         1: P1 (Critical)
         2: P2 (Default)

@@ -25,38 +25,49 @@ describe Issue do
       @issue = FactoryGirl.build(:issue, user: @user, translation: @translation)
     end
 
-    it "should not allow priority less than -1" do
-      @issue.priority = -2
-      expect(@issue).to_not be_valid
+    context "[priority]" do
+      it "should not allow priority less than 0" do
+        @issue.priority = -1
+        expect(@issue).to_not be_valid
+      end
+
+      it "should not allow priority greater than 3" do
+        @issue.priority = 4
+        expect(@issue).to_not be_valid
+      end
+
+      it "should allow priority nil" do
+        @issue.priority = nil
+        expect(@issue).to be_valid
+      end
     end
 
-    it "should not allow priority greater than 3" do
-      @issue.priority = 4
-      expect(@issue).to_not be_valid
+    context "[kind]" do
+      it "should not allow kind less than 1" do
+        @issue.kind = 0
+        expect(@issue).to_not be_valid
+      end
+
+      it "should not allow kind greater than 6" do
+        @issue.kind = 7
+        expect(@issue).to_not be_valid
+      end
     end
 
-    it "should not allow kind less than 1" do
-      @issue.kind = 0
-      expect(@issue).to_not be_valid
-    end
+    context "[user]" do
+      it "should validate user on create, should have a nil user_nil if user is deleted and should not validate user on update" do
+        @issue.user_id = nil
+        expect(@issue).to_not be_valid
+        @issue.user = @user
+        @issue.save
 
-    it "should not allow kind greater than 6" do
-      @issue.kind = 7
-      expect(@issue).to_not be_valid
-    end
+        @user.destroy
+        @issue.reload
+        expect(@issue.user_id).to be_nil
 
-    it "should validate user on create, should have a nil user_nil if user is deleted and should not validate user on update" do
-      @issue.user_id = nil
-      expect(@issue).to_not be_valid
-      @issue.user = @user
-      @issue.save
-
-      @user.destroy
-      @issue.reload
-      expect(@issue.user_id).to be_nil
-
-      @issue.summary += "test"
-      expect(@issue).to be_valid
+        @issue.summary += "test"
+        expect(@issue).to be_valid
+      end
     end
 
     context "[subscribed_emails]" do

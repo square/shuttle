@@ -42,8 +42,10 @@ describe IssuesController do
     subject { xhr :post, :create, params }
 
     context "with valid issue arguments" do
-      [ { issue: { summary: "this is a unique summary", description: "my description", priority: 1, kind: 1, subscribed_emails: "a@b.com, c@d.com, a@b.com" } },
-        { issue: { summary: "this is a unique summary", description: "my description", priority: 1, kind: 1 } }
+      [ { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: 1, subscribed_emails: "a@b.com, c@d.com, a@b.com" } },
+        { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: nil, subscribed_emails: "" } },
+        { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: '' } },
+        { issue: { summary: "this is a unique summary", description: "my description", kind: 1 } }
       ].each do |extra_params|
         let(:extra_params) { extra_params }
 
@@ -70,7 +72,7 @@ describe IssuesController do
     end
 
     context "with invalid issue arguments" do
-      let(:extra_params) { { issue: { subscribed_emails: "a@b.com,  a@b.com  ,  abc xyz, abc@abc, abc.com" } } }
+      let(:extra_params) { { issue: { subscribed_emails: "a@b.com,  a@b.com  ,  abc xyz, abc@abc, abc.com", priority: 30 } } }
 
       it "doesn't create an issue; response includes the errors; doesn't send an email" do
         subject
@@ -79,7 +81,7 @@ describe IssuesController do
         expect(response.body).to include("Errors:")
         expect(response.body).to include('Summary can’t be blank')
         expect(response.body).to include('Description can’t be blank')
-        expect(response.body).to include('Priority not a number')
+        expect(response.body).to include('Priority must be less than or equal to 3')
         expect(response.body).to include('Kind not a number')
         expect(response.body).to include('Subscribed email abc xyz is not a valid email address')
         expect(response.body).to include('Subscribed email abc@abc is not a valid email address')

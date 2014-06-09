@@ -59,7 +59,7 @@ class Issue < ActiveRecord::Base
   validates :updater, :translation, presence: true
   validates :summary, presence: true, length: { maximum: 200 }
   validates :description, presence: true, length: { maximum: 1000 }
-  validates :priority, numericality: {only_integer: true, greater_than_or_equal_to: -1, less_than_or_equal_to: 3}
+  validates :priority, numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3}, allow_nil: true
   validates :kind, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 6}
   validates :status, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 4}
 

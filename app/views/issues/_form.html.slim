@@ -27,7 +27,7 @@
   .control-group
     = f.label :priority, class: 'control-label'
     .controls
-      = f.select :priority, t('models.issue.priority').to_a.map(&:reverse)
+      = f.select :priority, t('models.issue.priority').to_a.map(&:reverse).tap{|outer_arr| outer_arr.each {|arr| arr[1] = nil if arr[1] == :none}}
   .control-group
     = f.label :kind, class: 'control-label'
     .controls

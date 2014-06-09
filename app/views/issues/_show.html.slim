@@ -22,7 +22,7 @@
     label.control-label
       | Priority
     .controls
-      = t("models.issue.priority")[issue.priority_was]
+      = t("models.issue.priority")[issue.priority_was ? issue.priority_was : :none]
   .control-group
     label.control-label
       | Kind
