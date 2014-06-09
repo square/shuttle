@@ -16,7 +16,7 @@ namespace :metrics do
   desc "Update metrics for the latest date"
   task update: :environment do
     date = (Date.parse(ENV['date']) rescue Date.yesterday).at_beginning_of_day
-    date_range = date..(date + 1.day)
+    date_range = date...(date + 1.day)
 
     commits_loaded = Commit.includes(:project).where(loaded_at: date_range)
     commits_completed = Commit.includes(:project).where(completed_at: date_range)

@@ -38,7 +38,7 @@ class StatsController < ApplicationController
     @num_commits_loaded  = decorate_num_commits_loaded(metrics)
 
     @num_words_created_per_language = decorate_num_words_created_per_language(this_week_metrics)
-    @num_words_completed_per_language = decorate_num_words_completed_per_language(last_week_metrics)
+    @num_words_completed_per_language = decorate_num_words_completed_per_language(this_week_metrics)
 
     @num_commits_loaded_this_week = this_week_metrics.
       reduce(0) { |total, m| total + m.num_commits_loaded }
