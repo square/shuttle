@@ -16,6 +16,8 @@
 
 class CommentMailer < ActionMailer::Base
   include ActionView::Helpers::TextHelper
+  helper CommentsHelper
+
   default from: Shuttle::Configuration.mailer.from
 
   # Notifies everybody who is associated with this comment that a new comment is created.
@@ -25,12 +27,8 @@ class CommentMailer < ActionMailer::Base
 
   def comment_created(comment)
     @comment = comment
-    @issue = @comment.issue
-    @translation = @issue.translation
-    @key = @translation.key
-    @project = @key.project
 
-    mail to: related_peoples_emails(@comment, @issue, @translation),
+    mail to: related_peoples_emails(@comment),
          subject: t('mailer.comment.comment_created.subject', name: @comment.user_name, content: truncate(@comment.content, length: 50, escape: false))
   end
 
@@ -39,12 +37,11 @@ class CommentMailer < ActionMailer::Base
   # Finds the emails of people who should be notified about the given comment.
   #
   # @param [Comment] comment
-  # @param [Issue] issue
-  # @param [Translation] translation
   # @return [Array<String>] Array of emails of people who are associated with this comment.
 
-  def related_peoples_emails(comment, issue, translation)
-    last_commit = translation.key.commits.last
+  def related_peoples_emails(comment)
+    issue = comment.issue
+    last_commit = issue.translation.key.commits.last
 
     emails = [Shuttle::Configuration.mailer.translators_list,
               comment.user.try!(:email),
