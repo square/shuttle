@@ -37,6 +37,7 @@
 #= require jquery-highlighter
 #= require jquery-prettyTextDiff
 #= require jquery-gallery
+#= require jquery-scrollTo
 #= require jquery-swipebox
 #= require purl
 #= require datepicker

@@ -95,4 +95,8 @@ class Issue < ActiveRecord::Base
   def user_name
     user.try!(:name) || t('models.issue.unknown_user')
   end
+
+  def self.order_default
+    order('issues.status ASC, issues.priority ASC, issues.created_at DESC')
+  end
 end

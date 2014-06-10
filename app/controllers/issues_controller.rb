@@ -48,8 +48,8 @@ class IssuesController < ApplicationController
 
   def create
     issue = current_user.issues.create(issue_params.merge(translation: @translation))
-    issues = @translation.issues.includes(:user, comments: :user).order('issues.created_at DESC')
-    render template: 'issues/create.js.erb', locals: {project: @project, key: @key, translation: @translation, issues: issues, issue: issue.errors.present? ? issue : Issue.new }
+    issues = @translation.issues.includes(:user, comments: :user).order_default
+    render template: 'issues/create.js.erb', locals: {project: @project, key: @key, translation: @translation, issues: issues, issue: issue.errors.present? ? issue : Issue.new, created_issue: issue.errors.present? ? nil : issue }
   end
 
   # Updates an Issue for a Translation.
