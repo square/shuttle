@@ -59,6 +59,8 @@
       ul
         li class=('active' if action_name == 'show')
           a href=project_commit_path(@project, @commit) Settings
+        li class=('active' if action_name == 'issues')
+          a href=issues_project_commit_path(@project, @commit) Issues
         - if current_user.monitor?
           li class=('active' if action_name == 'tools')
             a href=tools_project_commit_path(@project, @commit) Tools

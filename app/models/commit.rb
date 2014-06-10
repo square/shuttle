@@ -92,6 +92,7 @@ class Commit < ActiveRecord::Base
   has_many :translations, through: :keys
   has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
   has_many :blobs, through: :blobs_commits
+  has_many :issues, through: :translations
 
   include HasMetadataColumn
   has_metadata_column(

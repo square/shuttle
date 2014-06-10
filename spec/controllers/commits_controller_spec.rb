@@ -699,4 +699,28 @@ de:
       expect(response.bytes.to_a[1]).to eq(bom[1])
     end
   end
+
+  describe "#issues" do
+    render_views
+
+    before :each do
+      @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in @user
+    end
+
+    it "should return the issues" do
+      commit = FactoryGirl.create(:commit)
+      project = commit.project
+      key = FactoryGirl.create(:key, project: project)
+      commit.keys << key
+      translation = FactoryGirl.create(:translation, key: key)
+
+      issues = 3.times.map { FactoryGirl.create(:issue).tap{|issue| translation.issues << issue } }
+
+      get :issues, project_id: translation.key.project.to_param, id: commit.to_param, format: 'html'
+      expect(response).to be_ok
+      expect(response.body.to_s).to include(*issues.map{|issue| "#issue-wrapper-#{issue.id}"})
+    end
+  end
 end

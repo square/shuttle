@@ -20,13 +20,13 @@ class CommitsController < ApplicationController
   COMMIT_ATTRIBUTES = [:exported, :revision, :description, :due_date, :pull_request_url, :priority]
 
   before_filter :authenticate_user!, except: [:manifest, :localize]
-  before_filter :monitor_required, except: [:show, :search, :gallery, :manifest, :localize]
+  before_filter :monitor_required, except: [:show, :search, :gallery, :manifest, :localize, :issues]
   before_filter :admin_required, only: :clear
 
   before_filter :find_project
   before_filter :find_commit, except: [:create, :manifest, :localize]
 
-  respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy,
+  respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
                                   :import, :sync, :match, :redo, :clear, :recalculate, :ping_stash]
 
   # Renders JSON information about a Commit and its translation progress.
@@ -97,6 +97,26 @@ class CommitsController < ApplicationController
 
   def gallery
     respond_with @commit
+  end
+
+  # Renders information about the issues associated with the keys in this commit.
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:project_id/commits/:id/issues`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |              |                        |
+  # |:-------------|:-----------------------|
+  # | `project_id` | The slug of a Project. |
+  # | `id`         | The SHA of a Commit.   |
+
+  def issues
+    @presenter = CommitIssuesPresenter.new(@commit)
+    respond_with @presenter
   end
 
   # Renders a table displaying all keys belonging to a commit and a search bar that

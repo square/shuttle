@@ -4,6 +4,13 @@ $status-green: #40C20F;
 $status-blue: #66B2FF;
 $status-yellow: #E4DB00;
 
+.issue-status {
+  &.issue-status-1 { color: $status-red; }
+  &.issue-status-2 { color: $status-yellow; }
+  &.issue-status-3 { color: $status-green; }
+  &.issue-status-4 { color: $status-blue; }
+}
+
 #issues {
   padding-top: 30px;
   margin-top: 70px;
@@ -13,12 +20,7 @@ $status-yellow: #E4DB00;
   }
 
   .issue-wrapper {
-    .status {
-      &.status-1 { color: $status-red; }
-      &.status-2 { color: $status-yellow; }
-      &.status-3 { color: $status-green }
-      &.status-4 { color: $status-blue; }
-
+    .issue-status {
       padding: 0 5px;
     }
 
