@@ -13,8 +13,11 @@
 #    limitations under the License.
 
 # A presenter that handles the instance variables needed to populate the commits/issues page.
+# It loads everything lazily to minimize overhead of unused variables.
 
 class CommitIssuesPresenter
+
+  attr_reader :commit
 
   # Initializes an instance of the presenter class with the given {Commit}
   #   @param [Commit] commit The {Commit} about which the data will be presented.
@@ -53,5 +56,19 @@ class CommitIssuesPresenter
   def as_json(*args)
     { issues: issues.as_json(*args),
       status_counts: status_counts.as_json(*args) }
+  end
+
+  # This generates a label to be used for the tabs in the commit page.
+  # If there are pending issues associated with this commit, it will be shown in parenthesis.
+  #   @return [String] a string with pending issues count appended if there are any
+  def issues_label_with_pending_count
+    @_label ||= "ISSUES" + (pending_issues_count > 0 ? " (#{pending_issues_count})" : "")
+  end
+
+  private
+
+  #   @return [Fixnum] number of pending issues associated with this commit
+  def pending_issues_count
+    @_pending_issues_count ||= @commit.issues.pending.count
   end
 end

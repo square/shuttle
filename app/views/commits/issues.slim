@@ -26,12 +26,12 @@
 = render layout: 'commits/layout' do
   #issues-section
     legend Issues
-    - if @presenter.issues.present?
+    - if @commit_issues_presenter.issues.present?
       dl.issues-stats
         .dhead
           dt Status
           dt Count
-        - @presenter.status_counts.each do |status_details|
+        - @commit_issues_presenter.status_counts.each do |status_details|
           div
             dt class="issue-status issue-status-#{status_details[:status]}" = status_details[:status_desc]
             dd = status_details[:count]
@@ -44,7 +44,7 @@
             th.kind Kind
             th Summary
             th Date
-        - @presenter.issues.each do |issue|
+        - @commit_issues_presenter.issues.each do |issue|
           tr
             td class="issue-status issue-status-#{issue.status}" = t("models.issue.status")[issue.status]
             td = t("models.issue.priority")[issue.priority ? issue.priority : :none]

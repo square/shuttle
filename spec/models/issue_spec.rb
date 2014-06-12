@@ -152,4 +152,41 @@ describe Issue do
       expect(issue.status).to eql(Issue::Status::OPEN)
     end
   end
+
+  context "[scopes]" do
+    context "[pending]" do
+      context "#pending?" do
+        it "should be pending for an issue with status OPEN" do
+          expect(FactoryGirl.build(:issue, status: Issue::Status::OPEN).pending?).to be_true
+        end
+
+        it "should be pending for an issue with status IN PROGRESS" do
+          expect(FactoryGirl.build(:issue, status: Issue::Status::IN_PROGRESS).pending?).to be_true
+        end
+
+        it "should NOT be pending for an issue with status RESOLVED" do
+          expect(FactoryGirl.build(:issue, status: Issue::Status::RESOLVED).pending?).to be_false
+        end
+
+        it "should NOT be pending for an issue with status ICEBOX" do
+          expect(FactoryGirl.build(:issue, status: Issue::Status::ICEBOX).pending?).to be_false
+        end
+      end
+
+      context "Issue.pending" do
+        it "should return no issues if there are no pending issues" do
+          issue = FactoryGirl.create(:issue)
+          issue.update_attributes(status: Issue::Status::ICEBOX)
+          expect(Issue.pending).to be_blank
+        end
+
+        it "should return pending issues" do
+          issue = FactoryGirl.create(:issue)
+          issue.update_attributes(status: Issue::Status::ICEBOX)
+          pending_issue = FactoryGirl.create(:issue)
+          expect(Issue.pending.to_a).to eql([pending_issue])
+        end
+      end
+    end
+  end
 end

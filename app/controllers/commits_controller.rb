@@ -25,6 +25,7 @@ class CommitsController < ApplicationController
 
   before_filter :find_project
   before_filter :find_commit, except: [:create, :manifest, :localize]
+  before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
 
   respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
                                   :import, :sync, :match, :redo, :clear, :recalculate, :ping_stash]
@@ -115,8 +116,7 @@ class CommitsController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def issues
-    @presenter = CommitIssuesPresenter.new(@commit)
-    respond_with @presenter
+    respond_with @commit_issues_presenter
   end
 
   # Renders a table displaying all keys belonging to a commit and a search bar that
@@ -565,5 +565,9 @@ class CommitsController < ApplicationController
 
   def submitted_revision_key(project, revision)
     "submitted_revision:#{project.id}:#{revision}"
+  end
+
+  def set_commit_issues_presenter
+    @commit_issues_presenter ||= CommitIssuesPresenter.new(@commit)
   end
 end

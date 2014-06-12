@@ -65,6 +65,13 @@ class Issue < ActiveRecord::Base
 
   before_validation(on: :create) { self.status = Status::OPEN }
 
+  # ===== START SCOPES BY STATUS =====
+  scope :pending, -> { where("issues.status = ? OR issues.status = ?", Status::OPEN, Status::IN_PROGRESS) }
+  def pending?
+    status == Status::OPEN or status == Status::IN_PROGRESS
+  end
+  # ===== END SCOPES BY STATUS =====
+
   # ===== START subscribed_emails =====
   serialize :subscribed_emails, Array
   validate :subscribed_emails_format

@@ -61,6 +61,7 @@
 #= require infinite_scroll
 #= require live_update
 #= require smart_form
+#= require scroll_to_with_data_attrs
 #
 #= require_tree ../templates
 #= require_tree ./application
