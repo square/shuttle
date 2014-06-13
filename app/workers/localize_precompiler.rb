@@ -29,7 +29,7 @@ class LocalizePrecompiler
   def perform(commit_id)
     commit = Commit.find(commit_id)
     Shuttle::Redis.set key(commit), Compiler.new(commit).localize(force: true).io.read
-  rescue Compiler::CommitNotReadyError
+  rescue Compiler::CommitNotReadyError, Compiler::CommitLoadingError
     # the commit was probably "downgraded" from ready between when the job was
     # queued and when it was started. ignore.
   end
