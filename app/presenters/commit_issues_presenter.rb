@@ -41,11 +41,13 @@ class CommitIssuesPresenter
   # The issues eager loads necessary associations for performance.
   #   @return [Array<Hash>] an array of hashes that each include details mentioned above
   #
-  # Example: [{status: 1, status_desc: 'Open', count: 10}, {status: 2, status_desc: 'In Progress', count: 0}]
+  # @example
+  #   CommitIssuesPresenter.new(Commit.first).status_counts =>
+  #           [{status: 1, status_desc: 'Open', count: 10}, {status: 2, status_desc: 'In Progress', count: 0}, etc...]
 
   def status_counts
     return @status_counts if @status_counts
-    issues_grouped_by_status = @commit.issues.group('issues.status').select("count(issues.id) as count, issues.status")
+    issues_grouped_by_status = @commit.issues.group('issues.status').select("count(*) as count, issues.status")
     status_to_count_hsh = issues_grouped_by_status.reduce({}) {|hsh, issue_group| hsh[issue_group.status] = issue_group.count; hsh}
     @status_counts = I18n.t('models.issue.status').map { |status, status_desc| { status: status, status_desc: status_desc, count: (status_to_count_hsh[status] || 0) } }
   end

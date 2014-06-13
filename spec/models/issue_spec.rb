@@ -157,19 +157,19 @@ describe Issue do
     context "[pending]" do
       context "#pending?" do
         it "should be pending for an issue with status OPEN" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::OPEN).pending?).to be_true
+          expect(FactoryGirl.build(:issue, status: Issue::Status::OPEN)).to be_pending
         end
 
         it "should be pending for an issue with status IN PROGRESS" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::IN_PROGRESS).pending?).to be_true
+          expect(FactoryGirl.build(:issue, status: Issue::Status::IN_PROGRESS)).to be_pending
         end
 
         it "should NOT be pending for an issue with status RESOLVED" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::RESOLVED).pending?).to be_false
+          expect(FactoryGirl.build(:issue, status: Issue::Status::RESOLVED)).to_not be_pending
         end
 
         it "should NOT be pending for an issue with status ICEBOX" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::ICEBOX).pending?).to be_false
+          expect(FactoryGirl.build(:issue, status: Issue::Status::ICEBOX)).to_not be_pending
         end
       end
 

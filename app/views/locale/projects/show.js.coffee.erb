@@ -35,7 +35,7 @@ $(document).ready ->
     else
       new Flash('alert').text('Need to select a commit to view screenshots')
 
-  issues_link.click () ->
+  issues_link.click ->
     commit_sha = commit_select.val()
     if commit_sha
       window.open "/projects/<%= @project.to_param %>/commits/#{commit_sha}/issues"

@@ -66,7 +66,8 @@ class Issue < ActiveRecord::Base
   before_validation(on: :create) { self.status = Status::OPEN }
 
   # ===== START SCOPES BY STATUS =====
-  scope :pending, -> { where("issues.status = ? OR issues.status = ?", Status::OPEN, Status::IN_PROGRESS) }
+  scope :pending, -> { where(status: [Status::OPEN, Status::IN_PROGRESS]) }
+
   def pending?
     status == Status::OPEN or status == Status::IN_PROGRESS
   end

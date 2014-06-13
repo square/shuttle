@@ -974,6 +974,20 @@ CREATE INDEX issues_translation ON issues USING btree (translation_id);
 
 
 --
+-- Name: issues_translation_status; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX issues_translation_status ON issues USING btree (translation_id, status);
+
+
+--
+-- Name: issues_translation_status_priority_created_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX issues_translation_status_priority_created_at ON issues USING btree (translation_id, status, priority, created_at);
+
+
+--
 -- Name: issues_updater; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1346,3 +1360,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140523201726');
 INSERT INTO schema_migrations (version) VALUES ('20140531020536');
 
 INSERT INTO schema_migrations (version) VALUES ('20140606111509');
+
+INSERT INTO schema_migrations (version) VALUES ('20140613215228');
