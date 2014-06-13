@@ -38,7 +38,10 @@
   h6
     strong
       - if @commit.loading?
-        - current_status = "Loading With #{pluralize_with_delimiter @commit.import_batch_status.pending, 'Job'} Remaining" 
+        - if @commit.import_batch_status
+          - current_status = "Loading With #{pluralize_with_delimiter @commit.import_batch_status.pending, 'Job'} Remaining" 
+        - else
+          - current_status = "Hung (Loading, No Import Batch)"
       - else
         - current_status = (@commit.ready? ? 'Ready' : 'Translating')
       = "Currently #{current_status}"
