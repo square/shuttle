@@ -35,6 +35,8 @@ class CommitImporter
     force = options[:force] ? true : nil
     commit = Commit.find(commit_id)
     commit.import_strings(locale: locale, force: force)
+  rescue CommitNotFoundError
+    # commit no longer exists, fail silently
   end
 
   include SidekiqLocking
