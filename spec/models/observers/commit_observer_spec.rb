@@ -29,6 +29,7 @@ describe Commit do
     end
 
     it "should email if commit has import errors after submitting twice" do
+      Blob.delete_all
       user = FactoryGirl.create(:user)
       project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
 
