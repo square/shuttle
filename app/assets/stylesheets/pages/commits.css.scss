@@ -103,3 +103,24 @@ body.commits {
   }
 }
 
+#issues-section {
+  legend { margin-bottom: 20px; }
+  .no-issues-found { text-align: center; }
+  table.issues thead {
+    .status { width: 72px; }
+    .priority { width: 120px; }
+    .kind { width: 132px; }
+  }
+
+  dl.issues-stats {
+    max-width: 230px;
+    .dhead {
+      border-bottom: 1px solid $gray5;
+    }
+
+    dt, dd {
+      display: inline-block;
+      min-width: 100px;
+    }
+  }
+}

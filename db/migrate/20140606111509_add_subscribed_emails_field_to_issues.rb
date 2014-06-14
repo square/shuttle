@@ -12,11 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-set :output, 'log/whenever.log'
+class AddSubscribedEmailsFieldToIssues < ActiveRecord::Migration
+  def up
+    execute "ALTER TABLE issues ADD COLUMN subscribed_emails TEXT"
+  end
 
-every(30.minutes) { runner 'AutoImporter.perform_once' }
-
-every(:day, at: '12:00 am')  { rake 'metrics:update' }
-every(:minute) { rake 'touchdown:update' }
-
-every(:saturday, at: '12am') { rake 'maintenance:clean_old_commits' }
+  def down
+    execute "ALTER TABLE issues DROP COLUMN subscribed_emails"
+  end
+end

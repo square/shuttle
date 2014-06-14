@@ -1,0 +1,3 @@
+div#issue-notifications-on-translations-page-header
+  - if issues.any?(&:pending?)
+    = link_to "There are pending issues in this translation!", "#issues", "data-scroll-to" => "#issues", class: "has-pending-issues"

@@ -19,7 +19,6 @@ FactoryGirl.define do
     translation
     summary "MyString"
     description "MyText"
-    priority -1
     kind 1
   end
 end

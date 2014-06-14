@@ -16,6 +16,7 @@
 
 class IssueMailer < ActionMailer::Base
   include ActionView::Helpers::TextHelper
+  helper IssuesHelper
 
   default from: Shuttle::Configuration.mailer.from
 
@@ -30,7 +31,7 @@ class IssueMailer < ActionMailer::Base
     @key = @translation.key
     @project = @key.project
 
-    mail to: related_peoples_emails(@issue, @translation),
+    mail to: related_peoples_emails(@issue),
          subject: t('mailer.issue.issue_created.subject', name: @issue.user_name, summary: truncate(@issue.summary, length: 50, escape: false))
   end
 
@@ -41,14 +42,10 @@ class IssueMailer < ActionMailer::Base
 
   def issue_updated(issue)
     @issue = issue
-    @translation = @issue.translation
-    @key = @translation.key
-    @project = @key.project
 
     @translatable_fields = %w(priority kind status)
-    @fields_to_skip = %w(created_at updated_at)
 
-    mail to: related_peoples_emails(@issue, @translation),
+    mail to: related_peoples_emails(@issue),
          subject: t('mailer.issue.issue_updated.subject', name: @issue.updater.name, summary: truncate(@issue.summary, length: 50, escape: false))
   end
 
@@ -57,15 +54,18 @@ class IssueMailer < ActionMailer::Base
   # Finds the emails of people who should be notified about the given issue.
   #
   # @param [Issue] issue
-  # @param [Translation] translation
   # @return [Array<String>] Array of emails of people who are associated with this issue.
 
-  def related_peoples_emails(issue, translation)
+  def related_peoples_emails(issue)
+    last_commit = issue.translation.key.commits.last
+
     emails = [Shuttle::Configuration.mailer.translators_list,
               issue.user.try!(:email),
               issue.updater.try!(:email),
-              translation.key.commits.last.try!(:user).try!(:email)] +
-             issue.comments.includes(:user).map { |comment| comment.user.try!(:email) }
+              last_commit.try!(:user).try!(:email),
+              last_commit.try!(:author_email)] +
+         issue.subscribed_emails +
+         issue.comments.includes(:user).map { |comment| comment.user.try!(:email) }
 
     emails.compact.uniq
   end

@@ -12,11 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-set :output, 'log/whenever.log'
+# Helper methods that are related to Issues.
 
-every(30.minutes) { runner 'AutoImporter.perform_once' }
+module IssuesHelper
 
-every(:day, at: '12:00 am')  { rake 'metrics:update' }
-every(:minute) { rake 'touchdown:update' }
+  # The url to view an issue.
+  #
+  # @param [Issue] issue The issue of interest.
+  # @return [String] Url of the issue in the project_key_translation page, with the section identifier.
 
-every(:saturday, at: '12am') { rake 'maintenance:clean_old_commits' }
+  def issue_url(issue)
+    raise ArgumentError, "Issue must be provided" unless issue.is_a?(Issue)
+    project_key_translation_url(issue.translation.key.project, issue.translation.key, issue.translation) + "#issue-wrapper-#{issue.id}"
+  end
+end

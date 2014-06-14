@@ -92,6 +92,7 @@ class Commit < ActiveRecord::Base
   has_many :translations, through: :keys
   has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
   has_many :blobs, through: :blobs_commits
+  has_many :issues, through: :translations
 
   include HasMetadataColumn
   has_metadata_column(
@@ -158,7 +159,6 @@ class Commit < ActiveRecord::Base
   before_create :set_author
   after_commit :initial_import, on: :create
   after_commit :compile_and_cache_or_clear, on: :update
-  after_update :update_touchdown_branch
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -513,10 +513,6 @@ class Commit < ActiveRecord::Base
         ManifestPrecompiler.perform_once id, format
       end
     end
-  end
-
-  def update_touchdown_branch
-    TouchdownBranchUpdater.perform_async(project_id, id)# if ready_changed?
   end
 
   def import_blob(path, blob, options={})

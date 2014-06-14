@@ -3,7 +3,7 @@
 Changes:
 
 <% @issue.changes.each do |field, values| %>
-<% unless @fields_to_skip.include?(field) %>
+<% unless Issue::SKIPPED_FIELDS_FOR_EMAIL_ON_UPDATE.include?(field) %>
 <%= field.humanize %>:
     Was: <%= @translatable_fields.include?(field) ? t("models.issue.#{field}")[values.first] : values.first %>
 
@@ -13,7 +13,7 @@ Changes:
 <% end %>
 <% end %>
 
-View the issue: <%= project_key_translation_url(@project, @key, @translation) + "#issue-wrapper-#{@issue.id}" %>
+View the issue: <%= issue_url(@issue) %>
 
 Sincerely,
 The Shuttle Automated Mailer

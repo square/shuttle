@@ -12,11 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-set :output, 'log/whenever.log'
+# Helper methods that are related to Comments.
 
-every(30.minutes) { runner 'AutoImporter.perform_once' }
+module CommentsHelper
+  # The url to view a comment.
+  #
+  # @param [Comment] comment The comment of interest.
+  # @return [String] Url of the comment in the project_key_translation page, with the section identifier.
 
-every(:day, at: '12:00 am')  { rake 'metrics:update' }
-every(:minute) { rake 'touchdown:update' }
-
-every(:saturday, at: '12am') { rake 'maintenance:clean_old_commits' }
+  def comment_url(comment)
+    raise ArgumentError, "Comment must be provided" unless comment.is_a?(Comment)
+    project_key_translation_url(comment.issue.translation.key.project, comment.issue.translation.key, comment.issue.translation) + "#comment-#{comment.id}"
+  end
+end

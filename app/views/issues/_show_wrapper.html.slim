@@ -18,7 +18,7 @@
   .top-bar
     strong.pull-right
       | Status:
-      span class="status status-#{issue.status}"
+      span class="issue-status issue-status-#{issue.status}"
         = t("models.issue.status")[issue.status]
     .info
       strong = issue.user_name

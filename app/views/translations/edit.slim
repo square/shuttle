@@ -29,6 +29,7 @@
     | #{@translation.key.project.name}
     strong &nbsp;>&nbsp;
     | Translation #{@translation.id}
+  = render partial: 'issues/notifications_on_translation_page_header', locals: { issues: @issues }
 
 
 hr.divider

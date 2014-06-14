@@ -48,8 +48,8 @@ class IssuesController < ApplicationController
 
   def create
     issue = current_user.issues.create(issue_params.merge(translation: @translation))
-    issues = @translation.issues.includes(:user, comments: :user)
-    render template: 'issues/create.js.erb', locals: {project: @project, key: @key, translation: @translation, issues: issues, issue: issue.errors.present? ? issue : Issue.new }
+    issues = @translation.issues.includes(:user, comments: :user).order_default
+    render template: 'issues/create.js.erb', locals: {project: @project, key: @key, translation: @translation, issues: issues, issue: issue.errors.present? ? issue : Issue.new, created_issue: issue.errors.present? ? nil : issue }
   end
 
   # Updates an Issue for a Translation.
@@ -97,7 +97,7 @@ class IssuesController < ApplicationController
   end
 
   def issue_params
-    params.require(:issue).permit(:summary, :priority, :kind, :description, :status).merge(updater_id: current_user.id)
+    params.require(:issue).permit(:summary, :priority, :kind, :description, :status, :subscribed_emails).merge(updater_id: current_user.id)
   end
 
 end

@@ -12,22 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Periodic Sidekiq worker that updates the touchdown branch for a given
-# {Project}.
-
-class TouchdownBranchUpdater
-  include Sidekiq::Worker
-  sidekiq_options queue: :low
-
-  # Runs this worker.
-  #
-  # @param [Fixnum] project_id The ID of a Project.
-
-  def perform(project_id, commit_id)
-    commit = Commit.find_by_id(commit_id)
-    logger.info "[TouchdownBranchUpdater] Started for project #{project_id} due to commit #{commit_id} (#{commit.try!(:revision)})"
-    Project.find_by_id(project_id).try!(:update_touchdown_branch)
-  end
-
-  include SidekiqLocking
-end
+$(document).ready ->
+  # A simple hook that hooks 'data-scroll-to' attr to jquery-scrollTo plugin.
+  $('[data-scroll-to]').click (event) ->
+    $(window).scrollTo($(this).attr('data-scroll-to'), 300);
+    # Cancel event
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    return false;
