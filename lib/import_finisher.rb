@@ -15,7 +15,7 @@ class ImportFinisher
     blob_shas = commit.blobs_commits.pluck(:sha_raw)
     Blob.where(project_id: commit.project_id, sha_raw: blob_shas, errored: false).update_all parsed: true
 
-    commit.clear_import_errors_in_redis
+    commit.clear_import_errors_in_redis if commit.import_errors.present? && commit.import_errors == commit.import_errors_in_redis
 
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
