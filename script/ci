@@ -5,6 +5,10 @@ export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
 
+function install_tidy() {
+  yes | sudo yum install tidy
+}
+
 function install_libarchive() {
   curl -O "http://www.libarchive.org/downloads/libarchive-3.1.2.tar.gz"
   tar -zxf libarchive-3.1.2.tar.gz
@@ -65,6 +69,7 @@ function run_jasmine() {
 }
 
 function prepare() {
+  install_tidy
   install_elasticsearch 
   install_libarchive
   install_bundler_if_needed &&
