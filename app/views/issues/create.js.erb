@@ -15,3 +15,7 @@
 %>
 
 $('#issues').replaceWith('<%=j render partial: 'index', locals: {project: project, key: key, translation: translation, issues: issues, issue: issue} %>');
+
+<% if created_issue %>
+    $(window).scrollTo('#issue-wrapper-<%=created_issue.id%>', 500);
+<% end %>

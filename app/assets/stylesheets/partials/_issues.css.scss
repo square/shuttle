@@ -1,8 +1,25 @@
 // VARS
-$status-red: #FF0000;
-$status-green: #40C20F;
-$status-blue: #66B2FF;
-$status-yellow: #E4DB00;
+$issue-status-red: #FF0000;
+$issue-status-green: #40C20F;
+$issue-status-blue: #66B2FF;
+$issue-status-yellow: #E4DB00;
+
+.issue-status {
+  &.issue-status-1 { color: $issue-status-red; }
+  &.issue-status-2 { color: $issue-status-yellow; }
+  &.issue-status-3 { color: $issue-status-green; }
+  &.issue-status-4 { color: $issue-status-blue; }
+}
+
+#issue-notifications-on-translations-page-header {
+  display:inline-block;
+  float: right;
+  padding-top:10px;
+
+  .has-pending-issues {
+    color: $issue-status-red;
+  }
+}
 
 #issues {
   padding-top: 30px;
@@ -13,12 +30,7 @@ $status-yellow: #E4DB00;
   }
 
   .issue-wrapper {
-    .status {
-      &.status-1 { color: $status-red; }
-      &.status-2 { color: $status-yellow; }
-      &.status-3 { color: $status-green }
-      &.status-4 { color: $status-blue; }
-
+    .issue-status {
       padding: 0 5px;
     }
 

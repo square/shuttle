@@ -22,7 +22,7 @@
     label.control-label
       | Priority
     .controls
-      = t("models.issue.priority")[issue.priority_was]
+      = t("models.issue.priority")[issue.priority_was ? issue.priority_was : :none]
   .control-group
     label.control-label
       | Kind
@@ -33,6 +33,11 @@
       | Description
     .controls
       = issue.description_was
+  .control-group
+    label.control-label
+      | Subscribed Emails
+    .controls
+      = issue.subscribed_emails_was.blank? ? 'None' : issue.subscribed_emails_was.join(", ")
   .control-group
     label.control-label
       | Reporter

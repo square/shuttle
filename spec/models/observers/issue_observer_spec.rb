@@ -17,45 +17,48 @@ require 'spec_helper'
 describe Issue do
   context "[email notifications]" do
 
-    before(:each) do
-      @user = FactoryGirl.create(:user)
+    before (:each) do
+      @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
+      @updater = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
       @translation = FactoryGirl.create(:translation)
-
+      FactoryGirl.create(:commit, user: FactoryGirl.create(:user), author_email: "commitauthor@test.com").keys << @translation.key # associate the translation with a commit through key
       ActionMailer::Base.deliveries.clear
-      @issue = FactoryGirl.create(:issue, translation: @translation, user: @user, updater: @user, summary: 'Some fake issue')
     end
 
     context "after_create" do
-      it "should send an email to the right people" do
+      it "sends an email when an issue is created" do
+        @issue = FactoryGirl.create(:issue, user: @user, updater: @updater, translation: @translation, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary")
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-        email = ActionMailer::Base.deliveries.first
-        expected_email_list = [Shuttle::Configuration.mailer.translators_list, @user.email]
-        expect(email.to.sort).to eql(expected_email_list.sort)
-        expect(email.subject).to eql("[Shuttle] Sancho Sample reported a new issue. Issue Summary: Some fake issue")
-        expect(email.body.to_s).to include("reported a new issue")
-        expect(email.body.to_s).to include("http://test.host/projects/#{@translation.key.project.to_param}/keys/#{@translation.key.to_param}/translations/#{@translation.to_param}#issue-wrapper-#{@issue.id}")
+        mail = ActionMailer::Base.deliveries.first
+        expected_email_list = [Shuttle::Configuration.mailer.translators_list, @user.email, @updater.email, @translation.key.commits.last.user.email, 'a@test.com', 'b@test.com', 'commitauthor@test.com']
+        expect(mail.to.sort).to eql(expected_email_list.sort)
+        expect(mail.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: my summary")
+        expect(mail.body.to_s).to include("reported a new issue")
+        expect(mail.body.to_s).to include("http://test.host/projects/#{@translation.key.project.to_param}/keys/#{@translation.key.to_param}/translations/#{@translation.to_param}#issue-wrapper-#{@issue.id}")
       end
     end
 
     context "after_update" do
-      before(:each) do
+      it "sends an email when an issue is updated" do
+        @issue = FactoryGirl.create(:issue, user: @user, updater: @updater, translation: @translation, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary")
+        2.times { FactoryGirl.create(:comment, issue: @issue) }
         ActionMailer::Base.deliveries.clear
-      end
-
-      it "should send an email" do
-        @issue.update_attributes(status: 2)
+        @issue.update_attributes(status: Issue::Status::IN_PROGRESS, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com, c@test.com")
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-
-        email = ActionMailer::Base.deliveries.first
-        expect(email.subject).to eql("[Shuttle] Sancho Sample updated an issue. Issue Summary: Some fake issue")
-        expect(email.body.to_s).to include("updated an issue")
-        expect(email.body.to_s).to include("Was: Open")
-        expect(email.body.to_s).to include("Is: In progress")
-        expect(email.body.to_s).to include("http://test.host/projects/#{@translation.key.project.to_param}/keys/#{@translation.key.to_param}/translations/#{@translation.to_param}#issue-wrapper-#{@issue.id}")
+        mail = ActionMailer::Base.deliveries.first
+        expected_email_list = [Shuttle::Configuration.mailer.translators_list, @user.email, @updater.email, @translation.key.commits.last.user.email, 'a@test.com', 'b@test.com', 'c@test.com', 'commitauthor@test.com'] + @issue.comments.includes(:user).map { |c| c.user.email }
+        expect(mail.to.sort).to eql(expected_email_list.sort)
+        expect(mail.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: my summary")
+        expect(mail.body.to_s).to include("updated an issue")
+        expect(mail.body.to_s).to include("Was: Open")
+        expect(mail.body.to_s).to include("Is: In progress")
+        expect(mail.body.to_s).to include("http://test.host/projects/#{@translation.key.project.to_param}/keys/#{@translation.key.to_param}/translations/#{@translation.to_param}#issue-wrapper-#{@issue.id}")
       end
 
       it "should NOT send an email if nothing was changed" do
-        @issue.update_attributes(status: @issue.status)
+        issue = FactoryGirl.create(:issue, user: @user, updater: @updater, translation: @translation, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary")
+        ActionMailer::Base.deliveries.clear
+        issue.update_attributes(status: issue.status)
         expect(ActionMailer::Base.deliveries.size).to eql(0)
       end
     end

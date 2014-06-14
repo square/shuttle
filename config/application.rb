@@ -34,6 +34,7 @@ module Shuttle
     config.autoload_paths << config.root.join('app', 'models', 'concerns') #RAILS4 remove
     config.autoload_paths << config.root.join('app', 'controllers', 'concerns') #RAILS4 remove
     config.autoload_paths << config.root.join('app', 'models', 'observers')
+    config.autoload_paths << config.root.join('app', 'presenters')
 
     # Activate observers that should always be running.
     config.active_record.observers     = :comment_observer, :commit_observer, :issue_observer, :translation_observer

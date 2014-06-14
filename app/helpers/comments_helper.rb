@@ -12,13 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
-  factory :issue do
-    user
-    association :updater, factory: :user
-    translation
-    summary "MyString"
-    description "MyText"
-    kind 1
+# Helper methods that are related to Comments.
+
+module CommentsHelper
+  # The url to view a comment.
+  #
+  # @param [Comment] comment The comment of interest.
+  # @return [String] Url of the comment in the project_key_translation page, with the section identifier.
+
+  def comment_url(comment)
+    raise ArgumentError, "Comment must be provided" unless comment.is_a?(Comment)
+    project_key_translation_url(comment.issue.translation.key.project, comment.issue.translation.key, comment.issue.translation) + "#comment-#{comment.id}"
   end
 end

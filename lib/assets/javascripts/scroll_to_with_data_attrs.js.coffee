@@ -12,13 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
-  factory :issue do
-    user
-    association :updater, factory: :user
-    translation
-    summary "MyString"
-    description "MyText"
-    kind 1
-  end
-end
+$(document).ready ->
+  # A simple hook that hooks 'data-scroll-to' attr to jquery-scrollTo plugin.
+  $('[data-scroll-to]').click (event) ->
+    $(window).scrollTo($(this).attr('data-scroll-to'), 300);
+    # Cancel event
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    return false;

@@ -37,6 +37,7 @@
 #= require jquery-highlighter
 #= require jquery-prettyTextDiff
 #= require jquery-gallery
+#= require jquery-scrollTo
 #= require jquery-swipebox
 #= require purl
 #= require datepicker
@@ -60,6 +61,7 @@
 #= require infinite_scroll
 #= require live_update
 #= require smart_form
+#= require scroll_to_with_data_attrs
 #
 #= require_tree ../templates
 #= require_tree ./application

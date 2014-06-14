@@ -12,13 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
-  factory :issue do
-    user
-    association :updater, factory: :user
-    translation
-    summary "MyString"
-    description "MyText"
-    kind 1
+# Helper methods that are related to Issues.
+
+module IssuesHelper
+
+  # The url to view an issue.
+  #
+  # @param [Issue] issue The issue of interest.
+  # @return [String] Url of the issue in the project_key_translation page, with the section identifier.
+
+  def issue_url(issue)
+    raise ArgumentError, "Issue must be provided" unless issue.is_a?(Issue)
+    project_key_translation_url(issue.translation.key.project, issue.translation.key, issue.translation) + "#issue-wrapper-#{issue.id}"
   end
 end

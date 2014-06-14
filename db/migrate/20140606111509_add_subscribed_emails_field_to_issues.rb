@@ -12,13 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
-  factory :issue do
-    user
-    association :updater, factory: :user
-    translation
-    summary "MyString"
-    description "MyText"
-    kind 1
+class AddSubscribedEmailsFieldToIssues < ActiveRecord::Migration
+  def up
+    execute "ALTER TABLE issues ADD COLUMN subscribed_emails TEXT"
+  end
+
+  def down
+    execute "ALTER TABLE issues DROP COLUMN subscribed_emails"
   end
 end
