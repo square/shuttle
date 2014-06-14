@@ -19,4 +19,4 @@ every(30.minutes) { runner 'AutoImporter.perform_once' }
 every(:day, at: '12:00 am')  { rake 'metrics:update' }
 
 every(:saturday, at: '12am') { rake 'maintenance:clean_old_commits' }
-every(5.minutes) { rake 'maintenance:touchdown' }
+# every(5.minutes) { rake 'maintenance:touchdown' }
