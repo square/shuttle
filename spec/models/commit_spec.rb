@@ -438,7 +438,6 @@ describe Commit do
       commit.add_import_error_in_redis("fakefile", "fake error")
       commit.update_attributes(loading: true)
       commit.update_attributes(loading: false)
-      expect(commit.import_errors_in_redis).to eql([])
       expect(commit.import_errors).to eql([["fakefile", "fake error"]])
       commit.import_strings
       commit.reload
