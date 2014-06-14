@@ -341,7 +341,7 @@ GEM
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
-    twitter-typeahead-rails (0.10.2)
+    twitter-typeahead-rails (0.9.3)
       actionpack (>= 3.1)
       jquery-rails
       railties (>= 3.1)
@@ -427,7 +427,7 @@ DEPENDENCIES
   therubyracer
   timecop
   tire
-  twitter-typeahead-rails
+  twitter-typeahead-rails (= 0.9.3)
   uea-stemmer
   uglifier
   unicode_scanner

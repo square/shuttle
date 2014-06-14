@@ -31,7 +31,7 @@ class ManifestPrecompiler
     commit = Commit.find(commit_id)
     file_key = key(commit, format)
     Shuttle::Redis.set file_key, Compiler.new(commit).manifest(format, force: true).io.read
-  rescue Compiler::CommitNotReadyError
+  rescue Compiler::CommitNotReadyError, Compiler::CommitLoadingError
     # the commit was probably "downgraded" from ready between when the job was
     # queued and when it was started. ignore.
   end

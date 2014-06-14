@@ -25,7 +25,7 @@ gem 'tire'
 # VIEWS
 gem 'jquery-rails'
 gem 'font-awesome-rails'
-gem 'twitter-typeahead-rails'
+gem 'twitter-typeahead-rails', '0.9.3' # 0.10.2 breaks locale key filtering
 gem 'dropzonejs-rails'
 gem 'kaminari'
 gem 'slim-rails'
