@@ -229,6 +229,7 @@ describe SearchController do
       @user     = FactoryGirl.create(:user, role: "translator")
       @project1 = FactoryGirl.create(:project)
       @project2 = FactoryGirl.create(:project)
+      Commit.delete_all
       2.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("abcdef")) }
       2.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("123456")) }
       1.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("abc111")) }
