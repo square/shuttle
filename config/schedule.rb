@@ -17,3 +17,4 @@ set :output, 'log/whenever.log'
 every(30.minutes) { runner 'AutoImporter.perform_once' }
 
 every(:day, at: '12:00 am')  { rake 'metrics:update' }
+every(:minute) { rake 'touchdown:update' }
