@@ -159,7 +159,6 @@ class Commit < ActiveRecord::Base
     CommitImporter.perform_once(commit.id) unless commit.skip_import
   end
   after_commit :compile_and_cache_or_clear, on: :update
-  after_update :update_touchdown_branch
   after_commit :update_stats_at_end_of_loading, on: :update, if: :loading_state_changed?
   after_commit :mark_blobs_as_parsed, on: :update, if: :loading_state_changed?
   after_destroy { |c| Commit.flush_memoizations c.id }
@@ -497,10 +496,6 @@ class Commit < ActiveRecord::Base
         ManifestPrecompiler.perform_once id, format
       end
     end
-  end
-
-  def update_touchdown_branch
-    TouchdownBranchUpdater.perform_async(project_id) if ready_changed?
   end
 
   def import_blob(path, blob, options={})
