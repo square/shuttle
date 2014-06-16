@@ -149,7 +149,7 @@ hr.divider
     = paginate @commits
 .row
   .pagination-info
-    = page_entries_info(@commits)
+    = page_entries_info(@commits, entry_name: 'commit')
     | &nbsp;
     a#expand-filters = @filters
 
