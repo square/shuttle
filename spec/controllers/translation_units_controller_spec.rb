@@ -42,21 +42,21 @@ describe TranslationUnitsController do
         get :index, field: 'searchable_source_copy', keyword: 'carried', format: 'json'
         expect(response.status).to eql(200)
         expect(assigns(:offset)).to eql(0)
-        expect(assigns(:translation_units).to_a).to eql(@trans_units_list[0,50])
+        expect(assigns(:translation_units).to_a).to match_array(@trans_units_list[0,50])
       end
   
       it "renders the first page of results if passed offset < 0" do
         get :index, field: 'searchable_source_copy', keyword: 'carried', offset: -1, format: 'json'
         expect(response.status).to eql(200)
         expect(assigns(:offset)).to eql(0)
-        expect(assigns(:translation_units).to_a).to eql(@trans_units_list[0,50])
+        expect(assigns(:translation_units).to_a).to match_array(@trans_units_list[0,50])
       end
   
       it "correctly lists the last page of results" do
         get :index, field: 'searchable_source_copy', keyword: 'carried', offset: 50, format: 'json'
         expect(response.status).to eql(200)
         expect(assigns(:offset)).to eql(50)
-        expect(assigns(:translation_units).to_a).to eql(@trans_units_list[50,1])
+        expect(assigns(:translation_units).to_a).to match_array(@trans_units_list[50,1])
       end
     end
 
@@ -81,19 +81,19 @@ describe TranslationUnitsController do
       it "should filter by source copy" do
         get :index, keyword: 'foo', field: 'searchable_source_copy', format: 'json'
         expect(response.status).to eql(200)
-        expect(JSON.parse(response.body).map { |e| e['id'] }).to eql(@tus_source_foo.map(&:id))
+        expect(JSON.parse(response.body).map { |e| e['id'] }).to match_array(@tus_source_foo.map(&:id))
       end
 
       it "should filter by target copy" do
         get :index, keyword: 'foo', field: 'searchable_copy', format: 'json'
         expect(response.status).to eql(200)
-        expect(JSON.parse(response.body).map { |e| e['id'] }).to eql(@tus_target_foo.map(&:id))
+        expect(JSON.parse(response.body).map { |e| e['id'] }).to match_array(@tus_target_foo.map(&:id))
       end
 
       it "should filter by target locale" do
         get :index, keyword: 'baz', field: 'searchable_source_copy', target_locales: 'fr', format: 'json'
         expect(response.status).to eql(200)
-        expect(JSON.parse(response.body).map { |e| e['id'] }).to eql(@tus_target_foo.map(&:id))
+        expect(JSON.parse(response.body).map { |e| e['id'] }).to match_array(@tus_target_foo.map(&:id))
       end
     end
   end
