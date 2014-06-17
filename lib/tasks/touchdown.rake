@@ -2,7 +2,7 @@ TOUCHDOWN_BRANCH_KEY = 'touchdown_running'
 
 namespace :touchdown do
   desc "Updates touchdown branches"
-  task :update do
+  task update: :environment do
     # only run one instance of this cron
     return if Shuttle::Redis.exists(TOUCHDOWN_BRANCH_KEY)
     Shuttle::Redis.set TOUCHDOWN_BRANCH_KEY, '1'
