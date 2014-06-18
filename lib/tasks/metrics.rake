@@ -15,6 +15,8 @@
 namespace :metrics do
   desc "Update metrics for the latest date"
   task update: :environment do
+    Rails.logger.info "[metrics:update] Updating metrics for #{Date.today}."
+
     date = (Date.parse(ENV['date']) rescue Date.yesterday).at_beginning_of_day
     date_range = date...(date + 1.day)
 
@@ -57,5 +59,6 @@ namespace :metrics do
       each_with_object(Hash.new(0)) { |t, hash| hash[t.rfc5646_locale] += t.words_count }
 
     metric.save
+    Rails.logger.info "[metrics:update] Successfully updated metrics for #{Date.today}"
   end
 end
