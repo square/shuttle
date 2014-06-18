@@ -25,6 +25,7 @@ class CommitsController < ApplicationController
 
   before_filter :find_project
   before_filter :find_commit, except: [:create, :manifest, :localize]
+  before_filter :find_format
   before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
 
   respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
@@ -48,17 +49,6 @@ class CommitsController < ApplicationController
   def show
     respond_with @commit do |format|
       format.json { render json: decorate(@commit).to_json }
-      format.html do
-        @format = @project.cache_manifest_formats.first
-        @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
-          hsh[locale.rfc5646] = {
-              required: required,
-              targeted: true,
-              finished: @commit.translations.where('approved IS NOT TRUE AND rfc5646_locale = ?', locale.rfc5646).first.nil?
-          }
-          hsh
-        end
-      end
     end
   end
 
@@ -138,7 +128,6 @@ class CommitsController < ApplicationController
   def search
     respond_with @commit do |format|
       format.html do
-        @format = @project.cache_manifest_formats.first
         @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
           hsh[locale.rfc5646] = {
             required: required,
@@ -524,6 +513,10 @@ class CommitsController < ApplicationController
     end
     @commit = @project.commits.for_revision(params[:id]).first!
   end
+
+  def find_format
+    @format = @project.cache_manifest_formats.first
+  end 
 
   def decorate(commit)
     commit.as_json.merge(
