@@ -46,10 +46,21 @@ class AutoImporter
     def perform(project_id)
       project = Project.find(project_id)
       project.repo &:fetch
+
+      branches_to_delete = [] # any branches that don't actually exist anymore?
+
       project.watched_branches.each do |branch|
-        project.commit! branch,
-                        other_fields: {description: "Automatically imported from the #{branch} branch"}
+        begin
+          project.commit! branch,
+                          other_fields: {description: "Automatically imported from the #{branch} branch"}
+        rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound
+          # branch doesn't actually exist; remove from watched branches and ignore
+          branches_to_delete << branch
+        end
       end
+
+      project.watched_branches = project.watched_branches - branches_to_delete
+      project.save!
     rescue Timeout::Error
       self.class.perform_in 2.minutes, project_id
     end
