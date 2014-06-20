@@ -17,10 +17,12 @@ require 'strscan'
 module Exporter
 
   # Exports the translated strings of a Commit to a Java .properties file.
+  #
+  # @raise [NoLocaleProvidedError] If a single locale is not provided.
 
   class Properties < Base
     def export(io, *locales)
-      raise ArgumentError, ".properties files can only be for a single locale" unless locales.size == 1
+      raise NoLocaleProvidedError, ".properties files can only be for a single locale" unless locales.size == 1
       locale = locales.first
 
       translations = Translation.in_commit(@commit).

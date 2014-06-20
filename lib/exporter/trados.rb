@@ -18,8 +18,14 @@ module Exporter
   # translation tool.
 
   class Trados < Base
+
+    # Exports the translated strings to a TRADOS-ready RTF file in the locale
+    # provided.
+    #
+    # @raise [NoLocaleProvidedError] If a single locale is not provided.
+
     def export(io, *locales)
-      raise ArgumentError, "Trados files can only be for a single locale" unless locales.size == 1
+      raise NoLocaleProvidedError, "Trados files can only be for a single locale" unless locales.size == 1
       locale = locales.first
 
       io.puts preamble

@@ -344,6 +344,16 @@ de:
   key2: Hallo {name}! Du hast {count} Itemen.
       YAML
     end
+
+    it "should 400 if a single locale is required and no locales are given" do
+      get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'strings'
+      expect(response.status).to eql(400)
+    end
+
+    it "should 400 if a single locale is required and multiple locales are given" do
+      get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr,de', format: 'strings'
+      expect(response.status).to eql(400)
+    end
   end
 
   describe '#localize' do
