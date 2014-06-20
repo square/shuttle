@@ -378,7 +378,10 @@ class Project < ActiveRecord::Base
     found_commit = nil
     offset = 0
     until found_commit
-      log = repo.object(watched_branches.first).log(50).skip(offset)
+      branch = repo.object(watched_branches.first)
+      return unless branch
+
+      log = branch.log(50).skip(offset)
       break if log.size.zero?
       db_commits = commits.for_revision(log.map(&:sha)).where(ready: true).to_a
       log.each do |log_commit|

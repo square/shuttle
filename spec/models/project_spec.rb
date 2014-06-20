@@ -455,5 +455,17 @@ describe Project do
       expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
           to eql('translated')
     end
+
+    it "should gracefully exit if the first watched branch doesn't exist" do
+      @project.watched_branches = %w(nonexistent)
+      @project.touchdown_branch = 'translated'
+
+      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
+      c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+      CommitStatsRecalculator.new.perform(c.id)
+      expect(c.reload).to be_ready
+
+      expect { @project.update_touchdown_branch }.not_to raise_error
+    end
   end
 end
