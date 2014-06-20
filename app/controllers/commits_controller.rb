@@ -432,6 +432,8 @@ class CommitsController < ApplicationController
     render text: 'Unknown format', status: :not_acceptable
   rescue ActiveRecord::RecordNotFound
     render text: 'Unknown commit', status: :not_found
+  rescue Exporter::NoLocaleProvidedError
+    render text: 'Must provide a single locale', status: :bad_request
   end
 
   # Generates a tarball of localized files, extractable into the project root.

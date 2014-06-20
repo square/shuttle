@@ -16,10 +16,12 @@ module Exporter
 
   # Exports the translated strings of a Commit to a JavaScript file formatted
   # for use with the Ember I18n library.
+  #
+  # @raise [NoLocaleProvidedError] If a single locale is not provided.
 
 class EmberModule < Base
     def export(io, *locales)
-      raise ArgumentError, "Dependency-injected Ember.js files can only be for a single locale" unless locales.size == 1
+      raise NoLocaleProvidedError, "Dependency-injected Ember.js files can only be for a single locale" unless locales.size == 1
       locale = locales.first
 
       dedupe_from = @commit.project.required_locales.select { |rl| locale.child_of?(rl) }

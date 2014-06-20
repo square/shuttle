@@ -27,9 +27,13 @@ module Exporter
     C_STRING_ESCAPES["\n"] = '\n'
     C_STRING_ESCAPES['"' ] = '\"'
 
+    # Exports the translated strings of the commit to a .strings file in the
+    # locale provided.
+    #
+    # @raise [NoLocaleProvidedError] If a single locale is not provided.
 
     def export(io, *locales)
-      raise ArgumentError, ".strings files can only be for a single locale" unless locales.size == 1
+      raise NoLocaleProvidedError, ".strings files can only be for a single locale" unless locales.size == 1
       locale = locales.first
 
       # write the BOM
