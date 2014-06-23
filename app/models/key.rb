@@ -125,7 +125,6 @@ class Key < ActiveRecord::Base
     indexes :commit_ids, as: 'batched_commit_ids.try!(:to_a) || commits_keys.pluck(:commit_id)'
   end
 
-  after_commit :add_or_remove_translations, on: :create, if: :apply_readiness_hooks?
   after_update :update_commit_readiness, if: :apply_readiness_hooks?
 
   validates :project,
@@ -243,9 +242,5 @@ class Key < ActiveRecord::Base
   def update_commit_readiness(force=false)
     return if !ready_changed? && !force
     KeyReadinessRecalculator.perform_once id
-  end
-
-  def add_or_remove_translations
-    KeyTranslationAdder.perform_once id
   end
 end
