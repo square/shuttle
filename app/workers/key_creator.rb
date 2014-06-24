@@ -95,15 +95,6 @@ class KeyCreator
             batched_commit_ids:   []) # we'll fill this out later
     )
 
-    key.translations.in_locale(@blob.project.base_locale).create_or_update!(
-        source_copy:              value,
-        copy:                     value,
-        approved:                 true,
-        source_rfc5646_locale:    @blob.project.base_rfc5646_locale,
-        rfc5646_locale:           @blob.project.base_rfc5646_locale,
-        skip_readiness_hooks:     true,
-        preserve_reviewed_status: true)
-
     # add additional pending translations if necessary
     key.add_pending_translations
 

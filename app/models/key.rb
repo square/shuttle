@@ -125,7 +125,6 @@ class Key < ActiveRecord::Base
     indexes :commit_ids, as: 'batched_commit_ids.try!(:to_a) || commits_keys.pluck(:commit_id)'
   end
 
-  after_commit :add_or_remove_translations, on: :create, if: :apply_readiness_hooks?
   after_update :update_commit_readiness, if: :apply_readiness_hooks?
 
   validates :project,
@@ -178,23 +177,30 @@ class Key < ActiveRecord::Base
   # each of the Project's required locales where such a Translation does not
   # already exist.
   #
+  # Also creates the base locale translation.
+  #
   # This is used, for example, when a Project adds a new required localization,
   # to create pending Translation requests for each string in the new locale.
 
   def add_pending_translations
-    base_translation = translations.base.first
-    return unless base_translation
-
-    project.targeted_locales.each do |locale, _|
+    project.targeted_locales.each do |locale|
       next if project.skip_key?(key, locale)
-
       translations.where(rfc5646_locale: locale.rfc5646).find_or_create! do |t|
-        t.source_locale        = base_translation.source_locale
+        t.source_locale        = project.base_locale
         t.locale               = locale
-        t.source_copy          = base_translation.source_copy
+        t.source_copy          = source_copy
         t.skip_readiness_hooks = true
       end
     end
+
+    translations.in_locale(project.base_locale).create_or_update!(
+        source_copy:              source_copy,
+        copy:                     source_copy,
+        approved:                 true,
+        source_rfc5646_locale:    project.base_rfc5646_locale,
+        rfc5646_locale:           project.base_rfc5646_locale,
+        skip_readiness_hooks:     true,
+        preserve_reviewed_status: true)
   end
 
   # Scans all of the Translations under this Tree and removes translations that
@@ -243,9 +249,5 @@ class Key < ActiveRecord::Base
   def update_commit_readiness(force=false)
     return if !ready_changed? && !force
     KeyReadinessRecalculator.perform_once id
-  end
-
-  def add_or_remove_translations
-    KeyTranslationAdder.perform_once id
   end
 end
