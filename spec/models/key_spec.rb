@@ -49,6 +49,7 @@ describe Key do
   describe "#add_pending_translations" do
     it "should add missing pending translations for any imported base translations" do
       project = FactoryGirl.create(:project,
+                                   base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: {'en' => true, 'de' => false, 'fr' => true})
       # key1 has all translations
       key1    = FactoryGirl.create(:key, project: project)
