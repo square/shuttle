@@ -394,8 +394,14 @@ class Project < ActiveRecord::Base
     end
 
     if found_commit
-      system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'update-ref', "refs/heads/#{touchdown_branch}", found_commit.sha
-      system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'push', '-f', repository_url, (["refs/heads/#{touchdown_branch}"]*2).join(':')
+      begin 
+        Timeout::timeout(1.minute) do
+          system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'update-ref', "refs/heads/#{touchdown_branch}", found_commit.sha
+          system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'push', '-f', repository_url, (["refs/heads/#{touchdown_branch}"]*2).join(':')
+        end 
+      rescue Timeout::Error
+        Rails.logger.error "[Project#update_touchdown_branch] Timed out on updating touchdown branch for #{inspect}"
+      end 
     end
   end
 
