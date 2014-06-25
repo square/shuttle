@@ -443,6 +443,22 @@ describe Project do
           to eql('d82287c47388278d54433cfb2383c7ad496d9827')
     end
 
+    it "should log an error if updating the touchdown branch takes longer than 1 minute" do
+      @project.watched_branches = %w(master)
+      @project.touchdown_branch = 'translated'
+
+      allow(@project).to receive('system').and_raise(Timeout::Error)
+
+      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
+      c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+      CommitStatsRecalculator.new.perform(c.id)
+
+      expect(c.reload).to be_ready
+      expect(Rails.logger).to receive(:error).with("[Project#update_touchdown_branch] Timed out on updating touchdown branch for #{@project.inspect}")
+
+      @project.update_touchdown_branch
+    end
+
     it "should do nothing if none of the commits in the watched branch are translated" do
       @project.watched_branches = %w(master)
       @project.touchdown_branch = 'translated'

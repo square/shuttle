@@ -8,7 +8,7 @@ namespace :touchdown do
 
     # only run one instance of this cron
     if Shuttle::Redis.exists(TOUCHDOWN_BRANCH_KEY)
-      Rails.logger.info "[touchdown:update] Unable to obtain lock.  Incrementing touchdown branch key"
+      Rails.logger.info "[touchdown:update] Unable to obtain lock."
       exit
     end
 
