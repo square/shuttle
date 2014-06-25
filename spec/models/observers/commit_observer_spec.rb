@@ -36,7 +36,7 @@ describe Commit do
       commit_and_expect_import_errors(project, 'a82cf69f11618883e534189dea61f234da914462', user)
       expect(Blob.count).to eql(2) # see above
 
-      commit_and_expect_import_errors(project, 'HEAD', user)
+      commit_and_expect_import_errors(project, 'c04aeaa2bd9d8ff21c12eda2cb56e8622abb4727', user)
       expect(Blob.count).to eql(3)  # see above
     end
   end
