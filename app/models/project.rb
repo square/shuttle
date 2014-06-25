@@ -350,10 +350,6 @@ class Project < ActiveRecord::Base
     super options
   end
 
-  def recalculate_commit_readiness
-    ProjectReadinessRecalculator.perform_once id
-  end
-
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
