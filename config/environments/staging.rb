@@ -94,7 +94,7 @@ Shuttle::Application.configure do
 
   config.action_mailer.default_url_options = {
       protocol: 'https',
-      host:     'baltimore.corp.squareup.com'
+      host:     'shuttle-stage-a-01.corp.squareup.com'
   }
 
   config.use_ssl = true
