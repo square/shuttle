@@ -16,7 +16,7 @@
   - if current_user.monitor?
     .pull-right
       - if @format and @commit.ready?
-        button.primary href=manifest_project_commit_url(@project, @commit, @format) Download #{@format}
+        button.primary href=manifest_project_commit_url(@project, @commit, @format) Download Manifest
       - elsif @commit.ready?
         button.primary.disabled.tooltip-parent[
           data-tooltip='#missing_format_tooltip'

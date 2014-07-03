@@ -226,6 +226,8 @@ module Exporter
       return hsh
     end
   end
+
+  class NoLocaleProvidedError < StandardError; end
 end
 
 Dir.glob(Rails.root.join('lib', 'exporter', '*')).each { |f| require f }
