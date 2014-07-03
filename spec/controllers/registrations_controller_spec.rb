@@ -15,6 +15,7 @@
 require 'spec_helper'
 
 describe RegistrationsController do
+  before(:all) { User.delete_all }
   before(:each) { @request.env["devise.mapping"] = Devise.mappings[:user] }
 
   describe '#create' do
