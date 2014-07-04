@@ -40,4 +40,124 @@ describe Commit do
       expect(Blob.count).to eql(3)  # see above
     end
   end
+
+
+  context "[pinging webhooks]" do
+    around do |example|
+      Sidekiq::Testing.fake!(&example)
+    end
+
+    context "[stash]" do
+      context "[with a stash_webhook_url]" do
+        before(:each) do
+          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, stash_webhook_url: "http://example.com")
+          @commit = FactoryGirl.create(:commit, project: @project, ready: false, loading: false)
+        end
+
+        it "enqueues a StashWebhookPinger job when a commit is created" do
+          commit = FactoryGirl.build(:commit, project: @project)
+          expect(StashWebhookPinger).to receive(:perform_once)
+          commit.save!
+        end
+
+        it "enqueues a StashWebhookPinger job when a commit becomes ready" do
+          @commit.ready = true
+          expect(StashWebhookPinger).to receive(:perform_once)
+          @commit.save!
+        end
+
+        it "enqueues a StashWebhookPinger job when a commit becomes not-ready" do
+          @commit.update!(ready: true)
+          @commit.ready = false
+          expect(StashWebhookPinger).to receive(:perform_once)
+          @commit.save!
+        end
+
+        it "enqueues a StashWebhookPinger job when a commit finishes loading" do
+          @commit.update!(loading: true)
+          @commit.loading = false
+          expect(StashWebhookPinger).to receive(:perform_once)
+          @commit.save!
+        end
+
+        it "enqueues a StashWebhookPinger job when a commit starts loading" do
+          @commit.loading = true
+          expect(StashWebhookPinger).to receive(:perform_once)
+          @commit.save!
+        end
+
+        it "does not enqueue a StashWebhookPinger job when a commit is updated without changing its ready and loading fields" do
+          @commit.message = "some message"
+          expect(StashWebhookPinger).to_not receive(:perform_once)
+          @commit.save!
+        end
+      end
+
+      context "[without a stash_webhook_url]" do
+        before(:each) do
+          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, stash_webhook_url: nil)
+          @commit = FactoryGirl.create(:commit, project: @project, ready: false, loading: false)
+        end
+
+        it "does not enqueue a StashWebhookPinger job when a commit is created" do
+          commit = FactoryGirl.build(:commit, project: @project)
+          expect(StashWebhookPinger).to_not receive(:perform_once)
+          commit.save!
+        end
+
+        it "does not enqueue a StashWebhookPinger job when a commit becomes ready" do
+          @commit.ready = true
+          expect(StashWebhookPinger).to_not receive(:perform_once)
+          @commit.save!
+        end
+      end
+    end
+
+    context "[github]" do
+      context "[with a github_webhook_url]" do
+        before(:each) do
+          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, github_webhook_url: "http://example.com")
+          @commit = FactoryGirl.create(:commit, project: @project, ready: false, loading: false)
+        end
+
+        it "does not enqueue a GithubWebhookPinger job when a commit is created" do
+          @commit = FactoryGirl.build(:commit, project: @project, ready: true)
+          expect(GithubWebhookPinger).to_not receive(:perform_once)
+          @commit.save!
+        end
+
+        it "enqueues a GithubWebhookPinger job when a commit becomes ready" do
+          @commit.ready = true
+          expect(GithubWebhookPinger).to receive(:perform_once)
+          @commit.save!
+        end
+
+        it "doesn't enqueue a GithubWebhookPinger job when a commit becomes not-ready" do
+          @commit.update!(ready: true)
+          @commit.ready = false
+          expect(GithubWebhookPinger).to_not receive(:perform_once)
+          @commit.save!
+        end
+
+        it "doesn't enqueue a GithubWebhookPinger when a commit is updated without changing its ready field" do
+          @commit.message = "some message"
+          expect(GithubWebhookPinger).to_not receive(:perform_once)
+          @commit.save!
+        end
+      end
+
+      context "[without a github_webhook_url]" do
+        before(:each) do
+          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, github_webhook_url: nil)
+          @commit = FactoryGirl.create(:commit, project: @project, ready: false, loading: false)
+        end
+
+        it "does not enqueue a GithubWebhookPinger job when a commit's ready field changes" do
+          @commit.ready = true
+          expect(GithubWebhookPinger).to_not receive(:perform_once)
+          @commit.save!
+        end
+      end
+    end
+  end
 end

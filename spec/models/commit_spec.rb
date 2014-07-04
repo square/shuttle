@@ -188,43 +188,6 @@ describe Commit do
   end
 
   context "[hooks]" do
-
-    context "webhooks" do
-      before { @commit = FactoryGirl.create(:commit, ready: false) }
-      context "if ready" do
-        it "enqueues a webhook job if the state changed" do
-          expect(@commit).not_to be_ready
-          @commit.ready = true
-          expect(GithubWebhookPinger).to receive(:perform_once)
-          @commit.save!
-        end
-
-        it "doesn't enqueue a webhook job if the state did not change" do
-          @commit.ready = true
-          @commit.save!
-          @commit.ready = true
-          expect(GithubWebhookPinger).not_to receive(:perform_once)
-          @commit.save!
-        end
-
-      end
-
-      context "if not ready" do
-        it "doesn't enqueue a webhook job even if state has changed" do
-          @commit.ready = true
-          @commit.save!
-          @commit.ready = false
-          expect(GithubWebhookPinger).not_to receive(:perform_once)
-          @commit.save!
-        end
-
-        it "doesn't enqueue a webhook job if state has not changed" do
-          expect(GithubWebhookPinger).not_to receive(:perform_once)
-          @commit.save!
-        end
-      end
-    end
-
     context "[mail hooks]" do
       it "sends an email to the translators and cc's the user when loading changes to false from true" do
         @commit = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user))
