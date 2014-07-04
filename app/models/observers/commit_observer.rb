@@ -23,12 +23,12 @@ class CommitObserver < ActiveRecord::Observer
     handle_import_errors(commit)
   end
 
-  def after_save(commit)
+  def after_commit(commit)
     ping_stash_webhook(commit)
+    ping_github_webhook(commit)
   end
 
   def after_update(commit)
-    ping_github_webhook(commit)
     send_email(commit)
     cleanup_import_errors(commit)
   end
@@ -36,13 +36,15 @@ class CommitObserver < ActiveRecord::Observer
   private
 
   def ping_github_webhook(commit)
-    return unless commit.ready_changed? && commit.ready?
-    GithubWebhookPinger.perform_once commit.id
+    if !commit.previous_changes.include?(:id) && # make sure action is update, not create
+        commit.project.github_webhook_url &&
+        commit.previous_changes.include?(:ready) && commit.ready? # just became ready
+      GithubWebhookPinger.perform_once(commit.id)
+    end
   end
 
   def ping_stash_webhook(commit)
-    return unless commit.project.stash_webhook_url
-    if commit.id_changed? or commit.ready_changed? or commit.loading_changed?
+    if commit.project.stash_webhook_url && [:id, :ready, :loading].any? { |field| commit.previous_changes.include?(field) }
       StashWebhookPinger.perform_once commit.id
     end
   end
