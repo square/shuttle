@@ -482,7 +482,7 @@ class Commit < ActiveRecord::Base
   end
 
   def compile_and_cache_or_clear(force=false)
-    return unless force || ready_changed?
+    return unless force || previous_changes.include?(:ready)
 
     # clear out existing cache entries if present
     Exporter::Base.implementations.each do |exporter|
