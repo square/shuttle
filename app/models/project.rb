@@ -140,7 +140,7 @@ class Project < ActiveRecord::Base
 
   before_validation :create_api_key, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
-  after_update :add_or_remove_pending_translations
+  after_commit :add_or_remove_pending_translations, on: :update
   after_update :invalidate_manifests_and_localizations
 
   # Returns a `Git::Repository` proxy object that allows you to work with the
@@ -429,7 +429,9 @@ class Project < ActiveRecord::Base
   end
 
   def add_or_remove_pending_translations
-    ProjectTranslationAdder.perform_once id
+    if %w{targeted_rfc5646_locales key_exclusions key_inclusions key_locale_exclusions key_locale_inclusions}.any?{|field| previous_changes.include?(field)}
+      ProjectTranslationAdder.perform_once id
+    end
   end
 
   def invalidate_manifests_and_localizations
