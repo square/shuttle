@@ -408,6 +408,62 @@ describe Project do
       expect(key2.reload).not_to be_ready
       expect(commit.reload).not_to be_ready
     end
+
+    context "[add_or_remove_pending_translations]" do
+      around { |tests| Sidekiq::Testing.fake!(&tests) }
+
+      before(:all) do
+        @project = FactoryGirl.create(:project, name: "this is a test project",
+                                                 targeted_rfc5646_locales: {'en' => true},
+                                                 key_exclusions: [],
+                                                 key_inclusions: [],
+                                                 key_locale_exclusions: {},
+                                                 key_locale_inclusions: {} )
+      end
+
+      it "calls ProjectTranslationAdder when targeted_rfc5646_locales changes" do
+        @project.targeted_rfc5646_locales = {'fr' => true}
+        expect(ProjectTranslationAdder).to receive(:perform_once)
+        @project.save!
+      end
+
+      it "calls ProjectTranslationAdder when key_exclusions changes" do
+        @project.key_exclusions = %w{skip_me}
+        expect(ProjectTranslationAdder).to receive(:perform_once)
+        @project.save!
+      end
+
+      it "calls ProjectTranslationAdder when key_inclusions changes" do
+        @project.key_inclusions = %w{include_me}
+        expect(ProjectTranslationAdder).to receive(:perform_once)
+        @project.save!
+      end
+
+      it "calls ProjectTranslationAdder when key_locale_exclusions changes" do
+        @project.key_locale_exclusions = {'fr-FR' => %w(*cl*)}
+        expect(ProjectTranslationAdder).to receive(:perform_once)
+        @project.save!
+      end
+
+      it "calls ProjectTranslationAdder when key_locale_inclusions changes" do
+        @project.key_locale_inclusions = {'fr-FR' => %w(*cl*)}
+        expect(ProjectTranslationAdder).to receive(:perform_once)
+        @project.save!
+      end
+
+      it "doesn't call ProjectTranslationAdder fields like name, watched_branches, stash_webhook_url change" do
+        @project.name = "new name"
+        @project.watched_branches = ['newbranch']
+        @project.stash_webhook_url = "https://example.com"
+        expect(ProjectTranslationAdder).to_not receive(:perform_once)
+        @project.save!
+      end
+
+      it "doesn't call ProjectTranslationAdder when a project is created, even if it has targeted_rfc5646_locales and key_exclusions" do
+        expect(ProjectTranslationAdder).to_not receive(:perform_once)
+        FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true}, key_exclusions: %w{skip_me})
+      end
+    end
   end
 
   describe '#update_touchdown_branch' do
