@@ -232,7 +232,7 @@ class Commit < ActiveRecord::Base
   def import_strings(options={})
     raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
 
-    clear_import_errors # clear out any previous import errors
+    clear_import_errors! # clear out any previous import errors
 
     blobs  = project.blobs.includes(:project) # preload blobs for performance
 

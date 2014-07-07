@@ -57,13 +57,13 @@ describe Commit do
       end
 
       it "should not send an email if commit doesnt have import errors" do
-        @commit.update_attributes(loading: false, ready: true)
+        @commit.import_batch.jobs {}
         expect(ActionMailer::Base.deliveries.map(&:subject)).not_to include("[Shuttle] Error(s) occurred during the import")
       end
 
       it "should email if commit has import errors" do
         @commit.add_import_error_in_redis("some/fake/file.yaml", "some fake error")
-        @commit.update_attributes(loading: false, ready: false)
+        @commit.import_batch.jobs {}
         expect(ActionMailer::Base.deliveries.map(&:subject)).to include("[Shuttle] Error(s) occurred during the import")
         expect(ActionMailer::Base.deliveries.select { |email| email.subject == "[Shuttle] Error(s) occurred during the import"}.first.to).to eql([@commit.user.email, @commit.author_email].compact.uniq)
       end
@@ -399,8 +399,8 @@ describe Commit do
     it "clears the previous import errors" do
       commit = @project.commit!('HEAD', skip_import: true)
       commit.add_import_error_in_redis("fakefile", "fake error")
-      commit.update_attributes(loading: true)
-      commit.update_attributes(loading: false)
+      commit.update! import_errors: [["fakefile", "fake error"]]
+      expect(commit.import_errors_in_redis).to eql([["fakefile", "fake error"]])
       expect(commit.import_errors).to eql([["fakefile", "fake error"]])
       commit.import_strings
       commit.reload
