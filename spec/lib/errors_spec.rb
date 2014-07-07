@@ -17,13 +17,13 @@ require 'spec_helper'
 describe Git::NotFoundError do
   describe "#initialize" do
     it "creates a Git::NotFoundError which is a kind of StandardError that has a message derived from the given sha and object_type, if msg is not given" do
-      err = Git::NotFoundError.new('abc123', 'MyType')
+      err = Git::NotFoundError.new('xyz123', 'MyType')
       expect(err).to be_a_kind_of(StandardError)
-      expect(err.message).to eql("MyType not found in git repo: abc123 (it may have been rebased away)")
+      expect(err.message).to eql("MyType not found in git repo: xyz123 (it may have been rebased away)")
     end
 
     it "creates a Git::NotFoundError which is a kind of StandardError that has a message equal to the given msg" do
-      err = Git::NotFoundError.new('abc123', 'MyType', 'Custom message')
+      err = Git::NotFoundError.new('xyz123', 'MyType', 'Custom message')
       expect(err).to be_a_kind_of(StandardError)
       expect(err.message).to eql("Custom message")
     end
@@ -33,13 +33,13 @@ end
 describe Git::CommitNotFoundError do
   describe "#initialize" do
     it "creates a Git::CommitNotFoundError which is a kind of Git::NotFoundError that has a message derived from the given sha, if msg is not given" do
-      err = Git::CommitNotFoundError.new('abc123')
+      err = Git::CommitNotFoundError.new('xyz123')
       expect(err).to be_a_kind_of(Git::NotFoundError)
-      expect(err.message).to eql("Commit not found in git repo: abc123 (it may have been rebased away)")
+      expect(err.message).to eql("Commit not found in git repo: xyz123 (it may have been rebased away)")
     end
 
     it "creates a Git::CommitNotFoundError which is a kind of Git::NotFoundError that has a message equal to the given msg" do
-      err = Git::CommitNotFoundError.new('abc123', 'Custom message')
+      err = Git::CommitNotFoundError.new('xyz123', 'Custom message')
       expect(err).to be_a_kind_of(Git::NotFoundError)
       expect(err.message).to eql("Custom message")
     end
@@ -49,13 +49,13 @@ end
 describe Git::BlobNotFoundError do
   describe "#initialize" do
     it "creates a Git::BlobNotFoundError which is a kind of Git::NotFoundError that has a message derived from the given sha, if msg is not given" do
-      err = Git::BlobNotFoundError.new('abc123')
+      err = Git::BlobNotFoundError.new('xyz123')
       expect(err).to be_a_kind_of(Git::NotFoundError)
-      expect(err.message).to eql("Blob not found in git repo: abc123 (it may have been rebased away)")
+      expect(err.message).to eql("Blob not found in git repo: xyz123 (it may have been rebased away)")
     end
 
     it "creates a Git::BlobNotFoundError which is a kind of Git::NotFoundError that has a message equal to the given msg" do
-      err = Git::BlobNotFoundError.new('abc123', 'Custom message')
+      err = Git::BlobNotFoundError.new('xyz123', 'Custom message')
       expect(err).to be_a_kind_of(Git::NotFoundError)
       expect(err.message).to eql("Custom message")
     end

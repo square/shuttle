@@ -47,6 +47,8 @@ class KeyCreator
     if @commit
       self.class.update_key_associations key_objects, @commit
     end
+  rescue Git::CommitNotFoundError => err
+    @commit.add_import_error_in_redis(err, "failed in KeyCreator for commit_id #{commit_id} and blob #{sha}") if @commit
   end
 
   # Given a set of keys, bulk-updates their commits-keys associations and

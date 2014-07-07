@@ -307,6 +307,8 @@ en:
         subject: "[Shuttle] Finished translation of commit"
       notify_submitter_of_import_errors:
         subject: "[Shuttle] Error(s) occurred during the import"
+      notify_import_errors_in_commit_creator:
+        subject: "[Shuttle] Import Failed for sha: %{sha}"
     issue:
       issue_created:
         subject: "[Shuttle] %{name} reported a new issue. Issue Summary: %{summary}"
