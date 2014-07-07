@@ -75,8 +75,11 @@ class Blob < ActiveRecord::Base
   #   this Commit's `keys` association.
   # @option options [true, false] inline If `true`, Sidekiq workers will be run
   #   synchronously.
+  # @raise [Git::BlobNotFoundError] If the blob could not be found in the Git
+  #   repository.
 
   def import_strings(importer, path, options={})
+    blob! # make sure blob exists
     importer = importer.new(self, path, options[:commit])
     importer.inline = options[:inline]
     options[:locale] ? importer.import_locale(options[:locale]) : importer.import
@@ -91,11 +94,14 @@ class Blob < ActiveRecord::Base
   # Same as {#blob}, but fetches the repository of the blob SHA isn't found.
   #
   # @return [Git::Object::Blob] The Git blob this Blob represents.
+  # @raise [Git::BlobNotFoundError] If the blob could not be found in the Git
+  #   repository.
 
   def blob!
-    project.repo do |r|
-      r.object(sha) || (r.fetch && r.object(sha))
+    unless blob_object = project.find_or_fetch_git_object(sha)
+      raise Git::BlobNotFoundError, sha
     end
+    blob_object
   end
 
   # @private

@@ -226,12 +226,11 @@ class Commit < ActiveRecord::Base
   #   Sidekiq workers to perform the import in parallel.
   # @option options [true, false] force (false) If `true`, blobs will be
   #   re-scanned for keys even if they have already been scanned.
-  # @raise [CommitNotFoundError] If the commit could not be found in the Git
-  #   repository.
+  # @raise [Git::CommitNotFoundError] If the commit could not be found in
+  #   the Git repository.
 
   def import_strings(options={})
-    raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
-
+    commit! # Make sure commit exists
     clear_import_errors! # clear out any previous import errors
 
     blobs  = project.blobs.includes(:project) # preload blobs for performance
@@ -263,12 +262,15 @@ class Commit < ActiveRecord::Base
   # Same as {#commit}, but fetches the upstream repository changes if the commit
   # is unrecognized.
   #
-  # @return [Git::Object::Commit, nil] The commit object.
+  # @return [Git::Object::Commit] The commit object.
+  # @raise [Git::CommitNotFoundError] If the commit could not be found in
+  #   the Git repository.
 
   def commit!
-    project.repo do |r|
-      r.object(revision) || (r.fetch && r.object(revision))
+    unless commit_object = project.find_or_fetch_git_object(revision)
+      raise Git::CommitNotFoundError, revision
     end
+    commit_object
   end
 
   # @return [String, nil] The URL to this commit on GitHub or GitHub Enterprise,

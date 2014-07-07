@@ -43,8 +43,8 @@ describe ImportErrors do
       @commit.add_import_error_in_redis(StandardError.new("first fake error"))
       @commit.add_import_error_in_redis(StandardError.new("second fake error"), "in /path/to/some/file")
       @commit.update_attributes(import_errors: [["StandardError", "first fake error"], ["StandardError", "second fake error (in /path/to/some/file)"]])
-      expect(@commit.import_errors_in_redis).to eql([["StandardError", "first fake error"], ["StandardError", "second fake error (in /path/to/some/file)"]])
-      expect(@commit.import_errors).to eql([["StandardError", "first fake error"], ["StandardError", "second fake error (in /path/to/some/file)"]])
+      expect(@commit.import_errors_in_redis.sort).to eql([["StandardError", "first fake error"], ["StandardError", "second fake error (in /path/to/some/file)"]].sort)
+      expect(@commit.import_errors.sort).to eql([["StandardError", "first fake error"], ["StandardError", "second fake error (in /path/to/some/file)"]].sort)
 
       @commit.clear_import_errors!
       expect(@commit.import_errors_in_redis).to eql([])
