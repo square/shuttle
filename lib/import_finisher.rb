@@ -12,11 +12,11 @@ class ImportFinisher
     # if there were errors, persist them in postgresql and notify people
     handle_import_errors!(commit)
 
+    # finish loading
     commit.update! loading: false, import_batch_id: nil
 
-    # commit.blobs.update_all loading: false
-    blob_shas = commit.blobs_commits.pluck(:sha_raw)
-    Blob.where(project_id: commit.project_id, sha_raw: blob_shas, errored: false).update_all parsed: true
+    # mark related blobs as parsed so that we don't parse them again
+    mark_not_errored_blobs_as_parsed(commit)
 
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
@@ -25,10 +25,22 @@ class ImportFinisher
 
   private
 
+  # if there were errors, persist them in postgresql and notify people
   def handle_import_errors!(commit)
     if commit.import_errors_in_redis.present?
       commit.move_import_errors_from_redis_to_sql_db!
       CommitMailer.notify_submitter_of_import_errors(commit).deliver
     end
+  end
+
+  def mark_not_errored_blobs_as_parsed(commit)
+    # This is done here because we cannot have nested sidekiq batches.
+    # If we could nest them, we could create sub-batches for blobs, and set parsed to true at the end of that sub-batch.
+    # This would potentially be a performance optimization, too, since we would start using the parsed strings earlier
+    # instead of waiting till all blob importers are finished.
+
+    # commit.blobs.where(errored: false).update_all parsed: true
+    blob_shas = commit.blobs_commits.pluck(:sha_raw)
+    Blob.where(project_id: commit.project_id, sha_raw: blob_shas, errored: false).update_all parsed: true
   end
 end

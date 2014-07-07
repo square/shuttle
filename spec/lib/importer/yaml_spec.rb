@@ -46,13 +46,15 @@ describe Importer::Yaml do
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
                                       only_paths:     %w(config/locales/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
-        @commit  = @project.commit!('HEAD').reload
+        @commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde').reload
       end
 
       it "should add error to commit" do
         expect(@commit.import_errors_in_redis).to eql([])
         expect(@commit.import_errors).to eql([["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"]])
         expect(@commit.blobs.where(errored: true).count).to eql(1)
+        expect(@commit.blobs.where(parsed: false).count).to eql(1)
+        expect(@commit.blobs.where(parsed: true).count).to eql(2)
       end
     end
   end
