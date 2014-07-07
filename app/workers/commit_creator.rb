@@ -27,7 +27,12 @@ class CommitCreator
   #   have already been filtered for accessible attributes.
 
   def perform(project_id, sha, options={})
-    Project.find(project_id).commit!(sha, options.symbolize_keys)
+    options.symbolize_keys!
+    project = Project.find(project_id)
+    project.repo &:fetch # in case a dynamic ref like "HEAD" is given
+    project.commit!(sha, options)
+  rescue Git::CommitNotFoundError => err
+    CommitMailer.notify_import_errors_in_commit_creator(options[:other_fields].try!(:symbolize_keys).try!(:[], :user_id), project_id, sha, err).deliver
   rescue Timeout::Error => err
     self.class.perform_in 2.minutes, project_id, sha
   end
