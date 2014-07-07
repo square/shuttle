@@ -622,6 +622,11 @@ de:
 
       Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
     end
+
+    it "should 404 if an invalid commit SHA is provided" do
+      get :localize, project_id: @project.to_param, id: 'deadbeef', format: 'yaml'
+      expect(response.status).to eql(404)
+    end
   end
 
   describe '#create' do

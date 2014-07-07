@@ -197,15 +197,11 @@ class Project < ActiveRecord::Base
   # @option options [Hash] other_fields Additional model fields to set. Must
   #   have already been filtered for accessible attributes.
   # @return [Commit] The Commit for that SHA.
-  # @raise [ActiveRecord::RecordNotFound] If an unknown SHA is given.
+  # @raise [Git::CommitNotFoundError] If an unknown SHA is given.
 
   def commit!(sha, options={})
-    commit_object = repo { |repo| repo.object(sha) }
-    commit_object ||= begin
-      repo(&:fetch)
-      repo { |repo| repo.object(sha) }
-    end
-    raise ActiveRecord::RecordNotFound, "No such commit #{sha}" unless commit_object
+    commit_object = find_or_fetch_git_object(sha)
+    raise Git::CommitNotFoundError, sha unless commit_object
 
     if options[:skip_create]
       commits.for_revision(commit_object.sha).first!
@@ -219,6 +215,12 @@ class Project < ActiveRecord::Base
           c.send :"#{field}=", value
         end if options[:other_fields]
       end
+    end
+  end
+
+  def find_or_fetch_git_object(sha)
+    repo do |r|
+      r.object(sha) || (r.fetch; r.object(sha))
     end
   end
 

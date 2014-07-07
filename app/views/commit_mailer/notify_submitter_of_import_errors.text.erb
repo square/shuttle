@@ -5,8 +5,8 @@ Link: <%= project_commit_url(@commit.project, @commit) %>
 
 Errors:
 
-<% @commit.import_errors.each do |path, err| %>
-<%= err %> (in <%= path %>)
+<% @commit.import_errors.each_with_index do |err_arr, index| %>
+    <%= index + 1 %>) <%= err_arr.first %> - <%= err_arr.last %>
 <% end %>
 
 

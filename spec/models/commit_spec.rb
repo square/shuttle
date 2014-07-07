@@ -62,10 +62,12 @@ describe Commit do
       end
 
       it "should email if commit has import errors" do
-        @commit.add_import_error_in_redis("some/fake/file.yaml", "some fake error")
+        @commit.add_import_error_in_redis(StandardError.new("some fake error"), "in some/path/to/file")
         @commit.import_batch.jobs {}
-        expect(ActionMailer::Base.deliveries.map(&:subject)).to include("[Shuttle] Error(s) occurred during the import")
-        expect(ActionMailer::Base.deliveries.select { |email| email.subject == "[Shuttle] Error(s) occurred during the import"}.first.to).to eql([@commit.user.email, @commit.author_email].compact.uniq)
+        email = ActionMailer::Base.deliveries.select { |email| email.subject == "[Shuttle] Error(s) occurred during the import"}.first
+        expect(email).to_not be_nil
+        expect(email.to).to eql([@commit.user.email, @commit.author_email].compact.uniq)
+        expect(email.body).to include("SHA: #{@commit.revision}", "StandardError - some fake error (in some/path/to/file)")
       end
     end
   end
@@ -170,7 +172,7 @@ describe Commit do
       @commit.recalculate_ready!
       expect(@commit).to be_ready
 
-      @commit.add_import_error_in_redis 'some/file.yml', "Some Fake Error"
+      @commit.add_import_error_in_redis(StandardError.new("Some Fake Error"), "in some/file.yml")
       @commit.recalculate_ready!
 
       expect(@commit).to_not be_ready
@@ -398,10 +400,10 @@ describe Commit do
 
     it "clears the previous import errors" do
       commit = @project.commit!('HEAD', skip_import: true)
-      commit.add_import_error_in_redis("fakefile", "fake error")
-      commit.update! import_errors: [["fakefile", "fake error"]]
-      expect(commit.import_errors_in_redis).to eql([["fakefile", "fake error"]])
-      expect(commit.import_errors).to eql([["fakefile", "fake error"]])
+      commit.add_import_error_in_redis(StandardError.new("fake error"), "in fakefile")
+      commit.update! import_errors: [["StandardError", "fake error (in fakefile)"]]
+      expect(commit.import_errors_in_redis).to eql([["StandardError", "fake error (in fakefile)"]])
+      expect(commit.import_errors).to eql([["StandardError", "fake error (in fakefile)"]])
       commit.import_strings
       commit.reload
       expect(commit.import_errors_in_redis).to eql([])
@@ -529,6 +531,35 @@ describe Commit do
     it "should return false if the commit does not have a .shuttle.yml file" do
       @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
       expect(@commit.skip_key?('commit_excluded_1')).to be_false
+    end
+  end
+
+  describe "#commit!" do
+    before :each do
+      @project = FactoryGirl.create(:project)
+      @commit = FactoryGirl.create(:commit, revision: 'abc123', project: @project)
+      @repo = double('Git::Repo')
+      @commit_obj = double('Git::Object::Commit', sha: 'abc123')
+      allow(@project).to receive(:repo).and_yield(@repo)
+      allow(@commit).to receive(:commit).and_return(@commit_obj)
+    end
+
+    it "returns the git object for the commit without fetching if it's already in local repo" do
+      expect(@repo).to_not receive(:fetch)
+      expect(@repo).to receive(:object).with('abc123').once.and_return(@commit_obj)
+      expect(@commit.commit!).to eql(@commit_obj)
+    end
+
+    it "returns the git object for the commit after fetching if it's not initially in local repo, but is in the remote repo" do
+      expect(@repo).to receive(:fetch).once
+      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil, @commit_obj)
+      expect(@commit.commit!).to eql(@commit_obj)
+    end
+
+    it "raises Git::CommitNotFoundError if the revision is not found" do
+      expect(@repo).to receive(:fetch).once
+      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
+      expect { @commit.commit! }.to raise_error(Git::CommitNotFoundError, "Commit not found in git repo: abc123 (it may have been rebased away)")
     end
   end
 end

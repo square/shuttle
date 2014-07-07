@@ -411,8 +411,8 @@ class CommitsController < ApplicationController
     render text: 'Unknown locale', status: :bad_request
   rescue Compiler::UnknownExporterError
     render text: 'Unknown format', status: :not_acceptable
-  rescue ActiveRecord::RecordNotFound
-    render text: 'Unknown commit', status: :not_found
+  rescue Git::CommitNotFoundError => err
+    render text: err.message, status: :not_found
   rescue Exporter::NoLocaleProvidedError
     render text: 'Must provide a single locale', status: :bad_request
   end
@@ -476,8 +476,8 @@ class CommitsController < ApplicationController
     render text: 'Commit not ready', status: :not_found
   rescue Compiler::UnknownLocaleError
     render text: 'Unknown locale', status: :bad_request
-  rescue ActiveRecord::RecordNotFound
-    render text: 'Unknown commit', status: :not_found
+  rescue Git::CommitNotFoundError => err
+    render text: err.message, status: :not_found
   end
 
   private
