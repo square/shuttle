@@ -12,25 +12,28 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# A concern for {Commit} that records errors that happen during commit importing. It uses Redis to
-# store import errors in a threadsafe fashion. At the end of the import process, these errors are
-# moved to the sql db to be stored for the long term.
+# A concern for {Commit} that records errors that happen during commit
+# importing. It uses Redis to store import errors in a threadsafe fashion.
+# At the end of the import process, these errors are moved to the sql db
+# to be stored for the long term.
 
 module ImportErrors
-  # @return [Array<Array<String>>] An array containing import error details stored in redis
-  # represented as  `[path_to_file_with_error, error_message]`.
+  # @return [Array<Array<String>>] An array containing import error details
+  # stored in redis represented as  `[error class name, error_message]`.
   def import_errors_in_redis
     Shuttle::Redis.smembers(import_errors_redis_key).map do |err|
-      first, *rest = err.split(' ')
-      [first, rest.join(' ')]
+      first, *rest = err.split(' - ')
+      [first, rest.join(' - ')]
     end
   end
 
   # Adds an import error to redis for a commit
-  #   @param [String] path The path of the file which the error occurred in.
-  #   @param [String] err The error message to record.
-  def add_import_error_in_redis(path, err)
-    Shuttle::Redis.sadd(import_errors_redis_key, "#{path} #{err}")
+  #   @param [Error] err The error object.
+  #   @param [String] message The error message to record. This will
+  #       default to the error message of the {Error err} if none provided.
+  def add_import_error_in_redis(err, addition_message = nil)
+    message = addition_message ? "#{err.message} (#{addition_message})" : err.message
+    Shuttle::Redis.sadd(import_errors_redis_key, "#{err.class} - #{message}")
   end
 
   # Moves import errors from Redis to SQL database

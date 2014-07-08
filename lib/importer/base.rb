@@ -403,7 +403,7 @@ module Importer
 
     def handle_import_error(err)
       @blob.update_column :errored, true
-      @commit.add_import_error_in_redis(file.path, err) if @commit
+      @commit.add_import_error_in_redis(err, "in #{file.path}") if @commit
     end
 
     File = Struct.new(:path, :contents, :locale)

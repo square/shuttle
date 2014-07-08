@@ -51,7 +51,7 @@ describe Importer::Yaml do
 
       it "should add error to commit" do
         expect(@commit.import_errors_in_redis).to eql([])
-        expect(@commit.import_errors).to eql([["/config/locales/ruby/broken.yml", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1"]])
+        expect(@commit.import_errors).to eql([["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"]])
         expect(@commit.blobs.where(errored: true).count).to eql(1)
       end
     end
