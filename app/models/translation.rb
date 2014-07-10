@@ -80,7 +80,7 @@ class Translation < ActiveRecord::Base
     indexes :id, type: 'integer', index: :not_analyzed
     indexes :project_id, type: 'integer', as: 'send(:key).project_id'
     indexes :translator_id, type: 'integer'
-    indexes :rfc5646_locale, type: 'string'
+    indexes :rfc5646_locale, type: 'string', index: :not_analyzed
     indexes :created_at, type: 'date'
     indexes :updated_at, type: 'date'
     indexes :translated, type: 'boolean'
