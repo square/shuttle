@@ -26,17 +26,10 @@
 
   .show-issue-wrapper class="#{'hide' if issue.errors.any?}"
     = render partial: 'issues/show', locals: { project: project, key: key, translation: translation, issue: issue }
-    = button_tag 'Update Issue', \
-                 'data-show-on-click' => "##{issue_wrapper_id} .edit-issue-wrapper", \
-                 'data-hide-on-click' => "##{issue_wrapper_id} .show-issue-wrapper", \
-                  class: "small default toggle-button"
 
-  .edit-issue-wrapper.loading-overlayable class="#{'hide' if issue.errors.blank?}"
+  = button_tag 'Edit Issue', class: "small default show-form-button #{'hide' if issue.errors.any?}"
+  .form-wrapper.loading-overlayable class="#{'hide' if issue.errors.blank?}"
     = render partial: 'issues/edit', locals: { project: project, key: key, translation: translation, issue: issue }
-    = button_tag 'Cancel', \
-                 'data-show-on-click' => "##{issue_wrapper_id} .show-issue-wrapper", \
-                 'data-hide-on-click' => "##{issue_wrapper_id} .edit-issue-wrapper", \
-                  class: "small default toggle-button hide-edit-issue-wrapper"
 
   .issue-comments-wrapper
     = render partial: 'comments/index', locals: {issue: issue, comment: Comment.new}

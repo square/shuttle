@@ -16,7 +16,4 @@ $(document).ready ->
   # A simple hook that hooks 'data-scroll-to' attr to jquery-scrollTo plugin.
   $('[data-scroll-to]').click (event) ->
     $(window).scrollTo($(this).attr('data-scroll-to'), 300);
-    # Cancel event
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    return false;
+    preventDefaultAndStopPropagation(event)
