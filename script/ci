@@ -17,25 +17,28 @@ function install_libarchive() {
 }
 
 function install_elasticsearch() {
-  curl -o elasticsearch.tar.gz https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.2.tar.gz
-
-  tar -xf elasticsearch.tar.gz
-  rm elasticsearch.tar.gz
-  mv elasticsearch-* elasticsearch
-  sudo mv elasticsearch /usr/local/share
-
-  curl -L "https://github.com/elasticsearch/elasticsearch-servicewrapper/tarball/master" | tar -xz
-  mv *servicewrapper*/service /usr/local/share/elasticsearch/bin/
-  rm -Rf *servicewrapper*
-  sudo /usr/local/share/elasticsearch/bin/service/elasticsearch install
+  sudo service elasticsearch stop
+  sudo yum remove elasticsearch
+  wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.1.noarch.rpm
+  yes | sudo yum install elasticsearch-1.2.1.noarch.rpm
 }
 
 function start_elasticsearch() {
-  sudo /etc/init.d/elasticsearch start
+  sudo sh -c "echo 'http.port: 9200' > /etc/elasticsearch/elasticsearch.yml"
+  sudo service elasticsearch start
+  curl 'localhost:9200'
+  err=$?
+  while [ $err -ne 0 ]
+  do
+    echo 'Waiting for ElasticSearch to start'
+    sleep 1
+    curl 'localhost:9200'
+    err=$?
+  done
 }
 
 function stop_elasticsearch() {
-  sudo /etc/init.d/elasticsearch stop
+  sudo service elasticsearch stop
 }
 
 function install_bundler_if_needed() {
