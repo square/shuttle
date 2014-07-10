@@ -23,4 +23,6 @@
     - issue.comments.each do |comment|
       = render partial: 'comments/show', locals: {comment: comment}
 
-  = render partial: 'comments/new_wrapper', locals: { issue: issue, comment: comment}
+  = button_tag 'Write a Comment', class: "small default show-form-button #{'hide' if comment.errors.any?}"
+  div class="form-wrapper loading-overlayable #{'hide' if comment.errors.blank?}"
+    = render partial: 'comments/new', locals: { issue: issue, comment: comment }

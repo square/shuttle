@@ -15,10 +15,20 @@
 $(document).ready ->
     # A simple helper function which shows and hides some elements when
     # a button is clicked in the issues section of the page.
-    $(document).on 'click', '#issues button.toggle-button', (event) ->
+    $(document).on 'click', '#issues form .cancel-button', (event) ->
+        form_wrapper = $(@).closest('.form-wrapper')
+        form_wrapper.hide()
+        form_wrapper.siblings('.show-issue-wrapper').show()
+        form_wrapper.siblings('.show-form-button').show()
+        preventDefaultAndStopPropagation(event)
+
+    $(document).on 'click', '#issues .show-form-button', (event) ->
         btn = $(@)
-        $(btn.data('show-on-click')).show()
-        $(btn.data('hide-on-click')).hide()
+        btn.hide()
+        btn.siblings('.show-issue-wrapper').hide()
+        $(@).siblings('.form-wrapper').show()
+        preventDefaultAndStopPropagation(event)
+
 
     # Adds an overlay over the wrapper to prevent UI interaction with wrapper.
     # Adds a spinner to the overlay.
