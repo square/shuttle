@@ -46,6 +46,9 @@ hr.divider
         .controls
           textarea.resize readonly="readonly" rows=7
             = @translation.copy
+          - if current_user.translator?
+            = link_to edit_project_key_translation_path(@project, @key, @translation), class: "edit-page-link button default square" do
+              i.fa.fa-pencil-square-o
 
   / Information Side
   .eight.columns.info-side
