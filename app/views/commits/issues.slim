@@ -49,7 +49,7 @@
             td class="issue-status issue-status-#{issue.status}" = t("models.issue.status")[issue.status]
             td = t("models.issue.priority")[issue.priority ? issue.priority : :none]
             td = t("models.issue.kind")[issue.kind_was]
-            td = link_to issue.summary, issue_url(issue)
+            td = link_to issue.summary, issue_url(issue, current_user)
             td = l(issue.created_at, format: :mon_day_year)
     - else
       .no-issues-found.text-success No Issues found!
