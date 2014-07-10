@@ -25,6 +25,9 @@ class CommitObserver < ActiveRecord::Observer
 
   def after_commit(commit)
     ping_stash_webhook(commit)
+  end
+
+  def after_commit_on_update(commit)
     ping_github_webhook(commit)
   end
 
@@ -35,9 +38,7 @@ class CommitObserver < ActiveRecord::Observer
   private
 
   def ping_github_webhook(commit)
-    if !commit.previous_changes.include?(:id) && # make sure action is update, not create
-        commit.project.github_webhook_url &&
-        commit.previous_changes.include?(:ready) && commit.ready? # just became ready
+    if commit.project.github_webhook_url && commit.previous_changes.include?(:ready) && commit.ready? # if it just became ready
       GithubWebhookPinger.perform_once(commit.id)
     end
   end

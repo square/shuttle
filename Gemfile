@@ -21,6 +21,7 @@ gem 'find_or_create_on_scopes'
 gem 'composite_primary_keys', github: 'RISCfuture/composite_primary_keys', branch: 'rebase'
 gem 'rails-observers'
 gem 'tire'
+gem 'after-commit-on-action'
 
 # VIEWS
 gem 'jquery-rails'
