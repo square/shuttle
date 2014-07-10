@@ -104,7 +104,6 @@ class TranslationItem
       success: (match) =>
         return unless match?
         @copy_field.val match.copy
-        @copy_field.focus()
         @copy_field[0].selectionStart = 0
         @copy_field[0].selectionEnd = match.copy.length
 
