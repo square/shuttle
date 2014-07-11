@@ -159,3 +159,17 @@ jQuery.fn.extend
   # Like $.append, but safely appends text with HTML-unsafe characters.
   appendText: (text) ->
     $(this).append document.createTextNode(text)
+
+# Prevents default behavior, stops propagation, and returns false.
+#
+# @example
+#   $(document).on 'click', '#my-element', (event) ->
+#     preventDefaultAndStopPropagation(event)
+#
+# @param [Event] event The event that needs to be stopped.
+# @return false in order to stop propagation.
+#
+root.preventDefaultAndStopPropagation = (event) ->
+  event.preventDefault()
+  event.stopImmediatePropagation()
+  false

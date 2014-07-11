@@ -20,7 +20,9 @@
   .sixteen.columns
     legend ISSUES
 
-    = render partial: 'issues/new_wrapper', locals: { project: project, key: key, translation: translation, issue: issue }
+    = button_tag 'Create a New Issue', class: "default show-form-button #{'hide' if issue.errors.any?}"
+    div class="form-wrapper loading-overlayable #{'hide' if issue.errors.blank?}"
+      = render partial: 'issues/new', locals: { project: project, key: key, translation: translation, issue: issue }
 
     - if issues.present?
       h3 Existing Issues

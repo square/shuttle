@@ -17,12 +17,18 @@
 module IssuesHelper
 
   # The url to view an issue.
+  # Issue can be viewed in both an edit translation page and show translation page.
+  # If `user` is provided, and is a translator, this will produce the issue url within
+  # the edit translation page.
   #
   # @param [Issue] issue The issue of interest.
+  # @param [User] user The user who will see this url.
   # @return [String] Url of the issue in the project_key_translation page, with the section identifier.
 
-  def issue_url(issue)
+  def issue_url(issue, user=nil)
     raise ArgumentError, "Issue must be provided" unless issue.is_a?(Issue)
-    project_key_translation_url(issue.translation.key.project, issue.translation.key, issue.translation) + "#issue-wrapper-#{issue.id}"
+
+    args = [issue.translation.key.project, issue.translation.key, issue.translation]
+    (user.try(:translator?) ? edit_project_key_translation_url(*args) : project_key_translation_url(*args)) + "#issue-wrapper-#{issue.id}"
   end
 end

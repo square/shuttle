@@ -30,6 +30,8 @@ $issue-status-yellow: #E4DB00;
   }
 
   .issue-wrapper {
+    padding: 30px 10px;
+
     .issue-status {
       padding: 0 5px;
     }
@@ -40,26 +42,21 @@ $issue-status-yellow: #E4DB00;
     }
   }
 
-  .issues-table {
-    border: 1px solid $gray6;
+  .cancel-button {
+    width: 200px;
+    margin-left: 5px;
   }
 
-  .issue-wrapper {
-    padding: 30px 10px;
-  }
-
-  .new-issue-wrapper, .edit-issue-wrapper, .new-comment-wrapper {
+  .form-wrapper {
     position: relative;
   }
 
-  .hide-new-issue-wrapper, .hide-edit-issue-wrapper {
-    margin-left: 180px;
+  .comments .cancel-button {
+    width: 100px;
   }
 
-  .hide-new-comment-wrapper {
-    margin-top: -37px;
-    float: left;
-    margin-left: 90px;
+  .issues-table {
+    border: 1px solid $gray6;
   }
 
   .comment {
@@ -87,8 +84,10 @@ $issue-status-yellow: #E4DB00;
 
   .control-group {
     margin-bottom: 5px;
+
     .controls {
       min-height: 30px;
+      display: flex;
     }
     div.controls {
       padding-top: 9px;
