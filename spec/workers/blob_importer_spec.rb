@@ -25,7 +25,7 @@ describe BlobImporter do
         @commit.blobs << @blob
 
         expect(BlobImporter.new.perform("yaml", @project.id, "abc123", "some/path", @commit.id, nil)).to_not raise_error
-        expect(@commit.import_errors_in_redis).to eql([["Git::BlobNotFoundError", "Blob not found in git repo: abc123 (it may have been rebased away) (failed in BlobImporter for commit_id #{@commit.id} and blob abc123)"]])
+        expect(@commit.import_errors_in_redis).to eql([["Git::BlobNotFoundError", "Blob not found in git repo: abc123 (failed in BlobImporter for commit_id #{@commit.id} and blob abc123)"]])
       end
     end
   end

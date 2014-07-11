@@ -559,7 +559,7 @@ describe Commit do
     it "raises Git::CommitNotFoundError if the revision is not found" do
       expect(@repo).to receive(:fetch).once
       expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
-      expect { @commit.commit! }.to raise_error(Git::CommitNotFoundError, "Commit not found in git repo: abc123 (it may have been rebased away)")
+      expect { @commit.commit! }.to raise_error(Git::CommitNotFoundError, "Commit not found in git repo: abc123")
     end
   end
 end

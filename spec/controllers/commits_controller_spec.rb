@@ -354,6 +354,14 @@ de:
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr,de', format: 'strings'
       expect(response.status).to eql(400)
     end
+
+    it "should 404 with the commit not found in git repo error message if the commit is in db, but not found in git repo" do
+      allow_any_instance_of(Git::Base).to receive(:object).and_return(nil) # fake a CommitNotFoundError error
+      get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'strings'
+
+      expect(response.status).to eql(404)
+      expect(response.body).to eql("Commit with sha '#{@commit.revision}' could not be found in git repo. It may have been rebased away. Please submit the new sha to get your strings translated.")
+    end
   end
 
   describe '#localize' do
@@ -627,6 +635,14 @@ de:
       get :localize, project_id: @project.to_param, id: 'deadbeef', format: 'yaml'
       expect(response.status).to eql(404)
     end
+
+    it "should 404 with the commit not found in git repo error message if the commit is in db, but not found in git repo" do
+      allow_any_instance_of(Git::Base).to receive(:object).and_return(nil) # fake a CommitNotFoundError error
+      get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'strings'
+
+      expect(response.status).to eql(404)
+      expect(response.body).to eql("Commit with sha '#{@commit.revision}' could not be found in git repo. It may have been rebased and garbage collected in git. Please submit the new sha to be able to download the translations.")
+    end
   end
 
   describe '#create' do
@@ -679,7 +695,8 @@ de:
       mail = ActionMailer::Base.deliveries.first
       expect(mail.to).to eql([@user.email])
       expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
-      expect(mail.body).to include("Error Class: Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123 (it may have been rebased away)")
+      expect(mail.body).to include("Error Class:   Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123")
+      expect(mail.body).to include("Shuttle couldn't find your sha 'xyz123' in the git repo. Our best guesses are that the sha was invalid or your commit was rebased away. Please submit the new sha to be able to get your strings translated.")
     end
 
     it "sends an email to current user and the commit author if valid sha is submitted but sha goes invalid after CommitCreator finished and before import is finished" do
@@ -694,8 +711,8 @@ de:
 
       commit = project.commits.last
       expected_errors = [["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
-                         ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (it may have been rebased away) (failed in BlobImporter for commit_id #{commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"],
-                         ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (it may have been rebased away) (failed in KeyCreator for commit_id #{commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"],
+                         ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"],
+                         ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in KeyCreator for commit_id #{commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"],
                          ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
                          ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]]
 
@@ -711,6 +728,7 @@ de:
       expected_errors.each do |err_class, err_message|
         expect(mail.body).to include("#{err_class} - #{err_message}")
       end
+      expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. Our best guess is that your commit was rebased away. Please submit the new sha to be able to get your strings translated.")
     end
   end
 
