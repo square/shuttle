@@ -24,7 +24,7 @@ describe CommitImporter do
           commit = FactoryGirl.create(:commit, revision: "abc123", project: project)
 
           expect { CommitImporter.new.perform(commit.id) }.to_not raise_error
-          expect(commit.import_errors_in_redis).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (it may have been rebased away) (failed in CommitImporter for commit_id #{commit.id})"]])
+          expect(commit.import_errors_in_redis).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in CommitImporter for commit_id #{commit.id})"]])
         end
       end
     end
@@ -61,8 +61,8 @@ describe CommitImporter do
           commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
 
           expected_errors = [["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
-                             ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (it may have been rebased away) (failed in BlobImporter for commit_id #{commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"],
-                             ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (it may have been rebased away) (failed in KeyCreator for commit_id #{commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"],
+                             ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"],
+                             ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in KeyCreator for commit_id #{commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"],
                              ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
                              ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]]
 
@@ -76,7 +76,7 @@ describe CommitImporter do
           ActionMailer::Base.deliveries.clear
           commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
 
-          expected_errors = [["Git::CommitNotFoundError", "Commit not found in git repo: e5f5704af3c1f84cf42c4db46dcfebe8ab842bde (it may have been rebased away) (failed in CommitImporter for commit_id #{commit.id})"]]
+          expected_errors = [["Git::CommitNotFoundError", "Commit not found in git repo: e5f5704af3c1f84cf42c4db46dcfebe8ab842bde (failed in CommitImporter for commit_id #{commit.id})"]]
           expect(commit.reload.import_errors.sort).to eql(expected_errors.sort)
           expect_to_send_import_errors_email(expected_errors)
         end

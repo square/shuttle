@@ -431,7 +431,7 @@ class CommitsController < ApplicationController
   rescue Compiler::UnknownExporterError
     render text: 'Unknown format', status: :not_acceptable
   rescue Git::CommitNotFoundError => err
-    render text: err.message, status: :not_found
+    render text: I18n.t("controllers.commits.base.not_found_in_repo", revision: params[:id]), status: :not_found
   rescue Exporter::NoLocaleProvidedError
     render text: 'Must provide a single locale', status: :bad_request
   end
@@ -496,7 +496,7 @@ class CommitsController < ApplicationController
   rescue Compiler::UnknownLocaleError
     render text: 'Unknown locale', status: :bad_request
   rescue Git::CommitNotFoundError => err
-    render text: err.message, status: :not_found
+    render text: I18n.t("controllers.commits.base.not_found_in_repo", revision: params[:id]), status: :not_found
   end
 
   private

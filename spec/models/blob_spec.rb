@@ -73,7 +73,7 @@ describe Blob do
     it "raises Git::BlobNotFoundError if the sha is not found" do
       expect(@repo).to receive(:fetch).once
       expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
-      expect { @blob.blob! }.to raise_error(Git::BlobNotFoundError, "Blob not found in git repo: abc123 (it may have been rebased away)")
+      expect { @blob.blob! }.to raise_error(Git::BlobNotFoundError, "Blob not found in git repo: abc123")
     end
   end
 end

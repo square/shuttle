@@ -30,7 +30,7 @@ describe CommitCreator do
         mail = ActionMailer::Base.deliveries.first
         expect(mail.to).to eql(["example@squareup.com"])
         expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
-        expect(mail.body).to include("Error Class: Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123 (it may have been rebased away)")
+        expect(mail.body).to include("Error Class:   Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123")
       end
 
       it "rescues from Git::CommitNotFoundError error but doesn't send an email if given user_id is nil" do

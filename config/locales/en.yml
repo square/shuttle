@@ -150,6 +150,7 @@ en:
         invalid_format: Not a valid export format.
       base:
         unknown_locale: You must specify a known locale to import.
+        not_found_in_repo: Commit with sha '%{revision}' could not be found in git repo. It may have been rebased away. Please submit the new sha to get your strings translated.
       import:
         done: Import completed.
       recalculate:
@@ -307,8 +308,10 @@ en:
         subject: "[Shuttle] Finished translation of commit"
       notify_submitter_of_import_errors:
         subject: "[Shuttle] Error(s) occurred during the import"
+        not_found_in_repo_message: "Shuttle couldn't find at least one sha from your commit in the git repo. Our best guess is that your commit was rebased away. Please submit the new sha to be able to get your strings translated."
       notify_import_errors_in_commit_creator:
         subject: "[Shuttle] Import Failed for sha: %{sha}"
+        not_found_in_repo_message: "Shuttle couldn't find your sha '%{sha}' in the git repo. Our best guesses are that the sha was invalid or your commit was rebased away. Please submit the new sha to be able to get your strings translated."
     issue:
       issue_created:
         subject: "[Shuttle] %{name} reported a new issue. Issue Summary: %{summary}"

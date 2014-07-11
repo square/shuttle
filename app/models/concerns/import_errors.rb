@@ -29,8 +29,8 @@ module ImportErrors
 
   # Adds an import error to redis for a commit
   #   @param [Error] err The error object.
-  #   @param [String] message The error message to record. This will
-  #       default to the error message of the {Error err} if none provided.
+  #   @param [String] addition_message The error message to record in addition to the
+  #       actual error message. If provided, it will be added to the end, in paranthesis.
   def add_import_error_in_redis(err, addition_message = nil)
     message = addition_message ? "#{err.message} (#{addition_message})" : err.message
     Shuttle::Redis.sadd(import_errors_redis_key, "#{err.class} - #{message}")
