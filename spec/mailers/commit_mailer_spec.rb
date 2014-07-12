@@ -42,7 +42,7 @@ describe CommitMailer do
                        ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]]
 
         mail = set_import_errors_and_expect_an_email_with_them_return_mail_object(@commit, fake_errors)
-        expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. Our best guess is that your commit was rebased away. Please submit the new sha to be able to get your strings translated.")
+        expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated.")
       end
 
       it "and with the extra explanation for Git::NotFoundErors, if there is a Git::CommitNotFoundError and no Git::BlobNotFoundError" do
@@ -50,7 +50,7 @@ describe CommitMailer do
                        ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in KeyCreator for commit_id #{@commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"]]
 
         mail = set_import_errors_and_expect_an_email_with_them_return_mail_object(@commit, fake_errors)
-        expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. Our best guess is that your commit was rebased away. Please submit the new sha to be able to get your strings translated.")
+        expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated.")
       end
 
       it "and with the extra explanation for Git::NotFoundErors, if there is no Git::CommitNotFoundError and 1 Git::BlobNotFoundError" do
@@ -58,7 +58,7 @@ describe CommitMailer do
                        ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{@commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"]]
 
         mail = set_import_errors_and_expect_an_email_with_them_return_mail_object(@commit, fake_errors)
-        expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. Our best guess is that your commit was rebased away. Please submit the new sha to be able to get your strings translated.")
+        expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated.")
       end
 
       it "but without the extra explanation for Git::NotFoundErors, if there are no Git::NotFoundError" do
@@ -97,7 +97,7 @@ describe CommitMailer do
       expect(mail.to).to eql(["example@example.com"])
       expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
       expect(mail.body).to include("Error Class:   Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123")
-      expect(mail.body).to include("Shuttle couldn't find your sha 'xyz123' in the git repo. Our best guesses are that the sha was invalid or your commit was rebased away. Please submit the new sha to be able to get your strings translated.")
+      expect(mail.body).to include("Shuttle couldn't find your sha 'xyz123' in the git repo. This typically happens when your commit gets rebased away or the sha was invalid. Please submit the new sha to be able to get your strings translated.")
     end
 
     it "sends an email to the user if user_id is valid, but doesn't include the extra explanation about rebasing if the error is not related to Git::NotFoundError" do
