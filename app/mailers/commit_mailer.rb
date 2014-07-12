@@ -54,8 +54,27 @@ class CommitMailer < ActionMailer::Base
   def notify_submitter_of_import_errors(commit)
     @commit = commit
     submitter_emails = [@commit.author_email, @commit.user.try!(:email)].compact.uniq
-    if submitter_emails.present?
+    if submitter_emails.present? && @commit.import_errors.present?
       mail to: submitter_emails, subject: t('mailer.commit.notify_submitter_of_import_errors.subject')
+    end
+  end
+
+  # Notifies the user of a SHA which errored in the CommitCreator worker.
+  # An email will only be sent if the options hash a user_id field.
+  #
+  # @param [Fixnum] user_id The ID of the submitter.
+  # @param [Fixnum] project_id The ID of a Project.
+  # @param [String] sha The SHA of the commit to that failed in CommitCreator
+  # @param [StandardError] err The Error that happened.
+  #
+  # @return [Mail::Message] The email to be delivered.
+
+  def notify_import_errors_in_commit_creator(user_id, project_id, sha, err)
+    if user_id && (user = User.find_by_id(user_id))
+      @project = Project.find(project_id)
+      @err, @sha = err, sha
+
+      mail to: user.email, subject: t('mailer.commit.notify_import_errors_in_commit_creator.subject', sha: @sha)
     end
   end
 end

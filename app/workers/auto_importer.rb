@@ -48,19 +48,16 @@ class AutoImporter
       project.repo &:fetch
 
       branches_to_delete = [] # any branches that don't actually exist anymore?
-
       project.watched_branches.each do |branch|
         begin
-          project.commit! branch,
-                          other_fields: {description: "Automatically imported from the #{branch} branch"}
-        rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound
-          # branch doesn't actually exist; remove from watched branches and ignore
-          branches_to_delete << branch
+          project.commit! branch, other_fields: {description: "Automatically imported from the #{branch} branch"}
+        rescue Git::CommitNotFoundError => err
+          branches_to_delete << branch # branch doesn't actually exist; remove from watched branches and ignore
         end
       end
-
       project.watched_branches = project.watched_branches - branches_to_delete
       project.save!
+
     rescue Timeout::Error => err
       Squash::Ruby.notify err, project_id: project_id
       self.class.perform_in 2.minutes, project_id

@@ -354,6 +354,14 @@ de:
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr,de', format: 'strings'
       expect(response.status).to eql(400)
     end
+
+    it "should 404 with the commit not found in git repo error message if the commit is in db, but not found in git repo" do
+      allow_any_instance_of(Git::Base).to receive(:object).and_return(nil) # fake a CommitNotFoundError error
+      get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'strings'
+
+      expect(response.status).to eql(404)
+      expect(response.body).to eql("Commit with sha '#{@commit.revision}' could not be found in git repo. It may have been rebased away. Please submit the new sha to get your strings translated.")
+    end
   end
 
   describe '#localize' do
@@ -622,6 +630,19 @@ de:
 
       Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
     end
+
+    it "should 404 if an invalid commit SHA is provided" do
+      get :localize, project_id: @project.to_param, id: 'deadbeef', format: 'yaml'
+      expect(response.status).to eql(404)
+    end
+
+    it "should 404 with the commit not found in git repo error message if the commit is in db, but not found in git repo" do
+      allow_any_instance_of(Git::Base).to receive(:object).and_return(nil) # fake a CommitNotFoundError error
+      get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'strings'
+
+      expect(response.status).to eql(404)
+      expect(response.body).to eql("Commit with sha '#{@commit.revision}' could not be found in git repo. It may have been rebased and garbage collected in git. Please submit the new sha to be able to download the translations.")
+    end
   end
 
   describe '#create' do
@@ -665,6 +686,49 @@ de:
       expect(CommitCreator).not_to receive(:perform_once)
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
       expect(JSON.parse(response.body)['alert']).to include('already submitted')
+    end
+
+    it "sends an email to current user if invalid sha is submitted or sha goes invalid before CommitCreator is run" do
+      ActionMailer::Base.deliveries.clear
+      expect { post :create, project_id: @project.to_param, commit: {revision: 'xyz123'}, format: 'json' }.to_not raise_error
+      expect(ActionMailer::Base.deliveries.size).to eql(1)
+      mail = ActionMailer::Base.deliveries.first
+      expect(mail.to).to eql([@user.email])
+      expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
+      expect(mail.body).to include("Error Class:   Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123")
+      expect(mail.body).to include("Shuttle couldn't find your sha 'xyz123' in the git repo. This typically happens when your commit gets rebased away or the sha was invalid. Please submit the new sha to be able to get your strings translated.")
+    end
+
+    it "sends an email to current user and the commit author if valid sha is submitted but sha goes invalid after CommitCreator finished and before import is finished" do
+      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s).delete_all
+      project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
+      ActionMailer::Base.deliveries.clear
+
+      allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_call_original
+      allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).with("88e5b52732c23a4e33471d91cf2281e62021512a").and_return(nil) # fake a Git::BlobNotFoundError in CommitImporter
+      allow_any_instance_of(Commit).to receive(:skip_key?).with("how_are_you").and_raise(Git::CommitNotFoundError, "fake_sha") # fake a CommitNotFoundError error in KeyCreator failure
+      expect { post :create, project_id: project.to_param, commit: {revision: 'e5f5704af3c1f84cf42c4db46dcfebe8ab842bde'}, format: 'json' }.to_not raise_error
+
+      commit = project.commits.last
+      expected_errors = [["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
+                         ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"],
+                         ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in KeyCreator for commit_id #{commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"],
+                         ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
+                         ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]]
+
+      # expect to persist errors
+      expect(commit.ready? || commit.tap(&:recalculate_ready!).ready? ).to be_falsey
+      expect(commit.import_errors.sort).to eql(expected_errors.sort)
+
+      # expect sending email
+      expect(ActionMailer::Base.deliveries.size).to eql(1)
+      mail = ActionMailer::Base.deliveries.first
+      expect(mail.to).to eql(["yunus@squareup.com", @user.email])
+      expect(mail.subject).to eql("[Shuttle] Error(s) occurred during the import")
+      expected_errors.each do |err_class, err_message|
+        expect(mail.body).to include("#{err_class} - #{err_message}")
+      end
+      expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated.")
     end
   end
 

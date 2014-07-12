@@ -19,10 +19,6 @@
 # 3. Sends an email to the translators alerting them of the new commit, if it has finished loading.
 
 class CommitObserver < ActiveRecord::Observer
-  def before_update(commit)
-    handle_import_errors(commit)
-  end
-
   def after_commit(commit)
     ping_stash_webhook(commit)
   end
@@ -55,13 +51,6 @@ class CommitObserver < ActiveRecord::Observer
     end
     if commit.ready_was == false && commit.ready == true && commit.loading == false
       CommitMailer.notify_translation_finished(commit).deliver
-    end
-  end
-
-  def handle_import_errors(commit)
-    if commit.loading_was == true && commit.loading == false && commit.import_errors_in_redis.present?
-      commit.copy_import_errors_from_redis_to_sql_db
-      CommitMailer.notify_submitter_of_import_errors(commit).deliver
     end
   end
 end

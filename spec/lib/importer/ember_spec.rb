@@ -50,14 +50,16 @@ describe Importer::Ember do
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
                                       only_paths:     %w(ember-broken/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
-        @commit  = @project.commit!('HEAD').reload
+        @commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde').reload
       end
 
       it "should add error to commit" do
         expect(@commit.import_errors_in_redis).to eql([])
-        expect(@commit.import_errors.sort).to eql([["/ember-broken/en-US.js", "Unexpected identifier at <eval>:2:12"],
-                                                   ["/ember-broken/en-US.coffee", "[stdin]:2:5: error: unexpected this this is some invalid javascript code ^^^^"]].sort)
+        expect(@commit.import_errors.sort).to eql([["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
+                                                   ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]].sort)
         expect(@commit.blobs.where(errored: true).count).to eql(1) # these 2 files have the same contents, so they map to the same blob
+        expect(@commit.blobs.where(parsed: false).count).to eql(1)
+        expect(@commit.blobs.where(parsed: true).count).to eql(0)
       end
     end
   end

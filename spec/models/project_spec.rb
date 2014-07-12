@@ -68,7 +68,7 @@ describe Project do
     it "should raise an exception if the rev is still unknown after fetching" do
       expect(@repo).to receive(:fetch).once
       expect(@repo).to receive(:object).with('abc123').and_return(nil, nil)
-      expect { @project.commit!('abc123') }.to raise_error(ActiveRecord::RecordNotFound)
+      expect { @project.commit!('abc123') }.to raise_error(Git::CommitNotFoundError)
     end
   end
 
@@ -133,6 +133,38 @@ describe Project do
       FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), approved: false, copy: "foo", rfc5646_locale: 'en-US'
 
       expect(@project.pending_reviews).to eql(2)
+    end
+  end
+
+  describe "#find_or_fetch_git_object" do
+    before :each do
+      @project = FactoryGirl.create(:project)
+      @repo = double('Git::Repo')
+      @git_obj = double('Git::Object', sha: 'abc123')
+      allow(@project).to receive(:repo).and_yield(@repo)
+    end
+
+    it "finds the git object in repo without fetching when it's already in repo" do
+      expect(@repo).to_not receive(:fetch)
+      expect(@repo).to receive(:object).with('abc123').once.and_return(@git_obj)
+      git_obj = @project.find_or_fetch_git_object('abc123')
+      expect(git_obj).to eql(@git_obj)
+      expect(git_obj.sha).to eql('abc123')
+    end
+
+    it "finds the git object in repo after fetching when it was not previously in the repo" do
+      expect(@repo).to receive(:fetch).once
+      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil, @git_obj)
+      git_obj = @project.find_or_fetch_git_object('abc123')
+      expect(git_obj).to eql(@git_obj)
+      expect(git_obj.sha).to eql('abc123')
+    end
+
+    it "doesn't find the git object if it is not found in the local repo even after fetching" do
+      expect(@repo).to receive(:fetch).once
+      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
+      git_obj = @project.find_or_fetch_git_object('abc123')
+      expect(git_obj).to be_nil
     end
   end
 

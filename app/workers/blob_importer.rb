@@ -35,15 +35,6 @@ class BlobImporter
     project = Project.find(project_id)
     blob    = project.blobs.with_sha(sha).first!
 
-    if blob.blob!.nil?
-      # for whatever reason sometimes the blob is not accessible; try again in
-      # 5 minutes
-      commit.import_batch.jobs do
-        BlobImporter.perform_in 5.minutes, importer, project_id, sha, path, commit_id, rfc5646_locale
-      end
-      return
-    end
-
     importer = Importer::Base.find_by_ident(importer)
 
     blob.import_strings importer,
@@ -51,6 +42,8 @@ class BlobImporter
                         commit: commit,
                         locale: locale,
                         inline: jid.nil?
+  rescue Git::BlobNotFoundError => err
+    commit.add_import_error_in_redis(err, "failed in BlobImporter for commit_id #{commit_id} and blob #{sha}")
   end
 
   include SidekiqLocking

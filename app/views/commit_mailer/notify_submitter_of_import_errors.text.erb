@@ -3,10 +3,12 @@ The following errors occured while we were importing your commit <%= @commit.rev
 SHA: <%= @commit.revision %>
 Link: <%= project_commit_url(@commit.project, @commit) %>
 
+<%= t("mailer.commit.notify_submitter_of_import_errors.not_found_in_repo_message") if @commit.import_errors.any? {|err_arr| err_arr.first.try(:constantize).try(:<, Git::NotFoundError) } %>
+
 Errors:
 
-<% @commit.import_errors.each do |path, err| %>
-<%= err %> (in <%= path %>)
+<% @commit.import_errors.each_with_index do |err_arr, index| %>
+    <%= index + 1 %>) <%= err_arr.first %> - <%= err_arr.last %>
 <% end %>
 
 
