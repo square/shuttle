@@ -696,7 +696,7 @@ de:
       expect(mail.to).to eql([@user.email])
       expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
       expect(mail.body).to include("Error Class:   Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123")
-      expect(mail.body).to include("Shuttle couldn't find your sha 'xyz123' in the git repo. Our best guesses are that the sha was invalid or your commit was rebased away. Please submit the new sha to be able to get your strings translated.")
+      expect(mail.body).to include("Shuttle couldn't find your sha 'xyz123' in the git repo. This typically happens when your commit gets rebased away or the sha was invalid. Please submit the new sha to be able to get your strings translated.")
     end
 
     it "sends an email to current user and the commit author if valid sha is submitted but sha goes invalid after CommitCreator finished and before import is finished" do
@@ -728,7 +728,7 @@ de:
       expected_errors.each do |err_class, err_message|
         expect(mail.body).to include("#{err_class} - #{err_message}")
       end
-      expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. Our best guess is that your commit was rebased away. Please submit the new sha to be able to get your strings translated.")
+      expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated.")
     end
   end
 

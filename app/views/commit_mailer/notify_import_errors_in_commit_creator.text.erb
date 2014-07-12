@@ -1,6 +1,6 @@
 An error occurred during we were trying to import your sha: <%= @sha %>.
 
-<%= I18n.t("mailer.commit.notify_import_errors_in_commit_creator.not_found_in_repo_message", sha: @sha) if @err.is_a? Git::CommitNotFoundError %>
+<%= t("mailer.commit.notify_import_errors_in_commit_creator.not_found_in_repo_message", sha: @sha) if @err.is_a? Git::CommitNotFoundError %>
 
 Details of the Error:
 
