@@ -141,6 +141,7 @@ en:
       reviewer_required: You must be a reviewer to do that.
       admin_required: You must be an administrator to do that.
     commits:
+      blank_repository_url: This project doesn't have a repository url. You need to provide one to be able to complete this action.
       create:
         success: Your commit %{revision} has been received and is being processed.
         already_submitted: You have already submitted that revision for translation. Once it is loaded from the repository, it will appear on Shuttle and the import process will begin.

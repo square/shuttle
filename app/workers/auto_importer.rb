@@ -23,7 +23,7 @@ class AutoImporter
   # Runs this worker.
 
   def perform
-    Project.find_each do |project|
+    Project.with_repository_url.find_each do |project|
       next unless project.watched_branches.present?
       ProjectAutoImporter.perform_once project.id
     end
@@ -45,6 +45,8 @@ class AutoImporter
 
     def perform(project_id)
       project = Project.find(project_id)
+      return unless project.repository_url.present? && project.watched_branches.present?
+
       project.repo &:fetch
 
       branches_to_delete = [] # any branches that don't actually exist anymore?
