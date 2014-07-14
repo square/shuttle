@@ -24,6 +24,7 @@ class CommitsController < ApplicationController
   before_filter :admin_required, only: :clear
 
   before_filter :find_project
+  before_filter :require_repository_url, except: [:show, :tools, :gallery, :issues, :search, :update, :destroy]
   before_filter :find_commit, except: [:create, :manifest, :localize]
   before_filter :find_format
   before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
@@ -514,6 +515,10 @@ class CommitsController < ApplicationController
       end
     end
     @commit = @project.commits.for_revision(params[:id]).first!
+  end
+
+  def require_repository_url
+    render json: { alert: t('controllers.commits.blank_repository_url') } if @project.repository_url.blank?
   end
 
   def find_format

@@ -52,6 +52,22 @@ describe Blob do
     end
   end
 
+  describe "#blob" do
+    it "raises Project::BlankRepositoryUrlError if repository_url is nil" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      blob = FactoryGirl.create(:blob, project: project)
+      expect { blob.blob }.to raise_error(Project::BlankRepositoryUrlError)
+    end
+
+    it "returns the git blob object" do
+      @blob_obj = double('Git::Object::Blob', sha: 'abc123')
+      expect(File).to receive(:exist?).and_return(true)
+      expect(Git).to receive(:bare).and_return(@repo)
+      expect(@repo).to receive(:object).with("abc123").and_return(@blob_obj)
+      expect(@blob.blob).to eql(@blob_obj)
+    end
+  end
+
   describe "#blob!" do
     before :each do
       allow(@project).to receive(:repo).and_yield(@repo)
@@ -74,6 +90,12 @@ describe Blob do
       expect(@repo).to receive(:fetch).once
       expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
       expect { @blob.blob! }.to raise_error(Git::BlobNotFoundError, "Blob not found in git repo: abc123")
+    end
+
+    it "raises Project::BlankRepositoryUrlError if repository_url is nil" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      blob = FactoryGirl.create(:blob, project: project)
+      expect { blob.blob }.to raise_error(Project::BlankRepositoryUrlError)
     end
   end
 end
