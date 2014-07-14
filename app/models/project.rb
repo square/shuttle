@@ -111,6 +111,7 @@ class Project < ActiveRecord::Base
   )
 
   extend SetNilIfBlank
+  set_nil_if_blank :repository_url
   set_nil_if_blank :github_webhook_url
   set_nil_if_blank :stash_webhook_url
 
@@ -127,8 +128,6 @@ class Project < ActiveRecord::Base
   validates :name,
             presence: true,
             length:   {maximum: 256}
-  validates :repository_url,
-            presence:   true
   validates :api_key,
             presence: true
             #uniqueness: true,
