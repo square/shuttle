@@ -15,6 +15,25 @@
 require 'spec_helper'
 
 describe Project do
+  describe '[CRUD]' do
+    it "creates a valid project even if repository_url is nil" do
+      project = Project.create(name: "Project without a repository_url")
+      expect(project).to be_valid
+      expect(project).to be_persisted
+    end
+
+    it "creates a valid project even if repository_url is empty" do
+      project = Project.create(name: "Project with an empty repository_url", repository_url: "")
+      expect(project).to be_valid
+      expect(project).to be_persisted
+    end
+
+    it "sets repository_url to nil if it's empty" do
+      project = Project.create(name: "Project with an empty repository_url", repository_url: "")
+      expect(project.repository_url).to be_nil
+    end
+  end
+
   describe '#repo' do
     it "should check out the repository and return a Repository object" do
       Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
