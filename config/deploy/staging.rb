@@ -1,4 +1,5 @@
 set :stage, :staging
+set :rails_env, :staging
 
 role :app, %w{square@shuttle-stage-a-01.corp.squareup.com}
 role :web, %w{square@shuttle-stage-a-01.corp.squareup.com}
