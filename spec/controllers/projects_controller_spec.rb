@@ -37,4 +37,21 @@ describe ProjectsController do
       expect(@project.commits.first.description).to eql('github webhook')
     end
   end
+
+  describe '#stash_webhook' do
+    it "returns 200 if project has a repository_url" do
+      Project.delete_all
+      project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      expect(CommitCreator).to receive(:perform_once).once
+      post :stash_webhook, { id: project.to_param, sha: "HEAD" }
+      expect(response).to be_ok
+    end
+
+    it "returns 400 if project doesn't have a repository_url" do
+      project = Project.create(name: "Test")
+      expect(CommitCreator).to_not receive(:perform_once)
+      post :stash_webhook, { id: project.to_param, sha: "HEAD" }
+      expect(response.status).to eql(400)
+    end
+  end
 end

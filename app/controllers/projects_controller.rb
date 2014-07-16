@@ -210,7 +210,8 @@ class ProjectsController < ApplicationController
     end
   end
 
-  # Receives a stash webhook and triggers a new import for the latest commit.
+  # Receives a stash webhook and triggers a new import for the latest commit,
+  # if project has a repository_url. Otherwise, it returns a 400 error.
   #
   # Routes
   # ------
@@ -240,7 +241,7 @@ class ProjectsController < ApplicationController
       CommitCreator.perform_once @project.id, revision, other_fields: other_fields
       render status: :ok, text: 'Success'
     else
-      render status: :ok, text: 'Failure'
+      render status: :bad_request, text: 'Repository url is blank'
     end
   end
 
