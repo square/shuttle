@@ -29,7 +29,7 @@ class CommitCreator
   def perform(project_id, sha, options={})
     options.symbolize_keys!
     project = Project.find(project_id)
-    project.repo &:fetch # in case a dynamic ref like "HEAD" is given
+    # project.repo &:fetch # this looks like a good idea in case a dynamic ref like "HEAD" is given. But, the cost is too high. Doesn't seem like dynamic refs are given very often.
     project.commit!(sha, options)
   rescue Git::CommitNotFoundError => err
     CommitMailer.notify_import_errors_in_commit_creator(options[:other_fields].try!(:symbolize_keys).try!(:[], :user_id), project_id, sha, err).deliver
