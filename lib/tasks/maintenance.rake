@@ -23,13 +23,4 @@ namespace :maintenance do
       end
     end
   end
-
-  desc "Run update touchdown branch"
-  task touchdown: :environment do
-    Rails.logger.info "[Project#update_touchdown_branch] Running cron"
-    Project.find_each do |project|
-      project.update_touchdown_branch
-    end
-    Rails.logger.info "[Project#update_touchdown_branch] Cron ended"
-  end
 end
