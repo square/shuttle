@@ -35,17 +35,12 @@ hr.divider
       tr
         th Project
         th Repository URL
-        th Started
-        th Locale
-    tbody 
+        th Required Locales
+        th Optional Locales
+    tbody
       - @projects.each do |project|
         tr onclick="document.location = '#{edit_project_url(project)}'"
           td = project.name
           td = project.repository_url
-          td = l(project.created_at, format: :mon_day_year)
-          td = project.targeted_rfc5646_locales\
-                .reject { |key, value| !value }\
-                .keys.join(" / ").upcase
-
-
-
+          td = project.required_rfc5646_locales.join(" / ").upcase
+          td = project.other_rfc5646_locales.join(" / ").upcase
