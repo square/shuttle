@@ -42,7 +42,7 @@ class BlobImporter
                         commit: commit,
                         locale: locale,
                         inline: jid.nil?
-  rescue Git::BlobNotFoundError => err
+  rescue Git::CommitNotFoundError, Git::BlobNotFoundError => err
     commit.add_import_error_in_redis(err, "failed in BlobImporter for commit_id #{commit_id} and blob #{sha}")
   end
 
