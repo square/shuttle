@@ -303,5 +303,35 @@ describe Translation do
         expect(trans.errors[:copy]).to eql(["has an invalid <%= ERb %> interpolation"])
       end
     end
+
+    context "[fence_counts_must_match]" do
+      let(:key) { FactoryGirl.create(:key, fencers: %w(Mustache Html)) }
+      let(:translation) { FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong>hi</strong> {{howareyou}}", copy: nil, approved: nil) }
+
+      it "should not allow translation's source_fences and fences to have different counts if copy is not nil" do
+        translation.copy = "test {{hello}} <strong>hi</strong> howareyou"
+        expect(translation.tap(&:valid?).errors.messages).to eql({:fences=>["counts do not match"]})
+      end
+
+      it "should not allow translation's source_fences and fences to have different counts if translated is true" do
+        translation.update copy: "test {{hello}} <strong>hi</strong> howareyou", translated: true
+        expect(translation.errors.messages).to eql({:fences=>["counts do not match"]})
+      end
+
+      it "should not allow translation's source_fences and fences to have different counts if approved is true" do
+        translation.update copy: "test {{hello}} <strong>hi</strong> howareyou", approved: true
+        expect(translation.errors.messages).to eql({:fences=>["counts do not match"]})
+      end
+
+      it "should allow creation with copy = nil and approved = nil" do
+        translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong>hi</strong> {{howareyou}}", approved: nil, copy: nil)
+        expect(translation.errors.any?).to be_false
+      end
+
+      it "should allow creation if copy and source copy have the same fence counts, with fences reversed" do
+        translation.update approved: true, copy: "{{howareyou}} test {{hello}} <strong>hi</strong>"
+        expect(translation.errors.any?).to be_false
+      end
+    end
   end
 end

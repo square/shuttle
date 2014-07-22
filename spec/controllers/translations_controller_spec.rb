@@ -268,6 +268,41 @@ describe TranslationsController do
         expect(change.user).to eq(@user)
       end
     end
+
+    context "[unmatched fences]" do
+      it "should not update the translation if source_fences and fences counts don't match" do
+        key = FactoryGirl.create(:key, fencers: %w(Mustache Html))
+        translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong>hi</strong> {{how are you}}", copy: nil, translated: false, approved: nil).tap(&:valid?)
+        patch :update, project_id: key.project.to_param, key_id: key.to_param, id: translation.to_param, translation: { copy: "test <strong>hi</strong> {{how are you}}" }, format: 'json'
+
+        expect(response.status).to eql(422)
+        expect(translation.reload.copy).to eql(nil)
+        expect(translation).to_not be_translated
+        expect(translation.translation_changes.count).to eq(0)
+      end
+
+      it "should not update the translation if source_copy has fences and copy is empty string" do
+        key = FactoryGirl.create(:key, fencers: %w(Mustache Html))
+        translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}}", copy: nil, translated: false, approved: nil).tap(&:valid?)
+        patch :update, project_id: key.project.to_param, key_id: key.to_param, id: translation.to_param, translation: { copy: '' }, format: 'html'
+
+        expect(response.status).to eql(422)
+        expect(translation.reload.copy).to eql(nil)
+        expect(translation).to_not be_translated
+        expect(translation.translation_changes.count).to eq(0)
+      end
+
+      it "should update the translation if source_fences and fences counts match" do
+        key = FactoryGirl.create(:key, fencers: %w(Mustache Html))
+        translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong> asda </strong> {{a}}", copy: nil, translated: false, approved: nil).tap(&:valid?)
+        patch :update, project_id: key.project.to_param, key_id: key.to_param, id: translation.to_param, translation: { copy: "test {{hello}} <strong> asda </strong> {{a}}" }, format: 'json'
+
+        expect(response.status).to eql(200)
+        expect(translation.reload.copy).to eql("test {{hello}} <strong> asda </strong> {{a}}")
+        expect(translation).to be_translated
+        expect(translation.translation_changes.count).to eq(1)
+      end
+    end
   end
 
   describe "#approve" do

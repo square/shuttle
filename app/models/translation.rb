@@ -98,6 +98,7 @@ class Translation < ActiveRecord::Base
             uniqueness: {scope: :key_id, on: :create}
   validate :cannot_approve_or_reject_untranslated
   validate :valid_interpolations, on: :update
+  validate :fence_counts_must_match
 
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
   before_validation :approve_translation_made_by_reviewer, on: :update
@@ -292,5 +293,18 @@ class Translation < ActiveRecord::Base
       # does record a change (sigh)
       TranslationCachedManifestExpirer.perform_once self.id
     end
+  end
+
+  def fence_counts_must_match
+    return if !translated && !approved # don't validate if we are just saving a not-translated, not-approved translation. copy will be nil, and will be pending translation.
+
+    fence_counts, source_fence_counts = {}, {}
+    fences.each { |fence, ranges| fence_counts[fence] = ranges.count }
+    source_fences.each { |fence, ranges| source_fence_counts[fence] = ranges.count }
+    errors.add :fences, "counts do not match" unless fence_counts.sort == source_fence_counts.sort
+    # why sort before comparison:
+    # `   "べ<span class='sales-trends'>"[1..27].hash == "<span class='sales-trends'>".hash  ` returns false
+    # `   "べ<span class='sales-trends'>"[1..27] == "<span class='sales-trends'>"   `          returns true
+    # And comparing 2 hashes uses the strings hashCodes. So, this is a trick to avoid this unexpected behavior.
   end
 end

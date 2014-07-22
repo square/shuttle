@@ -178,6 +178,7 @@ en:
     translations:
       update:
         success: Translation updated.
+        failure: Translation could not be updated !
     users:
       destroy:
         success: "%{user}’s account was deleted."
