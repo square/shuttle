@@ -393,6 +393,7 @@ class Project < ActiveRecord::Base
     found_commit = nil
     offset = 0
     until found_commit
+      return if offset >= 500
       branch = repo.object(watched_branches.first)
       return unless branch
 
