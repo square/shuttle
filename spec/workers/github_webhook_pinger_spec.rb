@@ -20,6 +20,7 @@ describe GithubWebhookPinger do
 
   describe "#perform" do
     subject { GithubWebhookPinger.new }
+
     it "sends an http request to the project webhook_url if one is defined" do
       url = "http://www.example.com"
       @commit.project.github_webhook_url = url
@@ -27,10 +28,17 @@ describe GithubWebhookPinger do
       expect(HTTParty).to receive(:post).with(url, anything())
       subject.perform(@commit.id)
     end
+
     it "doesnt send anything if no webhook_url is defined on the project" do
       expect(@commit.project.github_webhook_url).to be_blank
       expect(HTTParty).not_to receive(:post)
       subject.perform(@commit.id)
+    end
+
+    it "raises a Project::NotLinkedToAGitRepositoryError if project doesn't have a repository_url" do
+      @commit.project.update! repository_url: nil
+      expect(HTTParty).not_to receive(:post)
+      expect { subject.perform(@commit.id) }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end
 end

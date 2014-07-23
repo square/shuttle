@@ -43,9 +43,9 @@ describe Project do
       expect(repo.repo.path).to eql(Rails.root.join('tmp', 'repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9.git').to_s)
     end
 
-    it "raises BlankRepositoryUrlError when repo is called if repository_url is nil" do
+    it "raises Project::NotLinkedToAGitRepositoryError when repo is called if repository_url is nil" do
       project = Project.create(name: "test", repository_url: nil)
-      expect { project.repo }.to raise_error(Project::BlankRepositoryUrlError)
+      expect { project.repo }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end
 
@@ -191,9 +191,9 @@ describe Project do
       expect(git_obj).to be_nil
     end
 
-    it "raises Project::BlankRepositoryUrlError if project doesn't have a repository_url" do
+    it "raises Project::NotLinkedToAGitRepositoryError if project doesn't have a repository_url" do
       project = Project.create(name: "test")
-      expect { project.find_or_fetch_git_object("any") }.to raise_error(Project::BlankRepositoryUrlError)
+      expect { project.find_or_fetch_git_object("any") }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end
 
@@ -642,10 +642,10 @@ describe Project do
   end
 
   describe "#clone_repo" do
-    it "raises BlankRepositoryUrlError if repository_url is nil" do
+    it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
       project = Project.create(name: "Project with an empty repository_url")
       expect(Git).to_not receive(:clone)
-      expect { project.send :clone_repo }.to raise_error(Project::BlankRepositoryUrlError)
+      expect { project.send :clone_repo }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
 
     it "calls Git.clone once to clone the repo if repository_url exists" do
@@ -661,6 +661,23 @@ describe Project do
       expect(project.errors.count).to eql(0)
       project.send :can_clone_repo
       expect(project.errors.count).to eql(1)
+    end
+  end
+
+  describe "#git?" do
+    it "returns true if repository_url exists" do
+      project = FactoryGirl.create(:project, repository_url: "https://example.com")
+      expect(project.git?).to be_true
+    end
+
+    it "returns true if repository_url is empty" do
+      project = FactoryGirl.create(:project, repository_url: "")
+      expect(project.git?).to be_false
+    end
+
+    it "returns true if repository_url is nil" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      expect(project.git?).to be_false
     end
   end
 end

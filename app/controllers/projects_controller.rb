@@ -197,7 +197,7 @@ class ProjectsController < ApplicationController
   def github_webhook
     payload = JSON.parse(params[:payload])
     requested_branch = payload['ref'].split('/').last
-    branch_is_valid = @project.repository_url.present? && @project.watched_branches.include?(requested_branch)
+    branch_is_valid = @project.git? && @project.watched_branches.include?(requested_branch)
     if branch_is_valid
       revision = payload['after']
       other_fields = { description: 'github webhook', user_id: current_user.id }
@@ -235,7 +235,7 @@ class ProjectsController < ApplicationController
   # | `type`    | Whether it was a pull request or push that triggered it  |
 
   def stash_webhook
-    if @project.repository_url.present?
+    if @project.git?
       revision = params[:sha]
       other_fields = { description: 'Requested due to a Pull Request on Stash.' }
       CommitCreator.perform_once @project.id, revision, other_fields: other_fields

@@ -45,7 +45,7 @@ class AutoImporter
 
     def perform(project_id)
       project = Project.find(project_id)
-      return unless project.repository_url.present? && project.watched_branches.present?
+      return unless project.git? && project.watched_branches.present?
 
       project.repo &:fetch
 

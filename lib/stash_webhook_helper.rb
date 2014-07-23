@@ -2,7 +2,9 @@ class StashWebhookHelper
   include Rails.application.routes.url_helpers
 
   def ping(commit, purged = false)
-    if commit.project.repository_url.present? && commit.project.stash_webhook_url.present?
+    raise Project::NotLinkedToAGitRepositoryError unless commit.project.git?
+
+    if commit.project.stash_webhook_url.present?
       stash_webhook_url = "#{commit.project.stash_webhook_url.sub(/\/$/, '')}/#{commit.revision}"
       post_parameters = {
           key: 'SHUTTLE',
