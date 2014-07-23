@@ -515,10 +515,10 @@ describe Commit do
   end
 
   describe "#commit" do
-    it "raises Project::BlankRepositoryUrlError if repository_url is nil" do
+    it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
       project = FactoryGirl.create(:project, repository_url: nil)
       commit = FactoryGirl.create(:commit, project: project)
-      expect { commit.commit }.to raise_error(Project::BlankRepositoryUrlError)
+      expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
 
     it "returns the git commit object" do
@@ -562,10 +562,10 @@ describe Commit do
       expect { @commit.commit! }.to raise_error(Git::CommitNotFoundError, "Commit not found in git repo: abc123")
     end
 
-    it "raises Project::BlankRepositoryUrlError if repository_url is nil" do
+    it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
       project = FactoryGirl.create(:project, repository_url: nil)
       commit = FactoryGirl.create(:commit, project: project)
-      expect { commit.commit }.to raise_error(Project::BlankRepositoryUrlError)
+      expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end
 end

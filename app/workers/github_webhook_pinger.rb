@@ -26,6 +26,8 @@ class GithubWebhookPinger
 
   def perform(commit_id)
     commit = Commit.find(commit_id)
+    raise Project::NotLinkedToAGitRepositoryError unless commit.project.git?
+
     if commit.project.github_webhook_url.present?
       post_parameters = {commit_revision: commit.revision, project_name: commit.project.name, ready: commit.ready?}
       HTTParty.post(commit.project.github_webhook_url, {timeout: 5, body: post_parameters })

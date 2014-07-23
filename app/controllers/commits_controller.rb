@@ -518,7 +518,7 @@ class CommitsController < ApplicationController
   end
 
   def require_repository_url
-    render json: { alert: t('controllers.commits.blank_repository_url') } if @project.repository_url.blank?
+    render json: { alert: t('controllers.commits.blank_repository_url') } unless @project.git?
   end
 
   def find_format

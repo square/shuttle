@@ -26,7 +26,7 @@ describe CommitsController do
 
       project = FactoryGirl.create(:project, repository_url: nil)
       post action, project_id: project.to_param, id: 'HEAD', format: 'json'
-      expect(response.body).to include("This project doesn't have a repository url. You need to provide one to be able to complete this action.")
+      expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
     end
   end
 
@@ -709,7 +709,7 @@ de:
       project = FactoryGirl.create(:project, repository_url: nil)
       expect(CommitCreator).to_not receive(:perform_once)
       post :create, project_id: project.to_param, commit: {revision: 'HEAD'}, format: 'json'
-      expect(response.body).to include("This project doesn't have a repository url. You need to provide one to be able to complete this action.")
+      expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
     end
 
     it "sends an email to current user if invalid sha is submitted or sha goes invalid before CommitCreator is run" do

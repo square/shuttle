@@ -53,10 +53,10 @@ describe Blob do
   end
 
   describe "#blob" do
-    it "raises Project::BlankRepositoryUrlError if repository_url is nil" do
+    it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
       project = FactoryGirl.create(:project, repository_url: nil)
       blob = FactoryGirl.create(:blob, project: project)
-      expect { blob.blob }.to raise_error(Project::BlankRepositoryUrlError)
+      expect { blob.blob }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
 
     it "returns the git blob object" do
@@ -92,10 +92,10 @@ describe Blob do
       expect { @blob.blob! }.to raise_error(Git::BlobNotFoundError, "Blob not found in git repo: abc123")
     end
 
-    it "raises Project::BlankRepositoryUrlError if repository_url is nil" do
+    it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
       project = FactoryGirl.create(:project, repository_url: nil)
       blob = FactoryGirl.create(:blob, project: project)
-      expect { blob.blob }.to raise_error(Project::BlankRepositoryUrlError)
+      expect { blob.blob }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end
 end
