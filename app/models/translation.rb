@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'digest/sha2'
+require 'set'
 
 # A localization of a string to a certain locale. The base string is represented
 # by a {Key}, unique to a Project. A Translation exists for every desired locale
@@ -98,7 +99,7 @@ class Translation < ActiveRecord::Base
             uniqueness: {scope: :key_id, on: :create}
   validate :cannot_approve_or_reject_untranslated
   validate :valid_interpolations, on: :update
-  validate :fence_counts_must_match
+  validate :fences_must_match
 
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
   before_validation :approve_translation_made_by_reviewer, on: :update
@@ -295,16 +296,13 @@ class Translation < ActiveRecord::Base
     end
   end
 
-  def fence_counts_must_match
-    return if !translated && !approved # don't validate if we are just saving a not-translated, not-approved translation. copy will be nil, and will be pending translation.
-
-    fence_counts, source_fence_counts = {}, {}
-    fences.each { |fence, ranges| fence_counts[fence] = ranges.count }
-    source_fences.each { |fence, ranges| source_fence_counts[fence] = ranges.count }
-    errors.add :fences, "counts do not match" unless fence_counts.sort == source_fence_counts.sort
-    # why sort before comparison:
+  def fences_must_match
+    return if locale.pseudo? # don't validate if locale is pseudo
+    return if copy.nil? && !translated && !approved # don't validate if we are just saving a not-translated, not-approved translation. copy will be nil, and will be pending translation.
+    errors.add :fences, "do not match" unless fences.keys.sort == source_fences.keys.sort
+    # Need to be careful when comparing. Should not use a comparison method which will compare hashcodes of strings
+    # because of non-ascii characters such as the following:
     # `   "べ<span class='sales-trends'>"[1..27].hash == "<span class='sales-trends'>".hash  ` returns false
     # `   "べ<span class='sales-trends'>"[1..27] == "<span class='sales-trends'>"   `          returns true
-    # And comparing 2 hashes uses the strings hashCodes. So, this is a trick to avoid this unexpected behavior.
   end
 end
