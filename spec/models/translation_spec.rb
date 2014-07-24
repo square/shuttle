@@ -304,33 +304,69 @@ describe Translation do
       end
     end
 
-    context "[fence_counts_must_match]" do
-      let(:key) { FactoryGirl.create(:key, fencers: %w(Mustache Html)) }
-      let(:translation) { FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong>hi</strong> {{howareyou}}", copy: nil, approved: nil) }
+    context "[fences_must_match]" do
+      let(:key) { FactoryGirl.create(:key, fencers: %w(Mustache Html Printf)) }
+      let(:translation) { FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} {{hello}} <strong>hi</strong> {{howareyou}}", copy: nil, approved: nil) }
 
-      it "should not allow translation's source_fences and fences to have different counts if copy is not nil" do
-        translation.copy = "test {{hello}} <strong>hi</strong> howareyou"
-        expect(translation.tap(&:valid?).errors.messages).to eql({:fences=>["counts do not match"]})
+      it "should allow copy = nil even if source_copy has fences when translated = false and approved = nil" do
+        translation = FactoryGirl.build(:translation, key: key, source_copy: "{{hello}}", copy: nil, translated: false, approved: nil)
+        expect(translation).to be_valid
       end
 
-      it "should not allow translation's source_fences and fences to have different counts if translated is true" do
-        translation.update copy: "test {{hello}} <strong>hi</strong> howareyou", translated: true
-        expect(translation.errors.messages).to eql({:fences=>["counts do not match"]})
+      it "should not allow copy to have missing fences even if approved = nil" do
+        translation.update copy: "test"
+        expect(translation.errors[:fences]).to eql(["do not match"])
       end
 
-      it "should not allow translation's source_fences and fences to have different counts if approved is true" do
-        translation.update copy: "test {{hello}} <strong>hi</strong> howareyou", approved: true
-        expect(translation.errors.messages).to eql({:fences=>["counts do not match"]})
+      it "should allow copy and source_copy to have the same fences" do
+        translation.update copy: "test {{hello}} {{hello}} <strong>hi</strong> {{howareyou}}"
+        expect(translation).to be_valid
       end
 
-      it "should allow creation with copy = nil and approved = nil" do
-        translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong>hi</strong> {{howareyou}}", approved: nil, copy: nil)
-        expect(translation.errors.any?).to be_false
+      it "should allow copy and source_copy to have the same fences, even if fences are in a different order" do
+        translation.update copy: "{{howareyou}}<strong>hi</strong> test {{hello}} {{hello}}"
+        expect(translation).to be_valid
       end
 
-      it "should allow creation if copy and source copy have the same fence counts, with fences reversed" do
-        translation.update approved: true, copy: "{{howareyou}} test {{hello}} <strong>hi</strong>"
-        expect(translation.errors.any?).to be_false
+      it "should not allow adding a fence that doesn't exist in the source_copy" do
+        translation.update copy: "test {{hello}} {{thisisnew} {{hello}} <strong>hi</strong> {{howareyou}}"
+        expect(translation.errors[:fences]).to eql(["do not match"])
+      end
+
+      it "should not allow removing a fence that exist in the source_copy" do
+        translation.update copy: "test {{hello}} {{hello}} <strong>hi</strong>"
+        expect(translation.errors[:fences]).to eql(["do not match"])
+      end
+
+      it "should allow using a fence less number of times than used in the source_copy, as long as it's used only once" do
+        translation.update copy: "test {{hello}} <strong>hi</strong> {{howareyou}}"
+        expect(translation).to be_valid
+      end
+
+      it "should allow using a fence more number of times than used in the source_copy" do
+        translation.update copy: "{{howareyou}} test {{hello}} {{hello}} {{hello}} <strong>hi</strong> {{howareyou}} {{howareyou}}"
+        expect(translation).to be_valid
+      end
+
+      it "should handle japanese characters which may be problematic" do
+        # This is a special case which was encountered during
+        translation = FactoryGirl.build(:translation, key: key, source_copy: "<span class='sales-trends'>", copy: "べ<span class='sales-trends'>")
+        expect(translation).to be_valid
+      end
+
+      it "should allow creating base translations" do
+        translation = FactoryGirl.build(:translation, key: key, source_copy: "Refund %@", copy: "Refund %@", approved: true, source_rfc5646_locale: 'en', rfc5646_locale: 'en', skip_readiness_hooks: true, preserve_reviewed_status: true)
+        expect(translation).to be_valid
+      end
+
+      it "should not validate fences if the locale is a pseudo locale" do
+        translation = FactoryGirl.build(:translation, key: key, source_copy: "Refund %@", copy: "gd4!&!^~*", source_rfc5646_locale: 'en', rfc5646_locale: 'en-pseudo', approved: true, preserve_reviewed_status: true)
+        expect(translation).to be_valid
+      end
+
+      it "should allow repeating tokens for iOS even if the source copy does not specify order" do
+        translation = FactoryGirl.build(:translation, key: key, source_copy: "Refund %2$@ %1$@ %2$@", copy: "Refund %@ %@")
+        expect(translation).to be_valid
       end
     end
   end

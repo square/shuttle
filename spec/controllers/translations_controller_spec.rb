@@ -270,7 +270,7 @@ describe TranslationsController do
     end
 
     context "[unmatched fences]" do
-      it "should not update the translation if source_fences and fences counts don't match" do
+      it "should not update the translation if source_fences and fences don't match" do
         key = FactoryGirl.create(:key, fencers: %w(Mustache Html))
         translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong>hi</strong> {{how are you}}", copy: nil, translated: false, approved: nil).tap(&:valid?)
         patch :update, project_id: key.project.to_param, key_id: key.to_param, id: translation.to_param, translation: { copy: "test <strong>hi</strong> {{how are you}}" }, format: 'json'
