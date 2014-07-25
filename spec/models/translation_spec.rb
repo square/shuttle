@@ -313,8 +313,13 @@ describe Translation do
         expect(translation).to be_valid
       end
 
-      it "should allow copy = nil even if source_copy has fences when translated = false" do
-        translation = FactoryGirl.build(:translation, key: key, source_copy: "{{hello}}", copy: nil, translated: false)
+      it "should allow creating base translations" do
+        translation = FactoryGirl.build(:translation, key: key, source_copy: "Refund %@", copy: "Refund %@", approved: true, source_rfc5646_locale: 'en', rfc5646_locale: 'en', skip_readiness_hooks: true, preserve_reviewed_status: true)
+        expect(translation).to be_valid
+      end
+
+      it "should allow copy = nil even if source_copy has fences" do
+        translation = FactoryGirl.build(:translation, key: key, source_copy: "{{hello}}", copy: nil)
         expect(translation).to be_valid
       end
 
@@ -356,11 +361,6 @@ describe Translation do
       it "should handle japanese characters which may be problematic" do
         # This is a special case which was encountered during manual testing
         translation = FactoryGirl.build(:translation, key: key, source_copy: "<span class='sales-trends'>", copy: "べ<span class='sales-trends'>")
-        expect(translation).to be_valid
-      end
-
-      it "should allow creating base translations" do
-        translation = FactoryGirl.build(:translation, key: key, source_copy: "Refund %@", copy: "Refund %@", approved: true, source_rfc5646_locale: 'en', rfc5646_locale: 'en', skip_readiness_hooks: true, preserve_reviewed_status: true)
         expect(translation).to be_valid
       end
 
