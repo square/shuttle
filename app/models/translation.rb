@@ -297,7 +297,7 @@ class Translation < ActiveRecord::Base
 
   def fences_must_match
     return if locale.pseudo? # don't validate if locale is pseudo
-    return if copy.nil? && !translated? # don't validate if we are just saving a not-translated translation. copy will be nil, and will be pending translation.
+    return if copy.nil? # don't validate if we are just saving a not-translated translation. copy will be nil, and translation will be pending.
     errors.add(:copy, :unmatched_fences) unless fences.keys.sort == source_fences.keys.sort
     # Need to be careful when comparing. Should not use a comparison method which will compare hashcodes of strings
     # because of non-ascii characters such as the following:
