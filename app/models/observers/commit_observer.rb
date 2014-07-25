@@ -34,13 +34,13 @@ class CommitObserver < ActiveRecord::Observer
   private
 
   def ping_github_webhook(commit)
-    if commit.project.github_webhook_url && commit.previous_changes.include?(:ready) && commit.ready? # if it just became ready
+    if commit.project.git? && commit.project.github_webhook_url && commit.previous_changes.include?(:ready) && commit.ready? # if it just became ready
       GithubWebhookPinger.perform_once(commit.id)
     end
   end
 
   def ping_stash_webhook(commit)
-    if commit.project.stash_webhook_url && [:id, :ready, :loading].any? { |field| commit.previous_changes.include?(field) }
+    if commit.project.git? && commit.project.stash_webhook_url && [:id, :ready, :loading].any? { |field| commit.previous_changes.include?(field) }
       StashWebhookPinger.perform_once commit.id
     end
   end

@@ -197,7 +197,7 @@ class ProjectsController < ApplicationController
   def github_webhook
     payload = JSON.parse(params[:payload])
     requested_branch = payload['ref'].split('/').last
-    branch_is_valid = @project.watched_branches.include? requested_branch
+    branch_is_valid = @project.git? && @project.watched_branches.include?(requested_branch)
     if branch_is_valid
       revision = payload['after']
       other_fields = { description: 'github webhook', user_id: current_user.id }
@@ -210,7 +210,8 @@ class ProjectsController < ApplicationController
     end
   end
 
-  # Receives a stash webhook and triggers a new import for the latest commit.
+  # Receives a stash webhook and triggers a new import for the latest commit,
+  # if project has a repository_url. Otherwise, it returns a 400 error.
   #
   # Routes
   # ------
@@ -234,10 +235,14 @@ class ProjectsController < ApplicationController
   # | `type`    | Whether it was a pull request or push that triggered it  |
 
   def stash_webhook
-    revision = params[:sha]
-    other_fields = { description: 'Requested due to a Pull Request on Stash.' }
-    CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-    render status: :ok, text: 'Success'
+    if @project.git?
+      revision = params[:sha]
+      other_fields = { description: 'Requested due to a Pull Request on Stash.' }
+      CommitCreator.perform_once @project.id, revision, other_fields: other_fields
+      render status: :ok, text: 'Success'
+    else
+      render status: :bad_request, text: 'Repository url is blank'
+    end
   end
 
   private

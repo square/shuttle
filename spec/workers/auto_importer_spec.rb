@@ -16,7 +16,7 @@ require 'spec_helper'
 
 describe AutoImporter do
   describe "#perform" do
-    context "[watched branches]"
+    context "[watched branches]" do
       it "calls ProjectAutoImporter on the projects with watched_branches, removes the watched branch if it doesn't exist" do
         Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
         project1 = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
@@ -32,6 +32,15 @@ describe AutoImporter do
         expect(project1.reload.watched_branches).to eql(%w(master))
         expect(project2.reload.watched_branches).to be_blank
       end
+    end
+
+    it "calls ProjectAutoImporter for projects with a repository_url, and doesn't for projects without a repository_url" do
+      project_with_repo = FactoryGirl.create(:project, repository_url: "test", watched_branches: %w(master))
+      project_without_repo = FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
+      expect(AutoImporter::ProjectAutoImporter).to receive(:perform_once).once.with(project_with_repo.id)
+      expect(AutoImporter::ProjectAutoImporter).to_not receive(:perform_once).with(project_without_repo.id)
+      expect { AutoImporter.new.perform }.to_not raise_error
+    end
   end
 end
 
@@ -48,6 +57,18 @@ describe AutoImporter::ProjectAutoImporter do
           expect(project.reload.watched_branches).to eql(%w(master))
         end
       end
+    end
+
+    it "does nothing if project doesn't have a repository_url" do
+      Project.any_instance.stub(:commit!).and_raise("This should not have been called")
+      project = FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
+      AutoImporter::ProjectAutoImporter.new.perform(project.id)
+    end
+
+    it "does nothing if project doesn't have any watched_branches" do
+      Project.any_instance.stub(:commit!).and_raise("This should not have been called")
+      project = FactoryGirl.create(:project, watched_branches: %w())
+      AutoImporter::ProjectAutoImporter.new.perform(project.id)
     end
   end
 end

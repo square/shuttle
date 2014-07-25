@@ -111,6 +111,7 @@ class Project < ActiveRecord::Base
   )
 
   extend SetNilIfBlank
+  set_nil_if_blank :repository_url
   set_nil_if_blank :github_webhook_url
   set_nil_if_blank :stash_webhook_url
 
@@ -127,8 +128,6 @@ class Project < ActiveRecord::Base
   validates :name,
             presence: true,
             length:   {maximum: 256}
-  validates :repository_url,
-            presence:   true
   validates :api_key,
             presence: true
             #uniqueness: true,
@@ -143,9 +142,14 @@ class Project < ActiveRecord::Base
   after_commit :add_or_remove_pending_translations, on: :update
   after_update :invalidate_manifests_and_localizations
 
+  scope :with_repository_url, -> { where("projects.repository_url IS NOT NULL") }
+
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
+  #
+  # If project is not linked to a git repository, NotLinkedToAGitRepositoryError is raised. This may happen if
+  # this project is only used for key_groups. Ex: help-center project.
   #
   # Any Git errors that occur when attempting to clone the repository are
   # swallowed, and `nil` is returned.
@@ -160,8 +164,11 @@ class Project < ActiveRecord::Base
   #   is freed when the block completes.
   #   @yield A block that is given exclusive control of the repository.
   #   @yieldparam [Git::Repository] repo The proxy object for the repository.
+  #
+  # @raise [Project::NotLinkedToAGitRepositoryError] If repository_url is blank.
 
   def repo
+    raise NotLinkedToAGitRepositoryError unless git?
     if File.exist?(repo_path)
       @repo ||= Git.bare(repo_path)
     else
@@ -182,6 +189,16 @@ class Project < ActiveRecord::Base
     end
   rescue Git::GitExecuteError
     raise "Repo not ready: #{$!.to_s}"
+  end
+
+  # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed).
+  # It checks `repository_url` field to determine that.
+  # Doesn't check if `repository_url` is valid.
+  #
+  # @return [Boolean] true if there is a repository_url present, false otherwise
+
+  def git?
+    repository_url.present?
   end
 
   # Attempts to find or create a Commit object corresponding to a SHA or other
@@ -360,10 +377,10 @@ class Project < ActiveRecord::Base
 
   # Updates the `touchdown_branch` head to be the latest translated commit in
   # the first `watched_branches` branch. Does nothing if either of those fields
-  # are not set.
+  # are not set, or if repo is nil.
 
   def update_touchdown_branch
-    return unless watched_branches.present? && touchdown_branch.present?
+    return unless git? && watched_branches.present? && touchdown_branch.present?
 
     retried = false
     begin
@@ -408,19 +425,22 @@ class Project < ActiveRecord::Base
   private
 
   def repo_path
-    @repo_path ||= REPOS_DIRECTORY.join(repo_directory)
+    return @_repo_path if instance_variable_defined?(:@_repo_path)
+    @_repo_path = repo_directory.present? ? REPOS_DIRECTORY.join(repo_directory) : nil
   end
 
   def repo_directory
-    @repo_dir ||= Digest::SHA1.hexdigest(repository_url) + '.git'
+    return @_repo_dir if instance_variable_defined?(:@_repo_dir)
+    @_repo_dir = git? ? (Digest::SHA1.hexdigest(repository_url) + '.git') : nil
   end
 
   def clone_repo
+    raise NotLinkedToAGitRepositoryError unless git?
     Git.clone repository_url, repo_directory, path: REPOS_DIRECTORY.to_s, mirror: true
   end
 
   def can_clone_repo
-    errors.add(:repository_url, :unreachable) unless repo
+    errors.add(:repository_url, :unreachable) unless git? && repo
   end
 
   def repo_mutex
@@ -441,5 +461,18 @@ class Project < ActiveRecord::Base
   def require_valid_locales_hash
     errors.add(:targeted_rfc5646_locales, :invalid) unless targeted_rfc5646_locales.keys.all? { |k| k.kind_of?(String) } &&
         targeted_rfc5646_locales.values.all? { |v| v == true || v == false }
+  end
+
+  # ERRORS
+  # This error will be raised when there are problems related to a repository.
+  # This error class will most likely not be raised directly, but will be subclassed by more specific error classes.
+  class InvalidRepositoryError < StandardError; end;
+
+  # This error will be raised if project doesn't have a repository_url, and we attempt to
+  # initialize a `Git::Repository` object (project.repo) or make a remote call to a git repo.
+  class NotLinkedToAGitRepositoryError < InvalidRepositoryError
+    def initialize
+      super("repository_url is empty")
+    end
   end
 end

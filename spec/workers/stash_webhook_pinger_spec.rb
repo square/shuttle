@@ -48,6 +48,12 @@ describe StashWebhookPinger do
         expect(HTTParty).not_to receive(:post)
         subject.perform(@commit.id)
       end
+
+      it "raises a Project::NotLinkedToAGitRepositoryError if project doesn't have a repository_url" do
+        @commit.project.update! repository_url: nil
+        expect(HTTParty).not_to receive(:post)
+        expect { subject.perform(@commit.id) }.to raise_error(Project::NotLinkedToAGitRepositoryError)
+      end
     end
 
     context "on_create" do

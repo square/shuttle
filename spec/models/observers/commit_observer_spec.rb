@@ -112,6 +112,16 @@ describe Commit do
           @commit.save!
         end
       end
+
+      context "[without a repository_url]" do
+        it "does not enqueue a StashWebhookPinger job when a commit is created or when it becomes ready" do
+          expect(StashWebhookPinger).to_not receive(:perform_once)
+          project = FactoryGirl.create(:project, repository_url: nil, stash_webhook_url: "http://example.com")
+          commit = FactoryGirl.create(:commit, project: project, ready: false, loading: false)
+          commit.update! ready: true
+          commit.save!
+        end
+      end
     end
 
     context "[github]" do
@@ -157,6 +167,16 @@ describe Commit do
           @commit.ready = true
           expect(GithubWebhookPinger).to_not receive(:perform_once)
           @commit.save!
+        end
+      end
+
+      context "[without a repository_url]" do
+        it "does not enqueue a GithubWebhookPinger job when a commit is created or when it becomes ready" do
+          expect(GithubWebhookPinger).to_not receive(:perform_once)
+          project = FactoryGirl.create(:project, repository_url: nil, github_webhook_url: "http://example.com")
+          commit = FactoryGirl.create(:commit, project: project, ready: false, loading: false)
+          commit.update! ready: true
+          commit.save!
         end
       end
     end

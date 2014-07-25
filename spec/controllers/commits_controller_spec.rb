@@ -18,6 +18,19 @@ require 'spec_helper'
 require 'fileutils'
 
 describe CommitsController do
+  shared_examples_for "returns error string if repository_url is blank" do |action|
+    it "should return an error string if repository_url is blank" do
+      user = FactoryGirl.create(:user, role: 'monitor')
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in user
+
+      project = FactoryGirl.create(:project, repository_url: nil)
+      post action, project_id: project.to_param, id: 'HEAD', format: 'json'
+      expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
+    end
+  end
+
+
   describe "#manifest" do
     before :all do
       Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
@@ -362,6 +375,8 @@ de:
       expect(response.status).to eql(404)
       expect(response.body).to eql("Commit with sha '#{@commit.revision}' could not be found in git repo. It may have been rebased away. Please submit the new sha to get your strings translated.")
     end
+
+    it_behaves_like "returns error string if repository_url is blank", :manifest
   end
 
   describe '#localize' do
@@ -643,6 +658,8 @@ de:
       expect(response.status).to eql(404)
       expect(response.body).to eql("Commit with sha '#{@commit.revision}' could not be found in git repo. It may have been rebased and garbage collected in git. Please submit the new sha to be able to download the translations.")
     end
+
+    it_behaves_like "returns error string if repository_url is blank", :localize
   end
 
   describe '#create' do
@@ -686,6 +703,13 @@ de:
       expect(CommitCreator).not_to receive(:perform_once)
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
       expect(JSON.parse(response.body)['alert']).to include('already submitted')
+    end
+
+    it "should not call CommitCreator if repository_url is blank" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      expect(CommitCreator).to_not receive(:perform_once)
+      post :create, project_id: project.to_param, commit: {revision: 'HEAD'}, format: 'json'
+      expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
     end
 
     it "sends an email to current user if invalid sha is submitted or sha goes invalid before CommitCreator is run" do
@@ -796,5 +820,25 @@ de:
       expect(response).to be_ok
       expect(response.body.to_s).to include(*issues.map{|issue| "#issue-wrapper-#{issue.id}"})
     end
+  end
+
+  describe "#import" do
+    it_behaves_like "returns error string if repository_url is blank", :import
+  end
+
+  describe "#sync" do
+    it_behaves_like "returns error string if repository_url is blank", :sync
+  end
+
+  describe "#redo" do
+    it_behaves_like "returns error string if repository_url is blank", :redo
+  end
+
+  describe "#recalculate" do
+    it_behaves_like "returns error string if repository_url is blank", :recalculate
+  end
+
+  describe "#ping_stash" do
+    it_behaves_like "returns error string if repository_url is blank", :ping_stash
   end
 end

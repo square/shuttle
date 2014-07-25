@@ -338,11 +338,10 @@ CREATE TABLE projects (
     id integer NOT NULL,
     name character varying(256) NOT NULL,
     metadata text,
-    repository_url character varying(256) NOT NULL,
+    repository_url character varying(256),
     api_key character(36) NOT NULL,
     created_at timestamp without time zone,
-    CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0)),
-    CONSTRAINT projects_repository_url_check CHECK ((char_length((repository_url)::text) > 0))
+    CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0))
 );
 
 
@@ -1362,3 +1361,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140531020536');
 INSERT INTO schema_migrations (version) VALUES ('20140606111509');
 
 INSERT INTO schema_migrations (version) VALUES ('20140613215228');
+
+INSERT INTO schema_migrations (version) VALUES ('20140714173058');

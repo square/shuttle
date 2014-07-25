@@ -534,6 +534,26 @@ describe Commit do
     end
   end
 
+  describe "#commit" do
+    it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      commit = FactoryGirl.create(:commit, project: project)
+      expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
+    end
+
+    it "returns the git commit object" do
+      project = FactoryGirl.create(:project)
+      repo = double('Git::Repo')
+      commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+      
+      commit_obj = double('Git::Object::Commit', revision: 'abc123')
+      expect(File).to receive(:exist?).and_return(true)
+      expect(Git).to receive(:bare).and_return(repo)
+      expect(repo).to receive(:object).with("abc123").and_return(commit_obj)
+      expect(commit.commit).to eql(commit_obj)
+    end
+  end
+
   describe "#commit!" do
     before :each do
       @project = FactoryGirl.create(:project)
@@ -560,6 +580,12 @@ describe Commit do
       expect(@repo).to receive(:fetch).once
       expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
       expect { @commit.commit! }.to raise_error(Git::CommitNotFoundError, "Commit not found in git repo: abc123")
+    end
+
+    it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      commit = FactoryGirl.create(:commit, project: project)
+      expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end
 end
