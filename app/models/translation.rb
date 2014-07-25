@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 require 'digest/sha2'
-require 'set'
 
 # A localization of a string to a certain locale. The base string is represented
 # by a {Key}, unique to a Project. A Translation exists for every desired locale
@@ -298,8 +297,8 @@ class Translation < ActiveRecord::Base
 
   def fences_must_match
     return if locale.pseudo? # don't validate if locale is pseudo
-    return if copy.nil? && !translated && !approved # don't validate if we are just saving a not-translated, not-approved translation. copy will be nil, and will be pending translation.
-    errors.add :fences, "do not match" unless fences.keys.sort == source_fences.keys.sort
+    return if copy.nil? && !translated? # don't validate if we are just saving a not-translated translation. copy will be nil, and will be pending translation.
+    errors.add(:copy, :unmatched_fences) unless fences.keys.sort == source_fences.keys.sort
     # Need to be careful when comparing. Should not use a comparison method which will compare hashcodes of strings
     # because of non-ascii characters such as the following:
     # `   "べ<span class='sales-trends'>"[1..27].hash == "<span class='sales-trends'>".hash  ` returns false

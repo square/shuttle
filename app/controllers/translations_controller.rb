@@ -152,7 +152,7 @@ class TranslationsController < ApplicationController
         if @translation.errors.any?
           redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { alert: @translation.errors.full_messages.unshift(t('controllers.translations.update.failure')) }
         else
-          redirect_to edit_project_key_translation_url(@project, @key, @translation), status: :unprocessable_entity, flash: { success: t('controllers.translations.update.success') }
+          redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { success: t('controllers.translations.update.success') }
         end
       end
     end
