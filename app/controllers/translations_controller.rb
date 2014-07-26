@@ -145,7 +145,7 @@ class TranslationsController < ApplicationController
         if @translation.valid?
           render json: decorate([@translation]).first
         else
-          render json: @translation.errors, status: :unprocessable_entity
+          render json: @translation.errors.full_messages, status: :unprocessable_entity
         end
       end
       format.html do

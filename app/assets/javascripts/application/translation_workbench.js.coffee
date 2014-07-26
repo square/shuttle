@@ -80,7 +80,7 @@ class TranslationItem
       data: $.param('translation[copy]': @element.find('.translation-area').val())
       complete: => @element.find('.translation-area, input').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
-      error: => new Flash('alert').text("Couldn't update that translation.");
+      error: (xhr, textStatus, errorThrown) => new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
     return true
 
   # Re-renders the cell using a new translation object (loaded from JSON).
