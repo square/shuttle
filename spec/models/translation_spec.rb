@@ -278,7 +278,7 @@ describe Translation do
         key   = FactoryGirl.create(:key, fencers: %w(Android))
         trans = FactoryGirl.create(:translation, key: key)
 
-        trans.copy = "{{hello world}}"
+        trans.source_copy = trans.copy = "{{hello world}}"
         expect(trans).not_to be_valid
         expect(trans.errors[:copy]).to eql(["has an invalid {android} interpolation"])
       end
@@ -287,18 +287,18 @@ describe Translation do
         key   = FactoryGirl.create(:key, fencers: %w(Erb Html))
         trans = FactoryGirl.create(:translation, key: key)
 
-        trans.copy = "<<%= foo %>em>baz</<%= foo %>em>"
+        trans.source_copy = trans.copy = "<<%= foo %>em>baz</<%= foo %>em>"
         expect(trans).to be_valid
 
         # Only checks the first validation 
-        trans.copy = "<<%= foo %>em>baz</<%= foo %>b>"
+        trans.source_copy = trans.copy = "<<%= foo %>em>baz</<%= foo %>b>"
         expect(trans).to be_valid
 
-        trans.copy = "<<%= foo %>em>baz</<%= foo >em>"
+        trans.source_copy = trans.copy = "<<%= foo %>em>baz</<%= foo >em>"
         expect(trans).not_to be_valid
         expect(trans.errors[:copy]).to eql(["has an invalid <%= ERb %> interpolation"])
 
-        trans.copy = "<<%= foo %>em>baz</<%= foo >b>"
+        trans.source_copy = trans.copy = "<<%= foo %>em>baz</<%= foo >b>"
         expect(trans).not_to be_valid
         expect(trans.errors[:copy]).to eql(["has an invalid <%= ERb %> interpolation"])
       end
