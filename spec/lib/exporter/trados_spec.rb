@@ -52,7 +52,7 @@ describe Exporter::Trados do
                          source_locale: @en,
                          locale:        @de,
                          source_copy:   "When {{one}} wants clear water",
-                         copy:          "Wenn {{man}} klares Wasser will",
+                         copy:          "Wenn {{one}} klares Wasser will",
                          updated_at:    Time.at(1234567890),
                          translator:    person
       FactoryGirl.create :translation,
@@ -68,7 +68,7 @@ describe Exporter::Trados do
                          source_locale: @en,
                          locale:        @de,
                          source_copy:   "{Deep} {{water}} {isn't} {{still}}",
-                         copy:          "{Tiefe} {{Wasser}} {sind nicht} {{still}}",
+                         copy:          "{Tiefe} {{water}} {sind nicht} {{still}}",
                          updated_at:    Time.at(1234567890),
                          translator:    person
 
@@ -151,7 +151,7 @@ describe Exporter::Trados do
 <CrD>13022009, 15:31:30</CrD>
 <CrU>SANCHO</CrU>
 <Seg L=EN-US>When {\\cs6\\f1\\cf6\\lang1024 \\{\\{one\\}\\}} wants clear water</Seg>
-<Seg L=DE-DE>Wenn {\\cs6\\f1\\cf6\\lang1024 \\{\\{man\\}\\}} klares Wasser will</Seg>
+<Seg L=DE-DE>Wenn {\\cs6\\f1\\cf6\\lang1024 \\{\\{one\\}\\}} klares Wasser will</Seg>
 </TrU>
       XML
     end
@@ -225,7 +225,7 @@ describe Exporter::Trados do
 <CrD>13022009, 15:31:30</CrD>
 <CrU>SANCHO</CrU>
 <Seg L=EN-US>\\{Deep\\} {\\cs6\\f1\\cf6\\lang1024 \\{\\{water\\}\\}} \\{isn't\\} {\\cs6\\f1\\cf6\\lang1024 \\{\\{still\\}\\}}</Seg>
-<Seg L=DE-DE>\\{Tiefe\\} {\\cs6\\f1\\cf6\\lang1024 \\{\\{Wasser\\}\\}} \\{sind nicht\\} {\\cs6\\f1\\cf6\\lang1024 \\{\\{still\\}\\}}</Seg>
+<Seg L=DE-DE>\\{Tiefe\\} {\\cs6\\f1\\cf6\\lang1024 \\{\\{water\\}\\}} \\{sind nicht\\} {\\cs6\\f1\\cf6\\lang1024 \\{\\{still\\}\\}}</Seg>
 </TrU>
       XML
     end
