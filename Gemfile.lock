@@ -17,8 +17,8 @@ GIT
 
 GIT
   remote: git://github.com/RISCfuture/ruby-git.git
-  revision: 14d05318c3c22352564dfb3acf45ee1a29a09864
-  ref: 14d05318c3c22352564dfb3acf45ee1a29a09864
+  revision: 88076a50eb70fd96f2417b646fe37fb2f6c4cca4
+  ref: 88076a50eb70fd96f2417b646fe37fb2f6c4cca4
   specs:
     git (1.2.6)
 
