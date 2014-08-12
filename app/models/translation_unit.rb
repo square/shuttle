@@ -47,7 +47,7 @@ class TranslationUnit < ActiveRecord::Base
   mapping do
     indexes :copy, analyzer: 'snowball'
     indexes :source_copy, analyzer: 'snowball'
-    indexes :id, type: 'string', index: :not_analyzed
+    indexes :id, type: 'integer', index: :not_analyzed
     indexes :rfc5646_locale, analyzer: 'simple'
   end
 
