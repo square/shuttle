@@ -22,7 +22,6 @@ describe ScreenshotsController do
   let(:screenshot)      { FactoryGirl.attributes_for :screenshot }
   let(:bad_screenshot)  { FactoryGirl.attributes_for :screenshot, image: File.new(Rails.root.join('spec', 'fixtures', 'test.txt')) }
 
-  # http://everydayrails.com/2012/04/07/testing-series-rspec-controllers.html
   describe 'POST #create' do
     context 'is a monitor' do
       before :each do
