@@ -75,7 +75,7 @@ class SourceGlossaryEntry < ActiveRecord::Base
   include Tire::Model::Callbacks
   mapping do
     indexes :source_copy, analyzer: 'snowball', as: 'source_copy'
-    indexes :id, type: 'string', index: :not_analyzed
+    indexes :id, type: 'integer', index: :not_analyzed
     indexes :source_rfc5646_locale, type: 'string'
     indexes :due_date, type: 'date', as: 'due_date'
   end
