@@ -285,7 +285,8 @@ class ProjectsController < ApplicationController
     project_params = params[:project].to_hash.slice(*%w(
         name repository_url base_rfc5646_locale due_date cache_localization
         github_webhook_url stash_webhook_url skip_imports cache_manifest_formats key_exclusions
-        key_inclusions skip_paths only_paths watched_branches touchdown_branch
+        key_inclusions skip_paths only_paths
+        watched_branches touchdown_branch manifest_directory
         key_locale_exclusions key_locale_inclusions
         only_importer_paths skip_importer_paths
     ))

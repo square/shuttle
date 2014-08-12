@@ -34,7 +34,7 @@ describe Project do
     end
   end
 
-  describe '#repo' do
+  describe "#repo" do
     it "should check out the repository and return a Repository object" do
       Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
       repo = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git").repo
@@ -43,9 +43,50 @@ describe Project do
       expect(repo.repo.path).to eql(Rails.root.join('tmp', 'repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9.git').to_s)
     end
 
+    it "should yield the Repository object if a block is passed" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      expect { |b| project.repo(&b) }.to yield_with_args(kind_of(Git::Base))
+    end
+
+    it "should obtain a lock on the Repository object if a block is passed" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      # To ensure that the repo already exists and doesn't need to synchronize
+      project.repo
+      expect_any_instance_of(FileMutex).to receive(:synchronize)
+      project.repo {}
+    end
+
     it "raises Project::NotLinkedToAGitRepositoryError when repo is called if repository_url is nil" do
       project = Project.create(name: "test", repository_url: nil)
       expect { project.repo }.to raise_error(Project::NotLinkedToAGitRepositoryError)
+    end
+  end
+
+  describe "#working_repo" do
+    it "should check out the repository and return a Repository object" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      working_repo = project.working_repo
+      expect(working_repo).to be_kind_of(Git::Base)
+      expect(working_repo.index).to_not be_nil # should not be bare
+      expect(working_repo.dir.path).to eql(Rails.root.join('tmp', 'working_repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9').to_s)
+    end
+
+    it "should yield the Repository object if a block is passed" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      expect { |b| project.working_repo(&b) }.to yield_with_args(kind_of(Git::Base))
+    end
+
+    it "should obtain a lock on the Repository object if a block is passed" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      # To ensure that the working_repo already exists and doesn't need to synchronize
+      project.working_repo
+      expect_any_instance_of(FileMutex).to receive(:synchronize)
+      project.working_repo {}
+    end
+
+    it "raises Project::NotLinkedToAGitRepositoryError when repo is called if repository_url is nil" do
+      project = Project.create(name: "test", repository_url: nil)
+      expect { project.working_repo }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end
 
@@ -538,87 +579,6 @@ describe Project do
     end
   end
 
-  describe '#update_touchdown_branch' do
-    before :each do
-      Project.delete_all
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      # delete an existing translated branch, if it exists
-      system 'git', 'push', @project.repository_url, ':refs/heads/translated'
-    end
-
-    it "should do nothing unless watched_branches and touchdown_branch are set" do
-      @project.watched_branches = []
-      @project.touchdown_branch = nil
-
-      @project.update_touchdown_branch
-
-      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
-          to eql('translated')
-    end
-
-    it "should advance the touchdown branch to the most recently translated watched branch commit" do
-      @project.watched_branches = %w(master)
-      @project.touchdown_branch = 'translated'
-
-      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
-      c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
-      CommitStatsRecalculator.new.perform(c.id)
-      expect(c.reload).to be_ready
-
-      @project.update_touchdown_branch
-
-      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
-          to eql('d82287c47388278d54433cfb2383c7ad496d9827')
-    end
-
-    it "should log an error if updating the touchdown branch takes longer than 1 minute" do
-      @project.watched_branches = %w(master)
-      @project.touchdown_branch = 'translated'
-
-      allow(@project).to receive('system').and_raise(Timeout::Error)
-
-      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
-      c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
-      CommitStatsRecalculator.new.perform(c.id)
-
-      expect(c.reload).to be_ready
-      expect(Rails.logger).to receive(:error).with("[Project#update_touchdown_branch] Timed out on updating touchdown branch for #{@project.inspect}")
-
-      @project.update_touchdown_branch
-    end
-
-    it "should do nothing if none of the commits in the watched branch are translated" do
-      @project.watched_branches = %w(master)
-      @project.touchdown_branch = 'translated'
-
-      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
-      expect(c).not_to be_ready
-
-      @project.update_touchdown_branch
-
-      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
-          to eql('translated')
-    end
-
-    it "should gracefully exit if the first watched branch doesn't exist" do
-      @project.watched_branches = %w(nonexistent)
-      @project.touchdown_branch = 'translated'
-
-      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
-      c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
-      CommitStatsRecalculator.new.perform(c.id)
-      expect(c.reload).to be_ready
-
-      expect { @project.update_touchdown_branch }.not_to raise_error
-    end
-
-    it "should do nothing if repository_url is nil" do
-      project = Project.create(name: "test", watched_branches: %w(master), touchdown_branch: 'translated')
-      Project.any_instance.stub(:repo).and_raise("This should not have been called")
-      expect { project.update_touchdown_branch }.not_to raise_error
-    end
-  end
-
   describe "#repo_path" do
     it "returns nil if repository_url is not provided" do
       project = Project.create(name: "Project with an empty repository_url")
@@ -650,7 +610,7 @@ describe Project do
 
     it "calls Git.clone once to clone the repo if repository_url exists" do
       project = Project.create(name: "Project with an non-empty repository_url", repository_url: "http://example.com")
-      expect(Git).to receive(:clone).once
+      expect(Git).to receive(:clone).once.with(anything(), anything(), {path: Project::REPOS_DIRECTORY.to_s, mirror: true})
       expect { project.send :clone_repo }.to_not raise_error
     end
   end

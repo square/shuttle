@@ -69,11 +69,14 @@ require 'file_mutex'
 # | `cache_localization`     | If `true`, a precompiled localization will be generated and cached for each new Commit once it is ready.                                                                                     |
 # | `cache_manifest_formats` | A precompiled manifest will be generated and cached for each exporter in this list (referenced by format parameter). Included exporters must be {Exporter::Base.multilingual? multilingual}. |
 # | `watched_branches`       | A list of branches to automatically import new Commits from.                                                                                                                                 |
-# | `touchdown_branch`       | If this is set, Squash will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch.                                   |
+# | `touchdown_branch`       | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch.                                  |
+# | `manifest_directory`     | If this is set, Shuttle will automatically push a new commit containing the translated manifest in the specified directory to the touchdown branch.                                          |
 
 class Project < ActiveRecord::Base
-  # The directory where repositories are checked out.
+  # The directory where repositories are mirrored.
   REPOS_DIRECTORY = Rails.root.join('tmp', 'repos')
+  # The directory where working repositories are checked out.
+  WORKING_REPOS_DIRECTORY = Rails.root.join('tmp', 'working_repos')
 
   # @return [true, false] If `true`, Git will attempt to clone the repository,
   #   and add an error to the `repository_url` attribute if it cannot.
@@ -105,6 +108,7 @@ class Project < ActiveRecord::Base
 
       watched_branches:         {type: Array, default: []},
       touchdown_branch:         {allow_nil: true},
+      manifest_directory:       {allow_nil: true},
 
       github_webhook_url:       {type: String, allow_nil: true},
       stash_webhook_url:        {type: String, allow_nil: true}
@@ -114,6 +118,7 @@ class Project < ActiveRecord::Base
   set_nil_if_blank :repository_url
   set_nil_if_blank :github_webhook_url
   set_nil_if_blank :stash_webhook_url
+  set_nil_if_blank :manifest_directory
 
   include Slugalicious
   slugged :name
@@ -148,8 +153,8 @@ class Project < ActiveRecord::Base
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
   #
-  # If project is not linked to a git repository, NotLinkedToAGitRepositoryError is raised. This may happen if
-  # this project is only used for key_groups. Ex: help-center project.
+  # If project is not linked to a git repository, {NotLinkedToAGitRepositoryError} is raised. This may happen if
+  # this project is only used for key_groups.
   #
   # Any Git errors that occur when attempting to clone the repository are
   # swallowed, and `nil` is returned.
@@ -188,7 +193,55 @@ class Project < ActiveRecord::Base
       return @repo
     end
   rescue Git::GitExecuteError
-    raise "Repo not ready: #{$!.to_s}"
+    raise "Repo not ready: #{$ERROR_INFO.to_s}"
+  end
+
+  # Returns a `Git::Repository` working directory object that allows you to work with the
+  # local checkout of this Project's repository. The repository will be checked
+  # out if it hasn't been already.
+  #
+  # If project is not linked to a git repository, {NotLinkedToAGitRepositoryError} is raised. This may happen if
+  # this project is only used for key_groups.
+  #
+  # Any Git errors that occur when attempting to clone the repository are
+  # swallowed, and `nil` is returned.
+  #
+  # @overload working_repo
+  #   @return [Git::Repository, nil] The working directory object.
+  #
+  # @overload working_repo(&block)
+  #   If passed a block, this method will lock a mutex and yield the working repository,
+  #   giving you exclusive access to the working repository. This is recommended when
+  #   performing any repository-altering operations (e.g., fetches). The mutex
+  #   is freed when the block completes.
+  #   @yield A block that is given exclusive control of the working repository.
+  #   @yieldparam [Git::Repository] repo The proxy object for the wokring repository.
+  #
+  # @raise [Project::NotLinkedToAGitRepositoryError] If repository_url is blank.
+
+  def working_repo
+    raise NotLinkedToAGitRepositoryError unless git?
+    if File.exist?(working_repo_path)
+      @working_repo ||= Git.open(working_repo_path)
+    else
+      FileUtils::mkdir_p WORKING_REPOS_DIRECTORY
+      working_repo_mutex.synchronize do
+        @working_repo ||= begin
+          exists = File.exist?(working_repo_path) || clone_working_repo
+          exists ? Git.open(working_repo_path) : nil
+        end
+      end
+    end
+
+    if block_given?
+      raise "Repo not ready" unless @working_repo
+      result = working_repo_mutex.synchronize { yield @working_repo }
+      return result
+    else
+      return @working_repo
+    end
+  rescue Git::GitExecuteError
+    raise "Repo not ready: #{$ERROR_INFO.to_s}"
   end
 
   # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed).
@@ -375,53 +428,6 @@ class Project < ActiveRecord::Base
     "#<#{self.class.to_s} #{id}: #{name}>"
   end
 
-  # Updates the `touchdown_branch` head to be the latest translated commit in
-  # the first `watched_branches` branch. Does nothing if either of those fields
-  # are not set, or if repo is nil.
-
-  def update_touchdown_branch
-    return unless git? && watched_branches.present? && touchdown_branch.present?
-
-    retried = false
-    begin
-      repo.fetch
-    rescue Git::GitExecuteError
-      FileUtils.rm_rf repo_directory
-      repo.fetch
-    end
-
-    found_commit = nil
-    offset = 0
-    until found_commit
-      return if offset >= 500
-      branch = repo.object(watched_branches.first)
-      return unless branch
-
-      log = branch.log(50).skip(offset)
-      break if log.size.zero?
-      db_commits = commits.for_revision(log.map(&:sha)).where(ready: true).to_a
-      log.each do |log_commit|
-        if db_commits.detect { |dbc| dbc.revision == log_commit.sha }
-          found_commit = log_commit
-          break
-        end
-      end
-      offset += log.size
-    end
-
-    if found_commit
-      Rails.logger.info "[Project#update_touchdown_branch] Updating #{inspect} branch #{touchdown_branch} to #{found_commit.sha}"
-      begin 
-        Timeout::timeout(1.minute) do
-          system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'update-ref', "refs/heads/#{touchdown_branch}", found_commit.sha
-          system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'push', '-f', repository_url, (["refs/heads/#{touchdown_branch}"]*2).join(':')
-        end 
-      rescue Timeout::Error
-        Rails.logger.error "[Project#update_touchdown_branch] Timed out on updating touchdown branch for #{inspect}"
-      end 
-    end
-  end
-
   private
 
   def repo_path
@@ -434,9 +440,24 @@ class Project < ActiveRecord::Base
     @_repo_dir = git? ? (Digest::SHA1.hexdigest(repository_url) + '.git') : nil
   end
 
+  def working_repo_path
+    return @_working_repo_path if instance_variable_defined?(:@_working_repo_path)
+    @_working_repo_path = working_repo_directory.present? ? WORKING_REPOS_DIRECTORY.join(working_repo_directory) : nil
+  end
+
+  def working_repo_directory
+    return @_working_repo_dir if instance_variable_defined?(:@_working_repo_dir)
+    @_working_repo_dir = git? ? Digest::SHA1.hexdigest(repository_url) : nil
+  end
+
   def clone_repo
     raise NotLinkedToAGitRepositoryError unless git?
     Git.clone repository_url, repo_directory, path: REPOS_DIRECTORY.to_s, mirror: true
+  end
+
+  def clone_working_repo
+    raise NotLinkedToAGitRepositoryError unless git?
+    Git.clone repository_url, working_repo_directory, path: WORKING_REPOS_DIRECTORY.to_s
   end
 
   def can_clone_repo
@@ -445,6 +466,10 @@ class Project < ActiveRecord::Base
 
   def repo_mutex
     @repo_mutex = FileMutex.new(repo_path.to_s + '.lock')
+  end
+
+  def working_repo_mutex
+    @working_repo_mutex = FileMutex.new(working_repo_path.to_s + '.lock')
   end
 
   def add_or_remove_pending_translations

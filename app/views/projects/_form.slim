@@ -129,6 +129,15 @@
               | Any time a commit from the <strong>first</strong> watched branch
               |  finishes translation, the head of this branch will be advanced
               |  to that commit. See the developer guide for more information.
+
+        .control-group
+          = f.label :manifest_directory, class: 'control-label'
+          .controls
+            = f.text_field :manifest_directory
+            p.help-block
+              | If this directory is specified, Shuttle will automatically create
+              | a new commit that contains your translated manifest in the specified
+              | directory and push it to your touchdown branch.
       fieldset 
         legend Precompilation and Caching
 
