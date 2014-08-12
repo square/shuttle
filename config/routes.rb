@@ -28,7 +28,15 @@ Shuttle::Application.routes.draw do
   }
 
   # API
-  post 'api/1.0/strings' => 'api/v1#strings'
+  namespace :api, defaults: { format: 'json' } do
+    namespace :v1 do
+      resources :key_groups, param: :key, only: [:index, :create, :show, :update] do
+        member do
+          get :status, :manifest
+        end
+      end
+    end
+  end
 
   # IN-CONTEXT TRANSLATION
   constraints(key_id: /[^\s]+/) do

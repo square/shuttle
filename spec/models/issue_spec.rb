@@ -15,8 +15,12 @@
 require 'spec_helper'
 
 describe Issue do
+  before :all do
+    Issue.delete_all
+  end
+
   context "[validations]" do
-    before(:all) do
+    before :all do
       @user = FactoryGirl.create(:user)
       @translation = FactoryGirl.create(:translation)
     end

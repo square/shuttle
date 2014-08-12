@@ -27,19 +27,21 @@ class ProjectTranslationAdder
   def perform(project_id)
     project      = Project.find(project_id)
     worker_queue = "KeyTranslationAdder:#{SecureRandom.uuid}"
-    num_jobs     = project.keys.count.to_s
+    keys_with_commits = project.keys_with_commits
+    num_jobs     = keys_with_commits.length
 
     self.class.trace_execution_scoped(['Custom/ProjectTranslationAdder/spawn_key_translation_adders']) do
-      project.keys.each do |key|
+      keys_with_commits.each do |key|
         KeyTranslationAdder.perform_once(key.id, worker_queue)
       end
     end
 
+    # TODO: this is bad. will potentially lead to deadlocks for an hour. All the workers can get stuck waiting
     # Try for up to 1 hour
     self.class.trace_execution_scoped(['Custom/ProjectTranslationAdder/wait_for_workers_to_finish']) do
       720.times do
         break unless Shuttle::Redis.exists(worker_queue)
-        break if Shuttle::Redis.get(worker_queue) >= num_jobs
+        break if Shuttle::Redis.get(worker_queue).to_i >= num_jobs
         sleep(5)
       end
     end

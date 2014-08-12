@@ -12,21 +12,21 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# After a {Key}'s readiness is changed, we need to recalculate the
-# "readiness" of every {Commit} associated with that Key.
+# A worker which will start an import for a {KeyGroup}.
+# This worker is only scheduled in `import!` method of {KeyGroup} after it's become
+# known that a re-import is needed.
 
-class KeyReadinessRecalculator
+class KeyGroupImporter
   include Sidekiq::Worker
-  sidekiq_options queue: :low
+  sidekiq_options queue: :high
 
-  # Executes this worker.
+  # Executes this worker by calling `#import_strings` on {Importer::KeyGroup}.
   #
-  # @param [Fixnum] key_id The ID of a Key.
+  # @param [Fixnum] key_group_id The ID of a KeyGroup.
 
-  def perform(key_id)
-    key = Key.find(key_id)
-    key.commits.find_each(&:recalculate_ready!)
-    key.key_group.try!(:recalculate_ready!)
+  def perform(key_group_id)
+    key_group = KeyGroup.find(key_group_id)
+    Importer::KeyGroup.new(key_group).import_strings
   end
 
   include SidekiqLocking

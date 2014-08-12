@@ -15,6 +15,8 @@
 require 'spec_helper'
 
 describe Project do
+  it_behaves_like "CommonLocaleLogic"
+
   describe '[CRUD]' do
     it "creates a valid project even if repository_url is nil" do
       project = Project.create(name: "Project without a repository_url")
@@ -466,9 +468,12 @@ describe Project do
   context "[hooks]" do
     it "should recalculate pending translations when the list of targeted locales is changed" do
       project = FactoryGirl.create(:project,
+                                   base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: {'en' => true, 'fr' => true})
       key1    = FactoryGirl.create(:key, project: project)
       key2    = FactoryGirl.create(:key, project: project)
+      commit      = FactoryGirl.create(:commit, project: project)
+      commit.keys = [key1, key2]
 
       trans1_en = FactoryGirl.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
       trans1_fr = FactoryGirl.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr')
@@ -487,6 +492,7 @@ describe Project do
 
     it "should recalculate commit readiness when required locales are added or removed" do
       project = FactoryGirl.create(:project,
+                                   base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: {'en' => true, 'fr' => false})
       key1    = FactoryGirl.create(:key, project: project)
       key2    = FactoryGirl.create(:key, project: project)
@@ -514,56 +520,101 @@ describe Project do
     context "[add_or_remove_pending_translations]" do
       around { |tests| Sidekiq::Testing.fake!(&tests) }
 
-      before(:all) do
-        @project = FactoryGirl.create(:project, name: "this is a test project",
-                                                 targeted_rfc5646_locales: {'en' => true},
-                                                 key_exclusions: [],
-                                                 key_inclusions: [],
-                                                 key_locale_exclusions: {},
-                                                 key_locale_inclusions: {} )
+      context "[ProjectTranslationAdder]" do
+        before(:all) do
+          @project = FactoryGirl.create(:project, name: "this is a test project",
+                                        targeted_rfc5646_locales: {'en' => true},
+                                        key_exclusions: [],
+                                        key_inclusions: [],
+                                        key_locale_exclusions: {},
+                                        key_locale_inclusions: {} )
+        end
+
+        it "calls ProjectTranslationAdder when targeted_rfc5646_locales changes" do
+          @project.targeted_rfc5646_locales = {'fr' => true}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "calls ProjectTranslationAdder when key_exclusions changes" do
+          @project.key_exclusions = %w{skip_me}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "calls ProjectTranslationAdder when key_inclusions changes" do
+          @project.key_inclusions = %w{include_me}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "calls ProjectTranslationAdder when key_locale_exclusions changes" do
+          @project.key_locale_exclusions = {'fr-FR' => %w(*cl*)}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "calls ProjectTranslationAdder when key_locale_inclusions changes" do
+          @project.key_locale_inclusions = {'fr-FR' => %w(*cl*)}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "doesn't call ProjectTranslationAdder fields like name, watched_branches, stash_webhook_url change" do
+          @project.name = "new name"
+          @project.watched_branches = ['newbranch']
+          @project.stash_webhook_url = "https://example.com"
+          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+          @project.save!
+        end
+
+        it "doesn't call ProjectTranslationAdder when a project is created, even if it has targeted_rfc5646_locales and key_exclusions" do
+          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+          FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true}, key_exclusions: %w{skip_me})
+        end
       end
 
-      it "calls ProjectTranslationAdder when targeted_rfc5646_locales changes" do
-        @project.targeted_rfc5646_locales = {'fr' => true}
-        expect(ProjectTranslationAdder).to receive(:perform_once)
-        @project.save!
+      context "[ProjectTranslationAdderForKeyGroups]" do
+        before(:all) do
+          @project = FactoryGirl.create(:project, name: "test project", targeted_rfc5646_locales: {'en' => true})
+        end
+
+        it "calls ProjectTranslationAdderForKeyGroups when targeted_rfc5646_locales changes" do
+          @project.targeted_rfc5646_locales = {'fr' => true}
+          expect(ProjectTranslationAdderForKeyGroups).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "doesn't call ProjectTranslationAdderForKeyGroups fields like key_exclusions, key_inclusions, key_locale_exclusions, key_locale_inclusions, name, watched_branches, stash_webhook_url change" do
+          @project.assign_attributes key_exclusions: %w{skip_me},
+                                     key_inclusions: %w{include_me},
+                                     key_locale_exclusions: {'fr-FR' => %w(*excl*)},
+                                     key_locale_inclusions: {'es' => %w(*incl*)},
+                                     name: "new name",
+                                     watched_branches: %w(newbranch),
+                                     stash_webhook_url: "https://example.com"
+          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
+          @project.save!
+        end
+
+        it "doesn't call ProjectTranslationAdderForKeyGroups when a project is created, even if it has targeted_rfc5646_locales" do
+          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
+          FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true})
+        end
+      end
+    end
+
+    context "[create_api_token]" do
+      it "sets a 36 character api token on create" do
+        project = FactoryGirl.create(:project, name: "Test", api_token: '')
+        expect(project.api_token.length).to eql(36)
       end
 
-      it "calls ProjectTranslationAdder when key_exclusions changes" do
-        @project.key_exclusions = %w{skip_me}
-        expect(ProjectTranslationAdder).to receive(:perform_once)
-        @project.save!
-      end
-
-      it "calls ProjectTranslationAdder when key_inclusions changes" do
-        @project.key_inclusions = %w{include_me}
-        expect(ProjectTranslationAdder).to receive(:perform_once)
-        @project.save!
-      end
-
-      it "calls ProjectTranslationAdder when key_locale_exclusions changes" do
-        @project.key_locale_exclusions = {'fr-FR' => %w(*cl*)}
-        expect(ProjectTranslationAdder).to receive(:perform_once)
-        @project.save!
-      end
-
-      it "calls ProjectTranslationAdder when key_locale_inclusions changes" do
-        @project.key_locale_inclusions = {'fr-FR' => %w(*cl*)}
-        expect(ProjectTranslationAdder).to receive(:perform_once)
-        @project.save!
-      end
-
-      it "doesn't call ProjectTranslationAdder fields like name, watched_branches, stash_webhook_url change" do
-        @project.name = "new name"
-        @project.watched_branches = ['newbranch']
-        @project.stash_webhook_url = "https://example.com"
-        expect(ProjectTranslationAdder).to_not receive(:perform_once)
-        @project.save!
-      end
-
-      it "doesn't call ProjectTranslationAdder when a project is created, even if it has targeted_rfc5646_locales and key_exclusions" do
-        expect(ProjectTranslationAdder).to_not receive(:perform_once)
-        FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true}, key_exclusions: %w{skip_me})
+      it "doesn't change the api_token on update" do
+        project = FactoryGirl.create(:project, name: "Test")
+        token = project.api_token
+        project.update! name: "New test"
+        expect(project.api_token).to eql(token)
       end
     end
   end
@@ -638,6 +689,26 @@ describe Project do
     it "returns true if repository_url is nil" do
       project = FactoryGirl.create(:project, repository_url: nil)
       expect(project.git?).to be_false
+    end
+  end
+
+  describe "#keys_with_commits" do
+    it "returns the keys with commit" do
+      project = FactoryGirl.create(:project)
+      key_group = FactoryGirl.create(:key_group, project: project)
+
+      commit1 = FactoryGirl.create(:commit, project: project)
+      commit2 = FactoryGirl.create(:commit, project: project)
+
+      key1 = FactoryGirl.create(:key, project: project)
+      key2 = FactoryGirl.create(:key, project: project)
+      FactoryGirl.create(:key, project: project, key_group: key_group)
+
+      commit1.keys << key1
+      commit2.keys << key1
+      commit2.keys << key2
+
+      expect(project.reload.keys_with_commits.to_a.sort).to eql([key1, key2].sort)
     end
   end
 end
