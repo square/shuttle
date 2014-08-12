@@ -61,9 +61,9 @@ $(window).ready () ->
         entry.height(orig_height)
         entry.width(orig_width)
 
-        entry.html(full_description)
+        entry.text(full_description)
         entry.animate({height: entry.prop('scrollHeight')}, 500, () ->
-          entry.html(full_description)
+          entry.text(full_description)
           row.addClass("expanded")
         )
         row.addClass("expanded")
