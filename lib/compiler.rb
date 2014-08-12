@@ -171,10 +171,21 @@ class Compiler
 
   # The output of a manifest or localize operation. Stores the output data and
   # associated metadata for transmission.
+  # TODO: This is a bad name.  Conflates this "file" object with an actual File.
   class File < Struct.new(:io, :encoding, :filename, :mime_type)
 
-    # Closes the `io` stream if appliable.
+    # Contents of the file
+    def content
+      if io.respond_to?(:string)
+        str = io.string
+      else
+        str = io.read
+      end
+      return str.force_encoding(encoding) if encoding
+      str
+    end
 
+    # Closes the `io` stream if appliable.
     def close
       io.close if io.respond_to?(:close)
     end

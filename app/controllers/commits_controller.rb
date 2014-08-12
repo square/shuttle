@@ -418,7 +418,7 @@ class CommitsController < ApplicationController
 
     response.charset                   = file.encoding
     response.headers['X-Git-Revision'] = @commit.revision
-    send_data extract_data(file),
+    send_data file.content,
               filename: file.filename,
               type:     file.mime_type
     file.close
@@ -483,7 +483,7 @@ class CommitsController < ApplicationController
 
     respond_to do |format|
       format.gz do
-        send_data extract_data(file), filename: file.filename, type: file.mime_type
+        send_data file.content, filename: file.filename, type: file.mime_type
       end
       format.any { head :not_acceptable } #TODO why is this necessary?
     end
@@ -536,17 +536,6 @@ class CommitsController < ApplicationController
         translations_total: commit.translations_total,
         strings_total:      commit.strings_total
     )
-  end
-
-  # extract data while preserving BOM from a Compiler::File object
-  def extract_data(file)
-    if file.io.respond_to?(:string)
-      str = file.io.string
-    else
-      str = file.io.read
-    end
-    return str.force_encoding(file.encoding) if file.encoding
-    str
   end
 
   def commit_params
