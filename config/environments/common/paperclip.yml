@@ -1,0 +1,2 @@
+url: "/system/development/:attachment/:id/:style/:basename.:extension"
+path: ":rails_root/public:url"
