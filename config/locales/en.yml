@@ -23,6 +23,10 @@ en:
               cant_equal_source_locale: can’t equal source locale
             base:
               illegal_change: Translators can’t change a translation that has been approved.
+        key_group:
+          attributes:
+            base:
+              not_finished: latest requested import is not yet finished
     attributes:
       project:
         name: name
@@ -104,6 +108,7 @@ en:
       invalid_sha: is not a valid SHA2 digest
       unknown_sha: does not exist in the Git repository
       wrong_sha_type: is not the correct Git object type
+      readonly: cannot be changed
   helpers:
     submit:
       commit:
@@ -135,6 +140,11 @@ en:
       mon_day: "%b %-d"
       mon_day_year: "%m/%-d/%Y"
   controllers:
+    api:
+      v1:
+        key_groups:
+          invalid_api_token: Invalid project API TOKEN
+          key_group_not_found: Key group doesn't exist
     application:
       mass_assignment_security: You tried to modify something you weren’t allowed to!
       monitor_required: You must be a monitor to do that.

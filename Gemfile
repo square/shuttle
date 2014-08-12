@@ -47,6 +47,7 @@ gem 'CFPropertyList', require: 'cfpropertylist'
 gem 'parslet'
 gem 'mustache'
 gem 'html_validation'
+gem 'diff-lcs'
 
 # EXPORTING
 gem 'libarchive'

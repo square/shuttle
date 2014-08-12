@@ -25,6 +25,9 @@ require 'sidekiq/testing/inline'
 # in spec/support/ and its subdirectories.
 Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
 
+# Requires shared examples in model concerns
+Dir[Rails.root.join('spec', 'models', 'concerns', 'common_locale_logic_spec.rb')].each { |f| require f }
+
 # Clear out the database to avoid duplicate key conflicts
 Dir[Rails.root.join('app', 'models', '**', '*.rb')].each { |f| require f }
 ActiveRecord::Base.subclasses.each do |model|

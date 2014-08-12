@@ -55,7 +55,7 @@ class Translation < ActiveRecord::Base
   belongs_to :translator, class_name: 'User', foreign_key: 'translator_id', inverse_of: :authored_translations
   belongs_to :reviewer, class_name: 'User', foreign_key: 'reviewer_id', inverse_of: :reviewed_translations
   has_many :translation_changes, inverse_of: :translation, dependent: :delete_all
-  has_many :issues, inverse_of: :translation, dependent: :delete_all
+  has_many :issues, inverse_of: :translation, dependent: :destroy
 
   include HasMetadataColumn
   has_metadata_column(
@@ -163,6 +163,7 @@ class Translation < ActiveRecord::Base
       where(rfc5646_locale: langs.map(&:rfc5646))
     end
   }
+  scope :approved, -> { where(translations: { approved: true }) }
   scope :base, -> { where('source_rfc5646_locale = rfc5646_locale') }
   scope :not_base, -> { where('source_rfc5646_locale != rfc5646_locale') }
   scope :in_commit, ->(commit) {

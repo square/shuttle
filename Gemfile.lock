@@ -358,6 +358,7 @@ DEPENDENCIES
   composite_primary_keys!
   configoro
   devise
+  diff-lcs
   dropzonejs-rails
   factory_girl_rails
   faker
