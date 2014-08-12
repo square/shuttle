@@ -19,5 +19,10 @@ FactoryGirl.define do
     base_rfc5646_locale 'en-US'
     targeted_rfc5646_locales 'en-US' => true, 'de-DE' => true
     validate_repo_connectivity false
+
+    trait :light do
+      repository_url  { Rails.root.join('spec', 'fixtures', 'repository-light.git').to_s }
+      skip_imports    { Importer::Base.implementations.map(&:ident) - %w(yaml) }
+    end
   end
 end
