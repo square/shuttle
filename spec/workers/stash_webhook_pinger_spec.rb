@@ -17,6 +17,7 @@ describe StashWebhookPinger do
   include Rails.application.routes.url_helpers
 
   before(:each) do
+    allow(Kernel).to receive(:sleep)
     allow(HTTParty).to receive(:post)
   end
 
@@ -32,14 +33,14 @@ describe StashWebhookPinger do
         @commit = FactoryGirl.create(:commit)
       end
 
-      it "sends an http request to the project stash_webhook_url if one is defined" do
+      it "sends an http request to the project stash_webhook_url 10 times if one is defined" do
         url = "http://www.example.com"
         @commit.project.stash_webhook_url = url
         @commit.project.save!
         expect(HTTParty).to receive(:post).with(
                                 "#{url}/#{@commit.revision}",
                                 anything()
-                            )
+                            ).exactly(10).times
         subject.perform(@commit.id)
       end
 

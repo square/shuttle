@@ -13,9 +13,16 @@ class StashWebhookHelper
                                   commit,
                                   host: Shuttle::Configuration.worker.default_url_options.host,
                                   port: Shuttle::Configuration.worker.default_url_options['port'],
-                                  protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http' ),
+                                  protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'),
       }
+      headers = { 'Content-Type' => 'application/json',
+                  'Accept' => 'application/json' }
 
+      # This is only used for Production (since Staging should never ping Stash)
+      auth = {
+          username: Shuttle::Configuration.stash.username,
+          password: Shuttle::Configuration.stash.password,
+      }
 
       case
         when commit.ready?
@@ -44,10 +51,15 @@ class StashWebhookHelper
         )
       end
 
-      headers = { 'Content-Type' => 'application/json',
-                  'Accept' => 'application/json' }
-
-      HTTParty.post(stash_webhook_url, { timeout: 5, body: post_parameters.to_json, headers: headers })
+      # Pretty god awful but there's no way we can verify that Stash decided to ignore us
+      # Other projects do it this way as well
+      10.times do
+        HTTParty.post(stash_webhook_url, { timeout: 5,
+                                           body: post_parameters.to_json,
+                                           headers: headers,
+                                           basic_auth: auth })
+        Kernel.sleep(1)
+      end
     end
   end
 end
