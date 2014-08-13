@@ -76,7 +76,7 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   include Tire::Model::Callbacks
   mapping do
     indexes :copy, analyzer: 'snowball', as: 'copy'
-    indexes :id, type: 'string', index: :not_analyzed
+    indexes :id, type: 'integer', index: :not_analyzed
     indexes :source_glossary_entry_id, type: 'integer'
     indexes :rfc5646_locale, type: 'string'
     indexes :translated, type: 'boolean'
