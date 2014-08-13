@@ -2,3 +2,5 @@
 .yardoc
 .sass-cache
 .validation
+tmp/**
+public/system/**
