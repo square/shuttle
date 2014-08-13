@@ -19,7 +19,7 @@ namespace :touchdown do
     Project.all.each do |p| 
       project_start_time = Time.now 
       Rails.logger.info "[touchdown:update] Starting update for project #{p.name}."
-      p.update_touchdown_branch
+      TouchdownBranchUpdater.new(p).update
       Rails.logger.info "[touchdown:update] Successfully updated touchdown branch for project #{p.name}.  Took #{(Time.now - project_start_time).round} seconds."
     end
 
