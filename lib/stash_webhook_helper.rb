@@ -51,10 +51,15 @@ class StashWebhookHelper
         )
       end
 
-      HTTParty.post(stash_webhook_url, { timeout: 5,
-                                         body: post_parameters.to_json,
-                                         headers: headers,
-                                         basic_auth: auth })
+      # Pretty god awful but there's no way we can verify that Stash decided to ignore us
+      # Other projects do it this way as well
+      10.times do
+        HTTParty.post(stash_webhook_url, { timeout: 5,
+                                           body: post_parameters.to_json,
+                                           headers: headers,
+                                           basic_auth: auth })
+        Kernel.sleep(1)
+      end
     end
   end
 end
