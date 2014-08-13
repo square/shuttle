@@ -57,13 +57,9 @@ class IssueMailer < ActionMailer::Base
   # @return [Array<String>] Array of emails of people who are associated with this issue.
 
   def related_peoples_emails(issue)
-    last_commit = issue.translation.key.commits.last
-
     emails = [Shuttle::Configuration.mailer.translators_list,
               issue.user.try!(:email),
-              issue.updater.try!(:email),
-              last_commit.try!(:user).try!(:email),
-              last_commit.try!(:author_email)] +
+              issue.updater.try!(:email)] +
          issue.subscribed_emails +
          issue.comments.includes(:user).map { |comment| comment.user.try!(:email) }
 

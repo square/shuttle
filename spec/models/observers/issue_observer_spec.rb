@@ -21,7 +21,7 @@ describe Issue do
       @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
       @updater = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
       @translation = FactoryGirl.create(:translation)
-      FactoryGirl.create(:commit, user: FactoryGirl.create(:user), author_email: "commitauthor@test.com").keys << @translation.key # associate the translation with a commit through key
+      FactoryGirl.create(:commit, user: FactoryGirl.create(:user)).keys << @translation.key # associate the translation with a commit through key
       ActionMailer::Base.deliveries.clear
     end
 
@@ -30,7 +30,7 @@ describe Issue do
         @issue = FactoryGirl.create(:issue, user: @user, updater: @updater, translation: @translation, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary")
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         mail = ActionMailer::Base.deliveries.first
-        expected_email_list = [Shuttle::Configuration.mailer.translators_list, @user.email, @updater.email, @translation.key.commits.last.user.email, 'a@test.com', 'b@test.com', 'commitauthor@test.com']
+        expected_email_list = [Shuttle::Configuration.mailer.translators_list, @user.email, @updater.email, 'a@test.com', 'b@test.com']
         expect(mail.to.sort).to eql(expected_email_list.sort)
         expect(mail.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: my summary")
         expect(mail.body.to_s).to include("reported a new issue")
@@ -46,7 +46,7 @@ describe Issue do
         @issue.update_attributes(status: Issue::Status::IN_PROGRESS, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com, c@test.com")
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         mail = ActionMailer::Base.deliveries.first
-        expected_email_list = [Shuttle::Configuration.mailer.translators_list, @user.email, @updater.email, @translation.key.commits.last.user.email, 'a@test.com', 'b@test.com', 'c@test.com', 'commitauthor@test.com'] + @issue.comments.includes(:user).map { |c| c.user.email }
+        expected_email_list = [Shuttle::Configuration.mailer.translators_list, @user.email, @updater.email, 'a@test.com', 'b@test.com', 'c@test.com'] + @issue.comments.includes(:user).map { |c| c.user.email }
         expect(mail.to.sort).to eql(expected_email_list.sort)
         expect(mail.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: my summary")
         expect(mail.body.to_s).to include("updated an issue")

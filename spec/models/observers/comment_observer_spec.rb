@@ -20,7 +20,7 @@ describe Comment do
       it "should send an email when a new comment is created" do
         # SETUP
         translation = FactoryGirl.create(:translation)
-        FactoryGirl.create(:commit, user: FactoryGirl.create(:user), author_email: "commitauthor@test.com").keys << translation.key # associate the translation with a commit through key
+        FactoryGirl.create(:commit, user: FactoryGirl.create(:user)).keys << translation.key # associate the translation with a commit through key
         issue = FactoryGirl.create(:issue, translation: translation)
         user1 = FactoryGirl.create(:user, email: "first_commenter@test.com")
         user2 = FactoryGirl.create(:user, email: "second_commenter@test.com")
@@ -31,7 +31,7 @@ describe Comment do
         comment = FactoryGirl.create(:comment, issue: issue, user: user2, content: "This is awesome")
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         email = ActionMailer::Base.deliveries.first
-        expected_email_list = [Shuttle::Configuration.mailer.translators_list, "first_commenter@test.com", "second_commenter@test.com", "commitauthor@test.com", issue.user.email, issue.updater.email, issue.translation.key.commits.last.user.email] + issue.subscribed_emails
+        expected_email_list = [Shuttle::Configuration.mailer.translators_list, "first_commenter@test.com", "second_commenter@test.com", issue.user.email, issue.updater.email] + issue.subscribed_emails
 
         expect(email.to.sort).to eql(expected_email_list.sort)
         expect(email.subject).to eql("[Shuttle] Sancho Sample wrote a new comment to an issue: This is awesome")

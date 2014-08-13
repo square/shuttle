@@ -41,14 +41,11 @@ class CommentMailer < ActionMailer::Base
 
   def related_peoples_emails(comment)
     issue = comment.issue
-    last_commit = issue.translation.key.commits.last
 
     emails = [Shuttle::Configuration.mailer.translators_list,
               comment.user.try!(:email),
               issue.user.try!(:email),
-              issue.updater.try!(:email),
-              last_commit.try!(:user).try!(:email),
-              last_commit.try!(:author_email)] +
+              issue.updater.try!(:email)] +
         issue.subscribed_emails +
         issue.comments.includes(:user).map { |comment| comment.user.try!(:email) }
 
