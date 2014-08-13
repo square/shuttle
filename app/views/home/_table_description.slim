@@ -7,6 +7,9 @@ ruby:
     full_description = '-'
   end
 
+  author = commit.author
+
 div.description[data-full-description=full_description
-                data-short-description=truncate(description || '-', length: 50)]
+                data-short-description=truncate(description || '-', length: 50)
+                data-author=author]
   = truncate(description || '-', length: 50)
