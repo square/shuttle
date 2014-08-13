@@ -38,6 +38,7 @@ $(window).ready () ->
     entry = row.find('.description')
     full_description = entry.data('full-description')
     short_description = entry.data('short-description')
+    author = entry.data('author')
 
     if not entry.data("orig-height")
       orig_height = entry.prop('scrollHeight')
@@ -62,8 +63,10 @@ $(window).ready () ->
         entry.width(orig_width)
 
         entry.text(full_description)
+        entry.append('</br>')
+        entry.append($('<strong/>').text("Authored by: #{author}"))
+
         entry.animate({height: entry.prop('scrollHeight')}, 500, () ->
-          entry.text(full_description)
           row.addClass("expanded")
         )
         row.addClass("expanded")
