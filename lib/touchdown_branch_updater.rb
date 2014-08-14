@@ -1,6 +1,7 @@
 class TouchdownBranchUpdater
   attr_reader :project
   attr_reader :working_repo
+  attr_reader :source_branch 
   attr_reader :touchdown_branch
 
   def initialize(project)
@@ -18,8 +19,13 @@ class TouchdownBranchUpdater
     return unless valid_touchdown_branch?
     project.working_repo do |working_repo|
       @working_repo = working_repo
-      @working_repo.fetch
+      @source_branch    = project.watched_branches.first
       @touchdown_branch = project.touchdown_branch
+
+      working_repo.fetch
+      working_repo.checkout(source_branch)
+      working_repo.reset_hard("origin/#{source_branch}")
+      working_repo.pull
 
       translated_commit = latest_translated_commit
 
@@ -32,6 +38,8 @@ class TouchdownBranchUpdater
         Rails.logger.info "[TouchdownBranchUpdater] Unable to find latest translated commit for #{project.inspect}"
       end
     end
+  rescue RuntimeError
+    Rails.logger.info "[TouchdownBranchUpdater] Unable to update touchdown branch due to git runtime issues"
   end
 
   private
@@ -45,7 +53,7 @@ class TouchdownBranchUpdater
     offset = 0
     until found_commit
       return if offset >= 500
-      branch = working_repo.object(project.watched_branches.first)
+      branch = working_repo.object(source_branch)
       return unless branch
 
       log = branch.log(50).skip(offset)
@@ -63,7 +71,7 @@ class TouchdownBranchUpdater
   end
 
   def add_manifest_commit
-    head_commit         = working_repo.object('HEAD')
+    head_commit         = working_repo.object(touchdown_branch)
     format              = project.cache_manifest_formats.first
     manifest_directory  = if project.manifest_directory
                             Pathname.new(working_repo.dir.path).join(project.manifest_directory)
