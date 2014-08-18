@@ -2,6 +2,7 @@ common: &common
   adapter: postgresql
   encoding: unicode
   username: shuttle
+  timeout: 10000 # this is set to a high number for debugging purposes. should be reduced in the future
 
 development:
   <<: *common
