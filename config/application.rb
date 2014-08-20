@@ -63,7 +63,13 @@ module Shuttle
 
     # Precompile additional assets.
     # application.js.coffee, application.css, and all non-JS/CSS in app/assets folder are already added.
-    config.assets.precompile += %w(*.png *.gif *.jpg)
+    config.assets.precompile += %w(
+      *.png *.gif *.jpg
+      incontext.js
+      incontext.css
+    )
+
+    config.i18n.enforce_available_locales = false # breaks en-pseudo translation specs
   end
 end
 
