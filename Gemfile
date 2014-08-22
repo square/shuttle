@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # FRAMEWORK
-gem 'rails', '4.0.4'
+gem 'rails', '4.0.6'
 gem 'configoro'
 gem 'redis-rails'
 gem 'rack-cache', require: 'rack/cache'
@@ -17,7 +17,7 @@ gem 'slugalicious'
 gem 'validates_timeliness'
 gem 'has_metadata_column', github: 'RISCfuture/has_metadata_column', branch: 'rails4', ref: 'dae0cda4835ff0903ac9b6b2a5ae5e64af15e119'
 gem 'find_or_create_on_scopes'
-gem 'composite_primary_keys', github: 'RISCfuture/composite_primary_keys', branch: 'rebase'
+gem 'composite_primary_keys', github: 'composite-primary-keys/composite_primary_keys', branch: 'ar_4.0.x'
 gem 'rails-observers'
 gem 'tire'
 gem 'after-commit-on-action'
