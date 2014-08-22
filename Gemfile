@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # FRAMEWORK
-gem 'rails', '4.0.6'
+gem 'rails', '4.0.9'
 gem 'configoro'
 gem 'redis-rails'
 gem 'rack-cache', require: 'rack/cache'
