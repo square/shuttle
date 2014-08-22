@@ -12,10 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# HACKY HACKY HACK -- fix a nasty-ass bug in PGconn#escape_bytea that only
-# happens in production. Remove this when we upgrade to PostgreSQL 9.0+.
-#
-# HACKY HACKY HACK 2 -- fix a bug in Rails 4.0 around handling of bytea values
+# HACKY HACKY HACK -- fix a bug in Rails 4.0 around handling of bytea values
 
 class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
 
@@ -93,6 +90,66 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
       retry
     else
       raise e
+    end
+  end
+end
+
+# Fix a bug with Composite Primary Keys that causes it to bypass the PostgreSQL
+# adapter's type_cast method.
+
+module ActiveRecord
+  module ConnectionAdapters
+    class PostgreSQLColumn
+      # This overide is needed to ensure ActiveRecord::Dirty behaves as expected
+      def type_cast(value)
+        # CPK's version
+        return value if value.kind_of?(Array)
+
+        # PostgreSQLAdapter's version
+        return if value.nil?
+        return super if encoded?
+
+        @oid_type.type_cast value
+      end
+    end
+  end
+end
+
+
+# Fix another CPK bug with bytea
+
+module ActiveRecord
+  module AttributeMethods
+    module Write
+      def write_attribute(attr_name, value)
+        # CPK
+        if attr_name.kind_of?(Array)
+          value = [nil]*attr_name.length if value.nil?
+          unless value.length == attr_name.length
+            raise "Number of attr_names #{attr_name.inspect} and values #{value.inspect} do not match"
+          end
+          [attr_name, value].transpose.map {|name,val| write_attribute(name, val)}
+          value
+        else
+          attr_name = attr_name.to_s
+          attr_name = self.class.primary_key if attr_name == 'id' && self.class.primary_key
+          @attributes_cache.delete(attr_name)
+          column = column_for_attribute(attr_name)
+
+          # If we're dealing with a binary column, write the data to the cache
+          # so we don't attempt to typecast multiple times.
+          if column && column.binary?
+            @attributes_cache[attr_name] = value
+          end
+
+          if column || @attributes.has_key?(attr_name)
+            @attributes[attr_name] = type_cast_attribute_for_write(column, value)
+          else
+            raise ActiveModel::MissingAttributeError, "can't write unknown attribute `#{attr_name}'"
+          end
+        end
+      end
+      alias_method :raw_write_attribute, :write_attribute
     end
   end
 end
