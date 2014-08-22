@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 source 'https://0858cb81:19556f67@www.mikeperham.com/rubygems/'
 
 # FRAMEWORK
-gem 'rails', '4.0.6'
+gem 'rails', '4.0.9'
 gem 'configoro'
 gem 'redis-rails'
 gem 'rack-cache', require: 'rack/cache'
