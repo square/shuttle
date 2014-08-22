@@ -8,7 +8,8 @@ GIT
 
 GIT
   remote: git://github.com/RISCfuture/has_metadata_column.git
-  revision: e5ebf9aa24ba5302bcc7a641c931595e1f402512
+  revision: dae0cda4835ff0903ac9b6b2a5ae5e64af15e119
+  ref: dae0cda4835ff0903ac9b6b2a5ae5e64af15e119
   branch: rails4
   specs:
     has_metadata_column (1.1.3)
