@@ -68,6 +68,8 @@ module Shuttle
       incontext.js
       incontext.css
     )
+
+    config.i18n.enforce_available_locales = false # breaks en-pseudo translation specs
   end
 end
 
