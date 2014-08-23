@@ -3,7 +3,7 @@ common: &common
   encoding: unicode
   username: shuttle
   timeout: 5 # (in seconds)
-  pool: 30
+  pool: 20
   host: localhost
   reconnect: true
 
