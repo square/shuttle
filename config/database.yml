@@ -2,23 +2,19 @@ common: &common
   adapter: postgresql
   encoding: unicode
   username: shuttle
-  timeout: 300 # (in seconds)
+  timeout: 5 # (in seconds)
+  pool: 30
+  host: localhost
+  reconnect: true
 
 development:
   <<: *common
   database: shuttle_development
-  pool: 30
-  host: localhost
 
 test:
   <<: *common
   database: shuttle_test
-  pool: 10
-  host: localhost
 
 production:
   <<: *common
   database: shuttle_production
-  pool: 50
-  host: localhost
-  reconnect: true
