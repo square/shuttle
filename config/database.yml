@@ -4,8 +4,8 @@ common: &common
   host: localhost
   username: shuttle
   password:
-  pool: 20
-  timeout: 5 # (in seconds)
+  pool: 30
+  timeout: 60 # (in seconds)
   reconnect: true
 
 development:
