@@ -1,4 +1,3 @@
 ---
 url: "redis://ironweed.corp.squareup.com:6379"
 db: 0
-timeout: 5.0
