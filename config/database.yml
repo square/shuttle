@@ -6,6 +6,7 @@ common: &common
   password:
   pool: 50
   reconnect: true
+  reaping_frequency: 30
 
 development:
   <<: *common
