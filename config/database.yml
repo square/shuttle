@@ -4,7 +4,7 @@ common: &common
   host: localhost
   username: shuttle
   password:
-  pool: 30
+  pool: 50
   reconnect: true
 
 development:
