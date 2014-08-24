@@ -5,7 +5,6 @@ common: &common
   username: shuttle
   password:
   pool: 30
-  timeout: 60 # (in seconds)
   reconnect: true
 
 development:
