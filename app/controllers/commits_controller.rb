@@ -170,13 +170,8 @@ class CommitsController < ApplicationController
         other_fields           = commit_params.stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
         other_fields[:user_id] = current_user.id
 
-        if already_submitted_revision?(@project, revision)
-          render json: {alert: t('controllers.commits.create.already_submitted')}
-        else
-          CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-          record_submitted_revision @project, revision
-          render json: {success: t('controllers.commits.create.success', revision: revision)}
-        end
+        CommitCreator.perform_once @project.id, revision, other_fields: other_fields
+        render json: {success: t('controllers.commits.create.success', revision: revision)}
       end
     end
   end
@@ -541,19 +536,6 @@ class CommitsController < ApplicationController
   def commit_params
     params[:commit]["due_date"] = DateTime::strptime(params[:commit]["due_date"], "%m/%d/%Y") rescue ''
     params.require(:commit).permit(*COMMIT_ATTRIBUTES)
-  end
-
-  def already_submitted_revision?(project, revision)
-    Shuttle::Redis.get(submitted_revision_key(project, revision)) == '1'
-  end
-
-  def record_submitted_revision(project, revision)
-    Shuttle::Redis.set submitted_revision_key(project, revision), '1'
-    Shuttle::Redis.expire submitted_revision_key(project, revision), 30
-  end
-
-  def submitted_revision_key(project, revision)
-    "submitted_revision:#{project.id}:#{revision}"
   end
 
   def set_commit_issues_presenter
