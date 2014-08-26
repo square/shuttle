@@ -45,7 +45,7 @@ module SidekiqLocking
     private
 
     def lock_name(*args)
-      "#{name.downcase}:#{args.map(&:to_s).join(':')}"
+      "#{name.downcase}:#{Sidekiq.dump_json(args)}"
     end
 
     def mutex(*args)
