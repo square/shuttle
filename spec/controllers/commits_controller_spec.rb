@@ -695,14 +695,14 @@ de:
       expect(@project.commits.first.due_date).to eql(Date.civil(2100, 1, 1))
     end
 
-    it "should not attempt to import the same revision twice in quick succession" do
+    it "should allow to import the same revision twice in quick succession" do
       expect(CommitCreator).to receive(:perform_once).once
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
       expect(JSON.parse(response.body)['success']).to include('has been received')
 
-      expect(CommitCreator).not_to receive(:perform_once)
+      expect(CommitCreator).to receive(:perform_once).once
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
-      expect(JSON.parse(response.body)['alert']).to include('already submitted')
+      expect(JSON.parse(response.body)['success']).to include('has been received')
     end
 
     it "should not call CommitCreator if repository_url is blank" do
