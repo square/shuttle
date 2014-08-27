@@ -45,13 +45,13 @@ describe "SidekiqLockingSpec" do
   describe "#perform_once" do
     let(:sample_args) { [1, 'a', { b: 'c', 2 => :d }] }
 
-    it "calls perform_async if mutex doesn't exist" do
+    it "doesn't call perform_async if the mutex is already locked" do
       TestWorker.send(:mutex, *sample_args).lock
       expect(TestWorker).to_not receive(:perform_async)
       TestWorker.perform_once(*sample_args)
     end
 
-    it "doesn't call perform_async if the mutex is already locked" do
+    it "calls perform_async if mutex doesn't exist" do
       expect(TestWorker).to receive(:perform_async).once.with(*sample_args)
       TestWorker.perform_once(*sample_args)
     end
