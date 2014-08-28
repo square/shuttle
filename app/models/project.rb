@@ -132,10 +132,11 @@ class Project < ActiveRecord::Base
             presence: true,
             length:   {maximum: 256}
   validates :api_token,
-            presence: true,
+            presence:   true,
             uniqueness: true,
             length:     {is: 36},
-            format:     {with: /[0-9a-f\-]+/}
+            format:     {with: /[0-9a-f\-]+/},
+            strict:     true
 
   validate :can_clone_repo, if: :validate_repo_connectivity
 
