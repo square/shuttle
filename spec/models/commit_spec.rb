@@ -18,7 +18,7 @@ describe Commit do
   context "[callbacks]" do
     before :each do
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @commit  = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
+      @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
     end
 
     context "[validations]" do
@@ -33,7 +33,7 @@ describe Commit do
 
       it "should set loading at" do
         old_time = Time.now
-        commit   = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user))
+        commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil, user: FactoryGirl.create(:user))
         Timecop.freeze(3.days.from_now)
         commit.loading = false
         commit.save!
@@ -50,7 +50,7 @@ describe Commit do
 
     context "[after import]" do
       before(:each) do
-        @commit = FactoryGirl.create(:commit, loading: true)
+        @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil)
         ActionMailer::Base.deliveries.clear
         @commit.user = FactoryGirl.create(:user)
       end
@@ -63,7 +63,7 @@ describe Commit do
       it "should email if commit has import errors" do
         @commit.add_import_error_in_redis(StandardError.new("some fake error"), "in some/path/to/file")
         @commit.import_batch.jobs {}
-        email = ActionMailer::Base.deliveries.select { |email| email.subject == "[Shuttle] Error(s) occurred during the import"}.first
+        email = ActionMailer::Base.deliveries.select { |email| email.subject == "[Shuttle] Error(s) occurred during the import" }.first
         expect(email).to_not be_nil
         expect(email.to).to eql([@commit.user.email, @commit.author_email].compact.uniq)
         expect(email.body).to include("SHA: #{@commit.revision}", "StandardError - some fake error (in some/path/to/file)")
@@ -75,7 +75,7 @@ describe Commit do
     before :each do
       Timecop.freeze(Time.now)
       @created_at = Time.now
-      @commit     = FactoryGirl.create(:commit, created_at: @created_at, loading: true)
+      @commit = FactoryGirl.create(:commit, created_at: @created_at, loading: true, loaded_at: nil, loaded_at: nil)
       Timecop.freeze(3.hours.from_now)
       @commit.loading = false
       @commit.save!
@@ -102,91 +102,113 @@ describe Commit do
       @commit.update_attribute(:completed_at, nil)
     end
 
-    it "should set ready to false for commits with unready keys" do
-      @commit.keys << FactoryGirl.create(:key)
-      @commit.keys << FactoryGirl.create(:key)
-      FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
-      @commit.keys.last.recalculate_ready!
+    context "has never loaded" do
+      it "should not do anything if it has never been loaded" do
+        @commit.update_attribute(:loaded_at, nil)
+        @commit.recalculate_ready!
+        expect(@commit).not_to be_ready
+      end
 
-      @commit.recalculate_ready!
-      expect(@commit).not_to be_ready
+      it "should not do anything if it is currently loading" do
+        @commit.update_attribute(:loaded_at, Time.now)
+        @commit.update_attribute(:loading, true)
+        @commit.recalculate_ready!
+        expect(@commit).not_to be_ready
+      end
     end
 
-    it "completed_at should remain nil if not ready" do
-      @commit.keys << FactoryGirl.create(:key)
-      @commit.keys << FactoryGirl.create(:key)
-      FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
-      @commit.keys.last.recalculate_ready!
+    context "has successfully loaded" do
+      before :each do
+        @commit.update_attribute(:loaded_at, Time.now)
+        @commit.update_attribute(:loading, false)
+      end
 
-      @commit.recalculate_ready!
-      expect(@commit).not_to be_ready
-      expect(@commit.completed_at).to be_nil
-    end
+      it "should set ready to false for commits with unready keys" do
+        @commit.keys << FactoryGirl.create(:key)
+        @commit.keys << FactoryGirl.create(:key)
+        FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+        @commit.keys.last.recalculate_ready!
 
-    it "should set ready to true for commits with all ready keys" do
-      @commit.keys << FactoryGirl.create(:key)
-      @commit.recalculate_ready!
-      expect(@commit).to be_ready
-    end
+        @commit.recalculate_ready!
+        expect(@commit).not_to be_ready
+      end
 
-    it "should set ready to true for commits with no keys" do
-      @commit.recalculate_ready!
-      expect(@commit).to be_ready
-    end
+      it "completed_at should remain nil if not ready" do
+        @commit.keys << FactoryGirl.create(:key)
+        @commit.keys << FactoryGirl.create(:key)
+        FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+        @commit.keys.last.recalculate_ready!
 
-    it "should set completed_at to current time when ready" do
-      Timecop.freeze(Time.now)
-      start_time = Time.now
+        @commit.recalculate_ready!
+        expect(@commit).not_to be_ready
+        expect(@commit.completed_at).to be_nil
+      end
 
-      @commit.keys << FactoryGirl.create(:key)
-      Timecop.freeze(1.day.from_now)
+      it "should set ready to true for commits with all ready keys" do
+        @commit.keys << FactoryGirl.create(:key)
+        @commit.recalculate_ready!
+        expect(@commit).to be_ready
+      end
 
-      @commit.recalculate_ready!
-      expect(@commit).to be_ready
+      it "should set ready to true for commits with no keys" do
+        @commit.recalculate_ready!
+        expect(@commit).to be_ready
+      end
 
-      expect(@commit.completed_at).to eql(start_time + 1.day)
-      Timecop.return
-    end
+      it "should set completed_at to current time when ready" do
+        Timecop.freeze(Time.now)
+        start_time = Time.now
 
-    it "should not change completed_at if commit goes from ready to unready." do
-      @commit.keys << FactoryGirl.create(:key)
-      @commit.recalculate_ready!
-      expect(@commit).to be_ready
-      completed_time = @commit.completed_at
+        @commit.keys << FactoryGirl.create(:key)
+        Timecop.freeze(1.day.from_now)
 
-      FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
-      @commit.keys.last.recalculate_ready!
-      @commit.recalculate_ready!
+        @commit.recalculate_ready!
+        expect(@commit).to be_ready
 
-      expect(@commit).not_to be_ready
-      expect(@commit.completed_at).to eql(completed_time)
-    end
+        expect(@commit.completed_at).to eql(start_time + 1.day)
+        Timecop.return
+      end
 
-    it "should not set ready if there are import errors in redis" do
-      @commit.recalculate_ready!
-      expect(@commit).to be_ready
+      it "should not change completed_at if commit goes from ready to unready." do
+        @commit.keys << FactoryGirl.create(:key)
+        @commit.recalculate_ready!
+        expect(@commit).to be_ready
+        completed_time = @commit.completed_at
 
-      @commit.add_import_error_in_redis(StandardError.new("Some Fake Error"), "in some/file.yml")
-      @commit.recalculate_ready!
+        FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+        @commit.keys.last.recalculate_ready!
+        @commit.recalculate_ready!
 
-      expect(@commit).to_not be_ready
-    end
+        expect(@commit).not_to be_ready
+        expect(@commit.completed_at).to eql(completed_time)
+      end
 
-    it "should not set ready if there are import errors in postgres" do
-      @commit.recalculate_ready!
-      expect(@commit).to be_ready
+      it "should not set ready if there are import errors in redis" do
+        @commit.recalculate_ready!
+        expect(@commit).to be_ready
 
-      @commit.update_attributes(import_errors: [['some/file.yml', "Some Fake Error"]])
-      @commit.recalculate_ready!
+        @commit.add_import_error_in_redis(StandardError.new("Some Fake Error"), "in some/file.yml")
+        @commit.recalculate_ready!
 
-      expect(@commit).to_not be_ready
+        expect(@commit).to_not be_ready
+      end
+
+      it "should not set ready if there are import errors in postgres" do
+        @commit.recalculate_ready!
+        expect(@commit).to be_ready
+
+        @commit.update_attributes(import_errors: [['some/file.yml', "Some Fake Error"]])
+        @commit.recalculate_ready!
+
+        expect(@commit).to_not be_ready
+      end
     end
   end
 
   context "[hooks]" do
     context "[mail hooks]" do
       it "sends an email to the translators and cc's the user when loading changes to false from true" do
-        @commit = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user))
+        @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil, user: FactoryGirl.create(:user))
         ActionMailer::Base.deliveries.clear
         @commit.loading = false
         @commit.save!
@@ -199,7 +221,7 @@ describe Commit do
       end
 
       it "does not send an email if the commit was previously ready" do
-        @commit = FactoryGirl.create(:commit, loading: true, user: FactoryGirl.create(:user), completed_at: 1.day.ago)
+        @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil, user: FactoryGirl.create(:user), completed_at: 1.day.ago)
         ActionMailer::Base.deliveries.clear
         @commit.loading = false
         @commit.save!
@@ -207,7 +229,7 @@ describe Commit do
       end
 
       it "sends one email to the translators when loading changes to false if the commit has no user" do
-        @commit = FactoryGirl.create(:commit, loading: true)
+        @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil)
         ActionMailer::Base.deliveries.clear
         @commit.loading = false
         @commit.save!
@@ -291,8 +313,8 @@ describe Commit do
 
       project = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'en' => true, 'fr' => true, 'de' => false, 'ja' => true})
       @commit = FactoryGirl.create(:commit, project: project)
-      key1    = FactoryGirl.create(:key, project: project)
-      key2    = FactoryGirl.create(:key, project: project)
+      key1 = FactoryGirl.create(:key, project: project)
+      key2 = FactoryGirl.create(:key, project: project)
 
       FactoryGirl.create :translation, key: key1, rfc5646_locale: 'en', source_rfc5646_locale: 'en', approved: true
       FactoryGirl.create :translation, key: key2, rfc5646_locale: 'en', source_rfc5646_locale: 'en', approved: true
@@ -371,8 +393,8 @@ describe Commit do
 
     it "should only associate relevant keys with a new commit when cached blob importing is being used" do
       @project.update_attribute :key_exclusions, %w(skip_me)
-      commit      = @project.commit!('HEAD')
-      blob        = commit.blobs.first
+      commit = @project.commit!('HEAD')
+      blob = commit.blobs.first
       red_herring = FactoryGirl.create(:key, key: 'skip_me')
       FactoryGirl.create :blobs_key, key: red_herring, blob: blob
 
@@ -391,8 +413,8 @@ describe Commit do
 
     it "should only associate relevant keys with a new commit when cached blob importing is being use3d" do
       @project.update_attribute :key_exclusions, %w(skip_me)
-      commit      = @project.commit!('HEAD')
-      blob        = commit.blobs.first
+      commit = @project.commit!('HEAD')
+      blob = commit.blobs.first
       red_herring = FactoryGirl.create(:key, key: 'skip_me')
       FactoryGirl.create :blobs_key, key: red_herring, blob: blob
 
@@ -430,8 +452,8 @@ describe Commit do
 
   describe "#all_translations_approved_for_locale?" do
     before :each do
-      @commit      = FactoryGirl.create(:commit)
-      @keys        = FactoryGirl.create_list(:key, 3)
+      @commit = FactoryGirl.create(:commit)
+      @keys = FactoryGirl.create_list(:key, 3)
       @commit.keys += @keys
     end
 
@@ -488,7 +510,7 @@ describe Commit do
       project = FactoryGirl.create(:project)
       repo = double('Git::Repo')
       commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
-      
+
       commit_obj = double('Git::Object::Commit', revision: 'abc123')
       expect(File).to receive(:exist?).and_return(true)
       expect(Git).to receive(:bare).and_return(repo)
