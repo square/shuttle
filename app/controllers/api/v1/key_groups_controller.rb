@@ -22,7 +22,9 @@ module Api
       # | `api_token` | The api token for a Project. |
 
       def index
-        render json: decorate_key_groups(@project.key_groups)
+        respond_with @project.key_groups do |format|
+          format.json { render json: decorate_key_groups(@project.key_groups) }
+        end
       end
 
       # Creates a KeyGroup in a Project.
@@ -53,10 +55,15 @@ module Api
 
       def create
         key_group = @project.key_groups.create(params_for_create)
-        if key_group.errors.blank?
-          render json: decorate_key_group(key_group), status: :accepted
-        else
-          render json: { error: { errors: key_group.errors } }, status: :bad_request
+
+        respond_with key_group do |format|
+          format.json do
+            if key_group.errors.blank?
+              render json: decorate_key_group(key_group), status: :accepted
+            else
+              render json: { error: { errors: key_group.errors } }, status: :bad_request
+            end
+          end
         end
       end
 
@@ -76,7 +83,11 @@ module Api
       # | `key`       | The `key` of the KeyGroup.   |
 
       def show
-        render json: decorate_key_group(@key_group)
+        respond_with @key_group do |format|
+          format.json do
+            render json: decorate_key_group(@key_group)
+          end
+        end
       end
 
       # Updates a KeyGroup in a Project.
@@ -106,10 +117,15 @@ module Api
 
       def update
         @key_group.update(params_for_update)
-        if @key_group.errors.blank?
-          render json: decorate_key_group(@key_group), status: :accepted
-        else
-          render json: { error: { errors: @key_group.errors } }, status: :bad_request
+
+        respond_with @key_group do |format|
+          format.json do
+            if @key_group.errors.blank?
+              render json: decorate_key_group(@key_group), status: :accepted
+            else
+              render json: { error: { errors: @key_group.errors } }, status: :bad_request
+            end
+          end
         end
       end
 
@@ -129,7 +145,11 @@ module Api
       # | `key`       | The `key` of the KeyGroup.   |
 
       def status
-        render json: decorate_key_group_status(@key_group)
+        respond_with @key_group do |format|
+          format.json do
+            render json: decorate_key_group_status(@key_group)
+          end
+        end
       end
 
       # Returns the translated copies of a KeyGroup if all translations are finished.
@@ -149,10 +169,14 @@ module Api
       # | `key`       | The `key` of the KeyGroup.   |
 
       def manifest
-        begin
-          render json: Exporter::KeyGroup.new(@key_group).export
-        rescue Exporter::KeyGroup::Error => e
-          render json: { error: { errors: [{ message: e.inspect }] } }, status: :bad_request
+        respond_with @key_group do |format|
+          format.json do
+            begin
+              render json: Exporter::KeyGroup.new(@key_group).export
+            rescue Exporter::KeyGroup::Error => e
+              render json: { error: { errors: [{ message: e.inspect }] } }, status: :bad_request
+            end
+          end
         end
       end
 
