@@ -4,7 +4,7 @@ class TouchdownBranchUpdater
   attr_reader :git_author_name
   attr_reader :git_author_email
 
-  delegate :working_repo, :touchdown_branch, :watched_branches, to: :project
+  delegate :touchdown_branch, :watched_branches, to: :project
 
   def initialize(project)
     @project = project
@@ -22,7 +22,7 @@ class TouchdownBranchUpdater
   # will be pushed up as well to the touchdown branch.
   def update
     return unless valid_touchdown_branch?
-    working_repo do |working_repo|
+    project.working_repo do |working_repo|
       # Set the user and email of the git repository 
       working_repo.config('user.name', git_author_name)
       working_repo.config('user.email', git_author_email)
@@ -32,7 +32,7 @@ class TouchdownBranchUpdater
       working_repo.reset_hard("origin/#{source_branch}")
       working_repo.pull
 
-      translated_commit = latest_translated_commit(working_repo)
+      translated_commit = latest_commit_in_source_branch(working_repo)
       if translated_commit.nil?
         Rails.logger.info "[TouchdownBranchUpdater] Unable to find latest translated commit for #{project.inspect}"
         return
@@ -61,46 +61,49 @@ class TouchdownBranchUpdater
     project.git? && watched_branches.present? && touchdown_branch.present?
   end
 
+  def valid_manifest_settings? 
+    project.cache_manifest_formats.present? && project.manifest_directory.present?
+  end 
+
   def touchdown_branch_changed?(translated_commit, working_repo)
     branch = working_repo.object(touchdown_branch)
     return true unless branch
+    if valid_manifest_settings?
+      return true unless branch.author.name == git_author_name
+    end 
 
     # Find the first commit that was not created by Shuttle
     current_touchdown_commit = branch.log(50).detect { |c| c.author.name != git_author_name }
 
-    # Only update the touchdown branch if the current_touchdown_branch is not equal to the translated_commit
+    # Only update the touchdown branch if the latest non-shuttle touchdown commit
+    # is not equal to the latest translated commit
     current_touchdown_commit.sha != translated_commit.sha
   end
 
-  def latest_translated_commit(working_repo)
+  def latest_commit_in_source_branch(working_repo)
     head_commit = working_repo.object(source_branch)
     db_commit = project.commits.for_revision(head_commit.sha).first
     db_commit.try(:ready?) ? head_commit : nil
   end
 
   def add_manifest_commit(working_repo)
-    head_commit         = working_repo.object(touchdown_branch)
-    format              = project.cache_manifest_formats.first
-    manifest_directory  = if project.manifest_directory
-                            Pathname.new(working_repo.dir.path).join(project.manifest_directory)
-                          else
-                            nil
-                          end
+    if valid_manifest_settings?
+      head_commit         = working_repo.object(touchdown_branch)
+      format              = project.cache_manifest_formats.first
+      manifest_directory  = Pathname.new(working_repo.dir.path).join(project.manifest_directory)
 
-    if format && manifest_directory
       Rails.logger.info "[TouchdownBranchUpdater] Adding translated manifest file for #{head_commit.sha}"
       shuttle_commit = Commit.for_revision(head_commit.sha).first
       compiler       = Compiler.new(shuttle_commit)
       # Not an actual Ruby File.  Actually Compiler::File object.
       file           = compiler.manifest(format)
-      # TODO: Manifest Filename
-      # manifest_filename = project.manifest_filename || file.filename
+      manifest_filename = project.manifest_filename || file.filename
 
       working_repo.checkout(touchdown_branch)
 
       # Create the manifest directory and write manifest file
       FileUtils::mkdir_p manifest_directory.to_s
-      manifest_file = manifest_directory.join(file.filename).to_s
+      manifest_file = manifest_directory.join(manifest_filename).to_s
       File.write(manifest_file, file.content)
 
       working_repo.add(manifest_file)

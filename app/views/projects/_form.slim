@@ -138,6 +138,15 @@
               | If this directory is specified, Shuttle will automatically create
               | a new commit that contains your translated manifest in the specified
               | directory and push it to your touchdown branch.
+
+        .control-group
+          = f.label :manifest_filename, class: 'control-label'
+          .controls
+            = f.text_field :manifest_filename
+            p.help-block
+              | If the filename is specified, then Shuttle will create a
+              | file using the given filename.  Otherwise, it will default to
+              | manifest.[default_file_extension]
       fieldset 
         legend Precompilation and Caching
 
