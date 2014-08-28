@@ -188,16 +188,12 @@ class Commit < ActiveRecord::Base
   end
 
   # Calculates the value of the `ready` field and saves the record.
-  # If this is the first time a commit has been marked as ready, sets 
+  # If this is the first time a commit has been marked as ready, sets
   # completed_at to be the current time.
 
   def recalculate_ready!
-    keys_are_ready = !keys.where(ready: false).exists?
-    no_errors_exist = import_errors.blank? && import_errors_in_redis.blank?
-    self.ready     = keys_are_ready && no_errors_exist
-    if self.ready and self.completed_at.nil?
-      self.completed_at = Time.current
-    end
+    self.ready = successfully_loaded? && keys_are_ready? && no_errors_exist?
+    self.completed_at = Time.current if self.ready && self.completed_at.nil?
     save!
   end
 
@@ -472,6 +468,31 @@ class Commit < ActiveRecord::Base
   end
 
   private
+
+  # Returns `true` if this commit is currently not loading and
+  # has successfully loaded at least once.
+  #
+  # @return [true, false] Whether the commit has successfully loaded.
+
+  def successfully_loaded?
+    loaded_at.present? && !loading?
+  end
+
+  # Returns `true` if all Keys associated with this commit are ready.
+  #
+  # @return [true, false] Whether all keys are ready for this commit.
+
+  def keys_are_ready?
+    !keys.where(ready: false).exists?
+  end
+
+  # Returns `true` if no errors exist on this commit.
+  #
+  # @return [true, false] Whether there are any errors associated with this commit.
+
+  def no_errors_exist?
+    import_errors.blank? && import_errors_in_redis.blank?
+  end
 
   def load_message
     self.message ||= commit!.message

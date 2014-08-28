@@ -40,6 +40,9 @@ describe CommitsController do
       @commit       = @project.commit!('HEAD^', skip_import: true)
       @newer_commit = @project.commit!('HEAD', skip_import: true)
 
+      @commit.update_attributes(loading: false, loaded_at: Time.now)
+      @newer_commit.update_attributes(loading: false, loaded_at: Time.now)
+
       key1 = FactoryGirl.create(:key,
                                 project: @project,
                                 key:     'key1',
