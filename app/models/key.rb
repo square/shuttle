@@ -114,6 +114,8 @@ class Key < ActiveRecord::Base
   has_many :blobs, through: :blobs_keys
   belongs_to :key_group, inverse_of: :keys
 
+  include InheritedSettingsForKey
+
   include HasMetadataColumn
   has_metadata_column(
       key:          {presence: true},
@@ -279,46 +281,6 @@ class Key < ActiveRecord::Base
       !translations.in_locale(*required_locales).where('approved IS NOT TRUE').exists?
     end
   end
-
-  # ======== START LOCALE RELATED CODE ===================================================================================
-
-  # If this {Key} belongs to a {KeyGroup}, the required locales are pulled from the
-  # KeyGroup's settings. Otherwise, project's settings are used.
-  #
-  # @return [Array<Locale>] array of {Locales} this {Key} must be translated to.
-
-  def required_locales
-    key_group ? key_group.required_locales : project.required_locales
-  end
-
-  # If this {Key} belongs to a {KeyGroup}, the KeyGroup is checked to see if the key
-  # should be skipped. Otherwise, project is checked.
-  #
-  # @return [Boolean] whether or not this {Key} should be skipped.
-
-  def skip_key?(locale)
-    key_group ? key_group.skip_key?(self, locale) : project.skip_key?(self.key, locale)
-  end
-
-  # If this {Key} belongs to a {KeyGroup}, the base locale is pulled from the
-  # KeyGroup's settings. Otherwise, project's settings are used.
-  #
-  # @return [Locale] base {Locale} of this {Key}
-
-  def base_locale
-    key_group ? key_group.base_locale : project.base_locale
-  end
-
-  # If this {Key} belongs to a {KeyGroup}, the targeted_locales are pulled from the
-  # KeyGroup's settings. Otherwise, project's settings are used.
-  #
-  # @return [Array<Locale>] array of {Locales} this {Key} is targeted to.
-
-  def targeted_locales
-    key_group ? key_group.targeted_locales : project.targeted_locales
-  end
-
-  # ======== END LOCALE RELATED CODE ===================================================================================
 
   # @private
   def inspect(default_behavior=false)
