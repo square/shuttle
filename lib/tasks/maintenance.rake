@@ -18,7 +18,7 @@ namespace :maintenance do
     Rails.logger.info "[maintenance:clean_old_commits] Cleaning old commits for #{Date.today}"
     Project.all.each do |p|
       p.commits.where(ready: true, loading: false).order('created_at DESC').offset(250).each do |c|
-        StashWebhookHelper.new.ping(c, true)
+        StashWebhookHelper.new.ping(c, purged: true)
         c.destroy
       end
     end
