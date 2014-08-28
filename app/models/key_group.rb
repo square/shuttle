@@ -102,8 +102,8 @@ class KeyGroup < ActiveRecord::Base
   validates :source_copy_sha_raw, presence: true
   validates :description, length: {maximum: 2000}
   validates :email, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i }, allow_nil: true
-  validates :ready,   inclusion: { in: [true, false] }
-  validates :loading, inclusion: { in: [true, false] }
+  validates :ready,   inclusion: { in: [true, false] }, strict: true
+  validates :loading, inclusion: { in: [true, false] }, strict: true
   validates :first_import_requested_at,
             :first_import_started_at,
             :first_import_finished_at,
@@ -112,7 +112,7 @@ class KeyGroup < ActiveRecord::Base
             :last_import_started_at,
             :last_import_finished_at,
             :last_completed_at,
-                timeliness: {type: :date}, allow_nil: true
+                timeliness: {type: :date}, allow_nil: true, strict: true
 
   # don't allow an update if there is a pending import or an import is in progress
   validate on: :update do
