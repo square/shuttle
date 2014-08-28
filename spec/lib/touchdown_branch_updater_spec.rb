@@ -7,7 +7,8 @@ describe TouchdownBranchUpdater do
     project
   end
 
-  let(:head_revision) { '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264' }
+  let(:head_revision) { 'fb355bb396eb3cf66e833605c835009d77054b71' }
+  let(:parent_revision) { '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264' }
 
   describe "#update" do
     context "invalid touchdown branch" do
@@ -35,7 +36,7 @@ describe TouchdownBranchUpdater do
     end
 
     context "valid touchdown branch" do
-      it "advances the touchdown branch to the most recently translated watched branch commit" do
+      it "advances the touchdown branch to the watched branch commit if it is translated" do
         project.watched_branches = %w(master)
         project.touchdown_branch = 'translated'
 
@@ -49,16 +50,40 @@ describe TouchdownBranchUpdater do
           to eql(head_revision)
       end
 
-      it "does nothing if none of the commits in the watched branch are translated" do
+      it "does nothing if the head of the watched branch is not translated" do
         project.watched_branches = %w(master)
         project.touchdown_branch = 'translated'
 
-        c = project.commit!(head_revision)
-        expect(c).not_to be_ready
+        parent_commit = project.commit!(parent_revision)
+        parent_commit.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+        CommitStatsRecalculator.new.perform(parent_commit.id)
+        expect(parent_commit.reload).to be_ready
+
+        head_commit = project.commit!(head_revision)
+        expect(head_commit.reload).to_not be_ready
 
         TouchdownBranchUpdater.new(project).update
         expect(`git --git-dir=#{Shellwords.escape project.repository_url} rev-parse translated`.chomp).
           to eql('translated')
+      end
+
+      it "does nothing if the head of the watched branch has not changed" do
+        project.watched_branches = %w(master)
+        project.touchdown_branch = 'translated'
+
+        c = project.commit!(head_revision)
+        c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+        CommitStatsRecalculator.new.perform(c.id)
+        expect(c.reload).to be_ready
+
+        # Mock to make it seem as if the working_repo's head of translated has not changed.
+        working_repo = double('working_repo').as_null_object
+        head_commit = project.working_repo.object(head_revision)
+        allow(working_repo).to receive(:object).and_return(head_commit)
+        allow(project).to receive(:working_repo).and_yield(working_repo)
+
+        TouchdownBranchUpdater.new(project).update
+        expect(working_repo).to_not have_received(:push)
       end
 
       it "logs an error if updating the touchdown branch takes longer than 1 minute" do
@@ -138,6 +163,38 @@ describe TouchdownBranchUpdater do
           TouchdownBranchUpdater.new(project).update
           manifest_filepath = Pathname.new(project.working_repo.dir.path).join(project.manifest_directory)
           expect(File.exist?(manifest_filepath)).to be_true
+        end
+      end
+
+      context "already created manifest" do
+        before do
+          project.watched_branches = %w(master)
+          project.touchdown_branch = 'translated'
+          project.cache_manifest_formats = %w(yaml)
+          project.manifest_directory = 'nonexist/directory'
+
+          c = project.commit!(head_revision)
+          c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+          CommitStatsRecalculator.new.perform(c.id)
+          c.reload
+          TouchdownBranchUpdater.new(project).update
+        end
+
+        it "does not attempt to push another commit if manifest is already there" do
+          # Mock to make it seem as if the working_repo's head of translated has not changed.
+          working_repo = double('working_repo').as_null_object
+          source_branch = project.watched_branches.first
+          touchdown_branch = project.touchdown_branch
+
+          translated_commit = project.working_repo.object(source_branch)
+          touchdown_commit = project.working_repo.object(touchdown_branch)
+
+          allow(working_repo).to receive(:object).and_return(translated_commit)
+          allow(working_repo).to receive(:object).with(touchdown_branch).and_return(touchdown_commit)
+          allow(project).to receive(:working_repo).and_yield(working_repo)
+
+          TouchdownBranchUpdater.new(project).update
+          expect(working_repo).to_not have_received(:push)
         end
       end
     end
