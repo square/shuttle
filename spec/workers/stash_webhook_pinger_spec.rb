@@ -40,7 +40,21 @@ describe StashWebhookPinger do
         expect(HTTParty).to receive(:post).with(
                                 "#{url}/#{@commit.revision}",
                                 anything()
-                            ).exactly(10).times
+                            ).exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times
+        subject.perform(@commit.id)
+      end
+
+      it "should make sure that the commit is reloaded with the proper state" do
+        url = "http://www.example.com"
+        @commit.project.stash_webhook_url = url
+        @commit.project.save!
+
+        expect(HTTParty).to receive(:post) do |url, params|
+          commit_state = JSON.parse(params[:body])['state']
+          expected_state = @commit.ready? ? 'SUCCESSFUL' : 'INPROGRESS'
+          expect(commit_state).to eql(expected_state)
+          @commit.update_column :ready, !@commit.ready
+        end.exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times
         subject.perform(@commit.id)
       end
 
