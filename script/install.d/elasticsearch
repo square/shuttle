@@ -7,7 +7,7 @@ cd vendor
 
 if [[ ! -e shuttle-es ]]; then
   attempts=0
-  cmd="git clone git://git-mirror.corp.squareup.com:10418/scm/sq/shuttle-es.git"
+  cmd="git clone /mnt/nfs/git/sq/shuttle-es.git"
 
   until $cmd || (( attempts == 5 )); do
     echo "retrying clone, attempt $attempts..."
