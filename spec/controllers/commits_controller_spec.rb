@@ -360,8 +360,6 @@ de:
 
     it "should 400 if a single locale is required and no locales are given" do
       get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'strings'
-      #purposeful fail here
-      expect(1).to eql(2)
       expect(response.status).to eql(400)
     end
 
