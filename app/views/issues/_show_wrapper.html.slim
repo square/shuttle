@@ -32,4 +32,4 @@
     = render partial: 'issues/edit', locals: { project: project, key: key, translation: translation, issue: issue }
 
   .issue-comments-wrapper
-    = render partial: 'comments/index', locals: {issue: issue, comment: Comment.new}
+    = render partial: 'comments/index', locals: {issue: issue, comment: local_assigns[:comment] || Comment.new}

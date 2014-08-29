@@ -54,6 +54,8 @@ class Issue < ActiveRecord::Base
   belongs_to :user, inverse_of: :issues
   belongs_to :updater, class_name: User
   has_many :comments, inverse_of: :issue, dependent: :delete_all
+  delegate :project, to: :key
+  delegate :key, to: :translation
 
   validates :user, presence: {on: :create} # in case the user gets deleted afterwards
   validates :updater, :translation, presence: true
@@ -64,6 +66,11 @@ class Issue < ActiveRecord::Base
   validates :status, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 4}
 
   before_validation(on: :create) { self.status = Status::OPEN }
+
+
+  def self.new_with_defaults
+    new(subscribed_emails: [Shuttle::Configuration.mailer.translators_list])
+  end
 
   # ===== START SCOPES BY STATUS =====
   scope :pending, -> { where(status: [Status::OPEN, Status::IN_PROGRESS]) }
@@ -87,6 +94,16 @@ class Issue < ActiveRecord::Base
     write_attribute(:subscribed_emails, emails)
   end
 
+  # Adds the given email to the subscribed emails list
+  # Updates the record in the database without calling validations or callbacks
+  #  @param [String] email that will be subscribed
+
+  def subscribe_email_silently(email)
+    self.subscribed_emails += [email] # so that this calls `subscribed_emails=` which does the sanitation
+    subscribed_emails_format
+    update_column :subscribed_emails, subscribed_emails unless errors.any?
+  end
+
   def subscribed_emails_format
     if subscribed_emails
       subscribed_emails.each do |email|
@@ -96,7 +113,6 @@ class Issue < ActiveRecord::Base
       end
     end
   end
-
   private :subscribed_emails_format
   # ===== END subscribed_emails =====
 
