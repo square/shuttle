@@ -98,6 +98,12 @@ describe Issue do
     end
   end
 
+  context "#new_with_defaults" do
+    it "initializes a new Issue with default subscribed_emails which contains the translators_list email address" do
+      expect(Issue.new_with_defaults.subscribed_emails).to eql([Shuttle::Configuration.mailer.translators_list])
+    end
+  end
+
   context "[subscribed_emails=]" do
     before(:all) do
       @user = FactoryGirl.create(:user)
@@ -142,6 +148,39 @@ describe Issue do
     it "should discard duplicate email addresses" do
       @issue.subscribed_emails = "a@b.com, c@d.com, c@d.com, a@b.com"
       @issue.subscribed_emails == %w(a@b.com c@d.com)
+    end
+  end
+
+  context "#subscribe_email_silently" do
+    before :each do
+      @issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
+    end
+
+    it "subscribes a new email address" do
+      @issue.subscribe_email_silently("test2@example.com")
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com", "test2@example.com"])
+    end
+
+    it "doesn't change subscribed_emails if the email address is already subscribed" do
+      @issue.subscribe_email_silently("test@example.com")
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
+    end
+
+    it "properly sanitizes the email address before update" do
+      @issue.subscribe_email_silently("   test2@example.com   ")
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com", "test2@example.com"])
+    end
+
+    it "doesn't throw an error if email address couldn't be subscribed" do
+      expect { @issue.subscribe_email_silently("test2") }.to_not raise_error
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
+    end
+
+    it "subscribes email address silently without sending any emails about the update" do
+      expect(@issue).to receive(:update_column).with(:subscribed_emails, ["test@example.com", "test2@example.com"])
+      ActionMailer::Base.deliveries.clear
+      @issue.subscribe_email_silently("test2@example.com")
+      expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
   end
 

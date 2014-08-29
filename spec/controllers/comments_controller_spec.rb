@@ -36,17 +36,13 @@ describe CommentsController do
     ActionMailer::Base.deliveries.clear
   end
 
-  let(:params) { @path_params.merge(extra_params) }
-
   describe "#create" do
-    subject { xhr :post, :create, params }
-
-    context "with valid issue arguments" do
-      let(:extra_params) { {comment: { content: "this is a comment" } } }
-
+    context "with valid comment arguments" do
       it "creates the comment; renders javascript code to replace the '.comments' section of the new comment's issue; response includes the new comment; response doesn't include errors; sends comment_created email" do
         expect(Comment.count).to eql(0)
-        subject
+
+        xhr :post, :create, @path_params.merge({comment: { content: "this is a comment" } })
+
         expect(Comment.count).to eql(1)
         comment = Comment.last
         expect(comment.content).to eql("this is a comment")
@@ -54,7 +50,7 @@ describe CommentsController do
 
         expect(response).to be_success
         expect(response.body).to_not include("Errors:")
-        expect(response.body).to include("$('#issue-wrapper-#{@issue.id} .comments').replaceWith")
+        expect(response.body).to include("$('#issues #issue-wrapper-#{@issue.id}').replaceWith")
         expect(response.body).to include("id=\\\"comment-#{comment.id}\\\"")
 
         expect(ActionMailer::Base.deliveries.size).to eql(1)
@@ -62,11 +58,10 @@ describe CommentsController do
       end
     end
 
-    context "with invalid issue arguments" do
-      let(:extra_params) { {comment: { content: "" } } }
-
+    context "with invalid comment arguments" do
       it "doesn't create a comment; response includes the errors; doesn't send an email" do
-        subject
+        xhr :post, :create, @path_params.merge({comment: { content: "" } })
+
         expect(Comment.count).to eql(0)
         expect(response).to be_success
         expect(response.body).to include("Errors:")

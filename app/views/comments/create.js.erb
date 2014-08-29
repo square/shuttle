@@ -14,4 +14,4 @@
 #    limitations under the License.
 %>
 
-$('#issue-wrapper-<%= issue.id %> .comments').replaceWith('<%=j render partial: 'comments/index', locals: {issue: issue, comment: comment} %>');
+$('#issues #issue-wrapper-<%= issue.id %>').replaceWith('<%=j render partial: 'issues/show_wrapper', locals: {project: project, key: key, translation: translation, issue: issue, comment: comment} %>');

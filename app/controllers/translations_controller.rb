@@ -324,7 +324,7 @@ class TranslationsController < ApplicationController
 
   def find_issues
     @issues = @translation.issues.includes(:user, comments: :user).order_default
-    @issue = Issue.new
+    @issue = Issue.new_with_defaults
   end
 
   def translation_params

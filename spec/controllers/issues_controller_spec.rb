@@ -36,13 +36,9 @@ describe IssuesController do
     ActionMailer::Base.deliveries.clear
   end
 
-  let(:params) { @path_params.merge(extra_params) }
-
   describe "#create" do
-    subject { xhr :post, :create, params }
-
     context "with valid issue arguments" do
-      [ { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: 1, subscribed_emails: "a@b.com, c@d.com, a@b.com" } },
+      [ { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: 1, subscribed_emails: "test1@example.com, test2@example.com, test1@example.com" } },
         { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: nil, subscribed_emails: "" } },
         { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: '' } },
         { issue: { summary: "this is a unique summary", description: "my description", kind: 1 } }
@@ -51,7 +47,9 @@ describe IssuesController do
 
         it "creates the issue; renders javascript code to replace the #issues that includes the new issue; and response doesn't include errors; sends issue_created email" do
           expect(Issue.count).to eql(0)
-          subject
+
+          xhr :post, :create, @path_params.merge(extra_params)
+
           expect(Issue.count).to eql(1)
           issue = Issue.last
           expect(issue.summary).to eql("this is a unique summary")
@@ -65,8 +63,12 @@ describe IssuesController do
           expect(response.body).to include("id=\\\"issues\\\"")
           expect(response.body).to include("id=\\\"issue-#{issue.id}\\\"")
 
-          expect(ActionMailer::Base.deliveries.size).to eql(1)
-          expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: this is a unique summary")
+          if extra_params[:issue][:subscribed_emails].present?
+            expect(ActionMailer::Base.deliveries.size).to eql(1)
+            expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: this is a unique summary")
+          else
+            expect(ActionMailer::Base.deliveries.size).to eql(0)
+          end
         end
       end
     end
@@ -75,7 +77,7 @@ describe IssuesController do
       let(:extra_params) { { issue: { subscribed_emails: "a@b.com,  a@b.com  ,  abc xyz, abc@abc, abc.com", priority: 30 } } }
 
       it "doesn't create an issue; response includes the errors; doesn't send an email" do
-        subject
+        xhr :post, :create, @path_params.merge(extra_params)
         expect(Issue.count).to eql(0)
         expect(response).to be_success
         expect(response.body).to include("Errors:")
@@ -97,13 +99,10 @@ describe IssuesController do
       ActionMailer::Base.deliveries.clear
     end
 
-    subject { xhr :patch, :update, params }
-
     context "with valid issue arguments" do
-      let(:extra_params) { { id: @issue.id, issue: { summary: "this is a unique summary updated", description: "my description updated", priority: 2, kind: 2, status: Issue::Status::RESOLVED, subscribed_emails: "a@b.com, c@d.com" } } }
-
       it "updates the issue; renders javascript code to replace the updated #issue-someID; and response doesn't include errors; sends issue_updated email" do
-        subject
+        xhr :patch, :update, @path_params.merge({ id: @issue.id, issue: { summary: "this is a unique summary updated", description: "my description updated", priority: 2, kind: 2, status: Issue::Status::RESOLVED, subscribed_emails: "a@b.com, c@d.com" } })
+
         @issue.reload
         expect(Issue.count).to eql(1)
         expect(@issue.summary).to eql("this is a unique summary updated")
@@ -123,10 +122,8 @@ describe IssuesController do
     end
 
     context "with invalid issue arguments" do
-      let(:extra_params) { { id: @issue.id, issue: { status: "wrong status", subscribed_emails: "xyz" } } }
-
       it "doesn't update an issue; response includes the errors; doesn't send an email" do
-        subject
+        xhr :patch, :update, @path_params.merge({ id: @issue.id, issue: { status: "wrong status", subscribed_emails: "xyz" } })
         @issue.reload
 
         expect(@issue.status).to eql(1)

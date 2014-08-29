@@ -18,6 +18,10 @@
 
 class CommentObserver < ActiveRecord::Observer
   def after_create(comment)
+    # subscribe the commenter's email to the issue
+    comment.issue.subscribe_email_silently(comment.user.try!(:email))
+
+    # send a notification to subscribed email addresses about the new comment
     CommentMailer.comment_created(comment).deliver
   end
 end
