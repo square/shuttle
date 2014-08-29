@@ -109,6 +109,7 @@ class Project < ActiveRecord::Base
       watched_branches:         {type: Array, default: []},
       touchdown_branch:         {allow_nil: true},
       manifest_directory:       {allow_nil: true},
+      manifest_filename:        {allow_nil: true},
 
       github_webhook_url:       {type: String, allow_nil: true},
       stash_webhook_url:        {type: String, allow_nil: true}
