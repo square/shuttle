@@ -22,7 +22,7 @@ describe IssuesController do
   include Devise::TestHelpers
 
   before(:all) do
-    @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
+    @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "foo@bar.com")
     @project = FactoryGirl.create(:project)
     @key = FactoryGirl.create(:key, project: @project)
     @translation = FactoryGirl.create(:translation, key: @key)
@@ -135,6 +135,47 @@ describe IssuesController do
 
         expect(ActionMailer::Base.deliveries.size).to eql(0)
       end
+    end
+  end
+
+  describe "#resolve" do
+    it "resolves the issue, subscribes the current user, and sends an email" do
+      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
+      ActionMailer::Base.deliveries.clear
+
+      expect(issue).to_not be_resolved
+      xhr :patch, :resolve, @path_params.merge({ id: issue.id })
+      expect(issue.reload).to be_resolved
+      expect(issue.reload.subscribed_emails).to eql(["test@example.com", "foo@bar.com"])
+      expect(ActionMailer::Base.deliveries.size).to eql(1)
+      expect(ActionMailer::Base.deliveries.first.subject).to include("updated an issue. Issue Summary:")
+      expect(ActionMailer::Base.deliveries.first.to).to eql(["test@example.com", "foo@bar.com"])
+    end
+  end
+
+  describe "#subscribe" do
+    it "subscribes the current user to the issue and sends an email" do
+      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
+      ActionMailer::Base.deliveries.clear
+
+      xhr :patch, :subscribe, @path_params.merge({ id: issue.id })
+      expect(issue.reload.subscribed_emails).to eql(["test@example.com", "foo@bar.com"])
+      expect(ActionMailer::Base.deliveries.size).to eql(1)
+      expect(ActionMailer::Base.deliveries.first.subject).to include("updated an issue. Issue Summary:")
+      expect(ActionMailer::Base.deliveries.first.to).to eql(["test@example.com", "foo@bar.com"])
+    end
+  end
+
+  describe "#unsubscribe" do
+    it "unsubscribes the current user from the issue and sends an email" do
+      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com", "foo@bar.com"], translation: @translation)
+      ActionMailer::Base.deliveries.clear
+
+      xhr :patch, :unsubscribe, @path_params.merge({ id: issue.id })
+      expect(issue.reload.subscribed_emails).to eql(["test@example.com"])
+      expect(ActionMailer::Base.deliveries.size).to eql(1)
+      expect(ActionMailer::Base.deliveries.first.subject).to include("updated an issue. Issue Summary:")
+      expect(ActionMailer::Base.deliveries.first.to).to eql(["test@example.com"])
     end
   end
 end

@@ -40,6 +40,14 @@ $issue-status-yellow: #E4DB00;
       border-bottom: 1px solid $gray5;
       margin-bottom: 15px;
     }
+
+    .right-side {
+      text-align: right;
+      input[type=submit] {
+        margin: 5px 0;
+        width: 170px;
+      }
+    }
   }
 
   .cancel-button {
@@ -47,7 +55,7 @@ $issue-status-yellow: #E4DB00;
     margin-left: 5px;
   }
 
-  .form-wrapper {
+  .form-wrapper, .loading-overlayable {
     position: relative;
   }
 
@@ -108,10 +116,5 @@ $issue-status-yellow: #E4DB00;
     left: 0px;
     right: 0px;
     bottom: 0px;
-  }
-
-  .unsubscribe-directions {
-    margin-top: 4px;
-    font-size: 12px;
   }
 }

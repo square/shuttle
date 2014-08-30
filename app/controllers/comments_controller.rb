@@ -48,7 +48,7 @@ class CommentsController < ApplicationController
     begin
       Comment.transaction do
         comment.save!
-        comment.issue.subscribe_email_silently(current_user.email)
+        comment.issue.subscribe_silently(current_user)
       end
     rescue ActiveRecord::RecordInvalid
     end
