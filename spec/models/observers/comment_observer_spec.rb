@@ -19,16 +19,14 @@ describe Comment do
     context "after_create" do
       it "subscribes the commenter to the issue emails; and sends an email to the subscription list when a new comment is created" do
         issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
-        user = FactoryGirl.create(:user, email: "commenter@example.com")
-
+        comment = FactoryGirl.build(:comment, issue: issue)
         ActionMailer::Base.deliveries.clear
-        comment = FactoryGirl.create(:comment, issue: issue, user: user)
-        expect(issue.reload.subscribed_emails).to eql(["test@example.com", "commenter@example.com"])
 
+        comment.save!
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         email = ActionMailer::Base.deliveries.first
 
-        expect(email.to).to eql(["test@example.com", "commenter@example.com"])
+        expect(email.to).to eql(["test@example.com"])
         expect(email.subject).to include("[Shuttle] Sancho Sample wrote a new comment to an issue")
       end
     end
