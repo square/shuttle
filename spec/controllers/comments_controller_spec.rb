@@ -22,11 +22,11 @@ describe CommentsController do
   include Devise::TestHelpers
 
   before(:all) do
-    @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
+    @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "test@example.com")
     @project = FactoryGirl.create(:project)
     @key = FactoryGirl.create(:key, project: @project)
     @translation = FactoryGirl.create(:translation, key: @key)
-    @issue = FactoryGirl.create(:issue, user: @user, translation: @translation)
+    @issue = FactoryGirl.create(:issue, user: @user, translation: @translation, subscribed_emails: [])
     @path_params = { issue_id: @issue.id }
   end
 
@@ -38,7 +38,7 @@ describe CommentsController do
 
   describe "#create" do
     context "with valid comment arguments" do
-      it "creates the comment; renders javascript code to replace the '.comments' section of the new comment's issue; response includes the new comment; response doesn't include errors; sends comment_created email" do
+      it "creates the comment; renders javascript code to replace the '.comments' section of the new comment's issue; response includes the new comment; response doesn't include errors; subscribes user to issue; sends comment_created email" do
         expect(Comment.count).to eql(0)
 
         xhr :post, :create, @path_params.merge({comment: { content: "this is a comment" } })
@@ -47,6 +47,7 @@ describe CommentsController do
         comment = Comment.last
         expect(comment.content).to eql("this is a comment")
         expect(comment.user_id).to eql(@user.id)
+        expect(@issue.reload.subscribed_emails).to eql(["test@example.com"])
 
         expect(response).to be_success
         expect(response.body).to_not include("Errors:")
@@ -54,15 +55,18 @@ describe CommentsController do
         expect(response.body).to include("id=\\\"comment-#{comment.id}\\\"")
 
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar wrote a new comment to an issue: this is a comment")
+        mail = ActionMailer::Base.deliveries.first
+        expect(mail.subject).to eql("[Shuttle] Foo Bar wrote a new comment to an issue: this is a comment")
+        expect(mail.to).to eql(["test@example.com"])
       end
     end
 
     context "with invalid comment arguments" do
-      it "doesn't create a comment; response includes the errors; doesn't send an email" do
+      it "doesn't create a comment; response includes the errors; doesn't send an email; doesn't subscribe the user to the issue" do
         xhr :post, :create, @path_params.merge({comment: { content: "" } })
 
         expect(Comment.count).to eql(0)
+        expect(@issue.reload.subscribed_emails).to eql([])
         expect(response).to be_success
         expect(response.body).to include("Errors:")
         expect(response.body).to include("Content can’t be blank")
