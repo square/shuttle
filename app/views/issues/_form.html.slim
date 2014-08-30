@@ -39,7 +39,7 @@
   .control-group
     = f.label :subscribed_emails, class: 'control-label'
     .controls
-      - emails = issue.errors.any? ? issue.subscribed_emails : issue.subscribed_emails.push(current_user.email).uniq
+      - emails = issue.errors.any? ? issue.subscribed_emails : (issue.subscribed_emails + [current_user.email]).uniq
       = f.text_field :subscribed_emails, value: emails.join(", "), placeholder: "person1@example.com, person2@example.com"
   - unless issue.new_record?
     .control-group
