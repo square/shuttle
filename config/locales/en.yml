@@ -157,8 +157,6 @@ en:
         done: Import completed.
       recalculate:
         success: Commit %{sha} has been successfully recalculated.
-      redo:
-        success: Commit %{sha} will be reimported momentarily.
       destroy:
         deleted: Commit %{sha} has been removed.
       stash:

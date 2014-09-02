@@ -184,14 +184,6 @@ class Commit
   renderButtons: ->
     buttons = $('<span/>').addClass('pull-right')
 
-    $('<a/>').attr('href', '#').text("Redo Import").addClass('btn btn-mini disable-when-loading').appendTo(buttons).click =>
-      $.ajax @commit.redo_url,
-             type: 'POST'
-             success: => @setRefreshTimer()
-             error: -> alert("Couldn’t re-import that commit.")
-      false
-    buttons.append ' '
-
     $('<a/>').attr('href', @commit.status_url).addClass('btn btn-mini').text('Status').appendTo buttons
     buttons.append ' '
 
