@@ -4,6 +4,7 @@ source "$HOME/.rvm/scripts/rvm"
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
+PIDFILE="tmp/elasticsearch.pid"
 
 function install_tidy() {
   yes | sudo yum install tidy
@@ -17,15 +18,12 @@ function install_libarchive() {
 }
 
 function install_elasticsearch() {
-  sudo service elasticsearch stop
-  sudo yum remove elasticsearch
-  wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.1.noarch.rpm
-  yes | sudo yum install elasticsearch-1.2.1.noarch.rpm
+  ./script/install.d/elasticsearch
 }
 
 function start_elasticsearch() {
-  sudo sh -c "echo 'http.port: 9200' > /etc/elasticsearch/elasticsearch.yml"
-  sudo service elasticsearch start
+  ./script/elasticsearch &
+
   curl 'localhost:9200'
   err=$?
   while [ $err -ne 0 ]
@@ -38,7 +36,12 @@ function start_elasticsearch() {
 }
 
 function stop_elasticsearch() {
-  sudo service elasticsearch stop
+  if [ -f $PIDFILE ]; then
+    kill `cat $PIDFILE`
+    sleep 5
+  fi
+
+  ./script/elasticsearch-cleanup
 }
 
 function install_bundler_if_needed() {
@@ -73,7 +76,7 @@ function run_jasmine() {
 
 function prepare() {
   install_tidy
-  install_elasticsearch 
+  install_elasticsearch
   install_libarchive
   install_bundler_if_needed &&
   update_gems_if_needed &&
@@ -83,7 +86,7 @@ function prepare() {
 prepare
 start_elasticsearch
 
-set -ex
+set -x
 case "${TEST_RUNNER}" in
   jasmine)
     run_jasmine
@@ -98,4 +101,6 @@ case "${TEST_RUNNER}" in
   ;;
 esac
 
+exit_status=$?
 stop_elasticsearch
+exit $exit_status

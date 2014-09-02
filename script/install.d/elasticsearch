@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+ROOT_DIR=$(pwd $(dirname $0)/../..)
+cd $ROOT_DIR
+[ -e vendor ] || mkdir vendor
+cd vendor
+
+if [[ ! -e shuttle-es ]]; then
+  attempts=0
+  cmd="git clone /mnt/nfs/git/sq/shuttle-es.git"
+
+  until $cmd || (( attempts == 5 )); do
+    echo "retrying clone, attempt $attempts..."
+    sleep $(( attempts++ ))
+  done
+fi
+
+cd shuttle-es
+git fetch
+git reset --hard origin/master > /dev/null
