@@ -24,12 +24,24 @@
       strong = issue.user_name
       |  reported this issue on #{l issue.created_at, format: :full}
 
-  .show-issue-wrapper class="#{'hide' if issue.errors.any?}"
-    = render partial: 'issues/show', locals: { project: project, key: key, translation: translation, issue: issue }
+  .loading-overlayable
+    .row
+      .twelve.columns
+        .show-issue-wrapper class="#{'hide' if issue.errors.any?}"
+          = render partial: 'issues/show', locals: { project: project, key: key, translation: translation, issue: issue }
 
-  = button_tag 'Edit Issue', class: "small default show-form-button #{'hide' if issue.errors.any?}"
-  .form-wrapper.loading-overlayable class="#{'hide' if issue.errors.blank?}"
-    = render partial: 'issues/edit', locals: { project: project, key: key, translation: translation, issue: issue }
+        = button_tag 'Edit Issue', class: "small default show-form-button #{'hide' if issue.errors.any?}"
+        .form-wrapper class="#{'hide' if issue.errors.blank?}"
+          = render partial: 'issues/edit', locals: { project: project, key: key, translation: translation, issue: issue }
 
-  .issue-comments-wrapper
-    = render partial: 'comments/index', locals: {issue: issue, comment: Comment.new}
+      .four.columns.right-side
+        - if issue.subscribed?(current_user)
+          = button_to "Unsubscribe", unsubscribe_project_key_translation_issue_path(project, key, translation, issue), method: :patch, remote: true, class: 'btn default'
+        - else
+          = button_to "Subscribe", subscribe_project_key_translation_issue_path(project, key, translation, issue), method: :patch, remote: true, class: 'btn'
+
+        - unless issue.resolved?
+          = button_to "Resolve", resolve_project_key_translation_issue_path(project, key, translation, issue), method: :patch, remote: true, class: 'btn approve'
+
+    .issue-comments-wrapper
+      = render partial: 'comments/index', locals: {issue: issue, comment: local_assigns[:comment] || Comment.new}

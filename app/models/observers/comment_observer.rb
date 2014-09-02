@@ -17,7 +17,8 @@
 # 1. Sends an email to relevant people alerting them of a new comment.
 
 class CommentObserver < ActiveRecord::Observer
-  def after_create(comment)
+  def after_commit_on_create(comment)
+    # send a notification to subscribed email addresses about the new comment
     CommentMailer.comment_created(comment).deliver
   end
 end

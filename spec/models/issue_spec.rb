@@ -98,6 +98,30 @@ describe Issue do
     end
   end
 
+  context "#new_with_defaults" do
+    it "initializes a new Issue with default subscribed_emails which contains the translators_list email address" do
+      expect(Issue.new_with_defaults.subscribed_emails).to eql([Shuttle::Configuration.mailer.translators_list])
+    end
+  end
+
+  context "#resolve" do
+    it "resolves an issue by setting its status to resolved, subscribes the user to the issue" do
+      issue = FactoryGirl.create(:issue, status: Issue::Status::OPEN, subscribed_emails: ["test@example.com"])
+      user = FactoryGirl.create(:user, email: "test2@example.com")
+      issue.resolve(user)
+      expect(issue.reload.status).to eql(Issue::Status::RESOLVED)
+      expect(issue.subscribed_emails).to eql(["test@example.com", "test2@example.com"])
+    end
+
+    it "resolves an issue by setting its status to resolved; doesn't change subscriptions if the user is already subscribed" do
+      issue = FactoryGirl.create(:issue, status: Issue::Status::OPEN, subscribed_emails: ["test@example.com"])
+      user = FactoryGirl.create(:user, email: "test@example.com")
+      issue.resolve(user)
+      expect(issue.reload.status).to eql(Issue::Status::RESOLVED)
+      expect(issue.subscribed_emails).to eql(["test@example.com"])
+    end
+  end
+
   context "[subscribed_emails=]" do
     before(:all) do
       @user = FactoryGirl.create(:user)
@@ -145,6 +169,97 @@ describe Issue do
     end
   end
 
+  context "#subscribe" do
+    before :each do
+      @issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
+    end
+
+    it "subscribes a new user's email address" do
+      user = FactoryGirl.create(:user, email: "test2@example.com")
+      @issue.subscribe(user)
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com", "test2@example.com"])
+    end
+
+    it "doesn't change subscribed_emails if the user's email address is already subscribed" do
+      user = FactoryGirl.create(:user, email: "test@example.com")
+      @issue.subscribe(user)
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
+    end
+  end
+
+  context "#unsubscribe" do
+    before :each do
+      @issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
+    end
+
+    it "unsubscribes a user's email address" do
+      user = FactoryGirl.create(:user, email: "test@example.com")
+      @issue.unsubscribe(user)
+      expect(@issue.reload.subscribed_emails).to eq([])
+    end
+
+    it "doesn't change subscribed_emails if the email address is not in the subscribed list" do
+      user = FactoryGirl.create(:user, email: "test2@example.com")
+      @issue.unsubscribe(user)
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
+    end
+  end
+
+  context "#subscribe_silently" do
+    before :each do
+      @issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
+    end
+
+    it "subscribes a new email address" do
+      user = FactoryGirl.create(:user, email: "test2@example.com")
+      @issue.subscribe_silently(user)
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com", "test2@example.com"])
+    end
+
+    it "doesn't change subscribed_emails if the email address is already subscribed" do
+      user = FactoryGirl.create(:user, email: "test@example.com")
+      @issue.subscribe_silently(user)
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
+    end
+
+    it "properly sanitizes the email address before update" do
+      user = FactoryGirl.create(:user, email: "   test2@example.com   ")
+      @issue.subscribe_silently(user)
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com", "test2@example.com"])
+    end
+
+    it "doesn't throw an error if email address couldn't be subscribed" do
+      user = FactoryGirl.create(:user)
+      user.update_column(:email, "test")
+
+      expect { @issue.subscribe_silently(user) }.to_not raise_error
+      expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
+    end
+
+    it "subscribes email address silently without sending any emails about the update" do
+      user = FactoryGirl.create(:user, email: "test2@example.com")
+
+      expect(@issue).to receive(:update_column).with(:subscribed_emails, ["test@example.com", "test2@example.com"])
+      ActionMailer::Base.deliveries.clear
+      @issue.subscribe_silently(user)
+      expect(ActionMailer::Base.deliveries.size).to eql(0)
+    end
+  end
+
+  context "#subscribed?" do
+    it "should return true if the given user's email is in the subscribed_emails list" do
+      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
+      user = FactoryGirl.create(:user, email: "test@example.com")
+      expect(issue.subscribed?(user)).to be_true
+    end
+
+    it "should return false if the given user's email is not in the subscribed_emails list" do
+      issue = FactoryGirl.create(:issue, subscribed_emails: ["other@example.com"])
+      user = FactoryGirl.create(:user, email: "test@example.com")
+      expect(issue.subscribed?(user)).to be_false
+    end
+  end
+
   context "[hooks]" do
     it "sets status to Open on create" do
       issue = FactoryGirl.build(:issue, user: nil, translation: nil, status: -1111)
@@ -154,6 +269,18 @@ describe Issue do
   end
 
   context "[scopes]" do
+    context "[resolved]" do
+      context "#resolved?" do
+        it "should be resolved if issue's status is RESOLVED" do
+          expect(FactoryGirl.build(:issue, status: Issue::Status::RESOLVED)).to be_resolved
+        end
+
+        it "should not be resolved if issue's status is OPEN" do
+          expect(FactoryGirl.build(:issue, status: Issue::Status::OPEN)).to_not be_resolved
+        end
+      end
+    end
+
     context "[pending]" do
       context "#pending?" do
         it "should be pending for an issue with status OPEN" do

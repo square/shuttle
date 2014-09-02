@@ -19,6 +19,7 @@ class IssuesController < ApplicationController
   before_filter :find_project
   before_filter :find_key
   before_filter :find_translation
+  before_filter :find_issue, only: [:update, :resolve, :subscribe, :unsubscribe]
 
   layout false
   respond_to :js
@@ -49,7 +50,7 @@ class IssuesController < ApplicationController
   def create
     issue = current_user.issues.create(issue_params.merge(translation: @translation))
     issues = @translation.issues.includes(:user, comments: :user).order_default
-    render template: 'issues/create.js.erb', locals: {project: @project, key: @key, translation: @translation, issues: issues, issue: issue.errors.present? ? issue : Issue.new, created_issue: issue.errors.present? ? nil : issue }
+    render template: 'issues/create.js.erb', locals: {project: @project, key: @key, translation: @translation, issues: issues, issue: issue.errors.present? ? issue : Issue.new_with_defaults, created_issue: issue.errors.present? ? nil : issue }
   end
 
   # Updates an Issue for a Translation.
@@ -57,7 +58,7 @@ class IssuesController < ApplicationController
   # Routes
   # ------
   #
-  # * `PUT /projects/:project_id/keys/:key_id/translations/:translation_id/issues/:id`
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:translation_id/issues/:id`
   #
   # Path Parameters
   # ---------------
@@ -77,9 +78,74 @@ class IssuesController < ApplicationController
   # | `issue` | Parameterized hash of Issue attributes. |
 
   def update
-    issue = @translation.issues.includes(comments: :user).find_by_id!(params[:id])
-    issue.update_attributes(issue_params)
-    render 'update', locals: {project: @project, key: @key, translation: @translation, issue: issue }
+    @issue.update(issue_params)
+    render 'issues/update.js.erb', locals: {project: @project, key: @key, translation: @translation, issue: @issue }
+  end
+
+  # Resolves an Issue by updating its status field.
+  #
+  # Routes
+  # ------
+  #
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:translation_id/issues/:id/resolve`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |                  |                                                                    |
+  # |:-----------------|:-------------------------------------------------------------------|
+  # | `project_id`     | The slug of a Project.                                             |
+  # | `key_id`         | The slug of a Key in that project.                                 |
+  # | `translation_id` | The locale of a Translation relating to the above project and key. |
+  # | `id`             | The id of an Issue.                                                |
+
+  def resolve
+    @issue.resolve(current_user)
+    render 'issues/update.js.erb', locals: {project: @project, key: @key, translation: @translation, issue: @issue }
+  end
+
+  # Subscribes the current user to the Issue.
+  #
+  # Routes
+  # ------
+  #
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:translation_id/issues/:id/subscribe`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |                  |                                                                    |
+  # |:-----------------|:-------------------------------------------------------------------|
+  # | `project_id`     | The slug of a Project.                                             |
+  # | `key_id`         | The slug of a Key in that project.                                 |
+  # | `translation_id` | The locale of a Translation relating to the above project and key. |
+  # | `id`             | The id of an Issue.                                                |
+
+  def subscribe
+    @issue.subscribe(current_user)
+    render 'issues/update.js.erb', locals: {project: @project, key: @key, translation: @translation, issue: @issue }
+  end
+
+  # Unsubscribes the current user to the Issue.
+  #
+  # Routes
+  # ------
+  #
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:translation_id/issues/:id/unsubscribe`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |                  |                                                                    |
+  # |:-----------------|:-------------------------------------------------------------------|
+  # | `project_id`     | The slug of a Project.                                             |
+  # | `key_id`         | The slug of a Key in that project.                                 |
+  # | `translation_id` | The locale of a Translation relating to the above project and key. |
+  # | `id`             | The id of an Issue.                                                |
+
+  def unsubscribe
+    @issue.unsubscribe(current_user)
+    render 'issues/update.js.erb', locals: {project: @project, key: @key, translation: @translation, issue: @issue }
   end
 
   private
@@ -96,8 +162,11 @@ class IssuesController < ApplicationController
     @translation = @key.translations.where(rfc5646_locale: params[:translation_id]).first!
   end
 
+  def find_issue
+    @issue = @translation.issues.includes(comments: :user).find_by_id!(params[:id])
+  end
+
   def issue_params
     params.require(:issue).permit(:summary, :priority, :kind, :description, :status, :subscribed_emails).merge(updater_id: current_user.id)
   end
-
 end

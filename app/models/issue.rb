@@ -54,6 +54,8 @@ class Issue < ActiveRecord::Base
   belongs_to :user, inverse_of: :issues
   belongs_to :updater, class_name: User
   has_many :comments, inverse_of: :issue, dependent: :delete_all
+  delegate :project, to: :key
+  delegate :key, to: :translation
 
   validates :user, presence: {on: :create} # in case the user gets deleted afterwards
   validates :updater, :translation, presence: true
@@ -65,11 +67,24 @@ class Issue < ActiveRecord::Base
 
   before_validation(on: :create) { self.status = Status::OPEN }
 
-  # ===== START SCOPES BY STATUS =====
+
+  def self.new_with_defaults
+    new(subscribed_emails: [Shuttle::Configuration.mailer.translators_list])
+  end
+
+  # ===== START STATUS RELATED CODE =====
   scope :pending, -> { where(status: [Status::OPEN, Status::IN_PROGRESS]) }
 
   def pending?
     status == Status::OPEN or status == Status::IN_PROGRESS
+  end
+
+  def resolved?
+    status == Status::RESOLVED
+  end
+
+  def resolve(resolver)
+    update status: Issue::Status::RESOLVED, subscribed_emails: (subscribed_emails + [resolver.email])
   end
   # ===== END SCOPES BY STATUS =====
 
@@ -87,6 +102,38 @@ class Issue < ActiveRecord::Base
     write_attribute(:subscribed_emails, emails)
   end
 
+  # Adds the given user to the subscribed emails list
+  #  @param [User] user that will be subscribed
+
+  def subscribe(user)
+    update subscribed_emails: (subscribed_emails + [user.email])
+  end
+
+  # Removes the given user from the subscribed emails list
+  #  @param [User] user that will be unsubscribed
+
+  def unsubscribe(user)
+    update subscribed_emails: (subscribed_emails - [user.email])
+  end
+
+  # Adds the given user to the subscribed emails list
+  # Updates the record in the database without calling validations or callbacks
+  #  @param [User] user that will be subscribed
+
+  def subscribe_silently(user)
+    self.subscribed_emails += [user.email] # so that this calls `subscribed_emails=` which does the sanitation
+    subscribed_emails_format # validate
+    update_column :subscribed_emails, subscribed_emails unless errors.any?
+  end
+
+  # Checks if the given user is subscribed to this issue
+  #   @param [User] user
+  #   @return [true, false] true if the given user is subscribed to this issue, false otherwise
+
+  def subscribed?(user)
+    subscribed_emails.include?(user.email)
+  end
+
   def subscribed_emails_format
     if subscribed_emails
       subscribed_emails.each do |email|
@@ -96,7 +143,6 @@ class Issue < ActiveRecord::Base
       end
     end
   end
-
   private :subscribed_emails_format
   # ===== END subscribed_emails =====
 

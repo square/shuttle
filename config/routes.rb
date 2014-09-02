@@ -61,7 +61,13 @@ Shuttle::Application.routes.draw do
       end
 
       resources :translations, only: [] do
-        resources :issues, only: [:create, :update]
+        resources :issues, only: [:create, :update] do
+          member do
+            patch :resolve
+            patch :subscribe
+            patch :unsubscribe
+          end
+        end
       end
     end
 

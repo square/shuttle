@@ -43,9 +43,23 @@ class CommentsController < ApplicationController
   # | `comment` | Parameterized hash of Comment attributes. |
 
   def create
-    comment = current_user.comments.create(comment_params)
+    comment = current_user.comments.build(comment_params)
+
+    begin
+      Comment.transaction do
+        comment.save!
+        comment.issue.subscribe_silently(current_user)
+      end
+    rescue ActiveRecord::RecordInvalid
+    end
+
     issue = Issue.includes(comments: :user).find_by_id!(@issue.id)
-    render 'create', locals: { issue: issue, comment: ( comment.errors.present? ? comment : Comment.new) }
+
+    render 'create', locals: { project: issue.project,
+                               key: issue.key,
+                               translation: issue.translation,
+                               issue: issue,
+                               comment: ( comment.errors.present? ? comment : Comment.new) }
   end
 
   private
