@@ -30,12 +30,6 @@
 
       .control-group.wide-label
         label
-          | Manually reimport a commit
-        .controls
-          button.primary href=redo_project_commit_path(@project, @commit) data-method='POST' Reimport
-
-      .control-group.wide-label
-        label
           | Recalculate commit progress
         .controls
           button.primary href=recalculate_project_commit_path(@project, @commit) data-method='POST' Recalculate

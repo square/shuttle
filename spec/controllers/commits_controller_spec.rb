@@ -816,10 +816,6 @@ de:
     it_behaves_like "returns error string if repository_url is blank", :sync
   end
 
-  describe "#redo" do
-    it_behaves_like "returns error string if repository_url is blank", :redo
-  end
-
   describe "#recalculate" do
     it_behaves_like "returns error string if repository_url is blank", :recalculate
   end

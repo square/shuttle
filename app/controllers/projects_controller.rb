@@ -86,7 +86,6 @@ class ProjectsController < ApplicationController
                                strings_total:      commit.strings_total,
                                import_url:         import_project_commit_url(@project, commit, format: 'json'),
                                sync_url:           sync_project_commit_url(@project, commit, format: 'json'),
-                               redo_url:           redo_project_commit_url(@project, commit, format: 'json'),
                                url:                project_commit_url(@project, commit),
                                status_url:         project_commit_url(@project, commit),
                            )

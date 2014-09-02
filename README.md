@@ -114,13 +114,6 @@ is the total number of required translations (should be the number of
 translatable strings times the number of required locales, minus any keys that
 are not applicable to certain locales).
 
-Clicking on the commit's SHA will bring you to the GitHub webpage for that
-commit, if the project's repository URL is recognized as a GitHub project. The
-"Redo Import" button re-runs an import, in the event that the previous import
-completed abnormally. The "Status" button takes you to a detailed status page
-where you can see a list of strings in the project and their translation
-statuses.
-
 The "Import and approve a localization" field allows you to import an existing
 localization. For example, if your Rails project already has an "fr.yml" file
 that you want to import into Shuttle (to save your translators the effort of
