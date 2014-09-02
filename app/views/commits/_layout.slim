@@ -80,12 +80,17 @@
         - @project.locale_requirements.each do |locale, required|
           - finished = @commit.all_translations_approved_for_locale?(locale)
           li.progress-bar
-            dl
+            dl class='tooltip-parent' data-tooltip='##{locale.rfc5646}-progress_bar_tooltip'
               dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
                 = locale.rfc5646
+                small = " (#{required ? 'required' : 'optional'})"
                 strong = (finished ? '100%' : "#{(@commit.fraction_done(locale) * 100).round(2)}%")
               dd
                 span class=(finished ? 'finished' : 'inprogress') style="width: #{(@commit.fraction_done(locale) * 100).round(2)}%;"
+
+            .tooltip id="#{locale.rfc5646}-progress_bar_tooltip"
+              = @commit.translations_new(locale)
+              |  untranslated strings
 
     .thirteen.columns.sidebar-main
       = yield

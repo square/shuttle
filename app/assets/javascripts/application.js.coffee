@@ -79,10 +79,10 @@ $(document).ready ->
       content:
         text: $($(this).data("tooltip"))
       position:
-        my: 'bottom left'
-        at: 'top right'
-      show: 'focus'
-      hide: 'blur'
+        my: 'center left'
+        at: 'center right'
+      show: 'mouseenter'
+      hide: 'mouseleave'
     }
 
     if $(this).data('tooltip-show')

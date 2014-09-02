@@ -34,7 +34,7 @@
       &.progress-bar {
         dl {
           @include box-sizing(border-box);
-          padding: 10px 30px;
+          margin: 30px;
           dt {
             text-transform: uppercase;
             strong {
