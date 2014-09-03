@@ -86,3 +86,7 @@ pre {
 .text-success { color: $input-green }
 .text-info { color: $input-blue }
 .muted { color: $gray3; }
+
+.lowercase {
+  text-transform: lowercase;
+}
