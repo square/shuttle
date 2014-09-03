@@ -205,47 +205,6 @@ describe Issue do
     end
   end
 
-  context "#subscribe_silently" do
-    before :each do
-      @issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
-    end
-
-    it "subscribes a new email address" do
-      user = FactoryGirl.create(:user, email: "test2@example.com")
-      @issue.subscribe_silently(user)
-      expect(@issue.reload.subscribed_emails).to eq(["test@example.com", "test2@example.com"])
-    end
-
-    it "doesn't change subscribed_emails if the email address is already subscribed" do
-      user = FactoryGirl.create(:user, email: "test@example.com")
-      @issue.subscribe_silently(user)
-      expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
-    end
-
-    it "properly sanitizes the email address before update" do
-      user = FactoryGirl.create(:user, email: "   test2@example.com   ")
-      @issue.subscribe_silently(user)
-      expect(@issue.reload.subscribed_emails).to eq(["test@example.com", "test2@example.com"])
-    end
-
-    it "doesn't throw an error if email address couldn't be subscribed" do
-      user = FactoryGirl.create(:user)
-      user.update_column(:email, "test")
-
-      expect { @issue.subscribe_silently(user) }.to_not raise_error
-      expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
-    end
-
-    it "subscribes email address silently without sending any emails about the update" do
-      user = FactoryGirl.create(:user, email: "test2@example.com")
-
-      expect(@issue).to receive(:update_column).with(:subscribed_emails, ["test@example.com", "test2@example.com"])
-      ActionMailer::Base.deliveries.clear
-      @issue.subscribe_silently(user)
-      expect(ActionMailer::Base.deliveries.size).to eql(0)
-    end
-  end
-
   context "#subscribed?" do
     it "should return true if the given user's email is in the subscribed_emails list" do
       issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])

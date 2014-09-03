@@ -122,6 +122,7 @@ class IssuesController < ApplicationController
   # | `id`             | The id of an Issue.                                                |
 
   def subscribe
+    @issue.skip_email_notifications = true
     @issue.subscribe(current_user)
     render 'issues/update.js.erb', locals: {project: @project, key: @key, translation: @translation, issue: @issue }
   end
@@ -144,6 +145,7 @@ class IssuesController < ApplicationController
   # | `id`             | The id of an Issue.                                                |
 
   def unsubscribe
+    @issue.skip_email_notifications = true
     @issue.unsubscribe(current_user)
     render 'issues/update.js.erb', locals: {project: @project, key: @key, translation: @translation, issue: @issue }
   end

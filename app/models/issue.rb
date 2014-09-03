@@ -48,6 +48,10 @@ class Issue < ActiveRecord::Base
     ICEBOX = 4
   end
 
+  # @return [true, false] If `true`, skips email notifications when issue is updated. We use this flag
+  #   because issues are updated in various actions and we should not send email notifications for all of them.
+  attr_accessor :skip_email_notifications
+
   SKIPPED_FIELDS_FOR_EMAIL_ON_UPDATE = %w(created_at updated_at)
 
   belongs_to :translation, inverse_of: :issues
@@ -115,16 +119,6 @@ class Issue < ActiveRecord::Base
 
   def unsubscribe(user)
     update subscribed_emails: (subscribed_emails - [user.email])
-  end
-
-  # Adds the given user to the subscribed emails list
-  # Updates the record in the database without calling validations or callbacks
-  #  @param [User] user that will be subscribed
-
-  def subscribe_silently(user)
-    self.subscribed_emails += [user.email] # so that this calls `subscribed_emails=` which does the sanitation
-    subscribed_emails_format # validate
-    update_column :subscribed_emails, subscribed_emails unless errors.any?
   end
 
   # Checks if the given user is subscribed to this issue

@@ -152,15 +152,13 @@ describe IssuesController do
   end
 
   describe "#subscribe" do
-    it "subscribes the current user to the issue and sends an email" do
+    it "subscribes the current user to the issue, but doesn't send an email" do
       issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
       ActionMailer::Base.deliveries.clear
 
       xhr :patch, :subscribe, @path_params.merge({ id: issue.id })
       expect(issue.reload.subscribed_emails).to eql(["test@example.com", "foo@bar.com"])
-      expect(ActionMailer::Base.deliveries.size).to eql(1)
-      expect(ActionMailer::Base.deliveries.first.subject).to include("updated an issue. Issue Summary:")
-      expect(ActionMailer::Base.deliveries.first.to).to eql(["test@example.com", "foo@bar.com"])
+      expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
   end
 
@@ -171,9 +169,7 @@ describe IssuesController do
 
       xhr :patch, :unsubscribe, @path_params.merge({ id: issue.id })
       expect(issue.reload.subscribed_emails).to eql(["test@example.com"])
-      expect(ActionMailer::Base.deliveries.size).to eql(1)
-      expect(ActionMailer::Base.deliveries.first.subject).to include("updated an issue. Issue Summary:")
-      expect(ActionMailer::Base.deliveries.first.to).to eql(["test@example.com"])
+      expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
   end
 end

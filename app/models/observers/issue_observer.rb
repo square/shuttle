@@ -23,7 +23,7 @@ class IssueObserver < ActiveRecord::Observer
   end
 
   def after_update(issue)
-    if (issue.changed - Issue::SKIPPED_FIELDS_FOR_EMAIL_ON_UPDATE).present?
+    if !issue.skip_email_notifications && (issue.changed - Issue::SKIPPED_FIELDS_FOR_EMAIL_ON_UPDATE).present?
       IssueMailer.issue_updated(issue).deliver
     end
   end
