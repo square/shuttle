@@ -218,6 +218,7 @@ en:
       kind:
         1: Needs More Context
         2: Typo
+        7: Feature Not Relevant
         3: Code Syntax Issue
         4: Mistranslation
         5: Truncation

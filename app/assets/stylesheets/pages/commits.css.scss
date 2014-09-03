@@ -106,10 +106,12 @@ body.commits {
 #issues-section {
   legend { margin-bottom: 20px; }
   .no-issues-found { text-align: center; }
-  table.issues thead {
+  table.issues tbody {
+    .source-copy { max-width: 180px; }
     .status { width: 72px; }
     .priority { width: 120px; }
     .kind { width: 132px; }
+    .summary { max-width: 180px; }
   }
 
   dl.issues-stats {

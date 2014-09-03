@@ -65,7 +65,7 @@ describe IssuesController do
 
           if extra_params[:issue][:subscribed_emails].present?
             expect(ActionMailer::Base.deliveries.size).to eql(1)
-            expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: this is a unique summary")
+            expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: Needs More Context - this is a unique summary")
           else
             expect(ActionMailer::Base.deliveries.size).to eql(0)
           end
@@ -81,8 +81,6 @@ describe IssuesController do
         expect(Issue.count).to eql(0)
         expect(response).to be_success
         expect(response.body).to include("Errors:")
-        expect(response.body).to include('Summary can’t be blank')
-        expect(response.body).to include('Description can’t be blank')
         expect(response.body).to include('Priority must be less than or equal to 3')
         expect(response.body).to include('Kind not a number')
         expect(response.body).to include('Subscribed email abc xyz is not a valid email address')
@@ -117,7 +115,7 @@ describe IssuesController do
         expect(response.body).to include("$('#issues #issue-wrapper-#{@issue.id}').replaceWith")
 
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: this is a unique summary updated")
+        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: Typo - this is a unique summary updated")
       end
     end
 

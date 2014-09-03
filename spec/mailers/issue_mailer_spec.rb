@@ -18,13 +18,13 @@ describe IssueMailer do
   context "issue_created" do
     it "sends an email notifying people that issue was created" do
       user = FactoryGirl.create(:user, first_name: "Test", last_name: "User")
-      issue = FactoryGirl.create(:issue, user: user, subscribed_emails: "a@example.com, b@example.com  ,   , a@example.com", summary: "my summary")
+      issue = FactoryGirl.create(:issue, user: user, subscribed_emails: "a@example.com, b@example.com  ,   , a@example.com", summary: "my summary", kind: 1)
       ActionMailer::Base.deliveries.clear
       IssueMailer.issue_created(issue).deliver
       expect(ActionMailer::Base.deliveries.size).to eql(1)
       mail = ActionMailer::Base.deliveries.first
       expect(mail.to).to eql(['a@example.com', 'b@example.com'])
-      expect(mail.subject).to eql("[Shuttle] Test User reported a new issue. Issue Summary: my summary")
+      expect(mail.subject).to eql("[Shuttle] Test User reported a new issue. Issue Summary: Needs More Context - my summary")
       expect(mail.body.to_s).to include("reported a new issue")
       expect(mail.body.to_s).to include(project_key_translation_url(issue.translation.key.project, issue.translation.key, issue.translation) + "#issue-wrapper-#{issue.id}")
     end
@@ -39,14 +39,14 @@ describe IssueMailer do
 
   context "issue_updated" do
     it "sends an email notifying people that issue was updated" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: "a@example.com, b@example.com", summary: "my summary")
+      issue = FactoryGirl.create(:issue, subscribed_emails: "a@example.com, b@example.com", summary: "my summary", kind: 1)
       user = FactoryGirl.create(:user, first_name: "Test", last_name: "User")
       ActionMailer::Base.deliveries.clear
       issue.update!(updater: user, status: Issue::Status::IN_PROGRESS, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com, c@test.com")
       expect(ActionMailer::Base.deliveries.size).to eql(1)
       mail = ActionMailer::Base.deliveries.first
       expect(mail.to).to eql(["a@test.com", "b@test.com", "c@test.com"])
-      expect(mail.subject).to eql("[Shuttle] Test User updated an issue. Issue Summary: my summary")
+      expect(mail.subject).to eql("[Shuttle] Test User updated an issue. Issue Summary: Needs More Context - my summary")
       expect(mail.body.to_s).to include("updated an issue")
       expect(mail.body.to_s).to include("Was: Open")
       expect(mail.body.to_s).to include("Is: In progress")
