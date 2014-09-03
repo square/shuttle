@@ -83,7 +83,7 @@
             dl class='tooltip-parent' data-tooltip='##{locale.rfc5646}-progress_bar_tooltip'
               dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
                 = locale.rfc5646
-                small = " (#{required ? 'required' : 'optional'})"
+                small.lowercase = " (#{required ? 'required' : 'optional'})"
                 strong = (finished ? '100%' : "#{(@commit.fraction_done(locale) * 100).round(2)}%")
               dd
                 span class=(finished ? 'finished' : 'inprogress') style="width: #{(@commit.fraction_done(locale) * 100).round(2)}%;"
