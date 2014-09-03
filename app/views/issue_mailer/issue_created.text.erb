@@ -1,12 +1,12 @@
 <%= @issue.user_name %> reported a new issue on <%= l @issue.created_at, format: :full %>:
 
-Summary: <%= @issue.summary %>
+Type: <%= t("models.issue.kind")[@issue.kind] %>
 
 Priority: <%= t("models.issue.priority")[@issue.priority] %>
 
-Description: <%= @issue.description %>
+Summary: <%= @issue.summary %>
 
-Kind: <%= t("models.issue.kind")[@issue.kind] %>
+Description: <%= @issue.description %>
 
 View the issue: <%= issue_url(@issue) %>
 

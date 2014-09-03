@@ -15,9 +15,9 @@
 .issue id="issue-#{issue.id}"
   .control-group
     label.control-label
-      | Summary
+      | Type
     .controls
-      = issue.summary_was
+      = t("models.issue.kind")[issue.kind_was]
   .control-group
     label.control-label
       | Priority
@@ -25,9 +25,9 @@
       = t("models.issue.priority")[issue.priority_was ? issue.priority_was : :none]
   .control-group
     label.control-label
-      | Kind
+      | Summary
     .controls
-      = t("models.issue.kind")[issue.kind_was]
+      = issue.summary_was
   .control-group
     label.control-label
       | Description
@@ -37,7 +37,7 @@
     label.control-label
       | Subscribed Emails
     .controls
-      = issue.subscribed_emails_was.blank? ? 'None' : issue.subscribed_emails_was.join(", ")
+      = issue.subscribed_emails_was.join(", ")
   .control-group
     label.control-label
       | Reporter

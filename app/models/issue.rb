@@ -57,16 +57,17 @@ class Issue < ActiveRecord::Base
   delegate :project, to: :key
   delegate :key, to: :translation
 
+  before_validation(on: :create) { self.status = Status::OPEN }
+  extend SetNilIfBlank
+  set_nil_if_blank :summary, :description
+
   validates :user, presence: {on: :create} # in case the user gets deleted afterwards
   validates :updater, :translation, presence: true
-  validates :summary, presence: true, length: { maximum: 200 }
-  validates :description, presence: true, length: { maximum: 1000 }
+  validates :summary, length: { maximum: 200 }
+  validates :description, length: { maximum: 1000 }
   validates :priority, numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3}, allow_nil: true
-  validates :kind, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 6}
+  validates :kind, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 7}
   validates :status, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 4}
-
-  before_validation(on: :create) { self.status = Status::OPEN }
-
 
   def self.new_with_defaults
     new(subscribed_emails: [Shuttle::Configuration.mailer.translators_list])
@@ -152,5 +153,14 @@ class Issue < ActiveRecord::Base
 
   def self.order_default
     order('issues.status ASC, issues.priority ASC, issues.created_at DESC')
+  end
+
+  # This method is used instead of the `summary` method, where appropriate because `summary` can sometimes be `nil`.
+  #   @return [String] which includes kind and summary (if exists) information
+
+  def long_summary
+    s = I18n.t("models.issue.kind")[kind]
+    s += " - " + summary if summary
+    s
   end
 end
