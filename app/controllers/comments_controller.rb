@@ -44,11 +44,12 @@ class CommentsController < ApplicationController
 
   def create
     comment = current_user.comments.build(comment_params)
-
+    issue = comment.issue
     begin
       Comment.transaction do
         comment.save!
-        comment.issue.subscribe_silently(current_user)
+        issue.skip_email_notifications = true
+        issue.subscribe(current_user)
       end
     rescue ActiveRecord::RecordInvalid
     end

@@ -38,7 +38,7 @@ describe CommentsController do
 
   describe "#create" do
     context "with valid comment arguments" do
-      it "creates the comment; renders javascript code to replace the '.comments' section of the new comment's issue; response includes the new comment; response doesn't include errors; subscribes user to issue; sends comment_created email" do
+      it "creates the comment; renders javascript code to replace the '.comments' section of the new comment's issue; response includes the new comment; response doesn't include errors; subscribes user to issue; sends comment_created email; doesn't send issue_updated email" do
         expect(Comment.count).to eql(0)
 
         xhr :post, :create, @path_params.merge({comment: { content: "this is a comment" } })
@@ -54,6 +54,7 @@ describe CommentsController do
         expect(response.body).to include("$('#issues #issue-wrapper-#{@issue.id}').replaceWith")
         expect(response.body).to include("id=\\\"comment-#{comment.id}\\\"")
 
+        # the below expectations implicitly mean that we don't expect an issue_updated email
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         mail = ActionMailer::Base.deliveries.first
         expect(mail.subject).to eql("[Shuttle] Foo Bar wrote a new comment to an issue: this is a comment")

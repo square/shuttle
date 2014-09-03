@@ -28,13 +28,21 @@ describe Issue do
     end
 
     context "after_update" do
-      it "sends an email when an issue is updated" do
+      it "sends an email if an issue is updated when skip_email_notifications is not set" do
         issue = FactoryGirl.create(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary", kind: 1)
         ActionMailer::Base.deliveries.clear
         expect(IssueMailer).to receive(:issue_updated).once.and_call_original
         issue.update!(status: Issue::Status::IN_PROGRESS, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com, c@test.com")
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         expect(ActionMailer::Base.deliveries.first.subject).to include("updated an issue. Issue Summary: Needs More Context - my summary")
+      end
+
+      it "doesn't send an email if an issue is updated when skip_email_notifications is set" do
+        issue = FactoryGirl.create(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary", kind: 1)
+        ActionMailer::Base.deliveries.clear
+        expect(IssueMailer).to_not receive(:issue_updated)
+        issue.update!(status: Issue::Status::IN_PROGRESS, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com, c@test.com", skip_email_notifications: true)
+        expect(ActionMailer::Base.deliveries.size).to eql(0)
       end
 
       it "should NOT send an email if nothing was changed (other than timestamps)" do
