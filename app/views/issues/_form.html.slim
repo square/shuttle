@@ -21,17 +21,17 @@
           - issue.errors.full_messages.each do |msg|
             li = msg
   .control-group
-    = f.label :summary, class: 'control-label'
+    = f.label :type, class: 'control-label'
     .controls
-      = f.text_field :summary
+      = f.select :kind, t('models.issue.kind').to_a.map(&:reverse)
   .control-group
     = f.label :priority, class: 'control-label'
     .controls
       = f.select :priority, t('models.issue.priority').to_a.map(&:reverse).tap{|outer_arr| outer_arr.each {|arr| arr[1] = nil if arr[1] == :none}}
   .control-group
-    = f.label :kind, class: 'control-label'
+    = f.label :summary, class: 'control-label'
     .controls
-      = f.select :kind, t('models.issue.kind').to_a.map(&:reverse)
+      = f.text_field :summary
   .control-group
     = f.label :description, class: 'control-label'
     .controls

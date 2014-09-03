@@ -48,8 +48,8 @@ describe Issue do
         expect(@issue).to_not be_valid
       end
 
-      it "should not allow kind greater than 6" do
-        @issue.kind = 7
+      it "should not allow kind greater than 7" do
+        @issue.kind = 8
         expect(@issue).to_not be_valid
       end
     end
@@ -314,6 +314,18 @@ describe Issue do
           expect(Issue.pending.to_a).to eql([pending_issue])
         end
       end
+    end
+  end
+
+  describe "#long_summary" do
+    it "returns kind and summary information in 'kind - summary' format if summary exists" do
+      issue = FactoryGirl.create(:issue, summary: "hello world", kind: 2)
+      expect(issue.long_summary).to eql("Typo - hello world")
+    end
+
+    it "returns kind information unless summary exists" do
+      issue = FactoryGirl.create(:issue, kind: 2, summary: nil)
+      expect(issue.long_summary).to eql("Typo")
     end
   end
 end

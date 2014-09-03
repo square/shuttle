@@ -33,7 +33,7 @@ class IssueMailer < ActionMailer::Base
     @project = @key.project
 
     mail to: @issue.subscribed_emails,
-         subject: t('mailer.issue.issue_created.subject', name: @issue.user_name, summary: truncate(@issue.summary, length: 50, escape: false))
+         subject: t('mailer.issue.issue_created.subject', name: @issue.user_name, summary: truncate(@issue.long_summary, length: 50, escape: false))
   end
 
   # Notifies everybody who is associated with this issue that the issue is updated.
@@ -48,6 +48,6 @@ class IssueMailer < ActionMailer::Base
     @translatable_fields = %w(priority kind status)
 
     mail to: @issue.subscribed_emails,
-         subject: t('mailer.issue.issue_updated.subject', name: @issue.updater.name, summary: truncate(@issue.summary, length: 50, escape: false))
+         subject: t('mailer.issue.issue_updated.subject', name: @issue.updater.name, summary: truncate(@issue.long_summary, length: 50, escape: false))
   end
 end

@@ -39,17 +39,28 @@
       table.table.issues
         thead
           tr
-            th.status Status
-            th.priority Priority
-            th.kind Kind
+            th Locale
+            th Source Copy
+            th Status
+            th Priority
+            th Type
             th Summary
             th Date
         - @commit_issues_presenter.issues.each do |issue|
           tr
-            td class="issue-status issue-status-#{issue.status}" = t("models.issue.status")[issue.status]
-            td = t("models.issue.priority")[issue.priority ? issue.priority : :none]
-            td = t("models.issue.kind")[issue.kind_was]
-            td = link_to issue.summary, issue_url(issue, current_user)
+            td = issue.translation.rfc5646_locale.upcase
+            td.source-copy.ellipsis = link_to issue.translation.source_copy, issue_url(issue, current_user)
+            td.status class="issue-status issue-status-#{issue.status}" = t("models.issue.status")[issue.status]
+            td.priority = t("models.issue.priority")[issue.priority ? issue.priority : :none]
+            td.kind = t("models.issue.kind")[issue.kind_was]
+            td.summary.ellipsis = link_to (issue.summary || '---------'), issue_url(issue, current_user)
             td = l(issue.created_at, format: :mon_day_year)
     - else
       .no-issues-found.text-success No Issues found!
+
+css:
+  .ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
