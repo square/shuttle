@@ -43,3 +43,14 @@ $(document).ready ->
 
     $(document).on 'click', '#issues .loading-overlayable input[type=submit]', (event) ->
       addLoadingOverlay(@)
+
+    # If the url contains an anchor is something like "...#issue-wrapper-12?...",
+    # finds the add comment form within that anchor, and imitates a click on it
+    # This is used when we guess that user might be interested in writing a comment more than usual.
+    showAddCommentFormIfIssueAnchorExistsInUrl = () ->
+      anchor_and_params = document.location.toString().split("#")[1];
+      if anchor_and_params
+        anchor_value = anchor_and_params.split("?")[0];
+        $('#' + anchor_value).closest('.issue-wrapper').find(".comments .show-form-button").click()
+
+    showAddCommentFormIfIssueAnchorExistsInUrl()
