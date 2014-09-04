@@ -22,6 +22,6 @@ module CommentsHelper
 
   def comment_url(comment)
     raise ArgumentError, "Comment must be provided" unless comment.is_a?(Comment)
-    project_key_translation_url(comment.issue.translation.key.project, comment.issue.translation.key, comment.issue.translation) + "#comment-#{comment.id}"
+    project_key_translation_url(comment.issue.translation.key.project, comment.issue.translation.key, comment.issue.translation, anchor: "comment-#{comment.id}")
   end
 end
