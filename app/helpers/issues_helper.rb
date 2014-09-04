@@ -28,7 +28,7 @@ module IssuesHelper
   def issue_url(issue, user=nil)
     raise ArgumentError, "Issue must be provided" unless issue.is_a?(Issue)
 
-    args = [issue.translation.key.project, issue.translation.key, issue.translation]
-    (user.try(:translator?) ? edit_project_key_translation_url(*args) : project_key_translation_url(*args)) + "#issue-wrapper-#{issue.id}"
+    args = [issue.translation.key.project, issue.translation.key, issue.translation, anchor: "issue-wrapper-#{issue.id}"]
+    (user.try(:translator?) ? edit_project_key_translation_url(*args) : project_key_translation_url(*args))
   end
 end
