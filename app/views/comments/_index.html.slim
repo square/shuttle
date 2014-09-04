@@ -15,7 +15,7 @@
 / Does not use any instance variables.
 / Expects the following local assigns:
 / issue - required
-/ comment - optional. If not provided, it's assumed that no new comment is in the process of being created for this issue. So, the create form is set up for an empty Comment object.
+/ comment - required
 .comments
   br
   - if issue.comments.present?
