@@ -350,7 +350,6 @@ class CommitsController < ApplicationController
   # |:----------|:------------------------------------------------------------------------------|
   # | `locale`  | The RFC 5646 identifier for a locale.                                         |
   # | `partial` | If `true`, partially-translated manifests are allowed.                        |
-  # | `force`   | If `true`, forces a recompile of the manifest even if there is a cached copy. |
   #
   # Responses
   # ---------
@@ -365,8 +364,7 @@ class CommitsController < ApplicationController
     compiler = Compiler.new(@commit)
     file     = compiler.manifest(request.format,
                                  locale:  params[:locale].presence,
-                                 partial: params[:partial].parse_bool,
-                                 force:   params[:force].parse_bool)
+                                 partial: params[:partial].parse_bool)
 
     response.charset                   = file.encoding
     response.headers['X-Git-Revision'] = @commit.revision
@@ -416,7 +414,6 @@ class CommitsController < ApplicationController
   # |:----------|:------------------------------------------------------------------------------------------|
   # | `locale`  | The RFC 5646 identifier for a locale. If not provided, all required locales are included. |
   # | `partial` | If `true`, partially-translated manifests are allowed.                                    |
-  # | `force`   | If `true`, forces a recompile of the tarball even if there is a cached copy.              |
   #
   # Responses
   # ---------
@@ -430,8 +427,7 @@ class CommitsController < ApplicationController
 
     compiler = Compiler.new(@commit)
     file     = compiler.localize(locale:  params[:locale].presence,
-                                 partial: params[:partial].parse_bool,
-                                 force:   params[:force].parse_bool)
+                                 partial: params[:partial].parse_bool)
 
     respond_to do |format|
       format.gz do
