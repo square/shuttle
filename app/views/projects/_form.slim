@@ -151,19 +151,6 @@
         legend Precompilation and Caching
 
         .control-group
-          = f.label :cache_localization, class: 'control-label'
-          .controls.checkboxes
-            = f.check_box :cache_localization 
-            span
-              / = label_tag :cache_localization, class: 'checkbox'
-              - localizers = Localizer::Base.implementations.map(&:human_name).sort.to_sentence
-              | The following localizers will be included in the tarball: #{localizers}.
-        /   .controls
-            / = f.check_box :cache_localization
-            / - localizers = Localizer::Base.implementations.map(&:human_name).sort.to_sentence
-            / p.help-block The following localizers will be included in the tarball: #{localizers}.
-          
-        .control-group
           = f.label :cache_manifest_formats, class: 'control-label'
           / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
           = hidden_field_tag 'project[cache_manifest_formats][]', ''

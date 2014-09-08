@@ -67,7 +67,6 @@ require 'file_mutex'
 # | `skip_paths`             | An array of paths that will not be searched for strings to import.                                                                                                                           |
 # | `only_importer_paths`    | A hash mapping an importer class name to an array of paths. If at least one path is set, paths not in this list will not be searched.                                                        |
 # | `skip_importer_paths`    | A hash mapping an importer class name to an array of paths that importer will not search under.                                                                                              |
-# | `cache_localization`     | If `true`, a precompiled localization will be generated and cached for each new Commit once it is ready.                                                                                     |
 # | `cache_manifest_formats` | A precompiled manifest will be generated and cached for each exporter in this list (referenced by format parameter). Included exporters must be {Exporter::Base.multilingual? multilingual}. |
 # | `watched_branches`       | A list of branches to automatically import new Commits from.                                                                                                                                 |
 # | `touchdown_branch`       | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch.                                  |
@@ -105,7 +104,6 @@ class Project < ActiveRecord::Base
       skip_importer_paths:      {type: Hash, default: {}, allow_nil: false},
       only_importer_paths:      {type: Hash, default: {}, allow_nil: false},
 
-      cache_localization:       {type: Boolean, default: false},
       cache_manifest_formats:   {type: Array, default: []},
 
       watched_branches:         {type: Array, default: []},
