@@ -202,57 +202,6 @@ describe Translation do
         expect(TranslationUnit.exact_matches(translation)).to be_empty
       end
     end
-
-    context "[manifest precompilation]" do
-      before :all do
-        @project = FactoryGirl.create(:project, cache_manifest_formats: %w(rb yaml), cache_localization: true, targeted_rfc5646_locales: {'en' => true, 'fr' => true})
-        @key1    = FactoryGirl.create(:key, project: @project)
-        @key2    = FactoryGirl.create(:key, project: @project)
-        @base1   = FactoryGirl.create(:translation, approved: true, key: @key1)
-        @base2   = FactoryGirl.create(:translation, approved: true, key: @key2)
-
-        @commit      = FactoryGirl.create(:commit, project: @project)
-        @commit.keys = [@key1, @key2]
-
-        @rb  = Mime::Type.lookup('application/x-ruby')
-        @yml = Mime::Type.lookup('text/x-yaml')
-      end
-
-      before :each do
-        @trans1 = FactoryGirl.create(:translation, approved: true, key: @key1, rfc5646_locale: 'fr')
-        trans2  = FactoryGirl.create(:translation, approved: true, key: @key2, rfc5646_locale: 'fr')
-
-        @key1.recalculate_ready!
-        @key2.recalculate_ready!
-        @commit.recalculate_ready!
-
-        expect(@commit.reload).to be_ready
-        expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit))).to be_true
-        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb))).to be_true
-        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml))).to be_true
-      end
-
-      it "should expire cached manifests when the copy of an approved translation is changed and the approval status is unchanged" do
-        @trans1.update_attributes copy: "new copy", preserve_reviewed_status: true
-        expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit))).to be_false
-        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb))).to be_false
-        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml))).to be_false
-      end
-
-      it "should expire cached manifests when a translation is unapproved" do
-        @trans1.update_attributes approved: false
-        expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit))).to be_false
-        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb))).to be_false
-        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml))).to be_false
-      end
-
-      it "should not expire cached manifests when some other attribute of an approved translation is changed" do
-        @trans1.update_attribute :translator, FactoryGirl.create(:user)
-        expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(@commit))).to be_true
-        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @rb))).to be_true
-        expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(@commit, @yml))).to be_true
-      end
-    end
   end
 
   context "[validations]" do

@@ -158,7 +158,6 @@ class Commit < ActiveRecord::Base
   before_save :set_loaded_at
   before_create :set_author
   after_commit :initial_import, on: :create
-  after_commit :compile_and_cache_or_clear, on: :update
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -200,7 +199,6 @@ class Commit < ActiveRecord::Base
       self.completed_at = Time.current
     end
     save!
-    compile_and_cache_or_clear(ready)
   end
 
   # Returns `true` if all Translations applying to this commit have been
@@ -490,24 +488,6 @@ class Commit < ActiveRecord::Base
       self.author_email = commit.author.email
     rescue
       # Don't set the author if commit doesn't exist
-    end
-  end
-
-  def compile_and_cache_or_clear(force=false)
-    return unless force || previous_changes.include?(:ready)
-
-    # clear out existing cache entries if present
-    Exporter::Base.implementations.each do |exporter|
-      Shuttle::Redis.del ManifestPrecompiler.new.key(self, exporter.request_mime)
-    end
-    Shuttle::Redis.del LocalizePrecompiler.new.key(self)
-
-    # if ready, generate new cache entries
-    if ready?
-      LocalizePrecompiler.perform_once(id) if project.cache_localization?
-      project.cache_manifest_formats.each do |format|
-        ManifestPrecompiler.perform_once id, format
-      end
     end
   end
 
