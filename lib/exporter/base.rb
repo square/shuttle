@@ -157,7 +157,7 @@ module Exporter
       # batch preload possible duplicate translations
       possible_duplicates = Hash.new { |h,k| h[k] = Array.new }
       translations.in_groups_of(100, false) do |group|
-        Translation.where(key_id: group.map(&:key_id), rfc5646_locale: deduplicate.map(&:rfc5646)).each do |dup|
+        Translation.where(key_id: group.map(&:key_id), rfc5646_locale: deduplicate.map(&:rfc5646)).includes(:key).each do |dup|
           possible_duplicates[dup.key.key] << dup.copy
         end
       end
