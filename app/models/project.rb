@@ -54,23 +54,23 @@ require 'file_mutex'
 # Metadata
 # ========
 #
-# |                          |                                                                                                                                                                                              |
-# |:-------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-# | `base_locale`            | The locale the Project is initially localized in.                                                                                                                                            |
-# | `locale_requirements`    | An hash mapping locales this Project can be localized to, to whether those locales are required.                                                                                             |
-# | `skip_imports`           | An array of classes under the {Importer} module that are _not_ used to search for Translations.                                                                                              |
-# | `key_exclusions`         | An array of globs that describe keys that should be ignored.                                                                                                                                 |
-# | `key_inclusions`         | An array of globs that describe keys that should be included. Other keys are ignored.                                                                                                        |
-# | `key_locale_exclusions`  | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that should be ignored in that locale.                                                                      |
-# | `key_locale_inclusions`  | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that will not be ignored in that locale.                                                                    |
-# | `only_paths`             | An array of paths. If at least one path is set, other paths will not be searched for strings to import.                                                                                      |
-# | `skip_paths`             | An array of paths that will not be searched for strings to import.                                                                                                                           |
-# | `only_importer_paths`    | A hash mapping an importer class name to an array of paths. If at least one path is set, paths not in this list will not be searched.                                                        |
-# | `skip_importer_paths`    | A hash mapping an importer class name to an array of paths that importer will not search under.                                                                                              |
-# | `cache_manifest_formats` | A precompiled manifest will be generated and cached for each exporter in this list (referenced by format parameter). Included exporters must be {Exporter::Base.multilingual? multilingual}. |
-# | `watched_branches`       | A list of branches to automatically import new Commits from.                                                                                                                                 |
-# | `touchdown_branch`       | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch.                                  |
-# | `manifest_directory`     | If this is set, Shuttle will automatically push a new commit containing the translated manifest in the specified directory to the touchdown branch.                                          |
+# |                           |                                                                                                                                                                                              |
+# |:--------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+# | `base_locale`             | The locale the Project is initially localized in.                                                                                                                                            |
+# | `locale_requirements`     | An hash mapping locales this Project can be localized to, to whether those locales are required.                                                                                             |
+# | `skip_imports`            | An array of classes under the {Importer} module that are _not_ used to search for Translations.                                                                                              |
+# | `key_exclusions`          | An array of globs that describe keys that should be ignored.                                                                                                                                 |
+# | `key_inclusions`          | An array of globs that describe keys that should be included. Other keys are ignored.                                                                                                        |
+# | `key_locale_exclusions`   | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that should be ignored in that locale.                                                                      |
+# | `key_locale_inclusions`   | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that will not be ignored in that locale.                                                                    |
+# | `only_paths`              | An array of paths. If at least one path is set, other paths will not be searched for strings to import.                                                                                      |
+# | `skip_paths`              | An array of paths that will not be searched for strings to import.                                                                                                                           |
+# | `only_importer_paths`     | A hash mapping an importer class name to an array of paths. If at least one path is set, paths not in this list will not be searched.                                                        |
+# | `skip_importer_paths`     | A hash mapping an importer class name to an array of paths that importer will not search under.                                                                                              |
+# | `default_manifest_format` | The default format in which the manifest file will be exported. Must be {Exporter::Base.multilingual? multilingual}.                                                                         |
+# | `watched_branches`        | A list of branches to automatically import new Commits from.                                                                                                                                 |
+# | `touchdown_branch`        | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch.                                  |
+# | `manifest_directory`      | If this is set, Shuttle will automatically push a new commit containing the translated manifest in the specified directory to the touchdown branch.                                          |
 
 class Project < ActiveRecord::Base
   # The directory where repositories are mirrored.
@@ -104,7 +104,7 @@ class Project < ActiveRecord::Base
       skip_importer_paths:      {type: Hash, default: {}, allow_nil: false},
       only_importer_paths:      {type: Hash, default: {}, allow_nil: false},
 
-      cache_manifest_formats:   {type: Array, default: []},
+      default_manifest_format:  {type: String, allow_nil: true},
 
       watched_branches:         {type: Array, default: []},
       touchdown_branch:         {allow_nil: true},
@@ -120,6 +120,7 @@ class Project < ActiveRecord::Base
   set_nil_if_blank :github_webhook_url
   set_nil_if_blank :stash_webhook_url
   set_nil_if_blank :manifest_directory
+  set_nil_if_blank :default_manifest_format
 
   include Slugalicious
   slugged :name

@@ -474,7 +474,7 @@ class CommitsController < ApplicationController
   end
 
   def find_format
-    @format = @project.cache_manifest_formats.first
+    @format = @project.default_manifest_format
   end 
 
   def decorate(commit)

@@ -100,7 +100,7 @@
             / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
           = hidden_field_tag 'project[use_imports][]', ''
           - Importer::Base.implementations.sort_by(&:human_name).each_with_index do |importer, index|
-            .controls.checkboxes
+            .controls.checkboxes_and_radios
               = label_tag "project_use_imports_#{index}", class: 'checkbox'
                 = importer.human_name
               = check_box_tag "project[use_imports][]", importer.ident, !@project.skip_imports.include?(importer.ident), id: "project_use_imports_#{index}"
@@ -151,14 +151,15 @@
         legend Precompilation and Caching
 
         .control-group
-          = f.label :cache_manifest_formats, class: 'control-label'
-          / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
-          = hidden_field_tag 'project[cache_manifest_formats][]', ''
+          = f.label :default_manifest_format, class: 'control-label'
+          .controls.checkboxes_and_radios
+            = label_tag "project_default_manifest_format_none", 'None'
+            = radio_button_tag 'project[default_manifest_format]', '', @project.default_manifest_format.blank?
           - Exporter::Base.implementations.select(&:multilingual?).sort_by(&:human_name).each_with_index do |importer, index|
-            .controls.checkboxes
-              = label_tag "project_cache_manifest_formats_#{index}", class: 'checkbox'
+            .controls.checkboxes_and_radios
+              = f.label "default_manifest_format_#{index}", class: 'radio'
                 = importer.human_name
-              = check_box_tag "project[cache_manifest_formats][]", importer.request_format.to_s, @project.cache_manifest_formats.include?(importer.request_format.to_s), id: "project_cache_manifest_formats_#{index}"
+              = f.radio_button :default_manifest_format, importer.request_format.to_s
 
 
     .eight.columns.right-side
