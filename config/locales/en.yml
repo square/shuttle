@@ -44,7 +44,6 @@ en:
         key_inclusions: Only translate keys containing these substrings
         key_locale_exclusions: Don’t translate keys containing these substrings to these locales
         key_locale_inclusions: Only translate keys containing these substrings to these locales
-        cache_localization: precompile and cache localizer output
         cache_manifest_formats: precompile and cache manifests for these exporters
         watched_branches: watched branches
       commit:
