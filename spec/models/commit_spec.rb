@@ -289,54 +289,6 @@ describe Commit do
       expect(project.blobs.size).to eql(36) # should import all blobs
     end
 
-    it "should cache a localization when ready" do
-      project = FactoryGirl.create(:project, cache_localization: true, targeted_rfc5646_locales: {'en' => true, 'fr' => true})
-      key1    = FactoryGirl.create(:key, project: project)
-      key2    = FactoryGirl.create(:key, project: project)
-      base1   = FactoryGirl.create(:translation, approved: true, key: key1)
-      base2   = FactoryGirl.create(:translation, approved: true, key: key2)
-      trans1  = FactoryGirl.create(:translation, approved: true, key: key1, rfc5646_locale: 'fr')
-      trans2  = FactoryGirl.create(:translation, approved: nil, key: key2, rfc5646_locale: 'fr')
-      commit  = FactoryGirl.create(:commit, project: project)
-      key1.recalculate_ready!
-      key2.recalculate_ready!
-
-      commit.keys = [key1, key2]
-      commit.recalculate_ready!
-      expect(commit).not_to be_ready
-      expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(commit))).to be_false
-
-      trans2.update_attribute :approved, true
-      expect(commit.reload).to be_ready
-      expect(Shuttle::Redis.exists(LocalizePrecompiler.new.key(commit))).to be_true
-    end
-
-    it "should cache manifests when ready" do
-      rb  = Mime::Type.lookup('application/x-ruby')
-      yml = Mime::Type.lookup('text/x-yaml')
-
-      project = FactoryGirl.create(:project, cache_manifest_formats: %w(rb yaml), targeted_rfc5646_locales: {'en' => true, 'fr' => true})
-      key1    = FactoryGirl.create(:key, project: project)
-      key2    = FactoryGirl.create(:key, project: project)
-      base1   = FactoryGirl.create(:translation, approved: true, key: key1)
-      base2   = FactoryGirl.create(:translation, approved: true, key: key2)
-      trans1  = FactoryGirl.create(:translation, approved: true, key: key1, rfc5646_locale: 'fr')
-      trans2  = FactoryGirl.create(:translation, approved: nil, key: key2, rfc5646_locale: 'fr')
-      commit  = FactoryGirl.create(:commit, project: project)
-      key1.recalculate_ready!
-      key2.recalculate_ready!
-
-      commit.keys = [key1, key2]
-      commit.recalculate_ready!
-      expect(commit).not_to be_ready
-      expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, rb))).to be_false
-      expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, yml))).to be_false
-
-      trans2.update_attribute :approved, true
-      expect(commit.reload).to be_ready
-      expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, rb))).to be_true
-      expect(Shuttle::Redis.exists(ManifestPrecompiler.new.key(commit, yml))).to be_true
-    end
   end
 
   describe "[statistics methods]" do
