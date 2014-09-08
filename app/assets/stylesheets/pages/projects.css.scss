@@ -74,7 +74,7 @@ body.projects {
         &:last-of-type { padding-bottom: 0px; }
         
         .controls {
-          &.checkboxes {
+          &.checkboxes_and_radios {
             &:first-of-type {
               margin-top: 10px;
               border-top: 1px solid $gray5;              
@@ -106,10 +106,11 @@ body.projects {
             width: 100%;
           }
 
-          input[type="checkbox"] {
+          input[type="checkbox"], input[type="radio"] {
             margin-right: 10px; 
             margin-top: 3px;
             float: right;
+            width: auto;
           }
         }
       }
