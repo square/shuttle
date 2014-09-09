@@ -202,7 +202,8 @@ class SearchController < ApplicationController
                          else
                            project_key_translation_url(translation.key.project, translation.key, translation)
                          end),
-          project:       translation.key.project.as_json
+          project:       translation.key.project.as_json,
+          key:           translation.key.key
       )
     end
   end

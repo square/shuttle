@@ -14,6 +14,10 @@ body.search {
   &#search-translations {
     .main > input[type="text"] { width: 535px; }
     .translation-entry { word-break: break-word; }
+    .key {
+      word-break: break-word;
+      width: 150px;
+    }
   }
 
   &#search-keys {
