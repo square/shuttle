@@ -63,6 +63,7 @@ class root.GlobalSearch
     else
       $('<td/>').addClass('translation-entry').addClass('muted').text("(untranslated)").appendTo tr
 
+    $('<td/>').addClass('key').text(translation.key).appendTo tr
   # Sets or clears a table-wide informational message. Removes all rows from the
   # table.
   #
@@ -86,4 +87,5 @@ class root.GlobalSearch
     $('<th/>').text("Source").appendTo tr
     $('<th/>').text("To").appendTo tr
     $('<th/>').text("Translation").appendTo tr
+    $('<th/>').text("Key").appendTo tr
     @body = $('<tbody/>').appendTo(@element)
