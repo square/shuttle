@@ -29,7 +29,7 @@ class CommitsController < ApplicationController
   before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
 
   respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
-                                  :import, :sync, :match, :redo, :clear, :recalculate, :ping_stash]
+                                  :import, :sync, :match, :clear, :recalculate, :ping_stash]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -280,30 +280,6 @@ class CommitsController < ApplicationController
     respond_with @commit, location: nil
   end
 
-  # Re-scans a revision for strings and adds new Translation records as
-  # necessary. Unlike {#sync}, this method rescans blobs that have already been
-  # scanned.
-  #
-  # Routes
-  # ------
-  #
-  # * `POST /projects/:project_id/commits/:id/redo`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `id`         | The SHA of a Commit.   |
-
-  def redo
-    @commit.import_batch.jobs do
-      CommitImporter.perform_once @commit.id, force: true
-    end
-    respond_with @commit, location: project_commit_url(@project, @commit)
-  end
-
   # Recalculates the readiness of a commit.  This method should be used
   # to fix commits that are "red" but should be "green"
   #
@@ -506,7 +482,6 @@ class CommitsController < ApplicationController
         url:                project_commit_url(@project, commit),
         import_url:         import_project_commit_url(@project, commit),
         sync_url:           sync_project_commit_url(@project, commit, format: 'json'),
-        redo_url:           redo_project_commit_url(@project, commit, format: 'json'),
         percent_done:       commit.fraction_done.nan? ? 0.0 : commit.fraction_done*100,
         translations_done:  commit.translations_done,
         translations_total: commit.translations_total,
