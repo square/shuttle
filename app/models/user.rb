@@ -119,9 +119,16 @@ class User < ActiveRecord::Base
     self.confirmed_at ||= Time.now.utc if self.role.present?
   end
 
+  # Updates the user's role to 'monitor' if the user's email address' domain is one of
+  # the `domains_to_get_monitor_role_after_email_confirmation` in settings.yml.
+  # The reason is that we trust these email addresses, and don't need an admin to
+  # activate their accounts.
+  # For all other email addresses, admin approval is required for them to use the application.
   def after_confirmation
-    self.role = 'monitor'
-    save
+    privileged_domains = Shuttle::Configuration.app[:domains_to_get_monitor_role_after_email_confirmation]
+    if privileged_domains && privileged_domains.include?(Mail::Address.new(email).domain)
+      update(role: 'monitor')
+    end
   end
 
   # @private Used by Devise.

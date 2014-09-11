@@ -1,0 +1,6 @@
+# Use this file to define application specific settings / constants
+
+# After a user signs up and confirms their email address, he will automatically get 'monitor' access
+# if his email is from one of the domains listed here. We recommend putting in your company email
+# domain here if you trust them and don't want to have to manually activate users from within the company.
+domains_to_get_monitor_role_after_email_confirmation: ['mycompany.com']
