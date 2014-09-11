@@ -69,6 +69,7 @@ require 'fileutils'
 # |:-------------------|:-------------------------------------------------------------------|
 # | `description`      | A user-submitted description of why we are localizing this commit. |
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
+# | `import_batch_id`  | The ID of the Sidekiq batch of import jobs.                        |
 # | `import_errors`    | Array of import errors that happened during the import process.    |
 # | `author`           | The name of the commit author.                                     |
 # | `author_email`     | The email address of the commit author.                            |
@@ -76,7 +77,6 @@ require 'fileutils'
 class Commit < ActiveRecord::Base
   extend RedisMemoize
   include CommitTraverser
-  include SidekiqWorkerTracking
   include ImportErrors
 
   # @return [true, false] If `true`, does not perform an import after creating
@@ -86,8 +86,8 @@ class Commit < ActiveRecord::Base
 
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
+  has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
   has_many :screenshots, inverse_of: :commit, dependent: :destroy
-  has_many :commits_keys, inverse_of: :commit, dependent: :destroy
   has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
   has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
@@ -97,10 +97,11 @@ class Commit < ActiveRecord::Base
   include HasMetadataColumn
   has_metadata_column(
       description:      {allow_nil: true},
-      author:           {allow_nil: true}, 
+      author:           {allow_nil: true},
       author_email:     {allow_nil: true},
       pull_request_url: {allow_nil: true},
-      import_errors:    {type: Array, default: []}
+      import_errors:    {type: Array, default: []},
+      import_batch_id:  {allow_nil: true}
   )
 
   include Tire::Model::Search
@@ -156,12 +157,8 @@ class Commit < ActiveRecord::Base
 
   before_save :set_loaded_at
   before_create :set_author
-  after_commit(on: :create) do |commit|
-    CommitImporter.perform_once(commit.id) unless commit.skip_import
-  end
+  after_commit :initial_import, on: :create
   after_commit :compile_and_cache_or_clear, on: :update
-  after_commit :update_stats_at_end_of_loading, on: :update, if: :loading_state_changed?
-  after_commit :mark_blobs_as_parsed, on: :update, if: :loading_state_changed?
   after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
@@ -233,22 +230,17 @@ class Commit < ActiveRecord::Base
     commit! # Make sure commit exists
     clear_import_errors! # clear out any previous import errors
 
-    blobs  = project.blobs.includes(:project) # preload blobs for performance
+    import_batch.jobs do
+      update_attribute :loading, true
+      blobs = project.blobs.includes(:project) # preload blobs for performance
 
-    # add us as one of the workers, to prevent the commit from prematurely going
-    # ready; let's just invent a job ID for us
-    job_id = SecureRandom.uuid
-    add_worker! job_id
-
-    # clear out existing keys so that we can import all new keys
-    commits_keys.delete_all unless options[:locale]
-    # perform the recursive import
-    traverse(commit!) do |path, blob|
-      import_blob path, blob, options.merge(blobs: blobs)
+      # clear out existing keys so that we can import all new keys
+      commits_keys.delete_all unless options[:locale]
+      # perform the recursive import
+      traverse(commit!) do |path, blob|
+        import_blob path, blob, options.merge(blobs: blobs)
+      end
     end
-
-    # this will also kick of stats recalculation for inline imports
-    remove_worker! job_id
   end
 
   # Returns a commit object used to interact with Git.
@@ -273,14 +265,24 @@ class Commit < ActiveRecord::Base
     commit_object
   end
 
-  # @return [String, nil] The URL to this commit on GitHub or GitHub Enterprise,
+  # @return [String, nil] The URL to this commit on GitHub, GitHub Enterprise or on Stash,
   #   or `nil` if the URL could not be determined.
 
-  def github_url
-    if project.repository_url =~ /^git@github\.com:([^\/]+)\/(.+)\.git$/ ||
-        project.repository_url =~ /https:\/\/\w+@github\.com\/([^\/]+)\/(.+)\.git/ ||
-        project.repository_url =~ /git:\/\/github\.com\/([^\/]+)\/(.+)\.git/ # GitHub
+  def git_url
+    github_enterprise_domain = Shuttle::Configuration.app[:github_enterprise_domain]
+    stash_domain = Shuttle::Configuration.app[:stash_domain]
+    escaped_github_enterprise_domain = Regexp.escape(github_enterprise_domain)
+    escaped_stash_domain = Regexp.escape(stash_domain)
+    path_regex = "([^\/]+)\/(.+)\.git$"
+
+    if project.repository_url =~ /^git@github\.com:#{path_regex}/ ||
+        project.repository_url =~ /https:\/\/github\.com\/#{path_regex}/ # GitHub
       "https://github.com/#{$1}/#{$2}/commit/#{revision}"
+    elsif project.repository_url =~ /^git@#{escaped_github_enterprise_domain}:#{path_regex}/ ||
+        project.repository_url =~ /^https:\/\/#{escaped_github_enterprise_domain}\/#{path_regex}/ # Github Enterprise: git.mycompany.com
+      "https://#{github_enterprise_domain}/#{$1}/#{$2}/commit/#{revision}"
+    elsif project.repository_url =~ /^https:\/\/#{escaped_stash_domain}\/scm\/#{path_regex}/ # Stash: stash.mycompany.com
+      "https://#{stash_domain}/projects/#{$1.upcase}/repos/#{$2}/commits/#{revision}"
     end
   end
 
@@ -289,7 +291,7 @@ class Commit < ActiveRecord::Base
     options ||= {}
 
     options[:methods] = Array.wrap(options[:methods])
-    options[:methods] << :github_url << :revision
+    options[:methods] << :git_url << :revision
 
     options[:except] = Array.wrap(options[:except])
     options[:except] << :revision_raw
@@ -407,14 +409,32 @@ class Commit < ActiveRecord::Base
   # @private
   def redis_memoize_key() to_param end
 
-  # @return [true, false] True if there are cached Sidekiq job IDs of
-  #   in-progress BlobImporters that do not actually exist anymore.
+  # @return [Sidekiq::Batch, nil] The batch of Sidekiq workers performing the
+  #   current import, if any.
 
-  def broken?
-    cached_jids = Shuttle::Redis.smembers("import:#{revision}")
-    return false if cached_jids.empty?
-    actual_jids = self.class.workers.map { |w| w['jid'] }
-    (cached_jids & actual_jids).empty? # none of the cached JIDs actually exist anymore
+  def import_batch
+    if import_batch_id
+      Sidekiq::Batch.new(import_batch_id)
+    else
+      batch             = Sidekiq::Batch.new
+      batch.description = "Import Commit #{id} (#{revision})"
+      batch.on :success, ImportFinisher, commit_id: id
+      update_attribute :import_batch_id, batch.bid
+      batch
+    end
+  rescue Sidekiq::Batch::NoSuchBatch
+    update_attribute :import_batch_id, nil
+    retry
+  end
+
+  # @return [Sidekiq::Batch::Status, nil] Information about the batch of Sidekiq
+  #   workers performing the current import, if any.
+
+  def import_batch_status
+    import_batch_id ? Sidekiq::Batch::Status.new(import_batch_id) : nil
+  rescue Sidekiq::Batch::NoSuchBatch
+    update_attribute :import_batch_id, nil
+    retry
   end
 
   # Returns whether we should skip a key for this particular commit, given the
@@ -542,10 +562,7 @@ class Commit < ActiveRecord::Base
       if options[:inline]
         BlobImporter.new.perform importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
       else
-        shuttle_jid = SecureRandom.uuid
-        blob_object.add_worker! shuttle_jid
-        add_worker! shuttle_jid
-        BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646), shuttle_jid)
+        BlobImporter.perform_once importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
       end
     end
   end
@@ -555,20 +572,14 @@ class Commit < ActiveRecord::Base
         (previous_changes.include?('loading') && previous_changes['loading'].first && !previous_changes['loading'].last)
   end
 
-  def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
-    return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
-
-    # the readiness hooks were all disabled, so now we need to go through and
-    # calculate readiness and stats.
-    CommitStatsRecalculator.new.perform id
-  end
-
-  # Sets all blobs for this commit as parsed once the import is
-  # complete.
-  def mark_blobs_as_parsed
-    return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
-
-    blob_shas = blobs_commits.pluck(:sha_raw)
-    Blob.where(project_id: project_id, sha_raw: blob_shas, errored: false).update_all parsed: true
+  #TODO there's a bug in Rails core that causes this to be run on update as well
+  # as create. sigh.
+  def initial_import
+    return if @_start_transaction_state[:id] # fix bug in Rails core
+    unless skip_import || loading?
+      import_batch.jobs do
+        CommitImporter.perform_once id
+      end
+    end
   end
 end

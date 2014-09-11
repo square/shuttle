@@ -4,3 +4,9 @@
 # if his email is from one of the domains listed here. We recommend putting in your company email
 # domain here if you trust them and don't want to have to manually activate users from within the company.
 domains_to_get_monitor_role_after_email_confirmation: ['mycompany.com']
+
+# Will be used to determine the url of a commit
+github_enterprise_domain: "git.mycompany.com"
+
+# Will be used to determine the url of a commit
+stash_domain: "stash.mycompany.com"

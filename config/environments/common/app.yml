@@ -3,4 +3,10 @@
 # After a user signs up and confirms their email address, he will automatically get 'monitor' access
 # if his email is from one of the domains listed here. We recommend putting in your company email
 # domain here if you trust them and don't want to have to manually activate users from within the company.
-domains_to_get_monitor_role_after_email_confirmation: ['squareup.com']
+domains_to_get_monitor_role_after_email_confirmation: TODO
+
+# Will be used to determine the url of a commit
+github_enterprise_domain: "git.squareup.com"
+
+# Will be used to determine the url of a commit
+stash_domain: TODO
