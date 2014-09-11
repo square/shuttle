@@ -17,6 +17,8 @@
 
 class RegistrationsController < Devise::RegistrationsController
 
+  # Creates a new user account.
+
   def create
     build_resource(sign_up_params)
 

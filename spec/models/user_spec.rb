@@ -45,5 +45,51 @@ describe User do
       expect(user.confirmed_at).to_not be_nil
     end
   end
-end
 
+  describe '#after_confirmation' do
+    it "sets user's role to monitor if their email address' domain is a privileged domain name" do
+      user = FactoryGirl.create(:user, role: nil, email: "test@mycompany.com")
+      expect(user.role).to be_nil
+      user.after_confirmation
+      expect(user.role).to eql('monitor')
+    end
+
+    it "doesn't change user's role if priviliged domains are present but their email address' domain is NOT one of them" do
+      user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
+      expect(user.role).to be_nil
+      user.after_confirmation
+      expect(user.role).to be_nil
+    end
+
+    it "doesn't change user's role if priviliged domains are blank" do
+      Shuttle::Configuration.stub(:app).and_return({ })
+      user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
+      expect(user.role).to be_nil
+      user.after_confirmation
+      expect(user.role).to be_nil
+    end
+  end
+
+  context '[Integration Tests]' do
+    it "sets user's role to monitor after a successful confirmation if their email address' domain is a privileged domain name" do
+      user = FactoryGirl.create(:user, role: nil, email: "test@mycompany.com")
+      user.send :generate_confirmation_token!
+      User.confirm_by_token(user.instance_eval { @raw_confirmation_token } )
+      expect(user.reload.role).to eql('monitor')
+    end
+
+    it "doesn't change user's role after a successful confirmation if their email address' domain is NOT a privileged domain name" do
+      user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
+      user.send :generate_confirmation_token!
+      User.confirm_by_token(user.instance_eval { @raw_confirmation_token} )
+      expect(user.reload.role).to be_nil
+    end
+
+    it "doesn't change user's role after an unsuccessful confirmation attempt" do
+      user = FactoryGirl.create(:user, role: nil, email: "test@mycompany.com")
+      user.send :generate_confirmation_token!
+      User.confirm_by_token( "fake" )
+      expect(user.reload.role).to be_nil
+    end
+  end
+end

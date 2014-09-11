@@ -16,6 +16,7 @@ require 'spec_helper'
 
 describe StatsController do
   before do
+    Translation.delete_all
     user = FactoryGirl.create(:user, role: 'monitor')
     @request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in user
