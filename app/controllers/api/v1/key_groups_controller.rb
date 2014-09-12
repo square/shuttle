@@ -184,7 +184,7 @@ module Api
 
       # ===== START AUTHENTICATION/AUTHORIZATION/VALIDATION ============================================================
       def authenticate_and_find_project
-        unless @project = Project.find_by_api_token(params[:api_token])
+        unless params[:api_token].present? && @project = Project.find_by_api_token(params[:api_token])
           render json: { error: { errors: [{ message: t("controllers.api.v1.key_groups.invalid_api_token") }] } }, status: :unauthorized
         end
       end
