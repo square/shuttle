@@ -16,12 +16,12 @@ require 'spec_helper'
 
 describe Importer::KeyGroup do
   describe "import_strings" do
-    it "doesn't call rebase_existing_keys or inactivate_all_keys if this is the initial import" do
+    it "doesn't call rebase_existing_keys or deactivate_all_keys if this is the initial import" do
       KeyGroup.any_instance.stub(:import!) # prevent automatic import
       key_group = FactoryGirl.create(:key_group, source_copy: "<p>a</p><p>b</p><p>c</p>", base_rfc5646_locale: :en, targeted_rfc5646_locales: {fr: true})
       importer = Importer::KeyGroup.new(key_group)
       expect(importer).to_not receive(:rebase_existing_keys)
-      expect(importer).to_not receive(:inactivate_all_keys)
+      expect(importer).to_not receive(:deactivate_all_keys)
       expect(importer).to receive(:split_into_paragraphs).and_call_original
       importer.import_strings
     end
@@ -231,12 +231,12 @@ describe Importer::KeyGroup do
     end
   end
 
-  describe "#inactivate_all_keys" do
+  describe "#deactivate_all_keys" do
     it "inactivates all Keys in a KeyGroup" do
       key_group = FactoryGirl.create(:key_group, source_copy: "<p>a</p><p>b</p><p>c</p>")
       expect(key_group.reload.keys.where('index_in_key_group IS NOT NULL').count).to eql(3)
       expect(key_group.keys.where('index_in_key_group IS NULL').count).to eql(0)
-      Importer::KeyGroup.new(key_group).send :inactivate_all_keys
+      Importer::KeyGroup.new(key_group).send :deactivate_all_keys
       expect(key_group.reload.keys.where('index_in_key_group IS NOT NULL').count).to eql(0)
       expect(key_group.keys.where('index_in_key_group IS NULL').count).to eql(3)
     end

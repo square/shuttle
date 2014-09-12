@@ -36,7 +36,7 @@ module Importer
 
       if @key_group.keys.exists?
         rebase_existing_keys(paragraphs) # so that we can re-use the unchanged portions of the source copy
-        inactivate_all_keys
+        deactivate_all_keys
       end
 
       @key_group.import_batch.jobs do
@@ -168,7 +168,7 @@ module Importer
 
     # Cleans associations between key_groups and keys so that we can start fresh.
     # A Key is considered to be inactive for a KeyGroup if index_in_key_group is nil.
-    def inactivate_all_keys
+    def deactivate_all_keys
       @key_group.keys.update_all(index_in_key_group: nil)
     end
   end
