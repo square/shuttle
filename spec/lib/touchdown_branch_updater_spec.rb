@@ -105,7 +105,7 @@ describe TouchdownBranchUpdater do
       context "existing manifest directory" do
         before do
           project.watched_branches = %w(master)
-          project.cache_manifest_formats = %w(yaml)
+          project.default_manifest_format = 'yaml'
           project.manifest_directory = 'config/locales'
 
           c = project.commit!(head_revision)
@@ -142,7 +142,7 @@ describe TouchdownBranchUpdater do
       context "non-existant manifest directory" do
         before do
           project.watched_branches = %w(master)
-          project.cache_manifest_formats = %w(yaml)
+          project.default_manifest_format = 'yaml'
           project.manifest_directory = 'nonexist/directory'
 
           c = project.commit!(head_revision)
@@ -165,7 +165,7 @@ describe TouchdownBranchUpdater do
       context "specified manifest filename" do
         before do
           project.watched_branches = %w(master)
-          project.cache_manifest_formats = %w(yaml)
+          project.default_manifest_format = 'yaml'
           project.manifest_directory = 'config/locales'
           project.manifest_filename = 'zzz_manifest.yaml'
 
@@ -196,7 +196,7 @@ describe TouchdownBranchUpdater do
         end
 
         it "should still create a new commit with the manifest file at the tip" do
-          project.cache_manifest_formats = %w(yaml)
+          project.default_manifest_format = 'yaml'
           project.manifest_directory = 'config/locales'
 
           TouchdownBranchUpdater.new(project).update
@@ -208,7 +208,7 @@ describe TouchdownBranchUpdater do
       context "already created manifest" do
         before do
           project.watched_branches = %w(master)
-          project.cache_manifest_formats = %w(yaml)
+          project.default_manifest_format = 'yaml'
           project.manifest_directory = 'nonexist/directory'
 
           c = project.commit!(head_revision)

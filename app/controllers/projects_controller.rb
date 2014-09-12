@@ -24,7 +24,6 @@ class ProjectsController < ApplicationController
                      [:project, :key_inclusions],
                      [:project, :skip_paths],
                      [:project, :only_paths],
-                     [:project, :cache_manifest_formats],
                      [:project, :watched_branches],
                      [:project, :required_rfc5646_locales],
                      [:project, :other_rfc5646_locales]
@@ -282,8 +281,8 @@ class ProjectsController < ApplicationController
     end
     
     project_params = params[:project].to_hash.slice(*%w(
-        name repository_url base_rfc5646_locale due_date cache_localization
-        github_webhook_url stash_webhook_url skip_imports cache_manifest_formats key_exclusions
+        name repository_url base_rfc5646_locale due_date
+        github_webhook_url stash_webhook_url skip_imports default_manifest_format key_exclusions
         key_inclusions skip_paths only_paths
         watched_branches touchdown_branch
         manifest_directory manifest_filename

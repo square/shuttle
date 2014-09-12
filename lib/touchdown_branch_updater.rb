@@ -61,8 +61,8 @@ class TouchdownBranchUpdater
     project.git? && watched_branches.present? && touchdown_branch.present?
   end
 
-  def valid_manifest_settings? 
-    project.cache_manifest_formats.present? && project.manifest_directory.present?
+  def valid_manifest_settings?
+    project.default_manifest_format.present? && project.manifest_directory.present?
   end 
 
   def touchdown_branch_changed?(translated_commit, working_repo)
@@ -89,7 +89,7 @@ class TouchdownBranchUpdater
   def add_manifest_commit(working_repo)
     if valid_manifest_settings?
       head_commit         = working_repo.object(touchdown_branch)
-      format              = project.cache_manifest_formats.first
+      format              = project.default_manifest_format
       manifest_directory  = Pathname.new(working_repo.dir.path).join(project.manifest_directory)
 
       Rails.logger.info "[TouchdownBranchUpdater] Adding translated manifest file for #{head_commit.sha}"
