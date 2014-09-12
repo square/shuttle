@@ -44,6 +44,7 @@ en:
         key_inclusions: Only translate keys containing these substrings
         key_locale_exclusions: Don’t translate keys containing these substrings to these locales
         key_locale_inclusions: Only translate keys containing these substrings to these locales
+        default_manifest_format: Export manifest in this format by default
         watched_branches: watched branches
       commit:
         revision: revision
