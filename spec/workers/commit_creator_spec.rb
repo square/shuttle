@@ -20,7 +20,7 @@ describe CommitCreator do
       before :each do
         Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
         @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-        @user = FactoryGirl.create(:user, email: "example@squareup.com")
+        @user = FactoryGirl.create(:user, email: "foo@example.com")
         ActionMailer::Base.deliveries.clear
       end
 
@@ -28,7 +28,7 @@ describe CommitCreator do
         CommitCreator.new.perform(@project.id, "xyz123", {"other_fields" => {:user_id => @user.id}})
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         mail = ActionMailer::Base.deliveries.first
-        expect(mail.to).to eql(["example@squareup.com"])
+        expect(mail.to).to eql(["foo@example.com"])
         expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
         expect(mail.body).to include("Error Class:   Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123")
       end
@@ -42,7 +42,7 @@ describe CommitCreator do
     context "[rescue Project::NotLinkedToAGitRepositoryError]" do
       before :each do
         @project = FactoryGirl.create(:project, repository_url: nil)
-        @user = FactoryGirl.create(:user, email: "example@squareup.com")
+        @user = FactoryGirl.create(:user, email: "foo@example.com")
         ActionMailer::Base.deliveries.clear
       end
 
@@ -50,7 +50,7 @@ describe CommitCreator do
         CommitCreator.new.perform(@project.id, "xyz123", {"other_fields" => {:user_id => @user.id}})
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         mail = ActionMailer::Base.deliveries.first
-        expect(mail.to).to eql(["example@squareup.com"])
+        expect(mail.to).to eql(["foo@example.com"])
         expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
         expect(mail.body).to include("Error Class:   Project::NotLinkedToAGitRepositoryError", "Error Message: repository_url is empty")
       end
