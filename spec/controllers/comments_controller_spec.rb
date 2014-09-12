@@ -36,6 +36,14 @@ describe CommentsController do
     ActionMailer::Base.deliveries.clear
   end
 
+  after(:all) do
+    User.delete_all
+    Project.delete_all
+    Key.delete_all
+    Translation.delete_all
+    Issue.delete_all
+  end
+
   describe "#create" do
     context "with valid comment arguments" do
       it "creates the comment; renders javascript code to replace the '.comments' section of the new comment's issue; response includes the new comment; response doesn't include errors; subscribes user to issue; sends comment_created email; doesn't send issue_updated email" do
