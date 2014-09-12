@@ -252,8 +252,8 @@ describe Api::V1::KeyGroupsController do
     let(:project) { FactoryGirl.create(:project, repository_url: nil) }
 
     it "permits key, source_copy, description, email, base_rfc5646_locale targeted_rfc5646_locales; but not id or project_id fields" do
-      post :create, api_token: project.api_token, key: "t", source_copy: "t", description: "t", email: "t@squareup.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
-      expect(controller.send :params_for_create).to eql({"key"=>"t", "source_copy"=>"t", "description"=>"t", "email"=>"t@squareup.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}})
+      post :create, api_token: project.api_token, key: "t", source_copy: "t", description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
+      expect(controller.send :params_for_create).to eql({"key"=>"t", "source_copy"=>"t", "description"=>"t", "email"=>"t@example.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}})
     end
 
     it "doesn't include targeted_rfc5646_locales in the permitted params (this is tested separately because it's a special case due to being a hash field)" do
@@ -267,8 +267,8 @@ describe Api::V1::KeyGroupsController do
     let(:key_group) { FactoryGirl.create(:key_group, project: project, key: "t") }
 
     it "permits source_copy, description, email, targeted_rfc5646_locales; but not id, project_id, key or base_rfc5646_locale fields" do
-      patch :update, api_token: project.api_token, key: key_group.key, source_copy: "t", description: "t", email: "t@squareup.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
-      expect(controller.send :params_for_update).to eql({"source_copy"=>"t", "description"=>"t", "email"=>"t@squareup.com", "targeted_rfc5646_locales"=>{"fr"=>true}})
+      patch :update, api_token: project.api_token, key: key_group.key, source_copy: "t", description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
+      expect(controller.send :params_for_update).to eql({"source_copy"=>"t", "description"=>"t", "email"=>"t@example.com", "targeted_rfc5646_locales"=>{"fr"=>true}})
     end
 
     it "doesn't include targeted_rfc5646_locales in the permitted params (this is tested separately because it's a special case due to being a hash field)" do
