@@ -261,6 +261,55 @@ ALTER SEQUENCE issues_id_seq OWNED BY issues.id;
 
 
 --
+-- Name: key_groups; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE key_groups (
+    id integer NOT NULL,
+    project_id integer NOT NULL,
+    key text NOT NULL,
+    key_sha_raw bytea NOT NULL,
+    source_copy text NOT NULL,
+    source_copy_sha_raw bytea NOT NULL,
+    description text,
+    email character varying(255),
+    import_batch_id character varying(255),
+    metadata text,
+    loading boolean DEFAULT false NOT NULL,
+    ready boolean DEFAULT false NOT NULL,
+    first_import_requested_at timestamp without time zone,
+    last_import_requested_at timestamp without time zone,
+    first_import_started_at timestamp without time zone,
+    last_import_started_at timestamp without time zone,
+    first_import_finished_at timestamp without time zone,
+    last_import_finished_at timestamp without time zone,
+    first_completed_at timestamp without time zone,
+    last_completed_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: key_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE key_groups_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: key_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE key_groups_id_seq OWNED BY key_groups.id;
+
+
+--
 -- Name: keys; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -270,7 +319,10 @@ CREATE TABLE keys (
     project_id integer NOT NULL,
     key_sha_raw bytea NOT NULL,
     source_copy_sha_raw bytea NOT NULL,
-    ready boolean DEFAULT true NOT NULL
+    ready boolean DEFAULT true NOT NULL,
+    key_group_id integer,
+    index_in_key_group integer,
+    CONSTRAINT non_negative_index_in_key_group CHECK ((index_in_key_group >= 0))
 );
 
 
@@ -339,7 +391,7 @@ CREATE TABLE projects (
     name character varying(256) NOT NULL,
     metadata text,
     repository_url character varying(256),
-    api_key character(36) NOT NULL,
+    api_token character(36) NOT NULL,
     created_at timestamp without time zone,
     CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0))
 );
@@ -662,6 +714,13 @@ ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::reg
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY key_groups ALTER COLUMN id SET DEFAULT nextval('key_groups_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY keys ALTER COLUMN id SET DEFAULT nextval('keys_id_seq'::regclass);
 
 
@@ -801,6 +860,14 @@ ALTER TABLE ONLY issues
 
 
 --
+-- Name: key_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY key_groups
+    ADD CONSTRAINT key_groups_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -814,14 +881,6 @@ ALTER TABLE ONLY keys
 
 ALTER TABLE ONLY locale_glossary_entries
     ADD CONSTRAINT locale_glossary_entries_pkey PRIMARY KEY (id);
-
-
---
--- Name: projects_api_key_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY projects
-    ADD CONSTRAINT projects_api_key_key UNIQUE (api_key);
 
 
 --
@@ -959,6 +1018,13 @@ CREATE INDEX index_blobs_on_project_id_and_sha_raw_and_errored ON blobs USING bt
 
 
 --
+-- Name: index_in_key_group_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_in_key_group_unique ON keys USING btree (key_group_id, index_in_key_group) WHERE ((key_group_id IS NOT NULL) AND (index_in_key_group IS NOT NULL));
+
+
+--
 -- Name: index_users_on_confirmation_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1001,10 +1067,31 @@ CREATE INDEX issues_user ON issues USING btree (user_id);
 
 
 --
+-- Name: key_groups_project; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX key_groups_project ON key_groups USING btree (project_id);
+
+
+--
+-- Name: key_groups_project_keys_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX key_groups_project_keys_unique ON key_groups USING btree (project_id, key_sha_raw);
+
+
+--
+-- Name: keys_in_key_group_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX keys_in_key_group_unique ON keys USING btree (key_group_id, key_sha_raw) WHERE (key_group_id IS NOT NULL);
+
+
+--
 -- Name: keys_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE UNIQUE INDEX keys_unique ON keys USING btree (project_id, key_sha_raw, source_copy_sha_raw);
+CREATE UNIQUE INDEX keys_unique ON keys USING btree (project_id, key_sha_raw, source_copy_sha_raw) WHERE (key_group_id IS NULL);
 
 
 --
@@ -1040,6 +1127,13 @@ CREATE UNIQUE INDEX translation_units_unique ON translation_units USING btree (s
 --
 
 CREATE UNIQUE INDEX translations_by_key ON translations USING btree (key_id, rfc5646_locale);
+
+
+--
+-- Name: unique_api_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX unique_api_token ON projects USING btree (api_token);
 
 
 --
@@ -1207,6 +1301,22 @@ ALTER TABLE ONLY issues
 
 
 --
+-- Name: key_groups_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY key_groups
+    ADD CONSTRAINT key_groups_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: keys_key_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY keys
+    ADD CONSTRAINT keys_key_group_id_fkey FOREIGN KEY (key_group_id) REFERENCES key_groups(id);
+
+
+--
 -- Name: keys_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1362,4 +1472,10 @@ INSERT INTO schema_migrations (version) VALUES ('20140606111509');
 
 INSERT INTO schema_migrations (version) VALUES ('20140613215228');
 
+INSERT INTO schema_migrations (version) VALUES ('20140616232942');
+
 INSERT INTO schema_migrations (version) VALUES ('20140714173058');
+
+INSERT INTO schema_migrations (version) VALUES ('20140717192729');
+
+INSERT INTO schema_migrations (version) VALUES ('20140721233942');

@@ -19,8 +19,8 @@
 # A Key has one base Translation, whose locale matches the Project's base
 # locale, and zero or more sibling Translations in the other locales supported
 # by the Project. When Translations in all required Locales are marked as
-# approved, the Key is marked as ready. When all Keys applicable to a Commit are
-# marked as ready, the Commit is marked as ready.
+# approved, the Key is marked as ready. When all Keys applicable to a
+# Commit/KeyGroup are marked as ready, the Commit/KeyGroup is marked as ready.
 #
 # Key uniqueness
 # --------------
@@ -42,6 +42,36 @@
 # Keys are uniquely referenced in combination with their source copy; in other
 # words, when a key's source copy changes, a new Key is generated.
 #
+#
+# Keys that belong to a KeyGroup
+# ------------------------------
+#
+# A key may belong_to a KeyGroup through the key_group_id column
+# (in which case, it will not belong to a commit or blob).
+#
+# If `index_in_key_group` is set, it means that this {Key} is an active part of
+# this {KeyGroup}. If set, it shows its order in all of KeyGroup's Keys.
+# In that sense, this field serves 2 purposes: a flag for active or not, and keeps
+# the order info. If null, it means this Key is not actively used in the KeyGroup;
+# if set, it's actively used in the KeyGroup.
+#
+# The key field of {Key} will be in this format: `index_in_key_group:source_copy_sha`.
+#   - index_in_key_group is included because if a paragraph is repeated twice in the KeyGroup,
+#     we should create 2 separate {Key Keys} for them, with unique key names.
+#     When re-importing a KeyGroup, we may deactivate a Key in a KeyGroup by removing
+#     the `index_in_key_group` field.
+#     When that happens, it's important to store the index in the `key` field, because
+#     the deactivated {Key} can be activated again, and we would search by the `key` field
+#     of {Key}.
+#     And it's less error-prone to store the index in the `key` field all the time rather than
+#     only when deactivating a Key.
+#   - source_copy_sha is included because we need a predictable `key` field, so that we can
+#     search by it later. source_copy_sha is the most obvious solution for that.
+#
+#
+# If the {Key} belongs to a KeyGroup, `key` field of {Key} is unique in combination with
+# the KeyGroup id.
+#
 # Associations
 # ============
 #
@@ -51,13 +81,15 @@
 # | `translations` | The {Translation Translations} of this Key's copy into different locales. |
 # | `commits`      | The {Commit Commits} this Key can be found in.                            |
 # | `blobs`        | The {Blob Blobs} this Key can be found in.                                |
+# | `key_group`    | The {KeyGroup KeyGroup} this Key belongs to.                              |
 #
 # Fields
 # ======
 #
-# |         |                                                                          |
-# |:--------|:-------------------------------------------------------------------------|
-# | `ready` | `true` when every required Translation under this Key has been approved. |
+# |                      |                                                                          |
+# |:---------------------|:-------------------------------------------------------------------------|
+# | `ready`              | `true` when every required Translation under this Key has been approved. |
+# | `index_in_key_group` | index of this {Key} in the {KeyGroup} with respect to other {Key Keys}.  |
 #
 # Metadata
 # ========
@@ -80,6 +112,9 @@ class Key < ActiveRecord::Base
   has_many :commits, through: :commits_keys
   has_many :blobs_keys, dependent: :delete_all, inverse_of: :key
   has_many :blobs, through: :blobs_keys
+  belongs_to :key_group, inverse_of: :keys
+
+  include InheritedSettingsForKey
 
   include HasMetadataColumn
   has_metadata_column(
@@ -125,15 +160,21 @@ class Key < ActiveRecord::Base
     indexes :commit_ids, as: 'batched_commit_ids.try!(:to_a) || commits_keys.pluck(:commit_id)'
   end
 
-  after_update :update_commit_readiness, if: :apply_readiness_hooks?
+  # need to update related commits' and key_group's readiness states
+  after_update :update_commit_and_key_group_readiness, if: :apply_readiness_hooks?
 
   validates :project,
             presence: true
   validates :source_copy_sha_raw,
             presence:   true
   validates :key_sha_raw,
-            presence:   true,
-            uniqueness: {scope: [:project_id, :source_copy_sha_raw], on: :create}
+            presence:   true
+  validates :key_sha_raw,
+            uniqueness: {scope: [:project_id, :source_copy_sha_raw], if: "key_group_id.nil?", on: :create}
+  validates :key_sha_raw,
+            uniqueness: {scope: [:key_group_id], if: "key_group_id", on: :create}
+  validates :index_in_key_group,
+            uniqueness: {scope: [:key_group_id], if: "key_group_id && index_in_key_group", on: :create}
 
   attr_readonly :project_id, :key, :original_key, :source_copy
 
@@ -174,36 +215,45 @@ class Key < ActiveRecord::Base
   def importer_name() importer_class.human_name end
 
   # Scans all of the base Translations under this Key and adds Translations for
-  # each of the Project's required locales where such a Translation does not
-  # already exist.
+  # each of the required locales and base locale where such a Translation
+  # does not already exist.
+  #
+  # If this key is associated with a key_group, base_locale and targeted_locales are
+  # retrieved from the KeyGroup. Otherwise, they are retrieved from Project.
   #
   # This is used, for example, when a Project adds a new required localization,
   # to create pending Translation requests for each string in the new locale.
 
   def add_pending_translations
-    base_translation = translations.base.first
-    return unless base_translation
+    translations.in_locale(base_locale).find_or_create!(
+        source_copy:              source_copy,
+        copy:                     source_copy,
+        source_locale:            base_locale,
+        locale:                   base_locale,
+        approved:                 true,
+        skip_readiness_hooks:     true,
+        preserve_reviewed_status: true)
 
-    project.targeted_locales.each do |locale, _|
-      next if project.skip_key?(key, locale)
-
-      translations.where(rfc5646_locale: locale.rfc5646).find_or_create! do |t|
-        t.source_locale        = base_translation.source_locale
-        t.locale               = locale
-        t.source_copy          = base_translation.source_copy
-        t.skip_readiness_hooks = true
-      end
+    targeted_locales.each do |locale|
+      next if skip_key?(locale)
+      translations.in_locale(locale).find_or_create!(
+        source_copy:          source_copy,
+        source_locale:        base_locale,
+        locale:               locale,
+        skip_readiness_hooks: true
+      )
     end
   end
 
   # Scans all of the Translations under this Tree and removes translations that
   # should be excluded based on the Project's `key_*clusions` and
-  # `key_locale_*clusions`. Translations that have been translated or
-  # approved are never removed, only pending Translations.
+  # `key_locale_*clusions`, or KeyGroup's targeted locales.
+  # Translations that have been translated or approved are never removed,
+  # only pending Translations.
 
   def remove_excluded_pending_translations
     translations.where(approved: nil, translated: false).find_each do |translation|
-      translation.destroy if project.skip_key?(key, translation.locale)
+      translation.destroy if skip_key?(translation.locale)
     end
   end
 
@@ -215,18 +265,20 @@ class Key < ActiveRecord::Base
     update_column :ready, ready
 
     # update_column doesn't run hooks and doesn't change the changes array so
-    # we need to force-update update_commit_readiness
-    update_commit_readiness(true) if !skip_readiness_hooks && ready != ready_was
+    # we need to force-update update_commit_and_key_group_readiness
+    if !skip_readiness_hooks && ready != ready_was
+      update_commit_and_key_group_readiness(true)
+    end
     tire.update_index
   end
 
-  # @return [true, false] `true` if this Commit should now be marked as ready.
+  # @return [true, false] `true` if this Key should now be marked as ready.
 
   def should_become_ready?
     if translations.loaded?
-      translations.select { |t| project.required_locales.include?(t.locale) }.all?(&:approved?)
+      translations.select { |t| required_locales.include?(t.locale) }.all?(&:approved?)
     else
-      !translations.in_locale(*project.required_locales).where('approved IS NOT TRUE').exists?
+      !translations.in_locale(*required_locales).where('approved IS NOT TRUE').exists?
     end
   end
 
@@ -239,7 +291,9 @@ class Key < ActiveRecord::Base
 
   private
 
-  def update_commit_readiness(force=false)
+  # Runs KeyReadinessRecalculator to update the related Commits' or KeyGroup's readiness state
+
+  def update_commit_and_key_group_readiness(force=false)
     return if !ready_changed? && !force
     KeyReadinessRecalculator.perform_once id
   end

@@ -34,21 +34,22 @@ require 'file_mutex'
 # Associations
 # ============
 #
-# |                |                                                    |
-# |:---------------|:---------------------------------------------------|
-# | `commits`      | The {Commit Commits} under this Project.           |
-# | `keys`         | The {Key Keys} found in this Project.              |
-# | `translations` | The {Translation Translations} under this Project. |
-# | `blobs`        | The Git {Blob Blobs} imported into this Project.   |
+# |                |                                                      |
+# |:---------------|:-----------------------------------------------------|
+# | `commits`      | The {Commit Commits} under this Project.             |
+# | `keys`         | The {Key Keys} found in this Project.                |
+# | `translations` | The {Translation Translations} under this Project.   |
+# | `blobs`        | The Git {Blob Blobs} imported into this Project.     |
+# | `key_groups`   | The {KeyGroup KeyGroups} imported into this Project. |
 #
 # Properties
 # ==========
 #
-# |                  |                                                                              |
-# |:-----------------|:-----------------------------------------------------------------------------|
-# | `api_key`        | A unique key used to refer to and authenticate this Project in API requests. |
-# | `name`           | The Project's name.                                                          |
-# | `repository_url` | The URL of the Project's Git repository.                                     |
+# |                  |                                                                                |
+# |:-----------------|:-------------------------------------------------------------------------------|
+# | `api_token`      | A unique token used to refer to and authenticate this Project in API requests. |
+# | `name`           | The Project's name.                                                            |
+# | `repository_url` | The URL of the Project's Git repository.                                       |
 #
 # Metadata
 # ========
@@ -86,6 +87,7 @@ class Project < ActiveRecord::Base
   has_many :keys, inverse_of: :project, dependent: :destroy
   has_many :blobs, inverse_of: :project, dependent: :delete_all
   has_many :translations, through: :keys
+  has_many :key_groups, inverse_of: :project
 
   include HasMetadataColumn
   has_metadata_column(
@@ -124,31 +126,32 @@ class Project < ActiveRecord::Base
   include Slugalicious
   slugged :name
 
-  extend LocaleField
-  locale_field :base_locale, from: :base_rfc5646_locale
-  locale_field :locale_requirements,
-               from:   :targeted_rfc5646_locales,
-               reader: ->(values) { values.inject({}) { |hsh, (k, v)| hsh[Locale.from_rfc5646(k)] = v; hsh } },
-               writer: ->(values) { values.inject({}) { |hsh, (k, v)| hsh[k.rfc5646] = v; hsh } }
+  include CommonLocaleLogic
 
   validates :name,
             presence: true,
             length:   {maximum: 256}
-  validates :api_key,
-            presence: true
-            #uniqueness: true,
-            #length:     {is: 36},
-            #format:     {with: /[0-9a-f\-]+/}
+  validates :api_token,
+            presence:   true,
+            uniqueness: true,
+            length:     {is: 36},
+            format:     {with: /[0-9a-f\-]+/},
+            strict:     true
 
   validate :can_clone_repo, if: :validate_repo_connectivity
-  validate :require_valid_locales_hash
 
-  before_validation :create_api_key, on: :create
+  before_validation :create_api_token, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
   after_commit :add_or_remove_pending_translations, on: :update
   after_update :invalidate_manifests_and_localizations
 
   scope :with_repository_url, -> { where("projects.repository_url IS NOT NULL") }
+
+  # @return [Array<Key>] all {Key keys} who belong to at least one {Commit} under this {Project}
+
+  def keys_with_commits
+    keys.joins(:commits_keys).uniq
+  end
 
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
@@ -299,23 +302,8 @@ class Project < ActiveRecord::Base
     commits.order('committed_at DESC').first
   end
 
-  # @return [Array<Locale>] The locales this Project can be localized to.
-  def targeted_locales() targeted_rfc5646_locales.keys.map { |l| Locale.from_rfc5646(l) } end
-
-  # @return [Array<Locale>] The locales this Project *must* be localized to.
-  def required_locales() targeted_rfc5646_locales.select { |_, req| req }.map(&:first).map { |l| Locale.from_rfc5646(l) } end
-
-  def required_rfc5646_locales
-    targeted_rfc5646_locales.select { |_, req| req }.map(&:first)
-  end 
-
-  def other_rfc5646_locales
-    targeted_rfc5646_locales.select { |_, req| !req }.map(&:first)
-  end 
-
-
-  # Generates a new API key for the Project. Does not save the Project.
-  def create_api_key() self.api_key = SecureRandom.uuid end
+  # Generates a new API token for the Project. Does not save the Project.
+  def create_api_token() self.api_token = SecureRandom.uuid end
 
   # Returns the number of Translations pending translation.
   #
@@ -473,9 +461,16 @@ class Project < ActiveRecord::Base
     @working_repo_mutex = FileMutex.new(working_repo_path.to_s + '.lock')
   end
 
+  # If related fields changed, run
+  #   ProjectTranslationAdder for projects with {Commit Commits} and/or
+  #   ProjectTranslationAdderForKeyGroups for projects with {KeyGroup KeyGroups}
+
   def add_or_remove_pending_translations
     if %w{targeted_rfc5646_locales key_exclusions key_inclusions key_locale_exclusions key_locale_inclusions}.any?{|field| previous_changes.include?(field)}
       ProjectTranslationAdder.perform_once id
+    end
+    if %w{targeted_rfc5646_locales}.any?{|field| previous_changes.include?(field)}
+      ProjectTranslationAdderForKeyGroups.perform_once id
     end
   end
 
