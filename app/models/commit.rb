@@ -462,16 +462,6 @@ class Commit < ActiveRecord::Base
     return false
   end
 
-  # @private Shanghai'd from Sidekiq::Web
-  def self.workers
-    Sidekiq.redis do |conn|
-      conn.smembers('workers').map do |w|
-        msg = conn.get("worker:#{w}")
-        msg ? Sidekiq.load_json(msg) : nil
-      end.compact
-    end
-  end
-
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
