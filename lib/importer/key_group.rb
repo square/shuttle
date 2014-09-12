@@ -57,7 +57,7 @@ module Importer
     # update the indexes of Keys before KeyCreatorForKeyGroups is run so that
     # it will match the old Key.
     #
-    # @example: [a] -> [b a]
+    # Example: [a] -> [b a]
     # In this scenario, initially we had something like: [Key(index_in_key_group => 0, key => "0:a")].
     # It transformed to [Key(index => 0, key => "0:b"), Key(index_in_key_group => 1, key => "1:a")].
     # In this rebasing step, we update the initial key to be Key(index_in_key_group => nil, key => "1:a").
@@ -70,7 +70,7 @@ module Importer
     # of that effort would be redundant. For that reason, we only reset the approved
     # states for the neighbors of changed paragraphs.
     #
-    # @example: [a b] -> [a]
+    # Example: [a b] -> [a]
     # In this scenario, the approved state of Key(a) will be reset.
 
     def rebase_existing_keys(new_paragraphs) # Ex: ["Hello a", "Hello c", "Hello e"]

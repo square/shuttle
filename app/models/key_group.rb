@@ -193,7 +193,8 @@ class KeyGroup < ActiveRecord::Base
   # @return [Collection<Key>] the {Key Keys} under this {KeyGroup} in a sorted fashion.
   #     {Translation Translations} will be `included` in the query.
   #
-  # @example: [<Key 1: 0:a>, <Key 2: 1:b>, <Key 3: 2:c>, <Key 4: 10:d>]
+  # @example
+  #   [<Key 1: 0:a>, <Key 2: 1:b>, <Key 3: 2:c>, <Key 4: 10:d>]
 
   def sorted_active_keys_with_translations
     active_keys.order(:index_in_key_group).includes(:translations)
