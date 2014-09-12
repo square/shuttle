@@ -18,7 +18,7 @@ describe CommitMailer do
   describe "#notify_submitter_of_import_errors" do
     before :each do
       @project = FactoryGirl.create(:project)
-      @commit = FactoryGirl.create(:commit, project: @project, author_email: "example@squareup.com")
+      @commit = FactoryGirl.create(:commit, project: @project, author_email: "foo@example.com")
       ActionMailer::Base.deliveries.clear
     end
 
@@ -28,7 +28,7 @@ describe CommitMailer do
         CommitMailer.notify_submitter_of_import_errors(commit).deliver
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         mail = ActionMailer::Base.deliveries.first
-        expect(mail.to).to eql(["example@squareup.com"])
+        expect(mail.to).to eql(["foo@example.com"])
         expect(mail.subject).to eql("[Shuttle] Error(s) occurred during the import")
         errors.each { |err_class, err_message| expect(mail.body).to include("#{err_class} - #{err_message}") }
         mail

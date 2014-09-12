@@ -61,7 +61,7 @@ describe 'Authentication', capybara: true do
     end
 
     it 'lets you register a square account and sends confirmation e-mail' do
-      square_user = FactoryGirl.build(:user, email: 'test@squareup.com')
+      square_user = FactoryGirl.build(:user, email: 'test@example.com')
 
       visit new_user_session_path + '#sign-up'
       expect(page).to have_content 'Sign up for Shuttle'

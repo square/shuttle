@@ -18,20 +18,9 @@
 class RegistrationsController < Devise::RegistrationsController
 
   # Creates a new user account.
-  #
-  # **Square email addresses:** The user is emailed a confirmation link, which
-  # if clicked, will activate their account automatically.
-  #
-  # **Other email address:** The confirmation step is bypassed, and the user
-  # awaits manual activation by an administrator.
 
   def create
     build_resource(sign_up_params)
-    begin
-      resource.skip_confirmation! unless Mail::Address.new(@_params[:user][:email]).domain == 'squareup.com'
-    rescue Mail::Field::ParseError
-      # bogus email address; ignore
-    end
 
     if resource.save
       if resource.active_for_authentication?

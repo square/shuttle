@@ -588,4 +588,42 @@ describe Commit do
       expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end
+
+  describe "#git_url" do
+    context "[on github]" do
+      it "returns the correct url for a commit where project url is for https" do
+        project = FactoryGirl.create(:project, repository_url: "https://github.com/mycompany/my-project.git")
+        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        expect(commit.git_url).to eql("https://github.com/mycompany/my-project/commit/abc123")
+      end
+
+      it "returns the correct url for a commit where project url is for ssh" do
+        project = FactoryGirl.create(:project, repository_url: "git@github.com:mycompany/my-project.git")
+        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        expect(commit.git_url).to eql("https://github.com/mycompany/my-project/commit/abc123")
+      end
+    end
+
+    context "[on github enterprise]" do
+      it "returns the correct url for a commit where project url is for https" do
+        project = FactoryGirl.create(:project, repository_url: "https://git.mycompany.com/all/my-project.git")
+        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        expect(commit.git_url).to eql("https://git.mycompany.com/all/my-project/commit/abc123")
+      end
+
+      it "returns the correct url for a commit where project url is for ssh" do
+        project = FactoryGirl.create(:project, repository_url: "git@git.mycompany.com:all/my-project.git")
+        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        expect(commit.git_url).to eql("https://git.mycompany.com/all/my-project/commit/abc123")
+      end
+    end
+
+    context "[on stash]" do
+      it "returns the correct url for a commit" do
+        project = FactoryGirl.create(:project, repository_url: "https://stash.mycompany.com/scm/all/my-project.git")
+        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        expect(commit.git_url).to eql("https://stash.mycompany.com/projects/ALL/repos/my-project/commits/abc123")
+      end
+    end
+  end
 end

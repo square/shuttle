@@ -265,20 +265,24 @@ class Commit < ActiveRecord::Base
     commit_object
   end
 
-  # @return [String, nil] The URL to this commit on GitHub or GitHub Enterprise,
+  # @return [String, nil] The URL to this commit on GitHub, GitHub Enterprise or on Stash,
   #   or `nil` if the URL could not be determined.
 
-  def github_url
-    if project.repository_url =~ /^git@github\.com:([^\/]+)\/(.+)\.git$/ ||
-        project.repository_url =~ /https:\/\/\w+@github\.com\/([^\/]+)\/(.+)\.git/ ||
-        project.repository_url =~ /git:\/\/github\.com\/([^\/]+)\/(.+)\.git/ # GitHub
+  def git_url
+    github_enterprise_domain = Shuttle::Configuration.app[:github_enterprise_domain]
+    stash_domain = Shuttle::Configuration.app[:stash_domain]
+    escaped_github_enterprise_domain = Regexp.escape(github_enterprise_domain)
+    escaped_stash_domain = Regexp.escape(stash_domain)
+    path_regex = "([^\/]+)\/(.+)\.git$"
+
+    if project.repository_url =~ /^git@github\.com:#{path_regex}/ ||
+        project.repository_url =~ /https:\/\/github\.com\/#{path_regex}/ # GitHub
       "https://github.com/#{$1}/#{$2}/commit/#{revision}"
-    elsif project.repository_url =~ /^git@git\.squareup\.com:([^\/]+)\/(.+)\.git$/ ||
-        project.repository_url =~ /^https:\/\/git\.squareup\.com\/([^\/]+)\/(.+)\.git$/ # git.squareup.com
-      "https://git.squareup.com/#{$1}/#{$2}/commit/#{revision}"
-    elsif project.repository_url =~ /^ssh:\/\/(?:git@)?git\.corp\.squareup.com\/([^\/]+)\/(.+)\.git$/ ||
-        project.repository_url =~ /^https:\/\/(?:\w+@)?stash\.corp\.squareup\.com\/scm\/([^\/]+)\/(.+)\.git$/ # stash.corp.squareup.com
-      "https://stash.corp.squareup.com/projects/#{$1.upcase}/repos/#{$2}/commits/#{revision}"
+    elsif project.repository_url =~ /^git@#{escaped_github_enterprise_domain}:#{path_regex}/ ||
+        project.repository_url =~ /^https:\/\/#{escaped_github_enterprise_domain}\/#{path_regex}/ # Github Enterprise: git.mycompany.com
+      "https://#{github_enterprise_domain}/#{$1}/#{$2}/commit/#{revision}"
+    elsif project.repository_url =~ /^https:\/\/#{escaped_stash_domain}\/scm\/#{path_regex}/ # Stash: stash.mycompany.com
+      "https://#{stash_domain}/projects/#{$1.upcase}/repos/#{$2}/commits/#{revision}"
     end
   end
 
@@ -287,7 +291,7 @@ class Commit < ActiveRecord::Base
     options ||= {}
 
     options[:methods] = Array.wrap(options[:methods])
-    options[:methods] << :github_url << :revision
+    options[:methods] << :git_url << :revision
 
     options[:except] = Array.wrap(options[:except])
     options[:except] << :revision_raw
@@ -456,16 +460,6 @@ class Commit < ActiveRecord::Base
     return false
   rescue Psych::SyntaxError
     return false
-  end
-
-  # @private Shanghai'd from Sidekiq::Web
-  def self.workers
-    Sidekiq.redis do |conn|
-      conn.smembers('workers').map do |w|
-        msg = conn.get("worker:#{w}")
-        msg ? Sidekiq.load_json(msg) : nil
-      end.compact
-    end
   end
 
   # @private
