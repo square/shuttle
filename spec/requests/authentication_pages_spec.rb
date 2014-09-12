@@ -39,7 +39,7 @@ describe 'Authentication', capybara: true do
       expect(page).to have_content 'Sign up for Shuttle'
     end
 
-    it 'sends confirmation email upon registration' do
+    it 'lets you register a non-square account but doesn\'t send confirmation e-mail' do
       non_square_user = FactoryGirl.build(:user)
 
       visit new_user_session_path + '#sign-up'
@@ -50,6 +50,27 @@ describe 'Authentication', capybara: true do
       fill_in 'user[email]', with: non_square_user.email
       fill_in 'user[password]', with: non_square_user.password
       fill_in 'user[password_confirmation]', with: non_square_user.password
+
+      click_button 'Sign up'
+
+      expect(current_path).to eql(new_user_session_path)
+      expect(page).to have_css '.flash-shown'
+      expect(page).to have_content t('devise.registrations.signed_up_but_inactive')
+
+      expect(ActionMailer::Base.deliveries.size).to eql(0)
+    end
+
+    it 'lets you register a square account and sends confirmation e-mail' do
+      square_user = FactoryGirl.build(:user, email: 'test@example.com')
+
+      visit new_user_session_path + '#sign-up'
+      expect(page).to have_content 'Sign up for Shuttle'
+
+      fill_in 'user[first_name]', with: square_user.first_name
+      fill_in 'user[last_name]', with: square_user.last_name
+      fill_in 'user[email]', with: square_user.email
+      fill_in 'user[password]', with: square_user.password
+      fill_in 'user[password_confirmation]', with: square_user.password
 
       click_button 'Sign up'
 
