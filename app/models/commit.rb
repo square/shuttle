@@ -537,11 +537,6 @@ class Commit < ActiveRecord::Base
     end
   end
 
-  def loading_state_changed?
-    (loading_was && !loading?) ||
-        (previous_changes.include?('loading') && previous_changes['loading'].first && !previous_changes['loading'].last)
-  end
-
   #TODO there's a bug in Rails core that causes this to be run on update as well
   # as create. sigh.
   def initial_import
