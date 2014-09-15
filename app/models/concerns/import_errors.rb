@@ -36,10 +36,12 @@ module ImportErrors
     Shuttle::Redis.sadd(import_errors_redis_key, "#{err.class} - #{message}")
   end
 
-  # Moves import errors from Redis to SQL database
+  # Moves import errors from Redis to SQL database if they exist
   def move_import_errors_from_redis_to_sql_db!
-    update!(import_errors: import_errors_in_redis)
-    clear_import_errors_in_redis
+    if import_errors_in_redis.present?
+      update!(import_errors: import_errors_in_redis)
+      clear_import_errors_in_redis
+    end
   end
 
   # Removes all previous import errors from redis and postgres.
