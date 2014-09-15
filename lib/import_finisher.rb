@@ -23,13 +23,8 @@ class ImportFinisher
   def on_success(_status, options)
     commit = Commit.find(options['commit_id'])
 
-    send_import_errors_email = commit.import_errors_in_redis.present?
-
     # if there were errors, persist them in postgresql
     commit.move_import_errors_from_redis_to_sql_db!
-
-    # if there were errors, notify author
-    CommitMailer.notify_submitter_of_import_errors(commit).deliver if send_import_errors_email
 
     # mark related blobs as parsed so that we don't parse them again
     mark_not_errored_blobs_as_parsed(commit)
