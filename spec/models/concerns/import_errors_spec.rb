@@ -62,6 +62,15 @@ describe ImportErrors do
       expect(@commit.reload.import_errors).to eql([["StandardError", "this is a fake error"]])
       expect(@commit.import_errors_in_redis).to be_empty
     end
+
+    it "should not do anything if there are no import errors in redis" do
+      @commit.save
+      expect(@commit.import_errors_in_redis).to be_empty
+      expect(@commit).to_not receive(:clear_import_errors_in_redis)
+      @commit.move_import_errors_from_redis_to_sql_db!
+      expect(@commit.reload.import_errors).to eql([])
+      expect(@commit.import_errors_in_redis).to be_empty
+    end
   end
 
   context "clear_import_errors_in_redis" do
