@@ -18,15 +18,11 @@ describe TranslationsController do
   include Devise::TestHelpers
 
   describe "#show" do
-    before :all do
-      Project.delete_all
+    before :each do
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @key = FactoryGirl.create(:key, project: @project)
       @translation = FactoryGirl.create(:translation, copy: 'some copy here', key: @key)
       @user = FactoryGirl.create(:user, role: 'monitor')
-    end
-
-    before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end
@@ -39,11 +35,8 @@ describe TranslationsController do
   end
 
   describe "#update" do
-    before :all do
-      @user = FactoryGirl.create(:user, role: 'translator')
-    end
-
     before :each do
+      @user = FactoryGirl.create(:user, role: 'translator')
       @translation = FactoryGirl.create(:translation, copy: nil, translated: false, approved: nil)
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
@@ -121,7 +114,11 @@ describe TranslationsController do
     end
 
     context "[reviewer changes]" do
-      before(:all) { @user = FactoryGirl.create(:user, role: 'reviewer') }
+      before :each do
+        @user = FactoryGirl.create(:user, role: 'reviewer')
+        @request.env['devise.mapping'] = Devise.mappings[:user]
+        sign_in @user
+      end
 
       it "should automatically approve reviewer changes to an approved string" do
         @translation.copy = 'hello!'
@@ -307,11 +304,8 @@ describe TranslationsController do
   end
 
   describe "#approve" do
-    before :all do
-      @user = FactoryGirl.create(:user, role: 'reviewer')
-    end
-
     before :each do
+      @user = FactoryGirl.create(:user, role: 'reviewer')
       @translation = FactoryGirl.create(:translation, copy: 'hello!', translated: true, approved: nil)
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
@@ -335,7 +329,7 @@ describe TranslationsController do
   end
 
   describe "#reject" do
-    before :all do
+    before :each do
       @user = FactoryGirl.create(:user, role: 'reviewer')
     end
 
@@ -363,7 +357,7 @@ describe TranslationsController do
   end
 
   describe "#match" do
-    before :all do
+    before :each do
       @project = FactoryGirl.create(:project)
       @user = FactoryGirl.create(:user, role: 'reviewer')
     end
@@ -482,7 +476,7 @@ describe TranslationsController do
   end
 
   describe "#fuzzy_match" do
-    before :all do
+    before :each do
       @user = FactoryGirl.create(:user, role: 'translator')
     end
 

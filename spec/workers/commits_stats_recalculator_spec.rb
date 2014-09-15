@@ -15,7 +15,7 @@
 require 'spec_helper'
 
 describe CommitStatsRecalculator do
-  before :all do
+  before :each do
     # create a commit with 2 total strings, 8 total translations, 4 required
     # translations, and 2 required done translations
 

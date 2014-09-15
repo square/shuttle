@@ -38,7 +38,6 @@ describe Project do
 
   describe "#repo" do
     it "should check out the repository and return a Repository object" do
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
       repo = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git").repo
       expect(repo).to be_kind_of(Git::Base)
       expect(repo.index).to be_nil # should be bare
@@ -93,9 +92,8 @@ describe Project do
   end
 
   describe "#commit!" do
-    before(:all) { @project = FactoryGirl.create(:project) }
-
     before :each do
+      @project = FactoryGirl.create(:project)
       @repo = double('Git::Repo')
       # for GitObjectField checking
       allow_any_instance_of(Project).to receive(:repo).and_return(double('Git::Repo', object: double('Git::Object::Commit', :commit? => true)))
@@ -140,7 +138,7 @@ describe Project do
   end
 
   describe "#pending_translations" do
-    before :all do
+    before :each do
       @project     = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
       @key1        = FactoryGirl.create(:key, project: @project)
       @key2        = FactoryGirl.create(:key, project: @project)
@@ -171,7 +169,7 @@ describe Project do
   end
 
   describe "#pending_reviews" do
-    before :all do
+    before :each do
       @project     = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
       @key1        = FactoryGirl.create(:key, project: @project)
       @key2        = FactoryGirl.create(:key, project: @project)
@@ -241,7 +239,7 @@ describe Project do
   end
 
   describe "#latest_commit" do
-    before do
+    before :each do
       @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
     end
 
@@ -257,7 +255,7 @@ describe Project do
   end
 
   describe "#skip_key?" do
-    before(:all) { @project = FactoryGirl.create(:project) }
+    before(:each) { @project = FactoryGirl.create(:project) }
 
     it "should return true if there is no matching key inclusion" do
       @project.update_attributes(key_exclusions:        [],
@@ -325,7 +323,7 @@ describe Project do
   end
 
   describe "#skip_path?" do
-    before(:all) { @project = FactoryGirl.create(:project) }
+    before(:each) { @project = FactoryGirl.create(:project) }
 
     it "should return true if there is no matching path inclusion" do
       @project.update_attributes(skip_paths:          [],
@@ -394,7 +392,7 @@ describe Project do
 
   describe "#skip_tree?" do
     context '[only paths]' do
-      before :all do
+      before :each do
         @project = FactoryGirl.create(:project,
                                       only_paths:          %w(only/path),
                                       only_importer_paths: {'foo' => %w(importeronly/path)})
@@ -430,7 +428,7 @@ describe Project do
     end
 
     context '[skip paths]' do
-      before :all do
+      before :each do
         @project = FactoryGirl.create(:project,
                                       skip_paths:          %w(skip/path),
                                       skip_importer_paths: {'foo' => %w(importerskip/path)})
@@ -521,7 +519,7 @@ describe Project do
       around { |tests| Sidekiq::Testing.fake!(&tests) }
 
       context "[ProjectTranslationAdder]" do
-        before(:all) do
+        before :each do
           @project = FactoryGirl.create(:project, name: "this is a test project",
                                         targeted_rfc5646_locales: {'en' => true},
                                         key_exclusions: [],
@@ -575,7 +573,7 @@ describe Project do
       end
 
       context "[ProjectTranslationAdderForKeyGroups]" do
-        before(:all) do
+        before :each do
           @project = FactoryGirl.create(:project, name: "test project", targeted_rfc5646_locales: {'en' => true})
         end
 
@@ -622,7 +620,6 @@ describe Project do
   context "[scopes]" do
     context "[scope = with_repository_url]" do
       it "returns the projects which has a repository_url" do
-        Project.delete_all
         project_with_repo = FactoryGirl.create(:project, repository_url: "test", watched_branches: %w(master))
         FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
         expect(Project.with_repository_url.to_a).to eql([project_with_repo])

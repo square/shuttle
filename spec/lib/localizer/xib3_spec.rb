@@ -18,7 +18,6 @@ require 'spec_helper'
 
 describe Localizer::Xib3 do
   before :each do
-    Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
     @project = FactoryGirl.create(:project,
                                   repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                   only_paths:     %w(apple/),

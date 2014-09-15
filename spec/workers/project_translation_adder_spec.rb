@@ -34,7 +34,6 @@ describe ProjectTranslationAdder do
     end
 
     it "doesn't call KeyTranslationAdder if key is not associated with a commit" do
-      Key.delete_all
       project = FactoryGirl.create(:project, repository_url: "")
       key_group = FactoryGirl.create(:key_group, project: project, source_copy: "test")
 

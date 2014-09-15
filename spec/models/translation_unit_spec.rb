@@ -24,7 +24,7 @@ describe TranslationUnit do
   end
 
   describe ".exact_matches" do
-    before(:all) do
+    before :each do
       @unit = FactoryGirl.create(:translation_unit,
                                  source_copy:           'something in english',
                                  copy:                  'etwas auf deutsch',
@@ -74,7 +74,7 @@ describe TranslationUnit do
   end
 
   describe ".store" do
-    before :all do
+    before :each do
       @translation = FactoryGirl.build(:translation, source_rfc5646_locale: 'en', rfc5646_locale: 'de', approved: true)
     end
 

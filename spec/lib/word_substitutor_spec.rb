@@ -18,7 +18,7 @@ require 'spec_helper'
 
 describe WordSubstitutor do
   context "[pathfinding]" do
-    before :all do
+    before :each do
       @sub = WordSubstitutor.new(Locale.from_rfc5646('en-US'), Locale.from_rfc5646('en-GB'))
     end
 
@@ -46,7 +46,7 @@ describe WordSubstitutor do
   end
 
   context "[:auto mode]" do
-    before :all do
+    before :each do
       @sub = WordSubstitutor.new(Locale.from_rfc5646('en-US'), Locale.from_rfc5646('en-GB'))
     end
 
@@ -102,7 +102,7 @@ describe WordSubstitutor do
   end
 
   context "[:prompt mode]" do
-    before :all do
+    before :each do
       @sub = WordSubstitutor.new(Locale.from_rfc5646('en-US'), Locale.from_rfc5646('en-GB'))
     end
 
@@ -159,7 +159,7 @@ describe WordSubstitutor do
   end
 
   context "[:stemmed mode]" do
-    before :all do
+    before :each do
       @sub = WordSubstitutor.new(Locale.from_rfc5646('en-US'), Locale.from_rfc5646('en-GB'))
     end
 

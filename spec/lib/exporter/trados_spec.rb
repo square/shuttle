@@ -16,7 +16,7 @@ require 'spec_helper'
 
 describe Exporter::Trados do
   context "[exporting]" do
-    before :all do
+    before :each do
       @project = FactoryGirl.create(:project)
       @en      = Locale.from_rfc5646('en-US')
       @de      = Locale.from_rfc5646('de-DE')

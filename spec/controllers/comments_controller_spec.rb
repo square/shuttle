@@ -21,27 +21,16 @@ describe CommentsController do
 
   include Devise::TestHelpers
 
-  before(:all) do
+  before(:each) do
     @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "test@example.com")
     @project = FactoryGirl.create(:project)
     @key = FactoryGirl.create(:key, project: @project)
     @translation = FactoryGirl.create(:translation, key: @key)
     @issue = FactoryGirl.create(:issue, user: @user, translation: @translation, subscribed_emails: [])
     @path_params = { issue_id: @issue.id }
-  end
-
-  before :each do
     @request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in @user
     ActionMailer::Base.deliveries.clear
-  end
-
-  after(:all) do
-    User.delete_all
-    Project.delete_all
-    Key.delete_all
-    Translation.delete_all
-    Issue.delete_all
   end
 
   describe "#create" do

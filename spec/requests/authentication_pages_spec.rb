@@ -17,17 +17,13 @@ require 'spec_helper'
 describe 'Authentication', capybara: true do
   include ActionView::Helpers
 
-  before(:each) do
+  before :each do
     Capybara.reset!
     Capybara.current_driver = :webkit
     ActionMailer::Base.deliveries.clear
   end
 
-  after(:each) do
-    User.delete_all
-  end
-
-  after(:all) do
+  after :all do
     Capybara.use_default_driver
   end
 
@@ -85,7 +81,7 @@ describe 'Authentication', capybara: true do
   end
 
   context '[reset password]' do
-    before :all do
+    before :each do
       @user = FactoryGirl.create(:user)
     end
 

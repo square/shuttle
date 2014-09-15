@@ -18,9 +18,8 @@ describe SearchController do
   include Devise::TestHelpers
 
   describe "#translations" do
-    before :all do
+    before :each do
       reset_elastic_search
-      Translation.delete_all
 
       update_date = DateTime.new(2014, 1, 1)
       @user = FactoryGirl.create(:user, role: 'translator')
@@ -46,9 +45,7 @@ describe SearchController do
       end
 
       regenerate_elastic_search_indexes
-    end
 
-    before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
       sleep(2)
@@ -149,7 +146,7 @@ describe SearchController do
   end
 
   describe '#keys' do
-    before :all do
+    before :each do
       reset_elastic_search
       @user    = FactoryGirl.create(:user, role: 'translator')
       @project = FactoryGirl.create(:project)
@@ -157,9 +154,7 @@ describe SearchController do
       5.times { |i| FactoryGirl.create :key, project: @project, key: "t1_n#{i}" }
       5.times { |i| FactoryGirl.create :key, project: @project, key: "t2_n#{i}" }
       regenerate_elastic_search_indexes
-    end
 
-    before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
       sleep(2)
@@ -223,7 +218,7 @@ describe SearchController do
     let(:prefix2) { "123456" }
     let(:prefix3) { "abc111" }
 
-    before :all do
+    before :each do
       reset_elastic_search
 
       @user     = FactoryGirl.create(:user, role: "translator")

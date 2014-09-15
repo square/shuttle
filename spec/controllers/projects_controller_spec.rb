@@ -16,16 +16,10 @@ require 'spec_helper'
 
 describe ProjectsController do
   describe '#github_webhook' do
-    before :all do
-      @user = FactoryGirl.create(:user, role: 'monitor')
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
-      @project = FactoryGirl.create(:project,
-                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
-                                    watched_branches: [ 'master' ])
-    end
-
     before :each do
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: [ 'master' ])
       @request.env['devise.mapping'] = Devise.mappings[:user]
+      @user = FactoryGirl.create(:user, role: 'monitor')
       sign_in @user
       @request.accept = "application/json"
       post :github_webhook, { id: @project.to_param, payload: "{\"ref\":\"refs/head/master\",\"after\":\"HEAD\"}" }
@@ -40,7 +34,6 @@ describe ProjectsController do
 
   describe '#stash_webhook' do
     it "returns 200 if project has a repository_url" do
-      Project.delete_all
       project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       expect(CommitCreator).to receive(:perform_once).once
       post :stash_webhook, { id: project.to_param, sha: "HEAD" }

@@ -15,17 +15,10 @@
 require 'spec_helper'
 
 describe Issue do
-  before :all do
-    Issue.delete_all
-  end
-
   context "[validations]" do
-    before :all do
+    before :each do
       @user = FactoryGirl.create(:user)
       @translation = FactoryGirl.create(:translation)
-    end
-
-    before(:each) do
       @issue = FactoryGirl.build(:issue, user: @user, translation: @translation)
     end
 
@@ -127,12 +120,9 @@ describe Issue do
   end
 
   context "[subscribed_emails=]" do
-    before(:all) do
+    before(:each) do
       @user = FactoryGirl.create(:user)
       @translation = FactoryGirl.create(:translation)
-    end
-
-    before(:each) do
       @issue = FactoryGirl.build(:issue, user: @user, translation: @translation)
     end
 

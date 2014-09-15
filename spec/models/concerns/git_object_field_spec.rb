@@ -16,7 +16,6 @@ require 'spec_helper'
 
 describe GitObjectField do
   it "should validate the Git object type when :git_type is set" do
-    Project.where(repository_url: 'git://github.com/RISCfuture/better_caller.git').delete_all
     blob = FactoryGirl.build(:blob, project: FactoryGirl.create(:project, repository_url: 'git://github.com/RISCfuture/better_caller.git'))
     blob.skip_sha_check = false
 
