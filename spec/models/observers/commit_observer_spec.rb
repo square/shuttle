@@ -14,7 +14,7 @@
 
 require 'spec_helper'
 
-describe Commit do
+describe CommitObserver do
   context "[mailing import errors]" do
 
     def commit_and_expect_import_errors(project, revision, user)
@@ -177,6 +177,34 @@ describe Commit do
           commit.update! ready: true
           commit.save!
         end
+      end
+    end
+  end
+
+  describe "#just_became_ready?" do
+    [[false, true, true],
+     [true, true, false],
+     [false, false, false],
+     [true, false, false]].each do |before, after, result|
+      it "returns #{result} if ready went from #{before} false to #{after}" do
+        commit = FactoryGirl.create(:commit)
+        commit.update! ready: before
+        commit.reload.update! ready: after
+        expect(CommitObserver.send(:new).send(:just_became_ready?, commit)).to eql(result)
+      end
+    end
+  end
+
+  describe "#just_finished_loading?" do
+    [[false, true, false],
+     [true, true, false],
+     [false, false, false],
+     [true, false, true]].each do |before, after, result|
+      it "returns #{result} if loading went from #{before} false to #{after}" do
+        commit = FactoryGirl.create(:commit)
+        commit.update! loading: before
+        commit.reload.update! loading: after
+        expect(CommitObserver.send(:new).send(:just_finished_loading?, commit)).to eql(result)
       end
     end
   end

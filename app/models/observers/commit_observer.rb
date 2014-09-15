@@ -25,16 +25,13 @@ class CommitObserver < ActiveRecord::Observer
 
   def after_commit_on_update(commit)
     ping_github_webhook(commit)
-  end
-
-  def after_update(commit)
-    send_email(commit)
+    send_emails(commit)
   end
 
   private
 
   def ping_github_webhook(commit)
-    if commit.project.git? && commit.project.github_webhook_url && commit.previous_changes.include?(:ready) && commit.ready? # if it just became ready
+    if commit.project.git? && commit.project.github_webhook_url && just_became_ready?(commit)
       GithubWebhookPinger.perform_once(commit.id)
     end
   end
@@ -45,12 +42,22 @@ class CommitObserver < ActiveRecord::Observer
     end
   end
 
-  def send_email(commit)
-    if commit.loading_was == true && commit.loading == false && !commit.completed_at && commit.import_errors.blank?
+  def send_emails(commit)
+    if just_finished_loading?(commit) && !commit.completed_at && commit.import_errors.blank?
       CommitMailer.notify_translators(commit).deliver
     end
-    if commit.ready_was == false && commit.ready == true && commit.loading == false
+    if just_became_ready?(commit) && commit.loading == false
       CommitMailer.notify_translation_finished(commit).deliver
     end
+  end
+
+  # This should be called in after_commit hooks only because it checks previous_changes hash instead of changes hash.
+  def just_became_ready?(commit)
+    commit.previous_changes.include?(:ready) && commit.ready?
+  end
+
+  # This should be called in after_commit hooks only because it checks previous_changes hash instead of changes hash.
+  def just_finished_loading?(commit)
+    commit.previous_changes.include?(:loading) && !commit.loading?
   end
 end
