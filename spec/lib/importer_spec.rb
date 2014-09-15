@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 require 'spec_helper'
-require 'sidekiq/testing/inline'
 
 describe Importer::Base do
   describe "[importing strings]" do
