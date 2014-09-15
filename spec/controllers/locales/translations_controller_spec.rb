@@ -17,7 +17,7 @@ require 'spec_helper'
 describe Locale::TranslationsController do
   describe "#index" do
     context "[filtering]" do
-      before :all do
+      before :each do
         reset_elastic_search
         @user    = FactoryGirl.create(:user, role: 'translator')
         @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: {'fr-CA' => true})
@@ -78,9 +78,7 @@ describe Locale::TranslationsController do
                                          translated:            false,
                                          approved:              nil)
         regenerate_elastic_search_indexes
-      end
 
-      before :each do
         @request.env["devise.mapping"] = Devise.mappings[:user]
         sign_in @user
         sleep(2)

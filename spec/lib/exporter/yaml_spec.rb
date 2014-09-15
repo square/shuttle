@@ -17,7 +17,7 @@
 require 'spec_helper'
 
 describe Exporter::Yaml do
-  before :all do
+  before :each do
     @source_locale = Locale.from_rfc5646('en-US')
     @target_locale = Locale.from_rfc5646('de-DE')
     @project       = FactoryGirl.create(:project)

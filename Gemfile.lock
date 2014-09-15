@@ -91,6 +91,7 @@ GEM
       activesupport
     connection_pool (2.0.0)
     daemons (1.1.9)
+    database_cleaner (1.3.0)
     devise (3.2.4)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -297,7 +298,6 @@ GEM
       sqlite3 (>= 1.3.3)
     stringex (2.2.0)
     temple (0.6.7)
-    test_after_commit (0.2.3)
     therubyracer (0.12.1)
       libv8 (~> 3.16.14.0)
       ref
@@ -357,6 +357,7 @@ DEPENDENCIES
   coffee-script
   composite_primary_keys!
   configoro
+  database_cleaner
   devise
   diff-lcs
   dropzonejs-rails
@@ -402,7 +403,6 @@ DEPENDENCIES
   sprockets-rails
   sql_origin
   stringex (= 2.2.0)
-  test_after_commit
   therubyracer
   timecop
   tire

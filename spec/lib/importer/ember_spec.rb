@@ -17,8 +17,7 @@ require 'spec_helper'
 describe Importer::Ember do
   context "[importing]" do
     context "[repo with valid files]" do
-      before :all do
-        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      before :each do
         @project = FactoryGirl.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                       only_paths:     %w(ember/),
@@ -45,7 +44,6 @@ describe Importer::Ember do
 
     context "[repo with broken files]" do
       before :each do
-        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s).delete_all
         @project = FactoryGirl.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
                                       only_paths:     %w(ember-broken/),
@@ -66,7 +64,6 @@ describe Importer::Ember do
 
   context "[importing with dot notation]" do
     it "should properly import keys" do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en',
@@ -80,7 +77,6 @@ describe Importer::Ember do
 
   context "[robust implementation]" do
     it "should be more robust than just a JSON parser" do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en-GB',

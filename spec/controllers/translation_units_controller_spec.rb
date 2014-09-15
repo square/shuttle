@@ -24,15 +24,13 @@ describe TranslationUnitsController do
     end
 
     context "[pagination]" do
-      before(:all) do
+      before :each do
         reset_elastic_search
         TranslationUnit.delete_all
         @trans_units_list = FactoryGirl.create_list(:translation_unit, 51).sort_by(&:id).reverse
         @user = FactoryGirl.create(:user, role: 'reviewer')
         regenerate_elastic_search_indexes
-      end
-      
-      before(:each) do
+
         @request.env["devise.mapping"] = Devise.mappings[:user]
         sign_in @user
         sleep(2)
@@ -61,7 +59,7 @@ describe TranslationUnitsController do
     end
 
     context "[filtering]" do
-      before :all do
+      before :each do
         reset_elastic_search
         TranslationUnit.delete_all
         @tus_source_foo = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "foo #{i}", copy: "baz #{i}", rfc5646_locale: 'fr') }.sort_by!(&:id).reverse!
@@ -70,9 +68,7 @@ describe TranslationUnitsController do
         @tus_target_bar = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "baz #{i}", copy: "bar #{i}", rfc5646_locale: 'ja') }.sort_by!(&:id).reverse!
         @user           = FactoryGirl.create(:user, role: 'reviewer')
         regenerate_elastic_search_indexes
-      end
 
-      before :each do
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user
         sleep(2)
@@ -107,11 +103,8 @@ describe TranslationUnitsController do
     end
 
     context "[authenticated user]" do
-      before :all do
-        @user = FactoryGirl.create(:user, role: 'reviewer')
-      end
-
       before :each do
+        @user = FactoryGirl.create(:user, role: 'reviewer')
         @tu                            = FactoryGirl.create(:translation_unit)
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user
@@ -141,11 +134,8 @@ describe TranslationUnitsController do
     end
 
     context "[authenticated user]" do
-      before :all do
-        @user = FactoryGirl.create(:user, role: 'reviewer')
-      end
-
       before :each do
+        @user = FactoryGirl.create(:user, role: 'reviewer')
         @tu                            = FactoryGirl.create(:translation_unit)
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user
@@ -189,11 +179,8 @@ describe TranslationUnitsController do
     end
 
     context "[authenticated user]" do
-      before :all do
-        @user = FactoryGirl.create(:user, role: 'reviewer')
-      end
-
       before :each do
+        @user = FactoryGirl.create(:user, role: 'reviewer')
         @tu                            = FactoryGirl.create(:translation_unit)
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user

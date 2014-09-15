@@ -21,16 +21,12 @@ describe IssuesController do
 
   include Devise::TestHelpers
 
-  before(:all) do
+  before :each do
     @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "foo@bar.com")
     @project = FactoryGirl.create(:project)
     @key = FactoryGirl.create(:key, project: @project)
     @translation = FactoryGirl.create(:translation, key: @key)
     @path_params = { translation_id: @translation.to_param, key_id: @key.to_param, project_id: @project.to_param }
-    Issue.delete_all
-  end
-
-  before :each do
     @request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in @user
     ActionMailer::Base.deliveries.clear

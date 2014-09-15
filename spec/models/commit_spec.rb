@@ -16,8 +16,7 @@ require 'spec_helper'
 
 describe Commit do
   context "[callbacks]" do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    before :each do
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit  = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
     end
@@ -73,8 +72,7 @@ describe Commit do
   end
 
   context "[callbacks]" do
-    before :all do
-      Project.delete_all
+    before :each do
       Timecop.freeze(Time.now)
       @created_at = Time.now
       @commit     = FactoryGirl.create(:commit, created_at: @created_at, loading: true)
@@ -85,7 +83,7 @@ describe Commit do
       @commit.recalculate_ready!
     end
 
-    after(:all) { Timecop.return }
+    after(:each) { Timecop.return }
 
     it "should persist the loaded_at time" do
       expect(@commit.loaded_at.to_time).to eql(@created_at + 3.hours)
@@ -97,13 +95,9 @@ describe Commit do
   end
 
   describe "#recalculate_ready!" do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    before :each do
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit  = @project.commit!('HEAD', skip_import: true)
-    end
-
-    before :each do
       @commit.keys.each(&:destroy)
       @commit.update_attribute(:completed_at, nil)
     end
@@ -283,7 +277,6 @@ describe Commit do
     end
 
     it "should import strings" do
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
       project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       FactoryGirl.create :commit, project: project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc', skip_import: false
       expect(project.blobs.size).to eql(36) # should import all blobs
@@ -292,7 +285,7 @@ describe Commit do
   end
 
   describe "[statistics methods]" do
-    before :all do
+    before :each do
       # create a commit with 2 total strings, 8 total translations, 4 required
       # translations, and 2 done required translations
 
@@ -328,7 +321,6 @@ describe Commit do
 
   describe "#import_strings" do
     before :each do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
@@ -390,7 +382,7 @@ describe Commit do
   end
 
   describe "#all_translations_entered_for_locale?" do
-    before :all do
+    before :each do
       @commit      = FactoryGirl.create(:commit)
       @keys        = FactoryGirl.create_list(:key, 4)
       @commit.keys += @keys
@@ -417,7 +409,7 @@ describe Commit do
   end
 
   describe "#all_translations_approved_for_locale?" do
-    before :all do
+    before :each do
       @commit      = FactoryGirl.create(:commit)
       @keys        = FactoryGirl.create_list(:key, 3)
       @commit.keys += @keys
@@ -445,8 +437,7 @@ describe Commit do
   end
 
   describe "#skip_key?" do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    before :each do
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 

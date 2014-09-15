@@ -87,7 +87,7 @@ group :test do
   gem 'timecop'
   gem 'pry'
   gem 'pry-nav'
-  gem 'test_after_commit'
+  gem 'database_cleaner'
 end
 
 group :acceptance do

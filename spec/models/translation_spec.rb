@@ -16,7 +16,7 @@ require 'spec_helper'
 
 describe Translation do
   context "[hooks]" do
-    before :all do
+    before :each do
       @key = FactoryGirl.create(:key, project: FactoryGirl.create(:project,
                                                                   targeted_rfc5646_locales: {'en' => true, 'de' => true}))
       FactoryGirl.create :translation, rfc5646_locale: 'en', source_rfc5646_locale: 'en', approved: true, key: @key
@@ -122,11 +122,11 @@ describe Translation do
     end
 
     context "[automatically setting reviewed]" do
-      before :all do
+      before :each do
         @key      = FactoryGirl.create(:key)
         @reviewer = FactoryGirl.create(:user, role: 'reviewer')
+        @translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, reviewer: nil)
       end
-      before(:each) { @translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, reviewer: nil) }
 
       it "should automatically mark as reviewed translations made by a translator" do
         @translation.translator = @reviewer

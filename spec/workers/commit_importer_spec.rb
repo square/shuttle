@@ -44,10 +44,6 @@ describe CommitImporter do
           end
         end
 
-        before :all do
-          Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s).delete_all
-        end
-
         before :each do
           @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
         end

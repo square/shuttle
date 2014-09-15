@@ -118,12 +118,8 @@ describe Key do
 
   describe "#recalculate_ready!" do
     context "[for git-based projects]" do
-      before :all do
-        @key = FactoryGirl.create(:key, project: FactoryGirl.create(:project,
-                                                                    targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true}))
-      end
-
       before :each do
+        @key = FactoryGirl.create(:key, project: FactoryGirl.create(:project, targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true}))
         @en_translation = FactoryGirl.create(:translation, rfc5646_locale: 'en', source_rfc5646_locale: 'en', approved: true, key: @key)
         @fr_translation = FactoryGirl.create(:translation, rfc5646_locale: 'fr', source_rfc5646_locale: 'en', approved: true, key: @key)
         @de_translation = FactoryGirl.create(:translation, rfc5646_locale: 'de', source_rfc5646_locale: 'en', approved: true, key: @key)
