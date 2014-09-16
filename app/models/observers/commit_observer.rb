@@ -49,6 +49,8 @@ class CommitObserver < ActiveRecord::Observer
       else
         # If you are editing this code, just remember that calling recalculate_ready! before loading is finished
         # doesn't set ready to true even if all keys are ready and no errors exist.
+        # Also, this code assumes that recalculate_ready! was run on all of its keys. Currently, CommitStatsRecalculator
+        # recalculates ready for keys in ImportFinisher right before loading finishes
         CommitMailer.notify_translators(commit).deliver unless commit.keys_are_ready?
       end
     end
