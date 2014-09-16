@@ -16,7 +16,7 @@ require "spec_helper"
 
 describe IssuesHelper do
   describe "#issue_url" do
-    before(:all) do
+    before :each do
       @issue = FactoryGirl.create(:issue)
       @translation = @issue.translation
       @key = @translation.key

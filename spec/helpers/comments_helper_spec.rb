@@ -16,14 +16,11 @@ require "spec_helper"
 
 describe CommentsHelper do
   describe "#issue_url" do
-    before(:all) do
+    before :each do
       @comment = FactoryGirl.create(:comment)
       @translation = @comment.issue.translation
       @key = @translation.key
       @project = @key.project
-    end
-
-    before(:each) do
       @expected_url = helper.project_key_translation_url(@project, @key, @translation) + "#comment-#{@comment.id}"
     end
 

@@ -18,7 +18,6 @@ describe CommitCreator do
   describe "#perform" do
     context "[rescue Git::CommitNotFoundError]" do
       before :each do
-        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
         @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
         @user = FactoryGirl.create(:user, email: "foo@example.com")
         ActionMailer::Base.deliveries.clear

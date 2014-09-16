@@ -89,7 +89,7 @@ group :test do
   gem 'timecop'
   gem 'pry'
   gem 'pry-nav'
-  gem 'test_after_commit'
+  gem 'database_cleaner'
 end
 
 # Include these gems if you're running acceptance tests.

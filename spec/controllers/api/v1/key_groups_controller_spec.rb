@@ -44,8 +44,6 @@ describe Api::V1::KeyGroupsController do
     end
 
     it "retrieves all KeyGroups in the project, but not the KeyGroups in other projects" do
-      KeyGroup.delete_all
-
       project = FactoryGirl.create(:project, repository_url: nil)
       key_group1 = FactoryGirl.create(:key_group, project: project)
       key_group2 = FactoryGirl.create(:key_group, project: project)
@@ -62,10 +60,6 @@ describe Api::V1::KeyGroupsController do
 
   describe "#create" do
     let(:project) { FactoryGirl.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
-
-    before :each do
-      KeyGroup.delete_all
-    end
 
     it_behaves_like "invalid api token" do
       let(:request_type) { :post }

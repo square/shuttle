@@ -18,8 +18,7 @@ require 'spec_helper'
 describe Importer::Yaml do
   context "[importing]" do
     context "[repo with valid files]" do
-      before :all do
-        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      before :each do
         @project = FactoryGirl.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                       only_paths:     %w(config/locales/),
@@ -41,7 +40,6 @@ describe Importer::Yaml do
 
     context "[repo with broken files]" do
       before :each do
-        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s).delete_all
         @project = FactoryGirl.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
                                       only_paths:     %w(config/locales/),

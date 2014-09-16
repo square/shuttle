@@ -32,8 +32,7 @@ describe CommitsController do
 
 
   describe "#manifest" do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    before :each do
       @project      = FactoryGirl.create(:project,
                                          base_rfc5646_locale:      'en-US',
                                          targeted_rfc5646_locales: {'en-US' => true, 'en' => true, 'fr' => true, 'de' => false},
@@ -332,8 +331,7 @@ de:
   end
 
   describe '#localize' do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    before :each do
       @project = FactoryGirl.create(:project,
                                     base_rfc5646_locale:      'en',
                                     targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true, 'zh' => false},
@@ -523,15 +521,12 @@ de:
   end
 
   describe '#create' do
-    before :all do
-      @user = FactoryGirl.create(:user, role: 'monitor')
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    before :each do
       @project = FactoryGirl.create(:project,
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-    end
 
-    before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
+      @user = FactoryGirl.create(:user, role: 'monitor')
       sign_in @user
 
       keys = Shuttle::Redis.keys('submitted_revision:*')
@@ -584,7 +579,6 @@ de:
     end
 
     it "sends an email to current user and the commit author if valid sha is submitted but sha goes invalid after CommitCreator finished and before import is finished" do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s).delete_all
       project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
       ActionMailer::Base.deliveries.clear
 
@@ -617,16 +611,11 @@ de:
   end
 
   describe '#destroy' do
-    before :all do
-      @user = FactoryGirl.create(:user, role: 'admin')
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
-      @project = FactoryGirl.create(:project,
-                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-    end
-
     before :each do
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit                        = @project.commit!('HEAD', skip_import: true)
       @request.env['devise.mapping'] = Devise.mappings[:user]
+      @user = FactoryGirl.create(:user, role: 'admin')
       sign_in @user
     end
 
