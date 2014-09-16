@@ -17,12 +17,12 @@ require 'spec_helper'
 describe Commit do
   context "[callbacks]" do
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
+      @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
     context "[validations]" do
       it "should truncate commit messages" do
+        @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
         expect(FactoryGirl.create(:commit, message: 'a'*300).message).to eql('a'*253 + '...')
       end
     end
@@ -43,6 +43,7 @@ describe Commit do
 
     context "[before_create]" do
       it "should save the commit's author" do
+        @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
         expect(@commit.author).to eql('Rick Song')
         expect(@commit.author_email).to eql('ricksong@squareup.com')
       end
