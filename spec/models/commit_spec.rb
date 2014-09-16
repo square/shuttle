@@ -206,104 +206,11 @@ describe Commit do
   end
 
   context "[hooks]" do
-    context "[mail hooks]" do
-      it "sends an email to the translators and cc's the user when loading changes to false from true" do
-        @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil, user: FactoryGirl.create(:user))
-        ActionMailer::Base.deliveries.clear
-        @commit.loading = false
-        @commit.save!
-        expect(ActionMailer::Base.deliveries.size).to eql(1)
-        email = ActionMailer::Base.deliveries.first
-        expect(email.to).to eql([Shuttle::Configuration.mailer.translators_list])
-        expect(email.cc).to eql([@commit.user.email])
-        expect(email.subject).to eql('[Shuttle] New commit ready for translation')
-        expect(email.body.to_s).to include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
-      end
-
-      it "does not send an email if the commit was previously ready" do
-        @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil, user: FactoryGirl.create(:user), completed_at: 1.day.ago)
-        ActionMailer::Base.deliveries.clear
-        @commit.loading = false
-        @commit.save!
-        expect(ActionMailer::Base.deliveries.size).to be_zero
-      end
-
-      it "sends one email to the translators when loading changes to false if the commit has no user" do
-        @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil)
-        ActionMailer::Base.deliveries.clear
-        @commit.loading = false
-        @commit.save!
-        expect(ActionMailer::Base.deliveries.size).to eql(1)
-        email = ActionMailer::Base.deliveries.first
-        expect(email.to).to eql([Shuttle::Configuration.mailer.translators_list])
-        expect(email.subject).to eql('[Shuttle] New commit ready for translation')
-        expect(email.body.to_s).to include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
-      end
-
-      it "sends an email when ready changes to true from false" do
-        @commit = FactoryGirl.create(:commit, ready: false, user: FactoryGirl.create(:user))
-        ActionMailer::Base.deliveries.clear
-        @commit.ready = true
-
-        @commit.project.key_inclusions += %w(inc_key_1 inc_key_2)
-        @commit.project.key_exclusions += %w(exc_key_1 exc_key_2 exc_key_3)
-
-        @commit.project.key_locale_inclusions = {"fr" => ["fr_exc_key_1", "fr_exc_key_2", "fr_exc_key_3"], "aa" => ["aa_exc_key_1", "aa_exc_key_2"]}
-        @commit.project.key_locale_exclusions = {"ja" => ["ja_inc_key_1", "ja_inc_key_2", "ja_inc_key_3"]}
-
-        @commit.project.only_paths += %w(only_path_1 only_path_2 only_path_1)
-        @commit.project.skip_paths += %w(skip_path_1 skip_path_2)
-
-        @commit.project.skip_importer_paths = {"Android XML" => ["an_skip_key_1", "an_skip_key_2", "an_skip_key_3"]}
-        @commit.project.only_importer_paths = {"Ember.js" => ["em_only_key_1", "em_only_key_2", "em_only_key_3"], "ERb File" => ["erb_only_key_1", "erb_only_key_2"]}
-
-        @commit.save!
-        expect(ActionMailer::Base.deliveries.size).to eql(1)
-        email = ActionMailer::Base.deliveries.first
-        expect(email.to).to eql([@commit.user.email])
-        expect(email.subject).to eql('[Shuttle] Finished translation of commit')
-        expect(email.body.to_s).to include(@commit.revision.to_s)
-
-        @commit.project.key_inclusions.each { |key| expect(email.body.to_s).to include(key) }
-        @commit.project.key_exclusions.each { |key| expect(email.body.to_s).to include(key) }
-
-        @commit.project.key_locale_inclusions.each_key do |locale|
-          expect(email.body.to_s).to include(locale + ":")
-          @commit.project.key_locale_inclusions[locale].each { |key| expect(email.body.to_s).to include(key) }
-        end
-        @commit.project.key_locale_exclusions.each_key do |locale|
-          expect(email.body.to_s).to include(locale + ":")
-          @commit.project.key_locale_exclusions[locale].each { |key| expect(email.body.to_s).to include(key) }
-        end
-
-        @commit.project.only_paths.each { |key| expect(email.body.to_s).to include(key) }
-        @commit.project.skip_paths.each { |key| expect(email.body.to_s).to include(key) }
-
-        @commit.project.skip_importer_paths.each_key do |path|
-          expect(email.body.to_s).to include(path + ":")
-          @commit.project.skip_importer_paths[path].each { |key| expect(email.body.to_s).to include(key) }
-        end
-        @commit.project.only_importer_paths.each_key do |path|
-          expect(email.body.to_s).to include(path + ":")
-          @commit.project.only_importer_paths[path].each { |key| expect(email.body.to_s).to include(key) }
-        end
-      end
-
-      it "should not send an email when ready changes to true from false if the commit has no user or the user has no email" do
-        @commit = FactoryGirl.create(:commit, ready: false)
-        ActionMailer::Base.deliveries.clear
-        @commit.ready = true
-        @commit.save!
-        expect(ActionMailer::Base.deliveries).to be_empty
-      end
-    end
-
     it "should import strings" do
       project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       FactoryGirl.create :commit, project: project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc', skip_import: false
       expect(project.blobs.size).to eql(36) # should import all blobs
     end
-
   end
 
   describe "[statistics methods]" do

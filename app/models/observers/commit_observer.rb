@@ -47,7 +47,9 @@ class CommitObserver < ActiveRecord::Observer
       if commit.import_errors.present?
         # TODO (yunus): need to move the emailing logic to here from import finisher
       else
-        CommitMailer.notify_translators(commit).deliver unless commit.completed_at
+        # If you are editing this code, just remember that calling recalculate_ready! before loading is finished
+        # doesn't set ready to true even if all keys are ready and no errors exist.
+        CommitMailer.notify_translators(commit).deliver unless commit.keys_are_ready?
       end
     end
 
