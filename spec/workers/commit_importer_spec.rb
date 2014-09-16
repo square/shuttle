@@ -48,7 +48,7 @@ describe CommitImporter do
           @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
         end
 
-        it "records all import errors and sends an email after the import if errors occured during the import" do
+        it "records all import errors and sends an email after the import if errors occured during the import (such as in BlobImporter or KeyCreator)" do
           allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_call_original
           allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).with("88e5b52732c23a4e33471d91cf2281e62021512a").and_return(nil) # fake a Git::BlobNotFoundError in CommitImporter
           allow_any_instance_of(Commit).to receive(:skip_key?).with("how_are_you").and_raise(Git::CommitNotFoundError, "fake_sha") # fake a CommitNotFoundError error in KeyCreator failure
