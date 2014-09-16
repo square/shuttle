@@ -467,8 +467,6 @@ class Commit < ActiveRecord::Base
     "#<#{self.class.to_s} #{id}: #{revision} (#{state})>"
   end
 
-  private
-
   # Returns `true` if this commit is currently not loading and
   # has successfully loaded at least once.
   #
@@ -485,6 +483,8 @@ class Commit < ActiveRecord::Base
   def keys_are_ready?
     !keys.where(ready: false).exists?
   end
+
+  private
 
   # Returns `true` if no errors exist on this commit.
   #
