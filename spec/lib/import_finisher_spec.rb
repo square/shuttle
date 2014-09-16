@@ -15,5 +15,30 @@
 require 'spec_helper'
 
 describe ImportFinisher do
+  describe "#on_success" do
+    before :each do
+      @project = FactoryGirl.create(:project, :light)
+      @commit = FactoryGirl.create(:commit, project: @project, loading: true)
+      @key = FactoryGirl.create(:key, project: @project)
+      @commit.keys << @key
+      @translation = FactoryGirl.create(:translation, key: @key, copy: "test")
+    end
 
+    it "sets loading to false and sets ready to true if all translations are finished" do
+      @translation.update! source_copy: "test", approved: true, skip_readiness_hooks: true
+      expect(@commit.reload).to be_loading
+      expect(@commit).to_not be_ready
+      ImportFinisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@commit.reload).to_not be_loading
+      expect(@commit).to be_ready
+    end
+
+    it "sets loading to false and sets ready to false if some translations are not translated" do
+      expect(@commit.reload).to be_loading
+      expect(@commit).to_not be_ready
+      ImportFinisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@commit.reload).to_not be_loading
+      expect(@commit).to_not be_ready
+    end
+  end
 end
