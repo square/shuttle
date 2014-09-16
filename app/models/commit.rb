@@ -221,11 +221,11 @@ class Commit < ActiveRecord::Base
   #   the Git repository.
 
   def import_strings(options={})
+    update_attribute :loading, true
     commit! # Make sure commit exists
     clear_import_errors! # clear out any previous import errors
 
     import_batch.jobs do
-      update_attribute :loading, true
       blobs = project.blobs.includes(:project) # preload blobs for performance
 
       # clear out existing keys so that we can import all new keys
