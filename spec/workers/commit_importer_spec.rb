@@ -67,7 +67,7 @@ describe CommitImporter do
         end
 
         it "records the import error in CommitImporter due to a Git:CommitNotFoundError and sends an email after the import" do
-          allow_any_instance_of(Commit).to receive(:import_strings).and_raise(Git::CommitNotFoundError, "e5f5704af3c1f84cf42c4db46dcfebe8ab842bde") # fake a Git::CommitNotFoundError in CommitImporter
+          allow_any_instance_of(Commit).to receive(:commit!).and_raise(Git::CommitNotFoundError, "e5f5704af3c1f84cf42c4db46dcfebe8ab842bde") # fake a Git::CommitNotFoundError in CommitImporter
 
           ActionMailer::Base.deliveries.clear
           commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
