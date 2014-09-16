@@ -46,7 +46,7 @@ class CommitObserver < ActiveRecord::Observer
     if just_finished_loading?(commit) && !commit.completed_at && commit.import_errors.blank?
       CommitMailer.notify_translators(commit).deliver
     end
-    if just_became_ready?(commit) && commit.loading == false
+    if just_became_ready?(commit)
       CommitMailer.notify_translation_finished(commit).deliver
     end
   end
