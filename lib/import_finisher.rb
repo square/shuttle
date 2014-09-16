@@ -26,15 +26,19 @@ class ImportFinisher
     # if there were errors, persist them in postgresql and notify people
     handle_import_errors!(commit)
 
-    # finish loading
-    commit.update! loading: false, import_batch_id: nil
-
     # mark related blobs as parsed so that we don't parse them again
     mark_not_errored_blobs_as_parsed(commit)
 
     # the readiness hooks were all disabled, so now we need to go through and
     # calculate readiness and stats.
     CommitStatsRecalculator.new.perform commit.id
+
+    # finish loading
+    commit.update! loading: false, import_batch_id: nil
+
+    # This is necessary because eventhough CommitStatsRecalculator calls recalculate_ready!, ready will not be set then
+    # since loading was not finished. Calling it again guarantees that ready will be set to true if appropriate.
+    commit.recalculate_ready!
   end
 
   private
