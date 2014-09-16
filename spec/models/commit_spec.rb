@@ -480,7 +480,7 @@ describe Commit do
 
   describe "#skip_key?" do
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
     it "should return true if the commit has a .shuttle.yml file given an excluded key" do
