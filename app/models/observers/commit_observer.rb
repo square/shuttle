@@ -43,9 +43,14 @@ class CommitObserver < ActiveRecord::Observer
   end
 
   def send_emails(commit)
-    if just_finished_loading?(commit) && !commit.completed_at && commit.import_errors.blank?
-      CommitMailer.notify_translators(commit).deliver
+    if just_finished_loading?(commit)
+      if commit.import_errors.present?
+        # TODO (yunus): need to move the emailing logic to here from import finisher
+      else
+        CommitMailer.notify_translators(commit).deliver unless commit.completed_at
+      end
     end
+
     if just_became_ready?(commit)
       CommitMailer.notify_translation_finished(commit).deliver
     end
