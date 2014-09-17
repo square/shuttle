@@ -526,7 +526,8 @@ de:
   describe '#create' do
     before :each do
       @project = FactoryGirl.create(:project,
-                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    skip_imports: Importer::Base.implementations.map(&:ident) - %w(yaml))
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       @user = FactoryGirl.create(:user, role: 'monitor')
