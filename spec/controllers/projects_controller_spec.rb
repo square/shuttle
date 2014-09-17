@@ -17,7 +17,7 @@ require 'spec_helper'
 describe ProjectsController do
   describe '#github_webhook' do
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: [ 'master' ])
+      @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: [ 'master' ])
       @request.env['devise.mapping'] = Devise.mappings[:user]
       @user = FactoryGirl.create(:user, role: 'monitor')
       sign_in @user
