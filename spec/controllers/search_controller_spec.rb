@@ -48,7 +48,7 @@ describe SearchController do
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      sleep(2)
+      sleep(1)
     end
 
     it "should search the copy field by default" do

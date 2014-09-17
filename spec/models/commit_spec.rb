@@ -260,9 +260,9 @@ describe Commit do
     end
 
     it "should not call #import on any disabled importer subclasses" do
-      @project.update_attribute :skip_imports, %w(ruby yaml)
+      @project.update_attribute(:skip_imports, (Importer::Base.implementations.map(&:ident) - %w(ruby yaml)))
       @project.commit! 'HEAD'
-      expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort - %w(ruby yaml))
+      expect(@project.keys.map(&:importer).uniq.sort).to eql(%w(ruby yaml))
       @project.update_attribute :skip_imports, []
     end
 
@@ -273,6 +273,7 @@ describe Commit do
     end
 
     it "clears the previous import errors" do
+      @project = FactoryGirl.create(:project, :light)
       commit = @project.commit!('HEAD', skip_import: true)
       commit.add_import_error_in_redis(StandardError.new("fake error"), "in fakefile")
       commit.update! import_errors: [["StandardError", "fake error (in fakefile)"]]
@@ -285,12 +286,13 @@ describe Commit do
     end
 
     it "should set all blobs as parsed" do
-      Blob.delete_all
+      @project = FactoryGirl.create(:project, :light)
       @project.commit!('HEAD')
       expect(Blob.where(parsed: false).count).to be_zero
     end
 
     it "should remove appropriate keys when reimporting after changed settings" do
+      @project.update_attribute(:skip_imports, (Importer::Base.implementations.map(&:ident) - %w(yaml)))
       commit = @project.commit!('HEAD')
       expect(commit.keys.map(&:original_key)).to include('root')
 
@@ -300,27 +302,7 @@ describe Commit do
     end
 
     it "should only associate relevant keys with a new commit when cached blob importing is being used" do
-      @project.update_attribute :key_exclusions, %w(skip_me)
-      commit = @project.commit!('HEAD')
-      blob = commit.blobs.first
-      red_herring = FactoryGirl.create(:key, key: 'skip_me')
-      FactoryGirl.create :blobs_key, key: red_herring, blob: blob
-
-      commit.import_strings
-      expect(commit.keys(true)).not_to include(red_herring)
-    end
-
-    it "should remove appropriate keys when reimporting after changed settings" do
-      commit = @project.commit!('HEAD')
-      expect(commit.keys.map(&:original_key)).to include('root')
-
-      @project.update_attribute :key_exclusions, %w(roo*)
-      commit.import_strings
-      expect(commit.keys(true).map(&:original_key)).not_to include('root')
-    end
-
-    it "should only associate relevant keys with a new commit when cached blob importing is being use3d" do
-      @project.update_attribute :key_exclusions, %w(skip_me)
+      @project = FactoryGirl.create(:project, :light, key_exclusions: %w(skip_me))
       commit = @project.commit!('HEAD')
       blob = commit.blobs.first
       red_herring = FactoryGirl.create(:key, key: 'skip_me')
