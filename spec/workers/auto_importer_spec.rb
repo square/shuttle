@@ -18,7 +18,7 @@ describe AutoImporter do
   describe "#perform" do
     context "[watched branches]" do
       it "calls ProjectAutoImporter on the projects with watched_branches, removes the watched branch if it doesn't exist" do
-        project1 = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
+        project1 = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)), repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
         project2 = FactoryGirl.create(:project, watched_branches: [])
 
         expect(project1.watched_branches).to eql(%w(master non_existent_branch))
@@ -48,7 +48,7 @@ describe AutoImporter::ProjectAutoImporter do
     context "[watched branches]" do
       context "[rescue Git::CommitNotFoundError]" do
         it "removes a watched branch if the branch doesn't exist anymore" do
-          project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
+          project = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)), repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
 
           expect(project.watched_branches).to eql(%w(master non_existent_branch))
           expect { AutoImporter::ProjectAutoImporter.new.perform(project.id) }.to_not raise_error
