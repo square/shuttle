@@ -304,7 +304,7 @@ describe CommitObserver do
         commit = FactoryGirl.create(:commit)
         commit.update! ready: before
         commit.reload.update! ready: after
-        expect(CommitObserver.send(:new).send(:just_became_ready?, commit)).to eql(result)
+        expect(CommitObserver.instance.send(:just_became_ready?, commit)).to eql(result)
       end
     end
   end
@@ -318,7 +318,7 @@ describe CommitObserver do
         commit = FactoryGirl.create(:commit)
         commit.update! loading: before
         commit.reload.update! loading: after
-        expect(CommitObserver.send(:new).send(:just_finished_loading?, commit)).to eql(result)
+        expect(CommitObserver.instance.send(:just_finished_loading?, commit)).to eql(result)
       end
     end
   end
