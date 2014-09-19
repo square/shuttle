@@ -1,0 +1,58 @@
+tr
+  / Project Status
+  th
+  th Project
+  th SHA
+  / Create Date
+  th
+    - if @sort_order == 'create'
+      - if @direction == 'asc'
+        = link_to request.parameters.merge({sort: 'create', direction: 'desc'}) do
+          | Created &nbsp;
+          i.fa.fa-caret-down
+      - else
+        = link_to request.parameters.merge({sort: 'create', direction: 'asc'}) do
+          | Created &nbsp;
+          i.fa.fa-caret-up
+    - else
+      = link_to 'Created', request.parameters.except(:direction).merge(sort: 'create')
+  / Due Date
+  th
+    - if @sort_order == 'due'
+      - if @direction == 'desc'
+        = link_to request.parameters.merge({sort: 'due', direction: 'asc'}) do
+          | Due Date&nbsp;
+          i.fa.fa-caret-up
+      - else
+        = link_to request.parameters.merge({sort: 'due', direction: 'desc'}) do
+          | Due Date&nbsp;
+          i.fa.fa-caret-down
+    - else
+      = link_to 'Due Date', request.parameters.except(:direction).merge(sort: 'due')
+  / Priority
+  th
+    - if @sort_order == 'priority' || @sort_order.nil?
+      - if @direction == 'desc'
+        = link_to request.parameters.merge({sort: 'priority', direction: 'asc'}) do
+          | Priority &nbsp;
+          i.fa.fa-caret-up
+      - else
+        = link_to request.parameters.merge({sort: 'priority', direction: 'desc'}) do
+          | Priority &nbsp;
+          i.fa.fa-caret-down
+
+    - else
+      = link_to 'Priority', request.parameters.except(:direction).merge(sort: 'priority')
+
+  th Description
+
+  - if current_user.translator?
+    th Translate
+    th Review
+
+  - else
+    th Progress
+
+  / Translation/Monitor Button
+  - if current_user.translator? or current_user.monitor?
+    th
