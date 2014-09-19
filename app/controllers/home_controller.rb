@@ -165,5 +165,7 @@ class HomeController < ApplicationController
                else
                  []
                end
+
+    @home_presenter = HomePresenter.new
   end
 end
