@@ -61,6 +61,7 @@ require 'fileutils'
 # | `priority`     | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
 # | `due_date`     | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
 # | `completed_at` | The date this Commit completed translation.                                                              |
+# | `stats`        | A hash of translation and key stats that are associated with this commit in all targeted locales         |
 #
 # Metadata
 # ========
@@ -146,6 +147,8 @@ class Commit < ActiveRecord::Base
                    repo:            ->(c) { c.project.try!(:repo) },
                    repo_must_exist: true,
                    scope:           :for_revision
+
+  serialize :stats, Hash
 
   extend SetNilIfBlank
   set_nil_if_blank :description, :due_date, :pull_request_url
