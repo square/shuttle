@@ -170,18 +170,29 @@ describe Key do
         expect(@key).to be_ready
       end
 
-      it "should run update_commit_and_key_group_readiness if readiness state changed" do
-        @key.update_column :ready, false
-        expect(@key).to receive(:update_commit_and_key_group_readiness).once
-        @key.recalculate_ready!
-      end
+      # TODO (yunus): the 2 tests below are not key-group specific, pull them out.
+      # Also, they are not applicable ATM since KeyStatsRecalculator is run whether or not ready cahnegd
+      # Uncomment these once that is fixed.
+      #
+      # it "should run KeyStatsRecalculator if readiness state changed" do
+      #   @key.update_column :ready, false
+      #   expect(KeyStatsRecalculator).to receive(:perform_once).once.with(@key.id)
+      #   @key.recalculate_ready!
+      # end
+      #
+      # it "should not run KeyStatsRecalculator if readiness state did not change" do
+      #   @fr_translation.update_attribute :approved, false
+      #   @key.update_column :ready, false
+      #   expect(KeyStatsRecalculator).to_not receive(:perform_once)
+      #   @key.recalculate_ready!
+      # end
+    end
 
-      it "should not run update_commit_and_key_group_readiness if readiness state did not change" do
-        @fr_translation.update_attribute :approved, false
-        @key.update_column :ready, false
-        expect(@key).to_not receive(:update_commit_and_key_group_readiness)
-        @key.recalculate_ready!
-      end
+    it "doesn't run KeyStatsRecalculator if skip_readiness_hooks is true" do
+      key = FactoryGirl.create(:key)
+      expect(KeyStatsRecalculator).to_not receive(:perform_once)
+      key.skip_readiness_hooks = true
+      key.recalculate_ready!
     end
   end
 
@@ -525,44 +536,6 @@ describe Key do
           expect(@key.should_become_ready?).to be_false
         end
       end
-    end
-  end
-
-  context "[hooks]" do
-    context "[update_commit_and_key_group_readiness]" do
-      it "calls update_commit_and_key_group_readiness after an update if skip_readiness_hooks is not set" do
-        key = FactoryGirl.create(:key, ready: false)
-        expect(key).to receive(:update_commit_and_key_group_readiness).once.and_call_original
-        expect(KeyReadinessRecalculator).to receive(:perform_once).once
-        key.update(ready: true)
-      end
-
-      it "does not call update_commit_and_key_group_readiness after an update if skip_readiness_hooks is set" do
-        key = FactoryGirl.create(:key, ready: false)
-        expect(key).to_not receive(:update_commit_and_key_group_readiness)
-        key.update(ready: true, skip_readiness_hooks: true)
-      end
-    end
-  end
-
-  describe "#update_commit_and_key_group_readiness" do
-    let(:key) { FactoryGirl.create(:key, ready: false, skip_readiness_hooks: true) }
-
-    it "should call KeyReadinessRecalculator if readiness state changed" do
-      key.update_column :ready, true    # populates changes hash
-      expect(KeyReadinessRecalculator).to receive(:perform_once).once
-      key.send :update_commit_and_key_group_readiness
-    end
-
-    it "should call KeyReadinessRecalculator if force is true" do
-      expect(KeyReadinessRecalculator).to receive(:perform_once).once
-      key.send :update_commit_and_key_group_readiness, true
-    end
-
-    it "should not call KeyReadinessRecalculator if force is false and ready didn't change" do
-      key.update ready: true            # doesn't populate changes hash
-      expect(KeyReadinessRecalculator).to_not receive(:perform_once)
-      key.send :update_commit_and_key_group_readiness, false
     end
   end
 end
