@@ -16,6 +16,8 @@ require 'sidekiq_locking'
 
 # Worker that recalculates {Commit} statistics. Finds all Commits that include a
 # {Key}, and recalculates translation counts for those Commits.
+#
+# Also recalculates the readiness of the associated KeyGroup if there is one.
 
 class KeyStatsRecalculator
   include Sidekiq::Worker
@@ -26,6 +28,9 @@ class KeyStatsRecalculator
   # @param [Fixnum] key_id The ID of a Key.
 
   def perform(key_id)
+    key = Key.find(key_id)
+    key.key_group.try!(:recalculate_ready!)
+
     query = <<-SQL
       SELECT commit_id
         FROM commits_keys

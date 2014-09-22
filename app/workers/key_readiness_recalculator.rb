@@ -26,7 +26,6 @@ class KeyReadinessRecalculator
   def perform(key_id)
     key = Key.find(key_id)
     key.commits.find_each(&:recalculate_ready!)
-    key.key_group.try!(:recalculate_ready!)
   end
 
   include SidekiqLocking

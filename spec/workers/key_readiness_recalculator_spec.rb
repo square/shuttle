@@ -37,22 +37,5 @@ describe KeyReadinessRecalculator do
         expect(commit1.reload).to be_ready
         expect(commit2.reload).to be_ready
     end
-
-      it "recalculates the readiness of the related KeyGroup" do
-        project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr' => true})
-        key_group = FactoryGirl.create(:key_group, project: project, ready: false, source_copy: "hi")
-
-        expect(key_group.reload.keys.length).to eql(1)
-        key = key_group.keys.first
-        expect(key).to_not be_ready
-        expect(key_group).to_not be_ready
-        expect(key.key_group).to eql(key_group)
-
-        expect(KeyReadinessRecalculator).to receive(:perform_once).once.and_call_original
-        key.translations.in_locale(Locale.from_rfc5646('fr')).first.update! copy: "hi", approved: true
-
-        expect(key.reload).to be_ready
-        expect(key_group.reload).to be_ready
-      end
   end
 end
