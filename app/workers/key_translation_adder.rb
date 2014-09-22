@@ -29,7 +29,6 @@ class KeyTranslationAdder
     key = Key.find(id)
     key.add_pending_translations
     key.remove_excluded_pending_translations
-    key.recalculate_ready!
 
     Shuttle::Redis.incr(worker_queue) if worker_queue
   end
