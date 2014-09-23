@@ -36,7 +36,7 @@ module CommitStats
 
     translation_groups.each do |tg|
       hsh[:locale_specific][tg.rfc5646_locale] ||= { }
-      state = (tg.approved? ? :approved : (tg.translated? ? :pending : :new))
+      state = translation_state(tg)
 
       [:translations_count, :words_count].each do |field|
         hsh[:locale_specific][tg.rfc5646_locale][state] ||= {}
@@ -131,5 +131,15 @@ module CommitStats
       result = result.try! :[], arg
     end
     result || default
+  end
+
+  def translation_state(t)
+    if t.approved?
+      :approved
+    elsif t.translated?
+      :pending
+    else
+      :new
+    end
   end
 end
