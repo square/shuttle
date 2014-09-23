@@ -38,9 +38,16 @@
   h6
     strong
       - if @commit.loading?
-        - current_status = "Loading with #{pluralize(@commit.list_workers.count, 'Job')}"
-      - else
-        - current_status = (@commit.ready? ? 'Ready' : 'Translating')
+        - if @commit.import_batch_status
+          - current_status = "Loading With #{pluralize_with_delimiter @commit.import_batch_status.pending, 'Job'} Remaining" 
+        - else
+          - current_status = "Hung (Loading, No Import Batch)"
+      - elsif @commit.ready?
+        - current_status = 'Ready'
+      - elsif @commit.import_errors.present?
+        - current_status = 'Errored - Import Aborted'
+      -else
+        - current_status = 'Translating'
       = "Currently #{current_status}"
       span.separator &nbsp;/&nbsp;
       = "Found #{@commit.keys.count} Keys"
@@ -77,17 +84,15 @@
         - @project.locale_requirements.each do |locale, required|
           - finished = @commit.all_translations_approved_for_locale?(locale)
           li.progress-bar
-            dl class='tooltip-parent' data-tooltip='##{locale.rfc5646}-progress_bar_tooltip'
+            dl
               dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
                 = locale.rfc5646
                 small.lowercase = " (#{required ? 'required' : 'optional'})"
                 strong = (finished ? '100%' : "#{(@commit.fraction_done(locale) * 100).round(2)}%")
-              dd
+              dd.bar-status
                 span class=(finished ? 'finished' : 'inprogress') style="width: #{(@commit.fraction_done(locale) * 100).round(2)}%;"
-
-            .tooltip id="#{locale.rfc5646}-progress_bar_tooltip"
-              = @commit.translations_new(locale)
-              |  untranslated strings
+              dd.text-status class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+                = "#{@commit.translations_new(locale)} left (#{@commit.translations_total(locale)} total)"
 
     .thirteen.columns.sidebar-main
       = yield
