@@ -148,8 +148,6 @@ class Commit < ActiveRecord::Base
                    repo_must_exist: true,
                    scope:           :for_revision
 
-  serialize :stats, Hash
-
   extend SetNilIfBlank
   set_nil_if_blank :description, :due_date, :pull_request_url
 
