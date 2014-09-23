@@ -160,9 +160,6 @@ class Key < ActiveRecord::Base
     indexes :commit_ids, as: 'batched_commit_ids.try!(:to_a) || commits_keys.pluck(:commit_id)'
   end
 
-  # need to update related commits' and key_group's readiness states
-  after_update :update_commit_and_key_group_readiness, if: :apply_readiness_hooks?
-
   validates :project,
             presence: true
   validates :source_copy_sha_raw,
@@ -258,16 +255,14 @@ class Key < ActiveRecord::Base
   # Recalculates the value of the `ready` column and updates the record.
 
   def recalculate_ready!
-    ready_was = ready?
-    ready = should_become_ready?
-    update_column :ready, ready
-
-    # update_column doesn't run hooks and doesn't change the changes array so
-    # we need to force-update update_commit_and_key_group_readiness
-    if !skip_readiness_hooks && ready != ready_was
-      update_commit_and_key_group_readiness(true)
-    end
-    tire.update_index
+    # ready_was = ready?
+    update ready: should_become_ready?
+    KeyStatsRecalculator.perform_once(id) unless skip_readiness_hooks
+    # TODO (yunus): (ready != ready_was) should really be another condition above
+    # If ready didnt change, KeyStatsRecalculator and CommitStatsRecalculator should not
+    # recalculate keys & commits & key_group's readiness states.
+    # Commit stats should be recalculated regardless of whether ready changed or not.
+    # Consider doing this check and handle hooks in Translation model. Or in an observer.
   end
 
   # @return [true, false] `true` if this Key should now be marked as ready.
@@ -285,15 +280,6 @@ class Key < ActiveRecord::Base
     return super() if default_behavior
     state = ready? ? 'ready' : 'not ready'
     "#<#{self.class.to_s} #{id}: #{key} (#{state})>"
-  end
-
-  private
-
-  # Runs KeyReadinessRecalculator to update the related Commits' or KeyGroup's readiness state
-
-  def update_commit_and_key_group_readiness(force=false)
-    return if !ready_changed? && !force
-    KeyReadinessRecalculator.perform_once id
   end
 
 end

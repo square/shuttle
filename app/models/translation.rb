@@ -109,7 +109,6 @@ class Translation < ActiveRecord::Base
   before_update :reset_reviewed, unless: :preserve_reviewed_status
 
   after_save :recalculate_readiness, if: :apply_readiness_hooks?
-  after_save :recalculate_commit_stats, if: :apply_readiness_hooks?
 
   after_commit :update_translation_memory, if: :apply_readiness_hooks?
 
@@ -257,11 +256,6 @@ class Translation < ActiveRecord::Base
       self.reviewer = translator
     end
     return true
-  end
-
-  def recalculate_commit_stats
-    return unless translated_changed? || approved_changed?
-    KeyStatsRecalculator.perform_once key_id
   end
 
   def update_translation_memory

@@ -582,4 +582,130 @@ describe TranslationsController do
       expect(sorted_results).to eql(sorted_results.sort.reverse)
     end
   end
+
+  context "[INTEGRATION TESTS]" do
+    describe "#update" do
+     context "[Commit]" do
+        before :each do
+          @user = FactoryGirl.create(:user, role: 'reviewer')
+          @request.env['devise.mapping'] = Devise.mappings[:user]
+          sign_in @user
+
+          @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
+          @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project)
+          @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project)
+          @key3 = FactoryGirl.create(:key, key: "thirdkey", project: @project)
+
+          [@key1, @key2, @key3].each do |key|
+            %w(fr es).each do |locale|
+              FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: locale, source_copy: 'fake', copy: nil, approved: nil)
+            end
+          end
+
+          @commit1 = FactoryGirl.create(:commit, project: @project)
+          @commit2 = FactoryGirl.create(:commit, project: @project)
+
+          @commit1.keys << @key1 << @key2
+          @commit2.keys << @key1 << @key2 << @key3
+
+          @project.keys.each { |k| k.recalculate_ready! }
+          @project.commits { |c| c.recalculate_ready! }
+
+          @project.translations.each { |t| expect(t).to_not be_translated }
+          @project.translations.each { |t| expect(t).to_not be_approved }
+          @project.keys.each { |k| expect(k).to_not be_ready }
+          @project.commits { |c| expect(c).to_not be_ready }
+        end
+
+        it "sets key readiness to true, sets commits' readiness to false and recalculates stats if the last standing translation for the key is approved" do
+          @key1.translations.first.update! copy: 'fake', approved: true
+          translation = @key1.translations.last
+          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+
+          expect(@key1.reload).to be_ready
+          @project.commits.reload.each do |c|
+            expect(c).to_not be_ready
+            #TODO (yunus): add stats recalculation specs here after they are implemented
+          end
+        end
+
+        it "sets key readiness to true, sets commit readiness to true and recalculates stats if the last standing translation for the commit is approved" do
+          ([@key1.translations.last] + @key2.translations.to_a).each { |t| t.update! copy: 'fake', approved: true }
+          translation = @key1.translations.first
+          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+
+          expect(@key1.reload).to be_ready
+          expect(@commit1.reload).to be_ready
+          expect(@commit2.reload).to_not be_ready
+          #TODO (yunus): add stats recalculation specs here after they are implemented
+        end
+
+        it "sets key readiness to false, recalculates commits' readiness and stats if a translation is approved but there are more translations in the key that are not approved" do
+          translation = @key1.translations.last
+          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+
+          expect(@key1.reload).to_not be_ready
+          @project.commits.reload.each do |c|
+            expect(c).to_not be_ready
+            #TODO (yunus): add stats recalculation specs here after they are implemented
+          end
+        end
+      end
+
+      context "[KeyGroup]" do
+        before :each do
+          @user = FactoryGirl.create(:user, role: 'reviewer')
+          @request.env['devise.mapping'] = Devise.mappings[:user]
+          sign_in @user
+
+          @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
+          @key_group = FactoryGirl.create(:key_group, project: @project)
+          Key.delete_all
+
+          @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project, key_group: @key_group, index_in_key_group: 0)
+          @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project, key_group: @key_group, index_in_key_group: 1)
+
+          [@key1, @key2].each do |key|
+            %w(fr es).each do |locale|
+              FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: locale, source_copy: 'fake', copy: nil, approved: nil)
+            end
+          end
+
+          @project.keys.each { |k| k.recalculate_ready! }
+          @project.key_groups { |kg| kg.recalculate_ready! }
+
+          @project.translations.each { |t| expect(t).to_not be_translated }
+          @project.translations.each { |t| expect(t).to_not be_approved }
+          @project.keys.each { |k| expect(k).to_not be_ready }
+          @project.key_groups { |kg| expect(kg).to_not be_ready }
+        end
+
+        it "sets key readiness to true, sets keygroup's readiness to false if the last standing translation for the key (but not for the keygroup) is approved" do
+          @key1.translations.last.update! copy: 'fake', approved: true
+          translation = @key1.translations.first
+          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+
+          expect(@key1.reload).to be_ready
+          expect(@key_group.reload).to_not be_ready
+        end
+
+        it "sets key readiness to true, sets keygroup's readiness to true if the last standing translation for the keygroup is approved" do
+          ([@key1.translations.last] + @key2.translations.to_a).each { |t| t.update! copy: 'fake', approved: true }
+          translation = @key1.translations.first
+          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+
+          expect(@key1.reload).to be_ready
+          expect(@key_group.reload).to be_ready
+        end
+
+        it "sets key readiness to false, sets keygroup's readiness to false if a translation is approved but there are more translations in the key that are not approved" do
+          translation = @key1.translations.first
+          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+
+          expect(@key1.reload).to_not be_ready
+          expect(@key_group.reload).to_not be_ready
+        end
+      end
+    end
+  end
 end
