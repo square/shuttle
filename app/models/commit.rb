@@ -61,6 +61,7 @@ require 'fileutils'
 # | `priority`     | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
 # | `due_date`     | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
 # | `completed_at` | The date this Commit completed translation.                                                              |
+# | `stats`        | A hash of translation and key stats that are associated with this commit in all targeted locales         |
 #
 # Metadata
 # ========
@@ -75,9 +76,9 @@ require 'fileutils'
 # | `author_email`     | The email address of the commit author.                            |
 
 class Commit < ActiveRecord::Base
-  extend RedisMemoize
   include CommitTraverser
   include ImportErrors
+  include CommitStats
 
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
@@ -158,7 +159,6 @@ class Commit < ActiveRecord::Base
   before_save :set_loaded_at
   before_create :set_author
   after_commit :initial_import, on: :create
-  after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
 
@@ -293,93 +293,6 @@ class Commit < ActiveRecord::Base
     super options
   end
 
-  # @return [Fixnum] The number of approved Translations across all required
-  #   under this Commit.
-
-  def translations_done(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_done
-
-  # @return [Fixnum] The number of Translations across all required locales
-  #   under this Commit.
-
-  def translations_total(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_total
-
-  # @return [Float] The fraction of Translations under this Commit that are
-  #   approved, across all required locales.
-
-  def fraction_done(*locales)
-    locales = project.required_locales if locales.empty?
-    translations_done(*locales)/translations_total(*locales).to_f
-  end
-
-  # @return [Fixnum] The total number of translatable base strings applying to
-  #   this Commit.
-
-  def strings_total
-    keys.count
-  end
-  redis_memoize :strings_total
-
-  # Calculates the total number of Translations that have not yet been
-  # translated.
-  #
-  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
-  #   Defaults to all required locales.
-  # @return [Fixnum] The total number of Translations.
-
-  def translations_new(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(translated: false, rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_new
-
-  # Calculates the total number of Translations that have not yet been approved.
-  #
-  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
-  #   Defaults to all required locales.
-  # @return [Fixnum] The total number of Translations.
-
-  def translations_pending(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_pending
-
-  # Calculates the total number of words across all Translations that have not
-  # yet been approved.
-  #
-  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
-  #   Defaults to all required locales.
-  # @return [Fixnum] The total number of words in the Translations' source copy.
-
-  def words_pending(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
-  end
-  redis_memoize :words_pending
-
-  # Calculates the total number of words across all Translations that have not
-  # yet been translations.
-  #
-  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
-  #   Defaults to all required locales.
-  # @return [Fixnum] The total number of words in the Translations' source copy.
-
-  def words_new(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(translated: false, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
-  end
-  redis_memoize :words_new
-
   # Returns whether a translator's work is entirely done for this Commit.
   #
   # @param [Locale] locale The locale the translator is working in.
@@ -399,9 +312,6 @@ class Commit < ActiveRecord::Base
   def all_translations_approved_for_locale?(locale)
     translations.where(rfc5646_locale: locale.rfc5646).where('approved IS NOT TRUE').count == 0
   end
-
-  # @private
-  def redis_memoize_key() to_param end
 
   # @return [Sidekiq::Batch, nil] The batch of Sidekiq workers performing the
   #   current import, if any.
