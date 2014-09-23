@@ -13,47 +13,54 @@
 #    limitations under the License.
 
 # This is a collection of statistical methods for the Commit model.
+# All of these methods are cached, and there will be a latency before they
+# return correct values. You should directly calculate values if you
+# need real-time accurate values.
 
 module CommitStats
   extend ActiveSupport::Concern
 
   included do
-    extend RedisMemoize
+    serialize :stats, Hash
   end
 
-  # @return [Fixnum] The number of approved Translations across all required
-  #   under this Commit.
+  # Recalculates the stats for this Key, sets the `stats` field.
+  # Should not depend on the commit's ready state since recalculate_stats! is not guaranteed to run before or after
+  # recalculate_ready!
 
-  def translations_done(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_done
+  def recalculate_stats!
+    hsh = { strings_total: keys.count, locale_specific: {} }
 
-  # @return [Fixnum] The number of Translations across all required locales
-  #   under this Commit.
+    translation_groups = translations.not_base.group("rfc5646_locale, translated, approved")
+    translation_groups = translation_groups.select("rfc5646_locale, translated, approved, count(*) as translations_count, sum(words_count) as words_count")
 
-  def translations_total(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_total
+    translation_groups.each do |tg|
+      hsh[:locale_specific][tg.rfc5646_locale] ||= { }
+      state = (tg.approved? ? :approved : (tg.translated? ? :pending : :new))
 
-  # @return [Float] The fraction of Translations under this Commit that are
-  #   approved, across all required locales.
+      [:translations_count, :words_count].each do |field|
+        hsh[:locale_specific][tg.rfc5646_locale][state] ||= {}
+        hsh[:locale_specific][tg.rfc5646_locale][state][field] ||= 0
+        hsh[:locale_specific][tg.rfc5646_locale][state][field] += tg.send(field)
+      end
+    end
 
-  def fraction_done(*locales)
-    locales = project.required_locales if locales.empty?
-    translations_done(*locales)/translations_total(*locales).to_f
+    update stats: hsh
   end
 
   # @return [Fixnum] The total number of translatable base strings applying to
   #   this Commit.
 
   def strings_total
-    keys.count
+    fetch_stat(:strings_total, 0)
   end
-  redis_memoize :strings_total
+
+  # @return [Fixnum] The number of approved Translations across all required
+  #   under this Commit.
+
+  def translations_done(*locales)
+    requested_locales(*locales).sum { |locale| fetch_stat(:locale_specific, locale.rfc5646, :approved, :translations_count, 0) }
+  end
 
   # Calculates the total number of Translations that have not yet been
   # translated.
@@ -63,10 +70,8 @@ module CommitStats
   # @return [Fixnum] The total number of Translations.
 
   def translations_new(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(translated: false, rfc5646_locale: locales.map(&:rfc5646)).count
+    requested_locales(*locales).sum { |locale| fetch_stat(:locale_specific, locale.rfc5646, :new, :translations_count, 0) }
   end
-  redis_memoize :translations_new
 
   # Calculates the total number of Translations that have not yet been approved.
   #
@@ -75,11 +80,22 @@ module CommitStats
   # @return [Fixnum] The total number of Translations.
 
   def translations_pending(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
+    requested_locales(*locales).sum { |locale| fetch_stat(:locale_specific, locale.rfc5646, :pending, :translations_count, 0) }
   end
-  redis_memoize :translations_pending
+
+  # @return [Fixnum] The number of Translations across all required locales
+  #   under this Commit.
+
+  def translations_total(*locales)
+    translations_done(*locales) + translations_pending(*locales) + translations_new(*locales)
+  end
+
+  # @return [Float] The fraction of Translations under this Commit that are
+  #   approved, across all required locales.
+
+  def fraction_done(*locales)
+    translations_done(*locales)/translations_total(*locales).to_f
+  end
 
   # Calculates the total number of words across all Translations that have not
   # yet been approved.
@@ -89,11 +105,8 @@ module CommitStats
   # @return [Fixnum] The total number of words in the Translations' source copy.
 
   def words_pending(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
+    requested_locales(*locales).sum { |locale| fetch_stat(:locale_specific, locale.rfc5646, :pending, :words_count, 0) }
   end
-  redis_memoize :words_pending
 
   # Calculates the total number of words across all Translations that have not
   # yet been translations.
@@ -103,12 +116,20 @@ module CommitStats
   # @return [Fixnum] The total number of words in the Translations' source copy.
 
   def words_new(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(translated: false, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
+    requested_locales(*locales).sum { |locale| fetch_stat(:locale_specific, locale.rfc5646, :new, :words_count, 0) }
   end
-  redis_memoize :words_new
 
+  private
 
-  # @private
-  def redis_memoize_key() to_param end
+  def requested_locales(*locales)
+    locales.empty? ? project.required_locales : locales
+  end
+
+  def fetch_stat(*args, default)
+    result = stats
+    args.each do |arg|
+      result = result.try! :[], arg
+    end
+    result || default
+  end
 end
