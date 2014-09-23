@@ -34,7 +34,7 @@ class ImportFinisher
     CommitStatsRecalculator.new.perform commit.id
 
     # finish loading
-    commit.update!(loading: false, import_batch_id: nil)
+    commit.reload.update!(loading: false, import_batch_id: nil)
 
     # This is necessary because eventhough CommitStatsRecalculator calls recalculate_ready!, ready will not be set then
     # since loading was not finished. Calling it again guarantees that ready will be set to true if appropriate.
