@@ -15,6 +15,59 @@
 require 'spec_helper'
 
 describe ProjectsController do
+  describe '#update' do
+    context "[git-based]" do
+      before :each do
+        @request.env['devise.mapping'] = Devise.mappings[:user]
+        @user = FactoryGirl.create(:user, role: 'monitor')
+        sign_in @user
+
+        @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true}, base_rfc5646_locale: 'en')
+        @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project)
+        @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project)
+        @commit = FactoryGirl.create(:commit, project: @project)
+        @commit.keys = [@key1, @key2]
+
+        @project.keys.each do |key|
+          FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en', source_copy: 'fake', copy: 'fake', approved: true)
+          FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', source_copy: 'fake', copy: 'fake', approved: true)
+          FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: 'fake', copy: nil, approved: nil)
+          key.recalculate_ready!
+          expect(key).to_not be_ready
+        end
+      end
+
+      it "runs ProjectTranslationAdder which adds missing translations when a new locale is added" do
+        expect(ProjectTranslationAdder).to receive(:perform_once).and_call_original
+        patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+        expect(@project.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en en es es fr fr ja ja))
+      end
+
+      it "switches keys' and commit's readiness from true to false when a new locale is added to a ready commit" do
+        @project.translations.where(translated: false).each { |t| t.update! copy: 'fake', approved: true }
+        @project.keys.each { |k| k.recalculate_ready! }
+        @commit.recalculate_ready!
+        expect(@commit.reload).to be_ready
+        @project.reload.keys.each { |k| expect(k).to be_ready }
+
+        patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+
+        expect(@commit.reload).to_not be_ready
+        @project.reload.keys.each { |k| expect(k).to_not be_ready }
+      end
+
+      it "switches keys' and commit's readiness from false to true when a locale is removed and the remaining translations were already approved" do
+        @commit.recalculate_ready!
+        expect(@commit.reload).to_not be_ready
+
+        patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+
+        expect(@commit.reload).to be_ready
+        @project.reload.keys.each { |k| expect(k).to be_ready }
+      end
+    end
+  end
+
   describe '#github_webhook' do
     before :each do
       @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: [ 'master' ])

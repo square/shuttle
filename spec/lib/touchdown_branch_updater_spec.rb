@@ -46,8 +46,9 @@ describe TouchdownBranchUpdater do
 
         c = project.commit!(head_revision)
         c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        CommitStatsRecalculator.new.perform(c.id)
-        expect(c.reload).to be_ready
+        Key.batch_recalculate_ready!(c)
+        c.recalculate_ready!
+        expect(c).to be_ready
 
         expect { TouchdownBranchUpdater.new(project).update }.not_to raise_error
       end
@@ -59,8 +60,9 @@ describe TouchdownBranchUpdater do
 
         c = project.commit!(head_revision)
         c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        CommitStatsRecalculator.new.perform(c.id)
-        expect(c.reload).to be_ready
+        Key.batch_recalculate_ready!(c)
+        c.recalculate_ready!
+        expect(c).to be_ready
 
         TouchdownBranchUpdater.new(project).update
         expect(`git --git-dir=#{Shellwords.escape project.repository_url} rev-parse translated`.chomp).
@@ -72,8 +74,9 @@ describe TouchdownBranchUpdater do
 
         parent_commit = project.commit!(parent_revision)
         parent_commit.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        CommitStatsRecalculator.new.perform(parent_commit.id)
-        expect(parent_commit.reload).to be_ready
+        Key.batch_recalculate_ready!(parent_commit)
+        parent_commit.recalculate_ready!
+        expect(parent_commit).to be_ready
 
         head_commit = project.commit!(head_revision)
         expect(head_commit.reload).to_not be_ready
@@ -88,8 +91,9 @@ describe TouchdownBranchUpdater do
 
         c = project.commit!(head_revision)
         c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        CommitStatsRecalculator.new.perform(c.id)
-        expect(c.reload).to be_ready
+        Key.batch_recalculate_ready!(c)
+        c.recalculate_ready!
+        expect(c).to be_ready
         TouchdownBranchUpdater.new(project).update
 
         # Running touchdown branch updater should not send another push
@@ -106,9 +110,10 @@ describe TouchdownBranchUpdater do
 
         c = project.commit!(head_revision)
         c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        CommitStatsRecalculator.new.perform(c.id)
+        Key.batch_recalculate_ready!(c)
+        c.recalculate_ready!
+        expect(c).to be_ready
 
-        expect(c.reload).to be_ready
         expect(Rails.logger).to receive(:error).with("[TouchdownBranchUpdater] Timed out on updating touchdown branch for #{project.inspect}")
 
         TouchdownBranchUpdater.new(project).update
@@ -124,8 +129,8 @@ describe TouchdownBranchUpdater do
 
           c = project.commit!(head_revision)
           c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          CommitStatsRecalculator.new.perform(c.id)
-          c.reload
+          Key.batch_recalculate_ready!(c)
+          c.recalculate_ready!
         end
 
         it "pushes a new commit with the manifest to the specified manifest directory" do
@@ -161,8 +166,8 @@ describe TouchdownBranchUpdater do
 
           c = project.commit!(head_revision)
           c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          CommitStatsRecalculator.new.perform(c.id)
-          c.reload
+          Key.batch_recalculate_ready!(c)
+          c.recalculate_ready!
         end
 
         it "does not fail if the manifest directory doesn't exist if it doesn't already exist" do
@@ -185,8 +190,8 @@ describe TouchdownBranchUpdater do
 
           c = project.commit!(head_revision)
           c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          CommitStatsRecalculator.new.perform(c.id)
-          c.reload
+          Key.batch_recalculate_ready!(c)
+          c.recalculate_ready!
         end
 
         it "creates a manifest file in the specified directory" do
@@ -203,8 +208,8 @@ describe TouchdownBranchUpdater do
 
           c = project.commit!(head_revision)
           c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          CommitStatsRecalculator.new.perform(c.id)
-          c.reload
+          Key.batch_recalculate_ready!(c)
+          c.recalculate_ready!
 
           TouchdownBranchUpdater.new(project).update
         end
@@ -227,8 +232,8 @@ describe TouchdownBranchUpdater do
 
           c = project.commit!(head_revision)
           c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          CommitStatsRecalculator.new.perform(c.id)
-          c.reload
+          Key.batch_recalculate_ready!(c)
+          c.recalculate_ready!
           TouchdownBranchUpdater.new(project).update
         end
 

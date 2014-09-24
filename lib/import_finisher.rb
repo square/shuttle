@@ -29,8 +29,10 @@ class ImportFinisher
     # mark related blobs as parsed so that we don't parse them again
     mark_not_errored_blobs_as_parsed(commit)
 
-    # the readiness hooks were all disabled, so now we need to go through and
-    # calculate readiness and stats.
+    # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
+    Key.batch_recalculate_ready!(commit)
+
+    # the readiness hooks were all disabled, so now we need to go through and calculate stats.
     CommitStatsRecalculator.new.perform commit.id
 
     # finish loading

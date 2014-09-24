@@ -40,5 +40,18 @@ describe ImportFinisher do
       expect(@commit.reload).to_not be_loading
       expect(@commit).to_not be_ready
     end
+
+    it "recalculates keys' readiness, sets to false if not all translations are approved" do
+      @key.update! ready: true
+      ImportFinisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@key.reload).to_not be_ready
+    end
+
+    it "recalculates keys' readiness, sets to true if all translations are approved" do
+      @translation.update! source_copy: "test", approved: true, skip_readiness_hooks: true
+      @key.update! ready: false
+      ImportFinisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@key.reload).to be_ready
+    end
   end
 end
