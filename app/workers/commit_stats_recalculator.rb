@@ -39,8 +39,6 @@ class CommitStatsRecalculator
     commit.words_new
     commit.words_pending
 
-    Key.batch_recalculate_ready!(commit)
-
     # the ES mapping loads all the commits_keys, this is slow
     # we can preload all the commits_keys for all commits, and partition them into
     # the correct commits

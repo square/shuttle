@@ -42,6 +42,9 @@ class ProjectTranslationAdder
       sleep(5)
     end
 
+    # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
+    Key.batch_recalculate_ready!(project)
+
     project.commits.each do |commit|
       CommitStatsRecalculator.perform_once(commit.id)
     end
