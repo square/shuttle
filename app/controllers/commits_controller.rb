@@ -27,6 +27,7 @@ class CommitsController < ApplicationController
   before_filter :find_commit, except: [:create, :manifest, :localize]
   before_filter :find_format
   before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
+  before_filter :recalculate_commit, only: [:show, :issues, :tools, :gallery, :search]
 
   respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
                                   :import, :sync, :match, :clear, :recalculate, :ping_stash]
@@ -492,5 +493,10 @@ class CommitsController < ApplicationController
 
   def set_commit_issues_presenter
     @commit_issues_presenter ||= CommitIssuesPresenter.new(@commit)
+  end
+
+  def recalculate_commit
+    @commit.recalculate_ready!
+    @commit.recalculate_stats!
   end
 end
