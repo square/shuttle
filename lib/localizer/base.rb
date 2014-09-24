@@ -58,7 +58,8 @@ module Localizer
           klass              = find_by_ident(localizer)
 
           translations_by_source.each do |source, translations_by_locale|
-            file_contents = commit.project.repo.object("#{commit.revision}^{tree}:#{source}").try!(:contents)
+            file_contents =
+                  commit.project.repo.object("#{commit.revision}^{tree}:#{source}").try!(:contents)
             next unless file_contents
             input_file = Localizer::File.new(source, file_contents)
 

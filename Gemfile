@@ -60,7 +60,8 @@ gem 'faker'
 
 # BACKGROUND JOBS
 gem 'sidekiq', '<3.0.0'
-gem 'sidekiq-failures'
+gem 'sidekiq-pro'
+gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
 
@@ -82,7 +83,7 @@ group :development do
 end
 
 group :test do
-  gem 'rspec-rails'
+  gem 'rspec-rails', '< 3.0.0'
   gem 'factory_girl_rails'
   gem 'timecop'
   gem 'pry'
@@ -90,9 +91,10 @@ group :test do
   gem 'database_cleaner'
 end
 
+# Include these gems if you're running acceptance tests.
 group :acceptance do
-  gem 'capybara'
-  gem 'capybara-webkit'
+  # gem 'capybara'
+  # gem 'capybara-webkit'
 end
 
 
