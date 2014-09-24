@@ -45,7 +45,7 @@ describe TouchdownBranchUpdater do
         project.watched_branches = %w(nonexistent)
 
         c = project.commit!(head_revision)
-        c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+        c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
         CommitStatsRecalculator.new.perform(c.id)
         expect(c.reload).to be_ready
 
@@ -58,7 +58,7 @@ describe TouchdownBranchUpdater do
         project.watched_branches = %w(master)
 
         c = project.commit!(head_revision)
-        c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+        c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
         CommitStatsRecalculator.new.perform(c.id)
         expect(c.reload).to be_ready
 
@@ -71,7 +71,7 @@ describe TouchdownBranchUpdater do
         project.watched_branches = %w(master)
 
         parent_commit = project.commit!(parent_revision)
-        parent_commit.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+        parent_commit.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
         CommitStatsRecalculator.new.perform(parent_commit.id)
         expect(parent_commit.reload).to be_ready
 
@@ -87,7 +87,7 @@ describe TouchdownBranchUpdater do
         project.watched_branches = %w(master)
 
         c = project.commit!(head_revision)
-        c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+        c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
         CommitStatsRecalculator.new.perform(c.id)
         expect(c.reload).to be_ready
         TouchdownBranchUpdater.new(project).update
@@ -105,7 +105,7 @@ describe TouchdownBranchUpdater do
         allow(project.working_repo).to receive('push').and_raise(Timeout::Error)
 
         c = project.commit!(head_revision)
-        c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+        c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
         CommitStatsRecalculator.new.perform(c.id)
 
         expect(c.reload).to be_ready
@@ -123,7 +123,7 @@ describe TouchdownBranchUpdater do
           project.manifest_directory = 'config/locales'
 
           c = project.commit!(head_revision)
-          c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
           CommitStatsRecalculator.new.perform(c.id)
           c.reload
         end
@@ -160,7 +160,7 @@ describe TouchdownBranchUpdater do
           project.manifest_directory = 'nonexist/directory'
 
           c = project.commit!(head_revision)
-          c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
           CommitStatsRecalculator.new.perform(c.id)
           c.reload
         end
@@ -184,7 +184,7 @@ describe TouchdownBranchUpdater do
           project.manifest_filename = 'zzz_manifest.yaml'
 
           c = project.commit!(head_revision)
-          c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
           CommitStatsRecalculator.new.perform(c.id)
           c.reload
         end
@@ -202,7 +202,7 @@ describe TouchdownBranchUpdater do
           project.watched_branches = %w(master)
 
           c = project.commit!(head_revision)
-          c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
           CommitStatsRecalculator.new.perform(c.id)
           c.reload
 
@@ -226,7 +226,7 @@ describe TouchdownBranchUpdater do
           project.manifest_directory = 'nonexist/directory'
 
           c = project.commit!(head_revision)
-          c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
+          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
           CommitStatsRecalculator.new.perform(c.id)
           c.reload
           TouchdownBranchUpdater.new(project).update
