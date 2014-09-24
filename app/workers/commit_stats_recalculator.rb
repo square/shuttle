@@ -60,7 +60,6 @@ class CommitStatsRecalculator
     end
 
     commit.recalculate_ready!
-    commit.save!
   end
 
   include SidekiqLocking
