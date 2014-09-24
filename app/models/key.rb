@@ -277,11 +277,22 @@ class Key < ActiveRecord::Base
     end
   end
 
+  # This takes a Commit, a Project or a KeyGroup, and batch updates their readiness states.
+  # Called in ImportFinisher and PTAFinisher at the moment.
+  #
+  # @param [Commit, Project, KeyGroup] obj The object whose keys should be batch recalculated
+
+  def self.batch_recalculate_ready!(obj)
+    # TODO (yunus): look into speeding this up
+    ready_keys, not_ready_keys = obj.keys.includes(:project, :translations).partition(&:should_become_ready?)
+    ready_keys.in_groups_of(500, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
+    not_ready_keys.in_groups_of(500, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
+  end
+
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
     state = ready? ? 'ready' : 'not ready'
     "#<#{self.class.to_s} #{id}: #{key} (#{state})>"
   end
-
 end
