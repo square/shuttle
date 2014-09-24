@@ -39,10 +39,7 @@ class CommitStatsRecalculator
     commit.words_new
     commit.words_pending
 
-    ready_keys, not_ready_keys = commit.keys.includes(:project, :translations).partition(&:should_become_ready?)
-
-    ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
-    not_ready_keys.in_groups_of(100, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
+    Key.batch_recalculate_ready!(commit)
 
     # the ES mapping loads all the commits_keys, this is slow
     # we can preload all the commits_keys for all commits, and partition them into

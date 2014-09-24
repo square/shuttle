@@ -538,4 +538,45 @@ describe Key do
       end
     end
   end
+
+  describe "#batch_recalculate_ready!" do
+    before :each do
+      @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr' => true}, base_rfc5646_locale: 'en')
+      @key1 = FactoryGirl.create(:key, project: @project)
+      @translation1 = FactoryGirl.create(:translation, key: @key1, rfc5646_locale: 'fr', source_rfc5646_locale: 'en', copy: "fake", approved: true)
+      @key2 = FactoryGirl.create(:key, project: @project)
+      @translation2 = FactoryGirl.create(:translation, key: @key2, rfc5646_locale: 'fr', source_rfc5646_locale: 'en')
+
+      @key1.update! ready: false
+      @key2.update! ready: false
+      expect(@key1).to_not be_ready
+      expect(@key2).to_not be_ready
+    end
+
+    it "properly recalculates ready for keys of a given commit in batch" do
+      commit = FactoryGirl.create(:commit, project: @project)
+      commit.keys = [@key1, @key2]
+
+      Key.batch_recalculate_ready!(commit)
+      expect(@key1.reload).to be_ready
+      expect(@key2.reload).to_not be_ready
+    end
+
+    it "properly recalculates ready for keys of a given project in batch" do
+      Key.batch_recalculate_ready!(@project)
+      expect(@key1.reload).to be_ready
+      expect(@key2.reload).to_not be_ready
+    end
+
+    it "properly recalculates ready for keys of a given key group in batch" do
+      KeyGroup.any_instance.stub(:import!)
+      key_group = FactoryGirl.create(:key_group, project: @project)
+      @key1.update! key_group: key_group, index_in_key_group: 0
+      @key2.update! key_group: key_group, index_in_key_group: 1
+
+      Key.batch_recalculate_ready!(key_group)
+      expect(@key1.reload).to be_ready
+      expect(@key2.reload).to_not be_ready
+    end
+  end
 end
