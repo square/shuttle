@@ -15,8 +15,6 @@
 # Adds the ability to generate a gzipped tarball of multiple files.
 
 module Multifile
-  extend ::NewRelic::Agent::MethodTracer
-
   protected
 
   # Call this method to build a gzipped TAR archive of your files. The block is
@@ -29,10 +27,8 @@ module Multifile
 
   def build_archive
     buffer = ''.encode('BINARY')
-    self.class.trace_execution_scoped(['Custom/Multifile/build_archive']) do
-      Archive.write_open_memory(buffer, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
-        yield Receiver.new(archive)
-      end
+    Archive.write_open_memory(buffer, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
+      yield Receiver.new(archive)
     end
     return buffer
   end

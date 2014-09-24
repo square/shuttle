@@ -29,7 +29,6 @@ module Localizer
 
   class Base
     extend ::Multifile
-    extend NewRelic::Agent::MethodTracer
 
     # @return [Array<Class>] All known implementations of the base class.
     #   Automatically updated.
@@ -60,9 +59,7 @@ module Localizer
 
           translations_by_source.each do |source, translations_by_locale|
             file_contents =
-                self.class.trace_execution_scoped(['Custom/Localizer/load_file_contents']) do
                   commit.project.repo.object("#{commit.revision}^{tree}:#{source}").try!(:contents)
-                end
             next unless file_contents
             input_file = Localizer::File.new(source, file_contents)
 
@@ -159,15 +156,13 @@ module Localizer
         }
       }
 
-      self.class.trace_execution_scoped(['Custom/Localizer/load_translations']) do
-        Translation.in_commit(commit).includes(:key).not_base.
-            where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).each do |translation|
-          next unless translation.key.source
-          source    = translation.key.source.sub(/^\//, '')
-          localizer = implementations.detect { |localizer| localizer.localizable?(commit.project, translation.key) }
-          next unless localizer
-          organized_translations[localizer.ident][source][translation.rfc5646_locale] << translation
-        end
+      Translation.in_commit(commit).includes(:key).not_base.
+          where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).each do |translation|
+        next unless translation.key.source
+        source    = translation.key.source.sub(/^\//, '')
+        localizer = implementations.detect { |localizer| localizer.localizable?(commit.project, translation.key) }
+        next unless localizer
+        organized_translations[localizer.ident][source][translation.rfc5646_locale] << translation
       end
 
       organized_translations
