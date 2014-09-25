@@ -16,7 +16,7 @@
 
 class HomeController < ApplicationController
   # Typical number of commits to show per page.
-  PER_PAGE = 30
+  PER_PAGE = 20
 
   before_filter :authenticate_user!
   before_filter :translator_required, only: [:translators, :glossary]
@@ -159,6 +159,8 @@ class HomeController < ApplicationController
         end
       end
     end
+
+    @commits.each &:recalculate_stats!
 
     @locales = if params[:locales].present?
                  params[:locales].split(',').map { |l| Locale.from_rfc5646 l }.compact
