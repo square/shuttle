@@ -29,18 +29,16 @@ class ImportFinisher
     # mark related blobs as parsed so that we don't parse them again
     mark_not_errored_blobs_as_parsed(commit)
 
-    # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
+    # the readiness hooks were all disabled, so now we need to go through and calculate keys' readiness.
+    # This needs to happen before updating loading to false because there are hooks in CommitObserver
+    # which gets fired when loading ends, and it expects keys to reflect correct readiness states.
     Key.batch_recalculate_ready!(commit)
 
-    # the readiness hooks were all disabled, so now we need to go through and calculate stats.
-    CommitStatsRecalculator.new.perform commit.id
-
     # finish loading
-    commit.reload.update!(loading: false, import_batch_id: nil)
+    commit.update!(loading: false, import_batch_id: nil)
 
-    # This is necessary because eventhough CommitStatsRecalculator calls recalculate_ready!, ready will not be set then
-    # since loading was not finished. Calling it again guarantees that ready will be set to true if appropriate.
-    commit.recalculate_ready!
+    # the readiness hooks were all disabled, so now we need to go through and calculate commit readiness and stats.
+    CommitStatsRecalculator.new.perform commit.id
   end
 
   private
