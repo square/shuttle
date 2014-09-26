@@ -137,6 +137,19 @@ describe Project do
     end
   end
 
+  describe "#translation_adder_batch" do
+    it "creates a new batch, saves its id, and runs ProjectTranslationAdderFinisher on success and sets description" do
+      project = FactoryGirl.create(:project)
+
+      ProjectTranslationAdderFinisher.any_instance.should_receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'project_id' => project.id)
+      batch = project.translation_adder_batch.tap { |b| b.jobs {} }
+
+      expect(batch).to be_an_instance_of(Sidekiq::Batch)
+      expect(batch.description).to eql("Project Translation Adder #{project.id} (#{project.name})")
+      expect(project.translation_adder_batch_id).to eql(batch.bid)
+    end
+  end
+
   describe "#pending_translations" do
     before :each do
       @project     = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')

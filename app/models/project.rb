@@ -115,6 +115,13 @@ class Project < ActiveRecord::Base
       stash_webhook_url:        {type: String, allow_nil: true}
   )
 
+  # Add import_batch and import_batch_status methods
+  extend SidekiqBatchManager
+  sidekiq_batch :translation_adder_batch do |batch|
+    batch.description = "Project Translation Adder #{id} (#{name})"
+    batch.on :success, ProjectTranslationAdderFinisher, project_id: id
+  end
+
   extend SetNilIfBlank
   set_nil_if_blank :repository_url
   set_nil_if_blank :github_webhook_url
