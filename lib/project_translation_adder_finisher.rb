@@ -12,24 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Adds or removes pending {Translation Translations} for locales that have
-# been added to or removed from a {Key}'s {Project}.
+# Contains hooks run by Sidekiq upon completion of a ProjectTranslationAdder batch.
 
-class KeyTranslationAdder
-  include Sidekiq::Worker
-  sidekiq_options queue: :low
+class ProjectTranslationAdderFinisher
 
-  # Executes this worker.
-  #
-  # @param [Fixnum] id The ID of a Key.
-  # @param [String] worker_queue A Redis counter that counts  the number of
-  #   completed `KeyTranslationAdder`s for a {ProjectTranslationAdder}.
+  # Run by Sidekiq after a ProjectTranslationAdder batch finishes successfully.
+  # Triggers a ProjectTranslationAdderOnSuccess job
 
-  def perform(id)
-    key = Key.find(id)
-    key.add_pending_translations
-    key.remove_excluded_pending_translations
+  def on_success(_status, options)
+    ProjectTranslationAdderOnSuccess.perform_once options['project_id']
   end
-
-  include SidekiqLocking
 end

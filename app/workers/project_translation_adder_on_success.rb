@@ -12,11 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Queues jobs to add or remove pending {Translation Translations} from
-# {Key Keys} for this project for locales that have been added to or removed
-# from a {Project}.
+# Recalculates keys' readiness since readiness hooks were disabled when ProjectTranslationAdder was running.
+# Queues jobs to recalculate readiness of {Commit Commits} of this {Project}.
 
-class ProjectTranslationAdder
+# This task could also be run in the batch finisher on success directly. However, this is a long running operation and
+# it's safer to run as a separate job. For example, if an error is raised in this task, it will be re-queued and
+# re-run. In the finisher, it would not be re-queued. Restarting sidekiq and deploying is also safer this way for
+# the same reason.
+
+class ProjectTranslationAdderOnSuccess
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
@@ -26,13 +30,12 @@ class ProjectTranslationAdder
 
   def perform(project_id)
     project = Project.find(project_id)
-    keys_with_commits = project.keys_with_commits
-    return if keys_with_commits.blank?
 
-    project.translation_adder_batch.jobs do
-      keys_with_commits.each do |key|
-        KeyTranslationAdder.perform_once(key.id)
-      end
+    # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
+    Key.batch_recalculate_ready!(project)
+
+    project.commits.each do |commit|
+      CommitStatsRecalculator.perform_once(commit.id)
     end
   end
 
