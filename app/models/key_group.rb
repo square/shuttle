@@ -121,6 +121,13 @@ class KeyGroup < ActiveRecord::Base
     end
   end
 
+  # Add import_batch and import_batch_status methods
+  extend SidekiqBatchManager
+  sidekiq_batch :import_batch do |batch|
+    batch.description = "Import KeyGroup #{id} (#{project.name} - #{key})"
+    batch.on :success, ImportFinisherForKeyGroups, key_group_id: id
+  end
+
   # ======== START LOCALE RELATED CODE =================================================================================
   include HasMetadataColumn
   has_metadata_column(
@@ -251,27 +258,6 @@ class KeyGroup < ActiveRecord::Base
     update_import_requested_at!
     reset_ready!
     KeyGroupImporter.perform_once(id)
-  end
-
-  # Finds or creates a Sidekiq import batch for the KeyGroup.
-  # Sets the KeyGroup's `import_batch_id` to its `bid`.
-  # On success of this batch, ImportFinisherForKeyGroups will be called for necessary cleanup.
-  #
-  # @return [Sidekiq::Batch] The batch of Sidekiq workers performing the current import, if any.
-  #    Otherwise, creates a new one.
-  def import_batch
-    if import_batch_id
-      Sidekiq::Batch.new(import_batch_id)
-    else
-      batch             = Sidekiq::Batch.new
-      batch.description = "Import KeyGroup #{id} (#{project.name} - #{key})"
-      batch.on :success, ImportFinisherForKeyGroups, key_group_id: id
-      update_attribute :import_batch_id, batch.bid
-      batch
-    end
-  rescue Sidekiq::Batch::NoSuchBatch
-    update_attribute :import_batch_id, nil
-    retry
   end
 
   # Updates first and last import_requested_at fields.
