@@ -27,19 +27,18 @@ class CommitStatsRecalculator
 
   def perform(commit_id)
     commit = Commit.find(commit_id)
-    Commit.flush_memoizations(commit)
 
+    commit.recalculate_ready!
+
+    # recalculate stats
+    Commit.flush_memoizations(commit)
     commit.translations_done
     commit.translations_total
     commit.translations_new
     commit.translations_pending
-
     commit.strings_total
-
     commit.words_new
     commit.words_pending
-
-    commit.recalculate_ready!
   end
 
   include SidekiqLocking
