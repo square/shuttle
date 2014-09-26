@@ -142,7 +142,6 @@ class Project < ActiveRecord::Base
   before_validation :create_api_token, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
   after_commit :add_or_remove_pending_translations, on: :update
-  after_update :invalidate_manifests_and_localizations
 
   scope :with_repository_url, -> { where("projects.repository_url IS NOT NULL") }
 
@@ -471,11 +470,6 @@ class Project < ActiveRecord::Base
     if %w{targeted_rfc5646_locales}.any?{|field| previous_changes.include?(field)}
       ProjectTranslationAdderForKeyGroups.perform_once id
     end
-  end
-
-  def invalidate_manifests_and_localizations
-    keys = Shuttle::Redis.keys("manifest:#{id}:*") + Shuttle::Redis.keys("localize:#{id}:*")
-    Shuttle::Redis.del(*keys) unless keys.empty?
   end
 
   def require_valid_locales_hash

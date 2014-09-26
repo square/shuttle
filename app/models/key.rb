@@ -277,11 +277,36 @@ class Key < ActiveRecord::Base
     end
   end
 
+  # This takes a Commit, a Project or a KeyGroup, and batch updates their readiness states.
+  # Called in ImportFinisher and PTAFinisher at the moment.
+  #
+  # @param [Commit, Project, KeyGroup] obj The object whose keys should be batch recalculated
+
+  def self.batch_recalculate_ready!(obj)
+    # TODO (yunus): look into speeding this up
+    ready_keys, not_ready_keys = obj.keys.includes(:project, :translations).partition(&:should_become_ready?)
+    ready_keys.in_groups_of(500, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
+    not_ready_keys.in_groups_of(500, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
+
+    # the ES mapping loads all the commits_keys, this is slow
+    # we can preload all the commits_keys for all commits, and partition them into the correct commits
+    obj.keys.find_in_batches do |keys|
+      commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
+        hsh[key_id.to_i] ||= Set.new
+        hsh[key_id.to_i] << commit_id.to_i
+        hsh
+      end
+      # now set batched_commit_ids for each key
+      keys.each { |key| key.batched_commit_ids = commits_by_key[key.id] || Set.new }
+      # and run the import
+      Key.tire.index.import keys
+    end
+  end
+
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
     state = ready? ? 'ready' : 'not ready'
     "#<#{self.class.to_s} #{id}: #{key} (#{state})>"
   end
-
 end
