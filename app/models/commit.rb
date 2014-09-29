@@ -147,6 +147,13 @@ class Commit < ActiveRecord::Base
                    repo_must_exist: true,
                    scope:           :for_revision
 
+  # Add import_batch and import_batch_status methods
+  extend SidekiqBatchManager
+  sidekiq_batch :import_batch do |batch|
+    batch.description = "Import Commit #{id} (#{revision})"
+    batch.on :success, ImportFinisher, commit_id: id
+  end
+
   extend SetNilIfBlank
   set_nil_if_blank :description, :due_date, :pull_request_url
 
@@ -402,34 +409,6 @@ class Commit < ActiveRecord::Base
 
   # @private
   def redis_memoize_key() to_param end
-
-  # @return [Sidekiq::Batch, nil] The batch of Sidekiq workers performing the
-  #   current import, if any.
-
-  def import_batch
-    if import_batch_id
-      Sidekiq::Batch.new(import_batch_id)
-    else
-      batch             = Sidekiq::Batch.new
-      batch.description = "Import Commit #{id} (#{revision})"
-      batch.on :success, ImportFinisher, commit_id: id
-      update_attribute :import_batch_id, batch.bid
-      batch
-    end
-  rescue Sidekiq::Batch::NoSuchBatch
-    update_attribute :import_batch_id, nil
-    retry
-  end
-
-  # @return [Sidekiq::Batch::Status, nil] Information about the batch of Sidekiq
-  #   workers performing the current import, if any.
-
-  def import_batch_status
-    import_batch_id ? Sidekiq::Batch::Status.new(import_batch_id) : nil
-  rescue Sidekiq::Batch::NoSuchBatch
-    update_attribute :import_batch_id, nil
-    retry
-  end
 
   # Returns whether we should skip a key for this particular commit, given the
   # contents of the `.shuttle.yml` file for this commit.
