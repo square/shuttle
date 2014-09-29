@@ -625,7 +625,6 @@ describe TranslationsController do
           expect(@key1.reload).to be_ready
           @project.commits.reload.each do |c|
             expect(c).to_not be_ready
-            #TODO (yunus): add stats recalculation specs here after they are implemented
           end
         end
 
@@ -637,7 +636,6 @@ describe TranslationsController do
           expect(@key1.reload).to be_ready
           expect(@commit1.reload).to be_ready
           expect(@commit2.reload).to_not be_ready
-          #TODO (yunus): add stats recalculation specs here after they are implemented
         end
 
         it "sets key readiness to false, recalculates commits' readiness and stats if a translation is approved but there are more translations in the key that are not approved" do
@@ -647,7 +645,6 @@ describe TranslationsController do
           expect(@key1.reload).to_not be_ready
           @project.commits.reload.each do |c|
             expect(c).to_not be_ready
-            #TODO (yunus): add stats recalculation specs here after they are implemented
           end
         end
       end
