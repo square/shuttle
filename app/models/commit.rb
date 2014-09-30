@@ -165,7 +165,6 @@ class Commit < ActiveRecord::Base
   before_save :set_loaded_at
   before_create :set_author
   after_commit :initial_import, on: :create
-  after_destroy { |c| Commit.flush_memoizations c.id }
 
   attr_readonly :revision, :message
 
