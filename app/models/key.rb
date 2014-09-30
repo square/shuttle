@@ -177,18 +177,6 @@ class Key < ActiveRecord::Base
 
   scope :in_blob, ->(blob) { where(project_id: blob.project_id, sha_raw: blob.sha_raw) }
 
-  # TODO:
-  def self.total_strings
-    Key.count
-  end
-  # redis_memoize :total_strings
-
-  # TODO:
-  def self.total_strings_incomplete
-    Key.where(ready: false).count
-  end 
-  # redis_memoize :total_strings_incomplete
-
   # @private
   def as_json(options=nil)
     options ||= {}
