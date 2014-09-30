@@ -12,24 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Adds or removes pending {Translation Translations} for locales that have
-# been added to or removed from a {Key}'s {Project}.
+require 'spec_helper'
 
-class KeyTranslationAdder
-  include Sidekiq::Worker
-  sidekiq_options queue: :low
-
-  # Executes this worker.
-  #
-  # @param [Fixnum] id The ID of a Key.
-  # @param [String] worker_queue A Redis counter that counts  the number of
-  #   completed `KeyTranslationAdder`s for a {ProjectTranslationAdder}.
-
-  def perform(id)
-    key = Key.find(id)
-    key.add_pending_translations
-    key.remove_excluded_pending_translations
+describe ProjectTranslationAdderFinisher do
+  describe "#on_success" do
+    it "runs ProjectTranslationAdderFinisher" do
+      @project = FactoryGirl.create(:project)
+      expect(ProjectTranslationAdderOnSuccess).to receive(:perform_once).with(@project.id)
+      ProjectTranslationAdderFinisher.new.on_success(nil, { 'project_id' => @project.id })
+    end
   end
-
-  include SidekiqLocking
 end

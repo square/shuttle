@@ -394,6 +394,7 @@ CREATE TABLE projects (
     repository_url character varying(256),
     api_token character(36) NOT NULL,
     created_at timestamp without time zone,
+    translation_adder_batch_id character varying(255),
     CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0))
 );
 
@@ -1484,3 +1485,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140721233942');
 INSERT INTO schema_migrations (version) VALUES ('20140919214058');
 
 INSERT INTO schema_migrations (version) VALUES ('20140925191736');
+
+INSERT INTO schema_migrations (version) VALUES ('20140927210829');
