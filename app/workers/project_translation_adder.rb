@@ -26,14 +26,23 @@ class ProjectTranslationAdder
 
   def perform(project_id)
     project = Project.find(project_id)
-    keys_with_commits = project.keys_with_commits
-    return if keys_with_commits.blank?
+    key_ids = key_ids_with_commits(project)
+    return if key_ids.blank?
 
     project.translation_adder_batch.jobs do
-      keys_with_commits.each do |key|
-        KeyTranslationAdder.perform_once(key.id)
+      key_ids.each do |key_id|
+        KeyTranslationAdder.perform_once(key_id)
       end
     end
+  end
+
+  private
+
+  # @return [Array<Key>] ids of all {Key keys} who belong to at least one {Commit} under this {Project}
+
+  def key_ids_with_commits(project)
+    key_ids = project.keys.pluck(:id)
+    CommitsKey.where(key_id: key_ids).uniq('key_id').select('key_id').map(&:key_id)
   end
 
   include SidekiqLocking
