@@ -261,7 +261,7 @@ class Key < ActiveRecord::Base
     update ready: should_become_ready?
     KeyStatsRecalculator.perform_once(id) unless skip_readiness_hooks
     # TODO (yunus): (ready != ready_was) should really be another condition above
-    # If ready didnt change, KeyStatsRecalculator and CommitStatsRecalculator should not
+    # If ready didnt change, KeyStatsRecalculator and CommitRecalculator should not
     # recalculate keys & commits & key_group's readiness states.
     # Commit stats should be recalculated regardless of whether ready changed or not.
     # Consider doing this check and handle hooks in Translation model. Or in an observer.

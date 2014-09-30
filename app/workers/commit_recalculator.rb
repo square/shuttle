@@ -14,10 +14,9 @@
 
 require 'sidekiq_locking'
 
-# Worker that recalculates Commit statistics. Recalculates translation counts
-# for a Commit.
+# Worker that recalculates Commit readiness and statistics such as translation counts.
 
-class CommitStatsRecalculator
+class CommitRecalculator
   include Sidekiq::Worker
   sidekiq_options queue: :low
 

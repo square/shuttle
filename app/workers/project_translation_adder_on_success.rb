@@ -35,7 +35,7 @@ class ProjectTranslationAdderOnSuccess
     Key.batch_recalculate_ready!(project)
 
     project.commits.each do |commit|
-      CommitStatsRecalculator.perform_once(commit.id)
+      CommitRecalculator.perform_once(commit.id)
     end
   end
 

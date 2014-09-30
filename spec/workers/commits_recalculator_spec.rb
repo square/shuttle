@@ -14,7 +14,7 @@
 
 require 'spec_helper'
 
-describe CommitStatsRecalculator do
+describe CommitRecalculator do
   before :each do
     # create a commit with 2 total strings, 8 total translations, 4 required
     # translations, and 2 required done translations
@@ -38,7 +38,7 @@ describe CommitStatsRecalculator do
 
   it "should recalculate commit statistics correctly" do
     Commit.flush_memoizations @commit
-    CommitStatsRecalculator.new.perform(@commit.id)
+    CommitRecalculator.new.perform(@commit.id)
 
     expect(@commit.reload.translations_total).to eql(4)
     expect(@commit.translations_done).to eql(2)
