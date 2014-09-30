@@ -16,7 +16,7 @@ require 'spec_helper'
 
 describe ProjectTranslationAdderOnSuccess do
   describe "#perform" do
-    it "recalculates ready for all keys of the project and calls CommitStatsRecalculator for each commit of the project" do
+    it "recalculates ready for all keys of the project and calls CommitRecalculator for each commit of the project" do
       # setup
       @project = FactoryGirl.create(:project)
       @commit1 = FactoryGirl.create(:commit, project: @project)
@@ -27,8 +27,8 @@ describe ProjectTranslationAdderOnSuccess do
       @commit2.keys = [@key1, @key2]
 
       @project.keys.update_all ready: false
-      expect(CommitStatsRecalculator).to receive(:perform_once).with(@commit1.id)
-      expect(CommitStatsRecalculator).to receive(:perform_once).with(@commit2.id)
+      expect(CommitRecalculator).to receive(:perform_once).with(@commit1.id)
+      expect(CommitRecalculator).to receive(:perform_once).with(@commit2.id)
 
       ProjectTranslationAdderOnSuccess.new.perform(@project.id)
       expect(@key1.reload).to be_ready

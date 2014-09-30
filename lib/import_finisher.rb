@@ -38,7 +38,7 @@ class ImportFinisher
     commit.update!(loading: false, import_batch_id: nil)
 
     # the readiness hooks were all disabled, so now we need to go through and calculate commit readiness and stats.
-    CommitStatsRecalculator.new.perform commit.id
+    CommitRecalculator.new.perform commit.id
   end
 
   private

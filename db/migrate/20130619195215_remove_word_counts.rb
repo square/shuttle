@@ -32,6 +32,6 @@ class RemoveWordCounts < ActiveRecord::Migration
     execute "ALTER TABLE commits ADD COLUMN words_pending integer DEFAULT 0 NOT NULL CHECK ((words_pending >= 0))"
     execute "ALTER TABLE commits ADD COLUMN strings_total integer DEFAULT 0 NOT NULL CHECK (strings_total >= 0)"
 
-    Commit.find_each { |c| CommitStatsRecalculator.new.perform(c.id) }
+    Commit.find_each { |c| CommitRecalculator.new.perform(c.id) }
   end
 end

@@ -39,7 +39,7 @@ class KeyStatsRecalculator
     SQL
 
     Commit.connection.select_rows(query).flatten.each do |commit_id|
-      CommitStatsRecalculator.perform_once commit_id.to_i
+      CommitRecalculator.perform_once commit_id.to_i
     end
   end
 
