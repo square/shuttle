@@ -1027,6 +1027,13 @@ CREATE UNIQUE INDEX index_in_key_group_unique ON keys USING btree (key_group_id,
 
 
 --
+-- Name: index_keys_on_project_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_keys_on_project_id ON keys USING btree (project_id);
+
+
+--
 -- Name: index_users_on_confirmation_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1487,3 +1494,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140919214058');
 INSERT INTO schema_migrations (version) VALUES ('20140925191736');
 
 INSERT INTO schema_migrations (version) VALUES ('20140927210829');
+
+INSERT INTO schema_migrations (version) VALUES ('20140930013949');
