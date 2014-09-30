@@ -31,13 +31,7 @@ class CommitRecalculator
 
     # recalculate stats
     Commit.flush_memoizations(commit)
-    commit.translations_done
-    commit.translations_total
-    commit.translations_new
-    commit.translations_pending
-    commit.strings_total
-    commit.words_new
-    commit.words_pending
+    commit.translations_done # this will memoize stats for 1 common case where no locale is specified (i.e. all locales applicable to this commit)
   end
 
   include SidekiqLocking
