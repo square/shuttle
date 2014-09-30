@@ -44,4 +44,21 @@ describe ProjectTranslationAdder do
       ProjectTranslationAdder.new.perform(project.id)
     end
   end
+
+  describe "#key_ids_with_commits" do
+    it "returns the ids of keys associated with at least 1 commit" do
+      project = FactoryGirl.create(:project)
+
+      commit1 = FactoryGirl.create(:commit, project: project)
+      commit2 = FactoryGirl.create(:commit, project: project)
+
+      key1 = FactoryGirl.create(:key, project: project)
+      key2 = FactoryGirl.create(:key, project: project)
+
+      commit1.keys << key1
+      commit2.keys << key1
+
+      expect(ProjectTranslationAdder.new.send(:key_ids_with_commits, project)).to eql([key1.id])
+    end
+  end
 end

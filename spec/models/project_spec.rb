@@ -701,24 +701,4 @@ describe Project do
       expect(project.git?).to be_false
     end
   end
-
-  describe "#keys_with_commits" do
-    it "returns the keys with commit" do
-      project = FactoryGirl.create(:project)
-      key_group = FactoryGirl.create(:key_group, project: project)
-
-      commit1 = FactoryGirl.create(:commit, project: project)
-      commit2 = FactoryGirl.create(:commit, project: project)
-
-      key1 = FactoryGirl.create(:key, project: project)
-      key2 = FactoryGirl.create(:key, project: project)
-      FactoryGirl.create(:key, project: project, key_group: key_group)
-
-      commit1.keys << key1
-      commit2.keys << key1
-      commit2.keys << key2
-
-      expect(project.reload.keys_with_commits.to_a.sort).to eql([key1, key2].sort)
-    end
-  end
 end

@@ -152,12 +152,6 @@ class Project < ActiveRecord::Base
 
   scope :with_repository_url, -> { where("projects.repository_url IS NOT NULL") }
 
-  # @return [Array<Key>] all {Key keys} who belong to at least one {Commit} under this {Project}
-
-  def keys_with_commits
-    keys.joins(:commits_keys).uniq
-  end
-
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
