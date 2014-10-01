@@ -40,7 +40,7 @@ describe StatsController do
       end
 
       it "assigns average_load_time" do
-        expect(assigns(:average_load_time).first).to include(:x, y: 0.0008333333333333334)
+        expect(assigns(:average_load_time).first).to include(:x, y: 0.05)
       end
 
       it "assigns num_commits_loaded" do

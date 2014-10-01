@@ -91,8 +91,8 @@ class StatsController < ApplicationController
   end
 
   def decorate_avg_load_time(metrics)
-    # Convert to [Timestamp, Load Time (in hours)]
-    metrics.map { |m| {x: m.date.to_time.to_i * 1000, y: m.avg_load_time / 3600} }
+    # Convert to [Timestamp, Load Time (in minutes)]
+    metrics.map { |m| {x: m.date.to_time.to_i * 1000, y: m.avg_load_time / 60} }
   end
 
   def decorate_num_commits_loaded(metrics)
