@@ -27,19 +27,9 @@ describe ProjectTranslationAdder do
       ProjectTranslationAdder.new.perform(project.id)
     end
 
-    it "doesn't call KeyTranslationAdder or ProjectTranslationAdderFinisher, or doesn't create a Sidekiq batch if there are no keys with commits in the project" do
-      project = FactoryGirl.create(:project)
-      key = FactoryGirl.create(:key, project: project)
-
-      expect(Sidekiq::Batch).to_not receive(:new)
-      expect(KeyTranslationAdder).to_not receive(:perform_once)
-      ProjectTranslationAdderFinisher.any_instance.stub(:on_success).and_raise("this shouldn't have been called")
-
-      ProjectTranslationAdder.new.perform(project.id)
-    end
-
     it "doesn't call KeyTranslationAdder if key is not associated with a commit" do
       project = FactoryGirl.create(:project)
+      commit = FactoryGirl.create(:commit, project: project)
       expect(KeyTranslationAdder).to_not receive(:perform_once)
       ProjectTranslationAdder.new.perform(project.id)
     end

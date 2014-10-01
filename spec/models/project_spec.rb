@@ -583,11 +583,17 @@ describe Project do
           expect(ProjectTranslationAdder).to_not receive(:perform_once)
           FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true}, key_exclusions: %w{skip_me})
         end
+
+        it "doesn't call ProjectTranslationAdder when watched branches change if project is not git-specific" do
+          @project.watched_branches = ['newbranch']
+          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+          @project.save!
+        end
       end
 
       context "[ProjectTranslationAdderForKeyGroups]" do
         before :each do
-          @project = FactoryGirl.create(:project, name: "test project", targeted_rfc5646_locales: {'en' => true})
+          @project = FactoryGirl.create(:project, repository_url: nil, name: "test project", targeted_rfc5646_locales: {'en' => true})
         end
 
         it "calls ProjectTranslationAdderForKeyGroups when targeted_rfc5646_locales changes" do
@@ -611,6 +617,12 @@ describe Project do
         it "doesn't call ProjectTranslationAdderForKeyGroups when a project is created, even if it has targeted_rfc5646_locales" do
           expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
           FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true})
+        end
+
+        it "doesn't call ProjectTranslationAdderForKeyGroups when watched branches change if project is git-specific" do
+          @project.update! repository_url: "https://example.com"
+          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
+          @project.save!
         end
       end
     end
