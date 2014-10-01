@@ -31,6 +31,8 @@ class ProjectTranslationAdderOnSuccess
   def perform(project_id)
     project = Project.find(project_id)
 
+    project.update! translation_adder_batch_id: nil # TODO: this can be abstracted into the SidekiqBatchManager as well
+
     # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
     Key.batch_recalculate_ready!(project)
 
