@@ -465,10 +465,10 @@ class Project < ActiveRecord::Base
   #   ProjectTranslationAdderForKeyGroups for projects with {KeyGroup KeyGroups}
 
   def add_or_remove_pending_translations
-    if %w{targeted_rfc5646_locales key_exclusions key_inclusions key_locale_exclusions key_locale_inclusions}.any?{|field| previous_changes.include?(field)}
-      ProjectTranslationAdder.perform_once id
+    if git? && %w{targeted_rfc5646_locales key_exclusions key_inclusions key_locale_exclusions key_locale_inclusions}.any?{|field| previous_changes.include?(field)}
+      translation_adder_batch.jobs { ProjectTranslationAdder.perform_once(id) }
     end
-    if %w{targeted_rfc5646_locales}.any?{|field| previous_changes.include?(field)}
+    if !git? && %w{targeted_rfc5646_locales}.any?{|field| previous_changes.include?(field)}
       ProjectTranslationAdderForKeyGroups.perform_once id
     end
   end

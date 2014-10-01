@@ -27,7 +27,6 @@ class ProjectTranslationAdder
   def perform(project_id)
     project = Project.find(project_id)
     key_ids = key_ids_with_commits(project)
-    return if key_ids.blank?
 
     project.translation_adder_batch.jobs do
       key_ids.each do |key_id|
