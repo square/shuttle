@@ -4,5 +4,5 @@ ruby:
 targets:
 - type: specs
   glob: spec/**/*_spec.rb
-  workers: 16
+  workers: 30
   queue_override: linux
