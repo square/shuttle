@@ -15,6 +15,17 @@
 require 'spec_helper'
 
 describe Translation do
+  context "[scopes]" do
+    describe "#not_approved" do
+      it "returns rejected (approved = false) and not reviewed (approved == nil) translations" do
+        FactoryGirl.create :translation, approved: true, copy: "fake"
+        t2 = FactoryGirl.create :translation, approved: false, copy: "fake"
+        t3 = FactoryGirl.create :translation, approved: nil
+        expect(Translation.not_approved.to_a).to eql([t2, t3])
+      end
+    end
+  end
+
   context "[hooks]" do
     before :each do
       @key = FactoryGirl.create(:key, project: FactoryGirl.create(:project,

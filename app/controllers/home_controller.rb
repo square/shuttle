@@ -166,6 +166,6 @@ class HomeController < ApplicationController
                  []
                end
 
-    @home_presenter = HomePresenter.new
+    @home_presenter = HomePresenter.new(@commits, @locales)
   end
 end
