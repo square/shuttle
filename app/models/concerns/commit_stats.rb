@@ -96,7 +96,7 @@ module CommitStats
 
   # Calculates the stats for this Key.
   #
-  # @return [Hash<String, Hash<String, FixNum>>] stats The hash whose key is a state (:new, :pending, or :approved),
+  # @return [Hash<String, Hash<String, Fixnum>>] stats The hash whose key is a state (:new, :pending, or :approved),
   #   and value is another hash whose key is either :translations_count or :words_count, and value is the count as fixnum.
 
   def stats(*locales)
