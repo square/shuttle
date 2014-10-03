@@ -37,7 +37,6 @@ describe CommitRecalculator do
   end
 
   it "should recalculate commit statistics correctly" do
-    Commit.flush_memoizations @commit
     CommitRecalculator.new.perform(@commit.id)
 
     expect(@commit.reload.translations_total).to eql(4)
