@@ -62,7 +62,7 @@ tr.row_class
     - elsif commit.ready?
       td Ready for Download
     - else
-      - strings_remaining = @home_presenter.commit_stat(@commit, :translations, :pending) + @home_presenter.commit_stat(@commit, :translations, :new)
+      - strings_remaining = @home_presenter.commit_stat(commit, :translations, :pending) + @home_presenter.commit_stat(commit, :translations, :new)
       td = "Translating #{pluralize_with_delimiter strings_remaining, 'String'}"
 
   / Translation/Monitor Button
