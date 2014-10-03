@@ -14,7 +14,7 @@
 
 require 'sidekiq_locking'
 
-# Worker that recalculates Commit readiness and statistics such as translation counts.
+# Worker that recalculates Commit readiness
 
 class CommitRecalculator
   include Sidekiq::Worker
@@ -26,12 +26,7 @@ class CommitRecalculator
 
   def perform(commit_id)
     commit = Commit.find(commit_id)
-
     commit.recalculate_ready!
-
-    # recalculate stats
-    Commit.flush_memoizations(commit)
-    commit.translations_done # this will memoize stats for 1 common case where no locale is specified (i.e. all locales applicable to this commit)
   end
 
   include SidekiqLocking

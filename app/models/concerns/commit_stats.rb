@@ -15,13 +15,6 @@
 # Includes the helper statistics methods for {Commit}
 
 module CommitStats
-  extend ActiveSupport::Concern
-
-  included do
-    extend RedisMemoize
-    redis_memoize :stats
-    redis_memoize :strings_total
-  end
 
   # Calculates the total number of Translations that have not yet been
   # translated.
@@ -100,6 +93,9 @@ module CommitStats
   #   and value is another hash whose key is either :translations_count or :words_count, and value is the count as fixnum.
 
   def stats(*locales)
+    cached = @_stats.try(:[], locales)
+    return cached if cached
+
     locales = project.required_locales if locales.empty?
     translation_groups = translations.not_base.where(rfc5646_locale: locales.map(&:rfc5646))
     translation_groups = translation_groups.group("translated, approved").select("translated, approved, count(*) as translations_count, sum(words_count) as words_count")
@@ -113,11 +109,10 @@ module CommitStats
         hsh[state][field] += tg.send(field)
       end
     end
-    hsh
-  end
 
-  # @private
-  def redis_memoize_key() to_param end
+    @_stats = {}
+    @_stats[locales] = hsh
+  end
 
   private
 
