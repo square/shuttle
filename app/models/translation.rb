@@ -56,6 +56,7 @@ class Translation < ActiveRecord::Base
   belongs_to :reviewer, class_name: 'User', foreign_key: 'reviewer_id', inverse_of: :reviewed_translations
   has_many :translation_changes, inverse_of: :translation, dependent: :delete_all
   has_many :issues, inverse_of: :translation, dependent: :destroy
+  has_many :commits_keys, primary_key: :key_id, foreign_key: :key_id
 
   include HasMetadataColumn
   has_metadata_column(
@@ -162,8 +163,9 @@ class Translation < ActiveRecord::Base
     end
   }
   scope :approved, -> { where(translations: { approved: true }) }
-  scope :base, -> { where('source_rfc5646_locale = rfc5646_locale') }
-  scope :not_base, -> { where('source_rfc5646_locale != rfc5646_locale') }
+  scope :not_approved, -> { where("translations.approved IS NOT TRUE") }
+  scope :base, -> { where('translations.source_rfc5646_locale = translations.rfc5646_locale') }
+  scope :not_base, -> { where('translations.source_rfc5646_locale != translations.rfc5646_locale') }
   scope :in_commit, ->(commit) {
     commit_id = commit.kind_of?(Commit) ? commit.id : commit
     joins("INNER JOIN commits_keys ON translations.key_id = commits_keys.key_id").

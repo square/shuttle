@@ -47,9 +47,9 @@ tr.row_class
 
   - if current_user.translator?
     / Word Translation Count
-    td = "#{number_with_delimiter commit.translations_new(*@locales)}s (#{number_with_delimiter commit.words_new(*@locales)}w)"
+    td = "#{number_with_delimiter @home_presenter.commit_stat(commit, :translations, :new)}s (#{number_with_delimiter @home_presenter.commit_stat(commit, :words, :new)}w)"
     / Word Review Count
-    td = "#{number_with_delimiter commit.translations_pending(*@locales)}s (#{number_with_delimiter commit.words_pending(*@locales)}w)"
+    td = "#{number_with_delimiter @home_presenter.commit_stat(commit, :translations, :pending)}s (#{number_with_delimiter @home_presenter.commit_stat(commit, :words, :pending)}w)"
   - else
     / Progress
     - if commit.loading?
@@ -62,7 +62,7 @@ tr.row_class
     - elsif commit.ready?
       td Ready for Download
     - else
-      - strings_remaining = commit.translations_pending(*@locales) + commit.translations_new(*@locales)
+      - strings_remaining = @home_presenter.commit_stat(@commit, :translations, :pending) + @home_presenter.commit_stat(@commit, :translations, :new)
       td = "Translating #{pluralize_with_delimiter strings_remaining, 'String'}"
 
   / Translation/Monitor Button

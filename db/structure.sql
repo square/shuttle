@@ -1034,6 +1034,13 @@ CREATE INDEX index_keys_on_project_id ON keys USING btree (project_id);
 
 
 --
+-- Name: index_translations_on_rfc5646_locale; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_translations_on_rfc5646_locale ON translations USING btree (rfc5646_locale);
+
+
+--
 -- Name: index_users_on_confirmation_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1496,3 +1503,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140925191736');
 INSERT INTO schema_migrations (version) VALUES ('20140927210829');
 
 INSERT INTO schema_migrations (version) VALUES ('20140930013949');
+
+INSERT INTO schema_migrations (version) VALUES ('20141002074759');
