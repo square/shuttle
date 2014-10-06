@@ -64,14 +64,6 @@ module Fencer
         end
       end
 
-      scanner.reset
-      until scanner.eos?
-        match = scanner.scan_until(/%%/)
-        break unless match
-        counter                     += 1
-        tokens['%' + counter.to_s + '$%'] = [(scanner.pos - 2)..(scanner.pos - 1)]
-      end
-
       return tokens
     end
 
