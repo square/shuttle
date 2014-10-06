@@ -51,13 +51,18 @@ describe Fencer::Printf do
 
     it "should handle %% tokens interspersed with positional tokens and adjacent to printf format strings" do
       # given a "%%" next to what happens to be a valid printf format string,
-      # e.g., "%%ld", the '%%' should be fenced and the 'ld' treated as literal.
+      # e.g., "%%ld", the '%%' and the 'ld' treated should be treated as literals.
+      expect(Fencer::Printf.fence('My name is %%ld , how about you?')).
+          to eql({})
 
       # also, the only non-positional format specifier that can be interspersed
       # with positional format specifiers is '%%'
 
       expect(Fencer::Printf.fence('My name is %2$s, and I am %1$u%% awesome. %%')).
-          to eql('%2$s' => [11..14], '%1$u' => [26..29], '%3$%' => [30..31], '%4$%' => [42..43])
+          to eql('%2$s' => [11..14], '%1$u' => [26..29])
+
+      expect(Fencer::Printf.fence('My name is %%%1$u, I am from %% %2$s %s %% %d%%')).
+          to eql({"%1$u"=>[13..16], "%2$s"=>[32..35], "%3$s"=>[37..38], "%4$d"=>[43..44]})
     end
   end
 end
