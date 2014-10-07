@@ -101,9 +101,8 @@ class HomeController < ApplicationController
     @project = projects.first if projects.length == 1
 
     # Filter by SHA
-    sha      = params[:sha].presence
-    sha = sha =~ /^[0-9A-F]+$/i ? sha.downcase : nil
-    @sha = sha
+    sha = params[:sha].presence
+    @sha = sha = (sha =~ /^[0-9A-F]+$/i ? sha.downcase : nil)
 
     # Filter by user
     # Changed for Jim Kingdon.  Testing feature.  Make it such that all users can see all commits.
@@ -117,10 +116,14 @@ class HomeController < ApplicationController
             end
     @filters = '(Only showing my commits)' if user
 
-    sort_order = params[:sort].present? ? params[:sort] : cookies[:home_sort]
-    direction = params[:direction].present? ? params[:direction] : cookies[:home_direction]
-    @sort_order = sort_order
-    @direction = direction
+    @sort_order = sort_order = params[:sort].present? ? params[:sort] : cookies[:home_sort]
+    @direction = direction = params[:direction].present? ? params[:direction] : cookies[:home_direction]
+
+    @locales = locales = if params[:locales].present?
+                           params[:locales].split(',').map { |l| Locale.from_rfc5646 l }.compact
+                         else
+                           []
+                         end
 
     @commits = Commit.search(load: {include: [:user, project: :slugs]}) do
       filter :prefix, revision: sha if sha
@@ -157,12 +160,6 @@ class HomeController < ApplicationController
         end
       end
     end
-
-    @locales = if params[:locales].present?
-                 params[:locales].split(',').map { |l| Locale.from_rfc5646 l }.compact
-               else
-                 []
-               end
 
     @home_presenter = HomePresenter.new(@commits, @locales)
   end
