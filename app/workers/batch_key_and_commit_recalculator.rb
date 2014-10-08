@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Recalculates keys' readiness since readiness hooks were disabled when ProjectTranslationAdder was running.
+# Recalculates keys' readiness since readiness hooks were disabled during the previous task (ex: `ProjectTranslationAdder`).
 # Queues jobs to recalculate readiness of {Commit Commits} of this {Project}.
 
 # This task could also be run in the batch finisher on success directly. However, this is a long running operation and
@@ -20,7 +20,9 @@
 # re-run. In the finisher, it would not be re-queued. Restarting sidekiq and deploying is also safer this way for
 # the same reason.
 
-class ProjectTranslationAdderOnSuccess
+# Also, this is generic enough that it can be run after multiple different events.
+
+class BatchKeyAndCommitRecalculator
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
@@ -30,8 +32,6 @@ class ProjectTranslationAdderOnSuccess
 
   def perform(project_id)
     project = Project.find(project_id)
-
-    project.update! translation_adder_batch_id: nil # TODO: this can be abstracted into the SidekiqBatchManager as well
 
     # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
     Key.batch_recalculate_ready!(project)

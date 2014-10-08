@@ -14,9 +14,9 @@
 
 require 'spec_helper'
 
-describe ProjectTranslationAdderOnSuccess do
+describe BatchKeyAndCommitRecalculator do
   describe "#perform" do
-    it "recalculates ready for all keys of the project and calls CommitRecalculator for each commit of the project; sets translation_adder_batch_id to nil at the end" do
+    it "recalculates ready for all keys of the project and calls CommitRecalculator for each commit of the project" do
       # setup
       @project = FactoryGirl.create(:project)
       @commit1 = FactoryGirl.create(:commit, project: @project)
@@ -30,8 +30,7 @@ describe ProjectTranslationAdderOnSuccess do
       expect(CommitRecalculator).to receive(:perform_once).with(@commit1.id)
       expect(CommitRecalculator).to receive(:perform_once).with(@commit2.id)
 
-      ProjectTranslationAdderOnSuccess.new.perform(@project.id)
-      expect(@project.reload.translation_adder_batch_id).to be_nil
+      BatchKeyAndCommitRecalculator.new.perform(@project.id)
       expect(@key1.reload).to be_ready
       expect(@key2.reload).to be_ready
     end
