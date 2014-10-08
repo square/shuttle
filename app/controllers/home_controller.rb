@@ -125,6 +125,10 @@ class HomeController < ApplicationController
                            []
                          end
 
+    if @locales.present? && (status == 'uncompleted')
+      uncompleted_commit_ids_in_locales = uncompleted_commit_ids_in_locales(@locales)
+    end
+
     @commits = Commit.search(load: {include: [:user, project: :slugs]}) do
       filter :prefix, revision: sha if sha
       filter :term, project_id: projects.map(&:id) if projects.any?
@@ -135,7 +139,11 @@ class HomeController < ApplicationController
 
       case status
         when 'uncompleted'
-          filter :term, ready: false
+          if locales.present?
+            filter :ids, { values: uncompleted_commit_ids_in_locales } # ex: 'ja' and 'uncompleted' are selected, don't show commits where all 'ja' are finished; show ready commits if they have optional 'ja' translations not yet approved. https://jira.corp.squareup.com/browse/SHUTTLE-363
+          else
+            filter :term, ready: false
+          end
         when 'completed'
           filter :term, ready: true
       end
@@ -162,5 +170,14 @@ class HomeController < ApplicationController
     end
 
     @home_presenter = HomePresenter.new(@commits, @locales)
+  end
+
+  private
+
+  # Joins are expensive. Running 2 queries in this case is cheaper. ES can also be used here, but at the time of writing, tests didn't show a performance difference
+
+  def uncompleted_commit_ids_in_locales(locales)
+    key_ids = Translation.connection.select_rows(Translation.where("approved IS NOT TRUE").where(rfc5646_locale: locales.map(&:rfc5646)).select(:key_id).uniq.to_sql).flatten
+    CommitsKey.connection.select_rows(CommitsKey.where(key_id: key_ids).select(:commit_id).uniq.to_sql).flatten
   end
 end
