@@ -20,6 +20,8 @@ class ProjectTranslationAdderFinisher
   # Triggers a ProjectTranslationAdderOnSuccess job
 
   def on_success(_status, options)
-    ProjectTranslationAdderOnSuccess.perform_once options['project_id']
+    project = Project.find(options['project_id'])
+    project.update! translation_adder_batch_id: nil # TODO: this can be abstracted into the SidekiqBatchManager as well
+    ProjectTranslationAdderOnSuccess.perform_once project.id
   end
 end
