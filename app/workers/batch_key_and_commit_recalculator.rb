@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Recalculates keys' readiness since readiness hooks were disabled when ProjectTranslationAdder was running.
+# Recalculates keys' readiness since readiness hooks were disabled during the previous task (ex: `ProjectTranslationAdder`).
 # Queues jobs to recalculate readiness of {Commit Commits} of this {Project}.
 
 # This task could also be run in the batch finisher on success directly. However, this is a long running operation and
@@ -22,7 +22,7 @@
 
 # Also, this is generic enough that it can be run after multiple different events.
 
-class ProjectTranslationAdderOnSuccess
+class BatchKeyAndCommitRecalculator
   include Sidekiq::Worker
   sidekiq_options queue: :high
 

@@ -16,9 +16,9 @@ require 'spec_helper'
 
 describe ProjectTranslationAdderFinisher do
   describe "#on_success" do
-    it "runs ProjectTranslationAdderFinisher" do
+    it "runs ProjectTranslationAdderFinisher; sets translation_adder_batch_id to nil" do
       @project = FactoryGirl.create(:project, translation_adder_batch_id: "11111111")
-      expect(ProjectTranslationAdderOnSuccess).to receive(:perform_once).with(@project.id)
+      expect(BatchKeyAndCommitRecalculator).to receive(:perform_once).with(@project.id)
       ProjectTranslationAdderFinisher.new.on_success(nil, { 'project_id' => @project.id })
       expect(@project.reload.translation_adder_batch_id).to be_nil
     end
