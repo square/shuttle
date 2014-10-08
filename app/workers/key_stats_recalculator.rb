@@ -32,14 +32,7 @@ class KeyStatsRecalculator
     key = Key.find(key_id)
     key.key_group.try!(:recalculate_ready!)
 
-    # TODO (yunus): rewrite this
-    query = <<-SQL
-      SELECT commit_id
-        FROM commits_keys
-        WHERE key_id = #{Commit.connection.quote key_id}
-    SQL
-
-    Commit.connection.select_rows(query).flatten.each do |commit_id|
+    CommitsKey.where(key_id: key_id).pluck(:commit_id).each do |commit_id|
       CommitRecalculator.perform_once commit_id.to_i
     end
   end
