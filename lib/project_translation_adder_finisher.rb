@@ -21,7 +21,7 @@ class ProjectTranslationAdderFinisher
 
   def on_success(_status, options)
     project = Project.find(options['project_id'])
-    project.update! translation_adder_batch_id: nil # TODO: this can be abstracted into the SidekiqBatchManager as well
+    project.reset_translation_adder_batch_id!
     BatchKeyAndCommitRecalculator.perform_once project.id
   end
 end

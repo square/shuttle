@@ -34,10 +34,10 @@
 
 module SidekiqBatchManager
 
-  # Defines 2 helper methods for Sidekiq Batches that handle persistance in sql database.
+  # Defines 3 helper methods for Sidekiq Batches that handle persistance in sql database.
   # It expects a column in the database table whose name is batch_method_name suffixed with '_id'.
   # For instance, if the batch name is 'import_batch', it expects a 'import_batch_id' column, and
-  # defines 2 methods: `import_batch` and `import_batch_status`.
+  # defines the following 3 methods: `import_batch`, `import_batch_status` and `reset_import_batch_id!`.
 
   # @param [Symbol] batch_method_name The batch method name to be created
   # @param [Proc] proc The proc that will be called in the context of this instance with the
@@ -48,15 +48,18 @@ module SidekiqBatchManager
     batch_method_name = batch_method_name.to_sym
     batch_status_method_name = :"#{batch_method_name}_status"
     bid_column_name = :"#{batch_method_name}_id"
+    reset_batch_id_method_name = :"reset_#{bid_column_name}!"
 
     define_batch_method(batch_method_name, bid_column_name, proc)
     define_batch_status_method(batch_status_method_name, bid_column_name)
+    define_reset_batch_id_method(reset_batch_id_method_name, bid_column_name)
   end
 
   private
 
-  # Finds or creates a Sidekiq batch for this record and for the specified batch method.
-  # Sets record's batch id in the db when a new batch is created.
+  # Defines the method which
+  #   - finds or creates a Sidekiq batch for this record and for the specified batch method.
+  #   - sets record's batch id in the db when a new batch is created.
   #
   # @param [Symbol] batch_method_name The method name which will find or create the sidekiq batch
   #   for this job
@@ -65,6 +68,7 @@ module SidekiqBatchManager
   #   sidekiq batch. Use this to configure batch settings such as description or callbacks such
   #   as on_success.
   #
+  # BELOW ARE THE ANNOTATIONS FOR THE DEFINED METHOD
   # @return [Sidekiq::Batch] The batch of Sidekiq workers performing the current import, if any.
   #    Otherwise, creates a new one.
 
@@ -86,11 +90,12 @@ module SidekiqBatchManager
     end
   end
 
-  # Returns Sidekiq Batch Status if there is a batch.
+  # Defines the method which returns Sidekiq Batch Status if there is a batch.
   #
   # @param [Symbol] batch_status_method_name The method name for the method which returns the batch info.
   # @param [Symbol] bid_column_name The name of the database column where batch id is stored.
   #
+  # BELOW ARE THE ANNOTATIONS FOR THE DEFINED METHOD
   # @return [Sidekiq::Batch::Status, nil] Information about the batch of Sidekiq
   #   workers performing the current job, if any.
 
@@ -102,6 +107,17 @@ module SidekiqBatchManager
         update_attribute bid_column_name, nil
         nil
       end
+    end
+  end
+
+  # Defines the method which resets batch id column to nil.
+  #
+  # @param [Symbol] reset_batch_id_method_name The method name which will be defined.
+  # @param [Symbol] bid_column_name The name of the database column where batch id is stored.
+
+  def define_reset_batch_id_method(reset_batch_id_method_name, bid_column_name)
+    define_method(reset_batch_id_method_name) do
+      update! bid_column_name => nil
     end
   end
 end
