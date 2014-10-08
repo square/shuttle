@@ -19,8 +19,6 @@ class HomeController < ApplicationController
   PER_PAGE = 20
 
   before_filter :authenticate_user!
-  before_filter :translator_required, only: [:translators, :glossary]
-  before_filter :reviewer_required, only: :reviewers
 
   # Displays a landing page depending on the current User's role.
   #
