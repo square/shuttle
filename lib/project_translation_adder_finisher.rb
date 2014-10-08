@@ -17,11 +17,11 @@
 class ProjectTranslationAdderFinisher
 
   # Run by Sidekiq after a ProjectTranslationAdder batch finishes successfully.
-  # Triggers a ProjectTranslationAdderOnSuccess job
+  # Triggers a BatchKeyAndCommitRecalculator job
 
   def on_success(_status, options)
     project = Project.find(options['project_id'])
     project.update! translation_adder_batch_id: nil # TODO: this can be abstracted into the SidekiqBatchManager as well
-    ProjectTranslationAdderOnSuccess.perform_once project.id
+    BatchKeyAndCommitRecalculator.perform_once project.id
   end
 end

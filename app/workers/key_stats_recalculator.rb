@@ -32,6 +32,7 @@ class KeyStatsRecalculator
     key = Key.find(key_id)
     key.key_group.try!(:recalculate_ready!)
 
+    # TODO (yunus): rewrite this
     query = <<-SQL
       SELECT commit_id
         FROM commits_keys
