@@ -31,7 +31,6 @@ describe ProjectTranslationAdderOnSuccess do
       expect(CommitRecalculator).to receive(:perform_once).with(@commit2.id)
 
       ProjectTranslationAdderOnSuccess.new.perform(@project.id)
-      expect(@project.reload.translation_adder_batch_id).to be_nil
       expect(@key1.reload).to be_ready
       expect(@key2.reload).to be_ready
     end
