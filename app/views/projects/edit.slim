@@ -24,7 +24,13 @@
 
 .header
   h1 Edit settings for #{@project.name}
-  
 hr.divider
 
 = render partial: 'projects/form' 
+
+- if current_user.admin?
+  .header.advanced_actions_header
+    h1 Advanced Actions for #{@project.name}
+  hr.divider
+
+  = link_to "Mass Copy Translations From One Locale Into Another", setup_mass_copy_translations_project_url

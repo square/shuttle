@@ -78,6 +78,8 @@ Shuttle::Application.routes.draw do
     member do
       post 'github-pull-request-builder' => 'projects#github_webhook'
       post 'stash-pull-request-builder' => 'projects#stash_webhook'
+      get  'mass-copy-translations' => 'projects#setup_mass_copy_translations', as: :setup_mass_copy_translations
+      post 'mass-copy-translations' => 'projects#mass_copy_translations', as: :mass_copy_translations
     end
   end
 

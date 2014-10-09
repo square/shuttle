@@ -119,7 +119,21 @@ body.projects {
         margin-top: 7px;
       }
 
-    } 
+    }
+
+    .header.advanced_actions_header {
+      margin-top: 100px;
+    }
   }
 
+  &#projects-setup_mass_copy_translations, &#projects-mass_copy_translations {
+    input[type=submit] {
+      width: auto;
+    }
+
+    ul {
+      list-style-type: disc;
+      margin-left: 20px;
+    }
+  }
 }
