@@ -164,6 +164,7 @@ class Translation < ActiveRecord::Base
   }
   scope :approved, -> { where(translations: { approved: true }) }
   scope :not_approved, -> { where("translations.approved IS NOT TRUE") }
+  scope :not_translated, -> { where(translations: { translated: false } ) }
   scope :base, -> { where('translations.source_rfc5646_locale = translations.rfc5646_locale') }
   scope :not_base, -> { where('translations.source_rfc5646_locale != translations.rfc5646_locale') }
   scope :in_commit, ->(commit) {

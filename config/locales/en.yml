@@ -183,6 +183,9 @@ en:
         up_to_date: "%{project} is already up to date."
       destroy:
         gone: "%{project} has been removed."
+      mass_copy_translations:
+        success: "Success. Shuttle is now mass copying translations from %{from} to %{to}."
+        failure: "Failure. Not copying translations."
     translations:
       update:
         success: Translation updated.
@@ -201,6 +204,17 @@ en:
         success: The translation memory entry was deleted.
       update:
         success: The translation memory entry was updated.
+  workers:
+    translations_mass_copier:
+      from_and_to_cannot_be_equal: "Source and target locales cannot be equal to each other"
+      invalid_rfc5646_locale: "Invalid %{kind} locale"
+      iso639s_doesnt_match: "Source and target locales are not in the same language family (their ISO639s do not match)"
+      translation_adder_batch_still_running: "Project Translation Adder batch is still running. Try after it finishes."
+      from:
+        not_a_targeted_or_base_locale: "Source locale is neither the base locale nor one of the project target locales"
+      to:
+        not_a_targeted_locale: "Target locale is not one of the project target locales"
+        cannot_copy_to_projects_base_locale: "Cannot copy to project base locale"
   models:
     user:
       name: "%{first} %{last}"

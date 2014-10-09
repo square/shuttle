@@ -24,6 +24,17 @@ describe Translation do
         expect(Translation.not_approved.to_a).to eql([t2, t3])
       end
     end
+
+    describe "#not_translated" do
+      it "returns only not-translated translations" do
+        t1 = FactoryGirl.create :translation, copy: nil
+        t2 = FactoryGirl.create :translation, copy: nil
+        FactoryGirl.create :translation, approved: true,  copy: "fake"
+        FactoryGirl.create :translation, approved: false, copy: "fake"
+        FactoryGirl.create :translation, approved: nil,   copy: "fake"
+        expect(Translation.not_translated.to_a).to eql([t1, t2])
+      end
+    end
   end
 
   context "[hooks]" do

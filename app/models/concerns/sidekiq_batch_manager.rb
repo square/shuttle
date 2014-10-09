@@ -30,6 +30,7 @@
 #     # add jobs here
 #   end
 #   document.parse_batch_status
+#   document.reset_parse_batch_id
 #
 
 module SidekiqBatchManager
