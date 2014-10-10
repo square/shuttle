@@ -25,6 +25,7 @@ describe Localizer::Android do
 
     {
         '/java/basic-hdpi/strings.xml:string'              => 'Hallo!',
+        '/java/basic-hdpi/strings.xml:newlines'            => "Hallo! \n \n Welt \n",
         '/java/basic-hdpi/strings.xml:excluded'            => 'Welt!',
         '/java/basic-hdpi/strings.xml:special_chars'       => '(de) Êtes-vous sûr ?',
         '/java/basic-hdpi/strings.xml:quoted_escaped'      => "Hallo @ \\'Welt\\'",
@@ -50,6 +51,7 @@ describe Localizer::Android do
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="string">Hello!</string>
+  <string name="newlines">Hello \\n \\n world \\n</string>
   <string-array name="array">
 	<item>Hello</item>
 	<item>World</item>
@@ -84,6 +86,7 @@ describe Localizer::Android do
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="string">Hallo!</string>
+  <string name="newlines">Hallo! \\n \\n Welt \\n</string>
   <string-array name="array">
 	<item>Hallo</item>
 	<item>Welt</item>
