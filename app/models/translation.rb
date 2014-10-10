@@ -113,7 +113,7 @@ class Translation < ActiveRecord::Base
 
   after_commit :update_translation_memory, if: :apply_readiness_hooks?
 
-  after_destroy :recalculate_readiness
+  after_destroy :recalculate_readiness # TODO (yunus): is this really necessary?
 
   attr_readonly :source_rfc5646_locale, :rfc5646_locale, :key_id
 
