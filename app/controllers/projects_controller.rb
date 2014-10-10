@@ -17,6 +17,7 @@
 class ProjectsController < ApplicationController
   before_filter :authenticate_user!, except: [:stash_webhook]
   before_filter :monitor_required, only: [:new, :create, :edit, :update]
+  before_filter :admin_required, only: [:setup_mass_copy_translations, :mass_copy_translations]
   before_filter :find_project, except: [:index, :new, :create]
 
   before_filter(only: [:create, :update]) do
@@ -240,6 +241,62 @@ class ProjectsController < ApplicationController
       render status: :ok, text: 'Success'
     else
       render status: :bad_request, text: 'Repository url is blank'
+    end
+  end
+
+  # Shows a page were admins can configure settings to mass copy translations from one locale to another.
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:id/mass_copy_translations`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                   |
+  # |:-----|:------------------|
+  # | `id` | A Project's slug. |
+
+  def setup_mass_copy_translations
+  end
+
+  # Kicks off a job which will mass copy translations from one locale to another.
+  # It only copies from translations which are already approved.
+  # It only copies into translations which are not yet translated.
+  # It preserves the approved state.
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:id/mass_copy_translations`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                   |
+  # |:-----|:------------------|
+  # | `id` | A Project's slug. |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |                       |                                                          |
+  # |:----------------------|----------------------------------------------------------|
+  # | `from_rfc5646_locale` | The ref of the SHA that needs to be built                |
+  # | `to_rfc5646_locale`   | The SHA of the commit that should be built               |
+
+  def mass_copy_translations
+    errors = TranslationsMassCopier.find_locale_errors(@project, params[:from_rfc5646_locale], params[:to_rfc5646_locale])
+
+    if errors.blank?
+      TranslationsMassCopier.perform_once(@project.id, params[:from_rfc5646_locale], params[:to_rfc5646_locale])
+      flash[:success] = t('controllers.projects.mass_copy_translations.success',
+                          from: params[:from_rfc5646_locale], to: params[:to_rfc5646_locale])
+      redirect_to setup_mass_copy_translations_project_url(@project)
+    else
+      flash.now[:alert] = [t('controllers.projects.mass_copy_translations.failure')] + errors
+      render 'setup_mass_copy_translations'
     end
   end
 
