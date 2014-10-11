@@ -45,6 +45,12 @@ describe ProjectsController do
         expect(@project.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en en es es fr fr ja ja))
       end
 
+      it "runs ProjectTranslationAdder which removes unnecessary translations when a locale is removed" do
+        expect(ProjectTranslationAdder).to receive(:perform_once).and_call_original
+        patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+        expect(@project.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en en es es ja ja))
+      end
+
       it "switches keys' and commit's readiness from true to false when a new locale is added to a ready commit" do
         @project.translations.where(translated: false).each { |t| t.update! copy: 'fake', approved: true }
         @project.keys.each { |k| k.recalculate_ready! }

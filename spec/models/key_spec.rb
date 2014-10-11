@@ -415,6 +415,33 @@ describe Key do
       expect(excluded.translations.first.rfc5646_locale).to eql('fr')
     end
 
+    it "should remove an empty translation if it's not in project's targeted locales or in its base locale" do
+      project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es' => true})
+      key = FactoryGirl.create(:key, project: project)
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en', rfc5646_locale: 'tr', key: key, copy: nil
+      key.remove_excluded_pending_translations
+
+      expect(key.reload.translations).to be_empty
+    end
+
+    it "should not remove an empty translation if it's in project's targeted locales" do
+      project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es' => true})
+      key = FactoryGirl.create(:key, project: project)
+      translation = FactoryGirl.create :translation, source_rfc5646_locale: 'en', rfc5646_locale: 'es', key: key, copy: nil
+      key.remove_excluded_pending_translations
+
+      expect(key.reload.translations.to_a).to eql([translation])
+    end
+
+    it "should not remove an empty base translation" do
+      project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es' => true})
+      key = FactoryGirl.create(:key, project: project)
+      translation = FactoryGirl.create :translation, source_rfc5646_locale: 'en', rfc5646_locale: 'en', key: key, copy: nil
+      key.remove_excluded_pending_translations
+
+      expect(key.reload.translations.to_a).to eql([translation])
+    end
+
     context "[for KeyGroup related keys]" do
       it "should not remove a translation in a targeted locale of the KeyGroup even if it would have been removed according to the project settings" do
         project  = FactoryGirl.create(:project,
