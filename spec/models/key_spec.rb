@@ -329,8 +329,8 @@ describe Key do
       key      = FactoryGirl.create(:key, key: 'key', project: project)
       excluded = FactoryGirl.create(:key, key: 'excluded', project: project)
 
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: key, copy: nil
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: excluded, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: key, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: excluded, copy: nil
       FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'fr', key: excluded, copy: nil
 
       key.remove_excluded_pending_translations
@@ -347,8 +347,8 @@ describe Key do
       included = FactoryGirl.create(:key, key: 'included', project: project)
       excluded = FactoryGirl.create(:key, key: 'excluded', project: project)
 
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: included, copy: nil
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: excluded, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: included, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: excluded, copy: nil
       FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'fr', key: excluded, copy: nil
 
       included.remove_excluded_pending_translations
@@ -365,8 +365,8 @@ describe Key do
       key      = FactoryGirl.create(:key, key: 'key', project: project)
       excluded = FactoryGirl.create(:key, key: 'excluded', project: project)
 
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: key
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: excluded, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: key
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: excluded, copy: nil
       FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'fr', key: excluded, copy: nil
 
       key.remove_excluded_pending_translations
@@ -374,7 +374,7 @@ describe Key do
 
       expect(key.translations.count).to eql(1)
       expect(excluded.translations.count).to eql(1)
-      expect(excluded.translations.first.rfc5646_locale).to eql('en-US')
+      expect(excluded.translations.first.rfc5646_locale).to eql('de')
     end
 
     it "should not remove a translated translation not matching an included key" do
@@ -384,8 +384,8 @@ describe Key do
       included = FactoryGirl.create(:key, key: 'included', project: project)
       excluded = FactoryGirl.create(:key, key: 'excluded', project: project)
 
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: included, copy: nil
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: excluded, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: included, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: excluded, copy: nil
       FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'fr', key: excluded, copy: "hello!"
 
       included.remove_excluded_pending_translations
@@ -403,8 +403,8 @@ describe Key do
       key      = FactoryGirl.create(:key, key: 'included', project: project)
       excluded = FactoryGirl.create(:key, key: 'excluded', project: project)
 
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: key, copy: nil
-      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'en-US', key: excluded, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: key, copy: nil
+      FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: excluded, copy: nil
       FactoryGirl.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'fr', key: excluded, copy: "hello!"
 
       key.remove_excluded_pending_translations
