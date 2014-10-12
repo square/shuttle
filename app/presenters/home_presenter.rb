@@ -54,43 +54,36 @@ class HomePresenter
 
   # Prepares a query which will group translations in a way that we can extract stats from them easily afterwards.
   # Queries for not_approved translations.
-  #
-  # If @locales are present, it queries directly by their values, and doesn't select the rfc5646_locale field.
-  # If @locales aren't present, need to group by rfc5646_locale so that we can select it, and process it later.
 
   def translation_groups_with_stats
     query = Translation.not_base.not_approved.joins(:commits_keys)
-    query = query.group("commits_keys.commit_id, translations.translated")
-    query = query.select("commits_keys.commit_id, translations.translated, COUNT(*) AS translations_count, SUM(translations.words_count) AS words_count")
     query = query.where(commits_keys: { commit_id: @commits.map(&:id) } )
-    if @locales.present?
-      query.where(translations: { rfc5646_locale: @locales.map(&:rfc5646) })
-      # no need to select the `rfc5646_locale` field, it will be set to nil. why? imagine, 2 locales are given,
-      # what should be the rfc5646_locale value? We could concat them, but why bother.
-    else
-      query.group("translations.rfc5646_locale").select("translations.rfc5646_locale")
-    end
+    query = query.where(translations: { rfc5646_locale: @locales.map(&:rfc5646) }) if @locales.present?
+    query = query.group("commit_id, translated, rfc5646_locale")
+    query.select("commit_id, translated, rfc5646_locale, COUNT(*) AS translations_count, SUM(words_count) AS words_count")
   end
 
   # @param [Collection<Translation>] translation_groups Augmented translation objects. Each is required to
-  #   have these fields: `commit_id`, `translated`, `translations_count`, `words_count`.
-  #   `rfc5646_locale` is required only if locales aren't present.
+  #   have these fields: `commit_id`, `translated`, `translations_count`, `words_count`, `rfc5646_locale`.
   #
   # @return [Hash<Integer, Hash<Symbol, Hash<Symbol, Integer>>>] all the stats in a hash.
   #   Ex: a specific stat can be accessed by hsh[commit.id][:translations][:new]
 
   def parse_commit_stats(translation_groups)
     # prep
+    commit_id_to_targeted_rfc5646_locales_hsh = {}
     commit_id_to_required_rfc5646_locales_hsh = {}
     results = {}
     @commits.each do |commit|
+      commit_id_to_targeted_rfc5646_locales_hsh[commit.id] = commit.project.targeted_rfc5646_locales.keys
       commit_id_to_required_rfc5646_locales_hsh[commit.id] = commit.project.required_rfc5646_locales
       results[commit.id] = { translations: { pending: 0, new: 0 }, words: { pending: 0, new: 0 } }
     end
 
     # parse
     translation_groups.each do |tg|
-      if @locales.present? || commit_id_to_required_rfc5646_locales_hsh[tg.commit_id].include?(tg.rfc5646_locale) # if locales are present, rfc5646_locale wasn't fetched from db because it wasn't necessary.
+      if (@locales.present? && commit_id_to_targeted_rfc5646_locales_hsh[tg.commit_id].include?(tg.rfc5646_locale)) ||
+         (@locales.blank?   && commit_id_to_required_rfc5646_locales_hsh[tg.commit_id].include?(tg.rfc5646_locale))
         state = tg.translated? ? :pending : :new
         results[tg.commit_id][:translations][state] += tg.translations_count
         results[tg.commit_id][:words][state] += tg.words_count
