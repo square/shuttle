@@ -237,8 +237,10 @@ class Key < ActiveRecord::Base
   # only pending Translations.
 
   def remove_excluded_pending_translations
-    translations.where(approved: nil, translated: false).find_each do |translation|
-      translation.destroy if skip_key?(translation.locale)
+    translations.not_translated.where(approved: nil).find_each do |translation|
+      if skip_key?(translation.locale)
+        translation.destroy
+      end
     end
   end
 
