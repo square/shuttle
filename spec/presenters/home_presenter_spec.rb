@@ -84,10 +84,10 @@ describe HomePresenter do
 
       # Tests with a single (random) locale: 'tr'
       home_presenter = HomePresenter.new([commit1, commit2], %w(tr).map { |x| Locale.from_rfc5646(x) } )
-      expect(home_presenter.commit_stat(commit1, :translations, :new)).to eql(1)
-      expect(home_presenter.commit_stat(commit1, :translations, :pending)).to eql(1)
-      expect(home_presenter.commit_stat(commit1, :words, :new)).to eql(3)
-      expect(home_presenter.commit_stat(commit1, :words, :pending)).to eql(3)
+      expect(home_presenter.commit_stat(commit1, :translations, :new)).to eql(0) # should discard translations in 'tr' because 'tr' is not a targeted locale
+      expect(home_presenter.commit_stat(commit1, :translations, :pending)).to eql(0)
+      expect(home_presenter.commit_stat(commit1, :words, :new)).to eql(0)
+      expect(home_presenter.commit_stat(commit1, :words, :pending)).to eql(0)
 
       # Tests with a two locales (1 required, 1 optional): 'ja', 'es'
       home_presenter = HomePresenter.new([commit1, commit2], %w(ja es).map { |x| Locale.from_rfc5646(x) } )
