@@ -158,27 +158,30 @@ describe ProjectsController do
       project = FactoryGirl.create(:project,
                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                    base_rfc5646_locale: 'en',
-                                   targeted_rfc5646_locales: { 'en-CA' => true, 'es-US' => false},
+                                   targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' => true, 'es-US' => false},
                                    skip_imports: (Importer::Base.implementations.map(&:ident) - %w(android)))
       project.commit!('a26f7f6a09aa362ff777c0bec11fa084e66efe64')
       commit = Commit.for_revision('a26f7f6a09aa362ff777c0bec11fa084e66efe64').last
-      en_ca_translations = project.translations.where(rfc5646_locale: 'en-CA')
+
+      fr_translations = project.translations.where(rfc5646_locale: 'fr')
+      fr_ca_translations = project.translations.where(rfc5646_locale: 'fr-CA')
+      fr_translations.each { |t| t.update! copy: "#{t.source_copy} - autotranslated", approved: true } # assume all fr translations are done
 
       expect(commit).to_not be_ready
       commit.keys.each { |key| expect(key).to_not be_ready }
-      expect(en_ca_translations.not_translated.count).to eql(14)
+      expect(fr_ca_translations.not_translated.count).to eql(14)
 
       expect(TranslationsMassCopier).to receive(:perform_once).and_call_original
 
-      post :mass_copy_translations, { id: project.to_param, from_rfc5646_locale: 'en', to_rfc5646_locale: 'en-CA' }
+      post :mass_copy_translations, { id: project.to_param, from_rfc5646_locale: 'fr', to_rfc5646_locale: 'fr-CA' }
       expect(response).to redirect_to(mass_copy_translations_project_url(project))
-      expect(request.flash[:success]).to eql("Success. Shuttle is now mass copying translations from en to en-CA.")
+      expect(request.flash[:success]).to eql("Success. Shuttle is now mass copying translations from fr to fr-CA.")
 
       expect(commit.reload).to be_ready
       commit.keys.each { |key| expect(key).to be_ready }
-      expect(en_ca_translations.not_translated.count).to eql(0)
-      expect(en_ca_translations.approved.count).to eql(14)
-      expect(project.translations.base.map(&:copy)).to eql(en_ca_translations.reload.map(&:copy))
+      expect(fr_ca_translations.not_translated.count).to eql(0)
+      expect(fr_ca_translations.approved.count).to eql(14)
+      expect(fr_translations.map(&:copy)).to eql(fr_ca_translations.reload.map(&:copy))
     end
 
     it "doesn't override already translated translations" do
