@@ -75,21 +75,20 @@ module SidekiqBatchManager
 
   def define_batch_method(batch_method_name, bid_column_name, proc)
     define_method(batch_method_name) do
-      begin
-        if send(bid_column_name)
-          Sidekiq::Batch.new(send(bid_column_name))
-        else
-          batch = Sidekiq::Batch.new
-          instance_exec batch, &proc
-          update_attribute bid_column_name, batch.bid
-          batch
+      if send(bid_column_name)
+        begin
+          return Sidekiq::Batch.new(send(bid_column_name))
+        rescue Sidekiq::Batch::NoSuchBatch
         end
-      rescue Sidekiq::Batch::NoSuchBatch
-        update_attribute bid_column_name, nil
-        retry
       end
+
+      batch = Sidekiq::Batch.new
+      instance_exec batch, &proc
+      update_attribute bid_column_name, batch.bid
+      batch
     end
   end
+
 
   # Defines the method which returns Sidekiq Batch Status if there is a batch.
   #
