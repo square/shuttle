@@ -36,29 +36,14 @@ class TranslationsMassCopier
     errors = TranslationsMassCopier.find_locale_errors(project, from_rfc5646_locale, to_rfc5646_locale)
     raise ArgumentError, errors.join(". ") if errors.present?
 
-    # filter by current source_locale in case there are random translations floating around with different source_locales
-    query_template = project.translations.where(source_rfc5646_locale: project.base_rfc5646_locale)
+    key_ids = key_ids_with_copyable_translations(project, from_rfc5646_locale, to_rfc5646_locale)
+    return if key_ids.empty?
 
-    # Only copy from approved translations
-    from_translations = query_template.approved.where(rfc5646_locale: from_rfc5646_locale)
-    from_translations_indexed_by_key_id = from_translations.index_by(&:key_id)
-
-    # Only copy into not-translated not-base translations
-    to_translations = query_template.not_base.not_translated.where(rfc5646_locale: to_rfc5646_locale)
-
-    # Actually perform the copying operations
-    to_translations.each do |to_translation|
-      from_translation = from_translations_indexed_by_key_id[to_translation.key_id]
-      if from_translation && from_translation.source_copy == to_translation.source_copy
-        to_translation.update! copy: from_translation.copy,
-                               approved: true,
-                               skip_readiness_hooks: true,
-                               preserve_reviewed_status: true
+    mass_copier_batch(project_id, from_rfc5646_locale, to_rfc5646_locale).jobs do
+      key_ids.each do |key_id|
+        TranslationCopier.perform_once(key_id, from_rfc5646_locale, to_rfc5646_locale)
       end
     end
-
-    # readiness hooks were skipped above, so we need to run them now
-    BatchKeyAndCommitRecalculator.perform_once project.id
   end
 
   def self.find_locale_errors(project, from_rfc5646_locale, to_rfc5646_locale)
@@ -109,5 +94,46 @@ class TranslationsMassCopier
     []
   end
 
+  # Returns the key ids with translations which can be copied from the given source locale to the given target locale.
+  # Should only be called in the perform method of this worker.
+  # This method is particularly useful for projects with a lot of keys, and a small number of not finished translations.
+  # The reason is that it contains a few of the filters TranslationCopier uses, such as from `approved` to `not translated` and ` not base`.
+  # And, these copied filters improve performance since it prevents calling TranslationCopier if it's not necessary.
+  # Nevertheless, the source of truth for filters should be the TranslationCopier worker.
+
+  # @return [Array<Fixnum>] an array of key ids
+
+  # @private
+  def key_ids_with_copyable_translations(project, from_rfc5646_locale, to_rfc5646_locale)
+    from_translations_key_ids = project.translations.approved.where(rfc5646_locale: from_rfc5646_locale).pluck(:key_id)
+    to_translations_key_ids = project.translations.not_base.not_translated.where(rfc5646_locale: to_rfc5646_locale).pluck(:key_id)
+    from_translations_key_ids & to_translations_key_ids
+  end
+
+  # Returns a new batch every time it's called. Runs TranslationsMassCopier::Finisher on success.
+  # Should only be called in the perform method of this worker.
+
+  # @return [Sidekiq::Batch] a sidekiq batch
+
+  # @private
+  def mass_copier_batch(project_id, from_rfc5646_locale, to_rfc5646_locale)
+    b = Sidekiq::Batch.new
+    b.description = "Translations Mass Copier #{project_id} (#{from_rfc5646_locale} -> #{to_rfc5646_locale})"
+    b.on :success, TranslationsMassCopier::Finisher, project_id: project_id
+    b
+  end
+
   include SidekiqLocking
+
+  # Contains hooks run by Sidekiq upon completion of a TranslationsMassCopier batch.
+
+  class Finisher
+
+    # Run by Sidekiq after a TranslationsMassCopier batch finishes successfully.
+    # Triggers a BatchKeyAndCommitRecalculator job
+
+    def on_success(_status, options)
+      BatchKeyAndCommitRecalculator.perform_once options['project_id']
+    end
+  end
 end
