@@ -85,7 +85,7 @@ module Localizer
     private
 
     def escape(copy)
-      copy.gsub(/[\\'@]/, "\\" => "\\\\", "'" => "\\'", "@" => "\\@")
+      copy.gsub(/(\\|'|@|\n|\r\n)/, "\\" => "\\\\", "'" => "\\'", "@" => "\\@", "\n" => "\\n", "\r\n" => "\\n")
     end
   end
 end
