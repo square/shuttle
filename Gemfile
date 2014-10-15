@@ -1,6 +1,8 @@
 source 'https://rubygems.org'
 source 'https://0858cb81:19556f67@www.mikeperham.com/rubygems/'
 
+ruby '2.0.0', :patchlevel => '576'
+
 # FRAMEWORK
 gem 'rails', '4.0.9'
 gem 'configoro'
