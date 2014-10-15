@@ -46,7 +46,7 @@ describe Importer::Android do
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     only_paths:     %w(java/),
                                     skip_imports:   Importer::Base.implementations.map(&:ident) - %w(android))
-      @commit  = @project.commit!('HEAD')
+      @commit  = @project.commit!('74761bd84b6f675cc0dc59c5421f0d6d31d3c7ad')
     end
 
     it "should import strings from XML files" do
@@ -70,6 +70,7 @@ describe Importer::Android do
     it "should properly escape strings" do
       expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:unicode_chars').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Êtes-vous sûr ?')
       expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:escaped_chars').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello\\\n@\\nworld!")
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:newlines').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello\n\n   world!")
       expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:quoted_escaped').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello \\'world\\'")
       expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:unquoted_escaped').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello 'world'")
     end
