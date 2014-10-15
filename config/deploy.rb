@@ -14,7 +14,7 @@ set :linked_files, %w{  config/database.yml
 set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos tmp/working_repos}
 
 set :rvm_type, :system
-set :rvm_ruby_version, "2.0.0-p576@#{fetch :application}"
+set :rvm_ruby_version, "2.0.0-p353@#{fetch :application}"
 
 set :whenever_roles, :cron
 set :sidekiq_role, :sidekiq
