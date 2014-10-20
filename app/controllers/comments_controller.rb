@@ -56,11 +56,11 @@ class CommentsController < ApplicationController
 
     issue = Issue.includes(comments: :user).find_by_id!(@issue.id)
 
-    render 'create', locals: { project: issue.project,
-                               key: issue.key,
-                               translation: issue.translation,
-                               issue: issue,
-                               comment: ( comment.errors.present? ? comment : Comment.new) }
+    render 'issues/update.js.erb', locals: { project: issue.project,
+                                             key: issue.key,
+                                             translation: issue.translation,
+                                             issue: issue,
+                                             comment: ( comment.errors.present? ? comment : Comment.new) }
   end
 
   private
