@@ -108,7 +108,7 @@ module Importer
 
     def unescape(string)
       result = ''
-      if string =~ /^"(.+?)"$/
+      if string =~ /^(".+?")$/
         result = $1
       else
         scanner = UnicodeScanner.new(string)
