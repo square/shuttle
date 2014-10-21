@@ -22,7 +22,7 @@ module Localizer
     include AndroidQualifiers
 
     # XML files that could contain localizable resources.
-    FILENAMES = %w(strings.xml arrays.xml plurals.xml titles.xml)
+    FILENAMES = %w(country_names.xml strings.xml arrays.xml plurals.xml titles.xml)
 
     def self.localizable?(project, key)
       _, qualifiers = AndroidQualifiers::parse_qualifiers(::File.basename(::File.dirname(key.source)))
