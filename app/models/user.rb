@@ -32,35 +32,26 @@
 # Associations
 # ============
 #
-# |                         |                                                                    |
-# |:------------------------|:-------------------------------------------------------------------|
-# | `authored_translations` | The {Translation Translations} this User has contributed.          |
-# | `reviewed_translations` | The {Translation Translations} this User has approved or rejected. |
-# | `commits`               | All {Commit Commits} submitted by this User for translation.       |
-# | `issues`                | All {Issue Issues} reported by this User.                          |
-# | `comments`              | All {Comment Comments} written by this User.                       |
+# |                         |                                                                              |
+# |:------------------------|:-----------------------------------------------------------------------------|
+# | `authored_translations` | The {Translation Translations} this User has contributed.                    |
+# | `reviewed_translations` | The {Translation Translations} this User has approved or rejected.           |
+# | `commits`               | All {Commit Commits} submitted by this User for translation.                 |
+# | `issues`                | All {Issue Issues} reported by this User.                                    |
+# | `comments`              | All {Comment Comments} written by this User.                                 |
 #
 # Properties
 # ==========
 #
-# |         |                                                                                                              |
-# |:--------|:-------------------------------------------------------------------------------------------------------------|
-# | `role`  | This user's role, determining what actions they are authorized to perform. If `nil`, the user is unapproved. |
-# | `email` | The User's email address.                                                                                    |
+# |                    |                                                                                                              |
+# |:-------------------|:-------------------------------------------------------------------------------------------------------------|
+# | `role`             | This user's role, determining what actions they are authorized to perform. If `nil`, the user is unapproved. |
+# | `email`            | The User's email address.                                                                                    |
+# | `first_name`       | The User's first name.                                                                                       |
+# | `last_name`        | The User's last name.                                                                                        |
+# | `approved_locales` | A list of locales that this translator or reviewer is approved to work with.                                 |
 #
 # There are other columns used by Devise; see the Devise documentation for
-# details.
-#
-# Metadata
-# ========
-#
-# |                    |                                                                              |
-# |:-------------------|------------------------------------------------------------------------------|
-# | `first_name`       | The User's first name.                                                       |
-# | `last_name`        | The User's last name.                                                        |
-# | `approved_locales` | A list of locales that this translator or reviewer is approved to work with. |
-#
-# There are other fields used by Devise; see the Devise documentation for
 # details.
 
 class User < ActiveRecord::Base
@@ -81,20 +72,6 @@ class User < ActiveRecord::Base
 
   include HasMetadataColumn
   has_metadata_column(
-      first_name:               {presence: true, length: {maximum: 100}},
-      last_name:                {presence: true, length: {maximum: 100}},
-      encrypted_password:       {presence: true},
-      remember_created_at:      {type: Time, allow_nil: true},
-      current_sign_in_at:       {type: Time, allow_nil: true},
-      last_sign_in_at:          {type: Time, allow_nil: true},
-      current_sign_in_ip:       {type: String, allow_nil: true},
-      last_sign_in_ip:          {type: String, allow_nil: true},
-      confirmed_at:             {type: Time, allow_nil: true},
-      confirmation_sent_at:     {type: Time, allow_nil: true},
-      locked_at:                {type: Time, allow_nil: true},
-      reset_password_sent_at:   {type: Time, allow_nil: true},
-      approved_rfc5646_locales: {type: Array, allow_nil: false, default: []},
-
       deprecated__first_name:               {allow_nil: true},
       deprecated__last_name:                {allow_nil: true},
       deprecated__encrypted_password:       {allow_nil: true},
@@ -110,15 +87,17 @@ class User < ActiveRecord::Base
       deprecated__approved_rfc5646_locales: {type: Array, allow_nil: false, default: []},
   )
 
+  serialize :approved_rfc5646_locales, Array
+
   extend LocaleField
   locale_field :approved_locales,
                from:   :approved_rfc5646_locales,
                reader: ->(values) { values.map { |v| Locale.from_rfc5646 v } },
                writer: ->(values) { values.map(&:rfc5646) }
 
-  validates :role,
-            inclusion: {in: ROLES},
-            allow_nil: true
+  validates :first_name, presence: true, length: { minimum: 1, maximum: 100 }
+  validates :last_name, presence: true,  length: { minimum: 1, maximum: 100 }
+  validates :role, inclusion: {in: ROLES}, allow_nil: true
 
   extend SetNilIfBlank
   set_nil_if_blank :role
