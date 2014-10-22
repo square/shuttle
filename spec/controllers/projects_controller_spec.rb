@@ -21,7 +21,7 @@ describe ProjectsController do
     context "[git-based]" do
       before :each do
         @request.env['devise.mapping'] = Devise.mappings[:user]
-        @user = FactoryGirl.create(:user, role: 'monitor')
+        @user = FactoryGirl.create(:user, :activated)
         sign_in @user
 
         @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true}, base_rfc5646_locale: 'en')
@@ -80,7 +80,7 @@ describe ProjectsController do
     before :each do
       @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: [ 'master' ])
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, role: 'monitor')
+      @user = FactoryGirl.create(:user, :activated)
       sign_in @user
       @request.accept = "application/json"
       post :github_webhook, { id: @project.to_param, payload: "{\"ref\":\"refs/head/master\",\"after\":\"HEAD\"}" }
@@ -113,7 +113,7 @@ describe ProjectsController do
     before :each do
       @project = FactoryGirl.create(:project)
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, role: 'admin')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'admin')
       sign_in @user
     end
 
@@ -135,7 +135,7 @@ describe ProjectsController do
   describe "#mass_copy_translations" do
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, role: 'admin')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'admin')
       sign_in @user
     end
 

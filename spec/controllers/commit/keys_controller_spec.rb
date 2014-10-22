@@ -36,7 +36,7 @@ describe Commit::KeysController do
       @keys.each &:add_pending_translations
       @commit.keys = @keys
 
-      @user = FactoryGirl.create(:user, role: 'monitor')
+      @user = FactoryGirl.create(:user, :activated)
 
       regenerate_elastic_search_indexes
 
