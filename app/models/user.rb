@@ -70,23 +70,6 @@ class User < ActiveRecord::Base
   has_many :issues, inverse_of: :user, dependent: :nullify
   has_many :comments, inverse_of: :user, dependent: :nullify
 
-  include HasMetadataColumn
-  has_metadata_column(
-      deprecated__first_name:               {allow_nil: true},
-      deprecated__last_name:                {allow_nil: true},
-      deprecated__encrypted_password:       {allow_nil: true},
-      deprecated__remember_created_at:      {type: Time, allow_nil: true},
-      deprecated__current_sign_in_at:       {type: Time, allow_nil: true},
-      deprecated__last_sign_in_at:          {type: Time, allow_nil: true},
-      deprecated__current_sign_in_ip:       {type: String, allow_nil: true},
-      deprecated__last_sign_in_ip:          {type: String, allow_nil: true},
-      deprecated__confirmed_at:             {type: Time, allow_nil: true},
-      deprecated__confirmation_sent_at:     {type: Time, allow_nil: true},
-      deprecated__locked_at:                {type: Time, allow_nil: true},
-      deprecated__reset_password_sent_at:   {type: Time, allow_nil: true},
-      deprecated__approved_rfc5646_locales: {type: Array, allow_nil: false, default: []},
-  )
-
   serialize :approved_rfc5646_locales, Array
 
   extend LocaleField
@@ -165,7 +148,6 @@ class User < ActiveRecord::Base
     options[:except] <<  :current_sign_in_ip
     options[:except] <<  :last_sign_in_ip
     options[:except] <<  :locked_at
-    options[:except] <<  :metadata
 
     options[:methods] = Array.wrap(options[:methods])
     options[:methods] << :name

@@ -643,7 +643,6 @@ ALTER SEQUENCE translations_id_seq OWNED BY translations.id;
 CREATE TABLE users (
     id integer NOT NULL,
     email character varying(255) NOT NULL,
-    metadata text,
     reset_password_token character varying(255),
     sign_in_count integer DEFAULT 0 NOT NULL,
     failed_attempts integer DEFAULT 0 NOT NULL,
@@ -1523,3 +1522,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141002074759');
 INSERT INTO schema_migrations (version) VALUES ('20141022174649');
 
 INSERT INTO schema_migrations (version) VALUES ('20141022191209');
+
+INSERT INTO schema_migrations (version) VALUES ('20141022223754');
