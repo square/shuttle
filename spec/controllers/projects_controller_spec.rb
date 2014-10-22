@@ -181,7 +181,7 @@ describe ProjectsController do
       commit.keys.each { |key| expect(key).to be_ready }
       expect(fr_ca_translations.not_translated.count).to eql(0)
       expect(fr_ca_translations.approved.count).to eql(14)
-      expect(fr_translations.map(&:copy)).to eql(fr_ca_translations.reload.map(&:copy))
+      expect(fr_translations.map(&:copy).sort).to eql(fr_ca_translations.reload.map(&:copy).sort)
     end
 
     it "doesn't override already translated translations" do
