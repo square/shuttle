@@ -126,7 +126,7 @@ class User < ActiveRecord::Base
   # For all other email addresses, admin approval is required for them to use the application.
   def after_confirmation
     privileged_domains = Shuttle::Configuration.app[:domains_to_get_monitor_role_after_email_confirmation]
-    if privileged_domains && privileged_domains.include?(Mail::Address.new(email).domain)
+    if privileged_domains && privileged_domains.include?(email_domain)
       update(role: 'monitor')
     end
   end
@@ -193,5 +193,10 @@ class User < ActiveRecord::Base
   def inspect(default_behavior=false)
     return super() if default_behavior
     "#<#{self.class.to_s} #{id}: #{email} (#{role})>"
+  end
+
+  # @private
+  def email_domain
+    Mail::Address.new(email).domain
   end
 end

@@ -70,6 +70,13 @@ describe User do
     end
   end
 
+  describe '#email_domain' do
+    it "returns 'example.com' for email address 'test@example.com'" do
+      user = FactoryGirl.create(:user, email: "test@example.com")
+      expect(user.email_domain).to eql('example.com')
+    end
+  end
+
   context '[Integration Tests]' do
     it "sets user's role to monitor after a successful confirmation if their email address' domain is a privileged domain name" do
       user = FactoryGirl.create(:user, role: nil, email: "test@mycompany.com")
