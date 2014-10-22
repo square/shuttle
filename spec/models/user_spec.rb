@@ -36,7 +36,6 @@ describe User do
       it "returns confirmed users" do
         confirmed = FactoryGirl.create(:user, :confirmed)
         not_confirmed = FactoryGirl.create(:user)
-        not_confirmed.update_columns confirmed_at: nil
         expect(User.confirmed.to_a).to eql([confirmed])
       end
     end
@@ -46,7 +45,6 @@ describe User do
         activated = FactoryGirl.create(:user, :activated)
         not_with_role = FactoryGirl.create(:user, :confirmed)
         not_confirmed = FactoryGirl.create(:user)
-        not_confirmed.update_columns confirmed_at: nil
         expect(User.activated.to_a).to eql([activated])
       end
     end
@@ -69,10 +67,10 @@ describe User do
 
   context 'unauthorized user' do
     let(:role) { nil }
-    it 'authorizes user when role is no longer nil' do
+    it "doesn't confirm user when role is no longer nil" do
       expect(user.confirmed_at).to be_nil
-      user.update_attribute(:role, 'monitor')
-      expect(user.confirmed_at).to_not be_nil
+      user.update!(role: 'monitor')
+      expect(user.confirmed_at).to be_nil
     end
   end
 
@@ -111,7 +109,6 @@ describe User do
 
     it "returns false if user is not confirmed even if the user has a role" do
       user = FactoryGirl.create(:user, role: 'monitor')
-      user.update_columns confirmed_at: nil
       expect(user.activated?).to be_false
     end
   end

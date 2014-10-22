@@ -19,7 +19,7 @@ describe Locale::TranslationsController do
     context "[filtering]" do
       before :each do
         reset_elastic_search
-        @user    = FactoryGirl.create(:user, role: 'translator')
+        @user    = FactoryGirl.create(:user, :confirmed, role: 'translator')
         @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: {'fr-CA' => true})
 
         @translated_key = FactoryGirl.create(:key, project: @project)

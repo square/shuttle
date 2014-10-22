@@ -18,7 +18,7 @@ describe TranslationUnitsController do
   describe "#index" do
     it "should not allow a non-reviewer" do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      sign_in FactoryGirl.create(:user, role: 'translator')
+      sign_in FactoryGirl.create(:user, :confirmed, role: 'translator')
       get :index
       expect(response).to be_redirect
     end
@@ -28,7 +28,7 @@ describe TranslationUnitsController do
         reset_elastic_search
         TranslationUnit.delete_all
         @trans_units_list = FactoryGirl.create_list(:translation_unit, 51).sort_by(&:id).reverse
-        @user = FactoryGirl.create(:user, role: 'reviewer')
+        @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
         regenerate_elastic_search_indexes
 
         @request.env["devise.mapping"] = Devise.mappings[:user]
@@ -66,7 +66,7 @@ describe TranslationUnitsController do
         @tus_source_bar = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "bar #{i}", copy: "baz #{i}", rfc5646_locale: 'ja') }.sort_by!(&:id).reverse!
         @tus_target_foo = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "baz #{i}", copy: "foo #{i}", rfc5646_locale: 'fr') }.sort_by!(&:id).reverse!
         @tus_target_bar = 5.times.map { |i| FactoryGirl.create(:translation_unit, source_copy: "baz #{i}", copy: "bar #{i}", rfc5646_locale: 'ja') }.sort_by!(&:id).reverse!
-        @user           = FactoryGirl.create(:user, role: 'reviewer')
+        @user           = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
         regenerate_elastic_search_indexes
 
         @request.env['devise.mapping'] = Devise.mappings[:user]
@@ -97,14 +97,14 @@ describe TranslationUnitsController do
   describe "#edit" do
     it "should not allow a non-reviewer" do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      sign_in FactoryGirl.create(:user, role: 'translator')
+      sign_in FactoryGirl.create(:user, :confirmed, role: 'translator')
       get :edit, id: FactoryGirl.create(:translation_unit).id
       expect(response).to be_redirect
     end
 
     context "[authenticated user]" do
       before :each do
-        @user = FactoryGirl.create(:user, role: 'reviewer')
+        @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
         @tu                            = FactoryGirl.create(:translation_unit)
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user
@@ -126,7 +126,7 @@ describe TranslationUnitsController do
   describe "#update" do
     it "should not allow a non-reviewer" do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      sign_in FactoryGirl.create(:user, role: 'translator')
+      sign_in FactoryGirl.create(:user, :confirmed, role: 'translator')
       put :update,
           id:               FactoryGirl.create(:translation_unit).id,
           translation_unit: {copy: 'new'}
@@ -135,7 +135,7 @@ describe TranslationUnitsController do
 
     context "[authenticated user]" do
       before :each do
-        @user = FactoryGirl.create(:user, role: 'reviewer')
+        @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
         @tu                            = FactoryGirl.create(:translation_unit)
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user
@@ -173,14 +173,14 @@ describe TranslationUnitsController do
   describe "#destroy" do
     it "should not allow a non-reviewer" do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      sign_in FactoryGirl.create(:user, role: 'translator')
+      sign_in FactoryGirl.create(:user, :confirmed, role: 'translator')
       delete :destroy, id: FactoryGirl.create(:translation_unit).id
       expect(response).to be_redirect
     end
 
     context "[authenticated user]" do
       before :each do
-        @user = FactoryGirl.create(:user, role: 'reviewer')
+        @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
         @tu                            = FactoryGirl.create(:translation_unit)
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user

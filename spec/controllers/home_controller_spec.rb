@@ -18,7 +18,7 @@ describe HomeController do
   context "[when 'uncompleted' filter is selected and locales are specified]" do
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, role: 'monitor')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
       sign_in @user
 
       @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'ja'=>true, 'es'=>false}, base_rfc5646_locale: 'en')

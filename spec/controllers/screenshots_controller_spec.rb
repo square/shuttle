@@ -15,9 +15,9 @@
 require 'spec_helper'
 
 describe ScreenshotsController do
-  let(:monitor)         { FactoryGirl.create(:user, role: 'monitor') }
-  let(:translator)      { FactoryGirl.create(:user, role: 'translator') }
-  let(:reviewer)        { FactoryGirl.create(:user, role: 'reviewer') }
+  let(:monitor)         { FactoryGirl.create(:user, :confirmed, role: 'monitor') }
+  let(:translator)      { FactoryGirl.create(:user, :confirmed, role: 'translator') }
+  let(:reviewer)        { FactoryGirl.create(:user, :confirmed, role: 'reviewer') }
   let(:commit)          { FactoryGirl.create(:commit) }
   let(:screenshot)      { FactoryGirl.attributes_for :screenshot }
   let(:bad_screenshot)  { FactoryGirl.attributes_for :screenshot, image: File.new(Rails.root.join('spec', 'fixtures', 'test.txt')) }
