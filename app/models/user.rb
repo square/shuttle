@@ -83,21 +83,31 @@ class User < ActiveRecord::Base
   has_metadata_column(
       first_name:               {presence: true, length: {maximum: 100}},
       last_name:                {presence: true, length: {maximum: 100}},
-
       encrypted_password:       {presence: true},
       remember_created_at:      {type: Time, allow_nil: true},
       current_sign_in_at:       {type: Time, allow_nil: true},
       last_sign_in_at:          {type: Time, allow_nil: true},
       current_sign_in_ip:       {type: String, allow_nil: true},
       last_sign_in_ip:          {type: String, allow_nil: true},
-
       confirmed_at:             {type: Time, allow_nil: true},
       confirmation_sent_at:     {type: Time, allow_nil: true},
-
       locked_at:                {type: Time, allow_nil: true},
       reset_password_sent_at:   {type: Time, allow_nil: true},
-
       approved_rfc5646_locales: {type: Array, allow_nil: false, default: []},
+
+      deprecated__first_name:               {allow_nil: true},
+      deprecated__last_name:                {allow_nil: true},
+      deprecated__encrypted_password:       {allow_nil: true},
+      deprecated__remember_created_at:      {type: Time, allow_nil: true},
+      deprecated__current_sign_in_at:       {type: Time, allow_nil: true},
+      deprecated__last_sign_in_at:          {type: Time, allow_nil: true},
+      deprecated__current_sign_in_ip:       {type: String, allow_nil: true},
+      deprecated__last_sign_in_ip:          {type: String, allow_nil: true},
+      deprecated__confirmed_at:             {type: Time, allow_nil: true},
+      deprecated__confirmation_sent_at:     {type: Time, allow_nil: true},
+      deprecated__locked_at:                {type: Time, allow_nil: true},
+      deprecated__reset_password_sent_at:   {type: Time, allow_nil: true},
+      deprecated__approved_rfc5646_locales: {type: Array, allow_nil: false, default: []},
   )
 
   extend LocaleField
