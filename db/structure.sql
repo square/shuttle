@@ -652,6 +652,20 @@ CREATE TABLE users (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     confirmation_token character varying(255),
+    first_name character varying(255) NOT NULL,
+    last_name character varying(255) NOT NULL,
+    encrypted_password character varying(255) NOT NULL,
+    remember_created_at timestamp without time zone,
+    current_sign_in_at timestamp without time zone,
+    last_sign_in_at timestamp without time zone,
+    current_sign_in_ip character varying(255),
+    last_sign_in_ip character varying(255),
+    confirmed_at timestamp without time zone,
+    confirmation_sent_at timestamp without time zone,
+    locked_at timestamp without time zone,
+    reset_password_sent_at timestamp without time zone,
+    approved_rfc5646_locales text,
+    CONSTRAINT encrypted_password_exists CHECK ((char_length((encrypted_password)::text) > 20)),
     CONSTRAINT users_email_check CHECK ((char_length((email)::text) > 0)),
     CONSTRAINT users_failed_attempts_check CHECK ((failed_attempts >= 0)),
     CONSTRAINT users_sign_in_count_check CHECK ((sign_in_count >= 0))
@@ -1507,3 +1521,5 @@ INSERT INTO schema_migrations (version) VALUES ('20140930013949');
 INSERT INTO schema_migrations (version) VALUES ('20141002074759');
 
 INSERT INTO schema_migrations (version) VALUES ('20141022174649');
+
+INSERT INTO schema_migrations (version) VALUES ('20141022191209');
