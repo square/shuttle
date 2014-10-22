@@ -29,6 +29,7 @@ $(document).ready ->
         $(@).siblings('.form-wrapper').show()
         preventDefaultAndStopPropagation(event)
 
+########################################################################################################################
 
     # Adds an overlay over the wrapper to prevent UI interaction with wrapper.
     # Adds a spinner to the overlay.
@@ -43,6 +44,8 @@ $(document).ready ->
 
     $(document).on 'click', '#issues .loading-overlayable input[type=submit]', (event) ->
       addLoadingOverlay(@)
+
+########################################################################################################################
 
     # If the url contains an anchor is something like "...#issue-wrapper-12?...",
     # finds the add comment form within that anchor, and imitates a click on it
