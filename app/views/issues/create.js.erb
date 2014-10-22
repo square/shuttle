@@ -14,6 +14,7 @@
 #    limitations under the License.
 %>
 
+<% # Replace the entire issues html with updated html %>
 $('#issues').replaceWith('<%=j render partial: 'index', locals: {project: project, key: key, translation: translation, issues: issues, issue: issue} %>');
 
 <% if created_issue %>

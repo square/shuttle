@@ -14,4 +14,5 @@
 #    limitations under the License.
 %>
 
+<% # Replace the issue html with updated html %>
 $('#issues #issue-wrapper-<%= issue.id %>').replaceWith('<%=j render partial: 'issues/show_wrapper', locals: local_assigns %>');
