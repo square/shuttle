@@ -5,6 +5,9 @@
 # domain here if you trust them and don't want to have to manually activate users from within the company.
 domains_to_get_monitor_role_after_email_confirmation: TODO
 
+# Will be used to determine if the current user can use the autofill feature
+domains_who_can_search_users: ['squareup.com']
+
 # Will be used to determine the url of a commit
 github_enterprise_domain: "git.squareup.com"
 

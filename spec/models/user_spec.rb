@@ -130,6 +130,18 @@ describe User do
     end
   end
 
+  describe '#can_search_users?' do
+    it "returns true if user's email domain allows for searching" do
+      user = FactoryGirl.create(:user, :activated, email: "test@mycompany.com")
+      expect(user.can_search_users?).to be_true
+    end
+
+    it "returns false if user's email domain doesn't allow for searching" do
+      user = FactoryGirl.create(:user, :activated, email: "test@notallowed.com")
+      expect(user.can_search_users?).to be_false
+    end
+  end
+
   context '[Integration Tests]' do
     it "sets user's role to monitor after a successful confirmation if their email address' domain is a privileged domain name" do
       user = FactoryGirl.create(:user, role: nil, email: "test@mycompany.com")
