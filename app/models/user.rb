@@ -87,12 +87,6 @@ class User < ActiveRecord::Base
   extend SetNilIfBlank
   set_nil_if_blank :role
 
-  before_save :activate_user
-
-  def activate_user
-    self.confirmed_at ||= Time.now.utc if self.role.present?
-  end
-
   scope :has_role, -> { where("users.role IS NOT NULL") }
   scope :confirmed, -> { where("users.confirmed_at IS NOT NULL") }
   scope :activated, -> { has_role.confirmed }

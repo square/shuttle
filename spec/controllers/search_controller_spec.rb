@@ -22,7 +22,7 @@ describe SearchController do
       reset_elastic_search
 
       update_date = DateTime.new(2014, 1, 1)
-      @user = FactoryGirl.create(:user, role: 'translator')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
       @start_date = (update_date - 1.day).strftime('%m/%d/%Y')
       @end_date = (update_date + 1.day).strftime('%m/%d/%Y')
 
@@ -148,7 +148,7 @@ describe SearchController do
   describe '#keys' do
     before :each do
       reset_elastic_search
-      @user    = FactoryGirl.create(:user, role: 'translator')
+      @user    = FactoryGirl.create(:user, :confirmed, role: 'translator')
       @project = FactoryGirl.create(:project)
 
       5.times { |i| FactoryGirl.create :key, project: @project, key: "t1_n#{i}" }
@@ -221,7 +221,7 @@ describe SearchController do
     before :each do
       reset_elastic_search
 
-      @user     = FactoryGirl.create(:user, role: "translator")
+      @user     = FactoryGirl.create(:user, :confirmed, role: "translator")
       @project1 = FactoryGirl.create(:project)
       @project2 = FactoryGirl.create(:project)
       Commit.delete_all

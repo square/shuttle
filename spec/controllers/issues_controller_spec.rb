@@ -22,7 +22,7 @@ describe IssuesController do
   include Devise::TestHelpers
 
   before :each do
-    @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "foo@bar.com")
+    @user = FactoryGirl.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "foo@bar.com")
     @project = FactoryGirl.create(:project)
     @key = FactoryGirl.create(:key, project: @project)
     @translation = FactoryGirl.create(:translation, key: @key)

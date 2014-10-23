@@ -22,7 +22,7 @@ describe TranslationsController do
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @key = FactoryGirl.create(:key, project: @project)
       @translation = FactoryGirl.create(:translation, copy: 'some copy here', key: @key)
-      @user = FactoryGirl.create(:user, role: 'monitor')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end
@@ -36,7 +36,7 @@ describe TranslationsController do
 
   describe "#update" do
     before :each do
-      @user = FactoryGirl.create(:user, role: 'translator')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
       @translation = FactoryGirl.create(:translation, copy: nil, translated: false, approved: nil)
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
@@ -115,14 +115,14 @@ describe TranslationsController do
 
     context "[reviewer changes]" do
       before :each do
-        @user = FactoryGirl.create(:user, role: 'reviewer')
+        @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user
       end
 
       it "should automatically approve reviewer changes to an approved string" do
         @translation.copy = 'hello!'
-        @translation.translator = translator = FactoryGirl.create(:user, role: 'translator')
+        @translation.translator = translator = FactoryGirl.create(:user, :confirmed, role: 'translator')
         @translation.approved = true
         @translation.save!
         @translation.translation_changes.delete_all
@@ -170,7 +170,7 @@ describe TranslationsController do
 
       it "should automatically approve reviewer non-changes to a translated string" do
         @translation.copy = 'hello!'
-        @translation.translator = translator = FactoryGirl.create(:user, role: 'translator')
+        @translation.translator = translator = FactoryGirl.create(:user, :confirmed, role: 'translator')
         @translation.save!
         @translation.translation_changes.delete_all
 
@@ -305,7 +305,7 @@ describe TranslationsController do
 
   describe "#approve" do
     before :each do
-      @user = FactoryGirl.create(:user, role: 'reviewer')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
       @translation = FactoryGirl.create(:translation, copy: 'hello!', translated: true, approved: nil)
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
@@ -330,7 +330,7 @@ describe TranslationsController do
 
   describe "#reject" do
     before :each do
-      @user = FactoryGirl.create(:user, role: 'reviewer')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
     end
 
     before :each do
@@ -359,7 +359,7 @@ describe TranslationsController do
   describe "#match" do
     before :each do
       @project = FactoryGirl.create(:project)
-      @user = FactoryGirl.create(:user, role: 'reviewer')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
     end
 
     before :each do
@@ -477,7 +477,7 @@ describe TranslationsController do
 
   describe "#fuzzy_match" do
     before :each do
-      @user = FactoryGirl.create(:user, role: 'translator')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
     end
 
     before :each do
@@ -587,7 +587,7 @@ describe TranslationsController do
     describe "#update" do
      context "[Commit]" do
         before :each do
-          @user = FactoryGirl.create(:user, role: 'reviewer')
+          @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
           @request.env['devise.mapping'] = Devise.mappings[:user]
           sign_in @user
 
@@ -651,7 +651,7 @@ describe TranslationsController do
 
       context "[KeyGroup]" do
         before :each do
-          @user = FactoryGirl.create(:user, role: 'reviewer')
+          @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
           @request.env['devise.mapping'] = Devise.mappings[:user]
           sign_in @user
 

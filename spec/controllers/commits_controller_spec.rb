@@ -20,7 +20,7 @@ require 'fileutils'
 describe CommitsController do
   shared_examples_for "returns error string if repository_url is blank" do |action|
     it "should return an error string if repository_url is blank" do
-      user = FactoryGirl.create(:user, role: 'monitor')
+      user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in user
 
@@ -530,7 +530,7 @@ de:
                                     skip_imports: Importer::Base.implementations.map(&:ident) - %w(yaml))
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, role: 'monitor')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
       sign_in @user
 
       keys = Shuttle::Redis.keys('submitted_revision:*')
@@ -619,7 +619,7 @@ de:
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit                        = @project.commit!('HEAD', skip_import: true)
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, role: 'admin')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'admin')
       sign_in @user
     end
 
@@ -641,7 +641,7 @@ de:
     render_views
 
     before :each do
-      @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
+      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar")
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end
