@@ -117,4 +117,19 @@ $issue-status-yellow: #E4DB00;
     right: 0px;
     bottom: 0px;
   }
+
+  .issue-subscribed-emails.selectize-control {
+    .selectize-input [data-value] {
+      .email { opacity: 0.7; }
+      .name + .email { margin-left: 5px; }
+      .email:before { content: '<'; }
+      .email:after { content: '>'; }
+    }
+
+    .selectize-dropdown .caption {
+      font-size: 12px;
+      display: block;
+      opacity: 0.5;
+    }
+  }
 }
