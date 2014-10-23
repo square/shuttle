@@ -1,8 +1,8 @@
 language: ruby
 ruby:
  - ruby-2.0.0-p576
+test_command: 'script/ci'
 targets:
 - type: specs
   glob: spec/**/*_spec.rb
   workers: 30
-  queue_override: linux
