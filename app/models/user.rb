@@ -15,7 +15,9 @@
 # A user of this application. Users are identified by their email address and
 # authenticated with a password. Authentication is handled by Devise.
 #
-# Users have one of three roles:
+# Users become `activated` by confirming their email address and getting assigned a role.
+#
+# Users can have one of four roles:
 #
 # **Translators** can view localizable strings and contribute translations to
 # those strings in the locales they are comfortable with.
@@ -91,6 +93,10 @@ class User < ActiveRecord::Base
     self.confirmed_at ||= Time.now.utc if self.role.present?
   end
 
+  scope :has_role, -> { where("users.role IS NOT NULL") }
+  scope :confirmed, -> { where("users.confirmed_at IS NOT NULL") }
+  scope :activated, -> { has_role.confirmed }
+
   # Updates the user's role to 'monitor' if the user's email address' domain is one of
   # the `domains_to_get_monitor_role_after_email_confirmation` in settings.yml.
   # The reason is that we trust these email addresses, and don't need an admin to
@@ -136,6 +142,16 @@ class User < ActiveRecord::Base
   def has_access_to_locale?(locale_id)
     locale_id = locale_id.rfc5646 if locale_id.kind_of?(Locale)
     admin? || approved_rfc5646_locales.include?(locale_id.strip)
+  end
+
+  # @return [true, false] whether or not the user has a role and confirmed their email address
+  def activated?
+    has_role? && confirmed?
+  end
+
+  # @return [true, false] whether or not the user has a role
+  def has_role?
+    role.present?
   end
 
   # @private

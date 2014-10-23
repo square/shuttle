@@ -22,6 +22,36 @@ describe User do
     user
   end
 
+  context "[scopes]" do
+    describe "#has_role" do
+      it "returns monitors and translators, doesn't return users with role=nil" do
+        monitor = FactoryGirl.create(:user, role: 'monitor')
+        translator = FactoryGirl.create(:user, role: 'translator')
+        other = FactoryGirl.create(:user, role: nil)
+        expect(User.has_role.to_a.sort).to eql([monitor, translator].sort)
+      end
+    end
+
+    describe "#confirmed" do
+      it "returns confirmed users" do
+        confirmed = FactoryGirl.create(:user, :confirmed)
+        not_confirmed = FactoryGirl.create(:user)
+        not_confirmed.update_columns confirmed_at: nil
+        expect(User.confirmed.to_a).to eql([confirmed])
+      end
+    end
+
+    describe "#activated" do
+      it "returns activated users" do
+        activated = FactoryGirl.create(:user, :activated)
+        not_with_role = FactoryGirl.create(:user, :confirmed)
+        not_confirmed = FactoryGirl.create(:user)
+        not_confirmed.update_columns confirmed_at: nil
+        expect(User.activated.to_a).to eql([activated])
+      end
+    end
+  end
+
   context 'an admin user' do
     let(:role) {'admin'}
     it '#has_access_to_locale?() returns true if the user is an admin' do
@@ -67,6 +97,32 @@ describe User do
       expect(user.role).to be_nil
       user.after_confirmation
       expect(user.role).to be_nil
+    end
+  end
+
+  describe '#activated?' do
+    it "returns true if user has a role and is confirmed" do
+      expect(FactoryGirl.create(:user, :activated).activated?).to be_true
+    end
+
+    it "returns false if user doesn't have a role, even if the user is confirmed" do
+      expect(FactoryGirl.create(:user, :confirmed).activated?).to be_false
+    end
+
+    it "returns false if user is not confirmed even if the user has a role" do
+      user = FactoryGirl.create(:user, role: 'monitor')
+      user.update_columns confirmed_at: nil
+      expect(user.activated?).to be_false
+    end
+  end
+
+  describe '#has_role?' do
+    it "returns true if user's role is set" do
+      expect(FactoryGirl.create(:user, role: 'monitor').has_role?).to be_true
+    end
+
+    it "returns false if user's role is not set" do
+      expect(FactoryGirl.create(:user, role: nil).has_role?).to be_false
     end
   end
 
