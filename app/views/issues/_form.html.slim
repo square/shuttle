@@ -12,7 +12,7 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-= form_for [project, key, translation, issue], remote: true do |f|
+= form_for [project, key, translation, issue], remote: true, html: {class: 'issue-form'} do |f|
   - if issue.errors.any?
     .control-group.errors
       label.control-label Errors:
@@ -40,7 +40,7 @@
     = f.label :subscribed_emails, class: 'control-label'
     .controls
       - emails = issue.errors.any? ? issue.subscribed_emails : (issue.subscribed_emails + [current_user.email]).uniq
-      = f.text_field :subscribed_emails, value: emails.join(", "), placeholder: "person1@example.com, person2@example.com"
+      = f.text_field :subscribed_emails, value: emails.join(", "), placeholder: "person1@example.com, person2@example.com", class: "issue-subscribed-emails"
   - unless issue.new_record?
     .control-group
       = f.label :status, class: 'control-label'

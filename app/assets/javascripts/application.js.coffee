@@ -62,6 +62,8 @@
 #= require live_update
 #= require smart_form
 #= require scroll_to_with_data_attrs
+#= require selectize
+#= require selectize_with_defaults
 #
 #= require_tree ../templates
 #= require_tree ./application

@@ -57,3 +57,56 @@ $(document).ready ->
         $('#' + anchor_value).closest('.issue-wrapper').find(".comments .show-form-button").click()
 
     showAddCommentFormIfIssueAnchorExistsInUrl()
+
+########################################################################################################################
+
+    # Selectize subscribed_emails field
+    userSearchUrl = $('#issues').data('search-url')
+    autoFillEnabled = $('#issues').data('auto-fill')
+
+    selectizeSubscribedEmails = (elt) ->
+        $(elt).find('input.issue-subscribed-emails').selectizeWithDefaults({
+                    create: true,
+                    openOnFocus: false,
+                    selectOnTab: true,
+                    createOnBlur: true,
+                    delimiter: ', ',
+                    valueField: 'email',
+                    labelField: 'email',
+                    searchField: ['name', 'email'],
+                    loadThrottle: 100,
+                    maxOptions: 5,
+                    render: {
+                            item: (item, escape) ->
+                                '<div>' +
+                                    (if item.name then '<span class="name">' + escape(item.name) + '</span>' else '') +
+                                    (if item.email then '<span class="email">' + escape(item.email) + '</span>' else '') +
+                                '</div>';
+                            ,
+                            option: (item, escape) ->
+                                label = item.name || item.email;
+                                caption = if item.name then item.email else null;
+                                '<div>' +
+                                    '<span class="label">' + escape(label) + '</span>' +
+                                    (if caption then '<span class="caption">' + escape(caption) + '</span>' else '') +
+                                '</div>';
+                            },
+                    load: (query, callback) ->
+                            return callback() if query.length < 2
+                            $.ajax({
+                                url: userSearchUrl + '?query=' + encodeURIComponent(query),
+                                type: 'GET',
+                                dataType: 'json',
+                                error: () -> callback(),
+                                success: (res) -> callback(res)
+                            }) if autoFillEnabled
+                    ,
+                    createFilter: (input) ->
+                        match = input.match(/^\S+@\S+\.\S+$/)
+                        if match then !this.options.hasOwnProperty(match[0]) else false
+        })
+
+    # Subscribe to 'render' events in #issues so that we can re-selectize email fields after an issue is created or updated
+    $(document).on('render', '#issues .issue-form', (event) -> selectizeSubscribedEmails(this))
+    # Manually trigger 'render' event on all issue forms to set up selectized email fields after a full page reload
+    $('#issues .issue-form').trigger('render')

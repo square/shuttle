@@ -138,6 +138,12 @@ class User < ActiveRecord::Base
     admin? || approved_rfc5646_locales.include?(locale_id.strip)
   end
 
+  # @return [true, false] whether or not the user has permissions to search other users
+  def can_search_users?
+    allowed_domains = Shuttle::Configuration.app[:domains_who_can_search_users]
+    allowed_domains && allowed_domains.include?(email_domain)
+  end
+
   # @return [true, false] whether or not the user has a role and confirmed their email address
   def activated?
     has_role? && confirmed?

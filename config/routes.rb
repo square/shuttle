@@ -100,6 +100,7 @@ Shuttle::Application.routes.draw do
   end
 
   resources :users, only: [:index, :show, :update, :destroy] do
+    collection { get :search }
     member { post :become }
   end
 
