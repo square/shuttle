@@ -99,7 +99,7 @@ class User < ActiveRecord::Base
   def after_confirmation
     privileged_domains = Shuttle::Configuration.app[:domains_to_get_monitor_role_after_email_confirmation]
     if privileged_domains && privileged_domains.include?(email_domain)
-      update(role: 'monitor')
+      update(role: 'monitor') unless has_role?
     end
   end
 
