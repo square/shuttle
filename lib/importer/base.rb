@@ -302,11 +302,10 @@ module Importer
           KeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
         end
       elsif @commit
-        bulk_args = @keys.in_groups_of(100, false).map do |keys|
-          [@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys]
-        end
         @commit.import_batch.jobs do
-          Sidekiq::Client.push_bulk 'class' => KeyCreator, 'args' => bulk_args
+          @keys.in_groups_of(100, false).each do |keys|
+            KeyCreator.perform_once @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+          end
         end
       else
         @keys.in_groups_of(100, false) do |keys|

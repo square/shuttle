@@ -81,6 +81,8 @@ class KeyCreator
     Translation.tire.index.import keys.map(&:translations).flatten
   end
 
+  include SidekiqLocking
+
   private
 
   def add_string(key, value, options={})
