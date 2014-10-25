@@ -297,14 +297,19 @@ module Importer
       end
 
       # then spawn jobs to create those keys
-      @keys.in_groups_of(100, false) do |keys|
-        if inline
+      if inline
+        @keys.in_groups_of(100, false) do |keys|
           KeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
-        else
-          shuttle_jid = SecureRandom.uuid
-          @blob.add_worker! shuttle_jid
-          @commit.add_worker!(shuttle_jid) if @commit
-          KeyCreator.perform_async(@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys, shuttle_jid)
+        end
+      elsif @commit
+        @commit.import_batch.jobs do
+          @keys.in_groups_of(100, false).each do |keys|
+            KeyCreator.perform_once @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+          end
+        end
+      else
+        @keys.in_groups_of(100, false) do |keys|
+          KeyCreator.perform_async @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
         end
       end
     end
