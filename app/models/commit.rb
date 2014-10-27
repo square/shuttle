@@ -115,6 +115,7 @@ class Commit < ActiveRecord::Base
     indexes :revision, as: 'revision', index: :not_analyzed
     indexes :ready, type: 'boolean'
     indexes :exported, type: 'boolean'
+    indexes :key_ids, as: 'commits_keys.pluck(:key_id)'
   end
 
   validates :project,

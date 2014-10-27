@@ -25,6 +25,9 @@ describe HomeController do
       @commit = FactoryGirl.create(:commit, project: @project)
       @key = FactoryGirl.create(:key, project: @project)
       @commit.keys << @key
+
+      regenerate_elastic_search_indexes
+      sleep(2)
     end
 
     it "returns the commit with pending translations in specified locales, even if that commit is ready and the locale is optional" do
