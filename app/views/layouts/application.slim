@@ -56,9 +56,13 @@ html lang="en"
     - if flash[:alert]
       -if flash[:alert].is_a?(Array)
         javascript:
-          $(document).ready(function() { 
-            errors = JSON.parse("#{flash[:alert]}".replace(/&quot;/ig, '"'))
-            new Flash('alert').list(errors.shift(), errors);
+          var flashAlerts = [];
+        - flash[:alert].each_with_index do |err, i|
+          javascript:
+            flashAlerts[#{i}] = "#{j raw(flash[:alert][i])}";
+        javascript:
+          $(document).ready(function() {
+            new Flash('alert').list(flashAlerts.shift(), flashAlerts);
           });
       - else
         javascript:
