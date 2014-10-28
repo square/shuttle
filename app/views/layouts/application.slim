@@ -63,17 +63,17 @@ html lang="en"
       - else
         javascript:
           $(document).ready(function() { 
-            new Flash('alert').text("#{escape_javascript raw(flash[:alert]) }");
+            new Flash('alert').text("#{j raw(flash[:alert]) }");
           });
 
     - if flash[:notice]
       javascript:
         $(document).ready(function() { 
-          $(window).oneTime(250, function() { new Flash('notice' ).text("#{escape_javascript raw(flash[:notice]) }");})
+          $(window).oneTime(250, function() { new Flash('notice' ).text("#{j raw(flash[:notice]) }");})
         });
 
     - if flash[:success]
       javascript:
         $(document).ready(function() { 
-          $(window).oneTime(500, function() { new Flash('success').text("#{escape_javascript raw(flash[:success]) }");}) 
+          $(window).oneTime(500, function() { new Flash('success').text("#{j raw(flash[:success]) }");})
         });
