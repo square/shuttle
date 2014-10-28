@@ -17,14 +17,9 @@ Shuttle::Application.routes.draw do
     match '*glob' => redirect('https://shuttle.squareup.com'), via: [:get, :post, :put, :patch, :delete]
   end
   
-  # BLOCK DEVISE ROUTES
-  get 'users/sign_up', to: redirect('/users/sign_in#sign-up')
-  get 'users/password/new', to: redirect('/users/sign_in#forgot-password')
-  
   # AUTHENTICATION
   devise_for :users, controllers: {
-      registrations: 'registrations',
-      passwords: 'passwords'
+      registrations: 'registrations'
   }
 
   # API

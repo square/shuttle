@@ -4,10 +4,10 @@
 
 $form-radius-size: 4px;
 
-body.sessions, body.passwords {
+body.unified-authentication, body.passwords {
   background-image: image-url('login-background.jpg');
   background-color: $gray3;
-  background-repeat: no-repeat;
+  background-repeat: repeat-y;
   background-size: cover;
 
   #navbar-container {
@@ -17,7 +17,7 @@ body.sessions, body.passwords {
   .content-container {
     background-color: transparent;
     .modal-container {
-      background-color: transparent;      
+      background-color: transparent;
       letter-spacing: 1px;
 
       &>.row {
@@ -61,13 +61,19 @@ body.sessions, body.passwords {
               }
             }
           }
-          
-          .active {
-            @include box;
-          }
 
-          .inactive {
-            display: none;
+          .partial-page {
+            display: inline-block;
+            @include transition(all, 0.3s, ease);
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+
+            &.active {
+              @include box;
+              height: auto;
+              opacity: 1;
+            }
           }
 
           .body-portion {
@@ -119,5 +125,9 @@ body.sessions, body.passwords {
       }  // &>.row
     } // .modal-container
   } // .content-container
+
+  footer {
+    display: none;
+  }
 
 }  // .sessions
