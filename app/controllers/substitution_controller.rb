@@ -56,3 +56,4 @@ class SubstitutionController < ApplicationController
     end
   end
 end
+
