@@ -12,25 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Overrides Devise's registrations controller default params and paths
-
-class RegistrationsController < Devise::RegistrationsController
-  protected
-
-  # @private
-  def after_inactive_sign_up_path_for(resource)
-    new_user_session_url
-  end
-
-  # @private
-  def sign_up_params
-    params.require(:user).permit(:email, :first_name, :last_name, :password,
-                                 :password_confirmation)
-  end
-
-  # @private
-  def account_update_params
-    params.require(:user).permit(:first_name, :last_name, :password,
-                                 :password_confirmation)
-  end
-end
+$(document).ready () ->
+  if $('body.unified-authentication').length > 0
+    $('[data-switch-to]').on 'click', ->
+        $('.partial-page').removeClass('active')
+        $($(this).data('switch-to')).addClass('active')

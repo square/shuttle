@@ -21,6 +21,9 @@
 - content_for :id do 
   = [controller_name, action_name].join('-')
 
+ruby:
+  flash.now[:alert] = resource.errors.full_messages.unshift('Errors:') unless resource.errors.empty?
+
 .row.row-modal
   .three.columns &nbsp;
   .ten.columns 
