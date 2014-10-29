@@ -37,8 +37,6 @@ html lang="en"
     - if %w(registrations sessions passwords).exclude?(controller_name)
       = render partial: 'layouts/footer'
 
-    div id="flashes"
-    
     = javascript_include_tag "application"
     = yield :javascript
     script type='text/javascript'
@@ -51,31 +49,4 @@ html lang="en"
       = raw(ERB.new(File.read(js_erb_file)).result(binding)) if File.exist?(js_erb_file)
       = raw(CoffeeScript.compile(ERB.new(File.read(js_coffee_erb_file)).result(binding))) if File.exist?(js_coffee_erb_file)
 
-    - if flash[:alert]
-      -if flash[:alert].is_a?(Array)
-        javascript:
-          var flashAlerts = [];
-        - flash[:alert].each_with_index do |err, i|
-          javascript:
-            flashAlerts[#{i}] = "#{j raw(flash[:alert][i])}";
-        javascript:
-          $(document).ready(function() {
-            new Flash('alert').list(flashAlerts.shift(), flashAlerts);
-          });
-      - else
-        javascript:
-          $(document).ready(function() { 
-            new Flash('alert').text("#{j raw(flash[:alert]) }");
-          });
-
-    - if flash[:notice]
-      javascript:
-        $(document).ready(function() { 
-          $(window).oneTime(250, function() { new Flash('notice' ).text("#{j raw(flash[:notice]) }");})
-        });
-
-    - if flash[:success]
-      javascript:
-        $(document).ready(function() { 
-          $(window).oneTime(500, function() { new Flash('success').text("#{j raw(flash[:success]) }");})
-        });
+    = render partial: 'layouts/flashes'
