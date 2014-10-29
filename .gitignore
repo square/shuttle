@@ -2,3 +2,4 @@
 .yardoc
 .sass-cache
 .validation
+tmp/**
