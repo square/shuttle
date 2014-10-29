@@ -32,11 +32,9 @@ html lang="en"
       .content-container 
         .container.modal-container 
           = yield
-
-      - if yield(:class) != 'sessions'
         .push
 
-    - if %w(sessions passwords).exclude? yield(:class)
+    - if %w(registrations sessions passwords).exclude?(controller_name)
       = render partial: 'layouts/footer'
 
     div id="flashes"
