@@ -17,13 +17,9 @@ div id="flashes"
 - if flash[:alert]
   -if flash[:alert].is_a?(Array)
     javascript:
-      var flashAlerts = [];
-    - flash[:alert].each_with_index do |err, i|
-      javascript:
-        flashAlerts[#{i}] = "#{j raw(flash[:alert][i])}";
-    javascript:
       $(document).ready(function() {
-        new Flash('alert').list(flashAlerts.shift(), flashAlerts);
+        var errors = JSON.parse("#{raw j(flash[:alert].to_json)}");
+        new Flash('alert').list(errors.shift(), errors);
       });
   - else
     javascript:
