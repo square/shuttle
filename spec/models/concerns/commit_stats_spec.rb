@@ -47,6 +47,7 @@ describe CommitStats do
       # without locales
       expect(@commit.strings_total).to eql(2)
       expect(@commit.translations_done).to eql(2)
+      expect(@commit.translations_not_done).to eql(2)
       expect(@commit.translations_pending).to eql(1)
       expect(@commit.translations_new).to eql(1)
       expect(@commit.translations_total).to eql(4)
@@ -57,6 +58,7 @@ describe CommitStats do
       expect(@commit.translations_done(*%w(fr).map { |rfc5646| Locale.from_rfc5646(rfc5646) } )).to eql(2)
       expect(@commit.translations_pending(*%w(ja de).map { |rfc5646| Locale.from_rfc5646(rfc5646) } )).to eql(2)
       expect(@commit.translations_new(*%w(ja).map { |rfc5646| Locale.from_rfc5646(rfc5646) } )).to eql(1)
+      expect(@commit.translations_not_done(*%w(ja fr de).map { |rfc5646| Locale.from_rfc5646(rfc5646) } )).to eql(3)
       expect(@commit.translations_total(*%w(fr de ja tr).map { |rfc5646| Locale.from_rfc5646(rfc5646) } )).to eql(6)
       expect(@commit.translations_total(*%w(tr).map { |rfc5646| Locale.from_rfc5646(rfc5646) } )).to eql(0)
       expect(@commit.words_pending(*%w(fr de ja).map { |rfc5646| Locale.from_rfc5646(rfc5646) } )).to eql(3)

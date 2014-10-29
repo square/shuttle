@@ -4,3 +4,4 @@
 .validation
 tmp/**
 public/system/**
+.idea/**
