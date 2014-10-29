@@ -21,7 +21,7 @@ module CommitStats
   #
   # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
   #   Defaults to all required locales.
-  # @return [Fixnum] The total number of Translations.
+  # @return [Fixnum] The total number of translations that have not been translated.
 
   def translations_new(*locales)
     fetch_stat(locales, :new, :translations_count)
@@ -31,10 +31,20 @@ module CommitStats
   #
   # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
   #   Defaults to all required locales.
-  # @return [Fixnum] The total number of Translations.
+  # @return [Fixnum] The total number of translations that are translated and not yet approved.
 
   def translations_pending(*locales)
     fetch_stat(locales, :pending, :translations_count)
+  end
+
+  # Calculates the total number of Translations that are not translated and not yet approved.
+  #
+  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
+  #   Defaults to all required locales.
+  # @return [Fixnum] The total number of translations that are not done (not translated and not yet approved).
+
+  def translations_not_done(*locales)
+    translations_new(*locales) + translations_pending(*locales)
   end
 
   # @return [Fixnum] The number of approved Translations across all required
@@ -59,11 +69,11 @@ module CommitStats
   end
 
   # Calculates the total number of words across all Translations that have not
-  # yet been translations.
+  # yet been translated.
   #
   # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
   #   Defaults to all required locales.
-  # @return [Fixnum] The total number of words in the Translations' source copy.
+  # @return [Fixnum] The total number of new words in the Translations' source copy.
 
   def words_new(*locales)
     fetch_stat(locales, :new, :words_count)
@@ -74,7 +84,7 @@ module CommitStats
   #
   # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
   #   Defaults to all required locales.
-  # @return [Fixnum] The total number of words in the Translations' source copy.
+  # @return [Fixnum] The total number of words in the Translations' source copy that haven't been approved.
 
   def words_pending(*locales)
     fetch_stat(locales, :pending, :words_count)
