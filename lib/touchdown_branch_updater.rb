@@ -30,7 +30,11 @@ class TouchdownBranchUpdater
       working_repo.fetch
       working_repo.checkout(source_branch)
       working_repo.reset_hard("origin/#{source_branch}")
+      Rails.logger.info "[TouchdownBranchUpdater] pre-pull, working_repo.log.first.sha: #{working_repo.log.first.sha}"
+      Rails.logger.info "[TouchdownBranchUpdater] pre-pull, working_repo.object(touchdown_branch): #{working_repo.object(touchdown_branch)}"
       working_repo.pull
+      Rails.logger.info "[TouchdownBranchUpdater] post-pull, working_repo.log.first.sha: #{working_repo.log.first.sha}"
+      Rails.logger.info "[TouchdownBranchUpdater] post-pull, working_repo.object(touchdown_branch): #{working_repo.object(touchdown_branch)}"
 
       translated_commit = latest_commit_in_source_branch(working_repo)
       if translated_commit.nil?
@@ -91,7 +95,6 @@ class TouchdownBranchUpdater
       head_commit         = working_repo.object(touchdown_branch)
       format              = project.default_manifest_format
       manifest_directory  = Pathname.new(working_repo.dir.path).join(project.manifest_directory)
-
       Rails.logger.info "[TouchdownBranchUpdater] Adding translated manifest file for #{head_commit.sha}"
       shuttle_commit = Commit.for_revision(head_commit.sha).first
       compiler       = Compiler.new(shuttle_commit)
