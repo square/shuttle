@@ -40,6 +40,7 @@ class TouchdownBranchUpdater
       Rails.logger.info "[TouchdownBranchUpdater] Found the latest commit in source branch: #{translated_commit.sha}"
 
       if touchdown_branch_changed?(translated_commit, working_repo)
+        Rails.logger.info "[TouchdownBranchUpdater] Found that touchdown branch has changed"
         # Updates the tip of the touchdown branch to the specified SHA
         working_repo.update_ref("refs/heads/#{touchdown_branch}", translated_commit.sha)
         # git reset --hard is needed here because updating the ref of a separate branch will cause 
@@ -75,6 +76,7 @@ class TouchdownBranchUpdater
 
     # Find the first commit that was not created by Shuttle
     current_touchdown_commit = branch.log(50).detect { |c| c.author.name != git_author_name }
+    Rails.logger.info "[TouchdownBranchUpdater] Current touchdown commit: #{current_touchdown_commit.sha}"
 
     # Only update the touchdown branch if the latest non-shuttle touchdown commit
     # is not equal to the latest translated commit
