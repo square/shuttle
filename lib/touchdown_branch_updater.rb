@@ -28,6 +28,9 @@ class TouchdownBranchUpdater
       working_repo.config('user.email', git_author_email)
 
       working_repo.fetch
+      working_repo.reset_hard # cleanup any lingering changes
+      working_repo.update_ref("refs/heads/#{touchdown_branch}", working_repo.object("origin/#{touchdown_branch}").sha)
+      working_repo.reset_hard # cleanup any lingering changes
       working_repo.checkout(source_branch)
       working_repo.reset_hard("origin/#{source_branch}")
 

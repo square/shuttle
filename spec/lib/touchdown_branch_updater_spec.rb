@@ -36,6 +36,7 @@ describe TouchdownBranchUpdater do
 
   before do
     project.working_repo.update_ref("refs/heads/#{project.touchdown_branch}", parent_revision)
+    project.working_repo.update_ref("refs/remotes/origin/#{project.touchdown_branch}", parent_revision)
   end
 
   describe "#update" do
