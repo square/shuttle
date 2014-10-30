@@ -15,6 +15,14 @@
 require 'spec_helper'
 
 describe TouchdownBranchUpdater do
+  def commit_and_translate(project, revision)
+    c = project.commit!(revision)
+    c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
+    Key.batch_recalculate_ready!(c)
+    c.recalculate_ready!
+    expect(c).to be_ready
+  end
+
   let(:project) do
     project = FactoryGirl.create(:project, :light)
     system 'git', 'push', project.repository_url, ':refs/heads/translated'
@@ -44,13 +52,7 @@ describe TouchdownBranchUpdater do
     context "non-existant watched branch" do
       it "gracefully exits if the first watched branch doesn't exist" do
         project.watched_branches = %w(nonexistent)
-
-        c = project.commit!(head_revision)
-        c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        Key.batch_recalculate_ready!(c)
-        c.recalculate_ready!
-        expect(c).to be_ready
-
+        commit_and_translate(project, head_revision)
         expect { TouchdownBranchUpdater.new(project).update }.not_to raise_error
       end
     end
@@ -58,12 +60,7 @@ describe TouchdownBranchUpdater do
     context "valid touchdown branch" do
       it "advances the touchdown branch to the watched branch commit if it is translated" do
         project.watched_branches = %w(master)
-
-        c = project.commit!(head_revision)
-        c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        Key.batch_recalculate_ready!(c)
-        c.recalculate_ready!
-        expect(c).to be_ready
+        commit_and_translate(project, head_revision)
 
         TouchdownBranchUpdater.new(project).update
         expect(`git --git-dir=#{Shellwords.escape project.repository_url} rev-parse translated`.chomp).
@@ -72,12 +69,7 @@ describe TouchdownBranchUpdater do
 
       it "does nothing if the head of the watched branch is not translated" do
         project.watched_branches = %w(master)
-
-        parent_commit = project.commit!(parent_revision)
-        parent_commit.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        Key.batch_recalculate_ready!(parent_commit)
-        parent_commit.recalculate_ready!
-        expect(parent_commit).to be_ready
+        commit_and_translate(project, parent_revision)
 
         head_commit = project.commit!(head_revision)
         expect(head_commit.reload).to_not be_ready
@@ -89,12 +81,7 @@ describe TouchdownBranchUpdater do
 
       it "does nothing if the head of the watched branch has not changed" do
         project.watched_branches = %w(master)
-
-        c = project.commit!(head_revision)
-        c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        Key.batch_recalculate_ready!(c)
-        c.recalculate_ready!
-        expect(c).to be_ready
+        commit_and_translate(project, head_revision)
         TouchdownBranchUpdater.new(project).update
 
         # Running touchdown branch updater should not send another push
@@ -106,17 +93,10 @@ describe TouchdownBranchUpdater do
 
       it "logs an error if updating the touchdown branch takes longer than 1 minute" do
         project.watched_branches = %w(master)
+        commit_and_translate(project, head_revision)
 
         allow(project.working_repo).to receive('push').and_raise(Timeout::Error)
-
-        c = project.commit!(head_revision)
-        c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-        Key.batch_recalculate_ready!(c)
-        c.recalculate_ready!
-        expect(c).to be_ready
-
         expect(Rails.logger).to receive(:error).with("[TouchdownBranchUpdater] Timed out on updating touchdown branch for #{project.inspect}")
-
         TouchdownBranchUpdater.new(project).update
       end
     end
@@ -128,10 +108,7 @@ describe TouchdownBranchUpdater do
           project.default_manifest_format = 'yaml'
           project.manifest_directory = 'config/locales'
 
-          c = project.commit!(head_revision)
-          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          Key.batch_recalculate_ready!(c)
-          c.recalculate_ready!
+          commit_and_translate(project, head_revision)
         end
 
         it "pushes a new commit with the manifest to the specified manifest directory" do
@@ -183,18 +160,15 @@ describe TouchdownBranchUpdater do
           end
 
           it "updates the touchdown branch to the tip of first watched branch if the tip of first watched branch is transalted; adds a new commit with the manifest file" do
-            c = project.commit!(parent_revision)
-            c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-            Key.batch_recalculate_ready!(c)
-            c.recalculate_ready!
+            commit_and_translate(project, parent_revision)
 
             TouchdownBranchUpdater.new(project).update
 
             project.working_repo.checkout(project.touchdown_branch)
             project.working_repo.pull('origin', project.touchdown_branch)
             expect(project.working_repo.log[1].sha).to eql(parent_revision)
-            #expect(project.working_repo.log[0].author.name).to eql(Shuttle::Configuration.git.author.name)
-            #expect(project.working_repo.log[0].author.email).to eql(Shuttle::Configuration.git.author.email)
+            expect(project.working_repo.log[0].author.name).to eql(Shuttle::Configuration.git.author.name)
+            expect(project.working_repo.log[0].author.email).to eql(Shuttle::Configuration.git.author.email)
           end
         end
       end
@@ -204,11 +178,7 @@ describe TouchdownBranchUpdater do
           project.watched_branches = %w(master)
           project.default_manifest_format = 'yaml'
           project.manifest_directory = 'nonexist/directory'
-
-          c = project.commit!(head_revision)
-          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          Key.batch_recalculate_ready!(c)
-          c.recalculate_ready!
+          commit_and_translate(project, head_revision)
         end
 
         it "does not fail if the manifest directory doesn't exist if it doesn't already exist" do
@@ -229,10 +199,7 @@ describe TouchdownBranchUpdater do
           project.manifest_directory = 'config/locales'
           project.manifest_filename = 'zzz_manifest.yaml'
 
-          c = project.commit!(head_revision)
-          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          Key.batch_recalculate_ready!(c)
-          c.recalculate_ready!
+          commit_and_translate(project, head_revision)
         end
 
         it "creates a manifest file in the specified directory" do
@@ -246,11 +213,7 @@ describe TouchdownBranchUpdater do
         before do
           # Set the touchdown branch to the tip
           project.watched_branches = %w(master)
-
-          c = project.commit!(head_revision)
-          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          Key.batch_recalculate_ready!(c)
-          c.recalculate_ready!
+          commit_and_translate(project, head_revision)
 
           TouchdownBranchUpdater.new(project).update
         end
@@ -271,10 +234,7 @@ describe TouchdownBranchUpdater do
           project.default_manifest_format = 'yaml'
           project.manifest_directory = 'nonexist/directory'
 
-          c = project.commit!(head_revision)
-          c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save! }
-          Key.batch_recalculate_ready!(c)
-          c.recalculate_ready!
+          commit_and_translate(project, head_revision)
           TouchdownBranchUpdater.new(project).update
         end
 
