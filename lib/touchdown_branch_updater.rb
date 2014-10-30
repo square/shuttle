@@ -30,17 +30,14 @@ class TouchdownBranchUpdater
       working_repo.fetch
       working_repo.checkout(source_branch)
       working_repo.reset_hard("origin/#{source_branch}")
-      Rails.logger.info "[TouchdownBranchUpdater] pre-pull, working_repo.log.first.sha: #{working_repo.log.first.sha}"
-      Rails.logger.info "[TouchdownBranchUpdater] pre-pull, working_repo.object(touchdown_branch): #{working_repo.object(touchdown_branch)}"
-      working_repo.pull
-      Rails.logger.info "[TouchdownBranchUpdater] post-pull, working_repo.log.first.sha: #{working_repo.log.first.sha}"
-      Rails.logger.info "[TouchdownBranchUpdater] post-pull, working_repo.object(touchdown_branch): #{working_repo.object(touchdown_branch)}"
 
       translated_commit = latest_commit_in_source_branch(working_repo)
       if translated_commit.nil?
         Rails.logger.info "[TouchdownBranchUpdater] Unable to find latest translated commit for #{project.inspect}"
         return
       end
+
+      Rails.logger.info "[TouchdownBranchUpdater] Found the latest commit in source branch: #{translated_commit.sha}"
 
       if touchdown_branch_changed?(translated_commit, working_repo)
         # Updates the tip of the touchdown branch to the specified SHA
