@@ -84,7 +84,7 @@ describe TouchdownBranchUpdater do
         commit_and_translate(project, head_revision)
         TouchdownBranchUpdater.new(project).update
 
-        # Running touchdown branch updater should not send another push
+        # Running touchdown branch updater should not send another push 
         working_repo = project.working_repo
         allow(project).to receive(:working_repo).and_yield(working_repo)
         expect(working_repo).to_not receive(:push)
