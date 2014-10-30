@@ -26,7 +26,7 @@ describe TouchdownBranchUpdater do
   let(:project) do
     project = FactoryGirl.create(:project, :light)
     system 'git', 'push', project.repository_url, ':refs/heads/translated'
-    project.touchdown_branch = 'translated'
+    project.update! touchdown_branch: 'translated'
     project
   end
 
@@ -41,8 +41,7 @@ describe TouchdownBranchUpdater do
   describe "#update" do
     context "invalid touchdown branch" do
       it "returns immediately if missing watched_branches and touchdown_branch" do
-        project.watched_branches = []
-        project.touchdown_branch = nil
+        project.update! watched_branches: [], touchdown_branch: nil
         TouchdownBranchUpdater.new(project).update
         expect(`git --git-dir=#{Shellwords.escape project.repository_url} rev-parse translated`.chomp).
           to eql('translated')
@@ -51,7 +50,7 @@ describe TouchdownBranchUpdater do
 
     context "non-existant watched branch" do
       it "gracefully exits if the first watched branch doesn't exist" do
-        project.watched_branches = %w(nonexistent)
+        project.update! watched_branches: %w(nonexistent)
         commit_and_translate(project, head_revision)
         expect { TouchdownBranchUpdater.new(project).update }.not_to raise_error
       end
@@ -59,7 +58,7 @@ describe TouchdownBranchUpdater do
 
     context "valid touchdown branch" do
       it "advances the touchdown branch to the watched branch commit if it is translated" do
-        project.watched_branches = %w(master)
+        project.update! watched_branches: %w(master)
         commit_and_translate(project, head_revision)
 
         TouchdownBranchUpdater.new(project).update
@@ -68,7 +67,7 @@ describe TouchdownBranchUpdater do
       end
 
       it "does nothing if the head of the watched branch is not translated" do
-        project.watched_branches = %w(master)
+        project.update! watched_branches: %w(master)
         commit_and_translate(project, parent_revision)
 
         head_commit = project.commit!(head_revision)
@@ -80,7 +79,7 @@ describe TouchdownBranchUpdater do
       end
 
       it "does nothing if the head of the watched branch has not changed" do
-        project.watched_branches = %w(master)
+        project.update! watched_branches: %w(master)
         commit_and_translate(project, head_revision)
         TouchdownBranchUpdater.new(project).update
 
@@ -92,7 +91,7 @@ describe TouchdownBranchUpdater do
       end
 
       it "logs an error if updating the touchdown branch takes longer than 1 minute" do
-        project.watched_branches = %w(master)
+        project.update! watched_branches: %w(master)
         commit_and_translate(project, head_revision)
 
         allow(project.working_repo).to receive('push').and_raise(Timeout::Error)
@@ -104,10 +103,7 @@ describe TouchdownBranchUpdater do
     context "valid manifest directory and touchdown branch" do
       context "existing manifest directory" do
         before do
-          project.watched_branches = %w(master)
-          project.default_manifest_format = 'yaml'
-          project.manifest_directory = 'config/locales'
-
+          project.update! watched_branches: %w(master), default_manifest_format: 'yaml', manifest_directory: 'config/locales'
           commit_and_translate(project, head_revision)
         end
 
@@ -175,9 +171,7 @@ describe TouchdownBranchUpdater do
 
       context "non-existant manifest directory" do
         before do
-          project.watched_branches = %w(master)
-          project.default_manifest_format = 'yaml'
-          project.manifest_directory = 'nonexist/directory'
+          project.update! watched_branches: %w(master), default_manifest_format: 'yaml', manifest_directory: 'nonexist/directory'
           commit_and_translate(project, head_revision)
         end
 
@@ -194,11 +188,7 @@ describe TouchdownBranchUpdater do
 
       context "specified manifest filename" do
         before do
-          project.watched_branches = %w(master)
-          project.default_manifest_format = 'yaml'
-          project.manifest_directory = 'config/locales'
-          project.manifest_filename = 'zzz_manifest.yaml'
-
+          project.update! watched_branches: %w(master), default_manifest_format: 'yaml', manifest_directory: 'config/locales', manifest_filename: 'zzz_manifest.yaml'
           commit_and_translate(project, head_revision)
         end
 
@@ -212,15 +202,14 @@ describe TouchdownBranchUpdater do
       context "previous touchdown branch already at tip" do
         before do
           # Set the touchdown branch to the tip
-          project.watched_branches = %w(master)
+          project.update! watched_branches: %w(master)
           commit_and_translate(project, head_revision)
 
           TouchdownBranchUpdater.new(project).update
         end
 
         it "should still create a new commit with the manifest file at the tip" do
-          project.default_manifest_format = 'yaml'
-          project.manifest_directory = 'config/locales'
+          project.update! default_manifest_format: 'yaml', manifest_directory: 'config/locales'
 
           TouchdownBranchUpdater.new(project).update
           manifest_filepath = Pathname.new(project.working_repo.dir.path).join(project.manifest_directory, 'manifest.yaml')
@@ -230,10 +219,7 @@ describe TouchdownBranchUpdater do
 
       context "already created manifest" do
         before do
-          project.watched_branches = %w(master)
-          project.default_manifest_format = 'yaml'
-          project.manifest_directory = 'nonexist/directory'
-
+          project.update! watched_branches: %w(master), default_manifest_format: 'yaml', manifest_directory: 'nonexist/directory'
           commit_and_translate(project, head_revision)
           TouchdownBranchUpdater.new(project).update
         end
