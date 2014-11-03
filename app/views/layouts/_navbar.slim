@@ -23,6 +23,8 @@ div id="navbar-container"
           li class=("active" if controller_name == "projects")
             a href=projects_url Projects
         - if current_user.translator?
+          li class=("active" if controller_name == "locale_associations")
+            a href=locale_associations_url Locale Associations
           li class=("active" if controller_name == "glossary")
             a href=glossary_url Glossary
         li class=("active" if controller_name == "stats")

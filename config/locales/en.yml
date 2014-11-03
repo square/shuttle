@@ -27,6 +27,11 @@ en:
           attributes:
             base:
               not_finished: latest requested import is not yet finished
+        locale_association:
+          attributes:
+            target_rfc5646_locale:
+              cant_equal_to_source_locale: cannot equal to source rfc5646 locale
+              iso639_doesnt_match_source_iso639: iso639 doesn't match source's
     attributes:
       project:
         name: name
