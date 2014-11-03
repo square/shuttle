@@ -514,6 +514,37 @@ describe TranslationsController do
       expect(results.size).to eql(2)
     end
 
+    it "should return potential fuzzy matches in fallback locales" do
+      translation = FactoryGirl.create :translation,
+                                       source_copy: 'foo bar 2',
+                                       copy: 'something else',
+                                       approved: true,
+                                       source_rfc5646_locale: 'en',
+                                       rfc5646_locale: 'fr-CA'
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      # fr is a fallback of fr-CA
+      get :fuzzy_match,
+          project_id: translation.key.project.to_param,
+          key_id: translation.key.to_param,
+          id: translation.to_param,
+          format: 'json'
+
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body).size).to eql(2)
+
+      # fr is not a fallback of fr-CA
+      get :fuzzy_match,
+          project_id: @translation.key.project.to_param,
+          key_id: @translation.key.to_param,
+          id: @translation.to_param,
+          format: 'json'
+
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body).size).to eql(1)
+    end
+
     it "should not return matches where the copy is nil" do
       FactoryGirl.create :translation,
                          source_copy: 'foo bar 2',

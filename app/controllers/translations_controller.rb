@@ -293,11 +293,11 @@ class TranslationsController < ApplicationController
       format.json do
         limit = 5
         query_filter = @translation.source_copy
-        target_locale = @translation.rfc5646_locale
+        target_locales = @translation.locale.fallbacks.map(&:rfc5646)
         @results = Translation.search(load: { include: { key: :project } }) do
           # TODO: Remove duplicate where source_copy, copy are same
           filter :and,
-                 { term: { rfc5646_locale: target_locale } },
+                 { terms: { rfc5646_locale: target_locales } },
                  { not: { missing: { field: 'copy' } } }
 
           size limit
