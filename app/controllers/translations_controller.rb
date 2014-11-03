@@ -296,9 +296,8 @@ class TranslationsController < ApplicationController
         target_locales = @translation.locale.fallbacks.map(&:rfc5646)
         @results = Translation.search(load: { include: { key: :project } }) do
           # TODO: Remove duplicate where source_copy, copy are same
-          filter :and,
-                 { terms: { rfc5646_locale: target_locales } },
-                 { not: { missing: { field: 'copy' } } }
+          filter :term, { approved: 1 }
+          filter :terms, { rfc5646_locale: target_locales }
 
           size limit
           query { match 'source_copy', query_filter, operator: 'or' }

@@ -487,6 +487,7 @@ describe TranslationsController do
       @translation = FactoryGirl.create :translation,
                                         source_copy: 'foo bar 1',
                                         copy: 'something else',
+                                        approved: true,
                                         source_rfc5646_locale: 'en',
                                         rfc5646_locale: 'fr'
 
@@ -497,6 +498,7 @@ describe TranslationsController do
     it "should return potential fuzzy matches" do
       FactoryGirl.create :translation,
                          source_copy: 'foo bar 2',
+                         approved: true,
                          copy: 'something else',
                          source_rfc5646_locale: 'en',
                          rfc5646_locale: 'fr'
@@ -545,7 +547,7 @@ describe TranslationsController do
       expect(JSON.parse(response.body).size).to eql(1)
     end
 
-    it "should not return matches where the copy is nil" do
+    it "should not return matches where translation is not approved" do
       FactoryGirl.create :translation,
                          source_copy: 'foo bar 2',
                          copy: nil,
@@ -570,6 +572,7 @@ describe TranslationsController do
       (1..10).each do |i|
         FactoryGirl.create :translation,
                            source_copy: "foo bar #{i}",
+                           approved: true,
                            copy: 'something else',
                            source_rfc5646_locale: 'en',
                            rfc5646_locale: 'fr'
@@ -593,6 +596,7 @@ describe TranslationsController do
       (10..50).step(10).each do |i|
         FactoryGirl.create :translation,
                            source_copy: "foo bar #{'a' * i}",
+                           approved: true,
                            copy: 'something else',
                            source_rfc5646_locale: 'en',
                            rfc5646_locale: 'fr'
