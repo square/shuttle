@@ -120,7 +120,8 @@ class TranslationItem
         for match in matches
           do (match) =>
             match_percentage = $('<span/>').addClass("match-percentage").text("(#{match.match_percentage.toString()[0..4]}%) ")
-            match_element = $('<a/>').append(match_percentage)
+            match_element = $('<a/>').append($('<span/>').text("(#{match.rfc5646_locale}) "))
+                                     .append(match_percentage)
                                      .append($('<span/>').addClass('fuzzy-matched-copy').text(match.copy))
                                      .append($('<span/>').addClass('changed').text(@translation.source_copy).hide())
                                      .append($('<span/>').addClass('original').text(match.source_copy).hide())
