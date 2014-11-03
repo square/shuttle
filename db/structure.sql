@@ -308,6 +308,40 @@ ALTER SEQUENCE keys_id_seq OWNED BY keys.id;
 
 
 --
+-- Name: locale_associations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE locale_associations (
+    id integer NOT NULL,
+    source_rfc5646_locale character varying(255) NOT NULL,
+    target_rfc5646_locale character varying(255) NOT NULL,
+    checked boolean DEFAULT false NOT NULL,
+    uncheckable boolean DEFAULT true NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: locale_associations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE locale_associations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: locale_associations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE locale_associations_id_seq OWNED BY locale_associations.id;
+
+
+--
 -- Name: locale_glossary_entries; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -697,6 +731,13 @@ ALTER TABLE ONLY keys ALTER COLUMN id SET DEFAULT nextval('keys_id_seq'::regclas
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY locale_associations ALTER COLUMN id SET DEFAULT nextval('locale_associations_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY locale_glossary_entries ALTER COLUMN id SET DEFAULT nextval('locale_glossary_entries_id_seq'::regclass);
 
 
@@ -834,6 +875,14 @@ ALTER TABLE ONLY key_groups
 
 ALTER TABLE ONLY keys
     ADD CONSTRAINT keys_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: locale_associations_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY locale_associations
+    ADD CONSTRAINT locale_associations_pkey PRIMARY KEY (id);
 
 
 --
@@ -1447,5 +1496,7 @@ INSERT INTO schema_migrations (version) VALUES ('20141022174649');
 INSERT INTO schema_migrations (version) VALUES ('20141022191209');
 
 INSERT INTO schema_migrations (version) VALUES ('20141022223754');
+
+INSERT INTO schema_migrations (version) VALUES ('20141103204013');
 
 INSERT INTO schema_migrations (version) VALUES ('20141104215833');

@@ -101,6 +101,7 @@ Shuttle::Application.routes.draw do
   end
 
   resources :translation_units, only: [:index, :edit, :update, :destroy]
+  resources :locale_associations, except: :show
 
   get 'substitute' => 'substitution#convert'
 
