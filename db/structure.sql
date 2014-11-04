@@ -184,45 +184,6 @@ ALTER SEQUENCE daily_metrics_id_seq OWNED BY daily_metrics.id;
 
 
 --
--- Name: glossary_entries; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE glossary_entries (
-    id integer NOT NULL,
-    translator_id integer,
-    reviewer_id integer,
-    metadata text,
-    source_rfc5646_locale character varying(15) NOT NULL,
-    rfc5646_locale character varying(15) NOT NULL,
-    translated boolean DEFAULT false NOT NULL,
-    approved boolean,
-    key_sha_raw bytea,
-    source_copy_sha_raw bytea,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
-);
-
-
---
--- Name: glossary_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE glossary_entries_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: glossary_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE glossary_entries_id_seq OWNED BY glossary_entries.id;
-
-
---
 -- Name: issues; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -715,13 +676,6 @@ ALTER TABLE ONLY daily_metrics ALTER COLUMN id SET DEFAULT nextval('daily_metric
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY glossary_entries ALTER COLUMN id SET DEFAULT nextval('glossary_entries_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
 ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::regclass);
 
 
@@ -856,14 +810,6 @@ ALTER TABLE ONLY commits
 
 ALTER TABLE ONLY daily_metrics
     ADD CONSTRAINT daily_metrics_pkey PRIMARY KEY (id);
-
-
---
--- Name: glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_pkey PRIMARY KEY (id);
 
 
 --
@@ -1016,13 +962,6 @@ CREATE UNIQUE INDEX commits_rev ON commits USING btree (project_id, revision_raw
 --
 
 CREATE UNIQUE INDEX daily_metrics_date ON daily_metrics USING btree (date);
-
-
---
--- Name: glossary_source_copy_sha; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX glossary_source_copy_sha ON glossary_entries USING btree (source_copy_sha_raw, rfc5646_locale);
 
 
 --
@@ -1290,22 +1229,6 @@ ALTER TABLE ONLY commits
 
 
 --
--- Name: glossary_entries_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE SET NULL;
-
-
---
--- Name: glossary_entries_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_translator_id_fkey FOREIGN KEY (translator_id) REFERENCES users(id) ON DELETE SET NULL;
-
-
---
 -- Name: issues_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1524,3 +1447,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141022174649');
 INSERT INTO schema_migrations (version) VALUES ('20141022191209');
 
 INSERT INTO schema_migrations (version) VALUES ('20141022223754');
+
+INSERT INTO schema_migrations (version) VALUES ('20141104215833');
