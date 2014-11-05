@@ -57,6 +57,7 @@ class Translation < ActiveRecord::Base
   has_many :translation_changes, inverse_of: :translation, dependent: :delete_all
   has_many :issues, inverse_of: :translation, dependent: :destroy
   has_many :commits_keys, primary_key: :key_id, foreign_key: :key_id
+  has_many :locale_associations, primary_key: :rfc5646_locale, foreign_key: :source_rfc5646_locale
 
   include HasMetadataColumn
   has_metadata_column(
