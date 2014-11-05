@@ -30,6 +30,13 @@ class LocaleAssociation < ActiveRecord::Base
   locale_field :source_locale, from: :source_rfc5646_locale
   locale_field :target_locale, from: :target_rfc5646_locale
 
+  # @private
+  def as_json(options={})
+    options[:except] ||= []
+    options[:except] << :created_at << :updated_at
+    super options
+  end
+
   private
 
   def target_rfc5646_locale_cannot_be_equal_to_source

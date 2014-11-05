@@ -29,7 +29,8 @@ module TranslationDecoration
           suggestion_url:   match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           fuzzy_match_url:  fuzzy_match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           translator:       translation.translator.as_json,
-          reviewer:         translation.reviewer.as_json # not sure why it's necessary to explicitly include these, but it is
+          reviewer:         translation.reviewer.as_json, # not sure why it's necessary to explicitly include these, but it is
+          effective_locale_associations: translation.effective_locale_associations.as_json,
       )
     end
   end
