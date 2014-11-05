@@ -22,6 +22,7 @@ class LocaleAssociation < ActiveRecord::Base
   validates :uncheckable, inclusion: { in: [true, false] }
   validates :source_rfc5646_locale, presence: true
   validates :target_rfc5646_locale, presence: true
+  validates :target_rfc5646_locale, uniqueness: { scope: :source_rfc5646_locale }
   validate :target_rfc5646_locale_cannot_be_equal_to_source
   validate :iso639s_should_match, if: "source_locale && target_locale"
 

@@ -27,6 +27,13 @@ describe LocaleAssociation do
       expect(association.errors.full_messages).to eql(["Target rfc5646 locale cannot equal to source rfc5646 locale"])
     end
 
+    it "doesn't allow duplicate source->target pairs" do
+      FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
+      la = FactoryGirl.build(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
+      la.save
+      expect(la.errors.full_messages).to eql(["Target rfc5646 locale already taken"])
+    end
+
     it "doesn't allow an association between locales from different families (fr -> es-US)" do
       association = FactoryGirl.build(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'es-US')
       association.save
