@@ -108,37 +108,8 @@ class TranslationItem
         @copy_field[0].selectionEnd = match.copy.length
 
 
-  loadFuzzyMatches: ->
-    @fuzzy_matches.append($('<dt/>').text('Fuzzy Matches'))
-    @fuzzy_matches.append($('<dd/>').text('Loading fuzzy matches'))
-    $.ajax @translation.fuzzy_match_url,
-      success: (matches) =>
-        @fuzzy_matches.empty()
-        @fuzzy_matches.append($('<dt/>').text('Fuzzy Matches'))
-        if matches.length == 0
-          @fuzzy_matches.append($('<dd/>').text('No fuzzy matches found :('))
-        for match in matches
-          do (match) =>
-            match_percentage = $('<span/>').addClass("match-percentage").text("(#{match.match_percentage.toString()[0..4]}%) ")
-            match_element = $('<a/>').append($('<span/>').text("(#{match.rfc5646_locale}) "))
-                                     .append(match_percentage)
-                                     .append($('<span/>').addClass('fuzzy-matched-copy').text(match.copy))
-                                     .append($('<span/>').addClass('changed').text(@translation.source_copy).hide())
-                                     .append($('<span/>').addClass('original').text(match.source_copy).hide())
-            match_wrapper = $('<dd/>').append(match_element)
-                                      .append($('<div/>').addClass('diff'))
-
-            match_element.click =>
-              @copy_field.val match.copy
-
-            match_element.mouseenter ->
-              match_element.prettyTextDiff
-                diffContainer: match_wrapper.find('.diff')
-              match_wrapper.find('.diff').prepend($('<span/>').addClass("match-percentage").text("Source Diff: "))
-            match_element.mouseleave ->
-              match_wrapper.find('.diff').empty()
-
-            @fuzzy_matches.append(match_wrapper)
+  findFuzzyMatches: ->
+    loadFuzzyMatches(@fuzzy_matches, @copy_field, @translation.fuzzy_match_url, @translation.source_copy)
 
   # @private
   build: ->
@@ -210,7 +181,7 @@ class TranslationItem
       @copy_field[0].selectionStart = 0
       @copy_field[0].selectionEnd = @copy_field.val().length
       @loadSuggestion()
-      @loadFuzzyMatches()
+      @findFuzzyMatches()
       @hideOtherGlossaryTooltips()
       @renderGlossaryTooltip()
 
