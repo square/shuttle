@@ -46,6 +46,15 @@
           margin: 0;
         }
 
+        .effective-locale-associations {
+          margin: 1px 0 5px 0;
+          input[type=checkbox] {
+            font-size: 200%;
+            vertical-align: middle;
+            margin-left: 10px;
+          }
+        }
+
         span.controls {
           float: right;
         }
