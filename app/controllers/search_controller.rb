@@ -16,8 +16,6 @@ class SearchController < ApplicationController
   # The number of records to return by default.
   PER_PAGE = 50
 
-  before_filter :authenticate_user!
-
   def translations
     respond_to do |format|
       format.html # translations.html.rb

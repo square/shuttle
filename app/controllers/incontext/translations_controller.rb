@@ -1,5 +1,4 @@
 class Incontext::TranslationsController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :translator_required
   before_filter :allow_iframe_requests
 

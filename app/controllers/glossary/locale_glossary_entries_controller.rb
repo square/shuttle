@@ -16,7 +16,6 @@
 # {LocaleGlossaryEntry LocaleGlossaryEntries}.
 
 class Glossary::LocaleGlossaryEntriesController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :translator_required, only: [:create, :edit, :update]
   before_filter :reviewer_required, only: [:approve, :reject]
   before_filter :locale_access_required, except: :create

@@ -15,7 +15,6 @@
 # The primary controller for the glossary landing page.
 
 class GlossaryController < ApplicationController
-  before_filter :authenticate_user!
 
   # Renders the list of glossary entries that enable translator and reviewers to
   # look over, edit, and approve them.

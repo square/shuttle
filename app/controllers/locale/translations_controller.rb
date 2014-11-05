@@ -22,7 +22,6 @@ class Locale::TranslationsController < ApplicationController
   # The number of records to return by default.
   PER_PAGE = 50
 
-  before_filter :authenticate_user!
   before_filter :translator_required
   before_filter :find_locale
   before_filter :find_project

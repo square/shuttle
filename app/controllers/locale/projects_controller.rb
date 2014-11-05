@@ -16,7 +16,6 @@
 # locale.
 
 class Locale::ProjectsController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :translator_required
   before_filter :locale_access_required
   before_filter :find_locale

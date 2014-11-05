@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 class Glossary::SourceGlossaryEntriesController < ApplicationController
-  before_filter :authenticate_user!, except: :manifest
+  skip_before_filter :authenticate_user!, only: :manifest
   before_filter :reviewer_required, only: [:edit, :update]
   before_filter :admin_required, only: [:destroy]
 
