@@ -15,7 +15,6 @@
 # Controller that returns information used to render the statistics page.
 
 class StatsController < ApplicationController
-  before_filter :authenticate_user!
 
   # Displays the statistics page.
   def index

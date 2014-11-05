@@ -15,7 +15,6 @@
 # Controller for working with {Issue Issues}.
 
 class IssuesController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :find_project
   before_filter :find_key
   before_filter :find_translation

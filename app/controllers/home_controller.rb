@@ -18,8 +18,6 @@ class HomeController < ApplicationController
   # Typical number of commits to show per page.
   PER_PAGE = 20
 
-  before_filter :authenticate_user!
-
   # Displays a landing page depending on the current User's role.
   #
   # Routes

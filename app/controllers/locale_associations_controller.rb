@@ -15,7 +15,6 @@
 # Controller for working with {LocaleAssociation LocaleAssociations}.
 
 class LocaleAssociationsController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :translator_required
   before_filter :set_locale_association, only: [:edit, :update, :destroy]
 

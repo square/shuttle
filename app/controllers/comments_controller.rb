@@ -15,7 +15,6 @@
 # Controller for working with {Comment Comments}.
 
 class CommentsController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :find_issue
 
   layout false

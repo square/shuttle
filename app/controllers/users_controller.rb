@@ -15,7 +15,6 @@
 # Administrative panel where admins can modify User accounts.
 
 class UsersController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :admin_required, except: [:search]
   before_filter :authorize_for_search!, only: [:search]
   before_filter :find_user, except: [:index, :search]
