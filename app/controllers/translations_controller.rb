@@ -292,7 +292,7 @@ class TranslationsController < ApplicationController
     respond_to do |format|
       format.json do
         limit = 5
-        query_filter = @translation.source_copy
+        query_filter = params[:source_copy] || @translation.source_copy
         target_locales = @translation.locale.fallbacks.map(&:rfc5646)
         @results = Translation.search(load: { include: { key: :project } }) do
           # TODO: Remove duplicate where source_copy, copy are same

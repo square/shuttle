@@ -547,6 +547,29 @@ describe TranslationsController do
       expect(JSON.parse(response.body).size).to eql(1)
     end
 
+    it "should search with the param[:source_copy] instead of translation.source_copy if provided" do
+      t = FactoryGirl.create :translation,
+                         source_copy: 'hello world',
+                         approved: true,
+                         copy: 'something else',
+                         source_rfc5646_locale: 'en',
+                         rfc5646_locale: 'fr'
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      get :fuzzy_match,
+          project_id: @translation.key.project.to_param,
+          key_id: @translation.key.to_param,
+          id: @translation.to_param,
+          source_copy: 'hello worl',
+          format: 'json'
+
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eql(1)
+      expect(results.first['source_copy']).to eql("hello world")
+    end
+
     it "should not return matches where translation is not approved" do
       FactoryGirl.create :translation,
                          source_copy: 'foo bar 2',
