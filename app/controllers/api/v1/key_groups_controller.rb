@@ -3,6 +3,7 @@ module Api
     class KeyGroupsController < ApplicationController
       respond_to :json
 
+      skip_before_filter :authenticate_user!
       skip_before_action :verify_authenticity_token
       before_filter :authenticate_and_find_project
       before_filter :find_key_group, only: [:show, :update, :status, :manifest]

@@ -18,6 +18,11 @@ require 'spec_helper'
 
 describe SubstitutionController do
   describe '#convert' do
+    before :each do
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in FactoryGirl.create(:user, :activated)
+    end
+
     it "should 404 if the from locale is invalid" do
       get :convert, from: 'wut is this', to: 'en-CA', string: 'What a colorful catalog.', format: 'json'
       expect(response.status).to eql(404)

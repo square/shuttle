@@ -19,7 +19,7 @@ class CommitsController < ApplicationController
   # @private
   COMMIT_ATTRIBUTES = [:exported, :revision, :description, :due_date, :pull_request_url, :priority]
 
-  before_filter :authenticate_user!, except: [:manifest, :localize]
+  skip_before_filter :authenticate_user!, only: [:manifest, :localize]
   before_filter :monitor_required, except: [:show, :search, :gallery, :manifest, :localize, :issues]
 
   before_filter :find_project

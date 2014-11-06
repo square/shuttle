@@ -18,7 +18,6 @@
 class TranslationsController < ApplicationController
   include TranslationDecoration
 
-  before_filter :authenticate_user!
   before_filter :translator_required, only: [:edit, :update]
 
   before_filter :find_project
