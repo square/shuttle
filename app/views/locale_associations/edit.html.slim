@@ -28,3 +28,4 @@
 hr.divider
 
 = render 'form'
+= button_to 'Delete', @locale_association, class: 'danger pull-right', data: {:confirm => 'Are you sure?'}, :method => :delete
