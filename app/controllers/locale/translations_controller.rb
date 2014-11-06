@@ -57,7 +57,7 @@ class Locale::TranslationsController < ApplicationController
 
     filter_source = params[:filter_source]
     catch :include_nothing do
-      @translations = Translation.search(load: {include: {key: :project}}) do
+      @translations = Translation.search(load: {include: [{key: [:project, :translations]}, :locale_associations]}) do
         query_terms = []
         query_terms << "commit_ids:\"#{commit_id}\"" if commit_id.present?
         query_terms << "rfc5646_locale:\"#{locale.rfc5646}\"" if locale

@@ -183,6 +183,22 @@ class Translation < ActiveRecord::Base
   #   this Translation's text, or an empty hash if the copy has no fences.
   def fences() copy ? Fencer.multifence(key.fencers, copy) : {} end
 
+  # A translation can have 10s of locale associations. But, a key doesn't have to have translation in
+  # all of those locale associations' targeted locales, due to locale settings and blacklist settings.
+  #
+  # Imagine a scenario where locale associations exist from 'fr' to 'fr-CA', 'fr-FR', 'fr-XX'.
+  # And, project has 'fr', 'fr-CA' and 'fr-FR' as targeted locales; but for a specific key,
+  # translation in 'fr-FR' is blacklisted. In other words, this key has translations in 'fr' and 'fr-CA'.
+  # In this scenario, 'fr' translation's effective locale associations will only be 'fr'->'fr-CA'.
+  # 'fr'->'fr-FR' will not be included because 'fr-FR' translation doesn't exist.
+  #
+  # @return [Array<LocaleAssociation>] locale associations whose target locales appear in this translation's key's other translations
+
+  def effective_locale_associations
+    targeted_rfc5646s = key.translations.to_a.map(&:rfc5646_locale)
+    locale_associations.select { |a| targeted_rfc5646s.include?(a.target_rfc5646_locale) }
+  end
+
   # @private
   def as_json(options=nil)
     options ||= {}
