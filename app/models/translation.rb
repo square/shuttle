@@ -195,7 +195,7 @@ class Translation < ActiveRecord::Base
   # @return [Array<LocaleAssociation>] locale associations whose target locales appear in this translation's key's other translations
 
   def effective_locale_associations
-    targeted_rfc5646s = key.translations.to_a.map(&:rfc5646_locale)
+    targeted_rfc5646s = key.translations.to_a.reject(&:base_translation?).map(&:rfc5646_locale)
     locale_associations.select { |a| targeted_rfc5646s.include?(a.target_rfc5646_locale) }
   end
 
