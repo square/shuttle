@@ -88,6 +88,23 @@ describe TranslationsController do
         expect(change.user).to eq(@user)
       end
 
+      it "should allow updating `notes` field for a not-translated translation" do
+        patch :update,
+              project_id: @translation.key.project.to_param,
+              key_id: @translation.key.to_param,
+              id: @translation.to_param,
+              translation: { copy: '', notes: 'hey there' },
+              format: 'json'
+        expect(response.status).to eql(200)
+        expect(@translation.reload.copy).to be_nil
+        expect(@translation.notes).to eql('hey there')
+        expect(@translation).not_to be_translated
+        expect(@translation.approved).to be_nil
+        expect(@translation.translator).to be_nil
+        expect(@translation.reviewer).to be_nil
+        expect(@translation.translation_changes.count).to eq(0)
+      end
+
       it "should update the translation normally if given empty copy and blank_string=true" do
         @translation.copy = 'hello!'
         @translation.save!

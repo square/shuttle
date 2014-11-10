@@ -106,38 +106,7 @@ class TranslationsController < ApplicationController
     # translators cannot modify approved copy
     return head(:forbidden) if @translation.approved? && current_user.role == 'translator'
 
-    # Need to save true copy_was because assign_attributes will push back the cache
-    @translation.freeze_tracked_attributes
-    @translation.assign_attributes translation_params
-
-    @translation.translator = current_user if @translation.copy_was != @translation.copy
-    @translation.modifier = current_user
-
-    # de-translate translation if empty
-    unless params[:blank_string].parse_bool
-      @translation.copy = nil if @translation.copy.blank?
-      if @translation.copy.nil?
-        @translation.translator = nil
-        @translation.approved = nil
-        @translation.reviewer = nil
-      end
-    end
-
-    # the only thing that can be edited is copy, so optimize DB calls if this
-    # is not a copy edit
-    if @translation.copy_was != @translation.copy # copy_changed? can be true even if the copy wasn't changed...
-      @translation.preserve_reviewed_status = current_user.reviewer?
-      @translation.save
-    else
-      # if the current user is a reviewer, treat this as an approve action; this
-      # makes tabbing through fields act as approval in the front-end
-      if current_user.reviewer?
-        @translation.reviewer = current_user
-        @translation.approved = true
-        @translation.preserve_reviewed_status = true
-        @translation.save
-      end
-    end
+    TranslationUpdateMediator.new(@translation, current_user, params).update
 
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
       format.json do
