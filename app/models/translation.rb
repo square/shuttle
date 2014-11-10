@@ -103,7 +103,6 @@ class Translation < ActiveRecord::Base
   validate :fences_must_match
 
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
-  before_validation :approve_translation_made_by_reviewer, on: :update
   before_validation :count_words
   before_validation :populate_pseudo_translation
 
@@ -268,14 +267,6 @@ class Translation < ActiveRecord::Base
 
   def cannot_approve_or_reject_untranslated
     errors.add(:approved, :not_translated) if approved != nil && !translated?
-  end
-
-  def approve_translation_made_by_reviewer
-    if translator_id_changed? && translator && translator.reviewer? && copy_changed? && translated?
-      self.approved = true
-      self.reviewer = translator
-    end
-    return true
   end
 
   def update_translation_memory
