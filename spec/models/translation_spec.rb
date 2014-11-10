@@ -150,14 +150,6 @@ describe Translation do
         @translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, reviewer: nil)
       end
 
-      it "should automatically mark as reviewed translations made by a translator" do
-        @translation.translator = @reviewer
-        @translation.copy       = 'foobar'
-        @translation.save!
-        expect(@translation).to be_approved
-        expect(@translation.reviewer).to eql(@reviewer)
-      end
-
       it "should not mark as reviewed a translation not made by a reviewer" do
         @translation.translator = FactoryGirl.create(:user, role: 'translator')
         @translation.copy       = 'foobar'
