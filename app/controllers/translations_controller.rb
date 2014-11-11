@@ -106,21 +106,22 @@ class TranslationsController < ApplicationController
     # translators cannot modify approved copy
     return head(:forbidden) if @translation.approved? && current_user.role == 'translator'
 
-    TranslationUpdateMediator.new(@translation, current_user, params).update
+    mediator = TranslationUpdateMediator.new(@translation, current_user, params)
+    mediator.update!
 
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
       format.json do
-        if @translation.valid?
+        if mediator.success?
           render json: decorate([@translation]).first
         else
-          render json: @translation.errors.full_messages, status: :unprocessable_entity
+          render json: mediator.errors, status: :unprocessable_entity
         end
       end
       format.html do
-        if @translation.errors.any?
-          redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { alert: @translation.errors.full_messages.unshift(t('controllers.translations.update.failure')) }
-        else
+        if mediator.success?
           redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { success: t('controllers.translations.update.success') }
+        else
+          redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { alert: mediator.errors.unshift(t('controllers.translations.update.failure')) }
         end
       end
     end

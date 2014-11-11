@@ -23,24 +23,38 @@
 # | `user`                | {User} who is making the change                                                           |
 # | `params`              | params from controller                                                                    |
 
-class TranslationUpdateMediator
+class TranslationUpdateMediator < BasicMediator
 
   # @param [Translation] primary_translation that will be updated
   # @param [User] user who is making the changes
   # @param [ActionController::Parameters] params that will be used to update the translation
 
   def initialize(primary_translation, user, params)
+    super()
     @primary_translation, @user, @params = primary_translation, user, params
   end
 
   # Updates this translation and its associated translations
-  def update
-    update_single_translation(@primary_translation, @params[:blank_string], @params.require(:translation).permit(:copy, :notes))
-    # TODO (yunus): update user specified associated translations
+  def update!
+    copy_to_translations = translations_that_should_be_multi_updated
+    return if failure?
+
+    Translation.transaction do
+      copy_to_translations.each do |translation|
+        update_single_translation!(translation)
+      end
+      update_single_translation!(@primary_translation)
+    end
+
+    @primary_translation.key.reload.recalculate_ready! # Readiness hooks were skipped in the transaction above, now we gotta run them.
+  rescue ActiveRecord::RecordInvalid => err
+    add_errors(err.record.errors.full_messages.map { |msg| "(#{err.record.rfc5646_locale}): #{msg}" })
   end
 
-  # Finds all translations that can be updated alongside the inputted {Translation} with the same copy.
-  # These translations make the keys of the returned hash. The values are the {LocaleAssociation LocaleAssociations}
+  # Finds all translations that is allowed to be updated alongside the inputted {Translation} with the same copy,
+  # based on {LocaleAssociation LocaleAssociations}. Doesn't include self, or base translation.
+  #
+  # These translations are the keys of the returned hash. The values are the {LocaleAssociation LocaleAssociations}
   # that tie the associated translations to the inputted translation.
   #
   # This should be used in 2 places:
@@ -64,24 +78,45 @@ class TranslationUpdateMediator
 
   private
 
-  # @return [Array<Translation>] a list of translations that can be updated alongside the primary translation.
-  def multi_updateable_translations
-    self.class.multi_updateable_translations_to_locale_associations_hash(@primary_translation).keys
+  # Retrive all translations that should be updated alongside the primary translation, based on the `copyToLocales`
+  # field in user provided params. It maps the user provided `copyToLocales` to {Translation} objects.
+  #
+  # If one of the requested locales are not allowed to be updated, it adds an error and breaks out of the loop.
+  #
+  # The consumer of this function should check for errors before proceeding.
+  #
+  # @return [Array<Translation>] array of translations that should be updated alongside the primary translation
+
+  def translations_that_should_be_multi_updated
+    return [] unless @params[:copyToLocales]
+    translations_indexed_by_rfc5646_locale = self.class.multi_updateable_translations_to_locale_associations_hash(@primary_translation).keys.index_by(&:rfc5646_locale)
+    @params[:copyToLocales].map do |rfc5646_locale|
+      unless translations_indexed_by_rfc5646_locale.key?(rfc5646_locale)
+        add_error("Cannot update translation in locale #{rfc5646_locale}")
+        break
+      end
+      translations_indexed_by_rfc5646_locale[rfc5646_locale]
+    end
+  end
+
+  # @return [Hash<String, Translation>] a hash of rfc5646_locale to translations that is allowed to be updated alongside the primary translation.
+  def multi_updateable_translations_indexed_by_rfc5646_locale
+    @multi_updateable_translations_indexed_by_rfc5646_locale ||=
+        self.class.multi_updateable_translations_to_locale_associations_hash(@primary_translation).keys.index_by(&:rfc5646_locale)
   end
 
   # Updates a single translation.
   #
   # @param [Translation] translation that will be updated
-  # @param [true, false] is_blank_string true if the translation should be updated as an empty string, false otherwise
-  # @param [ActionController::Parameters] permitted_params that will be used to update the translation
+  # @raise [ActiveRecord::RecordInvalid] if translation is invalid
 
-  def update_single_translation(translation, is_blank_string, permitted_params)
+  def update_single_translation!(translation)
     translation.freeze_tracked_attributes
     translation.modifier = @user
-    translation.assign_attributes(permitted_params)
+    translation.assign_attributes(@params.require(:translation).permit(:copy, :notes))
 
     # un-translate translation if empty but blank_string is not specified
-    if translation.copy.blank? && !is_blank_string
+    if translation.copy.blank? && !@params[:blank_string].parse_bool
       untranslate(translation)
     else
       translation.translator = @user if translation.copy != translation.copy_was
@@ -91,7 +126,8 @@ class TranslationUpdateMediator
         translation.preserve_reviewed_status = true
       end
     end
-    translation.save
+    translation.skip_readiness_hooks = true
+    translation.save!
   end
 
   # Untranslates a translation, but doesn't call `save`.
