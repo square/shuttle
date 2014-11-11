@@ -12,7 +12,23 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+# Handles the business logic of translations#update endpoint.
+#
+# Fields
+# ======
+#
+# |                       |                                                                                           |
+# |:----------------------|:------------------------------------------------------------------------------------------|
+# | `primary_translation` | primary {Translation} that {User} is attempting to update, ex: from translation workbench |
+# | `user`                | {User} who is making the change                                                           |
+# | `params`              | params from controller                                                                    |
+
 class TranslationUpdateMediator
+
+  # @param [Translation] primary_translation that will be updated
+  # @param [User] user who is making the changes
+  # @param [ActionController::Parameters] params that will be used to update the translation
+
   def initialize(primary_translation, user, params)
     @primary_translation, @user, @params = primary_translation, user, params
   end
@@ -25,7 +41,12 @@ class TranslationUpdateMediator
 
   private
 
-  # Update single translation
+  # Updates a single translation.
+  #
+  # @param [Translation] translation that will be updated
+  # @param [true, false] is_blank_string true if the translation should be updated as an empty string, false otherwise
+  # @param [ActionController::Parameters] permitted_params that will be used to update the translation
+
   def update_single_translation(translation, is_blank_string, permitted_params)
     translation.freeze_tracked_attributes
     translation.modifier = @user
@@ -44,6 +65,10 @@ class TranslationUpdateMediator
     end
     translation.save
   end
+
+  # Untranslates a translation, but doesn't call `save`.
+  #
+  # @param [Translation] translation that will be untranslated
 
   def untranslate(translation)
     translation.copy = nil
