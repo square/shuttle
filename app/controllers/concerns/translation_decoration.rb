@@ -30,8 +30,16 @@ module TranslationDecoration
           fuzzy_match_url:  fuzzy_match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           translator:       translation.translator.as_json,
           reviewer:         translation.reviewer.as_json, # not sure why it's necessary to explicitly include these, but it is
-          effective_locale_associations: translation.effective_locale_associations.as_json,
+          multi_updateable_translations_and_locale_associations: multi_updateable_translations_and_locale_associations(translation),
       )
     end
+  end
+
+  def multi_updateable_translations_and_locale_associations(translation)
+    TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(translation).
+        reduce([]) do |arr, (translation, locale_association)|
+          arr << {translation: translation.as_json(only: [:rfc5646_locale]), locale_association: locale_association.as_json}
+          arr
+        end
   end
 end

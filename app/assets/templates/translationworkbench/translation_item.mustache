@@ -5,14 +5,14 @@
       <div class="translation-side"> 
         <textarea class="translation-area {{status}}">{{translation_copy}}</textarea>
 
-        {{#effective_locale_associations.0}}
-          <div class="controls effective-locale-associations muted">
+        {{#multi_updateable_translations_and_locale_associations.0}}
+          <div class="controls multi-updateable-translations muted">
             <span>Copy to:</span>
-            {{#effective_locale_associations}}
-              <input type="checkbox" value="{{target_rfc5646_locale}}" {{#checked}}checked{{/checked}}>{{target_rfc5646_locale}}</input>
-            {{/effective_locale_associations}}
+            {{#multi_updateable_translations_and_locale_associations}}
+              <input type="checkbox" value="{{translation.rfc5646_locale}}" {{#locale_association.checked}}checked{{/locale_association.checked}}>{{translation.rfc5646_locale}}</input>
+            {{/multi_updateable_translations_and_locale_associations}}
           </div>
-        {{/effective_locale_associations.0}}
+        {{/multi_updateable_translations_and_locale_associations.0}}
 
         <button class="small default copy-source">Copy from source</button>
         <button class="small default convert-source">Convert source</button>
