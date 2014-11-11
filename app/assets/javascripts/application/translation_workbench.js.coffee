@@ -76,7 +76,7 @@ class TranslationItem
     @element.find('.translation-area, input').attr 'disabled', 'disabled'
 
     # find checked locales to which this translation copy should be copied to
-    copyToLocales = @element.find('.effective-locale-associations input[type=checkbox]:checked').map(() -> this.value).get()
+    copyToLocales = @element.find('.multi-updateable-translations input[type=checkbox]:checked').map(() -> this.value).get()
 
     $.ajax @translation.url + '.json',
       type: 'PUT'
@@ -133,7 +133,7 @@ class TranslationItem
                                                       @translation.source_fences
                                                     ).html()
 
-    context.effective_locale_associations = @translation.effective_locale_associations
+    context.multi_updateable_translations_and_locale_associations = @translation.multi_updateable_translations_and_locale_associations
 
     if @options.review && (@translation.approved == null)
       context.controls = true
