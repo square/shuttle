@@ -333,33 +333,4 @@ describe Translation do
       end
     end
   end
-
-  describe "#effective_locale_associations" do
-    it "returns translation's locale associations in the locales where sibling translations exist" do
-      la1 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
-      la2 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
-      la3 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-XX')
-      la4 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-YY')
-      la5 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr-CA', target_rfc5646_locale: 'fr')
-
-      project = FactoryGirl.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' => true, 'fr-FR' => false, 'fr-XX' => true })
-      key = FactoryGirl.create(:key, project: project)
-      translation = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'fr')
-      FactoryGirl.create(:translation, key: key, rfc5646_locale: 'fr-CA')
-      FactoryGirl.create(:translation, key: key, rfc5646_locale: 'fr-FR')
-      expect(translation.effective_locale_associations.sort).to eql([la1, la2].sort)
-    end
-
-    it "doesn't consider LocaleAssociations in base locale as an effective locale association" do
-      la1 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'en-XX', target_rfc5646_locale: 'en')
-      la2 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'en-XX', target_rfc5646_locale: 'en-YY')
-
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'en-XX' => true, 'en-YY' => true })
-      key = FactoryGirl.create(:key, project: project)
-      translation = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX')
-      FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
-      FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en-YY')
-      expect(translation.effective_locale_associations).to eql([la2])
-    end
-  end
 end
