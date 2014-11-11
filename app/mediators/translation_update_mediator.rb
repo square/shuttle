@@ -39,7 +39,35 @@ class TranslationUpdateMediator
     # TODO (yunus): update user specified associated translations
   end
 
+  # Finds all translations that can be updated alongside the inputted {Translation} with the same copy.
+  # These translations make the keys of the returned hash. The values are the {LocaleAssociation LocaleAssociations}
+  # that tie the associated translations to the inputted translation.
+  #
+  # This should be used in 2 places:
+  # - in the Translation Workbench when determining for which locales the checkboxes should appear
+  # - in validating that the locales that a translation should be copied to are valid
+  #
+  # For the first reason above, this is a class method.
+  #
+  # @return [Hash<Translation, LocaleAssociation>] a hash of associated multi updateable translations to the locale associations.
+
+  def self.multi_updateable_translations_to_locale_associations_hash(translation)
+    hsh = {}
+    translation.key.translations.each do |t| # translations should already loaded before this point, so don't run a new sql query. ie. prevent n+1 queries
+      if (t.id != translation.id) && !t.base_translation?
+        locale_association = translation.locale_associations.detect { |la| la.target_rfc5646_locale == t.rfc5646_locale }
+        hsh[t] = locale_association if locale_association
+      end
+    end
+    hsh
+  end
+
   private
+
+  # @return [Array<Translation>] a list of translations that can be updated alongside the primary translation.
+  def multi_updateable_translations
+    self.class.multi_updateable_translations_to_locale_associations_hash(@primary_translation).keys
+  end
 
   # Updates a single translation.
   #
