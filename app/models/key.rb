@@ -256,6 +256,9 @@ class Key < ActiveRecord::Base
     # recalculate keys & commits & key_group's readiness states.
     # Commit stats should be recalculated regardless of whether ready changed or not.
     # Consider doing this check and handle hooks in Translation model. Or in an observer.
+    #
+    # UPDATE: Since commit stats recalculator is deprecated, it may now be safe to run this entire block
+    # if ready changes.
   end
 
   # @return [true, false] `true` if this Key should now be marked as ready.
