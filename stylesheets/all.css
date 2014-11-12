@@ -201,7 +201,7 @@ body:after {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
   opacity: 1;
 }
-/* line 17, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 5, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -222,140 +222,138 @@ time, mark, audio, video {
   font-size: 100%;
   vertical-align: baseline; }
 
-/* line 22, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 22, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 html {
   line-height: 1; }
 
-/* line 24, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 24, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 ol, ul {
   list-style: none; }
 
-/* line 26, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 26, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 table {
   border-collapse: collapse;
   border-spacing: 0; }
 
-/* line 28, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 28, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 caption, th, td {
   text-align: left;
   font-weight: normal;
   vertical-align: middle; }
 
-/* line 30, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 30, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 q, blockquote {
   quotes: none; }
-  /* line 103, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+  /* line 103, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
   q:before, q:after, blockquote:before, blockquote:after {
     content: "";
     content: none; }
 
-/* line 32, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 32, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 a img {
   border: none; }
 
-/* line 116, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary {
+/* line 116, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
   display: block; }
 
-/* line 10, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/layout/_sticky-footer.scss */
+/* line 10, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/layout/_sticky-footer.scss */
 html, body {
   height: 100%; }
 
-/* line 12, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/layout/_sticky-footer.scss */
+/* line 12, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/layout/_sticky-footer.scss */
 #content {
   clear: both;
   min-height: 100%;
   height: auto !important;
   height: 100%;
   margin-bottom: -150px; }
-  /* line 18, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/layout/_sticky-footer.scss */
+  /* line 18, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/layout/_sticky-footer.scss */
   #content #content-footer {
     height: 150px; }
 
-/* line 20, /Users/ricksong/.rvm/gems/ruby-1.9.3-p448@shuttle/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/layout/_sticky-footer.scss */
+/* line 20, /Users/tim/.rvm/gems/ruby-2.1.4@squash/gems/compass-core-1.0.1/stylesheets/compass/layout/_sticky-footer.scss */
 #footer {
   clear: both;
   position: relative;
   height: 150px; }
 
-/* line 38, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 38, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 body {
   font-family: "Raleway", "Helvetica Neue", Helvetica, sans-serif;
   font-size: 18px;
   line-height: 30px;
   font-weight: 300; }
 
-/* line 44, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 44, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 strong {
   font-weight: 500; }
 
-/* line 45, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 45, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 h1 {
   font-size: 32px; }
 
-/* line 46, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 46, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 h2 {
   font-size: 26px;
   font-weight: 400; }
 
-/* line 47, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 47, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 h3 {
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 1px; }
 
-/* line 48, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 48, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 hr {
   background-color: #ebebeb;
   height: 1px;
   border: 0; }
 
-/* line 50, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 50, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 .container {
   width: 1200px;
   margin-left: auto;
   margin-right: auto; }
 
-/* line 56, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 56, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 input[type=button], .button {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
-  -ms-border-radius: 4px;
-  -o-border-radius: 4px;
+  -webkit-border-radius: 4px;
   border-radius: 4px;
-  background: white;
+  background: #ffffff;
   height: 32px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
-  color: black;
+  color: #000000;
   text-transform: uppercase;
   text-decoration: none !important;
   padding: 15px 30px; }
-  /* line 72, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+  /* line 72, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   input[type=button]:hover, .button:hover {
     background: #f2f2f2; }
-  /* line 73, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+  /* line 73, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   input[type=button]:active, .button:active {
     position: relative;
     top: 1px; }
 
-/* line 80, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 80, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 #navbar-container {
-  background-color: white; }
-  /* line 82, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+  background-color: #ffffff; }
+  /* line 82, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   #navbar-container.shadow {
-    -webkit-box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.4);
     -moz-box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.4);
     box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.4); }
-  /* line 84, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+  /* line 84, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   #navbar-container nav {
     z-index: 99;
     letter-spacing: 1px; }
-    /* line 87, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+    /* line 87, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
     #navbar-container nav > ul {
       width: 100%;
       display: -webkit-box;
@@ -366,7 +364,7 @@ input[type=button], .button {
       -moz-box-orient: horizontal;
       -ms-box-orient: horizontal;
       box-orient: horizontal; }
-      /* line 93, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+      /* line 93, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
       #navbar-container nav > ul > li {
         font-size: 12px;
         font-weight: 800;
@@ -374,27 +372,27 @@ input[type=button], .button {
         margin: 0 10px;
         line-height: 70px;
         position: relative; }
-        /* line 100, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+        /* line 100, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
         #navbar-container nav > ul > li.active a {
           color: #2884b4 !important; }
-        /* line 102, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+        /* line 102, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
         #navbar-container nav > ul > li a, #navbar-container nav > ul > li i {
-          color: black;
+          color: #000000;
           text-decoration: none; }
-          /* line 105, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+          /* line 105, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
           #navbar-container nav > ul > li a:hover, #navbar-container nav > ul > li i:hover {
             color: #2884b4 !important; }
-        /* line 110, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+        /* line 110, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
         #navbar-container nav > ul > li#logo {
           margin-right: 40px;
           text-transform: uppercase;
           line-height: 60px; }
-          /* line 115, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+          /* line 115, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
           #navbar-container nav > ul > li#logo img {
             margin-top: 5px;
             height: 27px;
             vertical-align: middle; }
-        /* line 122, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+        /* line 122, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
         #navbar-container nav > ul > li#quicknav-container {
           position: relative;
           -webkit-box-flex: 1;
@@ -402,30 +400,30 @@ input[type=button], .button {
           -ms-box-flex: 1;
           box-flex: 1; }
 
-/* line 132, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 132, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 #hero-container {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   background-color: #2a2f42;
   text-align: center;
   height: 280px;
   padding-top: 60px; }
-  /* line 138, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+  /* line 138, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   #hero-container h1 {
     font-family: "Raleway", "SQMarket", "Helvetica Neue", Helvetica, sans-serif;
-    color: white; }
-  /* line 142, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+    color: #ffffff; }
+  /* line 142, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   #hero-container h3 {
     color: #7b7f88;
     text-transform: uppercase;
     margin-top: 14px;
     margin-bottom: 50px; }
 
-/* line 151, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 151, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 article {
   margin-top: 40px; }
-  /* line 154, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+  /* line 154, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   article section {
     display: -webkit-box;
     display: -moz-box;
@@ -436,7 +434,7 @@ article {
     -ms-box-orient: horizontal;
     box-orient: horizontal;
     width: 100%; }
-    /* line 158, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+    /* line 158, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
     article section .half {
       display: -webkit-box;
       display: -moz-box;
@@ -460,29 +458,29 @@ article {
       box-align: center;
       width: 100%;
       padding: 40px 30px 40px 30px; }
-      /* line 166, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+      /* line 166, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
       article section .half img {
         width: 100%; }
-      /* line 168, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+      /* line 168, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
       article section .half h2 {
         margin-bottom: 15px; }
-      /* line 169, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+      /* line 169, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
       article section .half p + p {
         margin-top: 15px; }
 
-/* line 175, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+/* line 175, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
 #footer {
   background-color: #363636;
   text-align: center;
   padding-top: 80px; }
-  /* line 179, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+  /* line 179, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   #footer div + div {
     margin-top: 30px; }
-  /* line 180, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+  /* line 180, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
   #footer a:not(.button) {
     font-size: 14px;
     color: #ffffff;
     text-decoration: none; }
-    /* line 184, /Users/ricksong/Documents/Projects/shuttle-marketing/source/stylesheets/all.css.scss */
+    /* line 184, /Documents/Projects/shuttle/source/stylesheets/all.css.scss */
     #footer a:not(.button):hover {
       text-decoration: underline; }
