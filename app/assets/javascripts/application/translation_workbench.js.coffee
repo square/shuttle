@@ -81,7 +81,7 @@ class TranslationItem
     $.ajax @translation.url + '.json',
       type: 'PUT'
       data: $.param('translation[copy]': @element.find('.translation-area').val(), copyToLocales: copyToLocales)
-      complete: => @element.find('.translation-area, input').removeAttr 'disabled', 'disabled'
+      complete: => @element.find('.translation-area, textarea').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
       error: (xhr, textStatus, errorThrown) => new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
     return true
