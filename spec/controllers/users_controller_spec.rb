@@ -95,14 +95,6 @@ describe UsersController do
                                                             {"name"=>"test2 user3",  "email"=>"user3@example.com"},
                                                             {"name"=>"1test2 user4", "email"=>"user4@example.com"}])
         end
-
-        it "returns fuzzy matched users' email addresses and names" do
-          pending # TODO (yunus): implement fuzzy matching
-          FactoryGirl.create(:user, :activated, first_name: "tast",   last_name: "user1", email: 'user1@example.com') # fuzzy match
-          FactoryGirl.create(:user, :activated, first_name: "attast", last_name: "user2", email: 'user2@example.com') # miss
-          subject
-          expect(JSON.parse(response.body)).to eql([{"name"=>"tast user1", "email"=>"user1@example.com"}])
-        end
       end
 
       context "[matching by last name]" do
@@ -118,14 +110,6 @@ describe UsersController do
                                                             {"name"=>"user3 test2",  "email"=>"user3@example.com"},
                                                             {"name"=>"user4 1test2", "email"=>"user4@example.com"}])
           end
-
-        it "returns fuzzy matched users' email addresses and names" do
-          pending # TODO (yunus): implement fuzzy matching
-          FactoryGirl.create(:user, :activated, first_name: "user1", last_name: "tast",   email: 'user1@example.com') # fuzzy match
-          FactoryGirl.create(:user, :activated, first_name: "user2", last_name: "attast", email: 'user2@example.com') # miss
-          subject
-          expect(JSON.parse(response.body)).to eql([{"name"=>"user1 tast", "email"=>"user1@example.com"}])
-        end
       end
 
 

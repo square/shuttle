@@ -318,6 +318,47 @@ describe TranslationsController do
         expect(translation.translation_changes.count).to eq(1)
       end
     end
+
+    context "[multi-locale update]" do
+      before :each do
+        @user.update role: 'reviewer'
+
+        @project = FactoryGirl.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
+        @key = FactoryGirl.create(:key, ready: false, project:@project)
+        @fr_translation    = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr')
+        @fr_CA_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
+        @fr_FR_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
+        @fr_to_fr_CA = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
+        @fr_to_fr_FR = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
+        expect(@key.reload).to_not be_ready
+      end
+
+      it "updates the primary translation and 2 associated translations that user specifies" do
+        patch :update, project_id: @project.to_param, key_id: @key.to_param, id: @fr_translation.to_param, translation: { copy: "test" }, copyToLocales: %w(fr-CA fr-FR), format: 'json'
+
+        expect(@fr_translation.reload.copy).to eql("test")
+        expect(@fr_translation.translator).to eql(@user)
+        expect(@fr_CA_translation.reload.copy).to eql("test")
+        expect(@fr_CA_translation.translator).to eql(@user)
+        expect(@fr_FR_translation.reload.copy).to eql("test")
+        expect(@fr_FR_translation.translator).to eql(@user)
+        expect(@key.reload.ready).to be_true
+      end
+
+      it "doesn't update any of the requested translations because one of the translations are not linked to the primary one with a LocaleAssociation" do
+        @fr_to_fr_CA.delete
+
+        patch :update, project_id: @project.to_param, key_id: @key.to_param, id: @fr_translation.to_param, translation: { copy: "test" }, copyToLocales: %w(fr-CA fr-FR), format: 'json'
+
+        expect(@fr_translation.reload.copy).to be_nil
+        expect(@fr_translation.translator).to be_nil
+        expect(@fr_CA_translation.reload.copy).to be_nil
+        expect(@fr_CA_translation.translator).to be_nil
+        expect(@fr_FR_translation.reload.copy).to be_nil
+        expect(@fr_FR_translation.translator).to be_nil
+        expect(@key.reload.ready).to be_false
+      end
+    end
   end
 
   describe "#approve" do
