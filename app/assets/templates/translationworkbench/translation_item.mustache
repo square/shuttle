@@ -9,7 +9,13 @@
           <div class="controls multi-updateable-translations muted">
             <span>Copy to:</span>
             {{#multi_updateable_translations_and_locale_associations}}
-              <input type="checkbox" value="{{translation.rfc5646_locale}}" {{#locale_association.checked}}checked{{/locale_association.checked}}>
+              <input type="checkbox" value="{{translation.rfc5646_locale}}"
+                {{#locale_association}}
+                  {{#checked}}
+                    checked
+                    {{#uncheckable}}disabled{{/uncheckable}}
+                  {{/checked}}
+                {{/locale_association}}>
                 {{translation.rfc5646_locale}}
               </input>
             {{/multi_updateable_translations_and_locale_associations}}
