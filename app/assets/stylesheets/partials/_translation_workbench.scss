@@ -22,6 +22,11 @@
         padding: 10px;
         min-height: 240px;
 
+        textarea.translation-area {
+          width: 100%;
+          min-height: 150px;
+        }
+
         textarea.translation-area, .multi-updateable-translations a {
           &.approved {
             color: $input-green;
@@ -38,20 +43,40 @@
           &.unsaved {
             color: black;
           }
-          width: 100%;
-          min-height: 150px;
         }
 
         button.copy-source {
           margin: 0;
         }
 
-        .multi-updateable-translations {
-          margin: 1px 0 5px 0;
+        .multi-updateable-translations-wrapper {
+          margin: 1px 0 7px 0;
+          display: flex;
+          align-items: center;
+
           input[type=checkbox] {
             font-size: 200%;
-            vertical-align: middle;
-            margin-left: 10px;
+          }
+
+          .copy-to-label {
+            min-width: 55px;
+          }
+
+          .multi-updateable-translations {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+          }
+
+          .multi-updateable-translation {
+            display: flex;
+            align-items: center;
+            &:first-child { margin-left: 5px; }
+            &:not(:first-child) { margin-left: 20px; }
+          }
+
+          a {
+            text-align: center;
           }
         }
 
