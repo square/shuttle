@@ -13,8 +13,32 @@
 #    limitations under the License.
 
 # Represents an association between 2 locales.
+#
 # It's used in multi-lingual translation workbench for fast translations into multiple
 # associated locales.
+#
+# For example, let's assume that you have projects with 'fr' and 'fr-CA' as targeted locales.
+# In most cases, their translations would be the same. So, you would want to create a
+# {LocaleAssociation} from 'fr' to 'fr-CA', and set `checked` to true and `uncheck_disabled` to false.
+# From then on, whenever a translator is translating, say from 'en', to 'fr', they will see a
+# checkbox for 'fr-CA' which is checked by default. Translator can uncheck it if they think
+# the translations will not be the same. If it's checked when the translator submits the form,
+# the translation copy will be copied to both 'fr' & 'fr-CA' translations.
+#
+# Sometimes, you may want keep a 1:1 relationship between locales. In such cases, you can
+# set `checked` & `uncheck_disabled` both. Then, the translator should not be able to uncheck it.
+# However, these settings apply to translation workbench only. A translator can edit any single
+# translation by going to its edit page even regardless of LocaleAssociations.
+#
+# Properties
+# ==========
+#
+# |                         |                                                                                     |
+# |:------------------------|:------------------------------------------------------------------------------------|
+# | `checked`               | Whether or not the checkbox for this locale association will be checked by default. |
+# | `uncheck_disabled`      | Whether or not the checkbox will allow unchecking if it's checked by default.       |
+# | `source_rfc5646_locale` | The source locale for the association.                                              |
+# | `target_rfc5646_locale` | The target locale for the association.                                              |
 
 class LocaleAssociation < ActiveRecord::Base
   # VALIDATIONS
