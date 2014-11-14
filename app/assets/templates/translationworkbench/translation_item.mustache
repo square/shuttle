@@ -14,7 +14,7 @@
                   {{#checked}}checked{{/checked}}
                   {{#uncheckable}}disabled{{/uncheckable}}
                 {{/locale_association}}>
-                {{translation.rfc5646_locale}}
+                <a href="{{translation.edit_path}}" target="_blank">{{translation.rfc5646_locale}}</a>
               </input>
             {{/multi_updateable_translations_and_locale_associations}}
           </div>
