@@ -72,6 +72,14 @@ body.projects {
     form {
       fieldset {
         &:last-of-type { padding-bottom: 0px; }
+
+        .space-group {
+          .controls {
+            input[type="checkbox"], input[type="radio"] {
+              margin-top: -17px;
+            }
+          }
+        }
         
         .controls {
           &.checkboxes_and_radios {

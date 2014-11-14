@@ -390,6 +390,7 @@ CREATE TABLE projects (
     api_token character(36) NOT NULL,
     created_at timestamp without time zone,
     translation_adder_batch_id character varying(255),
+    disable_locale_association_checkbox_settings boolean DEFAULT false NOT NULL,
     CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0))
 );
 
@@ -1511,3 +1512,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141104215833');
 INSERT INTO schema_migrations (version) VALUES ('20141105193238');
 
 INSERT INTO schema_migrations (version) VALUES ('20141113025632');
+
+INSERT INTO schema_migrations (version) VALUES ('20141114011624');
