@@ -316,7 +316,7 @@ CREATE TABLE locale_associations (
     source_rfc5646_locale character varying(255) NOT NULL,
     target_rfc5646_locale character varying(255) NOT NULL,
     checked boolean DEFAULT false NOT NULL,
-    uncheckable boolean DEFAULT false NOT NULL,
+    uncheck_disabled boolean DEFAULT false NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
 );
@@ -1514,3 +1514,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141105193238');
 INSERT INTO schema_migrations (version) VALUES ('20141113025632');
 
 INSERT INTO schema_migrations (version) VALUES ('20141114011624');
+
+INSERT INTO schema_migrations (version) VALUES ('20141114073933');

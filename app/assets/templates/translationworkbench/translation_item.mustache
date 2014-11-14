@@ -13,7 +13,7 @@
                 <input type="checkbox" value="{{translation.rfc5646_locale}}"
                   {{#locale_association}}
                     {{#checked}}checked{{/checked}}
-                    {{#uncheckable}}disabled{{/uncheckable}}
+                    {{#uncheck_disabled}}disabled{{/uncheck_disabled}}
                   {{/locale_association}}>
                   <a href="{{translation.edit_path}}" target="_blank" class="muted {{translation.status}}">{{translation.rfc5646_locale}}</a>
                 </span>

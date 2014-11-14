@@ -138,6 +138,6 @@ class LocaleAssociationsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def locale_association_params
-    params.require(:locale_association).permit(:source_rfc5646_locale, :target_rfc5646_locale, :checked, :uncheckable)
+    params.require(:locale_association).permit(:source_rfc5646_locale, :target_rfc5646_locale, :checked, :uncheck_disabled)
   end
 end
