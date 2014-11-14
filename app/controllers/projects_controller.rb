@@ -345,6 +345,7 @@ class ProjectsController < ApplicationController
         manifest_directory manifest_filename
         key_locale_exclusions key_locale_inclusions
         only_importer_paths skip_importer_paths
+        disable_locale_association_checkbox_settings
     ))
     project_params["targeted_rfc5646_locales"] = targeted_rfc5646_locales
     project_params

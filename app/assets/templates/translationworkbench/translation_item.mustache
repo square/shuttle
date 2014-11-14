@@ -11,10 +11,8 @@
             {{#multi_updateable_translations_and_locale_associations}}
               <input type="checkbox" value="{{translation.rfc5646_locale}}"
                 {{#locale_association}}
-                  {{#checked}}
-                    checked
-                    {{#uncheckable}}disabled{{/uncheckable}}
-                  {{/checked}}
+                  {{#checked}}checked{{/checked}}
+                  {{#uncheckable}}disabled{{/uncheckable}}
                 {{/locale_association}}>
                 {{translation.rfc5646_locale}}
               </input>

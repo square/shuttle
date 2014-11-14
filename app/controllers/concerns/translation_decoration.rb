@@ -35,12 +35,26 @@ module TranslationDecoration
     end
   end
 
+  private
+
   def multi_updateable_translations_and_locale_associations(translation)
     TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(translation).
         sort_by { |translation, la| translation.rfc5646_locale }.
         reduce([]) do |arr, (translation, locale_association)|
-          arr << {translation: translation.as_json(only: [:rfc5646_locale]), locale_association: locale_association.as_json(only: [:checked, :uncheckable]) }
+          arr << {translation: translation.as_json(only: [:rfc5646_locale]),
+                  locale_association: {
+                    checked: multi_updateable_translation_checked?(translation, locale_association),
+                    uncheckable: multi_updateable_translation_uncheckable?(translation, locale_association)
+                  }}
           arr
         end
+  end
+
+  def multi_updateable_translation_checked?(translation, locale_association)
+    !translation.key.project.disable_locale_association_checkbox_settings && locale_association.checked
+  end
+
+  def multi_updateable_translation_uncheckable?(translation, locale_association)
+    !translation.key.project.disable_locale_association_checkbox_settings && locale_association.checked && locale_association.uncheckable
   end
 end

@@ -237,6 +237,8 @@
           .controls
             = f.content_tag_field 'div', :skip_importer_paths, class: 'hash-field', 'data-value' => @project.skip_importer_paths.to_json
 
+
+
   - if current_user.admin? && @project.persisted?
     .header.advanced_actions_header
       h1 Advanced
@@ -246,6 +248,11 @@
       .eight.columns
         fieldset
           legend Multi Locale Translations
+
+          .space-group
+            = f.label :disable_locale_association_checkbox_settings, class: 'control-label'
+            .controls
+              = f.check_box :disable_locale_association_checkbox_settings
 
           .space-group
             = link_to "Mass Copy Translations From One Locale Into Another", setup_mass_copy_translations_project_url
