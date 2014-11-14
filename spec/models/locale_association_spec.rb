@@ -27,6 +27,12 @@ describe LocaleAssociation do
       expect(association.errors.full_messages).to eql(["Target rfc5646 locale cannot equal to source rfc5646 locale"])
     end
 
+    it "doesn't allow setting uncheck_disabled if checked is not set" do
+      association = FactoryGirl.build(:locale_association, checked: false, uncheck_disabled: true)
+      association.save
+      expect(association.errors.full_messages).to eql(["Uncheck disabled cannot disable unchecking if it's not checked by default"])
+    end
+
     it "doesn't allow duplicate source->target pairs" do
       FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
       la = FactoryGirl.build(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
