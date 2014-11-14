@@ -48,7 +48,7 @@ module TranslationDecoration
                         edit_path: ERB::Util.h(edit_project_key_translation_path(translation.key.project, translation.key, translation))),
                     locale_association: {
                       checked: multi_updateable_translation_checked?(translation, locale_association),
-                      uncheckable: multi_updateable_translation_uncheckable?(translation, locale_association)
+                      uncheck_disabled: multi_updateable_translation_uncheck_disabled?(translation, locale_association)
                     }}
           arr
         end
@@ -58,8 +58,8 @@ module TranslationDecoration
     !translation.key.project.disable_locale_association_checkbox_settings && locale_association.checked
   end
 
-  def multi_updateable_translation_uncheckable?(translation, locale_association)
-    !translation.key.project.disable_locale_association_checkbox_settings && locale_association.checked && locale_association.uncheckable
+  def multi_updateable_translation_uncheck_disabled?(translation, locale_association)
+    !translation.key.project.disable_locale_association_checkbox_settings && locale_association.checked && locale_association.uncheck_disabled
   end
 
   def translation_status(translation)

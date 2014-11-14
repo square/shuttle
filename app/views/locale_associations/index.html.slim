@@ -37,11 +37,11 @@ hr.divider
         th Source Locale
         th Target Locale
         th Checked
-        th Uncheckable
+        th Uncheck Disabled
     tbody
       - @locale_associations.each do |locale_association|
         tr onclick="document.location = '#{edit_locale_association_path(locale_association)}'"
           td = locale_association.source_rfc5646_locale
           td = locale_association.target_rfc5646_locale
           td = locale_association.checked
-          td = locale_association.uncheckable
+          td = locale_association.uncheck_disabled

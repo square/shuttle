@@ -17,6 +17,6 @@ FactoryGirl.define do
     source_rfc5646_locale "fr"
     target_rfc5646_locale "fr-CA"
     checked false
-    uncheckable true
+    uncheck_disabled false
   end
 end

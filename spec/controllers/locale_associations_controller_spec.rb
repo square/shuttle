@@ -19,7 +19,7 @@ describe LocaleAssociationsController do
   # This should return the minimal set of attributes required to create a valid
   # LocaleAssociation. As you add validations to LocaleAssociation, be sure to
   # adjust the attributes here as well.
-  let(:valid_attributes) { { "source_rfc5646_locale" => "fr", "target_rfc5646_locale" => "fr-CA", "checked" => "0", "uncheckable" => "1" } }
+  let(:valid_attributes) { { "source_rfc5646_locale" => "fr", "target_rfc5646_locale" => "fr-CA", "checked" => "0", "uncheck_disabled" => "0" } }
 
   # This should return the minimal set of values that should be in the session
   # in order to pass any filters (e.g. authentication) defined in

@@ -19,7 +19,7 @@
 class LocaleAssociation < ActiveRecord::Base
   # VALIDATIONS
   validates :checked, inclusion: { in: [true, false] }
-  validates :uncheckable, inclusion: { in: [true, false] }
+  validates :uncheck_disabled, inclusion: { in: [true, false] }
   validates :source_rfc5646_locale, presence: true
   validates :target_rfc5646_locale, presence: true
   validates :target_rfc5646_locale, uniqueness: { scope: :source_rfc5646_locale }

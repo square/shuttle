@@ -16,9 +16,9 @@ require 'spec_helper'
 
 describe LocaleAssociation do
   context "[CRUD]" do
-    it "requires source_rfc5646_locale, target_rfc5646_locale, checked, uncheckable fields to be present" do
-      association = LocaleAssociation.create(source_rfc5646_locale: nil, target_rfc5646_locale: nil, checked: nil, uncheckable: nil)
-      expect(association.errors.full_messages).to eql(["Checked not acceptable", "Uncheckable not acceptable", "Source rfc5646 locale can’t be blank", "Target rfc5646 locale can’t be blank", "Target rfc5646 locale cannot equal to source rfc5646 locale"])
+    it "requires source_rfc5646_locale, target_rfc5646_locale, checked, uncheck_disabled fields to be present" do
+      association = LocaleAssociation.create(source_rfc5646_locale: nil, target_rfc5646_locale: nil, checked: nil, uncheck_disabled: nil)
+      expect(association.errors.full_messages).to eql(["Checked not acceptable", "Uncheck disabled not acceptable", "Source rfc5646 locale can’t be blank", "Target rfc5646 locale can’t be blank", "Target rfc5646 locale cannot equal to source rfc5646 locale"])
     end
 
     it "doesn't allow target and source locales to be equal" do

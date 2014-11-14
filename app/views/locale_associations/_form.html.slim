@@ -39,10 +39,11 @@ hr.divider
           = f.check_box :checked
           span.help-block Should the checkbox for the targeted locale be checked by default?
       .control-group
-        = f.label :uncheckable, class: 'control-label'
+        = f.label :uncheck_disabled, class: 'control-label'
         .controls.checkbox-wrapper
-          = f.check_box :uncheckable
-          span.help-block Should the checkbox for the targeted locale be uncheckable?
+          = f.check_box
+            uncheck_disabled
+          span.help-block Do you want to disable unchecking the checkbox if it's checked?
   .form-actions
     = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
     button.default href=locale_associations_url Cancel

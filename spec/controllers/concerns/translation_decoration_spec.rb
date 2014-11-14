@@ -22,7 +22,7 @@ describe TranslationDecoration do
   end
 
   before :each do
-    @locale_association = LocaleAssociation.create(source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA', checked: true, uncheckable: true)
+    @locale_association = LocaleAssociation.create(source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA', checked: true, uncheck_disabled: true)
     @project = FactoryGirl.create(:project, disable_locale_association_checkbox_settings: false)
     key = FactoryGirl.create(:key, project: @project)
     @translation = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'fr-CA')
@@ -44,24 +44,24 @@ describe TranslationDecoration do
     end
   end
 
-  describe "#multi_updateable_translation_uncheckable?" do
-    it "returns true if locale association is 'checked' and 'uncheckable', and project settings don't disable it" do
-      expect(TranslationDecorationTester.new.send(:multi_updateable_translation_uncheckable?, @translation, @locale_association)).to be_true
+  describe "#multi_updateable_translation_uncheck_disabled?" do
+    it "returns true if locale association is 'checked' and 'uncheck_disabled', and project settings don't disable it" do
+      expect(TranslationDecorationTester.new.send(:multi_updateable_translation_uncheck_disabled?, @translation, @locale_association)).to be_true
     end
 
-    it "returns false if locale association is not 'checked' even though it's 'uncheckable' and project settings don't disable it" do
+    it "returns false if locale association is not 'checked' even though it's 'uncheck_disabled' and project settings don't disable it" do
       @locale_association.update! checked: false
-      expect(TranslationDecorationTester.new.send(:multi_updateable_translation_uncheckable?, @translation, @locale_association)).to be_false
+      expect(TranslationDecorationTester.new.send(:multi_updateable_translation_uncheck_disabled?, @translation, @locale_association)).to be_false
     end
 
-    it "returns false if locale association is not 'uncheckable' even though it's 'checked' and project settings don't disable it" do
-      @locale_association.update! uncheckable: false
-      expect(TranslationDecorationTester.new.send(:multi_updateable_translation_uncheckable?, @translation, @locale_association)).to be_false
+    it "returns false if locale association is not 'uncheck_disabled' even though it's 'checked' and project settings don't disable it" do
+      @locale_association.update! uncheck_disabled: false
+      expect(TranslationDecorationTester.new.send(:multi_updateable_translation_uncheck_disabled?, @translation, @locale_association)).to be_false
     end
 
-    it "returns false if project settings disable it even if locale association is 'checked' and 'uncheckable'" do
+    it "returns false if project settings disable it even if locale association is 'checked' and 'uncheck_disabled'" do
       @project.update! disable_locale_association_checkbox_settings: true
-      expect(TranslationDecorationTester.new.send(:multi_updateable_translation_uncheckable?, @translation, @locale_association)).to be_false
+      expect(TranslationDecorationTester.new.send(:multi_updateable_translation_uncheck_disabled?, @translation, @locale_association)).to be_false
     end
   end
 end
