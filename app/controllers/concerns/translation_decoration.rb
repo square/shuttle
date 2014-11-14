@@ -48,7 +48,7 @@ module TranslationDecoration
                         edit_path: ERB::Util.h(edit_project_key_translation_path(translation.key.project, translation.key, translation))),
                     locale_association: {
                       checked:          locale_association_checked?(         locale_association, translation),
-                      uncheck_disabled: locale_association_uncheck_disabled?(translation, locale_association)
+                      uncheck_disabled: locale_association_uncheck_disabled?(locale_association, translation)
                     }}
           arr
         end
