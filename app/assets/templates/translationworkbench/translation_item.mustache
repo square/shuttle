@@ -6,24 +6,26 @@
         <textarea class="translation-area {{status}}">{{translation_copy}}</textarea>
 
         {{#multi_updateable_translations_and_locale_associations.0}}
-          <div class="controls multi-updateable-translations muted">
-            <span>Copy to:</span>
-            {{#multi_updateable_translations_and_locale_associations}}
-              <span>
-                <input type="checkbox" value="{{translation.rfc5646_locale}}"
-                  {{#locale_association}}
-                    {{#checked}}checked{{/checked}}
-                    {{#uncheck_disabled}}disabled{{/uncheck_disabled}}
-                  {{/locale_association}}>
-                  {{#translation}}
-                    <a href="{{edit_path}}" target="_blank" class="muted {{status}}">
-                      {{rfc5646_locale}}
-                      {{#similarity}} ({{similarity}}){{/similarity}}
-                    </a>
-                  {{/translation}}
-                </span>
-              </input>
-            {{/multi_updateable_translations_and_locale_associations}}
+          <div class="controls multi-updateable-translations-wrapper muted">
+            <div class="copy-to-label">Copy to:</div>
+            <div class="multi-updateable-translations">
+              {{#multi_updateable_translations_and_locale_associations}}
+                <div class="multi-updateable-translation">
+                  <input type="checkbox" value="{{translation.rfc5646_locale}}"
+                    {{#locale_association}}
+                      {{#checked}}checked{{/checked}}
+                      {{#uncheck_disabled}}disabled{{/uncheck_disabled}}
+                    {{/locale_association}}>
+                    {{#translation}}
+                      <a href="{{edit_path}}" target="_blank" class="muted {{status}}">
+                        <div>{{rfc5646_locale}}</div>
+                        <div>{{#similarity}}{{similarity}}{{/similarity}}</div>
+                      </a>
+                    {{/translation}}
+                  </input>
+                </div>
+              {{/multi_updateable_translations_and_locale_associations}}
+            </div>
           </div>
         {{/multi_updateable_translations_and_locale_associations.0}}
 
