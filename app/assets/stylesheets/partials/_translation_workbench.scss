@@ -55,7 +55,7 @@
           align-items: center;
 
           input[type=checkbox] {
-            font-size: 200%;
+            font-size: 250%;
           }
 
           .copy-to-label {
@@ -71,12 +71,16 @@
           .multi-updateable-translation {
             display: flex;
             align-items: center;
-            &:first-child { margin-left: 5px; }
-            &:not(:first-child) { margin-left: 20px; }
+            margin-left: 5px;
+            margin-right: 15px;
+            width: 90px;
           }
 
           a {
             text-align: center;
+            line-height: 15px;
+
+            .similarity { font-size: small;}
           }
         }
 

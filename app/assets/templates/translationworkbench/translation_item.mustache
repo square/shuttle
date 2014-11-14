@@ -19,7 +19,7 @@
                     {{#translation}}
                       <a href="{{edit_path}}" target="_blank" class="muted {{status}}">
                         <div>{{rfc5646_locale}}</div>
-                        <div>{{#similarity}}{{similarity}}{{/similarity}}</div>
+                        {{#similarity}}<div class='similarity'>{{similarity}}</div>{{/similarity}}
                       </a>
                     {{/translation}}
                   </input>
