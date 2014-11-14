@@ -16,6 +16,8 @@
 # Translation JSON serializations.
 
 module TranslationDecoration
+  include ActionView::Helpers::NumberHelper
+
   private
 
   def decorate(translations)
@@ -44,8 +46,9 @@ module TranslationDecoration
         reduce([]) do |arr, (translation, locale_association)|
           arr <<  { translation:
                       translation.as_json(only: [:rfc5646_locale]).merge(
-                        status:    translation_status(translation),
-                        edit_path: ERB::Util.h(edit_project_key_translation_path(translation.key.project, translation.key, translation))),
+                        status:     translation_status(translation),
+                        edit_path:  ERB::Util.h(edit_project_key_translation_path(translation.key.project, translation.key, translation)),
+                        similarity: similarity(translation, primary_translation)),
                     locale_association: {
                       checked:          locale_association_checked?(         locale_association, translation),
                       uncheck_disabled: locale_association_uncheck_disabled?(locale_association, translation)
@@ -72,5 +75,9 @@ module TranslationDecoration
     else
       ''
     end
+  end
+
+  def similarity(t1, t2)
+    number_to_percentage(t1.copy.similar(t2.copy), precision: 0) if t1.translated? && t2.translated?
   end
 end
