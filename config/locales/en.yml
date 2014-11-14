@@ -32,6 +32,8 @@ en:
             target_rfc5646_locale:
               cant_equal_to_source_locale: cannot equal to source rfc5646 locale
               iso639_doesnt_match_source_iso639: iso639 doesn't match source's
+            uncheck_disabled:
+              cannot_disable_uncheck_if_its_not_checked: cannot disable unchecking if it's not checked by default
     attributes:
       project:
         name: name

@@ -17,6 +17,8 @@
 # It's used in multi-lingual translation workbench for fast translations into multiple
 # associated locales.
 #
+# `uncheck_disabled` can only be set if `checked` is set.
+#
 # For example, let's assume that you have projects with 'fr' and 'fr-CA' as targeted locales.
 # In most cases, their translations would be the same. So, you would want to create a
 # {LocaleAssociation} from 'fr' to 'fr-CA', and set `checked` to true and `uncheck_disabled` to false.
@@ -49,6 +51,7 @@ class LocaleAssociation < ActiveRecord::Base
   validates :target_rfc5646_locale, uniqueness: { scope: :source_rfc5646_locale }
   validate :target_rfc5646_locale_cannot_be_equal_to_source
   validate :iso639s_should_match, if: "source_locale && target_locale"
+  validate :cannot_disable_uncheck_if_its_not_checked
 
   extend LocaleField
   locale_field :source_locale, from: :source_rfc5646_locale
@@ -72,6 +75,12 @@ class LocaleAssociation < ActiveRecord::Base
   def iso639s_should_match
     if source_locale.iso639 != target_locale.iso639
       errors.add(:target_rfc5646_locale, :iso639_doesnt_match_source_iso639)
+    end
+  end
+
+  def cannot_disable_uncheck_if_its_not_checked
+    if uncheck_disabled && !checked
+      errors.add(:uncheck_disabled, :cannot_disable_uncheck_if_its_not_checked)
     end
   end
 end
