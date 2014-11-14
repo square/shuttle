@@ -118,15 +118,7 @@ class TranslationItem
   build: ->
     context = {}
 
-    switch @translation.approved
-      when true then context.status = 'approved'
-      when false then context.status = 'rejected'
-      else
-        if @translation.translated
-          context.status = 'translated'
-        else
-          context.status = ''
-
+    context.status = @translation.status
     context.translation_copy = @translation.copy
     context.source_copy = this.renderCopyWithFencing(
                                                       @translation.source_copy,

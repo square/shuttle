@@ -22,7 +22,7 @@
         padding: 10px;
         min-height: 240px;
 
-        textarea.translation-area {
+        textarea.translation-area, .multi-updateable-translations a {
           &.approved {
             color: $input-green;
             font-weight: 500;

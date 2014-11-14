@@ -28,6 +28,7 @@ module TranslationDecoration
           reject_url:       reject_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           suggestion_url:   match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           fuzzy_match_url:  fuzzy_match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
+          status:           translation_status(translation),
           translator:       translation.translator.as_json,
           reviewer:         translation.reviewer.as_json, # not sure why it's necessary to explicitly include these, but it is
           multi_updateable_translations_and_locale_associations: multi_updateable_translations_and_locale_associations(translation),
@@ -37,12 +38,13 @@ module TranslationDecoration
 
   private
 
-  def multi_updateable_translations_and_locale_associations(translation)
-    TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(translation).
+  def multi_updateable_translations_and_locale_associations(primary_translation)
+    TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(primary_translation).
         sort_by { |translation, la| translation.rfc5646_locale }.
         reduce([]) do |arr, (translation, locale_association)|
           arr <<  { translation:
                       translation.as_json(only: [:rfc5646_locale]).merge(
+                        status:    translation_status(translation),
                         edit_path: ERB::Util.h(edit_project_key_translation_path(translation.key.project, translation.key, translation))),
                     locale_association: {
                       checked: multi_updateable_translation_checked?(translation, locale_association),
@@ -58,5 +60,17 @@ module TranslationDecoration
 
   def multi_updateable_translation_uncheckable?(translation, locale_association)
     !translation.key.project.disable_locale_association_checkbox_settings && locale_association.checked && locale_association.uncheckable
+  end
+
+  def translation_status(translation)
+    if translation.approved
+      'approved'
+    elsif translation.approved == false
+      'rejected'
+    elsif translation.translated
+      'translated'
+    else
+      ''
+    end
   end
 end
