@@ -41,11 +41,13 @@ module TranslationDecoration
     TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(translation).
         sort_by { |translation, la| translation.rfc5646_locale }.
         reduce([]) do |arr, (translation, locale_association)|
-          arr << {translation: translation.as_json(only: [:rfc5646_locale]),
-                  locale_association: {
-                    checked: multi_updateable_translation_checked?(translation, locale_association),
-                    uncheckable: multi_updateable_translation_uncheckable?(translation, locale_association)
-                  }}
+          arr <<  { translation:
+                      translation.as_json(only: [:rfc5646_locale]).merge(
+                        edit_path: ERB::Util.h(edit_project_key_translation_path(translation.key.project, translation.key, translation))),
+                    locale_association: {
+                      checked: multi_updateable_translation_checked?(translation, locale_association),
+                      uncheckable: multi_updateable_translation_uncheckable?(translation, locale_association)
+                    }}
           arr
         end
   end
