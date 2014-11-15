@@ -92,6 +92,8 @@ describe CommitsController do
                          source_rfc5646_locale: 'en-US',
                          rfc5646_locale:        'de',
                          approved:              true
+
+      @commit.update_column :ready, true
     end
 
     context '[formats]' do

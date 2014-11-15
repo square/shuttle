@@ -117,6 +117,26 @@ describe Key do
   end
 
   describe "#recalculate_ready!" do
+    it "doesn't run KeyStatsRecalculator if skip_readiness_hooks is true" do
+      key = FactoryGirl.create(:key)
+      expect(KeyStatsRecalculator).to_not receive(:perform_once)
+      key.skip_readiness_hooks = true
+      key.recalculate_ready!
+    end
+
+    it "runs KeyStatsRecalculator and updates the ready state in the database" do
+      key = FactoryGirl.create(:key, ready: false)
+      expect(KeyStatsRecalculator).to receive(:perform_once)
+      key.recalculate_ready!
+      expect(key.reload).to be_ready
+    end
+
+    it "doesn't run KeyStatsRecalculator if ready doesn't change" do
+      key = FactoryGirl.create(:key, ready: true)
+      expect(KeyStatsRecalculator).to_not receive(:perform_once)
+      key.recalculate_ready!
+    end
+
     context "[for git-based projects]" do
       before :each do
         @key = FactoryGirl.create(:key, project: FactoryGirl.create(:project, targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true}))
@@ -186,13 +206,6 @@ describe Key do
       #   expect(KeyStatsRecalculator).to_not receive(:perform_once)
       #   @key.recalculate_ready!
       # end
-    end
-
-    it "doesn't run KeyStatsRecalculator if skip_readiness_hooks is true" do
-      key = FactoryGirl.create(:key)
-      expect(KeyStatsRecalculator).to_not receive(:perform_once)
-      key.skip_readiness_hooks = true
-      key.recalculate_ready!
     end
   end
 
