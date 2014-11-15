@@ -238,7 +238,7 @@ class Translation < ActiveRecord::Base
   end
 
   def recalculate_readiness
-    key.recalculate_ready! if destroyed? || translated_changed? || approved_changed?
+    key.recalculate_ready! if destroyed? || approved_changed?
   end
 
   def reset_reviewed
