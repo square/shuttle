@@ -25,6 +25,8 @@ describe ImportFinisher do
     end
 
     it "sets loading to false and sets ready to true if all translations are finished" do
+      @key.update! ready: false
+      @commit.update! ready: false
       @translation.update! source_copy: "test", approved: true, skip_readiness_hooks: true
       expect(@commit.reload).to be_loading
       expect(@commit).to_not be_ready
@@ -34,6 +36,8 @@ describe ImportFinisher do
     end
 
     it "sets loading to false and sets ready to false if some translations are not translated" do
+      @key.update! ready: false
+      @commit.update! ready: false
       expect(@commit.reload).to be_loading
       expect(@commit).to_not be_ready
       ImportFinisher.new.on_success true, 'commit_id' => @commit.id
