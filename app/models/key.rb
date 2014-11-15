@@ -248,17 +248,10 @@ class Key < ActiveRecord::Base
   # Recalculates the value of the `ready` column and updates the record.
 
   def recalculate_ready!
-    # ready_was = ready?
-    update ready: should_become_ready?
+    new_ready = should_become_ready?
+    return if new_ready == ready # proceed only if ready is about to change
+    update ready: new_ready
     KeyStatsRecalculator.perform_once(id) unless skip_readiness_hooks
-    # TODO (yunus): (ready != ready_was) should really be another condition above
-    # If ready didnt change, KeyStatsRecalculator and CommitRecalculator should not
-    # recalculate keys & commits & key_group's readiness states.
-    # Commit stats should be recalculated regardless of whether ready changed or not.
-    # Consider doing this check and handle hooks in Translation model. Or in an observer.
-    #
-    # UPDATE: Since commit stats recalculator is deprecated, it may now be safe to run this entire block
-    # if ready changes.
   end
 
   # @return [true, false] `true` if this Key should now be marked as ready.
