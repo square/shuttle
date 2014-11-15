@@ -20,7 +20,7 @@ FactoryGirl.define do
     committed_at { Time.now }
     loaded_at { Time.now }
     loading false
-    ready true
+    ready false
     skip_import true
     skip_sha_check true
   end

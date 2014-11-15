@@ -99,12 +99,6 @@ describe Translation do
     end
 
     context "[readiness recalculation]" do
-      it "should recalculate the readiness of all affected commits when added" do
-        FactoryGirl.create :translation, key: @key, rfc5646_locale: 'de', approved: true
-        expect(@key.reload).to be_ready
-        expect(@commit.reload).to be_ready
-      end
-
       it "should recalculate the readiness of all affected commits when modified" do
         trans = FactoryGirl.create(:translation, key: @key, rfc5646_locale: 'de', approved: true)
         trans.update_attribute :approved, false
