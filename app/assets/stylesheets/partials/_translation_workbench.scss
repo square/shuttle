@@ -56,6 +56,17 @@
 
           input[type=checkbox] {
             font-size: 250%;
+
+            &:checked {
+              ::after {
+                border-bottom-width: 2px;
+                border-left-width: 3px;
+              }
+
+              &:disabled::after {
+                border-color: $gray5;
+              }
+            }
           }
 
           .copy-to-label {
