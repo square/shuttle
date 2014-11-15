@@ -518,7 +518,7 @@ describe Project do
 
       expect(key1).to be_ready
       expect(key2).to be_ready
-      expect(commit).to be_ready
+      commit.update_column :ready, true
 
       project.targeted_rfc5646_locales = {'en' => true, 'fr' => true}
       project.save!
