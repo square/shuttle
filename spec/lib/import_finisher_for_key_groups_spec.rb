@@ -82,8 +82,8 @@ describe ImportFinisherForKeyGroups do
       @key_group.keys.update_all ready: false
     end
 
-    it "doesn't run KeyStatsRecalculator (for performance reasons)" do
-      expect(KeyStatsRecalculator).to_not receive(:perform_once)
+    it "doesn't run KeyAncestorsRecalculator (for performance reasons)" do
+      expect(KeyAncestorsRecalculator).to_not receive(:perform_once)
       ImportFinisherForKeyGroups.new.send :recalculate_full_readiness!, @key_group
     end
 

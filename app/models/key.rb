@@ -251,7 +251,7 @@ class Key < ActiveRecord::Base
     new_ready = should_become_ready?
     return if new_ready == ready # proceed only if ready is about to change
     update ready: new_ready
-    KeyStatsRecalculator.perform_once(id) unless skip_readiness_hooks
+    KeyAncestorsRecalculator.perform_once(id) unless skip_readiness_hooks
   end
 
   # @return [true, false] `true` if this Key should now be marked as ready.

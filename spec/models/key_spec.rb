@@ -117,23 +117,24 @@ describe Key do
   end
 
   describe "#recalculate_ready!" do
-    it "doesn't run KeyStatsRecalculator if skip_readiness_hooks is true" do
+    it "doesn't run KeyAncestorsRecalculator if skip_readiness_hooks is true" do
       key = FactoryGirl.create(:key)
-      expect(KeyStatsRecalculator).to_not receive(:perform_once)
+      expect(KeyAncestorsRecalculator).to_not receive(:perform_once)
       key.skip_readiness_hooks = true
       key.recalculate_ready!
     end
 
-    it "runs KeyStatsRecalculator and updates the ready state in the database" do
+    it "runs KeyAncestorsRecalculator and updates the ready state in the database" do
       key = FactoryGirl.create(:key, ready: false)
-      expect(KeyStatsRecalculator).to receive(:perform_once)
+      expect(KeyAncestorsRecalculator).to receive(:perform_once)
       key.recalculate_ready!
       expect(key.reload).to be_ready
     end
 
-    it "doesn't run KeyStatsRecalculator if ready doesn't change" do
-      key = FactoryGirl.create(:key, ready: true)
-      expect(KeyStatsRecalculator).to_not receive(:perform_once)
+    it "doesn't run KeyAncestorsRecalculator if ready doesn't change" do
+      key = FactoryGirl.create(:key, ready: false)
+      FactoryGirl.create(:translation, key: key, approved: nil)
+      expect(KeyAncestorsRecalculator).to_not receive(:perform_once)
       key.recalculate_ready!
     end
 
@@ -189,23 +190,6 @@ describe Key do
         @key.recalculate_ready!
         expect(@key).to be_ready
       end
-
-      # TODO (yunus): the 2 tests below are not key-group specific, pull them out.
-      # Also, they are not applicable ATM since KeyStatsRecalculator is run whether or not ready cahnegd
-      # Uncomment these once that is fixed.
-      #
-      # it "should run KeyStatsRecalculator if readiness state changed" do
-      #   @key.update_column :ready, false
-      #   expect(KeyStatsRecalculator).to receive(:perform_once).once.with(@key.id)
-      #   @key.recalculate_ready!
-      # end
-      #
-      # it "should not run KeyStatsRecalculator if readiness state did not change" do
-      #   @fr_translation.update_attribute :approved, false
-      #   @key.update_column :ready, false
-      #   expect(KeyStatsRecalculator).to_not receive(:perform_once)
-      #   @key.recalculate_ready!
-      # end
     end
   end
 
