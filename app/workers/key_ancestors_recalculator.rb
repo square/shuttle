@@ -19,8 +19,7 @@ require 'sidekiq_locking'
 #
 # Also recalculates the readiness of the associated KeyGroup if there is one.
 
-# TODO (yunus): should rename this
-class KeyStatsRecalculator
+class KeyAncestorsRecalculator
   include Sidekiq::Worker
   sidekiq_options queue: :low
 

@@ -14,7 +14,7 @@
 
 require 'spec_helper'
 
-describe KeyStatsRecalculator do
+describe KeyAncestorsRecalculator do
   describe "#perform" do
     context "KeyGroup" do
       it "recalculates the readiness of the related KeyGroup" do
@@ -26,7 +26,7 @@ describe KeyStatsRecalculator do
         expect(key_group).to_not be_ready
         expect(key.key_group).to eql(key_group)
 
-        expect(KeyStatsRecalculator).to receive(:perform_once).once.and_call_original
+        expect(KeyAncestorsRecalculator).to receive(:perform_once).once.and_call_original
         key.translations.in_locale(Locale.from_rfc5646('fr')).first.update! copy: "hi", approved: true
         key.recalculate_ready!
 
