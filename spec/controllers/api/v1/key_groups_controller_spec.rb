@@ -236,6 +236,7 @@ describe Api::V1::KeyGroupsController do
       key_group.translations.in_locale(*key_group.required_locales).each do |translation|
         translation.update! copy: "<p>translated</p>", approved: true
       end
+      key_group.keys.reload.each(&:recalculate_ready!)
       get :manifest, api_token: project.api_token, key: key_group.key, format: :json
       expect(response.status).to eql(200)
       expect(JSON.parse(response.body)).to eql({"fr"=>"<p>translated</p><p>translated</p>", "ja"=>"<p>translated</p><p>translated</p>"})
@@ -320,6 +321,7 @@ describe Api::V1::KeyGroupsController do
       key_group.reload.translations.where(approved: nil).each do |translation|
         translation.update! copy: "test", approved: true
       end
+      key_group.keys.reload.each(&:recalculate_ready!)
 
       # Status
       get :status, api_token: project.api_token, key: "support-article", format: :json

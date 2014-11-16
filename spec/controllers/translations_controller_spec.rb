@@ -735,8 +735,9 @@ describe TranslationsController do
 
         it "sets key readiness to true, sets commits' readiness to false and recalculates stats if the last standing translation for the key is approved" do
           @key1.translations.first.update! copy: 'fake', approved: true
+          @project.keys.each { |k| k.recalculate_ready! }
           translation = @key1.translations.last
-          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+          patch :update, translation: { copy: 'fake', approved: true }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
 
           expect(@key1.reload).to be_ready
           @project.commits.reload.each do |c|
@@ -746,8 +747,9 @@ describe TranslationsController do
 
         it "sets key readiness to true, sets commit readiness to true and recalculates stats if the last standing translation for the commit is approved" do
           ([@key1.translations.last] + @key2.translations.to_a).each { |t| t.update! copy: 'fake', approved: true }
+          @project.keys.each { |k| k.recalculate_ready! }
           translation = @key1.translations.first
-          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+          patch :update, translation: { copy: 'fake', approved: true }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
 
           expect(@key1.reload).to be_ready
           expect(@commit1.reload).to be_ready
@@ -756,7 +758,7 @@ describe TranslationsController do
 
         it "sets key readiness to false, recalculates commits' readiness and stats if a translation is approved but there are more translations in the key that are not approved" do
           translation = @key1.translations.last
-          patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
+          patch :update, translation: { copy: 'fake', approved: true }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
 
           expect(@key1.reload).to_not be_ready
           @project.commits.reload.each do |c|
@@ -795,6 +797,7 @@ describe TranslationsController do
 
         it "sets key readiness to true, sets keygroup's readiness to false if the last standing translation for the key (but not for the keygroup) is approved" do
           @key1.translations.last.update! copy: 'fake', approved: true
+          @project.keys.each { |k| k.recalculate_ready! }
           translation = @key1.translations.first
           patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
 
@@ -804,6 +807,7 @@ describe TranslationsController do
 
         it "sets key readiness to true, sets keygroup's readiness to true if the last standing translation for the keygroup is approved" do
           ([@key1.translations.last] + @key2.translations.to_a).each { |t| t.update! copy: 'fake', approved: true }
+          @project.keys.each { |k| k.recalculate_ready! }
           translation = @key1.translations.first
           patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
 

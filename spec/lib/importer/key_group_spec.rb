@@ -72,6 +72,8 @@ describe Importer::KeyGroup do
       keys[1].translations.in_locale(Locale.from_rfc5646('es')).first.update! copy: "<p>translated</p>"
       keys[2].translations.in_locale(Locale.from_rfc5646('es')).first.update! copy: "<p>translated</p>", approved: true
 
+      keys.each(&:recalculate_ready!)
+
       expect(keys[1].reload).to be_ready
 
       key_group.update! source_copy: "<p>x</p><p>a</p><p>b</p><p>c</p><p>y</p>", targeted_rfc5646_locales: { 'ja' => true, 'fr' => false } # forces a re-import
@@ -102,6 +104,7 @@ describe Importer::KeyGroup do
       expect(key_group.reload.keys.count).to eql(3)
 
       key_group.translations.not_base.each { |translation| translation.update! copy: "<p>translated</p>", approved: true }
+      key_group.keys.each(&:recalculate_ready!)
       expect(key_group.reload).to be_ready
       Importer::KeyGroup.new(key_group).send :rebase_existing_keys, ["<p>x</p>", "<p>a</p>", "<p>b</p>", "<p>c</p>"]
 

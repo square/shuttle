@@ -98,15 +98,6 @@ describe Translation do
       end
     end
 
-    context "[readiness recalculation]" do
-      it "should recalculate the readiness of all affected commits when modified" do
-        trans = FactoryGirl.create(:translation, key: @key, rfc5646_locale: 'de', approved: true)
-        trans.update_attribute :approved, false
-        expect(@key.reload).not_to be_ready
-        expect(@commit.reload).not_to be_ready
-      end
-    end
-
     context "[resetting reviewed state]" do
       it "should reset the reviewed state when the copy is changed" do
         trans = FactoryGirl.create(:translation, approved: true, reviewer: FactoryGirl.create(:user))
