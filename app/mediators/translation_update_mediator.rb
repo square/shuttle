@@ -46,7 +46,7 @@ class TranslationUpdateMediator < BasicMediator
       update_single_translation!(@primary_translation)
     end
 
-    @primary_translation.key.reload.recalculate_ready! # Readiness hooks were skipped in the transaction above, now we gotta run them.
+    KeyRecalculator.perform_once(@primary_translation.key_id) # Readiness hooks were skipped in the transaction above, now we gotta run them.
   rescue ActiveRecord::RecordInvalid => err
     add_errors(err.record.errors.full_messages.map { |msg| "(#{err.record.rfc5646_locale}): #{msg}" })
   end
