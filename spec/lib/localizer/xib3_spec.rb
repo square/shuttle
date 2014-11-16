@@ -40,6 +40,7 @@ describe Localizer::Xib3 do
       key.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes(
           copy:     "#{string} (de)",
           approved: true)
+      key.recalculate_ready!
     end
   end
 

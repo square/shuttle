@@ -51,6 +51,8 @@ describe Localizer::Storyboard do
       keyobj.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes(
           copy:     "#{string} (de)",
           approved: true)
+
+      @commit.keys.each(&:recalculate_ready!)
     end
   end
 

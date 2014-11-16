@@ -109,11 +109,7 @@ class Translation < ActiveRecord::Base
   before_save { |obj| obj.translated = obj.copy.to_bool; true } # in case validation was skipped
   before_update :reset_reviewed, unless: :preserve_reviewed_status
 
-  after_save :recalculate_readiness, if: :apply_readiness_hooks?
-
   after_commit :update_translation_memory, if: :apply_readiness_hooks?
-
-  after_destroy :recalculate_readiness, if: :apply_readiness_hooks?
 
   attr_readonly :source_rfc5646_locale, :rfc5646_locale, :key_id
 
@@ -122,6 +118,7 @@ class Translation < ActiveRecord::Base
   #   processing a large batch of Translations.
   attr_accessor :skip_readiness_hooks
 
+  # TODO (yunus): get rid of this
   def apply_readiness_hooks?() !skip_readiness_hooks end
   private :apply_readiness_hooks?
 
@@ -235,10 +232,6 @@ class Translation < ActiveRecord::Base
     unless fencer_module.valid?(validating_copy)
       errors.add(:copy, :invalid_interpolations, fencer: I18n.t("fencer.#{fencer}"))
     end
-  end
-
-  def recalculate_readiness
-    key.recalculate_ready! if destroyed? || approved_changed?
   end
 
   def reset_reviewed
