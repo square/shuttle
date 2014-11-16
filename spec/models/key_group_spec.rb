@@ -504,6 +504,7 @@ describe KeyGroup do
     end
 
     last_es_translation.update! copy: "<p>test</p>", approved: true
+    key_group.keys.reload.each(&:recalculate_ready!)
     expect(key_group.reload).to be_ready
   end
 
@@ -512,11 +513,13 @@ describe KeyGroup do
     expect(key_group.reload.keys.count).to eql(2)
 
     key_group.translations.where(approved: nil).each { |translation| translation.update!  copy: "<p>test</p>", approved: true }
+    key_group.keys.reload.each(&:recalculate_ready!)
     expect(key_group.reload).to be_ready
 
     last_es_translation = key_group.translations.in_locale(Locale.from_rfc5646('es')).last
 
     last_es_translation.update! approved: false
+    key_group.keys.reload.each(&:recalculate_ready!)
     expect(key_group.reload).to_not be_ready
   end
 

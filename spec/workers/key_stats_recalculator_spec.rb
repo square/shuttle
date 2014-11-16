@@ -28,6 +28,7 @@ describe KeyStatsRecalculator do
 
         expect(KeyStatsRecalculator).to receive(:perform_once).once.and_call_original
         key.translations.in_locale(Locale.from_rfc5646('fr')).first.update! copy: "hi", approved: true
+        key.recalculate_ready!
 
         expect(key.reload).to be_ready
         expect(key_group.reload).to be_ready

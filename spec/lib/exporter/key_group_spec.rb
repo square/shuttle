@@ -38,6 +38,7 @@ describe Exporter::KeyGroup do
       @es_translations[0].update! copy: "<p>hola</p>", approved: true
       @es_translations[1].update! copy: "<p>mundo</p>", approved: true
 
+      @key_group.keys.reload.each(&:recalculate_ready!)
       expect(@key_group.reload).to be_ready
     end
 
@@ -55,6 +56,7 @@ describe Exporter::KeyGroup do
 
     it "raises NotReadyError if KeyGroup is not ready" do
       @es_translations[0].update! approved: false
+      @es_translations[0].key.reload.recalculate_ready!
       expect(@key_group.reload).to_not be_ready
       expect { Exporter::KeyGroup.new(@key_group).send(:export) }.to raise_error(Exporter::KeyGroup::NotReadyError)
     end
