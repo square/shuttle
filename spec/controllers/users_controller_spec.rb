@@ -72,14 +72,6 @@ describe UsersController do
           get :search, { query: "test@example.com", format: :json }
           expect(JSON.parse(response.body)).to eql([{"name"=>"first user1", "email"=>"test@example.com"}])
         end
-
-        it "returns fuzzy matched users' email addresses and names" do
-          pending # TODO (yunus): implement fuzzy matching
-          FactoryGirl.create(:user, :activated, first_name: "first",  last_name: "user1", email: 'tast@example.com')   # fuzzy match
-          FactoryGirl.create(:user, :activated, first_name: "second", last_name: "user2", email: 'attast@example.com') # miss
-          subject
-          expect(JSON.parse(response.body)).to eql([{"name"=>"first user1", "email"=>"test@example.com"}])
-        end
       end
 
       context "[matching by first name]" do
