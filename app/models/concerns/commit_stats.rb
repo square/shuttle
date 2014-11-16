@@ -107,7 +107,7 @@ module CommitStats
     return cached if cached
 
     locales = project.required_locales if locales.empty?
-    translation_groups = translations.not_base.where(rfc5646_locale: locales.map(&:rfc5646))
+    translation_groups = translations.where(rfc5646_locale: locales.map(&:rfc5646))
     translation_groups = translation_groups.group("translated, approved").select("translated, approved, count(*) as translations_count, sum(words_count) as words_count")
 
     hsh = {}
