@@ -25,8 +25,7 @@ class CommitRecalculator
   # @param [Fixnum] commit_id The ID of a Commit to process.
 
   def perform(commit_id)
-    commit = Commit.find(commit_id)
-    commit.recalculate_ready!
+    Commit.find(commit_id).recalculate_ready!
   end
 
   include SidekiqLocking
