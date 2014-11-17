@@ -457,6 +457,8 @@ describe TranslationsController do
                                          translated: true,
                                          approved: true)
 
+      Translation.all.each { |t| t.update! modifier: @user }
+
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end
@@ -477,13 +479,15 @@ describe TranslationsController do
       duplicate_key = FactoryGirl.create(:key,
                                          project: @project,
                                          key: 'duplicate_key')
-      FactoryGirl.create(:translation,
+      translation = FactoryGirl.create(:translation,
                          source_copy: 'hello123',
                          key: duplicate_key,
                          rfc5646_locale: 'fr-CA',
                          copy: 'duplicate_locale_sc',
                          translated: true,
                          approved: true)
+
+      translation.update! modifier: @user
 
       get :match,
           project_id: @project.to_param,

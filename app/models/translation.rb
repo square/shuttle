@@ -109,8 +109,6 @@ class Translation < ActiveRecord::Base
   before_save { |obj| obj.translated = obj.copy.to_bool; true } # in case validation was skipped
   before_update :reset_reviewed, unless: :preserve_reviewed_status
 
-  after_commit :update_translation_memory, if: :apply_readiness_hooks?
-
   attr_readonly :source_rfc5646_locale, :rfc5646_locale, :key_id
 
   # @return [true, false] If `true`, the after-save hooks that recalculate
@@ -244,10 +242,6 @@ class Translation < ActiveRecord::Base
 
   def cannot_approve_or_reject_untranslated
     errors.add(:approved, :not_translated) if approved != nil && !translated?
-  end
-
-  def update_translation_memory
-    TranslationUnit.store self
   end
 
   def count_words
