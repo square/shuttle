@@ -20,8 +20,8 @@ describe TranslationsMassCopier do
       @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'en' => true, 'en-XX' => true, 'en-YY' => false, 'es-XX' => false })
       @key = FactoryGirl.create(:key, project: @project, ready: false)
-      @en_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en', copy: 'test', approved: true, skip_readiness_hooks: true)
-      @en_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX', copy: nil, approved: nil, skip_readiness_hooks: true)
+      @en_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en', copy: 'test', approved: true)
+      @en_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX', copy: nil, approved: nil)
     end
 
     it "errors if there is a problem with the inputs such as locales not being in the same language family" do
@@ -127,31 +127,31 @@ describe TranslationsMassCopier do
       project = FactoryGirl.create(:project)
       # create a copyable key
       key1 = FactoryGirl.create(:key, project: project)
-      fr_translation_1    = FactoryGirl.create(:translation, key: key1, rfc5646_locale: 'fr', copy: 'test', approved: true, skip_readiness_hooks: true)
-      fr_xx_translation_1 = FactoryGirl.create(:translation, key: key1, rfc5646_locale: 'fr-XX', copy: nil, approved: nil, skip_readiness_hooks: true)
+      fr_translation_1    = FactoryGirl.create(:translation, key: key1, rfc5646_locale: 'fr', copy: 'test', approved: true)
+      fr_xx_translation_1 = FactoryGirl.create(:translation, key: key1, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
 
       # create another copyable key
       key2 = FactoryGirl.create(:key, project: project)
-      fr_translation_2    = FactoryGirl.create(:translation, key: key2, rfc5646_locale: 'fr', copy: 'test', approved: true, skip_readiness_hooks: true)
-      fr_xx_translation_2 = FactoryGirl.create(:translation, key: key2, rfc5646_locale: 'fr-XX', copy: nil, approved: nil, skip_readiness_hooks: true)
+      fr_translation_2    = FactoryGirl.create(:translation, key: key2, rfc5646_locale: 'fr', copy: 'test', approved: true)
+      fr_xx_translation_2 = FactoryGirl.create(:translation, key: key2, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
 
       # create a not-copyable key because translation in the target locale is already done
       key3 = FactoryGirl.create(:key, project: project)
-      fr_translation_3    = FactoryGirl.create(:translation, key: key3, rfc5646_locale: 'fr',    copy: 'test', approved: true, skip_readiness_hooks: true)
-      fr_xx_translation_3 = FactoryGirl.create(:translation, key: key3, rfc5646_locale: 'fr-XX', copy: 'test', approved: true, skip_readiness_hooks: true)
+      fr_translation_3    = FactoryGirl.create(:translation, key: key3, rfc5646_locale: 'fr',    copy: 'test', approved: true)
+      fr_xx_translation_3 = FactoryGirl.create(:translation, key: key3, rfc5646_locale: 'fr-XX', copy: 'test', approved: true)
 
       # create a not-copyable key because translation in the source locale is not approved
       key4 = FactoryGirl.create(:key, project: project)
-      fr_translation_4    = FactoryGirl.create(:translation, key: key4, rfc5646_locale: 'fr',    copy: 'test', approved: nil, skip_readiness_hooks: true)
-      fr_xx_translation_4 = FactoryGirl.create(:translation, key: key4, rfc5646_locale: 'fr-XX', copy: nil,    approved: nil, skip_readiness_hooks: true)
+      fr_translation_4    = FactoryGirl.create(:translation, key: key4, rfc5646_locale: 'fr',    copy: 'test', approved: nil)
+      fr_xx_translation_4 = FactoryGirl.create(:translation, key: key4, rfc5646_locale: 'fr-XX', copy: nil,    approved: nil)
 
       # create a not-copyable key because translation in the source locale does not exist
       key5 = FactoryGirl.create(:key, project: project)
-      fr_xx_translation_5 = FactoryGirl.create(:translation, key: key5, rfc5646_locale: 'fr-XX', copy: nil, approved: nil, skip_readiness_hooks: true)
+      fr_xx_translation_5 = FactoryGirl.create(:translation, key: key5, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
 
       # create a not-copyable key because translation in the target locale does not exist
       key6 = FactoryGirl.create(:key, project: project)
-      fr_translation_6 = FactoryGirl.create(:translation, key: key6, rfc5646_locale: 'fr', copy: 'test', approved: true, skip_readiness_hooks: true)
+      fr_translation_6 = FactoryGirl.create(:translation, key: key6, rfc5646_locale: 'fr', copy: 'test', approved: true)
 
       expect(TranslationsMassCopier.new.key_ids_with_copyable_translations(project, 'fr', 'fr-XX').sort).to eql([key1.id, key2.id].sort)
     end

@@ -20,8 +20,8 @@ describe TranslationCopier do
       @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'fr' => true, 'fr-XX' => true, 'fr-YY' => false, 'es-XX' => false })
       @key = FactoryGirl.create(:key, project: @project, ready: false)
-      @fr_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'fr', copy: 'test', approved: true, skip_readiness_hooks: true)
-      @fr_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'fr-XX', copy: nil, approved: nil, skip_readiness_hooks: true)
+      @fr_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'fr', copy: 'test', approved: true)
+      @fr_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
     end
 
     it "copies translation.copy from the given source locale to given target locale" do
@@ -49,8 +49,8 @@ describe TranslationCopier do
     end
 
     it "doesn't copy to base Translation" do
-      en_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en',    copy: nil,          approved: nil,  skip_readiness_hooks: true)
-      en_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX', copy: 'helloworld', approved: true, skip_readiness_hooks: true)
+      en_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en',    copy: nil,          approved: nil)
+      en_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX', copy: 'helloworld', approved: true)
       TranslationCopier.new.perform(@key.id, 'en-XX', 'en')
       expect(en_translation.reload.copy).to be_nil
       expect(en_translation.approved).to be_nil

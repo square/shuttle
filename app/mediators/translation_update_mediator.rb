@@ -126,7 +126,6 @@ class TranslationUpdateMediator < BasicMediator
         translation.preserve_reviewed_status = true
       end
     end
-    translation.skip_readiness_hooks = true
     translation.save!
   end
 

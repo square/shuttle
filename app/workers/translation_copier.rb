@@ -43,7 +43,6 @@ class TranslationCopier
     if from_translation && to_translation
       to_translation.update! copy: from_translation.copy,
                              approved: true,
-                             skip_readiness_hooks: true,
                              preserve_reviewed_status: true
     end
   end

@@ -111,15 +111,6 @@ class Translation < ActiveRecord::Base
 
   attr_readonly :source_rfc5646_locale, :rfc5646_locale, :key_id
 
-  # @return [true, false] If `true`, the after-save hooks that recalculate
-  #   Commit `ready?` values will not be run. You should use this when
-  #   processing a large batch of Translations.
-  attr_accessor :skip_readiness_hooks
-
-  # TODO (yunus): get rid of this
-  def apply_readiness_hooks?() !skip_readiness_hooks end
-  private :apply_readiness_hooks?
-
   # @return [true, false] If `true`, the value of `reviewed` will not be reset
   #   even if the copy has changed.
   attr_accessor :preserve_reviewed_status

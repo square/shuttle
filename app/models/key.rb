@@ -216,8 +216,8 @@ class Key < ActiveRecord::Base
         source_locale:            base_locale,
         locale:                   base_locale,
         approved:                 true,
-        skip_readiness_hooks:     true,
-        preserve_reviewed_status: true)
+        preserve_reviewed_status: true,
+    )
 
     targeted_locales.each do |locale|
       next if skip_key?(locale)
@@ -225,7 +225,6 @@ class Key < ActiveRecord::Base
         source_copy:          source_copy,
         source_locale:        base_locale,
         locale:               locale,
-        skip_readiness_hooks: true
       )
     end
   end
@@ -239,7 +238,6 @@ class Key < ActiveRecord::Base
   def remove_excluded_pending_translations
     translations.not_base.not_translated.where(approved: nil).find_each do |translation|
       if skip_key?(translation.locale) || !targeted_locales.include?(translation.locale)
-        translation.skip_readiness_hooks = true
         translation.destroy
       end
     end
