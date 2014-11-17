@@ -86,7 +86,7 @@ describe TranslationUnit do
       ).exists?).to be_true
     end
 
-    it "should update an existing translation memory unit" do
+    it "should not create a new translation memory unit if translation memory unit exists already and translation didn't change" do
       TranslationUnit.store @translation
       expect(TranslationUnit.source_copy_matches(@translation.source_copy).where(
           rfc5646_locale:        @translation.locale.rfc5646,
