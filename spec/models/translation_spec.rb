@@ -256,7 +256,7 @@ describe Translation do
       end
 
       it "should allow creating base translations" do
-        translation = FactoryGirl.build(:translation, key: key, source_copy: "Refund %@", copy: "Refund %@", approved: true, source_rfc5646_locale: 'en', rfc5646_locale: 'en', skip_readiness_hooks: true, preserve_reviewed_status: true)
+        translation = FactoryGirl.build(:translation, key: key, source_copy: "Refund %@", copy: "Refund %@", approved: true, source_rfc5646_locale: 'en', rfc5646_locale: 'en', preserve_reviewed_status: true)
         expect(translation).to be_valid
       end
 

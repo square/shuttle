@@ -225,7 +225,6 @@ module Importer
           approved:                 true,
           source_rfc5646_locale:    base.rfc5646_locale,
           rfc5646_locale:           locale.rfc5646,
-          skip_readiness_hooks:     true,
           preserve_reviewed_status: true)
     end
 

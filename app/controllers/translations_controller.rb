@@ -151,6 +151,8 @@ class TranslationsController < ApplicationController
     @translation.modifier = current_user
     @translation.save
 
+    # TODO (yunus): need to run KeyRecalculator here. or get rid of these endpoints and use `update`
+
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
       format.json { render json: decorate([@translation]).first }
     end
@@ -179,6 +181,8 @@ class TranslationsController < ApplicationController
     @translation.reviewer = current_user
     @translation.modifier = current_user
     @translation.save
+
+    # TODO (yunus): need to run KeyRecalculator here. or get rid of these endpoints and use `update`
 
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
       format.json { render json: decorate([@translation]).first, location: project_key_translation_url(@project, @key, @translation) }
