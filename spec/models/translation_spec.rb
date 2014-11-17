@@ -46,58 +46,6 @@ describe Translation do
       @commit.keys = [@key]
     end
 
-    context "[translation changes]" do
-      before :each do
-        @trans = FactoryGirl.create(:translation)
-      end
-
-      it "should log the change and the changer when a user changes the translation" do
-        old_copy   = @trans.copy
-        new_copy   = "A new translation"
-        translator = FactoryGirl.create(:user)
-        expect {
-          @trans.freeze_tracked_attributes
-          @trans.copy     = new_copy
-          @trans.modifier = translator
-          @trans.save
-        }.to change { TranslationChange.count }.by(1)
-        change = TranslationChange.last
-        expect(change.diff).to eq({"copy" => [old_copy, new_copy]})
-        expect(change.user).to eq(translator)
-      end
-
-      it "should log the approval and the approver when a user approves the translation" do
-        approver = FactoryGirl.create(:user)
-        expect {
-          @trans.freeze_tracked_attributes
-          @trans.approved = true
-          @trans.modifier = approver
-          @trans.save
-        }.to change { TranslationChange.count }.by(1)
-        change = TranslationChange.last
-        expect(change.diff).to eq({"approved" => [nil, true]})
-        expect(change.user).to eq(approver)
-      end
-
-      it "should not log a change when a field we don't care about changes" do
-        expect {
-          @trans.freeze_tracked_attributes
-          @trans.updated_at = Time.now
-          @trans.save
-        }.to_not change { TranslationChange.count }
-      end
-
-      it "should not log a user when the computer modifies the Translation" do
-        expect {
-          @trans.freeze_tracked_attributes
-          @trans.copy = "A new translation"
-          @trans.save
-        }.to change { TranslationChange.count }.by(1)
-        change = TranslationChange.last
-        expect(change.user).to eq(nil)
-      end
-    end
-
     context "[resetting reviewed state]" do
       it "should reset the reviewed state when the copy is changed" do
         trans = FactoryGirl.create(:translation, approved: true, reviewer: FactoryGirl.create(:user))
@@ -171,28 +119,6 @@ describe Translation do
         @translation.translator = @reviewer
         @translation.save!
         expect(@translation.approved).to be_nil
-      end
-    end
-
-    context "[translation memory]" do
-      it "should update the translation memory when not pre-approved" do
-        translation = FactoryGirl.create(:translation, approved: nil)
-        expect(TranslationUnit.exact_matches(translation)).to be_empty
-      end
-
-      it "should update the translation memory when approved" do
-        translation = FactoryGirl.create(:translation, approved: nil)
-        translation.update! approved: true, modifier: FactoryGirl.create(:user)
-        tu = TranslationUnit.exact_matches(translation).first
-        expect(tu.copy).to eql(translation.copy)
-        expect(tu.locale).to eql(translation.locale)
-      end
-
-      it "should not update the translation memory when updated but not approved" do
-        user = FactoryGirl.create(:user)
-        translation = FactoryGirl.create(:translation, approved: nil)
-        translation.update! translator: user, modifier: user
-        expect(TranslationUnit.exact_matches(translation)).to be_empty
       end
     end
   end
