@@ -180,24 +180,18 @@ describe Translation do
         expect(TranslationUnit.exact_matches(translation)).to be_empty
       end
 
-      it "should update the translation memory when pre-approved" do
-        translation = FactoryGirl.create(:translation, approved: true)
-        tu          = TranslationUnit.exact_matches(translation).first
-        expect(tu.copy).to eql(translation.copy)
-        expect(tu.locale).to eql(translation.locale)
-      end
-
       it "should update the translation memory when approved" do
         translation = FactoryGirl.create(:translation, approved: nil)
-        translation.update_attribute :approved, true
+        translation.update! approved: true, modifier: FactoryGirl.create(:user)
         tu = TranslationUnit.exact_matches(translation).first
         expect(tu.copy).to eql(translation.copy)
         expect(tu.locale).to eql(translation.locale)
       end
 
       it "should not update the translation memory when updated but not approved" do
+        user = FactoryGirl.create(:user)
         translation = FactoryGirl.create(:translation, approved: nil)
-        translation.update_attribute :translator, FactoryGirl.create(:user)
+        translation.update! translator: user, modifier: user
         expect(TranslationUnit.exact_matches(translation)).to be_empty
       end
     end

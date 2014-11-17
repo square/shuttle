@@ -85,7 +85,7 @@ class TranslationUnit < ActiveRecord::Base
         source_rfc5646_locale: translation.source_rfc5646_locale,
         rfc5646_locale:        translation.rfc5646_locale
     ).source_copy_matches(translation.source_copy).
-        copy_matches(translation.copy).create_or_update!(
+        copy_matches(translation.copy).find_or_create!(
             source_copy: translation.source_copy,
             copy:        translation.copy)
   end

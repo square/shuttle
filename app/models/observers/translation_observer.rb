@@ -15,14 +15,25 @@
 # This observer on the {Translation} model...
 #
 # 1. Creates a {TranslationChange} if a {Translation} is changed
+# 2. Updates Translation Memory if a translator is updating the {Translation}
 
 class TranslationObserver < ActiveRecord::Observer
+  # TODO (yunus): move to after_commit_on_update
   def after_update(translation)
     log_change(translation)
+  end
+
+  def after_commit_on_update(translation)
+    update_translation_memory(translation)
   end
 
   private
   def log_change(translation)
     TranslationChange.create_from_translation!(translation)
+  end
+
+  # Update the Translation memory if a human is updating it.
+  def update_translation_memory(translation)
+    TranslationUnit.store(translation) if translation.modifier
   end
 end
