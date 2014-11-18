@@ -108,7 +108,7 @@ module Importer
       # Reset translations' approved status for keys whose neighbors have changed
       keys_to_be_marked_pending.each do |key|
         key.translations.not_base.each do |translation|
-          translation.update!(approved: nil, skip_readiness_hooks: true) if translation.approved?
+          translation.update!(approved: nil) if translation.approved?
         end
         key.recalculate_ready!
       end
