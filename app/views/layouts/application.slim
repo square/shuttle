@@ -26,7 +26,7 @@ html lang="en"
     title = content_for?(:shuttle_title) ? yield(:shuttle_title) : 'Shuttle: Magic Localization Dust'
     /[if lt IE 9] = javascript_include_tag "http://html5shim.googlecode.com/svn/trunk/html5.js"
 
-  body class=yield(:class) id=yield(:id)
+  body id="#{body_id}" class="#{body_class}"
     .wrapper 
       = render partial: 'layouts/navbar' 
       .content-container 

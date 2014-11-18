@@ -16,10 +16,6 @@
   = "Commit #{@commit.revision_prefix} - Shuttle"
 - content_for :file_name do
   = 'views/commits/search'
-- content_for :class do
-  = controller_name
-- content_for :id do 
-  = [controller_name, action_name].join('-')
 - content_for :footer do
   true
 
