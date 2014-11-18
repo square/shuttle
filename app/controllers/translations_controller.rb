@@ -226,9 +226,17 @@ class TranslationsController < ApplicationController
   # Returns 204 Not Content and an empty body if no match is found.
 
   def match
+    source_copy = @translation.source_copy
+
     @translation.locale.fallbacks.each do |fallback|
-      @match = TranslationUnit.exact_matches(@translation, fallback).
-          order('created_at DESC').first
+      @match = Translation.search do
+        filter :term, { approved: 1 }
+        filter :term, { rfc5646_locale: fallback.rfc5646 }
+        filter :term, { source_copy: source_copy }
+        sort { by :created_at, 'desc' }
+        size 1
+      end.first
+
       break if @match
     end
 
