@@ -44,7 +44,7 @@ class TranslationChange < ActiveRecord::Base
 
   def self.create_from_translation!(translation)
     # Only track changes we care about
-    return unless Translation.tracked_attributes.any? { |t| translation.send(:"#{t}_changed?") }
+    return unless Translation.tracked_attributes.any? { |t| translation.previous_changes.key?(t) }
     diff = {}
     Translation.tracked_attributes.each do |a|
       diff[a.to_s] = [translation.send(:"#{a}_actually_was"), translation.send(a)]
