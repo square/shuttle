@@ -16,10 +16,6 @@
   = 'views/devise/sessions/passwords/edit'
 - content_for :shuttle_logo do 
   = image_tag("shuttle_white.png")
-- content_for :class do
-  = controller_name
-- content_for :id do 
-  = [controller_name, action_name].join('-')
 
 ruby:
   flash.now[:alert] = resource.errors.full_messages.unshift('Errors:') unless resource.errors.empty?
