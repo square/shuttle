@@ -18,12 +18,8 @@
 # 2. Updates Translation Memory if a translator is updating the {Translation}
 
 class TranslationObserver < ActiveRecord::Observer
-  # TODO (yunus): move to after_commit_on_update
-  def after_update(translation)
-    log_change(translation)
-  end
-
   def after_commit_on_update(translation)
+    log_change(translation)
     update_translation_memory(translation)
   end
 
