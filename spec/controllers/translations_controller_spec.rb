@@ -421,6 +421,7 @@ describe TranslationsController do
     end
 
     before :each do
+      reset_elastic_search
       allow_any_instance_of(Locale).to receive(:fallbacks).and_return(
                                            %w(fr-CA fr en).map { |l| Locale.from_rfc5646 l }
                                        )
@@ -463,7 +464,10 @@ describe TranslationsController do
       sign_in @user
     end
 
-    it "should 1. respond with a translation unit with matching locale and source copy" do
+    it "should 1. respond with a Translation with matching locale and source copy" do
+      regenerate_elastic_search_indexes
+      sleep(2)
+
       get :match,
           project_id: @project.to_param,
           key_id: @original_translation.key.to_param,
@@ -473,7 +477,7 @@ describe TranslationsController do
       expect(JSON.parse(response.body)['copy']).to eql('same_locale_sc')
     end
 
-    it "should 2. respond with the newest translation unit with matching locale and source copy (if there are duplicates)" do
+    it "should 2. respond with the newest Translation with matching locale and source copy (if there are duplicates)" do
       Timecop.freeze(Time.now + 5.hours)
 
       duplicate_key = FactoryGirl.create(:key,
@@ -489,6 +493,9 @@ describe TranslationsController do
 
       translation.update! modifier: @user
 
+      regenerate_elastic_search_indexes
+      sleep(2)
+
       get :match,
           project_id: @project.to_param,
           key_id:     @original_translation.key.to_param,
@@ -500,8 +507,11 @@ describe TranslationsController do
       Timecop.return
     end
 
-    it "should 3. respond with the translation unit of the 1st fallback locale with matching project/key and source copy" do
-      TranslationUnit.exact_matches(@same_locale_sc).delete_all
+    it "should 3. respond with the Translation of the 1st fallback locale with matching project/key and source copy" do
+      @same_locale_sc.destroy
+      regenerate_elastic_search_indexes
+      sleep(2)
+
       get :match,
           project_id: @project.to_param,
           key_id: @original_translation.key.to_param,
@@ -511,9 +521,11 @@ describe TranslationsController do
       expect(JSON.parse(response.body)['copy']).to eql('fallback1_sc')
     end
 
-    it "should 4. respond with the translation unit of the 1st fallback locale with source copy" do
-      TranslationUnit.exact_matches(@same_locale_sc).delete_all
-      TranslationUnit.exact_matches(@fallback1_sc).delete_all
+    it "should 4. respond with the Translation of the 1st fallback locale with source copy" do
+      [@same_locale_sc, @fallback1_sc].each(&:destroy)
+      regenerate_elastic_search_indexes
+      sleep(2)
+
       get :match,
           project_id: @project.to_param,
           key_id: @original_translation.key.to_param,
@@ -524,9 +536,10 @@ describe TranslationsController do
     end
 
     it "should 5. respond with a 204" do
-      TranslationUnit.exact_matches(@same_locale_sc).delete_all
-      TranslationUnit.exact_matches(@fallback1_sc).delete_all
-      TranslationUnit.exact_matches(@fallback2_sc).delete_all
+      [@same_locale_sc, @fallback1_sc, @fallback2_sc].each(&:destroy)
+      regenerate_elastic_search_indexes
+      sleep(2)
+
       get :match,
           project_id: @project.to_param,
           key_id: @original_translation.key.to_param,
