@@ -16,8 +16,6 @@
   = "Commit #{@commit.revision_prefix} - Shuttle"
 - content_for :file_name do
   = 'views/commits/show'
-- content_for :footer do
-  true
 
 = render layout: 'commits/layout' do
   = form_for @commit, url: project_commit_url(@project, @commit) do |f|
