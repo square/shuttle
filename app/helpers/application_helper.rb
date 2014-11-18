@@ -19,8 +19,6 @@
 module ApplicationHelper
   LANGUAGES_FOR_COUNTRIES_HASH = YAML.load_file(Rails.root.join('data', 'locale_countries.yml').to_s)
 
-  include IssuesHelper, CommentsHelper
-
   # A composition of `pluralize` and `number_with_delimiter.`
   #
   # @param [Fixnum] count The number of things.
