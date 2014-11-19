@@ -31,31 +31,19 @@ require 'digest/sha2'
 # Properties
 # ==========
 #
-# |              |                                                    |
-# |:-------------|:---------------------------------------------------|
-# | `translated` | If `true`, the copy has been translated.           |
-# | `approved`   | If `true`, the copy has been approved for release. |
-# | `locale`     | The locale the copy is translated to.              |
-#
-# Metadata
-# ========
-#
-# |         |                                                                                 |
-# |:--------|:--------------------------------------------------------------------------------|
-# | `copy`  | The translated copy.                                                            |
-# | `notes` | A human-readable explanation of any additional notes for translators/reviewers. |
+# |              |                                                                                 |
+# |:-------------|:--------------------------------------------------------------------------------|
+# | `translated` | If `true`, the copy has been translated.                                        |
+# | `approved`   | If `true`, the copy has been approved for release.                              |
+# | `locale`     | The locale the copy is translated to.                                           |
+# | `copy`       | The translated copy.                                                            |
+# | `notes`      | A human-readable explanation of any additional notes for translators/reviewers. |
 
 
 class LocaleGlossaryEntry < ActiveRecord::Base
   belongs_to :translator, class_name: 'User', foreign_key: 'translator_id', inverse_of: :authored_glossary_entries
   belongs_to :reviewer, class_name: 'User', foreign_key: 'reviewer_id', inverse_of: :reviewed_glossary_entries
   belongs_to :source_glossary_entry, inverse_of: :locale_glossary_entries
-
-  include HasMetadataColumn
-  has_metadata_column(
-      copy:  {allow_nil: true},
-      notes: {allow_nil: true}
-  )
 
   extend SetNilIfBlank
   set_nil_if_blank :copy, :notes
