@@ -35,20 +35,14 @@ require 'digest/sha2'
 # Properties
 # ==========
 #
-# |                 |                                                    |
-# |:----------------|:---------------------------------------------------|
-# | `translated`    | If `true`, the copy has been translated.           |
-# | `approved`      | If `true`, the copy has been approved for release. |
-# | `source_locale` | The locale the copy is translated from.            |
-# | `locale`        | The locale the copy is translated to.              |
-#
-# Metadata
-# ========
-#
-# |               |                                                       |
-# |:--------------|:------------------------------------------------------|
-# | `source_copy` | The copy for the string in the project's base locale. |
-# | `copy`        | The translated copy.                                  |
+# |                 |                                                       |
+# |:----------------|:------------------------------------------------------|
+# | `translated`    | If `true`, the copy has been translated.              |
+# | `approved`      | If `true`, the copy has been approved for release.    |
+# | `source_locale` | The locale the copy is translated from.               |
+# | `locale`        | The locale the copy is translated to.                 |
+# | `source_copy`   | The copy for the string in the project's base locale. |
+# | `copy`          | The translated copy.                                  |
 
 class Translation < ActiveRecord::Base
   belongs_to :key, inverse_of: :translations
@@ -58,13 +52,6 @@ class Translation < ActiveRecord::Base
   has_many :issues, inverse_of: :translation, dependent: :destroy
   has_many :commits_keys, primary_key: :key_id, foreign_key: :key_id
   has_many :locale_associations, primary_key: :rfc5646_locale, foreign_key: :source_rfc5646_locale
-
-  include HasMetadataColumn
-  has_metadata_column(
-      source_copy:  {allow_blank: true},
-      copy:         {allow_nil: true},
-      notes:        {allow_nil: true, length: { maximum: 1024 }}
-  )
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }
 
@@ -98,6 +85,7 @@ class Translation < ActiveRecord::Base
   validates :rfc5646_locale,
             presence:   true,
             uniqueness: {scope: :key_id, on: :create}
+  validates :notes, length: { maximum: 1024 }
   validate :cannot_approve_or_reject_untranslated
   validate :valid_interpolations, on: :update
   validate :fences_must_match
@@ -173,7 +161,6 @@ class Translation < ActiveRecord::Base
     options ||= {}
 
     options[:except] = Array.wrap(options[:except])
-    options[:except] << :metadata
     options[:except] << :translator_id << :reviewer_id << :key_id
     options[:except] << :searchable_copy << :searchable_source_copy
     options[:except] << :source_rfc5646_locale << :rfc5646_locale

@@ -635,7 +635,6 @@ ALTER SEQUENCE translation_units_id_seq OWNED BY translation_units.id;
 
 CREATE TABLE translations (
     id integer NOT NULL,
-    metadata text,
     key_id integer NOT NULL,
     translator_id integer,
     reviewer_id integer,
@@ -645,7 +644,10 @@ CREATE TABLE translations (
     approved boolean,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    words_count integer DEFAULT 0 NOT NULL
+    words_count integer DEFAULT 0 NOT NULL,
+    source_copy text,
+    copy text,
+    notes text
 );
 
 
@@ -1552,6 +1554,8 @@ INSERT INTO schema_migrations (version) VALUES ('20141113025632');
 INSERT INTO schema_migrations (version) VALUES ('20141114011624');
 
 INSERT INTO schema_migrations (version) VALUES ('20141114073933');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119005842');
 
 INSERT INTO schema_migrations (version) VALUES ('20141119043427');
 
