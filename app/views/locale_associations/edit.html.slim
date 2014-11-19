@@ -16,12 +16,6 @@
   = "Locale Association #{@locale_association.id}"
 - content_for :file_name do
   = 'views/locale_associations/edit'
-- content_for :class do
-  = controller_name
-- content_for :id do
-  = [controller_name, action_name].join('-')
-- content_for :footer do
-  true
 
 .header
   h1 Editing Locale Association (#{@locale_association.source_rfc5646_locale} => #{@locale_association.target_rfc5646_locale})
