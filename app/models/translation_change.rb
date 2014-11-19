@@ -23,22 +23,13 @@
 # |:--------------|:------------------------------------|
 # | `translation` | The {Translation} that was changed. |
 # | `user`        | The {User} that made the change.    |
-#
-# Metadata
-# ========
-#
-# |        |                           |
-# |:-------|:--------------------------|
-# | `diff` | The changes that occured. |
+# | `diff`        | The changes that occured.           |
 
 class TranslationChange < ActiveRecord::Base
   belongs_to :translation, inverse_of: :translation_changes
   belongs_to :user
 
-  include HasMetadataColumn
-  has_metadata_column(
-    diff: {type: Hash, default: {}}
-  )
+  serialize :diff, Hash
 
   validates :translation, presence: true
 
