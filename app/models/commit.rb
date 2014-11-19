@@ -50,29 +50,23 @@ require 'fileutils'
 # Properties
 # ==========
 #
-# |                |                                                                                                          |
-# |:---------------|:---------------------------------------------------------------------------------------------------------|
-# | `committed_at` | The time this commit was made.                                                                           |
-# | `message`      | The commit message.                                                                                      |
-# | `ready`        | If `true`, all Keys under this Commit are marked as ready.                                               |
-# | `exported`     | If `true`, monitor has already exported this commit and no longer needs it.                              |
-# | `revision`     | The SHA1 for this commit.                                                                                |
-# | `loading`      | If `true`, there is at least one {BlobImporter} processing this Commit.                                  |
-# | `priority`     | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
-# | `due_date`     | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
-# | `completed_at` | The date this Commit completed translation.                                                              |
-#
-# Metadata
-# ========
-#
-# |                    |                                                                    |
-# |:-------------------|:-------------------------------------------------------------------|
-# | `description`      | A user-submitted description of why we are localizing this commit. |
-# | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
-# | `import_batch_id`  | The ID of the Sidekiq batch of import jobs.                        |
-# | `import_errors`    | Array of import errors that happened during the import process.    |
-# | `author`           | The name of the commit author.                                     |
-# | `author_email`     | The email address of the commit author.                            |
+# |                    |                                                                                                          |
+# |:-------------------|:---------------------------------------------------------------------------------------------------------|
+# | `committed_at`     | The time this commit was made.                                                                           |
+# | `message`          | The commit message.                                                                                      |
+# | `ready`            | If `true`, all Keys under this Commit are marked as ready.                                               |
+# | `exported`         | If `true`, monitor has already exported this commit and no longer needs it.                              |
+# | `revision`         | The SHA1 for this commit.                                                                                |
+# | `loading`          | If `true`, there is at least one {BlobImporter} processing this Commit.                                  |
+# | `priority`         | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
+# | `due_date`         | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
+# | `completed_at`     | The date this Commit completed translation.                                                              |
+# | `description`      | A user-submitted description of why we are localizing this commit.                                       |
+# | `pull_request_url` | A user-submitted URL to the pull request that is being localized.                                        |
+# | `import_batch_id`  | The ID of the Sidekiq batch of import jobs.                                                              |
+# | `import_errors`    | Array of import errors that happened during the import process.                                          |
+# | `author`           | The name of the commit author.                                                                           |
+# | `author_email`     | The email address of the commit author.                                                                  |
 
 class Commit < ActiveRecord::Base
   include CommitTraverser
@@ -84,6 +78,8 @@ class Commit < ActiveRecord::Base
   #   spawning a worker for situations where Commits are being added in bulk.
   attr_accessor :skip_import
 
+  serialize :import_errors, Array
+
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
   has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
@@ -93,16 +89,6 @@ class Commit < ActiveRecord::Base
   has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
   has_many :blobs, through: :blobs_commits
   has_many :issues, through: :translations
-
-  include HasMetadataColumn
-  has_metadata_column(
-      description:      {allow_nil: true},
-      author:           {allow_nil: true},
-      author_email:     {allow_nil: true},
-      pull_request_url: {allow_nil: true},
-      import_errors:    {type: Array, default: []},
-      import_batch_id:  {allow_nil: true}
-  )
 
   include Tire::Model::Search
   include Tire::Model::Callbacks
@@ -156,7 +142,7 @@ class Commit < ActiveRecord::Base
   end
 
   extend SetNilIfBlank
-  set_nil_if_blank :description, :due_date, :pull_request_url
+  set_nil_if_blank :description, :due_date, :pull_request_url, :import_errors # `import_errors` is here because it's easier to query to check for `nil` rows
 
   before_validation :load_message, on: :create
   before_validation(on: :create) do |obj|
