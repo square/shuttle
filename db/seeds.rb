@@ -24,4 +24,5 @@ user      = User.new(email:                 'admin@example.com',
                      password_confirmation: password)
 user.role = 'admin'
 user.save!
+user.confirm!
 puts "Admin login is #{user.email} / #{password}"
