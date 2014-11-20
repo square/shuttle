@@ -45,32 +45,26 @@ require 'file_mutex'
 # Properties
 # ==========
 #
-# |                  |                                                                                |
-# |:-----------------|:-------------------------------------------------------------------------------|
-# | `api_token`      | A unique token used to refer to and authenticate this Project in API requests. |
-# | `name`           | The Project's name.                                                            |
-# | `repository_url` | The URL of the Project's Git repository.                                       |
-#
-# Metadata
-# ========
-#
-# |                           |                                                                                                                                                                                              |
-# |:--------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-# | `base_locale`             | The locale the Project is initially localized in.                                                                                                                                            |
-# | `locale_requirements`     | An hash mapping locales this Project can be localized to, to whether those locales are required.                                                                                             |
-# | `skip_imports`            | An array of classes under the {Importer} module that are _not_ used to search for Translations.                                                                                              |
-# | `key_exclusions`          | An array of globs that describe keys that should be ignored.                                                                                                                                 |
-# | `key_inclusions`          | An array of globs that describe keys that should be included. Other keys are ignored.                                                                                                        |
-# | `key_locale_exclusions`   | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that should be ignored in that locale.                                                                      |
-# | `key_locale_inclusions`   | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that will not be ignored in that locale.                                                                    |
-# | `only_paths`              | An array of paths. If at least one path is set, other paths will not be searched for strings to import.                                                                                      |
-# | `skip_paths`              | An array of paths that will not be searched for strings to import.                                                                                                                           |
-# | `only_importer_paths`     | A hash mapping an importer class name to an array of paths. If at least one path is set, paths not in this list will not be searched.                                                        |
-# | `skip_importer_paths`     | A hash mapping an importer class name to an array of paths that importer will not search under.                                                                                              |
-# | `default_manifest_format` | The default format in which the manifest file will be exported. Must be {Exporter::Base.multilingual? multilingual}.                                                                         |
-# | `watched_branches`        | A list of branches to automatically import new Commits from.                                                                                                                                 |
-# | `touchdown_branch`        | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch.                                  |
-# | `manifest_directory`      | If this is set, Shuttle will automatically push a new commit containing the translated manifest in the specified directory to the touchdown branch.                                          |
+# |                           |                                                                                                                                                             |
+# |:--------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------|
+# | `api_token`               | A unique token used to refer to and authenticate this Project in API requests.                                                                              |
+# | `name`                    | The Project's name.                                                                                                                                         |
+# | `repository_url`          | The URL of the Project's Git repository.                                                                                                                    |
+# | `base_locale`             | The locale the Project is initially localized in.                                                                                                           |
+# | `locale_requirements`     | An hash mapping locales this Project can be localized to, to whether those locales are required.                                                            |
+# | `skip_imports`            | An array of classes under the {Importer} module that are _not_ used to search for Translations.                                                             |
+# | `key_exclusions`          | An array of globs that describe keys that should be ignored.                                                                                                |
+# | `key_inclusions`          | An array of globs that describe keys that should be included. Other keys are ignored.                                                                       |
+# | `key_locale_exclusions`   | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that should be ignored in that locale.                                     |
+# | `key_locale_inclusions`   | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that will not be ignored in that locale.                                   |
+# | `only_paths`              | An array of paths. If at least one path is set, other paths will not be searched for strings to import.                                                     |
+# | `skip_paths`              | An array of paths that will not be searched for strings to import.                                                                                          |
+# | `only_importer_paths`     | A hash mapping an importer class name to an array of paths. If at least one path is set, paths not in this list will not be searched.                       |
+# | `skip_importer_paths`     | A hash mapping an importer class name to an array of paths that importer will not search under.                                                             |
+# | `default_manifest_format` | The default format in which the manifest file will be exported. Must be {Exporter::Base.multilingual? multilingual}.                                        |
+# | `watched_branches`        | A list of branches to automatically import new Commits from.                                                                                                |
+# | `touchdown_branch`        | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch. |
+# | `manifest_directory`      | If this is set, Shuttle will automatically push a new commit containing the translated manifest in the specified directory to the touchdown branch.         |
 
 class Project < ActiveRecord::Base
   # The directory where repositories are mirrored.
@@ -88,32 +82,21 @@ class Project < ActiveRecord::Base
   has_many :translations, through: :keys
   has_many :key_groups, inverse_of: :project
 
-  include HasMetadataColumn
-  has_metadata_column(
-      base_rfc5646_locale:      {presence: true, default: 'en', format: {with: Locale::RFC5646_FORMAT}},
-      targeted_rfc5646_locales: {presence: true, type: Hash, default: {'en' => true}},
+  serialize :targeted_rfc5646_locales, Hash
+  serialize :skip_imports,             Array
+  serialize :key_exclusions,           Array
+  serialize :key_inclusions,           Array
+  serialize :key_locale_exclusions,    Hash
+  serialize :key_locale_inclusions,    Hash
+  serialize :skip_paths,               Array
+  serialize :only_paths,               Array
+  serialize :skip_importer_paths,      Hash
+  serialize :only_importer_paths,      Hash
+  serialize :watched_branches,         Array
 
-      skip_imports:             {type: Array, default: []},
-      key_exclusions:           {type: Array, default: [], allow_nil: false},
-      key_inclusions:           {type: Array, default: [], allow_nil: false},
-      key_locale_exclusions:    {type: Hash, default: {}, allow_nil: false},
-      key_locale_inclusions:    {type: Hash, default: {}, allow_nil: false},
+  validates :base_rfc5646_locale, presence: true
+  validates :base_rfc5646_locale, format: { with: Locale::RFC5646_FORMAT }
 
-      skip_paths:               {type: Array, default: [], allow_nil: false},
-      only_paths:               {type: Array, default: [], allow_nil: false},
-      skip_importer_paths:      {type: Hash, default: {}, allow_nil: false},
-      only_importer_paths:      {type: Hash, default: {}, allow_nil: false},
-
-      default_manifest_format:  {type: String, allow_nil: true},
-
-      watched_branches:         {type: Array, default: []},
-      touchdown_branch:         {allow_nil: true},
-      manifest_directory:       {allow_nil: true},
-      manifest_filename:        {allow_nil: true},
-
-      github_webhook_url:       {type: String, allow_nil: true},
-      stash_webhook_url:        {type: String, allow_nil: true}
-  )
 
   # Add import_batch and import_batch_status methods
   extend SidekiqBatchManager

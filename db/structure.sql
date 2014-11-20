@@ -401,12 +401,29 @@ ALTER SEQUENCE locale_glossary_entries_id_seq OWNED BY locale_glossary_entries.i
 CREATE TABLE projects (
     id integer NOT NULL,
     name character varying(256) NOT NULL,
-    metadata text,
     repository_url character varying(256),
     api_token character(36) NOT NULL,
     created_at timestamp without time zone,
     translation_adder_batch_id character varying(255),
     disable_locale_association_checkbox_settings boolean DEFAULT false NOT NULL,
+    base_rfc5646_locale character varying(255) DEFAULT 'en'::character varying NOT NULL,
+    targeted_rfc5646_locales text,
+    skip_imports text,
+    key_exclusions text,
+    key_inclusions text,
+    key_locale_exclusions text,
+    key_locale_inclusions text,
+    skip_paths text,
+    only_paths text,
+    skip_importer_paths text,
+    only_importer_paths text,
+    default_manifest_format character varying(255),
+    watched_branches text,
+    touchdown_branch character varying(255),
+    manifest_directory text,
+    manifest_filename character varying(255),
+    github_webhook_url text,
+    stash_webhook_url text,
     CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0))
 );
 
@@ -1545,3 +1562,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141120005608');
 INSERT INTO schema_migrations (version) VALUES ('20141120006009');
 
 INSERT INTO schema_migrations (version) VALUES ('20141120007440');
+
+INSERT INTO schema_migrations (version) VALUES ('20141120011722');
