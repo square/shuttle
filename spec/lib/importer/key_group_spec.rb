@@ -18,7 +18,7 @@ describe Importer::KeyGroup do
   describe "import_strings" do
     it "doesn't call rebase_existing_keys or deactivate_all_keys if this is the initial import" do
       KeyGroup.any_instance.stub(:import!) # prevent automatic import
-      key_group = FactoryGirl.create(:key_group, source_copy: "<p>a</p><p>b</p><p>c</p>", base_rfc5646_locale: :en, targeted_rfc5646_locales: {fr: true})
+      key_group = FactoryGirl.create(:key_group, source_copy: "<p>a</p><p>b</p><p>c</p>", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
       importer = Importer::KeyGroup.new(key_group)
       expect(importer).to_not receive(:rebase_existing_keys)
       expect(importer).to_not receive(:deactivate_all_keys)
@@ -91,7 +91,7 @@ describe Importer::KeyGroup do
 
   describe "#rebase_existing_keys" do
     it "calls reset_approved_if_neighbor_changed! & update_indexes_of_unchanged_keys!" do
-      key_group = FactoryGirl.create(:key_group, source_copy: "<p>a</p><p>b</p><p>c</p>", base_rfc5646_locale: :en, targeted_rfc5646_locales: {fr: true})
+      key_group = FactoryGirl.create(:key_group, source_copy: "<p>a</p><p>b</p><p>c</p>", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
 
       importer = Importer::KeyGroup.new(key_group)
       expect(importer).to receive(:reset_approved_if_neighbor_changed!)
@@ -100,7 +100,7 @@ describe Importer::KeyGroup do
     end
 
     it "handles addition to the start" do
-      key_group = FactoryGirl.create(:key_group, source_copy: "<p>a</p><p>b</p><p>c</p>", base_rfc5646_locale: :en, targeted_rfc5646_locales: {fr: true})
+      key_group = FactoryGirl.create(:key_group, source_copy: "<p>a</p><p>b</p><p>c</p>", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true} )
       expect(key_group.reload.keys.count).to eql(3)
 
       key_group.translations.not_base.each { |translation| translation.update! copy: "<p>translated</p>", approved: true }
@@ -138,7 +138,7 @@ describe Importer::KeyGroup do
         tag = "p"
         original_existing_paragraphs = original_existing_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
         new_paragraphs = new_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
-        key_group = FactoryGirl.create(:key_group, source_copy: original_existing_paragraphs.join, base_rfc5646_locale: :en, targeted_rfc5646_locales: { fr: true } )
+        key_group = FactoryGirl.create(:key_group, source_copy: original_existing_paragraphs.join, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true} )
         existing_keys = key_group.reload.sorted_active_keys_with_translations
         key_group.translations.each { |key| key.update! approved: true, copy: "<#{tag}>translated</#{tag}>" }
         expect(key_group.reload.translations.all? { |t| t.approved? }).to be_true
@@ -174,7 +174,7 @@ describe Importer::KeyGroup do
         tag = "p"
         original_existing_paragraphs = original_existing_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
         new_paragraphs = new_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
-        key_group = FactoryGirl.create(:key_group, source_copy: original_existing_paragraphs.join, base_rfc5646_locale: :en, targeted_rfc5646_locales: { fr: true } )
+        key_group = FactoryGirl.create(:key_group, source_copy: original_existing_paragraphs.join, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true} )
         existing_keys = key_group.reload.sorted_active_keys_with_translations
 
         expect(existing_keys.count).to eql(original_existing_paragraphs.count)
@@ -196,7 +196,7 @@ describe Importer::KeyGroup do
     end
 
     it "removes conflicting keys before the rebase" do
-      key_group = FactoryGirl.create(:key_group, source_copy: "a", base_rfc5646_locale: :en, targeted_rfc5646_locales: { fr: true } )
+      key_group = FactoryGirl.create(:key_group, source_copy: "a", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true } )
       key_group.keys.create! key: "_old_:#{key_group.reload.keys.first.key}", project: key_group.project # creates a conflicting key for the first part of the rebase
 
       puts "1:#{key_group.keys.first.key}"
