@@ -93,6 +93,9 @@ module Api
 
       # Updates a KeyGroup in a Project.
       #
+      # Doesn't allow an update if there is a pending import or an import is in progress and the update
+      # attempts to change a sensitive attribute that would trigger a re-import
+      #
       # Routes
       # ------
       #
@@ -117,7 +120,15 @@ module Api
       # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the KeyGroup                                   |
 
       def update
-        @key_group.update(params_for_update)
+        _params_for_update = params_for_update # cache
+        if !@key_group.last_import_finished? && KeyGroup::FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED.any? do |field|
+                    # if there is a pending import or an import is in progress, and an import triggering field is trying to be changed
+                    _params_for_update.key?(field) && (_params_for_update[field] != @key_group.send(field.to_sym))
+                  end
+          @key_group.errors.add(:base, :not_finished)
+        else
+          @key_group.update(_params_for_update)
+        end
 
         respond_with @key_group do |format|
           format.json do

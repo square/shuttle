@@ -114,13 +114,6 @@ class KeyGroup < ActiveRecord::Base
             :last_completed_at,
                 timeliness: {type: :date}, allow_nil: true, strict: true
 
-  # don't allow an update if there is a pending import or an import is in progress
-  validate on: :update do
-    if !last_import_finished? && KeyGroup::FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED.any? {|field| changes.include?(field) }
-      errors.add(:base, :not_finished)
-    end
-  end
-
   # Add import_batch and import_batch_status methods
   extend SidekiqBatchManager
   sidekiq_batch :import_batch do |batch|
