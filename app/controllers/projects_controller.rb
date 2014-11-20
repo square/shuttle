@@ -123,7 +123,11 @@ class ProjectsController < ApplicationController
 
   def create
     @project = Project.create(project_params)
-    flash[:success] = t('controllers.projects.create.success', project: @project.name)
+    if @project.errors.blank?
+      flash[:success] = t('controllers.projects.create.success', project: @project.name)
+    else
+      flash.now[:alert] = @project.errors.full_messages.unshift(t('controllers.projects.create.failure'))
+    end
     respond_with @project, location: projects_url
   end
 
@@ -168,7 +172,11 @@ class ProjectsController < ApplicationController
 
   def update
     @project.update_attributes project_params
-    flash[:success] = t('controllers.projects.update.success', project: @project.name)
+    if @project.errors.blank?
+      flash[:success] = t('controllers.projects.update.success', project: @project.name)
+    else
+      flash.now[:alert] = @project.errors.full_messages.unshift(t('controllers.projects.update.failure'))
+    end
     respond_with @project, location: edit_project_url(@project)
   end
 
