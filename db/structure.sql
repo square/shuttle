@@ -292,13 +292,20 @@ ALTER SEQUENCE key_groups_id_seq OWNED BY key_groups.id;
 
 CREATE TABLE keys (
     id integer NOT NULL,
-    metadata text,
     project_id integer NOT NULL,
     key_sha_raw bytea NOT NULL,
     source_copy_sha_raw bytea NOT NULL,
     ready boolean DEFAULT true NOT NULL,
     key_group_id integer,
     index_in_key_group integer,
+    key text NOT NULL,
+    original_key text NOT NULL,
+    source_copy text,
+    context text,
+    importer character varying(255),
+    source text,
+    fencers text,
+    other_data text,
     CONSTRAINT non_negative_index_in_key_group CHECK ((index_in_key_group >= 0))
 );
 
@@ -1562,6 +1569,8 @@ INSERT INTO schema_migrations (version) VALUES ('20141119043427');
 INSERT INTO schema_migrations (version) VALUES ('20141119215724');
 
 INSERT INTO schema_migrations (version) VALUES ('20141119230218');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119235158');
 
 INSERT INTO schema_migrations (version) VALUES ('20141120005608');
 
