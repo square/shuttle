@@ -34,28 +34,6 @@ describe KeyGroup do
       expect(key_group_new.errors).to_not be_any
     end
 
-    it "doesn't allow updating the source of a KeyGroup if there is an unfinished import" do
-      key_group = FactoryGirl.create(:key_group, source_copy: "hello")
-
-      # fake it so that the first import appears to not have finished
-      key_group.update! last_import_requested_at: 10.minutes.ago, last_import_finished_at: nil
-      key_group.update source_copy: "hi"
-      expect(key_group.errors.messages).to eql({:base => ["latest requested import is not yet finished"]})
-
-      # fake it so that the first import appears to have finished
-      key_group.reload.update! last_import_requested_at: 10.minutes.ago, last_import_finished_at: 15.minutes.ago
-      key_group.update source_copy: "hi"
-      expect(key_group.errors.messages).to eql({:base => ["latest requested import is not yet finished"]})
-    end
-
-    it "allows updating not import requiring fields of a KeyGroup such as email and description even if there is an unfinished import" do
-      key_group = FactoryGirl.create(:key_group, email: "test@example.com", description: "desc")
-
-      # fake it so that the first import appears to not have finished
-      key_group.update email: "test2@example.com", description: "desc2"
-      expect(key_group.errors).to_not be_any
-    end
-
     it "doesn't allow creating without a key" do
       key_group = FactoryGirl.build(:key_group, key: nil)
       key_group.save
