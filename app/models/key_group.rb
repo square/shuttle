@@ -72,17 +72,12 @@
 # | `last_import_finished_at`   | The timestamp of the last  time an import of this KeyGroup was finished.                                           |
 # | `first_completed_at`        | The timestamp of the first time this KeyGroup was completed.                                                       |
 # | `last_completed_at`         | The timestamp of the last  time this KeyGroup was completed.                                                       |
-#
-#
-# Metadata
-# ========
-#
-# |                          |                                                                                                   |
-# |:-------------------------|:--------------------------------------------------------------------------------------------------|
-# | `base_locale`            | The locale the KeyGroup is initially localized in.                                                |
-# | `locale_requirements`    | An hash mapping locales this KeyGroup can be localized to, to whether those locales are required. |
+# | `base_locale`               | The locale the KeyGroup is initially localized in.                                                                 |
+# | `locale_requirements`       | An hash mapping locales this KeyGroup can be localized to, to whether those locales are required.                  |
 
 class KeyGroup < ActiveRecord::Base
+  extend SetNilIfBlank
+
   FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED = %w(source_copy targeted_rfc5646_locales)
 
   belongs_to :project, inverse_of: :key_groups
@@ -122,11 +117,9 @@ class KeyGroup < ActiveRecord::Base
   end
 
   # ======== START LOCALE RELATED CODE =================================================================================
-  include HasMetadataColumn
-  has_metadata_column(
-      base_rfc5646_locale:      {format: {with: Locale::RFC5646_FORMAT}, allow_nil: true},
-      targeted_rfc5646_locales: {type: Hash, allow_nil: true}
-  )
+  validates :base_rfc5646_locale, format: { with: Locale::RFC5646_FORMAT, allow_nil: true }
+  set_nil_if_blank :base_rfc5646_locale
+  serialize :targeted_rfc5646_locales, Hash
 
   include CommonLocaleLogic
 
@@ -145,7 +138,8 @@ class KeyGroup < ActiveRecord::Base
   # @return [Hash<Locale, Boolean>] locale requirements for this KeyGroup
 
   def locale_requirements_with_inheriting
-    locale_requirements_without_inheriting || project.locale_requirements
+    # since `targeted_rfc5646_locales` can be an empty hash, we need to check for presence here instead of checking for nil
+    locale_requirements_without_inheriting.present? ? locale_requirements_without_inheriting : project.locale_requirements
   end
 
   # Inherit base_locale from Project if none is provided in this KeyGroup

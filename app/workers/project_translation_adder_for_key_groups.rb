@@ -19,6 +19,11 @@
 # is a reimport of these KeyGroups. Since KeyGroups will generally not include too many strings,
 # this should not be a big performance impact.
 
+# TODO (yunus): this seems like it's more confusing than useful
+# instead of this kind of eternal inheritance, let's switch to
+# inheriting at creation time, and not worry about the project settings
+# after that point on.
+
 class ProjectTranslationAdderForKeyGroups
   include Sidekiq::Worker
   sidekiq_options queue: :high
@@ -32,7 +37,7 @@ class ProjectTranslationAdderForKeyGroups
 
   def perform(project_id)
     Project.find(project_id).key_groups.each do |key_group|
-      unless key_group.targeted_rfc5646_locales
+      if key_group.targeted_rfc5646_locales.blank?
         begin
           key_group.import!
         rescue KeyGroup::LastImportNotFinished

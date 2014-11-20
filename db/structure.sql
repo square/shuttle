@@ -236,7 +236,6 @@ CREATE TABLE key_groups (
     description text,
     email character varying(255),
     import_batch_id character varying(255),
-    metadata text,
     loading boolean DEFAULT false NOT NULL,
     ready boolean DEFAULT false NOT NULL,
     first_import_requested_at timestamp without time zone,
@@ -248,7 +247,9 @@ CREATE TABLE key_groups (
     first_completed_at timestamp without time zone,
     last_completed_at timestamp without time zone,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    base_rfc5646_locale character varying(255),
+    targeted_rfc5646_locales text
 );
 
 
@@ -1516,3 +1517,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141113025632');
 INSERT INTO schema_migrations (version) VALUES ('20141114011624');
 
 INSERT INTO schema_migrations (version) VALUES ('20141114073933');
+
+INSERT INTO schema_migrations (version) VALUES ('20141120005608');
