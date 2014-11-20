@@ -183,8 +183,10 @@ en:
     projects:
       create:
         success: "%{project} was created."
+        failure: "Project couldn't be created."
       update:
         success: "%{project} was updated."
+        failure: "Project couldn't be updated."
       sync:
         success: The latest revision (%{revision}) is being loaded and parsed.
         up_to_date: "%{project} is already up to date."
