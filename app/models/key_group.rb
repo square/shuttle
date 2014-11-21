@@ -119,7 +119,6 @@ class KeyGroup < ActiveRecord::Base
   # ======== START LOCALE RELATED CODE =================================================================================
   validates :base_rfc5646_locale, format: { with: Locale::RFC5646_FORMAT, allow_nil: true }
   set_nil_if_blank :base_rfc5646_locale
-  serialize :targeted_rfc5646_locales, Hash
 
   include CommonLocaleLogic
 
