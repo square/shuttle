@@ -8,15 +8,10 @@ describe DailyMetric do
     end
 
     metric_fields = [:num_commits_loaded,
-                     :num_commits_loaded_per_project,
                      :avg_load_time,
-                     :avg_load_time_per_project,
                      :num_commits_completed,
-                     :num_commits_completed_per_project,
                      :num_words_created,
-                     :num_words_created_per_language,
-                     :num_words_completed,
-                     :num_words_completed_per_language]
+                     :num_words_completed]
     metric_fields.each do |field|
       it "validates presence of #{field}" do
         metric = FactoryGirl.build :daily_metric, field => nil
