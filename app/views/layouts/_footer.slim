@@ -14,8 +14,10 @@
 
 footer
   p
-    | open source project by 
-    a href="https://squareup.com" 
-      | Square, Inc.
+    | we
+    | &nbsp;
+    i.fa.fa-heart
+    | &nbsp;suggestions! &nbsp;&nbsp; submit them&nbsp;
+    = link_to 'here', Shuttle::Configuration.app[:feedback_link]
   p 
     = image_tag "footer.png"
