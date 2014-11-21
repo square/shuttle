@@ -510,11 +510,14 @@ ALTER SEQUENCE slugs_id_seq OWNED BY slugs.id;
 
 CREATE TABLE source_glossary_entries (
     id integer NOT NULL,
-    metadata text,
     source_rfc5646_locale character varying(15) DEFAULT 'en'::character varying NOT NULL,
     source_copy_sha_raw bytea,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    source_copy text NOT NULL,
+    context text,
+    notes text,
+    due_date date
 );
 
 
@@ -1533,3 +1536,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141119043427');
 INSERT INTO schema_migrations (version) VALUES ('20141119230218');
 
 INSERT INTO schema_migrations (version) VALUES ('20141120005608');
+
+INSERT INTO schema_migrations (version) VALUES ('20141120006009');
