@@ -157,10 +157,19 @@ CREATE TABLE commits_keys (
 
 CREATE TABLE daily_metrics (
     id integer NOT NULL,
-    metadata text,
     date date NOT NULL,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    num_commits_loaded integer,
+    num_commits_loaded_per_project text,
+    avg_load_time double precision,
+    avg_load_time_per_project text,
+    num_commits_completed integer,
+    num_commits_completed_per_project text,
+    num_words_created integer,
+    num_words_created_per_language text,
+    num_words_completed integer,
+    num_words_completed_per_language text
 );
 
 
@@ -1517,5 +1526,7 @@ INSERT INTO schema_migrations (version) VALUES ('20141113025632');
 INSERT INTO schema_migrations (version) VALUES ('20141114011624');
 
 INSERT INTO schema_migrations (version) VALUES ('20141114073933');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119230218');
 
 INSERT INTO schema_migrations (version) VALUES ('20141120005608');
