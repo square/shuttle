@@ -569,9 +569,9 @@ ALTER SEQUENCE source_glossary_entries_id_seq OWNED BY source_glossary_entries.i
 CREATE TABLE translation_changes (
     id integer NOT NULL,
     translation_id integer NOT NULL,
-    metadata text,
     created_at timestamp without time zone,
-    user_id integer
+    user_id integer,
+    diff text
 );
 
 
@@ -1554,6 +1554,8 @@ INSERT INTO schema_migrations (version) VALUES ('20141114011624');
 INSERT INTO schema_migrations (version) VALUES ('20141114073933');
 
 INSERT INTO schema_migrations (version) VALUES ('20141119043427');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119215724');
 
 INSERT INTO schema_migrations (version) VALUES ('20141119230218');
 
