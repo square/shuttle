@@ -18,6 +18,6 @@ footer
     | &nbsp;
     i.fa.fa-heart
     | &nbsp;suggestions! &nbsp;&nbsp; submit them&nbsp;
-    a href="https://jira.corp.squareup.com/secure/CreateIssueDetails!init.jspa?pid=12827&issuetype=6" here
+    = link_to 'here', Shuttle::Configuration.app[:feedback_link]
   p 
     = image_tag "footer.png"
