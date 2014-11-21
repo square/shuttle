@@ -264,10 +264,6 @@ issues translations (compare to email communication where you don't see the
 previously raised issues in a translation unless you search for it on an external
 system).
 
-Models also use the HasMetadataColumn gem to reduce their width and incorporate
-schemaless data. Most models have a JSON-formatted `metadata` column to which
-new information can be added or removed without having to create new migrations.
-
 ### Authentication and Authorization
 
 Authentication is handled by Devise. Users log in using their email address and

@@ -36,7 +36,6 @@ SET default_with_oids = false;
 CREATE TABLE blobs (
     project_id integer NOT NULL,
     sha_raw bytea NOT NULL,
-    metadata text,
     parsed boolean DEFAULT false NOT NULL,
     errored boolean DEFAULT false NOT NULL
 );
@@ -1579,3 +1578,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141120006009');
 INSERT INTO schema_migrations (version) VALUES ('20141120007440');
 
 INSERT INTO schema_migrations (version) VALUES ('20141120011722');
+
+INSERT INTO schema_migrations (version) VALUES ('20141121202324');
