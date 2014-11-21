@@ -109,7 +109,6 @@ CREATE TABLE commits (
     committed_at timestamp without time zone NOT NULL,
     ready boolean DEFAULT false NOT NULL,
     loading boolean DEFAULT false NOT NULL,
-    metadata text,
     created_at timestamp without time zone,
     due_date date,
     priority integer,
@@ -117,6 +116,12 @@ CREATE TABLE commits (
     completed_at timestamp without time zone,
     exported boolean DEFAULT false NOT NULL,
     loaded_at timestamp without time zone,
+    description text,
+    author character varying(255),
+    author_email character varying(255),
+    pull_request_url text,
+    import_batch_id character varying(255),
+    import_errors text,
     CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0)),
     CONSTRAINT commits_priority_check CHECK (((priority >= 0) AND (priority <= 3)))
 );
@@ -1538,3 +1543,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141119230218');
 INSERT INTO schema_migrations (version) VALUES ('20141120005608');
 
 INSERT INTO schema_migrations (version) VALUES ('20141120006009');
+
+INSERT INTO schema_migrations (version) VALUES ('20141120007440');
