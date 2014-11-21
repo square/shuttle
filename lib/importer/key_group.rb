@@ -140,7 +140,7 @@ module Importer
           key = existing_keys[change.old_position] # Ex: <Key 1: 0:shaOfA>
           tmp_key_name = "_old_:#{key.key}" # Ex: "_old_:0:shaOfA"
           @key_group.keys.for_key(tmp_key_name).each{ |key| key.destroy! } # remove old keys that could be a conflict. There shouldn't be any such keys normally.
-          key.update!(key: tmp_key_name, skip_readiness_hooks: true)
+          key.update!(key: tmp_key_name, original_key: tmp_key_name, skip_readiness_hooks: true)
         end
 
         # Set the updated key names with updated indexes
@@ -148,7 +148,7 @@ module Importer
           key = existing_keys[change.old_position] # Ex: <Key 1: _old_:0:shaOfA>
           new_key_name = KeyCreatorForKeyGroups.generate_key_name(key.source_copy, change.new_position)   # Ex: "1:shaOfA"
           @key_group.keys.for_key(new_key_name).each{ |key| key.destroy! } # remove old keys that could be a conflict. There shouldn't be any such keys normally.
-          key.update!(key: new_key_name, skip_readiness_hooks: true)
+          key.update!(key: new_key_name, original_key: new_key_name, skip_readiness_hooks: true)
         end
       end
     end
