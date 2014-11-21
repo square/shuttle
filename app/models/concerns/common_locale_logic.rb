@@ -20,6 +20,8 @@ module CommonLocaleLogic
   extend ActiveSupport::Concern
 
   included do
+    serialize :targeted_rfc5646_locales, Hash
+
     extend LocaleField
     locale_field :base_locale, from: :base_rfc5646_locale
     locale_field :locale_requirements,

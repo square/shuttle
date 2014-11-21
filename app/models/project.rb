@@ -82,7 +82,6 @@ class Project < ActiveRecord::Base
   has_many :translations, through: :keys
   has_many :key_groups, inverse_of: :project
 
-  serialize :targeted_rfc5646_locales, Hash
   serialize :skip_imports,             Array
   serialize :key_exclusions,           Array
   serialize :key_inclusions,           Array
