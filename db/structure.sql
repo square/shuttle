@@ -360,12 +360,13 @@ CREATE TABLE locale_glossary_entries (
     translator_id integer,
     reviewer_id integer,
     source_glossary_entry_id integer,
-    metadata text,
     rfc5646_locale character varying(15) NOT NULL,
     translated boolean DEFAULT false NOT NULL,
     approved boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    copy text,
+    notes text
 );
 
 
@@ -1526,6 +1527,8 @@ INSERT INTO schema_migrations (version) VALUES ('20141113025632');
 INSERT INTO schema_migrations (version) VALUES ('20141114011624');
 
 INSERT INTO schema_migrations (version) VALUES ('20141114073933');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119043427');
 
 INSERT INTO schema_migrations (version) VALUES ('20141119230218');
 
