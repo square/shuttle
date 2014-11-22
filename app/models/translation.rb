@@ -107,26 +107,12 @@ class Translation < ActiveRecord::Base
   # @return [User] The person who changed this Translation
   attr_accessor :modifier
 
-  # @private
-  # The attributes we want TranslationChange to log
-  def self.tracked_attributes() [:approved, :copy] end
-
-  tracked_attributes.each { |a| attr_accessor :"#{a}_actually_was" }
-
   # TODO: Fold this into DailyMetric?
   def self.total_words_per_project
     Translation.not_base.joins(key: :project)
       .select("sum(words_count), projects.name").group("projects.name")
       .order("sum DESC")
       .map { |t| [t.name, t.sum] }
-  end
-
-  # Method used to cached the current state of the Translation
-  # Required before making changes to a Translation that will be saved
-  def freeze_tracked_attributes
-    self.class.tracked_attributes.each do |a|
-      send(:"#{a}_actually_was=", send(a))
-    end
   end
 
   scope :in_locale, ->(*langs) {
