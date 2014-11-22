@@ -12,15 +12,50 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-namespace :maintenance do
-  desc "Cleans old commits from Shuttle"
-  task clean_old_commits: :environment do
-    Rails.logger.info "[maintenance:clean_old_commits] Cleaning old commits for #{Date.today}"
-    Project.all.each do |p|
-      p.commits.where(ready: true, loading: false).order('created_at DESC').offset(250).each do |c|
-        StashWebhookHelper.new.ping(c, purged: true)
-        c.destroy
+class CommitCleaner
+  def run
+    log("Cleaning old commits for #{Date.today}")
+    destroy_old_commits_which_errored_during_import
+    destroy_old_excess_commits_per_project
+  end
+
+  private
+
+  # Destroys any commit older than 2 days, which errored during an import.
+  def destroy_old_commits_which_errored_during_import
+    log("[destroy_old_commits_which_errored_during_import]")
+    Commit.errored_during_import.where("created_at < ?", 2.days.ago).find_each do |commit|
+      log("import errors for #{commit.revision}: #{commit.import_errors}")
+      destroy_and_notify_stash(commit)
+    end
+  end
+
+  # Destroys old commits from projects if there are too many of them.
+  # For each project, only keep 250 most recent `ready` commits.
+  def destroy_old_excess_commits_per_project
+    log("[destroy_old_excess_commits_per_project]")
+    Project.find_each do |project|
+      project.commits.ready.order('created_at DESC').offset(250).find_each do |commit|
+        destroy_and_notify_stash(commit)
       end
     end
+  end
+
+  # Destroys a commit, notifies stash that the commit no longer exists in Shuttle
+  def destroy_and_notify_stash(commit)
+    log("Destroying commit #{commit.revision}")
+    StashWebhookHelper.new.ping(commit, purged: true)
+    commit.destroy
+  end
+
+  def log(message)
+    Rails.logger.info "[maintenance:cleanup_commits] #{message}"
+  end
+end
+
+namespace :maintenance do
+  desc "Cleans old or errored commits from Shuttle"
+  task cleanup_commits: :environment do
+    CommitCleaner.new.run
   end
 end
