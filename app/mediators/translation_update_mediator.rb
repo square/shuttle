@@ -111,7 +111,6 @@ class TranslationUpdateMediator < BasicMediator
   # @raise [ActiveRecord::RecordInvalid] if translation is invalid
 
   def update_single_translation!(translation)
-    translation.freeze_tracked_attributes
     translation.modifier = @user
     translation.assign_attributes(@params.require(:translation).permit(:copy, :notes))
 

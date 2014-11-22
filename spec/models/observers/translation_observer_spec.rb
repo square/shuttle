@@ -25,7 +25,6 @@ describe TranslationObserver do
       new_copy   = "A new translation"
       translator = FactoryGirl.create(:user)
       expect {
-        @trans.freeze_tracked_attributes
         @trans.copy     = new_copy
         @trans.modifier = translator
         @trans.save
@@ -38,7 +37,6 @@ describe TranslationObserver do
     it "should log the approval and the approver when a user approves the translation" do
       approver = FactoryGirl.create(:user)
       expect {
-        @trans.freeze_tracked_attributes
         @trans.approved = true
         @trans.modifier = approver
         @trans.save
@@ -50,7 +48,6 @@ describe TranslationObserver do
 
     it "should not log a change when a field we don't care about changes" do
       expect {
-        @trans.freeze_tracked_attributes
         @trans.updated_at = Time.now
         @trans.save
       }.to_not change { TranslationChange.count }
@@ -58,7 +55,6 @@ describe TranslationObserver do
 
     it "should not log a user when the computer modifies the Translation" do
       expect {
-        @trans.freeze_tracked_attributes
         @trans.copy = "A new translation"
         @trans.save
       }.to change { TranslationChange.count }.by(1)
