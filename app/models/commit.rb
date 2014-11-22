@@ -78,8 +78,6 @@ class Commit < ActiveRecord::Base
   #   spawning a worker for situations where Commits are being added in bulk.
   attr_accessor :skip_import
 
-  serialize :import_errors, Array
-
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
   has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
@@ -142,7 +140,7 @@ class Commit < ActiveRecord::Base
   end
 
   extend SetNilIfBlank
-  set_nil_if_blank :description, :due_date, :pull_request_url, :import_errors # `import_errors` is here because it's easier to query to check for `nil` rows
+  set_nil_if_blank :description, :due_date, :pull_request_url
 
   before_validation :load_message, on: :create
   before_validation(on: :create) do |obj|
@@ -185,7 +183,7 @@ class Commit < ActiveRecord::Base
   # completed_at to be the current time.
 
   def recalculate_ready!
-    self.ready = successfully_loaded? && keys_are_ready? && no_errors_exist?
+    self.ready = successfully_loaded? && keys_are_ready? && !errored_during_import?
     self.completed_at = Time.current if self.ready && self.completed_at.nil?
     save!
   end
@@ -360,14 +358,6 @@ class Commit < ActiveRecord::Base
   end
 
   private
-
-  # Returns `true` if no errors exist on this commit.
-  #
-  # @return [true, false] Whether there are any errors associated with this commit.
-
-  def no_errors_exist?
-    import_errors.blank? && import_errors_in_redis.blank?
-  end
 
   def load_message
     self.message ||= commit!.message

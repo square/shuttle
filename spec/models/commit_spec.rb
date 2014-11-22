@@ -62,7 +62,7 @@ describe Commit do
       end
 
       it "should email if commit has import errors" do
-        @commit.add_import_error_in_redis(StandardError.new("some fake error"), "in some/path/to/file")
+        @commit.add_import_error(StandardError.new("some fake error"), "in some/path/to/file")
         @commit.import_batch.jobs {}
         email = ActionMailer::Base.deliveries.select { |email| email.subject == "[Shuttle] Error(s) occurred during the import" }.first
         expect(email).to_not be_nil
@@ -184,16 +184,6 @@ describe Commit do
         expect(@commit.completed_at).to eql(completed_time)
       end
 
-      it "should not set ready if there are import errors in redis" do
-        @commit.recalculate_ready!
-        expect(@commit).to be_ready
-
-        @commit.add_import_error_in_redis(StandardError.new("Some Fake Error"), "in some/file.yml")
-        @commit.recalculate_ready!
-
-        expect(@commit).to_not be_ready
-      end
-
       it "should not set ready if there are import errors in postgres" do
         @commit.recalculate_ready!
         expect(@commit).to be_ready
@@ -240,13 +230,10 @@ describe Commit do
     it "clears the previous import errors" do
       @project = FactoryGirl.create(:project, :light)
       commit = @project.commit!('HEAD', skip_import: true)
-      commit.add_import_error_in_redis(StandardError.new("fake error"), "in fakefile")
       commit.update! import_errors: [["StandardError", "fake error (in fakefile)"]]
-      expect(commit.import_errors_in_redis).to eql([["StandardError", "fake error (in fakefile)"]])
       expect(commit.import_errors).to eql([["StandardError", "fake error (in fakefile)"]])
       commit.import_strings
       commit.reload
-      expect(commit.import_errors_in_redis).to eql([])
       expect(commit.import_errors).to eql([])
     end
 
