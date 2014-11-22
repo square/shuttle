@@ -23,9 +23,6 @@ class ImportFinisher
   def on_success(_status, options)
     commit = Commit.find(options['commit_id'])
 
-    # if there were errors, persist them in postgresql
-    commit.move_import_errors_from_redis_to_sql_db!
-
     # mark related blobs as parsed so that we don't parse them again
     mark_not_errored_blobs_as_parsed(commit)
 

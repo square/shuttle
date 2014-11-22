@@ -24,7 +24,7 @@ describe CommitImporter do
           commit = FactoryGirl.create(:commit, revision: "abc123", project: project)
 
           expect { CommitImporter.new.perform(commit.id) }.to_not raise_error
-          expect(commit.import_errors_in_redis).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in CommitImporter for commit_id #{commit.id})"]])
+          expect(commit.reload.import_errors).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in CommitImporter for commit_id #{commit.id})"]])
         end
       end
     end

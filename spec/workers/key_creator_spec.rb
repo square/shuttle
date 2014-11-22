@@ -24,7 +24,7 @@ describe KeyCreator do
 
         expect(KeyCreator).to receive(:update_key_associations).and_raise(Git::CommitNotFoundError, "abc123")
         expect { KeyCreator.new.perform(project.id, "abc123", commit.id, "yaml", []) }.to_not raise_error
-        expect(commit.import_errors_in_redis).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in KeyCreator for commit_id #{commit.id} and blob abc123)"]])
+        expect(commit.reload.import_errors).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in KeyCreator for commit_id #{commit.id} and blob abc123)"]])
       end
     end
   end
