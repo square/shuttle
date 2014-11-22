@@ -35,7 +35,7 @@ class CommitImporter
     commit = Commit.find(commit_id)
     commit.import_strings(locale: locale, force: force)
   rescue Git::CommitNotFoundError => err
-    commit.add_import_error_in_redis(err, "failed in CommitImporter for commit_id #{commit_id}")
+    commit.add_import_error(err, "failed in CommitImporter for commit_id #{commit_id}")
   end
 
   include SidekiqLocking
