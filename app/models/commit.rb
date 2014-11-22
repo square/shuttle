@@ -132,6 +132,10 @@ class Commit < ActiveRecord::Base
                    repo_must_exist: true,
                    scope:           :for_revision
 
+  # Scopes
+  scope :ready, -> { where(ready: true) }
+  scope :not_ready, -> { where(ready: false) }
+
   # Add import_batch and import_batch_status methods
   extend SidekiqBatchManager
   sidekiq_batch :import_batch do |batch|

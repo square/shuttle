@@ -15,6 +15,25 @@
 require 'spec_helper'
 
 describe Commit do
+  context "[scopes]" do
+    before :each do
+      @ready_commit = FactoryGirl.create(:commit, ready: true)
+      @not_ready_commit = FactoryGirl.create(:commit, ready: false)
+    end
+
+    describe "#ready" do
+      it "returns the ready commits" do
+        expect(Commit.ready.to_a).to eql([@ready_commit])
+      end
+    end
+
+    describe "#not_ready" do
+      it "returns the not-ready commits" do
+        expect(Commit.not_ready.to_a).to eql([@not_ready_commit])
+      end
+    end
+  end
+
   context "[callbacks]" do
     before :each do
       @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
