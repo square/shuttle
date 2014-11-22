@@ -145,7 +145,6 @@ class TranslationsController < ApplicationController
   # | `id`         | The ID of a Translation.           |
 
   def approve
-    @translation.freeze_tracked_attributes
     @translation.approved = true
     @translation.reviewer = current_user
     @translation.modifier = current_user
@@ -176,7 +175,6 @@ class TranslationsController < ApplicationController
   # | `id`         | The ID of a Translation.           |
 
   def reject
-    @translation.freeze_tracked_attributes
     @translation.approved = false
     @translation.reviewer = current_user
     @translation.modifier = current_user
