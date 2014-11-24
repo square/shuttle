@@ -98,7 +98,6 @@ group :acceptance do
   # gem 'capybara-webkit'
 end
 
-
 gem 'sql_origin', groups: [:development, :test]
 
 # Doesn't work in Rails 4
@@ -108,4 +107,11 @@ group :development, :test do
   gem 'mailcatcher'
   #gem 'jasminerice'
   #gem 'guard-jasmine'
+end
+
+group :development do
+  gem 'capistrano'
+  gem 'capistrano-rvm', '>= 0.1.0' # seems to really like 0.0.3
+  gem 'capistrano-bundler'
+  gem 'capistrano-rails'
 end
