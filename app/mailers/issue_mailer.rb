@@ -18,7 +18,7 @@ class IssueMailer < ActionMailer::Base
   include ActionView::Helpers::TextHelper
   helper IssuesHelper
 
-  default from: Shuttle::Configuration.mailer.from
+  default from: Shuttle::Configuration.app.mailer.from
 
   # Notifies everybody who is associated with this issue that a new issue is created.
   #

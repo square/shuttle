@@ -18,6 +18,7 @@
 
 class StashWebhookPinger
   include Sidekiq::Worker
+  include Rails.application.routes.url_helpers
 
   sidekiq_options queue: :low
 

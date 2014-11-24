@@ -123,6 +123,11 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   self.responder = JsonDetailResponder
 
+  before_filter :authenticate_user!
+
+  include Squash::Ruby::ControllerMethods
+  enable_squash_client
+
   rescue_from(ActiveRecord::RecordNotFound) do
     respond_to do |format|
       format.html { render file: Rails.root.join('public/404.html'), status: :not_found }

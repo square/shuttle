@@ -1,0 +1,28 @@
+disabled: true
+api_host: YOUR.HOST
+api_key: YOUR.API.KEY
+transmit_timeout: 60
+ignored_exception_classes:
+- ActionController::RoutingError
+- ActionController::MethodNotAllowed
+- ActionController::ActionNotFound
+- Sidekiq::Shutdown
+- Redis::TimeoutError
+- PG::TRDeadlockDetected
+- PG::UnableToSend
+- PG::ConnectionBad
+- Git::GitExecuteError
+- Errno::EHOSTUNREACH
+- Redis::CannotConnectError
+- Tire::Search::SearchRequestFailed
+- Errno::ECONNREFUSED
+- Net::ReadTimeout
+ignored_exception_messages:
+  SignalException:
+  - SIGTERM
+  NoMethodError:
+  - !ruby/regexp '/undefined method `.+?'' for #<Sidekiq::Shutdown.+?>/'
+  RuntimeError:
+  - Repo not ready
+  Redis::CommandError:
+  - ERR max number of clients reached

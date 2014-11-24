@@ -57,21 +57,23 @@ Getting Started
 
 ### Starting the server
 
-Developing for Shuttle requires Ruby 2.0.0, PostgreSQL, Redis, Tidy, and a modern
-version of libarchive. To run Shuttle for the first time:
+Developing for Shuttle requires Ruby 2.0.0, PostgreSQL, Redis, Tidy, Sidekiq Pro
+and a modern version of libarchive. To run Shuttle for the first time:
 
 1. Clone this project. You can run `brew bundle` to install all dependencies available 
    via Homebrew, which are specified in the `Brewfile`, or install them sequentially
    specified below.
+   
+2. Buy SidekiqPro, place your private repo url in Gemfile.
 
-2. Install a modern version of libarchive, one that supports the GNU tar format.
+3. Install a modern version of libarchive, one that supports the GNU tar format.
    (The version that comes with Mac OS X does not.) On OS X, you can run
 
         brew install libarchive
 
    If you have an out-of-date libarchive version, you will see missing constant
    errors in the multifile exporters.
-3. Create a PostgreSQL user called `shuttle`, and make it the owner of two
+4. Create a PostgreSQL user called `shuttle`, and make it the owner of two
    PostgreSQL databases, `shuttle_development` and `shuttle_test`:
 
         brew install postgresql
@@ -79,29 +81,29 @@ version of libarchive. To run Shuttle for the first time:
         createdb -O shuttle shuttle_development
         createdb -O shuttle shuttle_test
 
-4. Install the libarchive gem using a modern version of libarchive.
+5. Install the libarchive gem using a modern version of libarchive.
    For Homebrew, run
 
         gem install libarchive -- --with-opt-dir=/usr/local/Cellar/libarchive/3.1.2
 
-5. Install Redis and ElasticSearch. For Homebrew, run
+6. Install Redis and ElasticSearch. For Homebrew, run
 
         brew install redis elasticsearch
 
    and start them, following the post-install instructions for each of them.
-6. Install Qt, the cross-platform application framework, which is used for capybara-webkit.
+7. Install Qt, the cross-platform application framework, which is used for capybara-webkit.
    For Homebrew, run
 
         brew install qt
 
-6. You’ll need to run Bundler: `bundle install`
-7. Run `rake db:migrate db:seed` to seed the database.
-8. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
-9. Verify that all specs pass with `rspec spec`
-10. To run the server, use `rails server`
-11. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
+8. You’ll need to run Bundler: `bundle install`
+9. Run `rake db:migrate db:seed` to seed the database.
+10. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
+11. Verify that all specs pass with `rspec spec`
+12. To run the server, use `rails server`
+13. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
 to run the Sidekiq development server.
-12. Visit [http://localhost:3000](http://localhost:3000) and log in with the
+14. Visit [http://localhost:3000](http://localhost:3000) and log in with the
    credentials:
 
    username: **admin@example.com**<br>

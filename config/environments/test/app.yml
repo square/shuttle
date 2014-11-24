@@ -1,15 +1,12 @@
-# Use this file to define application specific settings / constants
+---
+# Used for creating urls in mailers and other places
+default_url_options:
+  host: test.host
 
-# After a user signs up and confirms their email address, he will automatically get 'monitor' access
-# if his email is from one of the domains listed here. We recommend putting in your company email
-# domain here if you trust them and don't want to have to manually activate users from within the company.
-domains_to_get_monitor_role_after_email_confirmation: ['mycompany.com']
+# The value of Shuttle::Application.config.secret_key_base in initializers/secret_token.rb
+cookies:
+  secret_key_base: cec7628f94856f041b643e01bbba15b5044fb508f6e853d264cfb6e2d73e193a86c654d14a29c13475f46b8b159ee510b0f3269afc7057bf5f0f3cfe41e26e5e
 
-# Will be used to determine if the current user can use the autofill feature
-domains_who_can_search_users: ['mycompany.com']
-
-# Will be used to determine the url of a commit
-github_enterprise_domain: "git.mycompany.com"
-
-# Will be used to determine the url of a commit
-stash_domain: "stash.mycompany.com"
+# Devise uses this key to generate random tokens such as confirmation, reset password and unlock tokens
+devise:
+  secret_key: 4e5683cc48ad3aedbd8fd4d6c1e2ce4f7f303843fd9b402c8a8d5d23aa1857f4f0f1939e39b4bc301892e7b07a150da3956726b18df24a9d954370de94e16e13

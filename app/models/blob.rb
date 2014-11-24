@@ -35,8 +35,6 @@
 # | `errored` | If `true`, parsing this blob has failed. Defaults to false.                                                                                                             |
 
 class Blob < ActiveRecord::Base
-  include SidekiqWorkerTracking
-
   self.primary_keys = :project_id, :sha_raw
 
   belongs_to :project, inverse_of: :blobs

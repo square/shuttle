@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2013 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -92,10 +92,4 @@ Shuttle::Application.configure do
   config.action_mailer.default_url_options = Shuttle::Configuration.app.default_url_options
 
   config.use_ssl = true
-
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings   = {
-      address: 'localhost',
-      port:    25
-  }
 end

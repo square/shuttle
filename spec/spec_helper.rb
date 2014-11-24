@@ -100,3 +100,37 @@ def regenerate_elastic_search_indexes
     Tire::Tasks::Import.import_model(model.tire.index, model, {})
   end
 end
+
+# Sidekiq Batches do not run their on-success callbacks in the test environment
+# because this feature is implemented using Sidekiq middleware. This shim
+# restores the on-success callback behavior in test.after() do
+
+class Sidekiq::Batch
+  def jobs_with_callbacks(*args, &block)
+    # only the outermost call to Batch#jobs should have hacked behavior when
+    # it completes
+    if Thread.current[:in_jobs_with_callback]
+      return jobs_without_callbacks(*args, &block)
+    end
+    Thread.current[:in_jobs_with_callback] = true
+
+    # assume jobs are run inline and will finish before this method completes
+    jobs_without_callbacks(*args, &block)
+
+    Thread.current[:in_jobs_with_callback] = false
+
+    # now that all jobs are finished, execute the on_success callback
+    status = Status.new(bid)
+    Array.wrap(callbacks['success']).each do |hash|
+      hash.each_pair do |target, options|
+        Sidekiq::Notifications::Callback.new('success', target.to_s).notify(status, options.stringify_keys)
+      end
+    end
+    Array.wrap(callbacks['finished']).each do |hash|
+      hash.each_pair do |target, options|
+        Sidekiq::Notifications::Callback.new('finished', target.to_s).notify(status, options.stringify_keys)
+      end
+    end
+  end
+  alias_method_chain :jobs, :callbacks
+end

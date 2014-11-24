@@ -1,0 +1,13 @@
+---
+# Used for creating urls in mailers and other places
+default_url_options:
+  host: localhost
+  port: 3000
+
+# The value of Shuttle::Application.config.secret_key_base in initializers/secret_token.rb
+cookies:
+  secret_key_base: 561025b92e0890f00394b953ab374faa55d6d35fb5af857447a7a2f83fc69e3f9b76bcd11a352ec02dda9c687758a626efc63864608f9e92dc48b4320c84ad5a
+
+# Devise uses this key to generate random tokens such as confirmation, reset password and unlock tokens
+devise:
+  secret_key: ea66262ac443101f7684e0c6bfedab1c4ec877c43741c5f02996a50026e73a355f835fc39194828aac73cbdf7f4c3f844f9e7f62ac59922e45f00541fe4af3a9

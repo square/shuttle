@@ -1,0 +1,24 @@
+---
+# Used for creating urls in mailers and other places
+default_url_options:
+  host: shuttle-stage.example.com
+  protocol: https
+
+# The value of Shuttle::Application.config.secret_key_base in initializers/secret_token.rb
+cookies:
+  secret_key_base: THIS.WILL.BE.USED.TO.VERIFY.INTEGRITY.OF.SIGNED.COOKIES
+
+# Devise uses this key to generate random tokens such as confirmation, reset password and unlock tokens
+devise:
+  secret_key: THIS.WILL.BE.USED.TO.GENERATE.RANDOM.DEVISE.TOKENS
+
+# Used in setting `config.cache_store` in production.rb
+cache_store:
+  type: :redis_store
+  endpoint: redis://localhost:6379/0/entitystore
+
+# Used in setting `config.action_dispatch.rack_cache` in production.rb
+action_dispatch:
+  rack_cache:
+    metastore: redis://localhost:6379/0/entitystore
+    entitystore: redis://localhost:6379/0/entitystore

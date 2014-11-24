@@ -416,39 +416,43 @@ describe Commit do
   end
 
   describe "#git_url" do
+    before :each do
+      Shuttle::Configuration.stub(:app).and_return(github_enterprise_domain: "git.example.com", stash_domain: "stash.example.com")
+    end
+
     context "[on github]" do
       it "returns the correct url for a commit where project url is for https" do
-        project = FactoryGirl.create(:project, repository_url: "https://github.com/mycompany/my-project.git")
+        project = FactoryGirl.create(:project, repository_url: "https://github.com/example/my-project.git")
         commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
-        expect(commit.git_url).to eql("https://github.com/mycompany/my-project/commit/abc123")
+        expect(commit.git_url).to eql("https://github.com/example/my-project/commit/abc123")
       end
 
       it "returns the correct url for a commit where project url is for ssh" do
-        project = FactoryGirl.create(:project, repository_url: "git@github.com:mycompany/my-project.git")
+        project = FactoryGirl.create(:project, repository_url: "git@github.com:example/my-project.git")
         commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
-        expect(commit.git_url).to eql("https://github.com/mycompany/my-project/commit/abc123")
+        expect(commit.git_url).to eql("https://github.com/example/my-project/commit/abc123")
       end
     end
 
     context "[on github enterprise]" do
       it "returns the correct url for a commit where project url is for https" do
-        project = FactoryGirl.create(:project, repository_url: "https://git.mycompany.com/all/my-project.git")
+        project = FactoryGirl.create(:project, repository_url: "https://git.example.com/all/my-project.git")
         commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
-        expect(commit.git_url).to eql("https://git.mycompany.com/all/my-project/commit/abc123")
+        expect(commit.git_url).to eql("https://git.example.com/all/my-project/commit/abc123")
       end
 
       it "returns the correct url for a commit where project url is for ssh" do
-        project = FactoryGirl.create(:project, repository_url: "git@git.mycompany.com:all/my-project.git")
+        project = FactoryGirl.create(:project, repository_url: "git@git.example.com:all/my-project.git")
         commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
-        expect(commit.git_url).to eql("https://git.mycompany.com/all/my-project/commit/abc123")
+        expect(commit.git_url).to eql("https://git.example.com/all/my-project/commit/abc123")
       end
     end
 
     context "[on stash]" do
       it "returns the correct url for a commit" do
-        project = FactoryGirl.create(:project, repository_url: "https://stash.mycompany.com/scm/all/my-project.git")
+        project = FactoryGirl.create(:project, repository_url: "https://stash.example.com/scm/all/my-project.git")
         commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
-        expect(commit.git_url).to eql("https://stash.mycompany.com/projects/ALL/repos/my-project/commits/abc123")
+        expect(commit.git_url).to eql("https://stash.example.com/projects/ALL/repos/my-project/commits/abc123")
       end
     end
   end

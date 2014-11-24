@@ -6,6 +6,14 @@ GIT
     git (1.2.6)
 
 GIT
+  remote: git://github.com/SquareSquash/rails.git
+  revision: e3c4207d2b90d27fa9ff4ba72c50ba354f507163
+  ref: e3c4207d2b90d27fa9ff4ba72c50ba354f507163
+  specs:
+    squash_rails (1.3.3)
+      squash_ruby
+
+GIT
   remote: git://github.com/composite-primary-keys/composite_primary_keys.git
   revision: f85acb1b8a8cd74dde5671f6474fa5ae7d540853
   branch: ar_4.0.x
@@ -301,6 +309,8 @@ GEM
     sqlite3 (1.3.9)
     sqlite3-ruby (1.3.3)
       sqlite3 (>= 1.3.3)
+    squash_ruby (1.4.0)
+      json
     sshkit (1.5.1)
       colorize
       net-scp (>= 1.1.2)
@@ -411,6 +421,8 @@ DEPENDENCIES
   spring-commands-rspec
   sprockets-rails
   sql_origin
+  squash_rails!
+  squash_ruby (>= 1.4.0)
   stringex (= 2.2.0)
   therubyracer
   timecop

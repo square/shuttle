@@ -1,0 +1,55 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the top of the
+ * compiled file, but it's generally better to create a new file per style scope.
+ *
+ *= require reset
+ *= require_self
+ */
+
+// ----- BASE
+@import "css3-mixins";
+@import "base/vars";
+@import "base/grid";
+@import "base/typography";
+
+@import "base/base";
+
+@import "base/controls";
+@import "base/forms";
+
+// ----- OTHER
+body {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.control-group {
+  width: 275px;
+  display: inline-block;
+
+  .control-label {
+    width: 75px;
+  }
+  .controls {
+    margin-left: 75px;
+
+    textarea {
+      width: 100%;
+    }
+  }
+}
+
+.control-group + .control-group {
+  margin-left: 50px;
+}
+
+.form-actions {
+  margin-top: 0px;
+  padding-top: 15px;
+}
