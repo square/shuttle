@@ -1,3 +1,17 @@
+# Copyright 2014 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
 class StashWebhookHelper
   include Rails.application.routes.url_helpers
 
@@ -37,17 +51,17 @@ class StashWebhookHelper
       name: "SHUTTLE-#{commit.revision_prefix}",
       url: project_commit_url(commit.project,
                               commit,
-                              host: Shuttle::Configuration.worker.default_url_options.host,
-                              port: Shuttle::Configuration.worker.default_url_options['port'],
-                              protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'),
+                              host: Shuttle::Configuration.app.default_url_options.host,
+                              port: Shuttle::Configuration.app.default_url_options['port'],
+                              protocol: Shuttle::Configuration.app.default_url_options['protocol'] || 'http'),
     }.merge(current_commit_state(commit))
 
     if opts[:purged]
       post_parameters[:description] = 'Commit has been purged from Shuttle.  Please resubmit.'
       post_parameters[:url] = root_url(
-        host: Shuttle::Configuration.worker.default_url_options.host,
-        port: Shuttle::Configuration.worker.default_url_options['port'],
-        protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'
+        host: Shuttle::Configuration.app.default_url_options.host,
+        port: Shuttle::Configuration.app.default_url_options['port'],
+        protocol: Shuttle::Configuration.app.default_url_options['protocol'] || 'http'
       )
     end
     post_parameters.to_json

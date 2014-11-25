@@ -1,3 +1,17 @@
+# Copyright 2014 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
 set :application, 'shuttle'
 set :repo_url, 'https://stash.corp.squareup.com/scm/intl/shuttle.git' # Square-specific
 
@@ -12,14 +26,12 @@ set :linked_files, %w{  config/database.yml
                         config/environments/staging/elasticsearch.yml
                         config/environments/staging/paperclip.yml
                         config/environments/staging/squash.yml
-                        config/environments/staging/worker.yml
                         config/environments/production/app.yml
                         config/environments/production/elasticsearch.yml
                         config/environments/production/paperclip.yml
                         config/environments/production/redis.yml
                         config/environments/production/squash.yml
                         config/environments/production/stash.yml
-                        config/environments/production/worker.yml
                         data/secret_token
                         tmp/sidekiq.pid  }
 set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos tmp/working_repos}

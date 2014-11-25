@@ -1,4 +1,0 @@
----
-default_url_options:
-  host: shuttle.example.com
-  protocol: https
