@@ -1,4 +1,16 @@
 ---
+# Used for creating urls in mailers and other places
 default_url_options:
   host: shuttle-staging.example.com
   protocol: https
+
+# Used in setting `config.cache_store` in staging.rb
+cache_store:
+  type: :redis_store
+  endpoint: redis://localhost:6379/0/shuttle_rails
+
+# Used in setting `config.action_dispatch.rack_cache` in staging.rb
+action_dispatch:
+  rack_cache:
+    metastore: redis://localhost:6379/0/metastore
+    entitystore: redis://localhost:6379/0/entitystore
