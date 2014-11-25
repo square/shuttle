@@ -12,21 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# TODO (yunus): is this necessary?
-# seems like this would do the job: https://github.com/SquareSquash/rails/blame/master/lib/squash/rails/sidekiq.rb
-module Squash
-  class Sidekiq
-    def call(_worker, msg, queue)
-      begin
-        yield
-      rescue Exception => ex
-        Squash::Ruby.notify ex, sidekiq: msg, queue: queue
-        raise
-      end
-    end
-  end
-end
-
 module Sidekiq::Util
 
   # Restore the presence of the process ID in the Sidekiq worker string. We need
@@ -50,10 +35,6 @@ configure_sidekiq = -> do
       # no sidekiq pro
     end
     config.redis = Redis.current
-
-    config.server_middleware do |chain|
-      chain.add ::Squash::Sidekiq
-    end
   end
 end
 
