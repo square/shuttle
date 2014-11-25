@@ -1,3 +1,6 @@
+disabled: true
+api_host: "YOUR.HOST"
+api_key: YOUR.API.KEY
 transmit_timeout: 60
 ignored_exception_classes:
 - ActionController::RoutingError
@@ -23,6 +26,3 @@ ignored_exception_messages:
   - Repo not ready
   Redis::CommandError:
   - ERR max number of clients reached
-disabled: true
-api_host: "https://squash.corp.squareup.com"
-api_key: 2b4eea87-a79c-4b1e-87b1-f7cca7cd0cfd

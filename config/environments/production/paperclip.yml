@@ -1,0 +1,9 @@
+---
+storage: :s3
+s3_credentials:
+  access_key_id: YOUR.S3.PRODUCTION.ACCESS.KEY.ID
+  secret_access_key: YOUR.S3.PRODUCTION.SECRET.ACCESS.KEY
+bucket: shuttle-production
+url: ':s3_domain_url'
+path: '/:class/:attachment/:id_partition/:style/:filename'
+use_timestamp: false

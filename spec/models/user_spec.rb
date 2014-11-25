@@ -67,7 +67,7 @@ describe User do
 
   context 'unauthorized user' do
     let(:role) { nil }
-    it "doesn't confirm user when role is no longer nil" do
+    it "doesn't confirm user when a role is assigned to the user" do
       expect(user.confirmed_at).to be_nil
       user.update!(role: 'monitor')
       expect(user.confirmed_at).to be_nil
@@ -76,14 +76,14 @@ describe User do
 
   describe '#after_confirmation' do
     it "sets user's role to monitor if their email address' domain is a privileged domain name" do
-      user = FactoryGirl.create(:user, role: nil, email: "test@mycompany.com")
+      user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
       expect(user.role).to be_nil
       user.after_confirmation
       expect(user.role).to eql('monitor')
     end
 
     it "doesn't change user's role if priviliged domains are present but their email address' domain is NOT one of them" do
-      user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
+      user = FactoryGirl.create(:user, role: nil, email: "test@notpriviliged.com")
       expect(user.role).to be_nil
       user.after_confirmation
       expect(user.role).to be_nil
@@ -132,7 +132,7 @@ describe User do
 
   describe '#can_search_users?' do
     it "returns true if user's email domain allows for searching" do
-      user = FactoryGirl.create(:user, :activated, email: "test@mycompany.com")
+      user = FactoryGirl.create(:user, :activated, email: "test@example.com")
       expect(user.can_search_users?).to be_true
     end
 
@@ -144,21 +144,21 @@ describe User do
 
   context '[Integration Tests]' do
     it "sets user's role to monitor after a successful confirmation if their email address' domain is a privileged domain name" do
-      user = FactoryGirl.create(:user, role: nil, email: "test@mycompany.com")
+      user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
       user.send :generate_confirmation_token!
       User.confirm_by_token(user.instance_eval { @raw_confirmation_token } )
       expect(user.reload.role).to eql('monitor')
     end
 
     it "doesn't change user's role after a successful confirmation if their email address' domain is NOT a privileged domain name" do
-      user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
+      user = FactoryGirl.create(:user, role: nil, email: "test@notpriviliged.com")
       user.send :generate_confirmation_token!
       User.confirm_by_token(user.instance_eval { @raw_confirmation_token} )
       expect(user.reload.role).to be_nil
     end
 
     it "doesn't change user's role after an unsuccessful confirmation attempt" do
-      user = FactoryGirl.create(:user, role: nil, email: "test@mycompany.com")
+      user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
       user.send :generate_confirmation_token!
       User.confirm_by_token( "fake" )
       expect(user.reload.role).to be_nil

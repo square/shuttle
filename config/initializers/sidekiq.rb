@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+# TODO (yunus): is this necessary?
+# seems like this would do the job: https://github.com/SquareSquash/rails/blame/master/lib/squash/rails/sidekiq.rb
 module Squash
   class Sidekiq
     def call(_worker, msg, queue)

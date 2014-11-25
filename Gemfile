@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-source 'https://0858cb81:19556f67@www.mikeperham.com/rubygems/'
+source 'https://0858cb81:19556f67@www.mikeperham.com/rubygems/' # Square-specific
 
 ruby '2.0.0', :patchlevel => '576'
 

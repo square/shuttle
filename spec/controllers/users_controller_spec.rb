@@ -20,7 +20,7 @@ describe UsersController do
 
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @activated_and_priviliged_user = FactoryGirl.create(:user, :activated, email: "someuser@mycompany.com")
+      @activated_and_priviliged_user = FactoryGirl.create(:user, :activated, email: "someuser@example.com")
     end
 
     context "[disabled cases]" do
@@ -30,13 +30,13 @@ describe UsersController do
       end
 
       it "returns nothing if current_user is not confirmed" do
-        sign_in FactoryGirl.create(:user, role: 'monitor', email: "test@mycompany.com") # not confirmed, has role, priviliged domain
+        sign_in FactoryGirl.create(:user, role: 'monitor', email: "test@example.com") # not confirmed, has role, priviliged domain
         subject
         expect(JSON.parse(response.body)).to eql({"error"=>"You have to confirm your account before continuing."})
       end
 
       it "returns nothing if current_user doesn't have a role" do
-        sign_in FactoryGirl.create(:user, :confirmed, email: "test@mycompany.com") # confirmed, doesn't have role, priviliged domain
+        sign_in FactoryGirl.create(:user, :confirmed, email: "test@example.com") # confirmed, doesn't have role, priviliged domain
         subject
         expect(JSON.parse(response.body)).to eql({"error"=>"Your account was not activated yet."})
       end

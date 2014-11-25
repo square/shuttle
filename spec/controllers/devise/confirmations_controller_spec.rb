@@ -18,8 +18,8 @@ describe Devise::ConfirmationsController do
   before(:each) { @request.env["devise.mapping"] = Devise.mappings[:user] }
 
   it "gives monitor permission to user after confirmation if their email address domain is a priviliged one" do
-    user = FactoryGirl.create(:user, role: nil, email: "foo@mycompany.com")
-    expect(user.email).to eql('foo@mycompany.com')
+    user = FactoryGirl.create(:user, role: nil, email: "foo@example.com")
+    expect(user.email).to eql('foo@example.com')
     user.send :generate_confirmation_token!
 
     get :show, { confirmation_token: user.instance_eval { @raw_confirmation_token } }
@@ -29,8 +29,8 @@ describe Devise::ConfirmationsController do
   end
 
   it "does not change the permission of user after confirmation if their email address domain is NOT a priviliged one" do
-    user = FactoryGirl.create(:user, role: nil, email: "foo@example.com")
-    expect(user.email).to eql('foo@example.com')
+    user = FactoryGirl.create(:user, role: nil, email: "foo@notpriviliged.com")
+    expect(user.email).to eql('foo@notpriviliged.com')
     user.send :generate_confirmation_token!
 
     get :show, { confirmation_token: user.instance_eval { @raw_confirmation_token } }
