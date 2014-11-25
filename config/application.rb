@@ -23,6 +23,11 @@ Bundler.require(:default, Rails.env)
 
 module Shuttle
   class Application < Rails::Application
+    # Load configoro settings here so that the settings can be used in application.rb, development.rb, production.rb, etc...
+    config.before_configuration do
+      Configoro.initialize
+    end
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.

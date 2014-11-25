@@ -16,3 +16,8 @@ stash_domain: "stash.example.com"
 
 # Will be linked to in the footer to give users a way to provide feedback to the engineers running Shuttle
 feedback_link: "https://jira.example.com"
+
+# Will be used for email-related things
+mailer:
+  from: shuttle-team@example.com
+  translators_list: translators@example.com

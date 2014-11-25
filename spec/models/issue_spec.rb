@@ -97,7 +97,7 @@ describe Issue do
 
   context "#new_with_defaults" do
     it "initializes a new Issue with default subscribed_emails which contains the translators_list email address" do
-      expect(Issue.new_with_defaults.subscribed_emails).to eql([Shuttle::Configuration.mailer.translators_list])
+      expect(Issue.new_with_defaults.subscribed_emails).to eql([Shuttle::Configuration.app.mailer.translators_list])
     end
   end
 
