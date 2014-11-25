@@ -160,7 +160,7 @@ preview translations locally or on a staging server.
 
 To download a manifest, use the following endpoint:
 
-`GET https://shuttle.squareup.com/projects/:project_slug/commits/:sha/manifest.:format`
+`GET /projects/:project_slug/commits/:sha/manifest.:format`
 
 Replace the colon-prefixed placeholders with the following:
 
@@ -210,7 +210,7 @@ the deploy.
 
 To download a localized tarball, use the following endpoint:
 
-`GET https://shuttle.squareup.com/projects/:project_slug/commits/:sha/localize.tgz`
+`GET /projects/:project_slug/commits/:sha/localize.tgz`
 
 Replace the colon-prefixed placeholders with the following:
 

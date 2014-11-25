@@ -1,7 +1,7 @@
 ---
 # Used for creating urls in mailers and other places
 default_url_options:
-  host: shuttle-staging.example.com
+  host: shuttle-stage-a-01.corp.squareup.com
   protocol: https
 
 # Used in setting `config.cache_store` in staging.rb

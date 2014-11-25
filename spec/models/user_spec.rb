@@ -15,6 +15,12 @@
 require 'spec_helper'
 
 describe User do
+  before :each do
+    app_config = Shuttle::Configuration.app
+    Shuttle::Configuration.stub(:app).and_return(app_config.merge(domains_to_get_monitor_role_after_email_confirmation: ['example.com'],
+                                                                  domains_who_can_search_users: ['example.com']))
+  end
+
   let(:role) { nil }
   let :user do
     user = FactoryGirl.create(:user, role: role)

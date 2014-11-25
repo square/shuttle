@@ -1,5 +1,5 @@
 disabled: true
-api_host: "YOUR.HOST"
+api_host: YOUR.HOST
 api_key: YOUR.API.KEY
 transmit_timeout: 60
 ignored_exception_classes:

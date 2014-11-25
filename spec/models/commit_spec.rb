@@ -416,6 +416,10 @@ describe Commit do
   end
 
   describe "#git_url" do
+    before :each do
+      Shuttle::Configuration.stub(:app).and_return(github_enterprise_domain: "git.example.com", stash_domain: "stash.example.com")
+    end
+
     context "[on github]" do
       it "returns the correct url for a commit where project url is for https" do
         project = FactoryGirl.create(:project, repository_url: "https://github.com/example/my-project.git")

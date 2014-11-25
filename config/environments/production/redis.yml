@@ -1,2 +1,2 @@
 ---
-url: "redis://shuttle-redis-production.example.com:PORT"
+url: "redis://ironweed.corp.squareup.com:6379"
