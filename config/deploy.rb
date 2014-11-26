@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 set :application, 'shuttle'
-set :repo_url, 'https://stash.corp.squareup.com/scm/intl/shuttle.git' # Square-specific
+set :repo_url, YAML.load(ERB.new(IO.read(File.join(File.dirname(__FILE__), 'environments', 'common', 'app.yml'))).result)["repo_url"]
 
 set :branch, 'deployable'
 
