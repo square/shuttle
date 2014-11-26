@@ -25,3 +25,9 @@ feedback_link: "https://jira.corp.squareup.com/secure/CreateIssueDetails!init.js
 mailer:
   from: shuttle-engineering@squareup.com
   translators_list: l10n@squareup.com
+
+# The author info that will be used when Shuttle is updating the touchdown branch, i.e. when pushing manifest file
+git:
+  author:
+    name: Shuttle
+    email: shuttle-noreply@squareup.com

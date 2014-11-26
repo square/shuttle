@@ -116,8 +116,8 @@ describe TouchdownBranchUpdater do
 
         it "pushes a new commit with the correct author" do
           TouchdownBranchUpdater.new(project).update
-          expect(project.working_repo.object(project.touchdown_branch).author.name).to eql(Shuttle::Configuration.git.author.name)
-          expect(project.working_repo.object(project.touchdown_branch).author.email).to eql(Shuttle::Configuration.git.author.email)
+          expect(project.working_repo.object(project.touchdown_branch).author.name).to eql(Shuttle::Configuration.app.git.author.name)
+          expect(project.working_repo.object(project.touchdown_branch).author.email).to eql(Shuttle::Configuration.app.git.author.email)
         end
 
         it "creates a manifest file in the specified directory" do
@@ -164,8 +164,8 @@ describe TouchdownBranchUpdater do
             project.working_repo.checkout(project.touchdown_branch)
             project.working_repo.pull('origin', project.touchdown_branch)
             expect(project.working_repo.log[1].sha).to eql(parent_revision)
-            expect(project.working_repo.log[0].author.name).to eql(Shuttle::Configuration.git.author.name)
-            expect(project.working_repo.log[0].author.email).to eql(Shuttle::Configuration.git.author.email)
+            expect(project.working_repo.log[0].author.name).to eql(Shuttle::Configuration.app.git.author.name)
+            expect(project.working_repo.log[0].author.email).to eql(Shuttle::Configuration.app.git.author.email)
           end
         end
       end
