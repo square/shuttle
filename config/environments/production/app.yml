@@ -8,6 +8,10 @@ default_url_options:
 cookies:
   secret_key_base: THIS.WILL.BE.USED.TO.VERIFY.INTEGRITY.OF.SIGNED.COOKIES
 
+# Devise uses this key to generate random tokens such as confirmation, reset password and unlock tokens
+devise:
+  secret_key: THIS.WILL.BE.USED.TO.GENERATE.RANDOM.DEVISE.TOKENS
+
 # Used in setting `config.cache_store` in production.rb
 cache_store:
   type: :redis_store
