@@ -1,8 +1,10 @@
 set :stage, :staging
 set :rails_env, :staging
 
-role :app, %w{square@shuttle-stage-a-01.corp.squareup.com}
-role :web, %w{square@shuttle-stage-a-01.corp.squareup.com}
-role :db, %w{square@shuttle-stage-a-01.corp.squareup.com}
-role :sidekiq, %w{square@shuttle-stage-a-01.corp.squareup.com}
-role :cron, %w{square@shuttle-stage-a-01.corp.squareup.com}
+single_server = "square@shuttle-stage-a-01.corp.squareup.com"
+
+role :app, [single_server]
+role :web, [single_server]
+role :db, [single_server]
+role :sidekiq, [single_server]
+role :cron, [single_server]
