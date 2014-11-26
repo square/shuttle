@@ -2,3 +2,7 @@
 default_url_options:
   host: localhost
   port: 3000
+
+# The value of Shuttle::Application.config.secret_key_base in initializers/secret_token.rb
+cookies:
+  secret_key_base: 561025b92e0890f00394b953ab374faa55d6d35fb5af857447a7a2f83fc69e3f9b76bcd11a352ec02dda9c687758a626efc63864608f9e92dc48b4320c84ad5a

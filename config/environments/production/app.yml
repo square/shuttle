@@ -4,6 +4,10 @@ default_url_options:
   host: shuttle.squareup.com
   protocol: https
 
+# The value of Shuttle::Application.config.secret_key_base in initializers/secret_token.rb
+cookies:
+  secret_key_base: THIS.WILL.BE.USED.TO.VERIFY.INTEGRITY.OF.SIGNED.COOKIES
+
 # Used in setting `config.cache_store` in production.rb
 cache_store:
   type: :redis_store
