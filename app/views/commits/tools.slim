@@ -16,23 +16,11 @@
   = "Commit #{@commit.revision_prefix} - Shuttle"
 - content_for :file_name do
   = 'views/commits/show'
-- content_for :class do
-  = controller_name
-- content_for :id do 
-  = [controller_name, action_name].join('-')
-- content_for :footer do
-  true
 
 = render layout: 'commits/layout' do
   fieldset
     legend Commit Tools
     .nine.columns
-
-      .control-group.wide-label
-        label
-          | Manually reimport a commit
-        .controls
-          button.primary href=redo_project_commit_path(@project, @commit) data-method='POST' Reimport
 
       .control-group.wide-label
         label

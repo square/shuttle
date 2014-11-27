@@ -17,26 +17,17 @@ require 'spec_helper'
 describe Comment do
   context "[email notifications]" do
     context "after_create" do
-      it "should send an email when a new comment is created" do
-        # SETUP
-        translation = FactoryGirl.create(:translation)
-        FactoryGirl.create(:commit, user: FactoryGirl.create(:user), author_email: "commitauthor@test.com").keys << translation.key # associate the translation with a commit through key
-        issue = FactoryGirl.create(:issue, translation: translation)
-        user1 = FactoryGirl.create(:user, email: "first_commenter@test.com")
-        user2 = FactoryGirl.create(:user, email: "second_commenter@test.com")
-        FactoryGirl.create(:comment, issue: issue, user: user1)
+      it "subscribes the commenter to the issue emails; and sends an email to the subscription list when a new comment is created" do
+        issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
+        comment = FactoryGirl.build(:comment, issue: issue)
         ActionMailer::Base.deliveries.clear
 
-        # TEST
-        comment = FactoryGirl.create(:comment, issue: issue, user: user2, content: "This is awesome")
+        comment.save!
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         email = ActionMailer::Base.deliveries.first
-        expected_email_list = [Shuttle::Configuration.mailer.translators_list, "first_commenter@test.com", "second_commenter@test.com", "commitauthor@test.com", issue.user.email, issue.updater.email, issue.translation.key.commits.last.user.email] + issue.subscribed_emails
 
-        expect(email.to.sort).to eql(expected_email_list.sort)
-        expect(email.subject).to eql("[Shuttle] Sancho Sample wrote a new comment to an issue: This is awesome")
-        expect(email.body.to_s).to include("wrote a new comment")
-        expect(email.body.to_s).to include("http://test.host/projects/#{issue.translation.key.project.to_param}/keys/#{issue.translation.key.to_param}/translations/#{issue.translation.to_param}#comment-#{comment.id}")
+        expect(email.to).to eql(["test@example.com"])
+        expect(email.subject).to include("[Shuttle] Sancho Sample wrote a new comment to an issue")
       end
     end
   end

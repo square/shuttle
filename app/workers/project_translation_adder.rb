@@ -25,23 +25,24 @@ class ProjectTranslationAdder
   # @param [Fixnum] project_id The ID of a Project.
 
   def perform(project_id)
-    project      = Project.find(project_id)
-    worker_queue = "KeyTranslationAdder:#{SecureRandom.uuid}"
-    num_jobs     = project.keys.count.to_s
-    project.keys.each do |key|
-      KeyTranslationAdder.perform_once(key.id, worker_queue)
-    end
+    project = Project.find(project_id)
+    key_ids = key_ids_with_commits(project)
+    return if key_ids.empty?
 
-    # Try for up to 1 hour
-    720.times do
-      break unless Shuttle::Redis.exists(worker_queue)
-      break if Shuttle::Redis.get(worker_queue) >= num_jobs
-      sleep(5)
+    project.translation_adder_batch.jobs do
+      key_ids.each do |key_id|
+        KeyTranslationAdder.perform_once(key_id)
+      end
     end
+  end
 
-    project.commits.each do |commit|
-      CommitStatsRecalculator.perform_once(commit.id)
-    end
+  private
+
+  # @return [Array<Key>] ids of all {Key keys} who belong to at least one {Commit} under this {Project}
+
+  def key_ids_with_commits(project)
+    key_ids = project.keys.pluck(:id)
+    CommitsKey.where(key_id: key_ids).uniq('key_id').select('key_id').map(&:key_id)
   end
 
   include SidekiqLocking

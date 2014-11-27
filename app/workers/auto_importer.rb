@@ -23,7 +23,7 @@ class AutoImporter
   # Runs this worker.
 
   def perform
-    Project.find_each do |project|
+    Project.with_repository_url.find_each do |project|
       next unless project.watched_branches.present?
       ProjectAutoImporter.perform_once project.id
     end
@@ -45,23 +45,23 @@ class AutoImporter
 
     def perform(project_id)
       project = Project.find(project_id)
+      return unless project.git? && project.watched_branches.present?
+
       project.repo &:fetch
 
       branches_to_delete = [] # any branches that don't actually exist anymore?
-
       project.watched_branches.each do |branch|
         begin
-          project.commit! branch,
-                          other_fields: {description: "Automatically imported from the #{branch} branch"}
-        rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound
-          # branch doesn't actually exist; remove from watched branches and ignore
-          branches_to_delete << branch
+          project.commit! branch, other_fields: {description: "Automatically imported from the #{branch} branch"}
+        rescue Git::CommitNotFoundError => err
+          branches_to_delete << branch # branch doesn't actually exist; remove from watched branches and ignore
         end
       end
-
       project.watched_branches = project.watched_branches - branches_to_delete
       project.save!
-    rescue Timeout::Error
+
+    rescue Timeout::Error => err
+      Squash::Ruby.notify err, project_id: project_id
       self.class.perform_in 2.minutes, project_id
     end
 

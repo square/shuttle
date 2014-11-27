@@ -15,16 +15,11 @@
   = "Stats - Shuttle"
 - content_for :file_name do
   = 'views/stats/index'
-- content_for :class do
-  = controller_name
-- content_for :id do
-  = [controller_name, action_name].join('-')
-- content_for :footer do
-  true
 
 .header
+  .pull-right
+    button.primary href=stats_url(format: :csv) Download CSV
   h1 Translation Statistics
-
 hr.divider
 
 .row.stats-charts

@@ -15,8 +15,9 @@
 # Controller for working with {Project Projects}.
 
 class ProjectsController < ApplicationController
-  before_filter :authenticate_user!, except: [:stash_webhook]
+  skip_before_filter :authenticate_user!, only: [:stash_webhook]
   before_filter :monitor_required, only: [:new, :create, :edit, :update]
+  before_filter :admin_required, only: [:setup_mass_copy_translations, :mass_copy_translations]
   before_filter :find_project, except: [:index, :new, :create]
 
   before_filter(only: [:create, :update]) do
@@ -24,7 +25,6 @@ class ProjectsController < ApplicationController
                      [:project, :key_inclusions],
                      [:project, :skip_paths],
                      [:project, :only_paths],
-                     [:project, :cache_manifest_formats],
                      [:project, :watched_branches],
                      [:project, :required_rfc5646_locales],
                      [:project, :other_rfc5646_locales]
@@ -86,7 +86,6 @@ class ProjectsController < ApplicationController
                                strings_total:      commit.strings_total,
                                import_url:         import_project_commit_url(@project, commit, format: 'json'),
                                sync_url:           sync_project_commit_url(@project, commit, format: 'json'),
-                               redo_url:           redo_project_commit_url(@project, commit, format: 'json'),
                                url:                project_commit_url(@project, commit),
                                status_url:         project_commit_url(@project, commit),
                            )
@@ -124,7 +123,11 @@ class ProjectsController < ApplicationController
 
   def create
     @project = Project.create(project_params)
-    flash[:success] = t('controllers.projects.create.success', project: @project.name)
+    if @project.errors.blank?
+      flash[:success] = t('controllers.projects.create.success', project: @project.name)
+    else
+      flash.now[:alert] = @project.errors.full_messages.unshift(t('controllers.projects.create.failure'))
+    end
     respond_with @project, location: projects_url
   end
 
@@ -169,7 +172,11 @@ class ProjectsController < ApplicationController
 
   def update
     @project.update_attributes project_params
-    flash[:success] = t('controllers.projects.update.success', project: @project.name)
+    if @project.errors.blank?
+      flash[:success] = t('controllers.projects.update.success', project: @project.name)
+    else
+      flash.now[:alert] = @project.errors.full_messages.unshift(t('controllers.projects.update.failure'))
+    end
     respond_with @project, location: edit_project_url(@project)
   end
 
@@ -197,7 +204,7 @@ class ProjectsController < ApplicationController
   def github_webhook
     payload = JSON.parse(params[:payload])
     requested_branch = payload['ref'].split('/').last
-    branch_is_valid = @project.watched_branches.include? requested_branch
+    branch_is_valid = @project.git? && @project.watched_branches.include?(requested_branch)
     if branch_is_valid
       revision = payload['after']
       other_fields = { description: 'github webhook', user_id: current_user.id }
@@ -210,7 +217,8 @@ class ProjectsController < ApplicationController
     end
   end
 
-  # Receives a stash webhook and triggers a new import for the latest commit.
+  # Receives a stash webhook and triggers a new import for the latest commit,
+  # if project has a repository_url. Otherwise, it returns a 400 error.
   #
   # Routes
   # ------
@@ -234,10 +242,70 @@ class ProjectsController < ApplicationController
   # | `type`    | Whether it was a pull request or push that triggered it  |
 
   def stash_webhook
-    revision = params[:sha]
-    other_fields = { description: 'Requested due to a Pull Request on Stash.' }
-    CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-    render status: :ok, text: 'Success'
+    if @project.git?
+      revision = params[:sha]
+      other_fields = { description: 'Requested due to a Pull Request on Stash.' }
+      CommitCreator.perform_once @project.id, revision, other_fields: other_fields
+      render status: :ok, text: 'Success'
+    else
+      render status: :bad_request, text: 'Repository url is blank'
+    end
+  end
+
+  # Shows a page were admins can configure settings to mass copy translations from one locale to another.
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:id/mass_copy_translations`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                   |
+  # |:-----|:------------------|
+  # | `id` | A Project's slug. |
+
+  def setup_mass_copy_translations
+  end
+
+  # Kicks off a job which will mass copy translations from one locale to another.
+  # It only copies from translations which are already approved.
+  # It only copies into translations which are not yet translated.
+  # It preserves the approved state.
+  #
+  # Routes
+  # ------
+  #
+  # * `POST /projects/:id/mass_copy_translations`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                   |
+  # |:-----|:------------------|
+  # | `id` | A Project's slug. |
+  #
+  # Body Parameters
+  # ---------------
+  #
+  # |                       |                                                          |
+  # |:----------------------|----------------------------------------------------------|
+  # | `from_rfc5646_locale` | The ref of the SHA that needs to be built                |
+  # | `to_rfc5646_locale`   | The SHA of the commit that should be built               |
+
+  def mass_copy_translations
+    errors = TranslationsMassCopier.find_locale_errors(@project, params[:from_rfc5646_locale], params[:to_rfc5646_locale])
+
+    if errors.blank?
+      TranslationsMassCopier.perform_once(@project.id, params[:from_rfc5646_locale], params[:to_rfc5646_locale])
+      flash[:success] = t('controllers.projects.mass_copy_translations.success',
+                          from: params[:from_rfc5646_locale], to: params[:to_rfc5646_locale])
+      redirect_to setup_mass_copy_translations_project_url(@project)
+    else
+      flash.now[:alert] = [t('controllers.projects.mass_copy_translations.failure')] + errors
+      render 'setup_mass_copy_translations'
+    end
   end
 
   private
@@ -278,11 +346,14 @@ class ProjectsController < ApplicationController
     end
     
     project_params = params[:project].to_hash.slice(*%w(
-        name repository_url base_rfc5646_locale due_date cache_localization
-        github_webhook_url stash_webhook_url skip_imports cache_manifest_formats key_exclusions
-        key_inclusions skip_paths only_paths watched_branches touchdown_branch
+        name repository_url base_rfc5646_locale due_date
+        github_webhook_url stash_webhook_url skip_imports default_manifest_format key_exclusions
+        key_inclusions skip_paths only_paths
+        watched_branches touchdown_branch
+        manifest_directory manifest_filename
         key_locale_exclusions key_locale_inclusions
         only_importer_paths skip_importer_paths
+        disable_locale_association_checkbox_settings
     ))
     project_params["targeted_rfc5646_locales"] = targeted_rfc5646_locales
     project_params

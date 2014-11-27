@@ -16,11 +16,7 @@
 
 class HomeController < ApplicationController
   # Typical number of commits to show per page.
-  PER_PAGE = 30
-
-  before_filter :authenticate_user!
-  before_filter :translator_required, only: [:translators, :glossary]
-  before_filter :reviewer_required, only: :reviewers
+  PER_PAGE = 20
 
   # Displays a landing page depending on the current User's role.
   #
@@ -103,9 +99,8 @@ class HomeController < ApplicationController
     @project = projects.first if projects.length == 1
 
     # Filter by SHA
-    sha      = params[:sha].presence
-    sha = sha =~ /^[0-9A-F]+$/i ? sha.downcase : nil
-    @sha = sha
+    sha = params[:sha].presence
+    @sha = sha = (sha =~ /^[0-9A-F]+$/i ? sha.downcase : nil)
 
     # Filter by user
     # Changed for Jim Kingdon.  Testing feature.  Make it such that all users can see all commits.
@@ -119,10 +114,18 @@ class HomeController < ApplicationController
             end
     @filters = '(Only showing my commits)' if user
 
-    sort_order = params[:sort].present? ? params[:sort] : cookies[:home_sort]
-    direction = params[:direction].present? ? params[:direction] : cookies[:home_direction]
-    @sort_order = sort_order
-    @direction = direction
+    @sort_order = sort_order = params[:sort].present? ? params[:sort] : cookies[:home_sort]
+    @direction = direction = params[:direction].present? ? params[:direction] : cookies[:home_direction]
+
+    @locales = locales = if params[:locales].present?
+                           params[:locales].split(',').map { |l| Locale.from_rfc5646 l }.compact
+                         else
+                           []
+                         end
+
+    if @locales.present? && (status == 'uncompleted')
+      uncompleted_key_ids_in_locales = uncompleted_key_ids_in_locales(@locales)
+    end
 
     @commits = Commit.search(load: {include: [:user, project: :slugs]}) do
       filter :prefix, revision: sha if sha
@@ -134,7 +137,11 @@ class HomeController < ApplicationController
 
       case status
         when 'uncompleted'
-          filter :term, ready: false
+          if locales.present?
+            filter :terms, key_ids: uncompleted_key_ids_in_locales
+          else
+            filter :term, ready: false
+          end
         when 'completed'
           filter :term, ready: true
       end
@@ -160,10 +167,12 @@ class HomeController < ApplicationController
       end
     end
 
-    @locales = if params[:locales].present?
-                 params[:locales].split(',').map { |l| Locale.from_rfc5646 l }.compact
-               else
-                 []
-               end
+    @home_presenter = HomePresenter.new(@commits, @locales)
+  end
+
+  private
+
+  def uncompleted_key_ids_in_locales(locales)
+    Translation.not_approved.in_locale(*locales).select(:key_id).uniq.pluck(:key_id)
   end
 end

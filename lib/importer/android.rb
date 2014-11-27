@@ -27,7 +27,7 @@ module Importer
     include AndroidQualifiers
 
     # XML files that could contain localizable resources.
-    FILENAMES = %w(strings.xml arrays.xml plurals.xml titles.xml)
+    FILENAMES = %w(country_names.xml strings.xml arrays.xml plurals.xml titles.xml)
 
     def self.fencers() %w(Android) end
 
@@ -108,7 +108,7 @@ module Importer
 
     def unescape(string)
       result = ''
-      if string =~ /^"(.+?)"$/
+      if string =~ /^(".+?")$/
         result = $1
       else
         scanner = UnicodeScanner.new(string)

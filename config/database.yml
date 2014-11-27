@@ -1,23 +1,25 @@
 common: &common
   adapter: postgresql
   encoding: unicode
+  host: localhost
   username: shuttle
+  password:
+  pool: 50
+  reconnect: true
+  reaping_frequency: 30
 
 development:
   <<: *common
   database: shuttle_development
-  pool: 30
-  host: localhost
 
 test:
   <<: *common
   database: shuttle_test
-  pool: 10
-  host: localhost
+
+staging:
+  <<: *common
+  database: shuttle_staging
 
 production:
   <<: *common
   database: shuttle_production
-  pool: 50
-  host: localhost
-  reconnect: true

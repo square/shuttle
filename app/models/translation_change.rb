@@ -23,38 +23,21 @@
 # |:--------------|:------------------------------------|
 # | `translation` | The {Translation} that was changed. |
 # | `user`        | The {User} that made the change.    |
-#
-# Metadata
-# ========
-#
-# |        |                           |
-# |:-------|:--------------------------|
-# | `diff` | The changes that occured. |
+# | `diff`        | The changes that occured.           |
 
 class TranslationChange < ActiveRecord::Base
+  TRACKED_ATTRIBUTES = [:copy, :approved]
+
   belongs_to :translation, inverse_of: :translation_changes
   belongs_to :user
 
-  include HasMetadataColumn
-  has_metadata_column(
-    diff: {type: Hash, default: {}}
-  )
+  serialize :diff, Hash
 
   validates :translation, presence: true
 
   def self.create_from_translation!(translation)
-    # Only track changes we care about
-    return unless Translation.tracked_attributes.any? { |t| translation.send(:"#{t}_changed?") }
-    diff = {}
-    Translation.tracked_attributes.each do |a|
-      diff[a.to_s] = [translation.send(:"#{a}_actually_was"), translation.send(a)]
-    end
-
-    diff = diff.select { |k,v| v[0] != v[1] } # Filter for duplicates
-    return if diff.empty?
-
-    change = TranslationChange.create(translation: translation, user: translation.modifier, diff: diff)
-    change.freeze
+    diff = translation.previous_changes.slice(*TRACKED_ATTRIBUTES)
+    TranslationChange.create(translation: translation, user: translation.modifier, diff: diff) if diff.present?
   end
 
   def differ

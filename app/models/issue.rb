@@ -48,28 +48,48 @@ class Issue < ActiveRecord::Base
     ICEBOX = 4
   end
 
+  # @return [true, false] If `true`, skips email notifications when issue is updated. We use this flag
+  #   because issues are updated in various actions and we should not send email notifications for all of them.
+  attr_accessor :skip_email_notifications
+
   SKIPPED_FIELDS_FOR_EMAIL_ON_UPDATE = %w(created_at updated_at)
 
   belongs_to :translation, inverse_of: :issues
   belongs_to :user, inverse_of: :issues
   belongs_to :updater, class_name: User
   has_many :comments, inverse_of: :issue, dependent: :delete_all
+  delegate :project, to: :key
+  delegate :key, to: :translation
+
+  before_validation(on: :create) { self.status = Status::OPEN }
+  extend SetNilIfBlank
+  set_nil_if_blank :summary, :description
 
   validates :user, presence: {on: :create} # in case the user gets deleted afterwards
   validates :updater, :translation, presence: true
-  validates :summary, presence: true, length: { maximum: 200 }
-  validates :description, presence: true, length: { maximum: 1000 }
+  validates :summary, length: { maximum: 200 }
+  validates :description, length: { maximum: 1000 }
   validates :priority, numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3}, allow_nil: true
-  validates :kind, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 6}
+  validates :kind, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 7}
   validates :status, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 4}
 
-  before_validation(on: :create) { self.status = Status::OPEN }
+  def self.new_with_defaults
+    new(subscribed_emails: [Shuttle::Configuration.app.mailer.translators_list])
+  end
 
-  # ===== START SCOPES BY STATUS =====
+  # ===== START STATUS RELATED CODE =====
   scope :pending, -> { where(status: [Status::OPEN, Status::IN_PROGRESS]) }
 
   def pending?
     status == Status::OPEN or status == Status::IN_PROGRESS
+  end
+
+  def resolved?
+    status == Status::RESOLVED
+  end
+
+  def resolve(resolver)
+    update status: Issue::Status::RESOLVED, subscribed_emails: (subscribed_emails + [resolver.email])
   end
   # ===== END SCOPES BY STATUS =====
 
@@ -87,6 +107,28 @@ class Issue < ActiveRecord::Base
     write_attribute(:subscribed_emails, emails)
   end
 
+  # Adds the given user to the subscribed emails list
+  #  @param [User] user that will be subscribed
+
+  def subscribe(user)
+    update subscribed_emails: (subscribed_emails + [user.email])
+  end
+
+  # Removes the given user from the subscribed emails list
+  #  @param [User] user that will be unsubscribed
+
+  def unsubscribe(user)
+    update subscribed_emails: (subscribed_emails - [user.email])
+  end
+
+  # Checks if the given user is subscribed to this issue
+  #   @param [User] user
+  #   @return [true, false] true if the given user is subscribed to this issue, false otherwise
+
+  def subscribed?(user)
+    subscribed_emails.include?(user.email)
+  end
+
   def subscribed_emails_format
     if subscribed_emails
       subscribed_emails.each do |email|
@@ -96,7 +138,6 @@ class Issue < ActiveRecord::Base
       end
     end
   end
-
   private :subscribed_emails_format
   # ===== END subscribed_emails =====
 
@@ -106,5 +147,14 @@ class Issue < ActiveRecord::Base
 
   def self.order_default
     order('issues.status ASC, issues.priority ASC, issues.created_at DESC')
+  end
+
+  # This method is used instead of the `summary` method, where appropriate because `summary` can sometimes be `nil`.
+  #   @return [String] which includes kind and summary (if exists) information
+
+  def long_summary
+    s = I18n.t("models.issue.kind")[kind]
+    s += " - " + summary if summary
+    s
   end
 end

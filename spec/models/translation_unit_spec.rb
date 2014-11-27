@@ -24,7 +24,7 @@ describe TranslationUnit do
   end
 
   describe ".exact_matches" do
-    before(:all) do
+    before :each do
       @unit = FactoryGirl.create(:translation_unit,
                                  source_copy:           'something in english',
                                  copy:                  'etwas auf deutsch',
@@ -74,7 +74,7 @@ describe TranslationUnit do
   end
 
   describe ".store" do
-    before :all do
+    before :each do
       @translation = FactoryGirl.build(:translation, source_rfc5646_locale: 'en', rfc5646_locale: 'de', approved: true)
     end
 
@@ -86,7 +86,7 @@ describe TranslationUnit do
       ).exists?).to be_true
     end
 
-    it "should update an existing translation memory unit" do
+    it "should not create a new translation memory unit if translation memory unit exists already and translation didn't change" do
       TranslationUnit.store @translation
       expect(TranslationUnit.source_copy_matches(@translation.source_copy).where(
           rfc5646_locale:        @translation.locale.rfc5646,

@@ -225,7 +225,6 @@ module Importer
           approved:                 true,
           source_rfc5646_locale:    base.rfc5646_locale,
           rfc5646_locale:           locale.rfc5646,
-          skip_readiness_hooks:     true,
           preserve_reviewed_status: true)
     end
 
@@ -297,14 +296,19 @@ module Importer
       end
 
       # then spawn jobs to create those keys
-      @keys.in_groups_of(100, false) do |keys|
-        if inline
+      if inline
+        @keys.in_groups_of(100, false) do |keys|
           KeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
-        else
-          shuttle_jid = SecureRandom.uuid
-          @blob.add_worker! shuttle_jid
-          @commit.add_worker!(shuttle_jid) if @commit
-          KeyCreator.perform_async(@blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys, shuttle_jid)
+        end
+      elsif @commit
+        @commit.import_batch.jobs do
+          @keys.in_groups_of(100, false).each do |keys|
+            KeyCreator.perform_once @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+          end
+        end
+      else
+        @keys.in_groups_of(100, false) do |keys|
+          KeyCreator.perform_async @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
         end
       end
     end
@@ -397,7 +401,7 @@ module Importer
 
     def handle_import_error(err)
       @blob.update_column :errored, true
-      @commit.add_import_error_in_redis(file.path, err) if @commit
+      @commit.add_import_error(err, "in #{file.path}") if @commit
     end
 
     File = Struct.new(:path, :contents, :locale)

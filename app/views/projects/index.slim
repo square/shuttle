@@ -15,12 +15,6 @@
   = "Projects - Shuttle"
 - content_for :file_name do
   = 'views/projects/index'
-- content_for :class do
-  = controller_name
-- content_for :id do 
-  = [controller_name, action_name].join('-')
-- content_for :footer do
-  true
 
 .header
   .pull-right
@@ -35,17 +29,12 @@ hr.divider
       tr
         th Project
         th Repository URL
-        th Started
-        th Locale
-    tbody 
+        th Required Locales
+        th Optional Locales
+    tbody
       - @projects.each do |project|
         tr onclick="document.location = '#{edit_project_url(project)}'"
           td = project.name
           td = project.repository_url
-          td = l(project.created_at, format: :mon_day_year)
-          td = project.targeted_rfc5646_locales\
-                .reject { |key, value| !value }\
-                .keys.join(" / ").upcase
-
-
-
+          td = project.required_rfc5646_locales.join(" / ").upcase
+          td = project.other_rfc5646_locales.join(" / ").upcase

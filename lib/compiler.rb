@@ -35,8 +35,6 @@ class Compiler
   #   are allowed, with untranslated strings being omitted.
   # @option options [String] locale The RFC 5646 code for a locale to export, or
   #   `nil` to export all required locales.
-  # @option options [true, false] force (false) If `true`, busts the cache and
-  #   forces a recompile.
   # @return [File] Output data and metadata.
   # @raise [CommitNotReadyError] If the Commit is not ready and a non-partial
   #   manifest is requested.
@@ -60,15 +58,6 @@ class Compiler
     exporter = Exporter::Base.find_by_format(format)
     raise UnknownExporterError unless exporter
 
-    if !options[:force] && locales.empty? && (data = cached_manifest(format))
-      return File.new(
-          StringIO.new(data),
-          exporter.character_encoding,
-          "manifest.#{exporter.file_extension}",
-          exporter.mime_type
-      )
-    end
-
     io = StringIO.new
     exporter = exporter.new(@commit)
     exporter.export io, *locales_for_export(*locales, options[:partial])
@@ -90,8 +79,6 @@ class Compiler
   #   are allowed, with untranslated strings being omitted.
   # @option options [String] locale The RFC 5646 code for a locale to use, or
   #   `nil` to use all required locales.
-  # @option options [true, false] force (false) If `true`, busts the cache and
-  #   forces a recompile.
   # @return [File] Output data and metadata.
   # @raise [CommitNotReadyError] If the Commit is not ready and a non-partial
   #   localization is requested.
@@ -109,14 +96,6 @@ class Compiler
     end
 
     filename = "#{locale.try!(:rfc5646) || 'localized'}.tar.gz"
-    if !options[:force] && locale.nil? && (data = cached_localization)
-      return File.new(
-          StringIO.new(data),
-          nil,
-          filename,
-          'application/x-gzip'
-      )
-    end
 
     data = Localizer::Base.localize(@commit, *locales_for_export(locale, options[:partial]))
 
@@ -138,26 +117,6 @@ class Compiler
     end
   end
 
-  def cached_manifest(format)
-    contents = Shuttle::Redis.get(ManifestPrecompiler.new.key(@commit, format))
-    if contents && valid_manifest?(contents, format)
-      return contents
-    else
-      Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, format)
-      return nil
-    end
-  end
-
-  def cached_localization
-    contents = Shuttle::Redis.get(LocalizePrecompiler.new.key(@commit))
-    if contents && valid_manifest?(contents, 'tgz')
-      return contents
-    else
-      Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
-      return nil
-    end
-  end
-
   def valid_manifest?(contents, format)
     case format
       when 'tgz'
@@ -173,8 +132,18 @@ class Compiler
   # associated metadata for transmission.
   class File < Struct.new(:io, :encoding, :filename, :mime_type)
 
-    # Closes the `io` stream if appliable.
+    # Contents of the file
+    def content
+      if io.respond_to?(:string)
+        str = io.string
+      else
+        str = io.read
+      end
+      return str.force_encoding(encoding) if encoding
+      str
+    end
 
+    # Closes the `io` stream if appliable.
     def close
       io.close if io.respond_to?(:close)
     end

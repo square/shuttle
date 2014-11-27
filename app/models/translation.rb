@@ -35,34 +35,23 @@ require 'digest/sha2'
 # Properties
 # ==========
 #
-# |                 |                                                    |
-# |:----------------|:---------------------------------------------------|
-# | `translated`    | If `true`, the copy has been translated.           |
-# | `approved`      | If `true`, the copy has been approved for release. |
-# | `source_locale` | The locale the copy is translated from.            |
-# | `locale`        | The locale the copy is translated to.              |
-#
-# Metadata
-# ========
-#
-# |               |                                                       |
-# |:--------------|:------------------------------------------------------|
-# | `source_copy` | The copy for the string in the project's base locale. |
-# | `copy`        | The translated copy.                                  |
+# |                 |                                                       |
+# |:----------------|:------------------------------------------------------|
+# | `translated`    | If `true`, the copy has been translated.              |
+# | `approved`      | If `true`, the copy has been approved for release.    |
+# | `source_locale` | The locale the copy is translated from.               |
+# | `locale`        | The locale the copy is translated to.                 |
+# | `source_copy`   | The copy for the string in the project's base locale. |
+# | `copy`          | The translated copy.                                  |
 
 class Translation < ActiveRecord::Base
   belongs_to :key, inverse_of: :translations
   belongs_to :translator, class_name: 'User', foreign_key: 'translator_id', inverse_of: :authored_translations
   belongs_to :reviewer, class_name: 'User', foreign_key: 'reviewer_id', inverse_of: :reviewed_translations
   has_many :translation_changes, inverse_of: :translation, dependent: :delete_all
-  has_many :issues, inverse_of: :translation, dependent: :delete_all
-
-  include HasMetadataColumn
-  has_metadata_column(
-      source_copy:  {allow_blank: true},
-      copy:         {allow_nil: true},
-      notes:        {allow_nil: true, length: { maximum: 1024 }}
-  )
+  has_many :issues, inverse_of: :translation, dependent: :destroy
+  has_many :commits_keys, primary_key: :key_id, foreign_key: :key_id
+  has_many :locale_associations, primary_key: :rfc5646_locale, foreign_key: :source_rfc5646_locale
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }
 
@@ -80,7 +69,7 @@ class Translation < ActiveRecord::Base
     indexes :id, type: 'integer', index: :not_analyzed
     indexes :project_id, type: 'integer', as: 'send(:key).project_id'
     indexes :translator_id, type: 'integer'
-    indexes :rfc5646_locale, type: 'string'
+    indexes :rfc5646_locale, type: 'string', index: :not_analyzed
     indexes :created_at, type: 'date'
     indexes :updated_at, type: 'date'
     indexes :translated, type: 'boolean'
@@ -96,34 +85,19 @@ class Translation < ActiveRecord::Base
   validates :rfc5646_locale,
             presence:   true,
             uniqueness: {scope: :key_id, on: :create}
+  validates :notes, length: { maximum: 1024 }
   validate :cannot_approve_or_reject_untranslated
   validate :valid_interpolations, on: :update
+  validate :fences_must_match
 
   before_validation { |obj| obj.translated = obj.copy.to_bool; true }
-  before_validation :approve_translation_made_by_reviewer, on: :update
   before_validation :count_words
   before_validation :populate_pseudo_translation
 
   before_save { |obj| obj.translated = obj.copy.to_bool; true } # in case validation was skipped
   before_update :reset_reviewed, unless: :preserve_reviewed_status
 
-  after_save :recalculate_readiness, if: :apply_readiness_hooks?
-  after_save :recalculate_commit_stats, if: :apply_readiness_hooks?
-  after_save :expire_affected_cached_manifests
-
-  after_commit :update_translation_memory, if: :apply_readiness_hooks?
-
-  after_destroy :recalculate_readiness
-
   attr_readonly :source_rfc5646_locale, :rfc5646_locale, :key_id
-
-  # @return [true, false] If `true`, the after-save hooks that recalculate
-  #   Commit `ready?` values will not be run. You should use this when
-  #   processing a large batch of Translations.
-  attr_accessor :skip_readiness_hooks
-
-  def apply_readiness_hooks?() !skip_readiness_hooks end
-  private :apply_readiness_hooks?
 
   # @return [true, false] If `true`, the value of `reviewed` will not be reset
   #   even if the copy has changed.
@@ -133,26 +107,12 @@ class Translation < ActiveRecord::Base
   # @return [User] The person who changed this Translation
   attr_accessor :modifier
 
-  # @private
-  # The attributes we want TranslationChange to log
-  def self.tracked_attributes() [:approved, :copy] end
-
-  tracked_attributes.each { |a| attr_accessor :"#{a}_actually_was" }
-
   # TODO: Fold this into DailyMetric?
   def self.total_words_per_project
     Translation.not_base.joins(key: :project)
       .select("sum(words_count), projects.name").group("projects.name")
       .order("sum DESC")
       .map { |t| [t.name, t.sum] }
-  end
-
-  # Method used to cached the current state of the Translation
-  # Required before making changes to a Translation that will be saved
-  def freeze_tracked_attributes
-    self.class.tracked_attributes.each do |a|
-      send(:"#{a}_actually_was=", send(a))
-    end
   end
 
   scope :in_locale, ->(*langs) {
@@ -162,8 +122,11 @@ class Translation < ActiveRecord::Base
       where(rfc5646_locale: langs.map(&:rfc5646))
     end
   }
-  scope :base, -> { where('source_rfc5646_locale = rfc5646_locale') }
-  scope :not_base, -> { where('source_rfc5646_locale != rfc5646_locale') }
+  scope :approved, -> { where(translations: { approved: true }) }
+  scope :not_approved, -> { where("translations.approved IS NOT TRUE") }
+  scope :not_translated, -> { where(translations: { translated: false } ) }
+  scope :base, -> { where('translations.source_rfc5646_locale = translations.rfc5646_locale') }
+  scope :not_base, -> { where('translations.source_rfc5646_locale != translations.rfc5646_locale') }
   scope :in_commit, ->(commit) {
     commit_id = commit.kind_of?(Commit) ? commit.id : commit
     joins("INNER JOIN commits_keys ON translations.key_id = commits_keys.key_id").
@@ -184,7 +147,6 @@ class Translation < ActiveRecord::Base
     options ||= {}
 
     options[:except] = Array.wrap(options[:except])
-    options[:except] << :metadata
     options[:except] << :translator_id << :reviewer_id << :key_id
     options[:except] << :searchable_copy << :searchable_source_copy
     options[:except] << :source_rfc5646_locale << :rfc5646_locale
@@ -234,10 +196,6 @@ class Translation < ActiveRecord::Base
     end
   end
 
-  def recalculate_readiness
-    key.recalculate_ready! if destroyed? || translated_changed? || approved_changed?
-  end
-
   def reset_reviewed
     if (copy != copy_was || source_copy != source_copy_was) && !base_translation? && !approved_changed?
       self.reviewer_id = nil
@@ -248,23 +206,6 @@ class Translation < ActiveRecord::Base
 
   def cannot_approve_or_reject_untranslated
     errors.add(:approved, :not_translated) if approved != nil && !translated?
-  end
-
-  def approve_translation_made_by_reviewer
-    if translator_id_changed? && translator && translator.reviewer? && copy_changed? && translated?
-      self.approved = true
-      self.reviewer = translator
-    end
-    return true
-  end
-
-  def recalculate_commit_stats
-    return unless translated_changed? || approved_changed?
-    KeyStatsRecalculator.perform_once key_id
-  end
-
-  def update_translation_memory
-    TranslationUnit.store self
   end
 
   def count_words
@@ -279,18 +220,13 @@ class Translation < ActiveRecord::Base
     self.preserve_reviewed_status = true
   end
 
-  # if the translation was updated post-approval, no associated commits will
-  # have their readiness state changed (since the translation was and is still
-  # approved), and therefore, manifests that should now be stale would not be,
-  # were it not for this handy hook
-  def expire_affected_cached_manifests
-    # if we changed the copy but kept the approval status, we need to expire the
-    # cache
-    if copy != copy_was && approved? && !approved_changed?
-      # clear out existing cache entries if present
-      # can't use copy_changed? because we overwrite the copy with itself, which
-      # does record a change (sigh)
-      TranslationCachedManifestExpirer.perform_once self.id
-    end
+  def fences_must_match
+    return if locale.pseudo? # don't validate if locale is pseudo
+    return if copy.nil? # don't validate if we are just saving a not-translated translation. copy will be nil, and translation will be pending.
+    errors.add(:copy, :unmatched_fences) unless fences.keys.sort == source_fences.keys.sort
+    # Need to be careful when comparing. Should not use a comparison method which will compare hashcodes of strings
+    # because of non-ascii characters such as the following:
+    # `   "べ<span class='sales-trends'>"[1..27].hash == "<span class='sales-trends'>".hash  ` returns false
+    # `   "べ<span class='sales-trends'>"[1..27] == "<span class='sales-trends'>"   `          returns true
   end
 end

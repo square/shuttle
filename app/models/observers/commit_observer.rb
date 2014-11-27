@@ -19,53 +19,51 @@
 # 3. Sends an email to the translators alerting them of the new commit, if it has finished loading.
 
 class CommitObserver < ActiveRecord::Observer
-  def before_update(commit)
-    handle_import_errors(commit)
-  end
-
-  def after_save(commit)
+  def after_commit(commit)
     ping_stash_webhook(commit)
   end
 
-  def after_update(commit)
+  def after_commit_on_update(commit)
     ping_github_webhook(commit)
-    send_email(commit)
-    cleanup_import_errors(commit)
+    send_emails(commit)
   end
 
   private
 
   def ping_github_webhook(commit)
-    return unless commit.ready_changed? && commit.ready?
-    GithubWebhookPinger.perform_once commit.id
+    if commit.project.git? && commit.project.github_webhook_url && just_became_ready?(commit)
+      GithubWebhookPinger.perform_once(commit.id)
+    end
   end
 
   def ping_stash_webhook(commit)
-    return unless commit.project.stash_webhook_url
-    if commit.id_changed? or commit.ready_changed? or commit.loading_changed?
+    if commit.project.git? && commit.project.stash_webhook_url && [:id, :ready, :loading].any? { |field| commit.previous_changes.include?(field) }
       StashWebhookPinger.perform_once commit.id
     end
   end
 
-  def send_email(commit)
-    if commit.loading_was == true && commit.loading == false && !commit.completed_at && commit.import_errors.blank? && commit.import_errors_in_redis.blank?
-      CommitMailer.notify_translators(commit).deliver
+  def send_emails(commit)
+    if just_finished_loading?(commit)
+      if commit.errored_during_import?
+        CommitMailer.notify_submitter_of_import_errors(commit).deliver
+      else
+        # This code assumes that recalculate_ready! was run on all of commit's keys
+        CommitMailer.notify_translators(commit).deliver unless commit.keys_are_ready?
+      end
     end
-    if commit.ready_was == false && commit.ready == true && commit.loading == false
+
+    if just_became_ready?(commit)
       CommitMailer.notify_translation_finished(commit).deliver
     end
   end
 
-  def handle_import_errors(commit)
-    if commit.loading_was == true && commit.loading == false && commit.import_errors_in_redis.present?
-      commit.copy_import_errors_from_redis_to_sql_db
-      CommitMailer.notify_submitter_of_import_errors(commit).deliver
-    end
+  # This should be called in after_commit hooks only because it checks previous_changes hash instead of changes hash.
+  def just_became_ready?(commit)
+    commit.previous_changes.include?(:ready) && commit.ready?
   end
 
-  def cleanup_import_errors(commit)
-    if commit.loading_was == true && commit.loading == false && commit.import_errors.present? && commit.import_errors == commit.import_errors_in_redis
-      commit.clear_import_errors_in_redis
-    end
+  # This should be called in after_commit hooks only because it checks previous_changes hash instead of changes hash.
+  def just_finished_loading?(commit)
+    commit.previous_changes.include?(:loading) && !commit.loading?
   end
 end

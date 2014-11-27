@@ -1,0 +1,61 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+- content_for :shuttle_title do
+  = "Mass Copy Translations"
+- content_for :file_name do
+  = 'views/projects/mass_copy_translations'
+
+.header
+  h1
+    | Mass Copy Translations for #{@project.name}
+
+hr.divider
+
+legend Important ReadMe
+p Please make sure that you understand what this tool will do, by reading all of this readme.
+br
+
+ul
+  li
+    | This project's base locale is
+    strong
+      |  "#{@project.base_rfc5646_locale}".
+  li
+    | This project's targeted locales are
+    strong
+      |  #{@project.targeted_rfc5646_locales.keys}.
+    =< link_to 'Update your locales.', edit_project_url(@project)
+  li This tool will copy all approved translations from 'from' locale into not-translated 'to' locale.
+  li It will not override already existing translations in the target locale. If the string is already translated in the target locale, it will not be updated.
+  li You can only copy between the locales which are in the same language family (same iso639), and in your targeted locales.
+  li This tool will not create the translation records. The translation records should exist in the database beforehand.
+  li This is not an instantaneous task. This task will run in the background for a while. Check Sidekiq for progress.
+br
+
+= form_tag mass_copy_translations_project_url(@project) do
+  fieldset
+    legend Ready To Party?
+
+    .control-group
+      = label_tag 'From (Source):', nil, class: 'control-label'
+      .controls
+        = text_field_tag :from_rfc5646_locale, params[:from_rfc5646_locale], class: 'locale-field'
+    .control-group
+      = label_tag 'To (Target):', nil, class: 'control-label'
+      .controls
+        = text_field_tag :to_rfc5646_locale, params[:to_rfc5646_locale], class: 'locale-field'
+
+    .form-actions
+      = submit_tag 'Mass Copy Translations', class: 'danger', data: { confirm: 'Are you sure? Did you carefully read the consequences of continuing. Changes are irreversible.'}
+      = link_to 'Cancel', edit_project_url(@project), class: 'button default'

@@ -62,6 +62,8 @@
 #= require live_update
 #= require smart_form
 #= require scroll_to_with_data_attrs
+#= require selectize
+#= require selectize_with_defaults
 #
 #= require_tree ../templates
 #= require_tree ./application
@@ -79,10 +81,10 @@ $(document).ready ->
       content:
         text: $($(this).data("tooltip"))
       position:
-        my: 'bottom left'
-        at: 'top right'
-      show: 'focus'
-      hide: 'blur'
+        my: 'center left'
+        at: 'center right'
+      show: 'mouseenter'
+      hide: 'mouseleave'
     }
 
     if $(this).data('tooltip-show')

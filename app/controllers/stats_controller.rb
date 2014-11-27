@@ -15,9 +15,6 @@
 # Controller that returns information used to render the statistics page.
 
 class StatsController < ApplicationController
-  before_filter :authenticate_user!
-
-  respond_to :html
 
   # Displays the statistics page.
   def index
@@ -32,6 +29,7 @@ class StatsController < ApplicationController
     last_week_metrics = DailyMetric.
       where(date: (2.weeks.ago)...(1.week.ago)).
       order(:date)
+
 
     @words_per_project   = decorate_words_per_project(Translation.total_words_per_project)
     @average_load_time   = decorate_avg_load_time(metrics)
@@ -50,10 +48,30 @@ class StatsController < ApplicationController
     @num_commits_completed_last_week = last_week_metrics.
       reduce(0) { |total, m| total + m.num_commits_completed }
 
-
+    respond_to do |format|
+      format.html
+      format.csv { render text: generate_commit_csv }
+    end
   end
 
   private
+
+  def generate_commit_csv
+    CSV.generate do |csv|
+      csv << ['Date Created', 'Time Created', 'SHA', 'Project', 'Loading Time']
+      Commit.where(loading: false).each do |commit|
+        if commit.loaded_at && commit.created_at
+          date_created = commit.created_at.strftime("%m-%d-%Y")
+          time_created = commit.created_at.strftime("%H:%M:%S %Z")
+          sha = commit.revision
+          project = commit.project.name
+          seconds_to_complete = (commit.loaded_at - commit.created_at)
+          load_time = Time.at(seconds_to_complete).utc.strftime("%H:%M:%S")
+          csv << [date_created, time_created, sha, project, load_time]
+        end
+      end
+    end
+  end
 
   def decorate_num_words_created_per_language(metrics)
     metrics.each_with_object({}) do |m, hash|
@@ -72,8 +90,8 @@ class StatsController < ApplicationController
   end
 
   def decorate_avg_load_time(metrics)
-    # Convert to [Timestamp, Load Time (in hours)]
-    metrics.map { |m| {x: m.date.to_time.to_i * 1000, y: m.avg_load_time / 3600} }
+    # Convert to [Timestamp, Load Time (in minutes)]
+    metrics.map { |m| {x: m.date.to_time.to_i * 1000, y: m.avg_load_time / 60} }
   end
 
   def decorate_num_commits_loaded(metrics)

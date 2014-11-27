@@ -1,0 +1,16 @@
+An error occurred during we were trying to import your sha: <%= @sha %>.
+
+<%= t("mailer.commit.notify_import_errors_in_commit_creator.not_found_in_repo_message", sha: @sha) if @err.is_a? Git::CommitNotFoundError %>
+
+Details of the Error:
+
+Project:       <%= @project.name %>
+SHA:           <%= @sha %>
+Error Class:   <%= @err.class %>
+Error Message: <%= @err.message %>
+
+
+Please email <%= Shuttle::Configuration.app.mailer.from %> for questions.
+
+Sincerely,
+The Shuttle Automated Mailer

@@ -18,7 +18,6 @@ require 'spec_helper'
 
 describe Localizer::Storyboard do
   before :each do
-    Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
     @project = FactoryGirl.create(:project,
                                   repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                   only_paths:     %w(apple/),
@@ -52,6 +51,8 @@ describe Localizer::Storyboard do
       keyobj.translations.where(rfc5646_locale: 'de-DE').first!.update_attributes(
           copy:     "#{string} (de)",
           approved: true)
+
+      @commit.keys.each(&:recalculate_ready!)
     end
   end
 

@@ -18,15 +18,30 @@ require 'spec_helper'
 require 'fileutils'
 
 describe CommitsController do
+  shared_examples_for "returns error string if repository_url is blank" do |action|
+    it "should return an error string if repository_url is blank" do
+      user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in user
+
+      project = FactoryGirl.create(:project, repository_url: nil)
+      post action, project_id: project.to_param, id: 'HEAD', format: 'json'
+      expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
+    end
+  end
+
+
   describe "#manifest" do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    before :each do
       @project      = FactoryGirl.create(:project,
                                          base_rfc5646_locale:      'en-US',
                                          targeted_rfc5646_locales: {'en-US' => true, 'en' => true, 'fr' => true, 'de' => false},
                                          repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit       = @project.commit!('HEAD^', skip_import: true)
       @newer_commit = @project.commit!('HEAD', skip_import: true)
+
+      @commit.update_attributes(loading: false, loaded_at: Time.now)
+      @newer_commit.update_attributes(loading: false, loaded_at: Time.now)
 
       key1 = FactoryGirl.create(:key,
                                 project: @project,
@@ -77,6 +92,8 @@ describe CommitsController do
                          source_rfc5646_locale: 'en-US',
                          rfc5646_locale:        'de',
                          approved:              true
+
+      @commit.update_column :ready, true
     end
 
     context '[formats]' do
@@ -249,54 +266,6 @@ key2=Tu avec carté {count} itém has
       expect(response.headers['X-Git-Revision']).to eql(@commit.revision)
     end
 
-    it "should use a cached manifest if available" do
-      mime = Mime::Type.lookup('application/javascript')
-      Shuttle::Redis.set ManifestPrecompiler.new.key(@commit, mime), "Ember.I18n.locales.translations.en = {};"
-      get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js'
-      expect(response.status).to eql(200)
-      expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.js"')
-      expect(response.body).to eql("Ember.I18n.locales.translations.en = {};")
-      Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, mime)
-    end
-
-    it "should not use a cached manifest if force=true" do
-      mime = Mime::Type.lookup('application/javascript')
-      Shuttle::Redis.set ManifestPrecompiler.new.key(@commit, mime), "hello, world!"
-      get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js', force: 'true'
-      expect(response.status).to eql(200)
-      expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.js"')
-      expect(response.body).to eql(<<-JS)
-Ember.I18n.locales.translations.en = {
-  "key1": "Hi {name}! You have {count} items.",
-  "key2": "Your cart has {count} items"
-};
-Ember.I18n.locales.translations.fr = {
-  "key1": "Bonjour {name}! Avec anninas fromage {count} la bouches.",
-  "key2": "Tu avec carté {count} itém has"
-};
-      JS
-      Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, mime)
-    end
-
-    it "should not use a cached manifest if the cached manifest is invalid" do
-      mime = Mime::Type.lookup('application/javascript')
-      Shuttle::Redis.set ManifestPrecompiler.new.key(@commit, mime), "hello, world!"
-      get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'js'
-      expect(response.status).to eql(200)
-      expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.js"')
-      expect(response.body).to eql(<<-JS)
-Ember.I18n.locales.translations.en = {
-  "key1": "Hi {name}! You have {count} items.",
-  "key2": "Your cart has {count} items"
-};
-Ember.I18n.locales.translations.fr = {
-  "key1": "Bonjour {name}! Avec anninas fromage {count} la bouches.",
-  "key2": "Tu avec carté {count} itém has"
-};
-      JS
-      Shuttle::Redis.del ManifestPrecompiler.new.key(@commit, mime)
-    end
-
     it "should 400 if an unknown locale is provided" do
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'sploops', format: 'yaml'
       expect(response.status).to eql(400)
@@ -354,11 +323,20 @@ de:
       get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr,de', format: 'strings'
       expect(response.status).to eql(400)
     end
+
+    it "should 404 with the commit not found in git repo error message if the commit is in db, but not found in git repo" do
+      allow_any_instance_of(Git::Base).to receive(:object).and_return(nil) # fake a CommitNotFoundError error
+      get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'strings'
+
+      expect(response.status).to eql(404)
+      expect(response.body).to eql("Commit with sha '#{@commit.revision}' could not be found in git repo. It may have been rebased away. Please submit the new sha to get your strings translated.")
+    end
+
+    it_behaves_like "returns error string if repository_url is blank", :manifest
   end
 
   describe '#localize' do
-    before :all do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+    before :each do
       @project = FactoryGirl.create(:project,
                                     base_rfc5646_locale:      'en',
                                     targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true, 'zh' => false},
@@ -531,109 +509,30 @@ de:
       XML
     end
 
-    it "should use a cached localization if available" do
-      smalltgz = "\x1F\x8B\b\b\xB1\x8E\xF8Q\x00\x03log.tar\x00\xED\x99\xCFO\xC20\x14\x80_'\xC6\x19/;\x19\x8F\xBDx\xF1\x80mi\xB7\xEBB\xF0hL\xDC\xC5\e\x121d\t?\x12\x1C\xF7\xFD\xE9\xB6\xF4I\x16\x10\x88\x89\e\"\xEFK\x9A\x0FX\xCB\xDE(\xAF\xEC\xD1\xF1lt\x0F5#\x84H\x8C\xE1\xD6J\xAB\xC4YH%\x96\xFE\x82K%\x93X\x8AD\x19\xCD\x85\x94\xC6$\xC0M\xDD\x819\x16\x1F\xC5`nC)\xF2\xC9\xCE~\x83\xE1$\x9F\xEE8\x8E\xD7\xB1\xF2\x910\xB6\xF3\xDF\xEE\xB7{Y?+f\xF3\xF7Z\xCEa?\x8FX\xEB\xED\xF3/\x95r\xF3o:\x89R\xB1\x8C\xED\xFCw\xB4Q\xC0E-\xD1\xACq\xE2\xF3\x0F\xE7\xD7\x17\x10\x00<\x0E\xDE\xF8S\xC6_8\xE2^\x83K\xDB\x94m\xDC6\xF7\xFC\xD9\rX\xF5\x88\x0E\x174\xF1[,\xF3\xBF\xD6\xEC\xDF\x97\xFFR\v\xA1\xD7\xF3_iI\xF9\xDF\x10\xAC\xBB\x18JX\xA6s\b\xDEp\xFB}\xD7\x10\xDB\x06A\xF5\xFD\x80\x96\x06\x82 \b\x828\x06\x98Wxu\xD80\b\x82\xF8\x83\xB8\xF5\x81\xA3St\xE9\xCD\xF0x\x80nU\xC6Dh\x8EN\xD1\xA57\xC3~\x01\xBA\x85\x0E\xD1\x11\x9A\xA3St\xE9\x8D\x8B\x16\xC3\xE2\x83\xE1\x99\x19V(\f\xAB\x10\xC6\xD1\xE9\x8F.\x99 N\x863\xAF\xC8\xFD\xFE?\xC0\xD6\xFA\x9F \x88\x7F\fk\xF5\xB2^\x17V\x05\xC1f\a\xDB^+\x8FK\xD8~\x13\x10\xF8?\vo*c9:E\x97\xDEt\#@\x10\x04\xD14\xCB\xFD\xBFQ^\xE4\xA3im\e\x80\xFB\xF6\xFF\x850\xEB\xFB\x7FF\xD3\xFE\x7F#\xDC\xB5\xED7\xE0\xD0A\x10\x04A\x10\x8D\xF3\t\n\xEE0\x8E\x00*\x00\x00"
-      Shuttle::Redis.set LocalizePrecompiler.new.key(@commit), smalltgz
-
-      get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz'
-      expect(response.status).to eql(200)
-      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
-      expect(response.body).to eql(smalltgz)
-
-      Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
+    it "should 404 if an invalid commit SHA is provided" do
+      get :localize, project_id: @project.to_param, id: 'deadbeef', format: 'yaml'
+      expect(response.status).to eql(404)
     end
 
-    it "should not use a cached localization if force=true" do
-      Shuttle::Redis.set LocalizePrecompiler.new.key(@commit), "hello, world!"
+    it "should 404 with the commit not found in git repo error message if the commit is in db, but not found in git repo" do
+      allow_any_instance_of(Git::Base).to receive(:object).and_return(nil) # fake a CommitNotFoundError error
+      get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'strings'
 
-      get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz', force: 'true'
-      expect(response.status).to eql(200)
-      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
-
-      entries = Hash.new
-      Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
-        while (entry = archive.next_header)
-          expect(entry).to be_regular
-          entries[entry.pathname] = archive.read_data
-        end
-      end
-
-      expect(entries.size).to eql(2)
-      expect(entries['file-de.svg']).to eql(<<-XML)
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
-  <text transform="matrix(0.95 0 0 1 34.5542 295.8516)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" font-size="7" letter-spacing="1.053">Hallo, Welt!</text>
-  <g>
-    <text>Gruppierten text</text>
-  </g>
-</svg>
-      XML
-      expect(entries['file-fr.svg']).to eql(<<-XML)
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
-  <text transform="matrix(0.95 0 0 1 34.5542 295.8516)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" font-size="7" letter-spacing="1.053">Bonjour tut le monde!</text>
-  <g>
-    <text>Texte groupé</text>
-  </g>
-</svg>
-      XML
-
-      Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
+      expect(response.status).to eql(404)
+      expect(response.body).to eql("Commit with sha '#{@commit.revision}' could not be found in git repo. It may have been rebased and garbage collected in git. Please submit the new sha to be able to download the translations.")
     end
 
-    it "should not use a cached localization if the cached localization is invalid" do
-      Shuttle::Redis.set LocalizePrecompiler.new.key(@commit), "hello, world!"
-
-      get :localize, project_id: @project.to_param, id: @commit.to_param, format: 'tgz'
-      expect(response.status).to eql(200)
-      expect(response.headers['Content-Disposition']).to eql('attachment; filename="localized.tar.gz"')
-
-      entries = Hash.new
-      Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
-        while (entry = archive.next_header)
-          expect(entry).to be_regular
-          entries[entry.pathname] = archive.read_data
-        end
-      end
-
-      expect(entries.size).to eql(2)
-      expect(entries['file-de.svg']).to eql(<<-XML)
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
-  <text transform="matrix(0.95 0 0 1 34.5542 295.8516)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" font-size="7" letter-spacing="1.053">Hallo, Welt!</text>
-  <g>
-    <text>Gruppierten text</text>
-  </g>
-</svg>
-      XML
-      expect(entries['file-fr.svg']).to eql(<<-XML)
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="292px" height="368.585px" viewBox="0 0 292 368.585" enable-background="new 0 0 292 368.585" xml:space="preserve">
-  <text transform="matrix(0.95 0 0 1 34.5542 295.8516)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" font-size="7" letter-spacing="1.053">Bonjour tut le monde!</text>
-  <g>
-    <text>Texte groupé</text>
-  </g>
-</svg>
-      XML
-
-      Shuttle::Redis.del LocalizePrecompiler.new.key(@commit)
-    end
+    it_behaves_like "returns error string if repository_url is blank", :localize
   end
 
   describe '#create' do
-    before :all do
-      @user = FactoryGirl.create(:user, role: 'monitor')
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
-      @project = FactoryGirl.create(:project,
-                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-    end
-
     before :each do
+      @project = FactoryGirl.create(:project,
+                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                    skip_imports: Importer::Base.implementations.map(&:ident) - %w(yaml))
+
       @request.env['devise.mapping'] = Devise.mappings[:user]
+      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
       sign_in @user
 
       keys = Shuttle::Redis.keys('submitted_revision:*')
@@ -657,28 +556,72 @@ de:
       expect(@project.commits.first.due_date).to eql(Date.civil(2100, 1, 1))
     end
 
-    it "should not attempt to import the same revision twice in quick succession" do
+    it "should allow to import the same revision twice in quick succession" do
       expect(CommitCreator).to receive(:perform_once).once
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
       expect(JSON.parse(response.body)['success']).to include('has been received')
 
-      expect(CommitCreator).not_to receive(:perform_once)
+      expect(CommitCreator).to receive(:perform_once).once
       post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
-      expect(JSON.parse(response.body)['alert']).to include('already submitted')
+      expect(JSON.parse(response.body)['success']).to include('has been received')
+    end
+
+    it "should not call CommitCreator if repository_url is blank" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      expect(CommitCreator).to_not receive(:perform_once)
+      post :create, project_id: project.to_param, commit: {revision: 'HEAD'}, format: 'json'
+      expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
+    end
+
+    it "sends an email to current user if invalid sha is submitted or sha goes invalid before CommitCreator is run" do
+      ActionMailer::Base.deliveries.clear
+      expect { post :create, project_id: @project.to_param, commit: {revision: 'xyz123'}, format: 'json' }.to_not raise_error
+      expect(ActionMailer::Base.deliveries.size).to eql(1)
+      mail = ActionMailer::Base.deliveries.first
+      expect(mail.to).to eql([@user.email])
+      expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
+      expect(mail.body).to include("Error Class:   Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123")
+      expect(mail.body).to include("Shuttle couldn't find your sha 'xyz123' in the git repo. This typically happens when your commit gets rebased away or the sha was invalid. Please submit the new sha to be able to get your strings translated.")
+    end
+
+    it "sends an email to current user and the commit author if valid sha is submitted but sha goes invalid after CommitCreator finished and before import is finished" do
+      project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
+      ActionMailer::Base.deliveries.clear
+
+      allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_call_original
+      allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).with("88e5b52732c23a4e33471d91cf2281e62021512a").and_return(nil) # fake a Git::BlobNotFoundError in CommitImporter
+      allow_any_instance_of(Commit).to receive(:skip_key?).with("how_are_you").and_raise(Git::CommitNotFoundError, "fake_sha") # fake a CommitNotFoundError error in KeyCreator failure
+      expect { post :create, project_id: project.to_param, commit: {revision: 'e5f5704af3c1f84cf42c4db46dcfebe8ab842bde'}, format: 'json' }.to_not raise_error
+
+      commit = project.commits.last
+      expected_errors = [["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
+                         ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"],
+                         ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in KeyCreator for commit_id #{commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"],
+                         ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
+                         ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]]
+
+      # expect to persist errors
+      expect(commit.ready? || commit.tap(&:recalculate_ready!).ready? ).to be_falsey
+      expect(commit.import_errors.sort).to eql(expected_errors.sort)
+
+      # expect sending email
+      expect(ActionMailer::Base.deliveries.size).to eql(1)
+      mail = ActionMailer::Base.deliveries.first
+      expect(mail.to).to eql(["yunus@squareup.com", @user.email])
+      expect(mail.subject).to eql("[Shuttle] Error(s) occurred during the import")
+      expected_errors.each do |err_class, err_message|
+        expect(mail.body).to include("#{err_class} - #{err_message}")
+      end
+      expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated.")
     end
   end
 
   describe '#destroy' do
-    before :all do
-      @user = FactoryGirl.create(:user, role: 'admin')
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
-      @project = FactoryGirl.create(:project,
-                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-    end
-
     before :each do
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit                        = @project.commit!('HEAD', skip_import: true)
       @request.env['devise.mapping'] = Devise.mappings[:user]
+      @user = FactoryGirl.create(:user, :confirmed, role: 'admin')
       sign_in @user
     end
 
@@ -696,25 +639,11 @@ de:
     end
   end
 
-  describe "#extract_data (private)" do
-    it "should preserve BOM at the beginning of the IO" do
-      # Calling io.string and io.read are not identical. This test ensures that the BOM
-      # data is preserved when pulling the information out of the IO.
-      io  = StringIO.new
-      bom = [0xFF, 0xFE]
-      bom.each { |b| io.putc b }
-      file     = Compiler::File.new(io, 'UTF-16LE', 'foo.bar', "application/x-gzip; charset=utf-16le")
-      response = controller.send(:extract_data, file)
-      expect(response.bytes.to_a[0]).to eq(bom[0])
-      expect(response.bytes.to_a[1]).to eq(bom[1])
-    end
-  end
-
   describe "#issues" do
     render_views
 
     before :each do
-      @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
+      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar")
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end
@@ -732,5 +661,21 @@ de:
       expect(response).to be_ok
       expect(response.body.to_s).to include(*issues.map{|issue| "#issue-wrapper-#{issue.id}"})
     end
+  end
+
+  describe "#import" do
+    it_behaves_like "returns error string if repository_url is blank", :import
+  end
+
+  describe "#sync" do
+    it_behaves_like "returns error string if repository_url is blank", :sync
+  end
+
+  describe "#recalculate" do
+    it_behaves_like "returns error string if repository_url is blank", :recalculate
+  end
+
+  describe "#ping_stash" do
+    it_behaves_like "returns error string if repository_url is blank", :ping_stash
   end
 end

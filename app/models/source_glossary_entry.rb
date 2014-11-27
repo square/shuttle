@@ -23,40 +23,28 @@ require 'digest/sha2'
 #
 # |                           |                                                                           |
 # |:--------------------------|:--------------------------------------------------------------------------|
-# | `locale_glossary_entries` | Locale specific glossary entries that are translatiosn of the source copy |
+# | `locale_glossary_entries` | Locale specific glossary entries that are translations of the source copy |
 # 
 # Properties
 # ==========
 #
-# |                 |                                                          |
-# |:----------------|:---------------------------------------------------------|
-# | `source_locale` | The locale the copy that needs to be translated is from. |
-#
-# Metadata
-# ========
-#
-# |               |                                                                        |
-# |:--------------|:-----------------------------------------------------------------------|
-# | `source_copy` | The copy for the string.                                               |
-# | `context`     | A human-readable explanation of the context in which the copy is used. |
-# | `notes`       | A human-readable explanation of any additional notes for translators.  |
-# | `due_date`    | The expected date when a glossary entry is due to be translated.       |
+# |                 |                                                                        |
+# |:----------------|:-----------------------------------------------------------------------|
+# | `source_locale` | The locale the copy that needs to be translated is from.               |
+# | `source_copy`   | The copy for the string.                                               |
+# | `context`       | A human-readable explanation of the context in which the copy is used. |
+# | `notes`         | A human-readable explanation of any additional notes for translators.  |
+# | `due_date`      | The expected date when a glossary entry is due to be translated.       |
 
 class SourceGlossaryEntry < ActiveRecord::Base
   has_many :locale_glossary_entries, dependent: :destroy, inverse_of: :source_glossary_entry
-
-  include HasMetadataColumn
-  has_metadata_column(
-      source_copy: {allow_nil: false},
-      context:     {allow_nil: true},
-      notes:       {allow_nil: true},
-      due_date:    {allow_nil: true}
-  )
 
   extend SetNilIfBlank
   set_nil_if_blank :context, :notes, :due_date
 
   validates :source_rfc5646_locale,
+            presence: true
+  validates :source_copy,
             presence: true
   validates :source_copy_sha,
             presence: true
@@ -75,7 +63,7 @@ class SourceGlossaryEntry < ActiveRecord::Base
   include Tire::Model::Callbacks
   mapping do
     indexes :source_copy, analyzer: 'snowball', as: 'source_copy'
-    indexes :id, type: 'string', index: :not_analyzed
+    indexes :id, type: 'integer', index: :not_analyzed
     indexes :source_rfc5646_locale, type: 'string'
     indexes :due_date, type: 'date', as: 'due_date'
   end

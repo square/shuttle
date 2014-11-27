@@ -15,7 +15,6 @@
 # Controller for working with {Comment Comments}.
 
 class CommentsController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :find_issue
 
   layout false
@@ -43,9 +42,24 @@ class CommentsController < ApplicationController
   # | `comment` | Parameterized hash of Comment attributes. |
 
   def create
-    comment = current_user.comments.create(comment_params)
+    comment = current_user.comments.build(comment_params)
+    issue = comment.issue
+    begin
+      Comment.transaction do
+        comment.save!
+        issue.skip_email_notifications = true
+        issue.subscribe(current_user)
+      end
+    rescue ActiveRecord::RecordInvalid
+    end
+
     issue = Issue.includes(comments: :user).find_by_id!(@issue.id)
-    render 'create', locals: { issue: issue, comment: ( comment.errors.present? ? comment : Comment.new) }
+
+    render 'issues/update.js.erb', locals: { project: issue.project,
+                                             key: issue.key,
+                                             translation: issue.translation,
+                                             issue: issue,
+                                             comment: ( comment.errors.present? ? comment : Comment.new) }
   end
 
   private

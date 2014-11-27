@@ -15,7 +15,7 @@
 / Does not use any instance variables.
 / Expects the following local assigns:
 / issue - required
-/ comment - optional. If not provided, it's assumed that no new comment is in the process of being created for this issue. So, the create form is set up for an empty Comment object.
+/ comment - required
 .comments
   br
   - if issue.comments.present?
@@ -23,4 +23,6 @@
     - issue.comments.each do |comment|
       = render partial: 'comments/show', locals: {comment: comment}
 
-  = render partial: 'comments/new_wrapper', locals: { issue: issue, comment: comment}
+  = button_tag 'Write a Comment', class: "small default show-form-button #{'hide' if comment.errors.any?}"
+  div class="form-wrapper #{'hide' if comment.errors.blank?}"
+    = render partial: 'comments/new', locals: { issue: issue, comment: comment }

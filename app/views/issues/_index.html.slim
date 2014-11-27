@@ -16,11 +16,13 @@
 / Requires local_assigns to include project, key, translation, issues.
 / local_assigns[:issue] is optional. If provided, it will be assumed that the issue's creation failed.
 
-.entry.row#issues
+.entry.row#issues data-search-url=search_users_url data-auto-fill=current_user.can_search_users?.to_s
   .sixteen.columns
     legend ISSUES
 
-    = render partial: 'issues/new_wrapper', locals: { project: project, key: key, translation: translation, issue: issue }
+    = button_tag 'Create a New Issue', class: "default show-form-button #{'hide' if issue.errors.any?}"
+    div class="form-wrapper loading-overlayable #{'hide' if issue.errors.blank?}"
+      = render partial: 'issues/new', locals: { project: project, key: key, translation: translation, issue: issue }
 
     - if issues.present?
       h3 Existing Issues

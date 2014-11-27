@@ -16,46 +16,56 @@ require 'spec_helper'
 
 describe ImportErrors do
   before(:each) do
-    @commit = FactoryGirl.build(:commit)
+    @commit = FactoryGirl.create(:commit)
   end
 
-  it "should return import errors in redis" do
-    Shuttle::Redis.sadd("commit:#{@commit.revision}:import_errors", "path/to/some/file this is a fake error")
-    expect(@commit.import_errors_in_redis).to eql([["path/to/some/file", "this is a fake error"]])
+  context "set_nil_if_blank" do
+    it "import_errors should be set to nil if it's blank so that it can be easily queryable" do
+      @commit.update! import_errors: []
+      expect(Commit.where(import_errors: nil).to_a).to eql([@commit])
+    end
   end
 
-  it "should add an import error to commit in redis" do
-    @commit.add_import_error_in_redis("path/to/some/file", "some error")
-    expect(@commit.import_errors_in_redis).to eql([["path/to/some/file", "some error"]])
+  describe "#errored_during_import" do
+    it "returns the imports which errored during an import" do
+      FactoryGirl.create(:commit, import_errors: [])
+      @commit.add_import_error(StandardError.new("This is a fake error"))
+      expect(Commit.errored_during_import.to_a).to eql([@commit])
+    end
   end
 
-  it "should clear all import errors of a commit in redis" do
-    @commit.add_import_error_in_redis("path/to/first/file", "first error")
-    @commit.add_import_error_in_redis("path/to/second/file", "second error")
-    expect(@commit.import_errors_in_redis.length).to eql(2)
-    @commit.send(:clear_import_errors_in_redis)
-    expect(@commit.import_errors_in_redis).to eql([])
+  describe "#add_import_error" do
+    it "should add an import error to commit with the default message" do
+      @commit.add_import_error(StandardError.new("This is a fake error"))
+      expect(@commit.import_errors).to eql([["StandardError", "This is a fake error"]])
+    end
+
+    it "should add an import error to commit with a custom message" do
+      @commit.add_import_error(StandardError.new("This is a fake error"), "in /path/to/some/file")
+      expect(@commit.import_errors).to eql([["StandardError", "This is a fake error (in /path/to/some/file)"]])
+    end
   end
 
-  it "should clear all import errors of a commit in redis and postgres" do
-    @commit.add_import_error_in_redis("path/to/first/file", "first error")
-    @commit.update_attributes(import_errors: [["path/to/first/file", "first error"]])
-    expect(@commit.import_errors_in_redis).to eql([["path/to/first/file", "first error"]])
-    expect(@commit.import_errors).to eql([["path/to/first/file", "first error"]])
+  describe "#clear_import_errors!" do
+    it "should clear all import errors of a commit in redis and postgres" do
+      @commit.add_import_error(StandardError.new("first fake error"))
+      @commit.add_import_error(StandardError.new("second fake error"), "in /path/to/some/file")
+      expect(@commit.import_errors.sort).to eql([["StandardError", "first fake error"], ["StandardError", "second fake error (in /path/to/some/file)"]].sort)
 
-    @commit.clear_import_errors
-    expect(@commit.import_errors_in_redis).to eql([])
-    expect(@commit.import_errors).to eql([])
+      @commit.clear_import_errors!
+      expect(@commit.import_errors).to eql([])
+    end
   end
 
-  it "should copy_import_errors_from_redis_to_sql_db" do
-    @commit.save
-    @commit.add_import_error_in_redis("path/to/first/file", "first error")
-    @commit.copy_import_errors_from_redis_to_sql_db
-    expect(@commit.import_errors).to eql([["path/to/first/file", "first error"]])
-  end
+  describe "#errored_during_import?" do
+    it "returns true if there are import errors" do
+      @commit.add_import_error(StandardError.new("This is a fake error"))
+      expect(@commit.errored_during_import?).to be_true
+    end
 
-  it "should return the correct redis key" do
-    expect(@commit.send(:import_errors_redis_key)).to eql("commit:#{@commit.revision}:import_errors")
+    it "returns false if there are no import errors" do
+      @commit.clear_import_errors!
+      expect(@commit.errored_during_import?).to be_false
+    end
   end
 end

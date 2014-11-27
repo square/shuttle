@@ -1,7 +1,9 @@
 source 'https://rubygems.org'
 
+ruby '2.0.0', :patchlevel => '576'
+
 # FRAMEWORK
-gem 'rails', '4.0.3'
+gem 'rails', '4.0.9'
 gem 'configoro'
 gem 'redis-rails'
 gem 'rack-cache', require: 'rack/cache'
@@ -15,11 +17,11 @@ gem 'pg'
 gem 'stringex', '2.2.0' # 2.5.2 forces config.enforce_available_locales to true for some stupid reason
 gem 'slugalicious'
 gem 'validates_timeliness'
-gem 'has_metadata_column'
 gem 'find_or_create_on_scopes'
-gem 'composite_primary_keys', github: 'RISCfuture/composite_primary_keys', branch: 'rebase'
+gem 'composite_primary_keys', github: 'composite-primary-keys/composite_primary_keys', branch: 'ar_4.0.x'
 gem 'rails-observers'
 gem 'tire'
+gem 'after-commit-on-action'
 
 # VIEWS
 gem 'jquery-rails'
@@ -31,7 +33,7 @@ gem 'slim-rails'
 
 # UTILITIES
 gem 'json'
-gem 'git', github: 'RISCfuture/ruby-git', ref: '14d05318c3c22352564dfb3acf45ee1a29a09864' # Fixes mirror issue
+gem 'git', github: 'RISCfuture/ruby-git', ref: '88076a50eb70fd96f2417b646fe37fb2f6c4cca4' # Fixes mirror issue
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
@@ -46,6 +48,7 @@ gem 'CFPropertyList', require: 'cfpropertylist'
 gem 'parslet'
 gem 'mustache'
 gem 'html_validation'
+gem 'diff-lcs'
 
 # EXPORTING
 gem 'libarchive'
@@ -58,7 +61,8 @@ gem 'faker'
 
 # BACKGROUND JOBS
 gem 'sidekiq', '<3.0.0'
-gem 'sidekiq-failures'
+gem 'sidekiq-pro'
+gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
 
@@ -80,19 +84,19 @@ group :development do
 end
 
 group :test do
-  gem 'rspec-rails'
+  gem 'rspec-rails', '< 3.0.0'
   gem 'factory_girl_rails'
   gem 'timecop'
   gem 'pry'
   gem 'pry-nav'
-  gem 'test_after_commit'
+  gem 'database_cleaner'
 end
 
+# Include these gems if you're running acceptance tests.
 group :acceptance do
-  gem 'capybara'
-  gem 'capybara-webkit'
+  # gem 'capybara'
+  # gem 'capybara-webkit'
 end
-
 
 gem 'sql_origin', groups: [:development, :test]
 
@@ -103,4 +107,16 @@ group :development, :test do
   gem 'mailcatcher'
   #gem 'jasminerice'
   #gem 'guard-jasmine'
+end
+
+# ERROR NOTIFICATIONS
+gem 'squash_ruby', '>= 1.4.0', require: 'squash/ruby'
+gem 'squash_rails', require: 'squash/rails', github: 'SquareSquash/rails', ref: 'e3c4207d2b90d27fa9ff4ba72c50ba354f507163' # deploy issue
+
+# DEPLOYING
+group :development do
+  gem 'capistrano'
+  gem 'capistrano-rvm', '>= 0.1.0' # seems to really like 0.0.3
+  gem 'capistrano-bundler'
+  gem 'capistrano-rails'
 end

@@ -18,7 +18,7 @@ Devise.setup do |config|
   # ==> Mailer Configuration
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class with default "from" parameter.
-  config.mailer_sender = "please-change-me-at-config-initializers-devise@example.com" #TODO
+  config.mailer_sender = Shuttle::Configuration.app.mailer.from
 
   # Configure the class responsible to send e-mails.
   # config.mailer = "Devise::Mailer"
@@ -86,12 +86,15 @@ Devise.setup do |config|
   # Limiting the stretches to just one in testing will increase the performance of
   # your test suite dramatically. However, it is STRONGLY RECOMMENDED to not use
   # a value less than 10 in other environments.
-  config.stretches = Rails.env.test? ? 1 : 10
+  config.stretches = Rails.env.test? ? 1 : 11
 
   # Setup a pepper to generate the encrypted password.
   # config.pepper = "ebb4b770094d25f6865dccec5bd3b3af540ad0ff57522f77f1f29ff9ae652b885f4c16a8b82830497092ee6f14f673bcb8e33a3160b793b292381444fe51ae09"
 
-  config.secret_key = 'YOUR_SECRET_KEY' #TODO
+  # The secret key used by Devise. Devise uses this key to generate
+  # random tokens. Changing this key will render invalid all existing
+  # confirmation, reset password and unlock tokens in the database.
+  config.secret_key = Shuttle::Configuration.app.devise.secret_key
 
   # ==> Configuration for :confirmable
   # A period that the user is allowed to access the website even without
@@ -150,7 +153,7 @@ Devise.setup do |config|
 
   # Number of authentication tries before locking an account if lock_strategy
   # is failed attempts.
-  # config.maximum_attempts = 20
+  config.maximum_attempts = 5
 
   # Time interval to unlock the account if :time is enabled as unlock_strategy.
   # config.unlock_in = 1.hour

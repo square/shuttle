@@ -30,6 +30,8 @@ $issue-status-yellow: #E4DB00;
   }
 
   .issue-wrapper {
+    padding: 30px 10px;
+
     .issue-status {
       padding: 0 5px;
     }
@@ -38,28 +40,31 @@ $issue-status-yellow: #E4DB00;
       border-bottom: 1px solid $gray5;
       margin-bottom: 15px;
     }
+
+    .right-side {
+      text-align: right;
+      input[type=submit] {
+        margin: 5px 0;
+        width: 170px;
+      }
+    }
+  }
+
+  .cancel-button {
+    width: 200px;
+    margin-left: 5px;
+  }
+
+  .form-wrapper, .loading-overlayable {
+    position: relative;
+  }
+
+  .comments .cancel-button {
+    width: 100px;
   }
 
   .issues-table {
     border: 1px solid $gray6;
-  }
-
-  .issue-wrapper {
-    padding: 30px 10px;
-  }
-
-  .new-issue-wrapper, .edit-issue-wrapper, .new-comment-wrapper {
-    position: relative;
-  }
-
-  .hide-new-issue-wrapper, .hide-edit-issue-wrapper {
-    margin-left: 180px;
-  }
-
-  .hide-new-comment-wrapper {
-    margin-top: -37px;
-    float: left;
-    margin-left: 90px;
   }
 
   .comment {
@@ -87,8 +92,10 @@ $issue-status-yellow: #E4DB00;
 
   .control-group {
     margin-bottom: 5px;
+
     .controls {
       min-height: 30px;
+      display: flex;
     }
     div.controls {
       padding-top: 9px;
@@ -109,5 +116,20 @@ $issue-status-yellow: #E4DB00;
     left: 0px;
     right: 0px;
     bottom: 0px;
+  }
+
+  .issue-subscribed-emails.selectize-control {
+    .selectize-input [data-value] {
+      .email { opacity: 0.7; }
+      .name + .email { margin-left: 5px; }
+      .email:before { content: '<'; }
+      .email:after { content: '>'; }
+    }
+
+    .selectize-dropdown .caption {
+      font-size: 12px;
+      display: block;
+      opacity: 0.5;
+    }
   }
 }

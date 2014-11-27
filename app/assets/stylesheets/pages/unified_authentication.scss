@@ -1,0 +1,129 @@
+@import "base/vars";
+@import "base/mixins";
+@import "css3-mixins";
+
+$form-radius-size: 4px;
+
+body.unified-authentication, body.passwords {
+  background-image: image-url('login-background.jpg');
+  background-color: $gray3;
+  background-repeat: repeat-y;
+  background-size: cover;
+
+  #navbar-container {
+    background-color: transparent;
+  }
+
+  .content-container {
+    background-color: transparent;
+    .modal-container {
+      background-color: transparent;
+      letter-spacing: 1px;
+
+      &>.row {
+        // adds a top margin to the content grid for modal-type views to separate it
+        // from the navbar
+        margin-top: 20px;
+
+        a {
+          text-decoration: none;
+        }
+
+        &>.ten.columns {
+          background-color: $gray1;
+          @include opacity(0.9);
+          color: white;
+          font-weight: 300;
+          text-align: center;
+          padding-top: 40px;
+          border-radius: $form-radius-size;
+
+          h1 {
+            font-size: 50px;
+            font-weight: 100;
+            line-height: 58px;
+          }
+
+          a {
+            color: $gray1;
+            // CURRENTLY, links aren't very distinguishable.  Need a way to make them stand out.  
+            span {
+              background-color: $gray1;
+            }
+
+            &:hover {
+              @include transition(all, 0.2s, ease);
+              color: $dark-blue !important;
+
+              span {
+                @include transition(all, 0.2s, ease);
+                background-color: $dark-blue !important;
+              }
+            }
+          }
+
+          .partial-page {
+            display: inline-block;
+            @include transition(all, 0.3s, ease);
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+
+            &.active {
+              @include box;
+              height: auto;
+              opacity: 1;
+            }
+          }
+
+          .body-portion {
+            margin-top: 40px;
+            background-color: $gray6;
+            color: black;
+            text-align: middle;
+            padding: 50px 0px 35px 0px;
+
+            .inset {
+              padding-left: 20px;
+              padding-right: 20px;
+            }
+
+
+            input {
+              @include opacity(1.0);
+              width: 100%;
+              margin-bottom: 8px;
+
+              &[type=submit] {
+                margin-top: 3px;
+                margin-bottom: 40px;
+              }
+            }
+          }
+
+          .footer-portion {
+            background-color: $gray5;
+            border-bottom-left-radius: $form-radius-size;
+            border-bottom-right-radius: $form-radius-size;
+            height: 25px;
+            padding: 10px 10px 10px 50px;
+            .row {
+              width: 100%;
+            }
+
+
+            a {
+              line-height: 25px; 
+              span {
+                @include circle(25px, $gray5, $gray3);
+                margin-right: 5px;
+                display: inline-block;
+              }
+            }
+          }
+        }
+      }  // &>.row
+    } // .modal-container
+  } // .content-container
+
+}  // .sessions

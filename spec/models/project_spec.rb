@@ -15,20 +15,85 @@
 require 'spec_helper'
 
 describe Project do
-  describe '#repo' do
+  it_behaves_like "CommonLocaleLogic"
+
+  describe '[CRUD]' do
+    it "creates a valid project even if repository_url is nil" do
+      project = Project.create(name: "Project without a repository_url")
+      expect(project).to be_valid
+      expect(project).to be_persisted
+    end
+
+    it "creates a valid project even if repository_url is empty" do
+      project = Project.create(name: "Project with an empty repository_url", repository_url: "")
+      expect(project).to be_valid
+      expect(project).to be_persisted
+    end
+
+    it "sets repository_url to nil if it's empty" do
+      project = Project.create(name: "Project with an empty repository_url", repository_url: "")
+      expect(project.repository_url).to be_nil
+    end
+  end
+
+  describe "#repo" do
     it "should check out the repository and return a Repository object" do
-      Project.where(repository_url: "git://github.com/RISCfuture/better_caller.git").delete_all
       repo = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git").repo
       expect(repo).to be_kind_of(Git::Base)
       expect(repo.index).to be_nil # should be bare
       expect(repo.repo.path).to eql(Rails.root.join('tmp', 'repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9.git').to_s)
     end
+
+    it "should yield the Repository object if a block is passed" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      expect { |b| project.repo(&b) }.to yield_with_args(kind_of(Git::Base))
+    end
+
+    it "should obtain a lock on the Repository object if a block is passed" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      # To ensure that the repo already exists and doesn't need to synchronize
+      project.repo
+      expect_any_instance_of(FileMutex).to receive(:synchronize)
+      project.repo {}
+    end
+
+    it "raises Project::NotLinkedToAGitRepositoryError when repo is called if repository_url is nil" do
+      project = Project.create(name: "test", repository_url: nil)
+      expect { project.repo }.to raise_error(Project::NotLinkedToAGitRepositoryError)
+    end
+  end
+
+  describe "#working_repo" do
+    it "should check out the repository and return a Repository object" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      working_repo = project.working_repo
+      expect(working_repo).to be_kind_of(Git::Base)
+      expect(working_repo.index).to_not be_nil # should not be bare
+      expect(working_repo.dir.path).to eql(Rails.root.join('tmp', 'working_repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9').to_s)
+    end
+
+    it "should yield the Repository object if a block is passed" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      expect { |b| project.working_repo(&b) }.to yield_with_args(kind_of(Git::Base))
+    end
+
+    it "should obtain a lock on the Repository object if a block is passed" do
+      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      # To ensure that the working_repo already exists and doesn't need to synchronize
+      project.working_repo
+      expect_any_instance_of(FileMutex).to receive(:synchronize)
+      project.working_repo {}
+    end
+
+    it "raises Project::NotLinkedToAGitRepositoryError when repo is called if repository_url is nil" do
+      project = Project.create(name: "test", repository_url: nil)
+      expect { project.working_repo }.to raise_error(Project::NotLinkedToAGitRepositoryError)
+    end
   end
 
   describe "#commit!" do
-    before(:all) { @project = FactoryGirl.create(:project) }
-
     before :each do
+      @project = FactoryGirl.create(:project)
       @repo = double('Git::Repo')
       # for GitObjectField checking
       allow_any_instance_of(Project).to receive(:repo).and_return(double('Git::Repo', object: double('Git::Object::Commit', :commit? => true)))
@@ -68,12 +133,25 @@ describe Project do
     it "should raise an exception if the rev is still unknown after fetching" do
       expect(@repo).to receive(:fetch).once
       expect(@repo).to receive(:object).with('abc123').and_return(nil, nil)
-      expect { @project.commit!('abc123') }.to raise_error(ActiveRecord::RecordNotFound)
+      expect { @project.commit!('abc123') }.to raise_error(Git::CommitNotFoundError)
+    end
+  end
+
+  describe "#translation_adder_batch" do
+    it "creates a new batch, saves its id, and runs ProjectTranslationAdderFinisher on success and sets description" do
+      project = FactoryGirl.create(:project)
+
+      ProjectTranslationAdderFinisher.any_instance.should_receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'project_id' => project.id)
+      batch = project.translation_adder_batch.tap { |b| b.jobs {} }
+
+      expect(batch).to be_an_instance_of(Sidekiq::Batch)
+      expect(batch.description).to eql("Project Translation Adder #{project.id} (#{project.name})")
+      expect(project.translation_adder_batch_id).to eql(batch.bid)
     end
   end
 
   describe "#pending_translations" do
-    before :all do
+    before :each do
       @project     = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
       @key1        = FactoryGirl.create(:key, project: @project)
       @key2        = FactoryGirl.create(:key, project: @project)
@@ -104,7 +182,7 @@ describe Project do
   end
 
   describe "#pending_reviews" do
-    before :all do
+    before :each do
       @project     = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
       @key1        = FactoryGirl.create(:key, project: @project)
       @key2        = FactoryGirl.create(:key, project: @project)
@@ -136,8 +214,45 @@ describe Project do
     end
   end
 
+  describe "#find_or_fetch_git_object" do
+    before :each do
+      @project = FactoryGirl.create(:project)
+      @repo = double('Git::Repo')
+      @git_obj = double('Git::Object', sha: 'abc123')
+      allow(@project).to receive(:repo).and_yield(@repo)
+    end
+
+    it "finds the git object in repo without fetching when it's already in repo" do
+      expect(@repo).to_not receive(:fetch)
+      expect(@repo).to receive(:object).with('abc123').once.and_return(@git_obj)
+      git_obj = @project.find_or_fetch_git_object('abc123')
+      expect(git_obj).to eql(@git_obj)
+      expect(git_obj.sha).to eql('abc123')
+    end
+
+    it "finds the git object in repo after fetching when it was not previously in the repo" do
+      expect(@repo).to receive(:fetch).once
+      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil, @git_obj)
+      git_obj = @project.find_or_fetch_git_object('abc123')
+      expect(git_obj).to eql(@git_obj)
+      expect(git_obj.sha).to eql('abc123')
+    end
+
+    it "doesn't find the git object if it is not found in the local repo even after fetching" do
+      expect(@repo).to receive(:fetch).once
+      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
+      git_obj = @project.find_or_fetch_git_object('abc123')
+      expect(git_obj).to be_nil
+    end
+
+    it "raises Project::NotLinkedToAGitRepositoryError if project doesn't have a repository_url" do
+      project = Project.create(name: "test")
+      expect { project.find_or_fetch_git_object("any") }.to raise_error(Project::NotLinkedToAGitRepositoryError)
+    end
+  end
+
   describe "#latest_commit" do
-    before do
+    before :each do
       @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
     end
 
@@ -153,7 +268,7 @@ describe Project do
   end
 
   describe "#skip_key?" do
-    before(:all) { @project = FactoryGirl.create(:project) }
+    before(:each) { @project = FactoryGirl.create(:project) }
 
     it "should return true if there is no matching key inclusion" do
       @project.update_attributes(key_exclusions:        [],
@@ -221,7 +336,7 @@ describe Project do
   end
 
   describe "#skip_path?" do
-    before(:all) { @project = FactoryGirl.create(:project) }
+    before(:each) { @project = FactoryGirl.create(:project) }
 
     it "should return true if there is no matching path inclusion" do
       @project.update_attributes(skip_paths:          [],
@@ -290,7 +405,7 @@ describe Project do
 
   describe "#skip_tree?" do
     context '[only paths]' do
-      before :all do
+      before :each do
         @project = FactoryGirl.create(:project,
                                       only_paths:          %w(only/path),
                                       only_importer_paths: {'foo' => %w(importeronly/path)})
@@ -326,7 +441,7 @@ describe Project do
     end
 
     context '[skip paths]' do
-      before :all do
+      before :each do
         @project = FactoryGirl.create(:project,
                                       skip_paths:          %w(skip/path),
                                       skip_importer_paths: {'foo' => %w(importerskip/path)})
@@ -364,9 +479,12 @@ describe Project do
   context "[hooks]" do
     it "should recalculate pending translations when the list of targeted locales is changed" do
       project = FactoryGirl.create(:project,
+                                   base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: {'en' => true, 'fr' => true})
       key1    = FactoryGirl.create(:key, project: project)
       key2    = FactoryGirl.create(:key, project: project)
+      commit      = FactoryGirl.create(:commit, project: project)
+      commit.keys = [key1, key2]
 
       trans1_en = FactoryGirl.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
       trans1_fr = FactoryGirl.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr')
@@ -385,6 +503,7 @@ describe Project do
 
     it "should recalculate commit readiness when required locales are added or removed" do
       project = FactoryGirl.create(:project,
+                                   base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: {'en' => true, 'fr' => false})
       key1    = FactoryGirl.create(:key, project: project)
       key2    = FactoryGirl.create(:key, project: project)
@@ -399,7 +518,7 @@ describe Project do
 
       expect(key1).to be_ready
       expect(key2).to be_ready
-      expect(commit).to be_ready
+      commit.update_column :ready, true
 
       project.targeted_rfc5646_locales = {'en' => true, 'fr' => true}
       project.save!
@@ -408,64 +527,190 @@ describe Project do
       expect(key2.reload).not_to be_ready
       expect(commit.reload).not_to be_ready
     end
+
+    context "[add_or_remove_pending_translations]" do
+      around { |tests| Sidekiq::Testing.fake!(&tests) }
+
+      context "[ProjectTranslationAdder]" do
+        before :each do
+          @project = FactoryGirl.create(:project, name: "this is a test project",
+                                        targeted_rfc5646_locales: {'en' => true},
+                                        key_exclusions: [],
+                                        key_inclusions: [],
+                                        key_locale_exclusions: {},
+                                        key_locale_inclusions: {} )
+        end
+
+        it "calls ProjectTranslationAdder when targeted_rfc5646_locales changes" do
+          @project.targeted_rfc5646_locales = {'fr' => true}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "calls ProjectTranslationAdder when key_exclusions changes" do
+          @project.key_exclusions = %w{skip_me}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "calls ProjectTranslationAdder when key_inclusions changes" do
+          @project.key_inclusions = %w{include_me}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "calls ProjectTranslationAdder when key_locale_exclusions changes" do
+          @project.key_locale_exclusions = {'fr-FR' => %w(*cl*)}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "calls ProjectTranslationAdder when key_locale_inclusions changes" do
+          @project.key_locale_inclusions = {'fr-FR' => %w(*cl*)}
+          expect(ProjectTranslationAdder).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "doesn't call ProjectTranslationAdder fields like name, watched_branches, stash_webhook_url change" do
+          @project.name = "new name"
+          @project.watched_branches = ['newbranch']
+          @project.stash_webhook_url = "https://example.com"
+          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+          @project.save!
+        end
+
+        it "doesn't call ProjectTranslationAdder when a project is created, even if it has targeted_rfc5646_locales and key_exclusions" do
+          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+          FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true}, key_exclusions: %w{skip_me})
+        end
+
+        it "doesn't call ProjectTranslationAdder when watched branches change if project is not git-specific" do
+          @project.watched_branches = ['newbranch']
+          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+          @project.save!
+        end
+      end
+
+      context "[ProjectTranslationAdderForKeyGroups]" do
+        before :each do
+          @project = FactoryGirl.create(:project, repository_url: nil, name: "test project", targeted_rfc5646_locales: {'en' => true})
+        end
+
+        it "calls ProjectTranslationAdderForKeyGroups when targeted_rfc5646_locales changes" do
+          @project.targeted_rfc5646_locales = {'fr' => true}
+          expect(ProjectTranslationAdderForKeyGroups).to receive(:perform_once)
+          @project.save!
+        end
+
+        it "doesn't call ProjectTranslationAdderForKeyGroups fields like key_exclusions, key_inclusions, key_locale_exclusions, key_locale_inclusions, name, watched_branches, stash_webhook_url change" do
+          @project.assign_attributes key_exclusions: %w{skip_me},
+                                     key_inclusions: %w{include_me},
+                                     key_locale_exclusions: {'fr-FR' => %w(*excl*)},
+                                     key_locale_inclusions: {'es' => %w(*incl*)},
+                                     name: "new name",
+                                     watched_branches: %w(newbranch),
+                                     stash_webhook_url: "https://example.com"
+          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
+          @project.save!
+        end
+
+        it "doesn't call ProjectTranslationAdderForKeyGroups when a project is created, even if it has targeted_rfc5646_locales" do
+          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
+          FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true})
+        end
+
+        it "doesn't call ProjectTranslationAdderForKeyGroups when watched branches change if project is git-specific" do
+          @project.update! repository_url: "https://example.com"
+          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
+          @project.save!
+        end
+      end
+    end
+
+    context "[create_api_token]" do
+      it "sets a 36 character api token on create" do
+        project = FactoryGirl.create(:project, name: "Test", api_token: '')
+        expect(project.api_token.length).to eql(36)
+      end
+
+      it "doesn't change the api_token on update" do
+        project = FactoryGirl.create(:project, name: "Test")
+        token = project.api_token
+        project.update! name: "New test"
+        expect(project.api_token).to eql(token)
+      end
+    end
   end
 
-  describe '#update_touchdown_branch' do
-    before :each do
-      Project.delete_all
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      # delete an existing translated branch, if it exists
-      system 'git', 'push', @project.repository_url, ':refs/heads/translated'
+  context "[scopes]" do
+    context "[scope = with_repository_url]" do
+      it "returns the projects which has a repository_url" do
+        project_with_repo = FactoryGirl.create(:project, repository_url: "test", watched_branches: %w(master))
+        FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
+        expect(Project.with_repository_url.to_a).to eql([project_with_repo])
+      end
+    end
+  end
+
+  describe "#repo_path" do
+    it "returns nil if repository_url is not provided" do
+      project = Project.create(name: "Project with an empty repository_url")
+      expect(project.send :repo_path).to be_nil
     end
 
-    it "should do nothing unless watched_branches and touchdown_branch are set" do
-      @project.watched_branches = []
-      @project.touchdown_branch = nil
+    it "returns correct repo path for a project with a non-empty repository_url" do
+      expect(Project.create(name: "test", repository_url: "http://example.com").send :repo_path).to eql(Rails.root.join('tmp', 'repos', '89dce6a446a69d6b9bdc01ac75251e4c322bcdff.git'))
+    end
+  end
 
-      @project.update_touchdown_branch
-
-      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
-          to eql('translated')
+  describe "#repo_directory" do
+    it "returns nil if repository_url is not provided" do
+      expect(Project.create(name: "test").send :repo_directory).to be_nil
     end
 
-    it "should advance the touchdown branch to the most recently translated watched branch commit" do
-      @project.watched_branches = %w(master)
-      @project.touchdown_branch = 'translated'
+    it "returns correct repo directory for a project with a non-empty repository_url" do
+      project = Project.create(name: "Project with an non-empty repository_url", repository_url: "http://example.com")
+      expect(project.send :repo_directory).to eql('89dce6a446a69d6b9bdc01ac75251e4c322bcdff.git')
+    end
+  end
 
-      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
-      c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
-      CommitStatsRecalculator.new.perform(c.id)
-      expect(c.reload).to be_ready
-
-      @project.update_touchdown_branch
-
-      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
-          to eql('d82287c47388278d54433cfb2383c7ad496d9827')
+  describe "#clone_repo" do
+    it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
+      project = Project.create(name: "Project with an empty repository_url")
+      expect(Git).to_not receive(:clone)
+      expect { project.send :clone_repo }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
 
-    it "should do nothing if none of the commits in the watched branch are translated" do
-      @project.watched_branches = %w(master)
-      @project.touchdown_branch = 'translated'
+    it "calls Git.clone once to clone the repo if repository_url exists" do
+      project = Project.create(name: "Project with an non-empty repository_url", repository_url: "http://example.com")
+      expect(Git).to receive(:clone).once.with(anything(), anything(), {path: Project::REPOS_DIRECTORY.to_s, mirror: true})
+      expect { project.send :clone_repo }.to_not raise_error
+    end
+  end
 
-      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
-      expect(c).not_to be_ready
+  describe "#can_clone_repo" do
+    it "adds an error if repository_url doesn't exist" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      expect(project.errors.count).to eql(0)
+      project.send :can_clone_repo
+      expect(project.errors.count).to eql(1)
+    end
+  end
 
-      @project.update_touchdown_branch
-
-      expect(`git --git-dir=#{Shellwords.escape @project.repository_url} rev-parse translated`.chomp).
-          to eql('translated')
+  describe "#git?" do
+    it "returns true if repository_url exists" do
+      project = FactoryGirl.create(:project, repository_url: "https://example.com")
+      expect(project.git?).to be_true
     end
 
-    it "should gracefully exit if the first watched branch doesn't exist" do
-      @project.watched_branches = %w(nonexistent)
-      @project.touchdown_branch = 'translated'
+    it "returns true if repository_url is empty" do
+      project = FactoryGirl.create(:project, repository_url: "")
+      expect(project.git?).to be_false
+    end
 
-      c = @project.commit!('d82287c47388278d54433cfb2383c7ad496d9827')
-      c.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.skip_readiness_hooks = true; t.save }
-      CommitStatsRecalculator.new.perform(c.id)
-      expect(c.reload).to be_ready
-
-      expect { @project.update_touchdown_branch }.not_to raise_error
+    it "returns true if repository_url is nil" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      expect(project.git?).to be_false
     end
   end
 end

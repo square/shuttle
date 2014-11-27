@@ -1,0 +1,6 @@
+---
+disabled: false
+api_host: https://squash.example.com
+api_key: YOUR.API.KEY
+revision_file: /app/shuttle/current/REVISION
+mirrored_repository: true

@@ -16,7 +16,7 @@ require 'spec_helper'
 
 describe Comment do
   context "[validations]" do
-    before(:all) do
+    before :each do
       @user = FactoryGirl.create(:user)
       @translation = FactoryGirl.create(:translation)
       @issue = FactoryGirl.create(:issue, user: @user, translation: @translation)

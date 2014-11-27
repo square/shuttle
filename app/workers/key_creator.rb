@@ -47,9 +47,8 @@ class KeyCreator
     if @commit
       self.class.update_key_associations key_objects, @commit
     end
-
-    @blob.remove_worker! shuttle_jid
-    @commit.remove_worker! shuttle_jid if @commit
+  rescue Git::CommitNotFoundError => err
+    @commit.add_import_error(err, "failed in KeyCreator for commit_id #{commit_id} and blob #{sha}") if @commit
   end
 
   # Given a set of keys, bulk-updates their commits-keys associations and
@@ -82,6 +81,8 @@ class KeyCreator
     Translation.tire.index.import keys.map(&:translations).flatten
   end
 
+  include SidekiqLocking
+
   private
 
   def add_string(key, value, options={})
@@ -94,15 +95,6 @@ class KeyCreator
             skip_readiness_hooks: true,
             batched_commit_ids:   []) # we'll fill this out later
     )
-
-    key.translations.in_locale(@blob.project.base_locale).create_or_update!(
-        source_copy:              value,
-        copy:                     value,
-        approved:                 true,
-        source_rfc5646_locale:    @blob.project.base_rfc5646_locale,
-        rfc5646_locale:           @blob.project.base_rfc5646_locale,
-        skip_readiness_hooks:     true,
-        preserve_reviewed_status: true)
 
     # add additional pending translations if necessary
     key.add_pending_translations

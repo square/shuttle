@@ -13,13 +13,10 @@
 #    limitations under the License.
 
 require 'spec_helper'
-require 'sidekiq/testing/inline'
 
 describe Importer::Base do
   describe "[importing strings]" do
     before :each do
-
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     targeted_rfc5646_locales: {'en-US' => true, 'de-DE' => true})
@@ -61,7 +58,6 @@ describe Importer::Base do
 
   describe "[importing translations]" do
     before :each do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     targeted_rfc5646_locales: {'en-US' => true, 'de-DE' => true})

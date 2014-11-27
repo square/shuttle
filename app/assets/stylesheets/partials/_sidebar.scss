@@ -34,7 +34,7 @@
       &.progress-bar {
         dl {
           @include box-sizing(border-box);
-          padding: 10px 30px;
+          margin: 30px;
           dt {
             text-transform: uppercase;
             strong {
@@ -42,18 +42,24 @@
             }
           }
           dd {
-            margin: 5px 0 10px;
-            background-color: $gray5;
             display: block;
-            border-radius: 5px;
-
-            span {
-              &.finished { background-color: $input-green; }
-              &.inprogress { background-color: $input-red; }
+            &.bar-status {
+              margin: 5px 0 5px;
+              background-color: $gray5;
               border-radius: 5px;
-              height: 7px;
-              min-width: 4px;
-              display: block;
+
+              span {
+                &.finished { background-color: $input-green; }
+                &.inprogress { background-color: $input-red; }
+                border-radius: 5px;
+                height: 7px;
+                min-width: 4px;
+                display: block;
+              }
+            }
+
+            &.text-status {
+              margin: 0;
             }
           }
         }

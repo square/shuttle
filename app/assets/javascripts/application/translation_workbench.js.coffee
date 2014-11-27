@@ -75,12 +75,15 @@ class TranslationItem
 
     @element.find('.translation-area, input').attr 'disabled', 'disabled'
 
+    # find checked locales to which this translation copy should be copied to
+    copyToLocales = @element.find('.multi-updateable-translations input[type=checkbox]:checked').map(() -> this.value).get()
+
     $.ajax @translation.url + '.json',
       type: 'PUT'
-      data: $.param('translation[copy]': @element.find('.translation-area').val())
-      complete: => @element.find('.translation-area, input').removeAttr 'disabled', 'disabled'
+      data: $.param('translation[copy]': @element.find('.translation-area').val(), copyToLocales: copyToLocales)
+      complete: => @element.find('.translation-area, textarea').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
-      error: => new Flash('alert').text("Couldn't update that translation.");
+      error: (xhr, textStatus, errorThrown) => new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
     return true
 
   # Re-renders the cell using a new translation object (loaded from JSON).
@@ -104,60 +107,25 @@ class TranslationItem
       success: (match) =>
         return unless match?
         @copy_field.val match.copy
-        @copy_field.focus()
         @copy_field[0].selectionStart = 0
         @copy_field[0].selectionEnd = match.copy.length
 
 
-  loadFuzzyMatches: ->
-    @fuzzy_matches.append($('<dt/>').text('Fuzzy Matches'))
-    @fuzzy_matches.append($('<dd/>').text('Loading fuzzy matches'))
-    $.ajax @translation.fuzzy_match_url,
-      success: (matches) =>
-        @fuzzy_matches.empty()
-        @fuzzy_matches.append($('<dt/>').text('Fuzzy Matches'))
-        if matches.length == 0
-          @fuzzy_matches.append($('<dd/>').text('No fuzzy matches found :('))
-        for match in matches
-          do (match) =>
-            match_percentage = $('<span/>').addClass("match-percentage").text("(#{match.match_percentage.toString()[0..4]}%) ")
-            match_element = $('<a/>').append(match_percentage)
-                                     .append($('<span/>').addClass('fuzzy-matched-copy').text(match.copy))
-                                     .append($('<span/>').addClass('changed').text(@translation.source_copy).hide())
-                                     .append($('<span/>').addClass('original').text(match.source_copy).hide())
-            match_wrapper = $('<dd/>').append(match_element)
-                                      .append($('<div/>').addClass('diff'))
-
-            match_element.click =>
-              @copy_field.val match.copy
-
-            match_element.mouseenter ->
-              match_element.prettyTextDiff
-                diffContainer: match_wrapper.find('.diff')
-              match_wrapper.find('.diff').prepend($('<span/>').addClass("match-percentage").text("Source Diff: "))
-            match_element.mouseleave ->
-              match_wrapper.find('.diff').empty()
-
-            @fuzzy_matches.append(match_wrapper)
+  findFuzzyMatches: ->
+    loadFuzzyMatches(@fuzzy_matches, @copy_field, @translation.fuzzy_match_url, @translation.source_copy)
 
   # @private
   build: ->
     context = {}
 
-    switch @translation.approved
-      when true then context.status = 'approved'
-      when false then context.status = 'rejected'
-      else
-        if @translation.translated
-          context.status = 'translated'
-        else
-          context.status = ''
-
+    context.status = @translation.status
     context.translation_copy = @translation.copy
     context.source_copy = this.renderCopyWithFencing(
                                                       @translation.source_copy,
                                                       @translation.source_fences
                                                     ).html()
+
+    context.multi_updateable_translations_and_locale_associations = @translation.multi_updateable_translations_and_locale_associations
 
     if @options.review && (@translation.approved == null)
       context.controls = true
@@ -210,7 +178,7 @@ class TranslationItem
       @copy_field[0].selectionStart = 0
       @copy_field[0].selectionEnd = @copy_field.val().length
       @loadSuggestion()
-      @loadFuzzyMatches()
+      @findFuzzyMatches()
       @hideOtherGlossaryTooltips()
       @renderGlossaryTooltip()
 

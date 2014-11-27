@@ -3,6 +3,7 @@
 --
 
 SET statement_timeout = 0;
+SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -35,7 +36,6 @@ SET default_with_oids = false;
 CREATE TABLE blobs (
     project_id integer NOT NULL,
     sha_raw bytea NOT NULL,
-    metadata text,
     parsed boolean DEFAULT false NOT NULL,
     errored boolean DEFAULT false NOT NULL
 );
@@ -108,7 +108,6 @@ CREATE TABLE commits (
     committed_at timestamp without time zone NOT NULL,
     ready boolean DEFAULT false NOT NULL,
     loading boolean DEFAULT false NOT NULL,
-    metadata text,
     created_at timestamp without time zone,
     due_date date,
     priority integer,
@@ -116,6 +115,12 @@ CREATE TABLE commits (
     completed_at timestamp without time zone,
     exported boolean DEFAULT false NOT NULL,
     loaded_at timestamp without time zone,
+    description text,
+    author character varying(255),
+    author_email character varying(255),
+    pull_request_url text,
+    import_batch_id character varying(255),
+    import_errors text,
     CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0)),
     CONSTRAINT commits_priority_check CHECK (((priority >= 0) AND (priority <= 3)))
 );
@@ -156,10 +161,19 @@ CREATE TABLE commits_keys (
 
 CREATE TABLE daily_metrics (
     id integer NOT NULL,
-    metadata text,
     date date NOT NULL,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    num_commits_loaded integer,
+    num_commits_loaded_per_project text,
+    avg_load_time double precision,
+    avg_load_time_per_project text,
+    num_commits_completed integer,
+    num_commits_completed_per_project text,
+    num_words_created integer,
+    num_words_created_per_language text,
+    num_words_completed integer,
+    num_words_completed_per_language text
 );
 
 
@@ -180,45 +194,6 @@ CREATE SEQUENCE daily_metrics_id_seq
 --
 
 ALTER SEQUENCE daily_metrics_id_seq OWNED BY daily_metrics.id;
-
-
---
--- Name: glossary_entries; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE glossary_entries (
-    id integer NOT NULL,
-    translator_id integer,
-    reviewer_id integer,
-    metadata text,
-    source_rfc5646_locale character varying(15) NOT NULL,
-    rfc5646_locale character varying(15) NOT NULL,
-    translated boolean DEFAULT false NOT NULL,
-    approved boolean,
-    key_sha_raw bytea,
-    source_copy_sha_raw bytea,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
-);
-
-
---
--- Name: glossary_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE glossary_entries_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: glossary_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE glossary_entries_id_seq OWNED BY glossary_entries.id;
 
 
 --
@@ -261,16 +236,76 @@ ALTER SEQUENCE issues_id_seq OWNED BY issues.id;
 
 
 --
+-- Name: key_groups; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE key_groups (
+    id integer NOT NULL,
+    project_id integer NOT NULL,
+    key text NOT NULL,
+    key_sha_raw bytea NOT NULL,
+    source_copy text NOT NULL,
+    source_copy_sha_raw bytea NOT NULL,
+    description text,
+    email character varying(255),
+    import_batch_id character varying(255),
+    loading boolean DEFAULT false NOT NULL,
+    ready boolean DEFAULT false NOT NULL,
+    first_import_requested_at timestamp without time zone,
+    last_import_requested_at timestamp without time zone,
+    first_import_started_at timestamp without time zone,
+    last_import_started_at timestamp without time zone,
+    first_import_finished_at timestamp without time zone,
+    last_import_finished_at timestamp without time zone,
+    first_completed_at timestamp without time zone,
+    last_completed_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    base_rfc5646_locale character varying(255),
+    targeted_rfc5646_locales text
+);
+
+
+--
+-- Name: key_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE key_groups_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: key_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE key_groups_id_seq OWNED BY key_groups.id;
+
+
+--
 -- Name: keys; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE keys (
     id integer NOT NULL,
-    metadata text,
     project_id integer NOT NULL,
     key_sha_raw bytea NOT NULL,
     source_copy_sha_raw bytea NOT NULL,
-    ready boolean DEFAULT true NOT NULL
+    ready boolean DEFAULT true NOT NULL,
+    key_group_id integer,
+    index_in_key_group integer,
+    key text NOT NULL,
+    original_key text NOT NULL,
+    source_copy text,
+    context text,
+    importer character varying(255),
+    source text,
+    fencers text,
+    other_data text,
+    CONSTRAINT non_negative_index_in_key_group CHECK ((index_in_key_group >= 0))
 );
 
 
@@ -294,6 +329,40 @@ ALTER SEQUENCE keys_id_seq OWNED BY keys.id;
 
 
 --
+-- Name: locale_associations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE locale_associations (
+    id integer NOT NULL,
+    source_rfc5646_locale character varying(255) NOT NULL,
+    target_rfc5646_locale character varying(255) NOT NULL,
+    checked boolean DEFAULT false NOT NULL,
+    uncheck_disabled boolean DEFAULT false NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: locale_associations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE locale_associations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: locale_associations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE locale_associations_id_seq OWNED BY locale_associations.id;
+
+
+--
 -- Name: locale_glossary_entries; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -302,12 +371,13 @@ CREATE TABLE locale_glossary_entries (
     translator_id integer,
     reviewer_id integer,
     source_glossary_entry_id integer,
-    metadata text,
     rfc5646_locale character varying(15) NOT NULL,
     translated boolean DEFAULT false NOT NULL,
     approved boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    copy text,
+    notes text
 );
 
 
@@ -337,12 +407,30 @@ ALTER SEQUENCE locale_glossary_entries_id_seq OWNED BY locale_glossary_entries.i
 CREATE TABLE projects (
     id integer NOT NULL,
     name character varying(256) NOT NULL,
-    metadata text,
-    repository_url character varying(256) NOT NULL,
-    api_key character(36) NOT NULL,
+    repository_url character varying(256),
+    api_token character(36) NOT NULL,
     created_at timestamp without time zone,
-    CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0)),
-    CONSTRAINT projects_repository_url_check CHECK ((char_length((repository_url)::text) > 0))
+    translation_adder_batch_id character varying(255),
+    disable_locale_association_checkbox_settings boolean DEFAULT false NOT NULL,
+    base_rfc5646_locale character varying(255) DEFAULT 'en'::character varying NOT NULL,
+    targeted_rfc5646_locales text,
+    skip_imports text,
+    key_exclusions text,
+    key_inclusions text,
+    key_locale_exclusions text,
+    key_locale_inclusions text,
+    skip_paths text,
+    only_paths text,
+    skip_importer_paths text,
+    only_importer_paths text,
+    default_manifest_format character varying(255),
+    watched_branches text,
+    touchdown_branch character varying(255),
+    manifest_directory text,
+    manifest_filename character varying(255),
+    github_webhook_url text,
+    stash_webhook_url text,
+    CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0))
 );
 
 
@@ -450,11 +538,14 @@ ALTER SEQUENCE slugs_id_seq OWNED BY slugs.id;
 
 CREATE TABLE source_glossary_entries (
     id integer NOT NULL,
-    metadata text,
     source_rfc5646_locale character varying(15) DEFAULT 'en'::character varying NOT NULL,
     source_copy_sha_raw bytea,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    source_copy text NOT NULL,
+    context text,
+    notes text,
+    due_date date
 );
 
 
@@ -484,9 +575,9 @@ ALTER SEQUENCE source_glossary_entries_id_seq OWNED BY source_glossary_entries.i
 CREATE TABLE translation_changes (
     id integer NOT NULL,
     translation_id integer NOT NULL,
-    metadata text,
     created_at timestamp without time zone,
-    user_id integer
+    user_id integer,
+    diff text
 );
 
 
@@ -550,7 +641,6 @@ ALTER SEQUENCE translation_units_id_seq OWNED BY translation_units.id;
 
 CREATE TABLE translations (
     id integer NOT NULL,
-    metadata text,
     key_id integer NOT NULL,
     translator_id integer,
     reviewer_id integer,
@@ -560,7 +650,10 @@ CREATE TABLE translations (
     approved boolean,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    words_count integer DEFAULT 0 NOT NULL
+    words_count integer DEFAULT 0 NOT NULL,
+    source_copy text,
+    copy text,
+    notes text
 );
 
 
@@ -590,7 +683,6 @@ ALTER SEQUENCE translations_id_seq OWNED BY translations.id;
 CREATE TABLE users (
     id integer NOT NULL,
     email character varying(255) NOT NULL,
-    metadata text,
     reset_password_token character varying(255),
     sign_in_count integer DEFAULT 0 NOT NULL,
     failed_attempts integer DEFAULT 0 NOT NULL,
@@ -599,6 +691,20 @@ CREATE TABLE users (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     confirmation_token character varying(255),
+    first_name character varying(255) NOT NULL,
+    last_name character varying(255) NOT NULL,
+    encrypted_password character varying(255) NOT NULL,
+    remember_created_at timestamp without time zone,
+    current_sign_in_at timestamp without time zone,
+    last_sign_in_at timestamp without time zone,
+    current_sign_in_ip character varying(255),
+    last_sign_in_ip character varying(255),
+    confirmed_at timestamp without time zone,
+    confirmation_sent_at timestamp without time zone,
+    locked_at timestamp without time zone,
+    reset_password_sent_at timestamp without time zone,
+    approved_rfc5646_locales text,
+    CONSTRAINT encrypted_password_exists CHECK ((char_length((encrypted_password)::text) > 20)),
     CONSTRAINT users_email_check CHECK ((char_length((email)::text) > 0)),
     CONSTRAINT users_failed_attempts_check CHECK ((failed_attempts >= 0)),
     CONSTRAINT users_sign_in_count_check CHECK ((sign_in_count >= 0))
@@ -649,13 +755,6 @@ ALTER TABLE ONLY daily_metrics ALTER COLUMN id SET DEFAULT nextval('daily_metric
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY glossary_entries ALTER COLUMN id SET DEFAULT nextval('glossary_entries_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
 ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::regclass);
 
 
@@ -663,7 +762,21 @@ ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::reg
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY key_groups ALTER COLUMN id SET DEFAULT nextval('key_groups_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY keys ALTER COLUMN id SET DEFAULT nextval('keys_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY locale_associations ALTER COLUMN id SET DEFAULT nextval('locale_associations_id_seq'::regclass);
 
 
 --
@@ -786,19 +899,19 @@ ALTER TABLE ONLY daily_metrics
 
 
 --
--- Name: glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_pkey PRIMARY KEY (id);
-
-
---
 -- Name: issues_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT issues_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: key_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY key_groups
+    ADD CONSTRAINT key_groups_pkey PRIMARY KEY (id);
 
 
 --
@@ -810,19 +923,19 @@ ALTER TABLE ONLY keys
 
 
 --
+-- Name: locale_associations_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY locale_associations
+    ADD CONSTRAINT locale_associations_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: locale_glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY locale_glossary_entries
     ADD CONSTRAINT locale_glossary_entries_pkey PRIMARY KEY (id);
-
-
---
--- Name: projects_api_key_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY projects
-    ADD CONSTRAINT projects_api_key_key UNIQUE (api_key);
 
 
 --
@@ -946,17 +1059,38 @@ CREATE UNIQUE INDEX daily_metrics_date ON daily_metrics USING btree (date);
 
 
 --
--- Name: glossary_source_copy_sha; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX glossary_source_copy_sha ON glossary_entries USING btree (source_copy_sha_raw, rfc5646_locale);
-
-
---
 -- Name: index_blobs_on_project_id_and_sha_raw_and_errored; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_blobs_on_project_id_and_sha_raw_and_errored ON blobs USING btree (project_id, sha_raw, errored);
+
+
+--
+-- Name: index_in_key_group_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_in_key_group_unique ON keys USING btree (key_group_id, index_in_key_group) WHERE ((key_group_id IS NOT NULL) AND (index_in_key_group IS NOT NULL));
+
+
+--
+-- Name: index_keys_on_project_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_keys_on_project_id ON keys USING btree (project_id);
+
+
+--
+-- Name: index_locale_associations_on_source_and_target_rfc5646_locales; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_locale_associations_on_source_and_target_rfc5646_locales ON locale_associations USING btree (source_rfc5646_locale, target_rfc5646_locale);
+
+
+--
+-- Name: index_translations_on_rfc5646_locale; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_translations_on_rfc5646_locale ON translations USING btree (rfc5646_locale);
 
 
 --
@@ -1002,10 +1136,31 @@ CREATE INDEX issues_user ON issues USING btree (user_id);
 
 
 --
+-- Name: key_groups_project; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX key_groups_project ON key_groups USING btree (project_id);
+
+
+--
+-- Name: key_groups_project_keys_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX key_groups_project_keys_unique ON key_groups USING btree (project_id, key_sha_raw);
+
+
+--
+-- Name: keys_in_key_group_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX keys_in_key_group_unique ON keys USING btree (key_group_id, key_sha_raw) WHERE (key_group_id IS NOT NULL);
+
+
+--
 -- Name: keys_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE UNIQUE INDEX keys_unique ON keys USING btree (project_id, key_sha_raw, source_copy_sha_raw);
+CREATE UNIQUE INDEX keys_unique ON keys USING btree (project_id, key_sha_raw, source_copy_sha_raw) WHERE (key_group_id IS NULL);
 
 
 --
@@ -1041,6 +1196,13 @@ CREATE UNIQUE INDEX translation_units_unique ON translation_units USING btree (s
 --
 
 CREATE UNIQUE INDEX translations_by_key ON translations USING btree (key_id, rfc5646_locale);
+
+
+--
+-- Name: unique_api_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX unique_api_token ON projects USING btree (api_token);
 
 
 --
@@ -1168,22 +1330,6 @@ ALTER TABLE ONLY commits
 
 
 --
--- Name: glossary_entries_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE SET NULL;
-
-
---
--- Name: glossary_entries_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY glossary_entries
-    ADD CONSTRAINT glossary_entries_translator_id_fkey FOREIGN KEY (translator_id) REFERENCES users(id) ON DELETE SET NULL;
-
-
---
 -- Name: issues_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1205,6 +1351,22 @@ ALTER TABLE ONLY issues
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT issues_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: key_groups_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY key_groups
+    ADD CONSTRAINT key_groups_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: keys_key_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY keys
+    ADD CONSTRAINT keys_key_group_id_fkey FOREIGN KEY (key_group_id) REFERENCES key_groups(id);
 
 
 --
@@ -1362,3 +1524,59 @@ INSERT INTO schema_migrations (version) VALUES ('20140531020536');
 INSERT INTO schema_migrations (version) VALUES ('20140606111509');
 
 INSERT INTO schema_migrations (version) VALUES ('20140613215228');
+
+INSERT INTO schema_migrations (version) VALUES ('20140616232942');
+
+INSERT INTO schema_migrations (version) VALUES ('20140714173058');
+
+INSERT INTO schema_migrations (version) VALUES ('20140717192729');
+
+INSERT INTO schema_migrations (version) VALUES ('20140721233942');
+
+INSERT INTO schema_migrations (version) VALUES ('20140919214058');
+
+INSERT INTO schema_migrations (version) VALUES ('20140925191736');
+
+INSERT INTO schema_migrations (version) VALUES ('20140927210829');
+
+INSERT INTO schema_migrations (version) VALUES ('20140930013949');
+
+INSERT INTO schema_migrations (version) VALUES ('20141002074759');
+
+INSERT INTO schema_migrations (version) VALUES ('20141022174649');
+
+INSERT INTO schema_migrations (version) VALUES ('20141022191209');
+
+INSERT INTO schema_migrations (version) VALUES ('20141022223754');
+
+INSERT INTO schema_migrations (version) VALUES ('20141103204013');
+
+INSERT INTO schema_migrations (version) VALUES ('20141104215833');
+
+INSERT INTO schema_migrations (version) VALUES ('20141105193238');
+
+INSERT INTO schema_migrations (version) VALUES ('20141113025632');
+
+INSERT INTO schema_migrations (version) VALUES ('20141114011624');
+
+INSERT INTO schema_migrations (version) VALUES ('20141114073933');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119005842');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119043427');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119215724');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119230218');
+
+INSERT INTO schema_migrations (version) VALUES ('20141119235158');
+
+INSERT INTO schema_migrations (version) VALUES ('20141120005608');
+
+INSERT INTO schema_migrations (version) VALUES ('20141120006009');
+
+INSERT INTO schema_migrations (version) VALUES ('20141120007440');
+
+INSERT INTO schema_migrations (version) VALUES ('20141120011722');
+
+INSERT INTO schema_migrations (version) VALUES ('20141121202324');

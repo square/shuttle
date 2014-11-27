@@ -4,6 +4,31 @@
     <div class="eight columns left">
       <div class="translation-side"> 
         <textarea class="translation-area {{status}}">{{translation_copy}}</textarea>
+
+        {{#multi_updateable_translations_and_locale_associations.0}}
+          <div class="controls multi-updateable-translations-wrapper muted">
+            <div class="copy-to-label">Copy to:</div>
+            <div class="multi-updateable-translations">
+              {{#multi_updateable_translations_and_locale_associations}}
+                <div class="multi-updateable-translation">
+                  <input type="checkbox" value="{{translation.rfc5646_locale}}"
+                    {{#locale_association}}
+                      {{#checked}}checked{{/checked}}
+                      {{#uncheck_disabled}}disabled{{/uncheck_disabled}}
+                    {{/locale_association}}>
+                    {{#translation}}
+                      <a href="{{edit_path}}" target="_blank" class="muted {{status}}">
+                        <div>{{rfc5646_locale}}</div>
+                        {{#similarity}}<div class='similarity'>{{similarity}}</div>{{/similarity}}
+                      </a>
+                    {{/translation}}
+                  </input>
+                </div>
+              {{/multi_updateable_translations_and_locale_associations}}
+            </div>
+          </div>
+        {{/multi_updateable_translations_and_locale_associations.0}}
+
         <button class="small default copy-source">Copy from source</button>
         <button class="small default convert-source">Convert source</button>
 
@@ -20,7 +45,7 @@
             <i class="fa fa-pencil-square-o"></i>
           </button>
         </span>
-        
+
         <div class="notes">
           <div class="half tips"></div>
           <div class="half alerts"></div>

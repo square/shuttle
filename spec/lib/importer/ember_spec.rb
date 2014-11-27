@@ -17,8 +17,7 @@ require 'spec_helper'
 describe Importer::Ember do
   context "[importing]" do
     context "[repo with valid files]" do
-      before :all do
-        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
+      before :each do
         @project = FactoryGirl.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                       only_paths:     %w(ember/),
@@ -45,26 +44,25 @@ describe Importer::Ember do
 
     context "[repo with broken files]" do
       before :each do
-        Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s).delete_all
         @project = FactoryGirl.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
                                       only_paths:     %w(ember-broken/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
-        @commit  = @project.commit!('HEAD').reload
+        @commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde').reload
       end
 
       it "should add error to commit" do
-        expect(@commit.import_errors_in_redis).to eql([])
-        expect(@commit.import_errors.sort).to eql([["/ember-broken/en-US.js", "Unexpected identifier at <eval>:2:12"],
-                                                   ["/ember-broken/en-US.coffee", "[stdin]:2:5: error: unexpected this this is some invalid javascript code ^^^^"]].sort)
+        expect(@commit.import_errors.sort).to eql([["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
+                                                   ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]].sort)
         expect(@commit.blobs.where(errored: true).count).to eql(1) # these 2 files have the same contents, so they map to the same blob
+        expect(@commit.blobs.where(parsed: false).count).to eql(1)
+        expect(@commit.blobs.where(parsed: true).count).to eql(0)
       end
     end
   end
 
   context "[importing with dot notation]" do
     it "should properly import keys" do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en',
@@ -78,7 +76,6 @@ describe Importer::Ember do
 
   context "[robust implementation]" do
     it "should be more robust than just a JSON parser" do
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en-GB',

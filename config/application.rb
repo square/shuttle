@@ -21,10 +21,13 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(:default, Rails.env)
 
-Dir.glob(File.join(File.dirname(__FILE__), 'preinitializers', '*.rb')).each { |f| require f }
-
 module Shuttle
   class Application < Rails::Application
+    # Load configoro settings here so that the settings can be used in application.rb, development.rb, production.rb, etc...
+    config.before_configuration do
+      Configoro.initialize
+    end
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
@@ -35,9 +38,10 @@ module Shuttle
     config.autoload_paths << config.root.join('app', 'controllers', 'concerns') #RAILS4 remove
     config.autoload_paths << config.root.join('app', 'models', 'observers')
     config.autoload_paths << config.root.join('app', 'presenters')
+    config.autoload_paths << config.root.join('app', 'mediators')
 
     # Activate observers that should always be running.
-    config.active_record.observers     = :comment_observer, :commit_observer, :issue_observer, :translation_observer
+    config.active_record.observers     = :comment_observer, :commit_observer, :key_group_observer, :issue_observer, :translation_observer
 
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
@@ -65,7 +69,13 @@ module Shuttle
 
     # Precompile additional assets.
     # application.js.coffee, application.css, and all non-JS/CSS in app/assets folder are already added.
-    config.assets.precompile += %w(*.png *.gif *.jpg)
+    config.assets.precompile += %w(
+      *.png *.gif *.jpg
+      incontext.js
+      incontext.css
+    )
+
+    config.i18n.enforce_available_locales = false # breaks en-pseudo translation specs
   end
 end
 

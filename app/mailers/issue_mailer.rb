@@ -18,7 +18,7 @@ class IssueMailer < ActionMailer::Base
   include ActionView::Helpers::TextHelper
   helper IssuesHelper
 
-  default from: Shuttle::Configuration.mailer.from
+  default from: Shuttle::Configuration.app.mailer.from
 
   # Notifies everybody who is associated with this issue that a new issue is created.
   #
@@ -26,13 +26,14 @@ class IssueMailer < ActionMailer::Base
   # @return [Mail::Message] The email to be delivered.
 
   def issue_created(issue)
+    return if issue.subscribed_emails.empty?
     @issue = issue
     @translation = @issue.translation
     @key = @translation.key
     @project = @key.project
 
-    mail to: related_peoples_emails(@issue),
-         subject: t('mailer.issue.issue_created.subject', name: @issue.user_name, summary: truncate(@issue.summary, length: 50, escape: false))
+    mail to: @issue.subscribed_emails,
+         subject: t('mailer.issue.issue_created.subject', name: @issue.user_name, summary: truncate(@issue.long_summary, length: 50, escape: false))
   end
 
   # Notifies everybody who is associated with this issue that the issue is updated.
@@ -41,32 +42,12 @@ class IssueMailer < ActionMailer::Base
   # @return [Mail::Message] The email to be delivered.
 
   def issue_updated(issue)
+    return if issue.subscribed_emails.empty?
     @issue = issue
 
     @translatable_fields = %w(priority kind status)
 
-    mail to: related_peoples_emails(@issue),
-         subject: t('mailer.issue.issue_updated.subject', name: @issue.updater.name, summary: truncate(@issue.summary, length: 50, escape: false))
-  end
-
-  private
-
-  # Finds the emails of people who should be notified about the given issue.
-  #
-  # @param [Issue] issue
-  # @return [Array<String>] Array of emails of people who are associated with this issue.
-
-  def related_peoples_emails(issue)
-    last_commit = issue.translation.key.commits.last
-
-    emails = [Shuttle::Configuration.mailer.translators_list,
-              issue.user.try!(:email),
-              issue.updater.try!(:email),
-              last_commit.try!(:user).try!(:email),
-              last_commit.try!(:author_email)] +
-         issue.subscribed_emails +
-         issue.comments.includes(:user).map { |comment| comment.user.try!(:email) }
-
-    emails.compact.uniq
+    mail to: @issue.subscribed_emails,
+         subject: t('mailer.issue.issue_updated.subject', name: @issue.updater.name, summary: truncate(@issue.long_summary, length: 50, escape: false))
   end
 end

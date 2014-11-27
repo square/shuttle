@@ -16,10 +16,9 @@ require 'spec_helper'
 
 describe Commit::KeysController do
   describe '#index' do
-    before :all do
+    before :each do
       reset_elastic_search
 
-      Project.where(repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s).delete_all
       @project = FactoryGirl.create(:project,
                                     base_rfc5646_locale:      'en',
                                     targeted_rfc5646_locales: {'en' => true, 'fr' => true},
@@ -37,12 +36,10 @@ describe Commit::KeysController do
       @keys.each &:add_pending_translations
       @commit.keys = @keys
 
-      @user = FactoryGirl.create(:user, role: 'monitor')
+      @user = FactoryGirl.create(:user, :activated)
 
       regenerate_elastic_search_indexes
-    end
 
-    before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
       sleep 2

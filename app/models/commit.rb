@@ -50,34 +50,28 @@ require 'fileutils'
 # Properties
 # ==========
 #
-# |                |                                                                                                          |
-# |:---------------|:---------------------------------------------------------------------------------------------------------|
-# | `committed_at` | The time this commit was made.                                                                           |
-# | `message`      | The commit message.                                                                                      |
-# | `ready`        | If `true`, all Keys under this Commit are marked as ready.                                               |
-# | `exported`     | If `true`, monitor has already exported this commit and no longer needs it.                              |
-# | `revision`     | The SHA1 for this commit.                                                                                |
-# | `loading`      | If `true`, there is at least one {BlobImporter} processing this Commit.                                  |
-# | `priority`     | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
-# | `due_date`     | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
-# | `completed_at` | The date this Commit completed translation.                                                              |
-#
-# Metadata
-# ========
-#
-# |                    |                                                                    |
-# |:-------------------|:-------------------------------------------------------------------|
-# | `description`      | A user-submitted description of why we are localizing this commit. |
-# | `pull_request_url` | A user-submitted URL to the pull request that is being localized.  |
-# | `import_errors`    | Array of import errors that happened during the import process.    |
-# | `author`           | The name of the commit author.                                     |
-# | `author_email`     | The email address of the commit author.                            |
+# |                    |                                                                                                          |
+# |:-------------------|:---------------------------------------------------------------------------------------------------------|
+# | `committed_at`     | The time this commit was made.                                                                           |
+# | `message`          | The commit message.                                                                                      |
+# | `ready`            | If `true`, all Keys under this Commit are marked as ready.                                               |
+# | `exported`         | If `true`, monitor has already exported this commit and no longer needs it.                              |
+# | `revision`         | The SHA1 for this commit.                                                                                |
+# | `loading`          | If `true`, there is at least one {BlobImporter} processing this Commit.                                  |
+# | `priority`         | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
+# | `due_date`         | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
+# | `completed_at`     | The date this Commit completed translation.                                                              |
+# | `description`      | A user-submitted description of why we are localizing this commit.                                       |
+# | `pull_request_url` | A user-submitted URL to the pull request that is being localized.                                        |
+# | `import_batch_id`  | The ID of the Sidekiq batch of import jobs.                                                              |
+# | `import_errors`    | Array of import errors that happened during the import process.                                          |
+# | `author`           | The name of the commit author.                                                                           |
+# | `author_email`     | The email address of the commit author.                                                                  |
 
 class Commit < ActiveRecord::Base
-  extend RedisMemoize
   include CommitTraverser
-  include SidekiqWorkerTracking
   include ImportErrors
+  include CommitStats
 
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
@@ -86,22 +80,13 @@ class Commit < ActiveRecord::Base
 
   belongs_to :project, inverse_of: :commits
   belongs_to :user, inverse_of: :commits
+  has_many :commits_keys, inverse_of: :commit, dependent: :delete_all
   has_many :screenshots, inverse_of: :commit, dependent: :destroy
-  has_many :commits_keys, inverse_of: :commit, dependent: :destroy
   has_many :keys, through: :commits_keys
   has_many :translations, through: :keys
   has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
   has_many :blobs, through: :blobs_commits
   has_many :issues, through: :translations
-
-  include HasMetadataColumn
-  has_metadata_column(
-      description:      {allow_nil: true},
-      author:           {allow_nil: true}, 
-      author_email:     {allow_nil: true},
-      pull_request_url: {allow_nil: true},
-      import_errors:    {type: Array, default: []}
-  )
 
   include Tire::Model::Search
   include Tire::Model::Callbacks
@@ -114,6 +99,7 @@ class Commit < ActiveRecord::Base
     indexes :revision, as: 'revision', index: :not_analyzed
     indexes :ready, type: 'boolean'
     indexes :exported, type: 'boolean'
+    indexes :key_ids, as: 'commits_keys.pluck(:key_id)'
   end
 
   validates :project,
@@ -146,6 +132,17 @@ class Commit < ActiveRecord::Base
                    repo_must_exist: true,
                    scope:           :for_revision
 
+  # Scopes
+  scope :ready, -> { where(ready: true) }
+  scope :not_ready, -> { where(ready: false) }
+
+  # Add import_batch and import_batch_status methods
+  extend SidekiqBatchManager
+  sidekiq_batch :import_batch do |batch|
+    batch.description = "Import Commit #{id} (#{revision})"
+    batch.on :success, ImportFinisher, commit_id: id
+  end
+
   extend SetNilIfBlank
   set_nil_if_blank :description, :due_date, :pull_request_url
 
@@ -156,13 +153,7 @@ class Commit < ActiveRecord::Base
 
   before_save :set_loaded_at
   before_create :set_author
-  after_commit(on: :create) do |commit|
-    CommitImporter.perform_once(commit.id) unless commit.skip_import
-  end
-  after_commit :compile_and_cache_or_clear, on: :update
-  after_commit :update_stats_at_end_of_loading, on: :update, if: :loading_state_changed?
-  after_commit :mark_blobs_as_parsed, on: :update, if: :loading_state_changed?
-  after_destroy { |c| Commit.flush_memoizations c.id }
+  after_commit :initial_import, on: :create
 
   attr_readonly :revision, :message
 
@@ -192,18 +183,13 @@ class Commit < ActiveRecord::Base
   end
 
   # Calculates the value of the `ready` field and saves the record.
-  # If this is the first time a commit has been marked as ready, sets 
+  # If this is the first time a commit has been marked as ready, sets
   # completed_at to be the current time.
 
   def recalculate_ready!
-    keys_are_ready = !keys.where(ready: false).exists?
-    no_errors_exist = import_errors.blank? && import_errors_in_redis.blank?
-    self.ready     = keys_are_ready && no_errors_exist
-    if self.ready and self.completed_at.nil?
-      self.completed_at = Time.current
-    end
+    self.ready = successfully_loaded? && keys_are_ready? && !errored_during_import?
+    self.completed_at = Time.current if self.ready && self.completed_at.nil?
     save!
-    compile_and_cache_or_clear(ready)
   end
 
   # Returns `true` if all Translations applying to this commit have been
@@ -226,30 +212,24 @@ class Commit < ActiveRecord::Base
   #   Sidekiq workers to perform the import in parallel.
   # @option options [true, false] force (false) If `true`, blobs will be
   #   re-scanned for keys even if they have already been scanned.
-  # @raise [CommitNotFoundError] If the commit could not be found in the Git
-  #   repository.
+  # @raise [Git::CommitNotFoundError] If the commit could not be found in
+  #   the Git repository.
 
   def import_strings(options={})
-    raise CommitNotFoundError, "Commit no longer exists: #{revision}" unless commit!
+    update_attribute :loading, true
+    commit! # Make sure commit exists
+    clear_import_errors! # clear out any previous import errors
 
-    clear_import_errors # clear out any previous import errors
+    import_batch.jobs do
+      blobs = project.blobs.includes(:project) # preload blobs for performance
 
-    blobs  = project.blobs.includes(:project) # preload blobs for performance
-
-    # add us as one of the workers, to prevent the commit from prematurely going
-    # ready; let's just invent a job ID for us
-    job_id = SecureRandom.uuid
-    add_worker! job_id
-
-    # clear out existing keys so that we can import all new keys
-    commits_keys.delete_all unless options[:locale]
-    # perform the recursive import
-    traverse(commit!) do |path, blob|
-      import_blob path, blob, options.merge(blobs: blobs)
+      # clear out existing keys so that we can import all new keys
+      commits_keys.delete_all unless options[:locale]
+      # perform the recursive import
+      traverse(commit!) do |path, blob|
+        import_blob path, blob, options.merge(blobs: blobs)
+      end
     end
-
-    # this will also kick of stats recalculation for inline imports
-    remove_worker! job_id
   end
 
   # Returns a commit object used to interact with Git.
@@ -263,22 +243,35 @@ class Commit < ActiveRecord::Base
   # Same as {#commit}, but fetches the upstream repository changes if the commit
   # is unrecognized.
   #
-  # @return [Git::Object::Commit, nil] The commit object.
+  # @return [Git::Object::Commit] The commit object.
+  # @raise [Git::CommitNotFoundError] If the commit could not be found in
+  #   the Git repository.
 
   def commit!
-    project.repo do |r|
-      r.object(revision) || (r.fetch && r.object(revision))
+    unless commit_object = project.find_or_fetch_git_object(revision)
+      raise Git::CommitNotFoundError, revision
     end
+    commit_object
   end
 
-  # @return [String, nil] The URL to this commit on GitHub or GitHub Enterprise,
+  # @return [String, nil] The URL to this commit on GitHub, GitHub Enterprise or on Stash,
   #   or `nil` if the URL could not be determined.
 
-  def github_url
-    if project.repository_url =~ /^git@github\.com:([^\/]+)\/(.+)\.git$/ ||
-        project.repository_url =~ /https:\/\/\w+@github\.com\/([^\/]+)\/(.+)\.git/ ||
-        project.repository_url =~ /git:\/\/github\.com\/([^\/]+)\/(.+)\.git/ # GitHub
+  def git_url
+    github_enterprise_domain = Shuttle::Configuration.app[:github_enterprise_domain]
+    stash_domain = Shuttle::Configuration.app[:stash_domain]
+    escaped_github_enterprise_domain = Regexp.escape(github_enterprise_domain)
+    escaped_stash_domain = Regexp.escape(stash_domain)
+    path_regex = "([^\/]+)\/(.+)\.git$"
+
+    if project.repository_url =~ /^git@github\.com:#{path_regex}/ ||
+        project.repository_url =~ /https:\/\/github\.com\/#{path_regex}/ # GitHub
       "https://github.com/#{$1}/#{$2}/commit/#{revision}"
+    elsif project.repository_url =~ /^git@#{escaped_github_enterprise_domain}:#{path_regex}/ ||
+        project.repository_url =~ /^https:\/\/#{escaped_github_enterprise_domain}\/#{path_regex}/ # Github Enterprise: git.mycompany.com
+      "https://#{github_enterprise_domain}/#{$1}/#{$2}/commit/#{revision}"
+    elsif project.repository_url =~ /^https:\/\/#{escaped_stash_domain}\/scm\/#{path_regex}/ # Stash: stash.mycompany.com
+      "https://#{stash_domain}/projects/#{$1.upcase}/repos/#{$2}/commits/#{revision}"
     end
   end
 
@@ -287,100 +280,13 @@ class Commit < ActiveRecord::Base
     options ||= {}
 
     options[:methods] = Array.wrap(options[:methods])
-    options[:methods] << :github_url << :revision
+    options[:methods] << :git_url << :revision
 
     options[:except] = Array.wrap(options[:except])
     options[:except] << :revision_raw
 
     super options
   end
-
-  # @return [Fixnum] The number of approved Translations across all required
-  #   under this Commit.
-
-  def translations_done(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(approved: true, rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_done
-
-  # @return [Fixnum] The number of Translations across all required locales
-  #   under this Commit.
-
-  def translations_total(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_total
-
-  # @return [Float] The fraction of Translations under this Commit that are
-  #   approved, across all required locales.
-
-  def fraction_done(*locales)
-    locales = project.required_locales if locales.empty?
-    translations_done(*locales)/translations_total(*locales).to_f
-  end
-
-  # @return [Fixnum] The total number of translatable base strings applying to
-  #   this Commit.
-
-  def strings_total
-    keys.count
-  end
-  redis_memoize :strings_total
-
-  # Calculates the total number of Translations that have not yet been
-  # translated.
-  #
-  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
-  #   Defaults to all required locales.
-  # @return [Fixnum] The total number of Translations.
-
-  def translations_new(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(translated: false, rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_new
-
-  # Calculates the total number of Translations that have not yet been approved.
-  #
-  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
-  #   Defaults to all required locales.
-  # @return [Fixnum] The total number of Translations.
-
-  def translations_pending(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).count
-  end
-  redis_memoize :translations_pending
-
-  # Calculates the total number of words across all Translations that have not
-  # yet been approved.
-  #
-  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
-  #   Defaults to all required locales.
-  # @return [Fixnum] The total number of words in the Translations' source copy.
-
-  def words_pending(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where('approved IS NOT TRUE').
-        where(translated: true, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
-  end
-  redis_memoize :words_pending
-
-  # Calculates the total number of words across all Translations that have not
-  # yet been translations.
-  #
-  # @param [Array<Locale>] locales If provided, a locale to limit the sum to.
-  #   Defaults to all required locales.
-  # @return [Fixnum] The total number of words in the Translations' source copy.
-
-  def words_new(*locales)
-    locales = project.required_locales if locales.empty?
-    translations.not_base.where(translated: false, rfc5646_locale: locales.map(&:rfc5646)).sum(:words_count)
-  end
-  redis_memoize :words_new
 
   # Returns whether a translator's work is entirely done for this Commit.
   #
@@ -400,19 +306,6 @@ class Commit < ActiveRecord::Base
 
   def all_translations_approved_for_locale?(locale)
     translations.where(rfc5646_locale: locale.rfc5646).where('approved IS NOT TRUE').count == 0
-  end
-
-  # @private
-  def redis_memoize_key() to_param end
-
-  # @return [true, false] True if there are cached Sidekiq job IDs of
-  #   in-progress BlobImporters that do not actually exist anymore.
-
-  def broken?
-    cached_jids = Shuttle::Redis.smembers("import:#{revision}")
-    return false if cached_jids.empty?
-    actual_jids = self.class.workers.map { |w| w['jid'] }
-    (cached_jids & actual_jids).empty? # none of the cached JIDs actually exist anymore
   end
 
   # Returns whether we should skip a key for this particular commit, given the
@@ -440,16 +333,6 @@ class Commit < ActiveRecord::Base
     return false
   end
 
-  # @private Shanghai'd from Sidekiq::Web
-  def self.workers
-    Sidekiq.redis do |conn|
-      conn.smembers('workers').map do |w|
-        msg = conn.get("worker:#{w}")
-        msg ? Sidekiq.load_json(msg) : nil
-      end.compact
-    end
-  end
-
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
@@ -459,6 +342,23 @@ class Commit < ActiveRecord::Base
               ready? ? 'ready' : 'not ready'
             end
     "#<#{self.class.to_s} #{id}: #{revision} (#{state})>"
+  end
+
+  # Returns `true` if this commit is currently not loading and
+  # has successfully loaded at least once.
+  #
+  # @return [true, false] Whether the commit has successfully loaded.
+
+  def successfully_loaded?
+    loaded_at.present? && !loading?
+  end
+
+  # Returns `true` if all Keys associated with this commit are ready.
+  #
+  # @return [true, false] Whether all keys are ready for this commit.
+
+  def keys_are_ready?
+    !keys.where(ready: false).exists?
   end
 
   private
@@ -478,24 +378,6 @@ class Commit < ActiveRecord::Base
       self.author_email = commit.author.email
     rescue
       # Don't set the author if commit doesn't exist
-    end
-  end
-
-  def compile_and_cache_or_clear(force=false)
-    return unless force || ready_changed?
-
-    # clear out existing cache entries if present
-    Exporter::Base.implementations.each do |exporter|
-      Shuttle::Redis.del ManifestPrecompiler.new.key(self, exporter.request_mime)
-    end
-    Shuttle::Redis.del LocalizePrecompiler.new.key(self)
-
-    # if ready, generate new cache entries
-    if ready?
-      LocalizePrecompiler.perform_once(id) if project.cache_localization?
-      project.cache_manifest_formats.each do |format|
-        ManifestPrecompiler.perform_once id, format
-      end
     end
   end
 
@@ -540,33 +422,19 @@ class Commit < ActiveRecord::Base
       if options[:inline]
         BlobImporter.new.perform importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
       else
-        shuttle_jid = SecureRandom.uuid
-        blob_object.add_worker! shuttle_jid
-        add_worker! shuttle_jid
-        BlobImporter.perform_once(importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646), shuttle_jid)
+        BlobImporter.perform_once importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
       end
     end
   end
 
-  def loading_state_changed?
-    (loading_was && !loading?) ||
-        (previous_changes.include?('loading') && previous_changes['loading'].first && !previous_changes['loading'].last)
-  end
-
-  def update_stats_at_end_of_loading(should_recalculate_affected_commits=false)
-    return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
-
-    # the readiness hooks were all disabled, so now we need to go through and
-    # calculate readiness and stats.
-    CommitStatsRecalculator.new.perform id
-  end
-
-  # Sets all blobs for this commit as parsed once the import is
-  # complete.
-  def mark_blobs_as_parsed
-    return unless loading_state_changed? # after_commit hooks are the buggiest piece of shit in the world
-
-    blob_shas = blobs_commits.pluck(:sha_raw)
-    Blob.where(project_id: project_id, sha_raw: blob_shas, errored: false).update_all parsed: true
+  #TODO there's a bug in Rails core that causes this to be run on update as well
+  # as create. sigh.
+  def initial_import
+    return if @_start_transaction_state[:id] # fix bug in Rails core
+    unless skip_import || loading?
+      import_batch.jobs do
+        CommitImporter.perform_once id
+      end
+    end
   end
 end

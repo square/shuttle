@@ -100,7 +100,7 @@
             / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
           = hidden_field_tag 'project[use_imports][]', ''
           - Importer::Base.implementations.sort_by(&:human_name).each_with_index do |importer, index|
-            .controls.checkboxes
+            .controls.checkboxes_and_radios
               = label_tag "project_use_imports_#{index}", class: 'checkbox'
                 = importer.human_name
               = check_box_tag "project[use_imports][]", importer.ident, !@project.skip_imports.include?(importer.ident), id: "project_use_imports_#{index}"
@@ -129,31 +129,37 @@
               | Any time a commit from the <strong>first</strong> watched branch
               |  finishes translation, the head of this branch will be advanced
               |  to that commit. See the developer guide for more information.
-      fieldset 
-        legend Precompilation and Caching
 
         .control-group
-          = f.label :cache_localization, class: 'control-label'
-          .controls.checkboxes
-            = f.check_box :cache_localization 
-            span
-              / = label_tag :cache_localization, class: 'checkbox'
-              - localizers = Localizer::Base.implementations.map(&:human_name).sort.to_sentence
-              | The following localizers will be included in the tarball: #{localizers}.
-        /   .controls
-            / = f.check_box :cache_localization
-            / - localizers = Localizer::Base.implementations.map(&:human_name).sort.to_sentence
-            / p.help-block The following localizers will be included in the tarball: #{localizers}.
-          
+          = f.label :manifest_directory, class: 'control-label'
+          .controls
+            = f.text_field :manifest_directory
+            p.help-block
+              | If this directory is specified, Shuttle will automatically create
+              | a new commit that contains your translated manifest in the specified
+              | directory and push it to your touchdown branch.
+
         .control-group
-          = f.label :cache_manifest_formats, class: 'control-label'
-          / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
-          = hidden_field_tag 'project[cache_manifest_formats][]', ''
+          = f.label :manifest_filename, class: 'control-label'
+          .controls
+            = f.text_field :manifest_filename
+            p.help-block
+              | If the filename is specified, then Shuttle will create a
+              | file using the given filename.  Otherwise, it will default to
+              | manifest.[default_file_extension]
+      fieldset 
+        legend Export Settings
+
+        .control-group
+          = f.label :default_manifest_format, class: 'control-label'
+          .controls.checkboxes_and_radios
+            = label_tag "project_default_manifest_format_none", 'None'
+            = radio_button_tag 'project[default_manifest_format]', '', @project.default_manifest_format.blank?
           - Exporter::Base.implementations.select(&:multilingual?).sort_by(&:human_name).each_with_index do |importer, index|
-            .controls.checkboxes
-              = label_tag "project_cache_manifest_formats_#{index}", class: 'checkbox'
+            .controls.checkboxes_and_radios
+              = f.label "default_manifest_format_#{index}", class: 'radio'
                 = importer.human_name
-              = check_box_tag "project[cache_manifest_formats][]", importer.request_format.to_s, @project.cache_manifest_formats.include?(importer.request_format.to_s), id: "project_cache_manifest_formats_#{index}"
+              = f.radio_button :default_manifest_format, importer.request_format.to_s
 
 
     .eight.columns.right-side
@@ -230,6 +236,26 @@
           p.help-block List paths that you want specific importers to skip.
           .controls
             = f.content_tag_field 'div', :skip_importer_paths, class: 'hash-field', 'data-value' => @project.skip_importer_paths.to_json
+
+
+
+  - if current_user.admin? && @project.persisted?
+    .header.advanced_actions_header
+      h1 Advanced
+    hr.divider
+
+    .row
+      .eight.columns
+        fieldset
+          legend Multi Locale Translations
+
+          .space-group
+            = f.label :disable_locale_association_checkbox_settings, class: 'control-label'
+            .controls
+              = f.check_box :disable_locale_association_checkbox_settings
+
+          .space-group
+            = link_to "Mass Copy Translations From One Locale Into Another", setup_mass_copy_translations_project_url
 
   .form-actions
     = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}

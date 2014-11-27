@@ -42,7 +42,7 @@ class CommitIssuesPresenter
   #   @return [Array<Hash>] an array of hashes that each include details mentioned above
   #
   # @example
-  #   CommitIssuesPresenter.new(Commit.first).status_counts =>
+  #   CommitIssuesPresenter.new(Commit.first).status_counts #=>
   #           [{status: 1, status_desc: 'Open', count: 10}, {status: 2, status_desc: 'In Progress', count: 0}, etc...]
 
   def status_counts

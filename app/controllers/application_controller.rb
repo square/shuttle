@@ -121,8 +121,12 @@
 
 class ApplicationController < ActionController::Base
   protect_from_forgery
-  clear_helpers # see application.html.rb
   self.responder = JsonDetailResponder
+
+  before_filter :authenticate_user!
+
+  include Squash::Ruby::ControllerMethods
+  enable_squash_client
 
   rescue_from(ActiveRecord::RecordNotFound) do
     respond_to do |format|

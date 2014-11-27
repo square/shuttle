@@ -15,11 +15,12 @@
 # Administrative panel where admins can modify User accounts.
 
 class UsersController < ApplicationController
-  before_filter :authenticate_user!
-  before_filter :admin_required
-  before_filter :find_user, except: :index
+  before_filter :admin_required, except: [:search]
+  before_filter :authorize_for_search!, only: [:search]
+  before_filter :find_user, except: [:index, :search]
 
-  respond_to :html
+  respond_to :html, except: [:search]
+  respond_to :json, only: [:search]
 
   before_filter(only: :update) do
     fix_empty_arrays [:user, :approved_rfc5646_locales]
@@ -138,6 +139,29 @@ class UsersController < ApplicationController
     end
   end
 
+  # Returns the name and email of every user. Only searches in activated users.
+  # Main use case is email autofilling in issues.
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /users/search`
+  #
+
+  def search
+    table = User.arel_table
+    users = User.activated.where(table[:email].matches("%#{params[:query]}%").
+                                     or(table[:first_name].matches("%#{params[:query]}%")).
+                                     or(table[:last_name].matches("%#{params[:query]}%"))).
+        select(:first_name, :last_name, :email).limit(5)
+
+    respond_with nil do |format|
+      format.json do
+        render json: users.map { |u| { name: u.name, email: u.email } }
+      end
+    end
+  end
+
   private
 
   def find_user
@@ -150,5 +174,10 @@ class UsersController < ApplicationController
         first_name last_name role password password_confirmation
         approved_rfc5646_locales
     ))
+  end
+
+  # If current user doesn't have search privilige, render nothing.
+  def authorize_for_search!
+    render nothing: true unless current_user.can_search_users?
   end
 end

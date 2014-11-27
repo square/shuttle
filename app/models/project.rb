@@ -34,46 +34,43 @@ require 'file_mutex'
 # Associations
 # ============
 #
-# |                |                                                    |
-# |:---------------|:---------------------------------------------------|
-# | `commits`      | The {Commit Commits} under this Project.           |
-# | `keys`         | The {Key Keys} found in this Project.              |
-# | `translations` | The {Translation Translations} under this Project. |
-# | `blobs`        | The Git {Blob Blobs} imported into this Project.   |
+# |                |                                                      |
+# |:---------------|:-----------------------------------------------------|
+# | `commits`      | The {Commit Commits} under this Project.             |
+# | `keys`         | The {Key Keys} found in this Project.                |
+# | `translations` | The {Translation Translations} under this Project.   |
+# | `blobs`        | The Git {Blob Blobs} imported into this Project.     |
+# | `key_groups`   | The {KeyGroup KeyGroups} imported into this Project. |
 #
 # Properties
 # ==========
 #
-# |                  |                                                                              |
-# |:-----------------|:-----------------------------------------------------------------------------|
-# | `api_key`        | A unique key used to refer to and authenticate this Project in API requests. |
-# | `name`           | The Project's name.                                                          |
-# | `repository_url` | The URL of the Project's Git repository.                                     |
-#
-# Metadata
-# ========
-#
-# |                          |                                                                                                                                                                                              |
-# |:-------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-# | `base_locale`            | The locale the Project is initially localized in.                                                                                                                                            |
-# | `locale_requirements`    | An hash mapping locales this Project can be localized to, to whether those locales are required.                                                                                             |
-# | `skip_imports`           | An array of classes under the {Importer} module that are _not_ used to search for Translations.                                                                                              |
-# | `key_exclusions`         | An array of globs that describe keys that should be ignored.                                                                                                                                 |
-# | `key_inclusions`         | An array of globs that describe keys that should be included. Other keys are ignored.                                                                                                        |
-# | `key_locale_exclusions`  | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that should be ignored in that locale.                                                                      |
-# | `key_locale_inclusions`  | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that will not be ignored in that locale.                                                                    |
-# | `only_paths`             | An array of paths. If at least one path is set, other paths will not be searched for strings to import.                                                                                      |
-# | `skip_paths`             | An array of paths that will not be searched for strings to import.                                                                                                                           |
-# | `only_importer_paths`    | A hash mapping an importer class name to an array of paths. If at least one path is set, paths not in this list will not be searched.                                                        |
-# | `skip_importer_paths`    | A hash mapping an importer class name to an array of paths that importer will not search under.                                                                                              |
-# | `cache_localization`     | If `true`, a precompiled localization will be generated and cached for each new Commit once it is ready.                                                                                     |
-# | `cache_manifest_formats` | A precompiled manifest will be generated and cached for each exporter in this list (referenced by format parameter). Included exporters must be {Exporter::Base.multilingual? multilingual}. |
-# | `watched_branches`       | A list of branches to automatically import new Commits from.                                                                                                                                 |
-# | `touchdown_branch`       | If this is set, Squash will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch.                                   |
+# |                           |                                                                                                                                                             |
+# |:--------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------|
+# | `api_token`               | A unique token used to refer to and authenticate this Project in API requests.                                                                              |
+# | `name`                    | The Project's name.                                                                                                                                         |
+# | `repository_url`          | The URL of the Project's Git repository.                                                                                                                    |
+# | `base_locale`             | The locale the Project is initially localized in.                                                                                                           |
+# | `locale_requirements`     | An hash mapping locales this Project can be localized to, to whether those locales are required.                                                            |
+# | `skip_imports`            | An array of classes under the {Importer} module that are _not_ used to search for Translations.                                                             |
+# | `key_exclusions`          | An array of globs that describe keys that should be ignored.                                                                                                |
+# | `key_inclusions`          | An array of globs that describe keys that should be included. Other keys are ignored.                                                                       |
+# | `key_locale_exclusions`   | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that should be ignored in that locale.                                     |
+# | `key_locale_inclusions`   | A hash mapping a locale's RFC 5646 code to an array of globs that describes keys that will not be ignored in that locale.                                   |
+# | `only_paths`              | An array of paths. If at least one path is set, other paths will not be searched for strings to import.                                                     |
+# | `skip_paths`              | An array of paths that will not be searched for strings to import.                                                                                          |
+# | `only_importer_paths`     | A hash mapping an importer class name to an array of paths. If at least one path is set, paths not in this list will not be searched.                       |
+# | `skip_importer_paths`     | A hash mapping an importer class name to an array of paths that importer will not search under.                                                             |
+# | `default_manifest_format` | The default format in which the manifest file will be exported. Must be {Exporter::Base.multilingual? multilingual}.                                        |
+# | `watched_branches`        | A list of branches to automatically import new Commits from.                                                                                                |
+# | `touchdown_branch`        | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch. |
+# | `manifest_directory`      | If this is set, Shuttle will automatically push a new commit containing the translated manifest in the specified directory to the touchdown branch.         |
 
 class Project < ActiveRecord::Base
-  # The directory where repositories are checked out.
+  # The directory where repositories are mirrored.
   REPOS_DIRECTORY = Rails.root.join('tmp', 'repos')
+  # The directory where working repositories are checked out.
+  WORKING_REPOS_DIRECTORY = Rails.root.join('tmp', 'working_repos')
 
   # @return [true, false] If `true`, Git will attempt to clone the repository,
   #   and add an error to the `repository_url` attribute if it cannot.
@@ -83,69 +80,66 @@ class Project < ActiveRecord::Base
   has_many :keys, inverse_of: :project, dependent: :destroy
   has_many :blobs, inverse_of: :project, dependent: :delete_all
   has_many :translations, through: :keys
+  has_many :key_groups, inverse_of: :project
 
-  include HasMetadataColumn
-  has_metadata_column(
-      base_rfc5646_locale:      {presence: true, default: 'en', format: {with: Locale::RFC5646_FORMAT}},
-      targeted_rfc5646_locales: {presence: true, type: Hash, default: {'en' => true}},
+  serialize :skip_imports,             Array
+  serialize :key_exclusions,           Array
+  serialize :key_inclusions,           Array
+  serialize :key_locale_exclusions,    Hash
+  serialize :key_locale_inclusions,    Hash
+  serialize :skip_paths,               Array
+  serialize :only_paths,               Array
+  serialize :skip_importer_paths,      Hash
+  serialize :only_importer_paths,      Hash
+  serialize :watched_branches,         Array
 
-      skip_imports:             {type: Array, default: []},
-      key_exclusions:           {type: Array, default: [], allow_nil: false},
-      key_inclusions:           {type: Array, default: [], allow_nil: false},
-      key_locale_exclusions:    {type: Hash, default: {}, allow_nil: false},
-      key_locale_inclusions:    {type: Hash, default: {}, allow_nil: false},
+  validates :base_rfc5646_locale, presence: true
+  validates :base_rfc5646_locale, format: { with: Locale::RFC5646_FORMAT }
 
-      skip_paths:               {type: Array, default: [], allow_nil: false},
-      only_paths:               {type: Array, default: [], allow_nil: false},
-      skip_importer_paths:      {type: Hash, default: {}, allow_nil: false},
-      only_importer_paths:      {type: Hash, default: {}, allow_nil: false},
 
-      cache_localization:       {type: Boolean, default: false},
-      cache_manifest_formats:   {type: Array, default: []},
-
-      watched_branches:         {type: Array, default: []},
-      touchdown_branch:         {allow_nil: true},
-
-      github_webhook_url:       {type: String, allow_nil: true},
-      stash_webhook_url:        {type: String, allow_nil: true}
-  )
+  # Add import_batch and import_batch_status methods
+  extend SidekiqBatchManager
+  sidekiq_batch :translation_adder_batch do |batch|
+    batch.description = "Project Translation Adder #{id} (#{name})"
+    batch.on :success, ProjectTranslationAdderFinisher, project_id: id
+  end
 
   extend SetNilIfBlank
+  set_nil_if_blank :repository_url
   set_nil_if_blank :github_webhook_url
   set_nil_if_blank :stash_webhook_url
+  set_nil_if_blank :manifest_directory
+  set_nil_if_blank :default_manifest_format
 
   include Slugalicious
   slugged :name
 
-  extend LocaleField
-  locale_field :base_locale, from: :base_rfc5646_locale
-  locale_field :locale_requirements,
-               from:   :targeted_rfc5646_locales,
-               reader: ->(values) { values.inject({}) { |hsh, (k, v)| hsh[Locale.from_rfc5646(k)] = v; hsh } },
-               writer: ->(values) { values.inject({}) { |hsh, (k, v)| hsh[k.rfc5646] = v; hsh } }
+  include CommonLocaleLogic
 
   validates :name,
             presence: true,
             length:   {maximum: 256}
-  validates :repository_url,
-            presence:   true
-  validates :api_key,
-            presence: true
-            #uniqueness: true,
-            #length:     {is: 36},
-            #format:     {with: /[0-9a-f\-]+/}
+  validates :api_token,
+            presence:   true,
+            uniqueness: true,
+            length:     {is: 36},
+            format:     {with: /[0-9a-f\-]+/},
+            strict:     true
 
   validate :can_clone_repo, if: :validate_repo_connectivity
-  validate :require_valid_locales_hash
 
-  before_validation :create_api_key, on: :create
+  before_validation :create_api_token, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
-  after_update :add_or_remove_pending_translations
-  after_update :invalidate_manifests_and_localizations
+  after_commit :add_or_remove_pending_translations, on: :update
+
+  scope :with_repository_url, -> { where("projects.repository_url IS NOT NULL") }
 
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
+  #
+  # If project is not linked to a git repository, {NotLinkedToAGitRepositoryError} is raised. This may happen if
+  # this project is only used for key_groups.
   #
   # Any Git errors that occur when attempting to clone the repository are
   # swallowed, and `nil` is returned.
@@ -160,8 +154,11 @@ class Project < ActiveRecord::Base
   #   is freed when the block completes.
   #   @yield A block that is given exclusive control of the repository.
   #   @yieldparam [Git::Repository] repo The proxy object for the repository.
+  #
+  # @raise [Project::NotLinkedToAGitRepositoryError] If repository_url is blank.
 
   def repo
+    raise NotLinkedToAGitRepositoryError unless git?
     if File.exist?(repo_path)
       @repo ||= Git.bare(repo_path)
     else
@@ -181,7 +178,65 @@ class Project < ActiveRecord::Base
       return @repo
     end
   rescue Git::GitExecuteError
-    raise "Repo not ready: #{$!.to_s}"
+    raise "Repo not ready: #{$ERROR_INFO.to_s}"
+  end
+
+  # Returns a `Git::Repository` working directory object that allows you to work with the
+  # local checkout of this Project's repository. The repository will be checked
+  # out if it hasn't been already.
+  #
+  # If project is not linked to a git repository, {NotLinkedToAGitRepositoryError} is raised. This may happen if
+  # this project is only used for key_groups.
+  #
+  # Any Git errors that occur when attempting to clone the repository are
+  # swallowed, and `nil` is returned.
+  #
+  # @overload working_repo
+  #   @return [Git::Repository, nil] The working directory object.
+  #
+  # @overload working_repo(&block)
+  #   If passed a block, this method will lock a mutex and yield the working repository,
+  #   giving you exclusive access to the working repository. This is recommended when
+  #   performing any repository-altering operations (e.g., fetches). The mutex
+  #   is freed when the block completes.
+  #   @yield A block that is given exclusive control of the working repository.
+  #   @yieldparam [Git::Repository] repo The proxy object for the wokring repository.
+  #
+  # @raise [Project::NotLinkedToAGitRepositoryError] If repository_url is blank.
+
+  def working_repo
+    raise NotLinkedToAGitRepositoryError unless git?
+    if File.exist?(working_repo_path)
+      @working_repo ||= Git.open(working_repo_path)
+    else
+      FileUtils::mkdir_p WORKING_REPOS_DIRECTORY
+      working_repo_mutex.synchronize do
+        @working_repo ||= begin
+          exists = File.exist?(working_repo_path) || clone_working_repo
+          exists ? Git.open(working_repo_path) : nil
+        end
+      end
+    end
+
+    if block_given?
+      raise "Repo not ready" unless @working_repo
+      result = working_repo_mutex.synchronize { yield @working_repo }
+      return result
+    else
+      return @working_repo
+    end
+  rescue Git::GitExecuteError
+    raise "Repo not ready: #{$ERROR_INFO.to_s}"
+  end
+
+  # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed).
+  # It checks `repository_url` field to determine that.
+  # Doesn't check if `repository_url` is valid.
+  #
+  # @return [Boolean] true if there is a repository_url present, false otherwise
+
+  def git?
+    repository_url.present?
   end
 
   # Attempts to find or create a Commit object corresponding to a SHA or other
@@ -197,15 +252,11 @@ class Project < ActiveRecord::Base
   # @option options [Hash] other_fields Additional model fields to set. Must
   #   have already been filtered for accessible attributes.
   # @return [Commit] The Commit for that SHA.
-  # @raise [ActiveRecord::RecordNotFound] If an unknown SHA is given.
+  # @raise [Git::CommitNotFoundError] If an unknown SHA is given.
 
   def commit!(sha, options={})
-    commit_object = repo { |repo| repo.object(sha) }
-    commit_object ||= begin
-      repo(&:fetch)
-      repo { |repo| repo.object(sha) }
-    end
-    raise ActiveRecord::RecordNotFound, "No such commit #{sha}" unless commit_object
+    commit_object = find_or_fetch_git_object(sha)
+    raise Git::CommitNotFoundError, sha unless commit_object
 
     if options[:skip_create]
       commits.for_revision(commit_object.sha).first!
@@ -222,27 +273,18 @@ class Project < ActiveRecord::Base
     end
   end
 
+  def find_or_fetch_git_object(sha)
+    repo do |r|
+      r.object(sha) || (r.fetch; r.object(sha))
+    end
+  end
+
   def latest_commit
     commits.order('committed_at DESC').first
   end
 
-  # @return [Array<Locale>] The locales this Project can be localized to.
-  def targeted_locales() targeted_rfc5646_locales.keys.map { |l| Locale.from_rfc5646(l) } end
-
-  # @return [Array<Locale>] The locales this Project *must* be localized to.
-  def required_locales() targeted_rfc5646_locales.select { |_, req| req }.map(&:first).map { |l| Locale.from_rfc5646(l) } end
-
-  def required_rfc5646_locales
-    targeted_rfc5646_locales.select { |_, req| req }.map(&:first)
-  end 
-
-  def other_rfc5646_locales
-    targeted_rfc5646_locales.select { |_, req| !req }.map(&:first)
-  end 
-
-
-  # Generates a new API key for the Project. Does not save the Project.
-  def create_api_key() self.api_key = SecureRandom.uuid end
+  # Generates a new API token for the Project. Does not save the Project.
+  def create_api_token() self.api_token = SecureRandom.uuid end
 
   # Returns the number of Translations pending translation.
   #
@@ -350,88 +392,84 @@ class Project < ActiveRecord::Base
     super options
   end
 
-  def recalculate_commit_readiness
-    ProjectReadinessRecalculator.perform_once id
-  end
-
   # @private
   def inspect(default_behavior=false)
     return super() if default_behavior
     "#<#{self.class.to_s} #{id}: #{name}>"
   end
 
-  # Updates the `touchdown_branch` head to be the latest translated commit in
-  # the first `watched_branches` branch. Does nothing if either of those fields
-  # are not set.
-
-  def update_touchdown_branch
-    return unless watched_branches.present? && touchdown_branch.present?
-
-    retried = false
-    begin
-      repo.fetch
-    rescue Git::GitExecuteError
-      FileUtils.rm_rf repo_directory
-      repo.fetch
-    end
-
-    found_commit = nil
-    offset = 0
-    until found_commit
-      branch = repo.object(watched_branches.first)
-      return unless branch
-
-      log = branch.log(50).skip(offset)
-      break if log.size.zero?
-      db_commits = commits.for_revision(log.map(&:sha)).where(ready: true).to_a
-      log.each do |log_commit|
-        if db_commits.detect { |dbc| dbc.revision == log_commit.sha }
-          found_commit = log_commit
-          break
-        end
-      end
-      offset += log.size
-    end
-
-    if found_commit
-      system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'update-ref', "refs/heads/#{touchdown_branch}", found_commit.sha
-      system 'git', "--git-dir=#{Shellwords.escape repo_path.to_s}", 'push', '-f', repository_url, (["refs/heads/#{touchdown_branch}"]*2).join(':')
-    end
-  end
-
   private
 
   def repo_path
-    @repo_path ||= REPOS_DIRECTORY.join(repo_directory)
+    return @_repo_path if instance_variable_defined?(:@_repo_path)
+    @_repo_path = repo_directory.present? ? REPOS_DIRECTORY.join(repo_directory) : nil
   end
 
   def repo_directory
-    @repo_dir ||= Digest::SHA1.hexdigest(repository_url) + '.git'
+    return @_repo_dir if instance_variable_defined?(:@_repo_dir)
+    @_repo_dir = git? ? (Digest::SHA1.hexdigest(repository_url) + '.git') : nil
+  end
+
+  def working_repo_path
+    return @_working_repo_path if instance_variable_defined?(:@_working_repo_path)
+    @_working_repo_path = working_repo_directory.present? ? WORKING_REPOS_DIRECTORY.join(working_repo_directory) : nil
+  end
+
+  def working_repo_directory
+    return @_working_repo_dir if instance_variable_defined?(:@_working_repo_dir)
+    @_working_repo_dir = git? ? Digest::SHA1.hexdigest(repository_url) : nil
   end
 
   def clone_repo
+    raise NotLinkedToAGitRepositoryError unless git?
     Git.clone repository_url, repo_directory, path: REPOS_DIRECTORY.to_s, mirror: true
   end
 
+  def clone_working_repo
+    raise NotLinkedToAGitRepositoryError unless git?
+    Git.clone repository_url, working_repo_directory, path: WORKING_REPOS_DIRECTORY.to_s
+  end
+
   def can_clone_repo
-    errors.add(:repository_url, :unreachable) unless repo
+    errors.add(:repository_url, :unreachable) unless git? && repo
   end
 
   def repo_mutex
     @repo_mutex = FileMutex.new(repo_path.to_s + '.lock')
   end
 
-  def add_or_remove_pending_translations
-    ProjectTranslationAdder.perform_once id
+  def working_repo_mutex
+    @working_repo_mutex = FileMutex.new(working_repo_path.to_s + '.lock')
   end
 
-  def invalidate_manifests_and_localizations
-    keys = Shuttle::Redis.keys("manifest:#{id}:*") + Shuttle::Redis.keys("localize:#{id}:*")
-    Shuttle::Redis.del(*keys) unless keys.empty?
+  # If related fields changed, run
+  #   ProjectTranslationAdder for projects with {Commit Commits} and/or
+  #   ProjectTranslationAdderForKeyGroups for projects with {KeyGroup KeyGroups}
+
+  def add_or_remove_pending_translations
+    if git? && %w{targeted_rfc5646_locales key_exclusions key_inclusions key_locale_exclusions key_locale_inclusions}.any?{|field| previous_changes.include?(field)}
+      translation_adder_batch.jobs { ProjectTranslationAdder.perform_once(id) }
+    end
+    if !git? && %w{targeted_rfc5646_locales}.any?{|field| previous_changes.include?(field)}
+      ProjectTranslationAdderForKeyGroups.perform_once id
+    end
   end
 
   def require_valid_locales_hash
     errors.add(:targeted_rfc5646_locales, :invalid) unless targeted_rfc5646_locales.keys.all? { |k| k.kind_of?(String) } &&
         targeted_rfc5646_locales.values.all? { |v| v == true || v == false }
+  end
+
+  # ERRORS
+  # This error will be raised when there are problems related to a repository.
+  # This error class will most likely not be raised directly, but will be subclassed by more specific error classes.
+  class InvalidRepositoryError < StandardError; end;
+
+  # This error will be raised if project doesn't have a repository_url, and we attempt to
+  # initialize a `Git::Repository` object (project.repo) or make a remote call to a git repo.
+  class NotLinkedToAGitRepositoryError < InvalidRepositoryError
+    def initialize
+      super("repository_url is empty")
+    end
   end
 end

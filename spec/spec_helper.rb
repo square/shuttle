@@ -17,6 +17,7 @@ ENV["RAILS_ENV"] ||= 'test'
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 require 'rspec/autorun'
+require 'database_cleaner'
 
 require 'paperclip/matchers'
 require 'sidekiq/testing/inline'
@@ -24,6 +25,9 @@ require 'sidekiq/testing/inline'
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
 Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
+
+# Requires shared examples in model concerns
+Dir[Rails.root.join('spec', 'models', 'concerns', 'common_locale_logic_spec.rb')].each { |f| require f }
 
 # Clear out the database to avoid duplicate key conflicts
 Dir[Rails.root.join('app', 'models', '**', '*.rb')].each { |f| require f }
@@ -43,10 +47,12 @@ RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   # config.fixture_path = "#{::Rails.root}/spec/fixtures"
 
+  config.deprecation_stream = 'log/rspec-deprecations.log'
+
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
-  config.use_transactional_fixtures                 = true
+  config.use_transactional_fixtures                 = false
 
   # If true, the base class of anonymous controllers will be inferred
   # automatically. This will be the default behavior in future versions of
@@ -68,6 +74,15 @@ RSpec.configure do |config|
     Redis::Mutex.sweep
     Shuttle::Redis.flushdb
   end
+
+  config.before :suite do
+    DatabaseCleaner.strategy = :deletion
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.after :each do |example|
+    DatabaseCleaner.clean
+  end
 end
 
 def reset_elastic_search
@@ -84,4 +99,38 @@ def regenerate_elastic_search_indexes
     next unless model.respond_to?(:tire)
     Tire::Tasks::Import.import_model(model.tire.index, model, {})
   end
+end
+
+# Sidekiq Batches do not run their on-success callbacks in the test environment
+# because this feature is implemented using Sidekiq middleware. This shim
+# restores the on-success callback behavior in test.after() do
+
+class Sidekiq::Batch
+  def jobs_with_callbacks(*args, &block)
+    # only the outermost call to Batch#jobs should have hacked behavior when
+    # it completes
+    if Thread.current[:in_jobs_with_callback]
+      return jobs_without_callbacks(*args, &block)
+    end
+    Thread.current[:in_jobs_with_callback] = true
+
+    # assume jobs are run inline and will finish before this method completes
+    jobs_without_callbacks(*args, &block)
+
+    Thread.current[:in_jobs_with_callback] = false
+
+    # now that all jobs are finished, execute the on_success callback
+    status = Status.new(bid)
+    Array.wrap(callbacks['success']).each do |hash|
+      hash.each_pair do |target, options|
+        Sidekiq::Notifications::Callback.new('success', target.to_s).notify(status, options.stringify_keys)
+      end
+    end
+    Array.wrap(callbacks['finished']).each do |hash|
+      hash.each_pair do |target, options|
+        Sidekiq::Notifications::Callback.new('finished', target.to_s).notify(status, options.stringify_keys)
+      end
+    end
+  end
+  alias_method_chain :jobs, :callbacks
 end

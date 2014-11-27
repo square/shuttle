@@ -16,19 +16,25 @@ require "spec_helper"
 
 describe IssuesHelper do
   describe "#issue_url" do
-    before(:all) do
+    before :each do
       @issue = FactoryGirl.create(:issue)
       @translation = @issue.translation
       @key = @translation.key
       @project = @key.project
     end
 
-    before(:each) do
-      @expected_url = helper.project_key_translation_url(@project, @key, @translation) + "#issue-wrapper-#{@issue.id}"
+    it "should return the correct uri given an issue if no user is given" do
+      expect(helper.issue_url(@issue)).to eql(helper.project_key_translation_url(@project, @key, @translation) + "#issue-wrapper-#{@issue.id}")
     end
 
-    it "should return the correct uri given an issue" do
-      expect(helper.issue_url(@issue)).to eql(@expected_url)
+    it "should return the correct uri given an issue if a non-translator user is given" do
+      user = FactoryGirl.create(:user, role: "")
+      expect(helper.issue_url(@issue, user)).to eql(helper.project_key_translation_url(@project, @key, @translation) + "#issue-wrapper-#{@issue.id}")
+    end
+
+    it "should return the correct uri given an issue if a translator user is given" do
+      user = FactoryGirl.create(:user, role: "translator")
+      expect(helper.issue_url(@issue, user)).to eql(helper.edit_project_key_translation_url(@project, @key, @translation) + "#issue-wrapper-#{@issue.id}")
     end
 
     it "should raise an Argument error given nil" do

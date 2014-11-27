@@ -15,13 +15,6 @@
   = "Translation #{@translation.id} - Shuttle"
 - content_for :file_name do
   = 'views/translations/edit'
-- content_for :class do
-  = controller_name
-- content_for :id do 
-  = [controller_name, action_name].join('-')
-- content_for :footer do
-  true
-
 
 / Status Line
 .header
@@ -70,7 +63,7 @@ hr.divider
         legend = @translation.source_locale.name
 
         .control-group
-          #source_copy.well
+          #source_copy.well.seven.columns
             span.highlight
               = @translation.source_copy
 

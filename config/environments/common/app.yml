@@ -1,0 +1,33 @@
+# Use this file to define application specific settings / constants
+
+# Capistrano will deploy the repo from this url. This is not environment specific.
+# For ex: it will not be read from production/app.yml.
+repo_url: https://github.com/square/shuttle.git
+
+# After a user signs up and confirms their email address, he will automatically get 'monitor' access
+# if his email is from one of the domains listed here. We recommend putting in your company email
+# domain here if you trust them and don't want to have to manually activate users from within the company.
+domains_to_get_monitor_role_after_email_confirmation: ['example.com']
+
+# Will be used to determine if the current user can use the autofill feature
+domains_who_can_search_users: ['example.com']
+
+# Will be used to determine the url of a commit
+github_enterprise_domain: "git.example.com"
+
+# Will be used to determine the url of a commit
+stash_domain: "stash.example.com"
+
+# Will be linked to in the footer to give users a way to provide feedback to the engineers running Shuttle
+feedback_link: "https://jira.example.com"
+
+# Will be used for email-related things
+mailer:
+  from: shuttle-engineers@example.com
+  translators_list: translators@example.com
+
+# The author info that will be used when Shuttle is updating the touchdown branch, i.e. when pushing manifest file
+git:
+  author:
+    name: Shuttle
+    email: shuttle-noreply@example.com

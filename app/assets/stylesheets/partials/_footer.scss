@@ -1,19 +1,14 @@
-@import "base/vars";
-@import "css3-mixins";
-
 body {
-  &:not(.sessions) {
-    .wrapper {
-      min-height: 100%;
-      height: auto !important;
-      height: 100%;
-      overflow: hidden;
-      margin-bottom: 0 auto -9em;
-    }
+  .wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    overflow: hidden;
+    margin-bottom: 0 auto -9em;
+  }
 
-    .push {
-      height: 9em;
-    }
+  .push {
+    height: 9em;
   }
 }
 
@@ -32,6 +27,10 @@ footer {
     margin-top: 20px;
     a {
       color: #555555;
+      text-decoration: underline;
+    }
+    i {
+      color: darkred;
     }
   }
 

@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 class ScreenshotsController < ApplicationController
-  before_filter :authenticate_user!
   before_filter :monitor_required, only: [:create]
 
   before_filter :find_project

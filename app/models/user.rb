@@ -15,7 +15,9 @@
 # A user of this application. Users are identified by their email address and
 # authenticated with a password. Authentication is handled by Devise.
 #
-# Users have one of three roles:
+# Users become `activated` by confirming their email address and getting assigned a role.
+#
+# Users can have one of four roles:
 #
 # **Translators** can view localizable strings and contribute translations to
 # those strings in the locales they are comfortable with.
@@ -32,42 +34,33 @@
 # Associations
 # ============
 #
-# |                         |                                                                    |
-# |:------------------------|:-------------------------------------------------------------------|
-# | `authored_translations` | The {Translation Translations} this User has contributed.          |
-# | `reviewed_translations` | The {Translation Translations} this User has approved or rejected. |
-# | `commits`               | All {Commit Commits} submitted by this User for translation.       |
-# | `issues`                | All {Issue Issues} reported by this User.                          |
-# | `comments`              | All {Comment Comments} written by this User.                       |
+# |                         |                                                                              |
+# |:------------------------|:-----------------------------------------------------------------------------|
+# | `authored_translations` | The {Translation Translations} this User has contributed.                    |
+# | `reviewed_translations` | The {Translation Translations} this User has approved or rejected.           |
+# | `commits`               | All {Commit Commits} submitted by this User for translation.                 |
+# | `issues`                | All {Issue Issues} reported by this User.                                    |
+# | `comments`              | All {Comment Comments} written by this User.                                 |
 #
 # Properties
 # ==========
 #
-# |         |                                                                                                              |
-# |:--------|:-------------------------------------------------------------------------------------------------------------|
-# | `role`  | This user's role, determining what actions they are authorized to perform. If `nil`, the user is unapproved. |
-# | `email` | The User's email address.                                                                                    |
+# |                    |                                                                                                              |
+# |:-------------------|:-------------------------------------------------------------------------------------------------------------|
+# | `role`             | This user's role, determining what actions they are authorized to perform. If `nil`, the user is unapproved. |
+# | `email`            | The User's email address.                                                                                    |
+# | `first_name`       | The User's first name.                                                                                       |
+# | `last_name`        | The User's last name.                                                                                        |
+# | `approved_locales` | A list of locales that this translator or reviewer is approved to work with.                                 |
 #
 # There are other columns used by Devise; see the Devise documentation for
-# details.
-#
-# Metadata
-# ========
-#
-# |                    |                                                                              |
-# |:-------------------|------------------------------------------------------------------------------|
-# | `first_name`       | The User's first name.                                                       |
-# | `last_name`        | The User's last name.                                                        |
-# | `approved_locales` | A list of locales that this translator or reviewer is approved to work with. |
-#
-# There are other fields used by Devise; see the Devise documentation for
 # details.
 
 class User < ActiveRecord::Base
   ROLES = %w(monitor translator reviewer admin)
 
   devise :database_authenticatable, :registerable, :confirmable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable, :lockable
 
   has_many :authored_translations, class_name: 'Translation', foreign_key: 'translator_id', inverse_of: :translator, dependent: :nullify
   has_many :reviewed_translations, class_name: 'Translation', foreign_key: 'reviewer_id', inverse_of: :reviewer, dependent: :nullify
@@ -79,26 +72,7 @@ class User < ActiveRecord::Base
   has_many :issues, inverse_of: :user, dependent: :nullify
   has_many :comments, inverse_of: :user, dependent: :nullify
 
-  include HasMetadataColumn
-  has_metadata_column(
-      first_name:               {presence: true, length: {maximum: 100}},
-      last_name:                {presence: true, length: {maximum: 100}},
-
-      encrypted_password:       {presence: true},
-      remember_created_at:      {type: Time, allow_nil: true},
-      current_sign_in_at:       {type: Time, allow_nil: true},
-      last_sign_in_at:          {type: Time, allow_nil: true},
-      current_sign_in_ip:       {type: String, allow_nil: true},
-      last_sign_in_ip:          {type: String, allow_nil: true},
-
-      confirmed_at:             {type: Time, allow_nil: true},
-      confirmation_sent_at:     {type: Time, allow_nil: true},
-
-      locked_at:                {type: Time, allow_nil: true},
-      reset_password_sent_at:   {type: Time, allow_nil: true},
-
-      approved_rfc5646_locales: {type: Array, allow_nil: false, default: []},
-  )
+  serialize :approved_rfc5646_locales, Array
 
   extend LocaleField
   locale_field :approved_locales,
@@ -106,17 +80,27 @@ class User < ActiveRecord::Base
                reader: ->(values) { values.map { |v| Locale.from_rfc5646 v } },
                writer: ->(values) { values.map(&:rfc5646) }
 
-  validates :role,
-            inclusion: {in: ROLES},
-            allow_nil: true
+  validates :first_name, presence: true, length: { minimum: 1, maximum: 100 }
+  validates :last_name, presence: true,  length: { minimum: 1, maximum: 100 }
+  validates :role, inclusion: {in: ROLES}, allow_nil: true
 
   extend SetNilIfBlank
   set_nil_if_blank :role
 
-  before_save :activate_user
+  scope :has_role, -> { where("users.role IS NOT NULL") }
+  scope :confirmed, -> { where("users.confirmed_at IS NOT NULL") }
+  scope :activated, -> { has_role.confirmed }
 
-  def activate_user
-    self.confirmed_at ||= Time.now.utc if self.role.present?
+  # Updates the user's role to 'monitor' if the user's email address' domain is one of
+  # the `domains_to_get_monitor_role_after_email_confirmation` in settings.yml.
+  # The reason is that we trust these email addresses, and don't need an admin to
+  # activate their accounts.
+  # For all other email addresses, admin approval is required for them to use the application.
+  def after_confirmation
+    privileged_domains = Shuttle::Configuration.app[:domains_to_get_monitor_role_after_email_confirmation]
+    if privileged_domains && privileged_domains.include?(email_domain)
+      update(role: 'monitor') unless has_role?
+    end
   end
 
   # @private Used by Devise.
@@ -154,6 +138,22 @@ class User < ActiveRecord::Base
     admin? || approved_rfc5646_locales.include?(locale_id.strip)
   end
 
+  # @return [true, false] whether or not the user has permissions to search other users
+  def can_search_users?
+    allowed_domains = Shuttle::Configuration.app[:domains_who_can_search_users]
+    allowed_domains && allowed_domains.include?(email_domain)
+  end
+
+  # @return [true, false] whether or not the user has a role and confirmed their email address
+  def activated?
+    has_role? && confirmed?
+  end
+
+  # @return [true, false] whether or not the user has a role
+  def has_role?
+    role.present?
+  end
+
   # @private
   def as_json(options={})
     options[:except] = Array.wrap(options[:only])
@@ -164,7 +164,6 @@ class User < ActiveRecord::Base
     options[:except] <<  :current_sign_in_ip
     options[:except] <<  :last_sign_in_ip
     options[:except] <<  :locked_at
-    options[:except] <<  :metadata
 
     options[:methods] = Array.wrap(options[:methods])
     options[:methods] << :name
@@ -181,5 +180,10 @@ class User < ActiveRecord::Base
   def inspect(default_behavior=false)
     return super() if default_behavior
     "#<#{self.class.to_s} #{id}: #{email} (#{role})>"
+  end
+
+  # @private
+  def email_domain
+    Mail::Address.new(email).domain
   end
 end

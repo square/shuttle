@@ -12,7 +12,7 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-= form_for [project, key, translation, issue], remote: true do |f|
+= form_for [project, key, translation, issue], remote: true, html: {class: 'issue-form'} do |f|
   - if issue.errors.any?
     .control-group.errors
       label.control-label Errors:
@@ -21,17 +21,17 @@
           - issue.errors.full_messages.each do |msg|
             li = msg
   .control-group
-    = f.label :summary, class: 'control-label'
+    = f.label :type, class: 'control-label'
     .controls
-      = f.text_field :summary
+      = f.select :kind, t('models.issue.kind').to_a.map(&:reverse)
   .control-group
     = f.label :priority, class: 'control-label'
     .controls
       = f.select :priority, t('models.issue.priority').to_a.map(&:reverse).tap{|outer_arr| outer_arr.each {|arr| arr[1] = nil if arr[1] == :none}}
   .control-group
-    = f.label :kind, class: 'control-label'
+    = f.label :summary, class: 'control-label'
     .controls
-      = f.select :kind, t('models.issue.kind').to_a.map(&:reverse)
+      = f.text_field :summary
   .control-group
     = f.label :description, class: 'control-label'
     .controls
@@ -39,7 +39,8 @@
   .control-group
     = f.label :subscribed_emails, class: 'control-label'
     .controls
-      = f.text_field :subscribed_emails, value: issue.subscribed_emails.join(", "), placeholder: "person1@example.com, person2@example.com"
+      - emails = issue.errors.any? ? issue.subscribed_emails : (issue.subscribed_emails + [current_user.email]).uniq
+      = f.text_field :subscribed_emails, value: emails.join(", "), placeholder: "person1@example.com, person2@example.com", class: "issue-subscribed-emails"
   - unless issue.new_record?
     .control-group
       = f.label :status, class: 'control-label'
@@ -48,3 +49,4 @@
   .control-group
     .controls
       = f.submit
+      = button_tag 'Cancel', class: "small default cancel-button"

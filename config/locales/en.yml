@@ -12,6 +12,7 @@ en:
               not_translated: cannot be set when translation is pending
             copy:
               invalid_interpolations: has an invalid %{fencer} interpolation
+              unmatched_fences: fences do not match the source copy fences
         translation_unit:
           attributes:
             source_copy_sha_raw:
@@ -22,6 +23,17 @@ en:
               cant_equal_source_locale: can’t equal source locale
             base:
               illegal_change: Translators can’t change a translation that has been approved.
+        key_group:
+          attributes:
+            base:
+              not_finished: latest requested import is not yet finished
+        locale_association:
+          attributes:
+            target_rfc5646_locale:
+              cant_equal_to_source_locale: cannot equal to source rfc5646 locale
+              iso639_doesnt_match_source_iso639: iso639 doesn't match source's
+            uncheck_disabled:
+              cannot_disable_uncheck_if_its_not_checked: cannot disable unchecking if it's not checked by default
     attributes:
       project:
         name: name
@@ -39,8 +51,7 @@ en:
         key_inclusions: Only translate keys containing these substrings
         key_locale_exclusions: Don’t translate keys containing these substrings to these locales
         key_locale_inclusions: Only translate keys containing these substrings to these locales
-        cache_localization: precompile and cache localizer output
-        cache_manifest_formats: precompile and cache manifests for these exporters
+        default_manifest_format: Export manifest in this format by default
         watched_branches: watched branches
       commit:
         revision: revision
@@ -103,6 +114,7 @@ en:
       invalid_sha: is not a valid SHA2 digest
       unknown_sha: does not exist in the Git repository
       wrong_sha_type: is not the correct Git object type
+      readonly: cannot be changed
   helpers:
     submit:
       commit:
@@ -134,6 +146,11 @@ en:
       mon_day: "%b %-d"
       mon_day_year: "%m/%-d/%Y"
   controllers:
+    api:
+      v1:
+        key_groups:
+          invalid_api_token: Invalid project API TOKEN
+          key_group_not_found: Key group doesn't exist
     application:
       mass_assignment_security: You tried to modify something you weren’t allowed to!
       monitor_required: You must be a monitor to do that.
@@ -141,6 +158,7 @@ en:
       reviewer_required: You must be a reviewer to do that.
       admin_required: You must be an administrator to do that.
     commits:
+      blank_repository_url: This project does not have a repository url. This action only applies to projects that have a repository.
       create:
         success: Your commit %{revision} has been received and is being processed.
         already_submitted: You have already submitted that revision for translation. Once it is loaded from the repository, it will appear on Shuttle and the import process will begin.
@@ -150,12 +168,11 @@ en:
         invalid_format: Not a valid export format.
       base:
         unknown_locale: You must specify a known locale to import.
+        not_found_in_repo: Commit with sha '%{revision}' could not be found in git repo. It may have been rebased away. Please submit the new sha to get your strings translated.
       import:
         done: Import completed.
       recalculate:
         success: Commit %{sha} has been successfully recalculated.
-      redo:
-        success: Commit %{sha} will be reimported momentarily.
       destroy:
         deleted: Commit %{sha} has been removed.
       stash:
@@ -166,16 +183,22 @@ en:
     projects:
       create:
         success: "%{project} was created."
+        failure: "Project couldn't be created."
       update:
         success: "%{project} was updated."
+        failure: "Project couldn't be updated."
       sync:
         success: The latest revision (%{revision}) is being loaded and parsed.
         up_to_date: "%{project} is already up to date."
       destroy:
         gone: "%{project} has been removed."
+      mass_copy_translations:
+        success: "Success. Shuttle is now mass copying translations from %{from} to %{to}."
+        failure: "Failure. Not copying translations."
     translations:
       update:
         success: Translation updated.
+        failure: Translation could not be updated !
     users:
       destroy:
         success: "%{user}’s account was deleted."
@@ -190,6 +213,17 @@ en:
         success: The translation memory entry was deleted.
       update:
         success: The translation memory entry was updated.
+  workers:
+    translations_mass_copier:
+      from_and_to_cannot_be_equal: "Source and target locales cannot be equal to each other"
+      invalid_rfc5646_locale: "Invalid %{kind} locale"
+      iso639s_doesnt_match: "Source and target locales are not in the same language family (their ISO639s do not match)"
+      translation_adder_batch_still_running: "Project Translation Adder batch is still running. Try after it finishes."
+      from:
+        not_a_targeted_or_base_locale: "Source locale is neither the base locale nor one of the project target locales"
+      to:
+        not_a_targeted_locale: "Target locale is not one of the project target locales"
+        cannot_copy_to_projects_base_locale: "Cannot copy to project base locale"
   models:
     user:
       name: "%{first} %{last}"
@@ -216,6 +250,7 @@ en:
       kind:
         1: Needs More Context
         2: Typo
+        7: Feature Not Relevant
         3: Code Syntax Issue
         4: Mistranslation
         5: Truncation
@@ -307,6 +342,10 @@ en:
         subject: "[Shuttle] Finished translation of commit"
       notify_submitter_of_import_errors:
         subject: "[Shuttle] Error(s) occurred during the import"
+        not_found_in_repo_message: "Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated."
+      notify_import_errors_in_commit_creator:
+        subject: "[Shuttle] Import Failed for sha: %{sha}"
+        not_found_in_repo_message: "Shuttle couldn't find your sha '%{sha}' in the git repo. This typically happens when your commit gets rebased away or the sha was invalid. Please submit the new sha to be able to get your strings translated."
     issue:
       issue_created:
         subject: "[Shuttle] %{name} reported a new issue. Issue Summary: %{summary}"

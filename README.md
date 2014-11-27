@@ -3,12 +3,15 @@ Shuttle: Magic localization dust [![Build Status](https://travis-ci.org/square/s
 
 
 Shuttle is a website allowing for the automatic extraction and reintegration of
-localizable strings in a code base. In addition, it provides a workflow for
+localizable strings in a code base. It also provides an API where articles can be
+submitted for translation and retrieved. In addition, it provides a workflow for
 translators and reviewers optimized for the efficient processing of many
 strings. Finally, for project managers, it provides a dashboard allowing them to
 view and manage the progress of a localization effort.
 
-The typical **Shuttle workflow** is as follows:
+Shuttle can be thought of as a Continuous Integration system for translations.
+
+One typical **Shuttle workflow** is as follows:
 
 1. An engineer makes a commit to a Project, and marks that commit as requiring
    localization in Shuttle.
@@ -23,35 +26,54 @@ The typical **Shuttle workflow** is as follows:
 7. When the commit is deployed, Shuttle provides a manifest of translated
    strings that is downloaded as part of the deploy artifact.
 
+Another typical **Shuttle workflow** is as follows:
+
+1. An engineer makes an API call using a Project's api_token to submit a
+   new {KeyGroup} (this can be an Article, Email, or anything else).
+2. Shuttle parses the {KeyGroup}, splits it up into small pieces of strings.
+3. Shuttle determines which strings need translation while optimizing for
+   efficiency and accuracy. These strings appear on the translators’ dashboard.
+4. Translators translate all these strings. They then appear on the reviewers’
+   dashboard.
+5. Reviewers review and approve translations.
+6. Once all translations applying to a {KeyGroup} are approved for all of a
+   Project's required localizations, the {KeyGroup} is marked as ready.
+7. An engineer makes an API call to retrieve the translated KeyGroups.
+
 The whole process is extremely parallelizable: while one commit might be pending
 translation or review, an engineer can make additional commits with new copy,
 and they will also sit in the queue awaiting translation. Once any commit is
-fully localized, it is marked as ready for release.
+fully localized, it is marked as ready for release. Most of this applies to
+KeyGroups as well, except, Shuttle doesn't keep versions for KeyGroups and
+any new submission will override the contents of the previous submission.
 
-Shuttle will refuse to deliver a manifest for a commit that has not been fully
-translated and reviewed. To prevent such deploys, engineers should add a test to
-their CI script that ensures that the manifest endpoint does not return 404.
+Shuttle will refuse to deliver a manifest for a commit or a KeyGroup that
+has not been fully translated and reviewed. To prevent such deploys, engineers
+should add a test to their CI script that ensures that the manifest endpoint
+does not return 404.
 
 Getting Started
 ---------------
 
 ### Starting the server
 
-Developing for Shuttle requires Ruby 1.9.3, PostgreSQL, Redis, Tidy, and a modern
-version of libarchive. To run Shuttle for the first time:
+Developing for Shuttle requires Ruby 2.0.0, PostgreSQL, Redis, Tidy, Sidekiq Pro
+and a modern version of libarchive. To run Shuttle for the first time:
 
 1. Clone this project. You can run `brew bundle` to install all dependencies available 
    via Homebrew, which are specified in the `Brewfile`, or install them sequentially
    specified below.
+   
+2. Buy SidekiqPro, place your private repo url in Gemfile.
 
-2. Install a modern version of libarchive, one that supports the GNU tar format.
+3. Install a modern version of libarchive, one that supports the GNU tar format.
    (The version that comes with Mac OS X does not.) On OS X, you can run
 
         brew install libarchive
 
    If you have an out-of-date libarchive version, you will see missing constant
    errors in the multifile exporters.
-3. Create a PostgreSQL user called `shuttle`, and make it the owner of two
+4. Create a PostgreSQL user called `shuttle`, and make it the owner of two
    PostgreSQL databases, `shuttle_development` and `shuttle_test`:
 
         brew install postgresql
@@ -59,29 +81,29 @@ version of libarchive. To run Shuttle for the first time:
         createdb -O shuttle shuttle_development
         createdb -O shuttle shuttle_test
 
-4. Install the libarchive gem using a modern version of libarchive.
+5. Install the libarchive gem using a modern version of libarchive.
    For Homebrew, run
 
         gem install libarchive -- --with-opt-dir=/usr/local/Cellar/libarchive/3.1.2
 
-5. Install Redis and ElasticSearch. For Homebrew, run
+6. Install Redis and ElasticSearch. For Homebrew, run
 
         brew install redis elasticsearch
 
    and start them, following the post-install instructions for each of them.
-6. Install Qt, the cross-platform application framework, which is used for capybara-webkit.
+7. Install Qt, the cross-platform application framework, which is used for capybara-webkit.
    For Homebrew, run
 
         brew install qt
 
-6. You’ll need to run Bundler: `bundle install`
-7. Run `rake db:migrate db:seed` to seed the database.
-8. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
-9. Verify that all specs pass with `rspec spec`
-10. To run the server, use `rails server`
-11. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
+8. You’ll need to run Bundler: `bundle install`
+9. Run `rake db:migrate db:seed` to seed the database.
+10. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
+11. Verify that all specs pass with `rspec spec`
+12. To run the server, use `rails server`
+13. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
 to run the Sidekiq development server.
-12. Visit [http://localhost:3000](http://localhost:3000) and log in with the
+14. Visit [http://localhost:3000](http://localhost:3000) and log in with the
    credentials:
 
    username: **admin@example.com**<br>
@@ -113,13 +135,6 @@ translations across all required locales (should be zero), and the second number
 is the total number of required translations (should be the number of
 translatable strings times the number of required locales, minus any keys that
 are not applicable to certain locales).
-
-Clicking on the commit's SHA will bring you to the GitHub webpage for that
-commit, if the project's repository URL is recognized as a GitHub project. The
-"Redo Import" button re-runs an import, in the event that the previous import
-completed abnormally. The "Status" button takes you to a detailed status page
-where you can see a list of strings in the project and their translation
-statuses.
 
 The "Import and approve a localization" field allows you to import an existing
 localization. For example, if your Rails project already has an "fr.yml" file
@@ -208,21 +223,26 @@ For information about requests and responses, see {ApplicationController}.
 
 ### Models
 
-Each {Project} has multiple {Commit Commits}. When a Commit is created, it is
-scanned by {Importer Importers} for localizable strings. These strings are
-represented as {Translation} records. A base Translation is created in the
-project's base locale, and preapproved, and pending, untranslated Translations
-are created for each target locale. These families of Translations are grouped
-under {Key} records, one for each unique key in the Project. The newly created
-Translations are in the Project's base locale. Future imports reuse the existing
-Keys if the source copy is unchanged, otherwise generating new Keys and new
-Translations for the new source copy. {User Users} with the translator role then
-fill out pending Translations, and reviewers approve them.
+Each {Project} has multiple {Commit Commits} or {KeyGroup KeyGroups}.
+When a Commit or KeyGroup is created, it is scanned by {Importer Importers} for
+localizable strings. These strings are represented as {Translation} records.
+A base Translation is created in the project's base locale, and preapproved,
+and pending, untranslated Translations are created for each target locale.
+These families of Translations are grouped under {Key} records, one for each
+unique key in the Project. The newly created Translations are in the Project's
+base locale. Future imports reuse the existing Keys if the source copy is unchanged,
+otherwise generating new Keys and new Translations for the new source copy.
+{User Users} with the translator role then fill out pending Translations, and
+reviewers approve them.
 
-When all of a Commit's Translations in all of a Project's required locales are
-marked as approved, the Commit is marked as ready. This Commit's translated copy
-can then be exported to a manifest file using an {Exporter}, or localized
-versions of project files can be generated and downloaded using a {Localizer}.
+When all of a Commit's/KeyGroup's Translations in all of a Project's required
+locales are marked as approved, the Commit/KeyGroup is marked as ready.
+This Commit's/KeyGroup's translated copy can then be exported to a manifest
+file using an {Exporter}, or localized versions of project files can be
+generated and downloaded using a {Localizer}.
+
+KeyGroup keeps an ordered set of {Key Keys} whereas Commit keeps an unordered
+set, so that the exporter can put the Translations back together in the right order.
 
 Because new source copy overwrites existing source copy, a translation memory
 consisting of {TranslationUnit TranslationUnits} is maintained. This is used by
@@ -240,9 +260,11 @@ Record mixins that leverage these PostgreSQL features.
 Observers are used for more high-level triggers, such as sending emails. See the
 classes in `app/models/observers` for more.
 
-Models also use the HasMetadataColumn gem to reduce their width and incorporate
-schemaless data. Most models have a JSON-formatted `metadata` column to which
-new information can be added or removed without having to create new migrations.
+Issues, Comments and Screenshots make up a light-weight issue-tracking system,
+and can be used by engineers and translators for easy communication and marking
+issues translations (compare to email communication where you don't see the
+previously raised issues in a translation unless you search for it on an external
+system).
 
 ### Authentication and Authorization
 
@@ -345,8 +367,6 @@ To-Do Items
 ### Translation view
 
 * Display meta-indication of special characters, esp. nonprinting ones
-* Translator ability to flag a translation with a question or issue, and then
-  mark it resolved
 
 ### Explosions
 

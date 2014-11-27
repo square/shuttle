@@ -1,0 +1,48 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+p This setting is used in multi-locale translation of a string.
+p
+  | For example, assume a project should be translated into 'fr' and 'fr-CA'. When you are translating a string in
+    that project into 'fr', you will, often times, want to copy the same translation into 'fr-CA'. To be able to
+    do that quickly in the translation workbench, you should create a locale association from 'fr' to 'fr-CA' and
+    set `checked` to true.
+br
+hr.divider
+
+= form_for @locale_association do |f|
+  .row
+    .eight.columns
+      .control-group
+        = f.label :source_rfc5646_locale, class: 'control-label'
+        .controls
+          = f.text_field :source_rfc5646_locale, class: 'locale-field'
+      .control-group
+        = f.label :target_rfc5646_locale, class: 'control-label'
+        .controls
+          = f.text_field :target_rfc5646_locale, class: 'locale-field'
+    .eight.columns
+      .control-group
+        = f.label :checked, "Checked by Default", class: 'control-label'
+        .controls.checkbox-wrapper
+          = f.check_box :checked
+          span.help-block Should the checkbox for the targeted locale be checked by default?
+      .control-group
+        = f.label :uncheck_disabled, class: 'control-label'
+        .controls.checkbox-wrapper
+          = f.check_box :uncheck_disabled
+          span.help-block Do you want to disable unchecking the checkbox if it's checked?
+  .form-actions
+    = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
+    button.default href=locale_associations_url Cancel

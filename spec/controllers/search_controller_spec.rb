@@ -18,12 +18,11 @@ describe SearchController do
   include Devise::TestHelpers
 
   describe "#translations" do
-    before :all do
+    before :each do
       reset_elastic_search
-      Translation.delete_all
 
       update_date = DateTime.new(2014, 1, 1)
-      @user = FactoryGirl.create(:user, role: 'translator')
+      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
       @start_date = (update_date - 1.day).strftime('%m/%d/%Y')
       @end_date = (update_date + 1.day).strftime('%m/%d/%Y')
 
@@ -32,8 +31,8 @@ describe SearchController do
           other_field        = (field == 'copy' ? 'source_copy' : 'copy')
           locale_field       = (field == 'copy' ? :rfc5646_locale : :source_rfc5646_locale)
           other_locale_field = (field == 'copy' ? :source_rfc5646_locale : :rfc5646_locale)
-          %w(en fr).each do |locale|
-            other_locale = (locale == 'en' ? 'fr' : 'en')
+          %w(en ja-JP).each do |locale|
+            other_locale = (locale == 'en' ? 'ja-JP' : 'en')
             FactoryGirl.create :translation,
                                field              => "foo #{term} bar",
                                other_field        => 'something else',
@@ -46,12 +45,10 @@ describe SearchController do
       end
 
       regenerate_elastic_search_indexes
-    end
 
-    before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      sleep(2)
+      sleep(1)
     end
 
     it "should search the copy field by default" do
@@ -71,16 +68,16 @@ describe SearchController do
     end
 
     it "should filter by target locale" do
-      get :translations, query: 'term1', target_locales: 'fr', format: 'json'
+      get :translations, query: 'term1', target_locales: 'ja-JP', format: 'json'
       expect(response.status).to eql(200)
       results = JSON.parse(response.body)
       expect(results.size).to eql(1)
       expect(results.first['copy']).to eql('foo term1 bar')
-      expect(results.first['locale']['rfc5646']).to eql('fr')
+      expect(results.first['locale']['rfc5646']).to eql('ja-JP')
     end
 
     it "should filter by more than one target locale" do
-      get :translations, query: 'term1', target_locales: 'fr, en', format: 'json'
+      get :translations, query: 'term1', target_locales: 'ja-JP, en', format: 'json'
       expect(response.status).to eql(200)
       results = JSON.parse(response.body)
       # Ensure ordering since ElasticSearch does not guarantee ordering
@@ -88,7 +85,7 @@ describe SearchController do
       expect(results.first['copy']).to eql('foo term1 bar')
       expect(results.first['locale']['rfc5646']).to eql('en')
       expect(results.last['copy']).to eql('foo term1 bar')
-      expect(results.last['locale']['rfc5646']).to eql('fr')
+      expect(results.last['locale']['rfc5646']).to eql('ja-JP')
     end
 
     it "should filter by translator" do
@@ -128,7 +125,7 @@ describe SearchController do
     end
 
     it "should respond with a 422 if the locale is unknown" do
-      get :translations, query: 'term1', target_locales: 'fr, foobar?', format: 'json'
+      get :translations, query: 'term1', target_locales: 'ja-JP, foobar?', format: 'json'
       expect(response.status).to eql(422)
       expect(response.body).to be_blank
     end
@@ -149,17 +146,15 @@ describe SearchController do
   end
 
   describe '#keys' do
-    before :all do
+    before :each do
       reset_elastic_search
-      @user    = FactoryGirl.create(:user, role: 'translator')
+      @user    = FactoryGirl.create(:user, :confirmed, role: 'translator')
       @project = FactoryGirl.create(:project)
 
       5.times { |i| FactoryGirl.create :key, project: @project, key: "t1_n#{i}" }
       5.times { |i| FactoryGirl.create :key, project: @project, key: "t2_n#{i}" }
       regenerate_elastic_search_indexes
-    end
 
-    before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
       sleep(2)
@@ -223,10 +218,10 @@ describe SearchController do
     let(:prefix2) { "123456" }
     let(:prefix3) { "abc111" }
 
-    before :all do
+    before :each do
       reset_elastic_search
 
-      @user     = FactoryGirl.create(:user, role: "translator")
+      @user     = FactoryGirl.create(:user, :confirmed, role: "translator")
       @project1 = FactoryGirl.create(:project)
       @project2 = FactoryGirl.create(:project)
       Commit.delete_all

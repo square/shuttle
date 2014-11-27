@@ -63,6 +63,14 @@ body.translations {
 
   .info-side {
     background-color: $gray6;
+
+    #source_copy {
+      word-wrap: break-word;
+    }
+  }
+
+  .edit-side .edit-page-link {
+    float: right;
   }
 
   .activity {

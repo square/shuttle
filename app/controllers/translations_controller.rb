@@ -18,7 +18,6 @@
 class TranslationsController < ApplicationController
   include TranslationDecoration
 
-  before_filter :authenticate_user!
   before_filter :translator_required, only: [:edit, :update]
 
   before_filter :find_project
@@ -107,48 +106,24 @@ class TranslationsController < ApplicationController
     # translators cannot modify approved copy
     return head(:forbidden) if @translation.approved? && current_user.role == 'translator'
 
-    # Need to save true copy_was because assign_attributes will push back the cache
-    @translation.freeze_tracked_attributes
-    @translation.assign_attributes translation_params
-
-    @translation.translator = current_user if @translation.copy_was != @translation.copy
-    @translation.modifier = current_user
-
-    # de-translate translation if empty
-    unless params[:blank_string].parse_bool
-      @translation.copy = nil if @translation.copy.blank?
-      if @translation.copy.nil?
-        @translation.translator = nil
-        @translation.approved = nil
-        @translation.reviewer = nil
-      end
-    end
-
-    # the only thing that can be edited is copy, so optimize DB calls if this
-    # is not a copy edit
-    if @translation.copy_was != @translation.copy # copy_changed? can be true even if the copy wasn't changed...
-      @translation.preserve_reviewed_status = current_user.reviewer?
-      @translation.save
-    else
-      # if the current user is a reviewer, treat this as an approve action; this
-      # makes tabbing through fields act as approval in the front-end
-      if current_user.reviewer?
-        @translation.reviewer = current_user
-        @translation.approved = true
-        @translation.preserve_reviewed_status = true
-        @translation.save
-      end
-    end
+    mediator = TranslationUpdateMediator.new(@translation, current_user, params)
+    mediator.update!
 
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
       format.json do
-        if @translation.valid?
+        if mediator.success?
           render json: decorate([@translation]).first
         else
-          render json: @translation.errors, status: :unprocessable_entity
+          render json: mediator.errors, status: :unprocessable_entity
         end
       end
-      format.html { redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { success: t('controllers.translations.update.success') } }
+      format.html do
+        if mediator.success?
+          redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { success: t('controllers.translations.update.success') }
+        else
+          redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { alert: mediator.errors.unshift(t('controllers.translations.update.failure')) }
+        end
+      end
     end
   end
 
@@ -170,11 +145,12 @@ class TranslationsController < ApplicationController
   # | `id`         | The ID of a Translation.           |
 
   def approve
-    @translation.freeze_tracked_attributes
     @translation.approved = true
     @translation.reviewer = current_user
     @translation.modifier = current_user
     @translation.save
+
+    # TODO (yunus): need to run KeyRecalculator here. or get rid of these endpoints and use `update`
 
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
       format.json { render json: decorate([@translation]).first }
@@ -199,11 +175,12 @@ class TranslationsController < ApplicationController
   # | `id`         | The ID of a Translation.           |
 
   def reject
-    @translation.freeze_tracked_attributes
     @translation.approved = false
     @translation.reviewer = current_user
     @translation.modifier = current_user
     @translation.save
+
+    # TODO (yunus): need to run KeyRecalculator here. or get rid of these endpoints and use `update`
 
     respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
       format.json { render json: decorate([@translation]).first, location: project_key_translation_url(@project, @key, @translation) }
@@ -247,9 +224,17 @@ class TranslationsController < ApplicationController
   # Returns 204 Not Content and an empty body if no match is found.
 
   def match
+    source_copy = @translation.source_copy
+
     @translation.locale.fallbacks.each do |fallback|
-      @match = TranslationUnit.exact_matches(@translation, fallback).
-          order('created_at DESC').first
+      @match = Translation.search do
+        filter :term, { approved: 1 }
+        filter :term, { rfc5646_locale: fallback.rfc5646 }
+        filter :term, { source_copy: source_copy }
+        sort { by :created_at, 'desc' }
+        size 1
+      end.first
+
       break if @match
     end
 
@@ -286,13 +271,12 @@ class TranslationsController < ApplicationController
     respond_to do |format|
       format.json do
         limit = 5
-        query_filter = @translation.source_copy
-        target_locale = @translation.rfc5646_locale
+        query_filter = params[:source_copy] || @translation.source_copy
+        target_locales = @translation.locale.fallbacks.map(&:rfc5646)
         @results = Translation.search(load: { include: { key: :project } }) do
           # TODO: Remove duplicate where source_copy, copy are same
-          filter :and,
-                 { term: { rfc5646_locale: target_locale } },
-                 { not: { missing: { field: 'copy' } } }
+          filter :term, { approved: 1 }
+          filter :terms, { rfc5646_locale: target_locales }
 
           size limit
           query { match 'source_copy', query_filter, operator: 'or' }
@@ -318,7 +302,7 @@ class TranslationsController < ApplicationController
 
   def find_issues
     @issues = @translation.issues.includes(:user, comments: :user).order_default
-    @issue = Issue.new
+    @issue = Issue.new_with_defaults
   end
 
   def translation_params
@@ -330,9 +314,10 @@ class TranslationsController < ApplicationController
       {
           source_copy: translation.source_copy,
           copy: translation.copy,
-          match_percentage: source_copy.similar(translation.source_copy)
+          match_percentage: source_copy.similar(translation.source_copy),
+          rfc5646_locale: translation.rfc5646_locale
       }
-    end.reject { |t| t[:match_percentage] < 60 }
+    end.reject { |t| t[:match_percentage] < 70 }
     translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
   end
 end

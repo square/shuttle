@@ -21,28 +21,20 @@ describe IssuesController do
 
   include Devise::TestHelpers
 
-  before(:all) do
-    @user = FactoryGirl.create(:user, role: 'monitor', first_name: "Foo", last_name: "Bar")
+  before :each do
+    @user = FactoryGirl.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "foo@bar.com")
     @project = FactoryGirl.create(:project)
     @key = FactoryGirl.create(:key, project: @project)
     @translation = FactoryGirl.create(:translation, key: @key)
     @path_params = { translation_id: @translation.to_param, key_id: @key.to_param, project_id: @project.to_param }
-    Issue.delete_all
-  end
-
-  before :each do
     @request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in @user
     ActionMailer::Base.deliveries.clear
   end
 
-  let(:params) { @path_params.merge(extra_params) }
-
   describe "#create" do
-    subject { xhr :post, :create, params }
-
     context "with valid issue arguments" do
-      [ { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: 1, subscribed_emails: "a@b.com, c@d.com, a@b.com" } },
+      [ { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: 1, subscribed_emails: "test1@example.com, test2@example.com, test1@example.com" } },
         { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: nil, subscribed_emails: "" } },
         { issue: { summary: "this is a unique summary", description: "my description", kind: 1, priority: '' } },
         { issue: { summary: "this is a unique summary", description: "my description", kind: 1 } }
@@ -51,7 +43,9 @@ describe IssuesController do
 
         it "creates the issue; renders javascript code to replace the #issues that includes the new issue; and response doesn't include errors; sends issue_created email" do
           expect(Issue.count).to eql(0)
-          subject
+
+          xhr :post, :create, @path_params.merge(extra_params)
+
           expect(Issue.count).to eql(1)
           issue = Issue.last
           expect(issue.summary).to eql("this is a unique summary")
@@ -65,8 +59,12 @@ describe IssuesController do
           expect(response.body).to include("id=\\\"issues\\\"")
           expect(response.body).to include("id=\\\"issue-#{issue.id}\\\"")
 
-          expect(ActionMailer::Base.deliveries.size).to eql(1)
-          expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: this is a unique summary")
+          if extra_params[:issue][:subscribed_emails].present?
+            expect(ActionMailer::Base.deliveries.size).to eql(1)
+            expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar reported a new issue. Issue Summary: Needs More Context - this is a unique summary")
+          else
+            expect(ActionMailer::Base.deliveries.size).to eql(0)
+          end
         end
       end
     end
@@ -75,12 +73,10 @@ describe IssuesController do
       let(:extra_params) { { issue: { subscribed_emails: "a@b.com,  a@b.com  ,  abc xyz, abc@abc, abc.com", priority: 30 } } }
 
       it "doesn't create an issue; response includes the errors; doesn't send an email" do
-        subject
+        xhr :post, :create, @path_params.merge(extra_params)
         expect(Issue.count).to eql(0)
         expect(response).to be_success
         expect(response.body).to include("Errors:")
-        expect(response.body).to include('Summary can’t be blank')
-        expect(response.body).to include('Description can’t be blank')
         expect(response.body).to include('Priority must be less than or equal to 3')
         expect(response.body).to include('Kind not a number')
         expect(response.body).to include('Subscribed email abc xyz is not a valid email address')
@@ -97,13 +93,10 @@ describe IssuesController do
       ActionMailer::Base.deliveries.clear
     end
 
-    subject { xhr :patch, :update, params }
-
     context "with valid issue arguments" do
-      let(:extra_params) { { id: @issue.id, issue: { summary: "this is a unique summary updated", description: "my description updated", priority: 2, kind: 2, status: Issue::Status::RESOLVED, subscribed_emails: "a@b.com, c@d.com" } } }
-
       it "updates the issue; renders javascript code to replace the updated #issue-someID; and response doesn't include errors; sends issue_updated email" do
-        subject
+        xhr :patch, :update, @path_params.merge({ id: @issue.id, issue: { summary: "this is a unique summary updated", description: "my description updated", priority: 2, kind: 2, status: Issue::Status::RESOLVED, subscribed_emails: "a@b.com, c@d.com" } })
+
         @issue.reload
         expect(Issue.count).to eql(1)
         expect(@issue.summary).to eql("this is a unique summary updated")
@@ -118,15 +111,13 @@ describe IssuesController do
         expect(response.body).to include("$('#issues #issue-wrapper-#{@issue.id}').replaceWith")
 
         expect(ActionMailer::Base.deliveries.size).to eql(1)
-        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: this is a unique summary updated")
+        expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Foo Bar updated an issue. Issue Summary: Typo - this is a unique summary updated")
       end
     end
 
     context "with invalid issue arguments" do
-      let(:extra_params) { { id: @issue.id, issue: { status: "wrong status", subscribed_emails: "xyz" } } }
-
       it "doesn't update an issue; response includes the errors; doesn't send an email" do
-        subject
+        xhr :patch, :update, @path_params.merge({ id: @issue.id, issue: { status: "wrong status", subscribed_emails: "xyz" } })
         @issue.reload
 
         expect(@issue.status).to eql(1)
@@ -138,6 +129,43 @@ describe IssuesController do
 
         expect(ActionMailer::Base.deliveries.size).to eql(0)
       end
+    end
+  end
+
+  describe "#resolve" do
+    it "resolves the issue, subscribes the current user, and sends an email" do
+      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
+      ActionMailer::Base.deliveries.clear
+
+      expect(issue).to_not be_resolved
+      xhr :patch, :resolve, @path_params.merge({ id: issue.id })
+      expect(issue.reload).to be_resolved
+      expect(issue.reload.subscribed_emails).to eql(["test@example.com", "foo@bar.com"])
+      expect(ActionMailer::Base.deliveries.size).to eql(1)
+      expect(ActionMailer::Base.deliveries.first.subject).to include("updated an issue. Issue Summary:")
+      expect(ActionMailer::Base.deliveries.first.to).to eql(["test@example.com", "foo@bar.com"])
+    end
+  end
+
+  describe "#subscribe" do
+    it "subscribes the current user to the issue, but doesn't send an email" do
+      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
+      ActionMailer::Base.deliveries.clear
+
+      xhr :patch, :subscribe, @path_params.merge({ id: issue.id })
+      expect(issue.reload.subscribed_emails).to eql(["test@example.com", "foo@bar.com"])
+      expect(ActionMailer::Base.deliveries.size).to eql(0)
+    end
+  end
+
+  describe "#unsubscribe" do
+    it "unsubscribes the current user from the issue and sends an email" do
+      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com", "foo@bar.com"], translation: @translation)
+      ActionMailer::Base.deliveries.clear
+
+      xhr :patch, :unsubscribe, @path_params.merge({ id: issue.id })
+      expect(issue.reload.subscribed_emails).to eql(["test@example.com"])
+      expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
   end
 end

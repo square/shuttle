@@ -30,13 +30,12 @@ class CommitImporter
 
   def perform(commit_id, options={})
     options.symbolize_keys!
-
     locale = options[:locale] ? Locale.from_rfc5646(options[:locale]) : nil
     force = options[:force] ? true : nil
     commit = Commit.find(commit_id)
     commit.import_strings(locale: locale, force: force)
-  rescue CommitNotFoundError
-    # commit no longer exists, fail silently
+  rescue Git::CommitNotFoundError => err
+    commit.add_import_error(err, "failed in CommitImporter for commit_id #{commit_id}")
   end
 
   include SidekiqLocking

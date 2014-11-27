@@ -1,0 +1,81 @@
+tr.row_class
+  / Project Status
+  td class=(if commit.loading? then 'commit-loading' else (commit.ready? ? 'commit-ready' : 'commit-translating') end)
+
+  /- if not current_user.translator?
+  /  td =(if commit.loading? then 'Loading' else (commit.ready? ? 'Ready' : 'Translating') end)
+
+  / Project Name
+  td = commit.project.name
+
+  / Commit
+  td = link_to commit.revision_prefix, project_commit_url(commit.project, commit)
+
+  / Project Create Date
+  td.centered = commit.created_at.strftime('%m/%d/%Y')
+
+  / Project Due Date
+  td.due-date class=('centered' if !commit.due_date)
+    - if current_user.admin? or current_user.monitor?
+      = form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
+        = f.text_field  :due_date, value: (f.object.due_date.strftime('%m/%d/%Y') if !f.object.due_date.nil?), class: 'datepicker'
+    - elsif commit.due_date
+      span class="#{@home_presenter.due_date_class(commit)}" = l(commit.due_date, format: :mon_day_year)
+
+  / Project Priority
+  td.centered
+    - if current_user.admin?
+      = form_for commit, url: project_commit_url(commit.project, commit, format: 'json') do |f|
+        = f.select :priority, \
+                                t('models.commit.priority').to_a.map(&:reverse).unshift(['-', nil]), \
+                                {}, \
+                                class: 'styled'
+    - else
+      - if commit.priority
+        span class="commit-priority-#{commit.priority}"
+          | P
+          = t("models.commit.priority.#{commit.priority}")
+      - else
+        | -
+
+  / Project Description
+  td class=('centered' if !commit.description)
+    div.description[data-full-description=@home_presenter.full_description(commit)
+      data-short-description=@home_presenter.short_description(commit)
+      data-author=commit.author]
+      = @home_presenter.short_description(commit)
+
+  - if current_user.translator?
+    / Word Translation Count
+    td = "#{number_with_delimiter @home_presenter.commit_stat(commit, :translations, :new)}s (#{number_with_delimiter @home_presenter.commit_stat(commit, :words, :new)}w)"
+    / Word Review Count
+    td = "#{number_with_delimiter @home_presenter.commit_stat(commit, :translations, :pending)}s (#{number_with_delimiter @home_presenter.commit_stat(commit, :words, :pending)}w)"
+  - else
+    / Progress
+    - if commit.loading?
+      td
+        | Importing
+        - if commit.import_batch_status
+          |  (#{pluralize_with_delimiter commit.import_batch_status.pending, 'Job'} Remaining)
+        - else
+          |  (stalled!)
+    - elsif commit.ready?
+      td Ready for Download
+    - else
+      - strings_remaining = @home_presenter.commit_stat(commit, :translations, :pending) + @home_presenter.commit_stat(commit, :translations, :new)
+      td = "Translating #{pluralize_with_delimiter strings_remaining, 'String'}"
+
+  / Translation/Monitor Button
+  - if current_user.translator?
+    - if (current_user.role == 'admin') || (current_user.approved_locales.any?)
+      td
+        input.submit.translate-link[
+          type="button"
+          data-sha=commit.revision
+          data-project=commit.project.to_param
+          data-locale=((current_user.role == 'admin') ? (commit.project.required_locales.any? ? commit.project.required_locales.first.rfc5646 : "fr") : current_user.approved_locales.first.rfc5646)
+          value="Translate"]
+    - else
+      td: button.submit disabled="disabled" No locales
+  - elsif current_user.monitor?
+    td: button.submit href=project_commit_url(commit.project, commit) Monitor

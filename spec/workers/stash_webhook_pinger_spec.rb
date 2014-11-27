@@ -17,6 +17,7 @@ describe StashWebhookPinger do
   include Rails.application.routes.url_helpers
 
   before(:each) do
+    allow(Kernel).to receive(:sleep)
     allow(HTTParty).to receive(:post)
   end
 
@@ -32,14 +33,28 @@ describe StashWebhookPinger do
         @commit = FactoryGirl.create(:commit)
       end
 
-      it "sends an http request to the project stash_webhook_url if one is defined" do
+      it "sends an http request to the project stash_webhook_url 10 times if one is defined" do
         url = "http://www.example.com"
         @commit.project.stash_webhook_url = url
         @commit.project.save!
         expect(HTTParty).to receive(:post).with(
                                 "#{url}/#{@commit.revision}",
                                 anything()
-                            )
+                            ).exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times
+        subject.perform(@commit.id)
+      end
+
+      it "should make sure that the commit is reloaded with the proper state" do
+        url = "http://www.example.com"
+        @commit.project.stash_webhook_url = url
+        @commit.project.save!
+
+        expect(HTTParty).to receive(:post) do |url, params|
+          commit_state = JSON.parse(params[:body])['state']
+          expected_state = @commit.ready? ? 'SUCCESSFUL' : 'INPROGRESS'
+          expect(commit_state).to eql(expected_state)
+          @commit.update_column :ready, !@commit.ready
+        end.exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times
         subject.perform(@commit.id)
       end
 
@@ -47,6 +62,12 @@ describe StashWebhookPinger do
         expect(@commit.project.stash_webhook_url).to be_blank
         expect(HTTParty).not_to receive(:post)
         subject.perform(@commit.id)
+      end
+
+      it "raises a Project::NotLinkedToAGitRepositoryError if project doesn't have a repository_url" do
+        @commit.project.update! repository_url: nil
+        expect(HTTParty).not_to receive(:post)
+        expect { subject.perform(@commit.id) }.to raise_error(Project::NotLinkedToAGitRepositoryError)
       end
     end
 
@@ -62,9 +83,9 @@ describe StashWebhookPinger do
             name: "SHUTTLE-#{@commit.revision_prefix}",
             url: project_commit_url(@commit.project,
                                     @commit,
-                                    host: Shuttle::Configuration.worker.default_url_options.host,
-                                    port: Shuttle::Configuration.worker.default_url_options['port'],
-                                    protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'),
+                                    host: Shuttle::Configuration.app.default_url_options.host,
+                                    port: Shuttle::Configuration.app.default_url_options['port'],
+                                    protocol: Shuttle::Configuration.app.default_url_options['protocol'] || 'http'),
             state: 'INPROGRESS',
             description: 'Currently loading',
         }.to_json))
@@ -88,9 +109,9 @@ describe StashWebhookPinger do
           name: "SHUTTLE-#{@commit.revision_prefix}",
           url: project_commit_url(@commit.project,
                                   @commit,
-                                  host: Shuttle::Configuration.worker.default_url_options.host,
-                                  port: Shuttle::Configuration.worker.default_url_options['port'],
-                                  protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'),
+                                  host: Shuttle::Configuration.app.default_url_options.host,
+                                  port: Shuttle::Configuration.app.default_url_options['port'],
+                                  protocol: Shuttle::Configuration.app.default_url_options['protocol'] || 'http'),
           state: 'INPROGRESS',
           description: 'Currently translating',
       }.to_json))
@@ -108,9 +129,9 @@ describe StashWebhookPinger do
           name: "SHUTTLE-#{@commit.revision_prefix}",
           url: project_commit_url(@commit.project,
                                   @commit,
-                                  host: Shuttle::Configuration.worker.default_url_options.host,
-                                  port: Shuttle::Configuration.worker.default_url_options['port'],
-                                  protocol: Shuttle::Configuration.worker.default_url_options['protocol'] || 'http'),
+                                  host: Shuttle::Configuration.app.default_url_options.host,
+                                  port: Shuttle::Configuration.app.default_url_options['port'],
+                                  protocol: Shuttle::Configuration.app.default_url_options['protocol'] || 'http'),
           state: 'SUCCESSFUL',
           description: 'Translations completed',
       }.to_json))

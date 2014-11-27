@@ -19,17 +19,17 @@ class CommitsController < ApplicationController
   # @private
   COMMIT_ATTRIBUTES = [:exported, :revision, :description, :due_date, :pull_request_url, :priority]
 
-  before_filter :authenticate_user!, except: [:manifest, :localize]
+  skip_before_filter :authenticate_user!, only: [:manifest, :localize]
   before_filter :monitor_required, except: [:show, :search, :gallery, :manifest, :localize, :issues]
-  before_filter :admin_required, only: :clear
 
   before_filter :find_project
+  before_filter :require_repository_url, except: [:show, :tools, :gallery, :issues, :search, :update, :destroy]
   before_filter :find_commit, except: [:create, :manifest, :localize]
   before_filter :find_format
   before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
 
   respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
-                                  :import, :sync, :match, :redo, :clear, :recalculate, :ping_stash]
+                                  :import, :sync, :match, :clear, :recalculate, :ping_stash]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -169,13 +169,8 @@ class CommitsController < ApplicationController
         other_fields           = commit_params.stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
         other_fields[:user_id] = current_user.id
 
-        if already_submitted_revision?(@project, revision)
-          render json: {alert: t('controllers.commits.create.already_submitted')}
-        else
-          CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-          record_submitted_revision @project, revision
-          render json: {success: t('controllers.commits.create.success', revision: revision)}
-        end
+        CommitCreator.perform_once @project.id, revision, other_fields: other_fields
+        render json: {success: t('controllers.commits.create.success', revision: revision)}
       end
     end
   end
@@ -256,7 +251,9 @@ class CommitsController < ApplicationController
   # | `locale` | The RFC 5646 identifier for a locale. |
 
   def import
-    CommitImporter.perform_once @commit.id, locale: params[:locale]
+    @commit.import_batch.jobs do
+      CommitImporter.perform_once @commit.id, locale: params[:locale]
+    end
     respond_with @commit, location: nil
   end
 
@@ -277,54 +274,10 @@ class CommitsController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def sync
-    CommitImporter.perform_once @commit.id
+    @commit.import_batch.jobs do
+      CommitImporter.perform_once @commit.id
+    end
     respond_with @commit, location: nil
-  end
-
-  # Re-scans a revision for strings and adds new Translation records as
-  # necessary. Unlike {#sync}, this method rescans blobs that have already been
-  # scanned.
-  #
-  # Routes
-  # ------
-  #
-  # * `POST /projects/:project_id/commits/:id/redo`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `id`         | The SHA of a Commit.   |
-
-  def redo
-    @commit.update_attribute(:loading, true)
-    CommitImporter.perform_once @commit.id, force: true
-    flash[:success] = t('controllers.commits.redo.success', sha: @commit.revision_prefix)
-    respond_with @commit, location: project_commit_url(@project, @commit)
-  end
-
-  # Removes all workers from the loading list, marks the Commit as not loading,
-  # and recalculates Commit statistics if the Commit was previously loading.
-  # This method should be used to fix "stuck" Commits.
-  #
-  # Routes
-  # ------
-  #
-  # * `POST /projects/:project_id/commits/:id/clear`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `id`         | The SHA of a Commit.   |
-
-  def clear
-    @commit.clear_workers!
-    respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
   # Recalculates the readiness of a commit.  This method should be used
@@ -397,7 +350,6 @@ class CommitsController < ApplicationController
   # |:----------|:------------------------------------------------------------------------------|
   # | `locale`  | The RFC 5646 identifier for a locale.                                         |
   # | `partial` | If `true`, partially-translated manifests are allowed.                        |
-  # | `force`   | If `true`, forces a recompile of the manifest even if there is a cached copy. |
   #
   # Responses
   # ---------
@@ -412,12 +364,11 @@ class CommitsController < ApplicationController
     compiler = Compiler.new(@commit)
     file     = compiler.manifest(request.format,
                                  locale:  params[:locale].presence,
-                                 partial: params[:partial].parse_bool,
-                                 force:   params[:force].parse_bool)
+                                 partial: params[:partial].parse_bool)
 
     response.charset                   = file.encoding
     response.headers['X-Git-Revision'] = @commit.revision
-    send_data extract_data(file),
+    send_data file.content,
               filename: file.filename,
               type:     file.mime_type
     file.close
@@ -430,8 +381,8 @@ class CommitsController < ApplicationController
     render text: 'Unknown locale', status: :bad_request
   rescue Compiler::UnknownExporterError
     render text: 'Unknown format', status: :not_acceptable
-  rescue ActiveRecord::RecordNotFound
-    render text: 'Unknown commit', status: :not_found
+  rescue Git::CommitNotFoundError => err
+    render text: t("controllers.commits.base.not_found_in_repo", revision: params[:id]), status: :not_found
   rescue Exporter::NoLocaleProvidedError
     render text: 'Must provide a single locale', status: :bad_request
   end
@@ -463,7 +414,6 @@ class CommitsController < ApplicationController
   # |:----------|:------------------------------------------------------------------------------------------|
   # | `locale`  | The RFC 5646 identifier for a locale. If not provided, all required locales are included. |
   # | `partial` | If `true`, partially-translated manifests are allowed.                                    |
-  # | `force`   | If `true`, forces a recompile of the tarball even if there is a cached copy.              |
   #
   # Responses
   # ---------
@@ -477,12 +427,11 @@ class CommitsController < ApplicationController
 
     compiler = Compiler.new(@commit)
     file     = compiler.localize(locale:  params[:locale].presence,
-                                 partial: params[:partial].parse_bool,
-                                 force:   params[:force].parse_bool)
+                                 partial: params[:partial].parse_bool)
 
     respond_to do |format|
       format.gz do
-        send_data extract_data(file), filename: file.filename, type: file.mime_type
+        send_data file.content, filename: file.filename, type: file.mime_type
       end
       format.any { head :not_acceptable } #TODO why is this necessary?
     end
@@ -495,8 +444,8 @@ class CommitsController < ApplicationController
     render text: 'Commit not ready', status: :not_found
   rescue Compiler::UnknownLocaleError
     render text: 'Unknown locale', status: :bad_request
-  rescue ActiveRecord::RecordNotFound
-    render text: 'Unknown commit', status: :not_found
+  rescue Git::CommitNotFoundError => err
+    render text: t("controllers.commits.base.not_found_in_repo", revision: params[:id]), status: :not_found
   end
 
   private
@@ -516,8 +465,12 @@ class CommitsController < ApplicationController
     @commit = @project.commits.for_revision(params[:id]).first!
   end
 
+  def require_repository_url
+    render json: { alert: t('controllers.commits.blank_repository_url') } unless @project.git?
+  end
+
   def find_format
-    @format = @project.cache_manifest_formats.first
+    @format = @project.default_manifest_format
   end 
 
   def decorate(commit)
@@ -525,7 +478,6 @@ class CommitsController < ApplicationController
         url:                project_commit_url(@project, commit),
         import_url:         import_project_commit_url(@project, commit),
         sync_url:           sync_project_commit_url(@project, commit, format: 'json'),
-        redo_url:           redo_project_commit_url(@project, commit, format: 'json'),
         percent_done:       commit.fraction_done.nan? ? 0.0 : commit.fraction_done*100,
         translations_done:  commit.translations_done,
         translations_total: commit.translations_total,
@@ -533,33 +485,9 @@ class CommitsController < ApplicationController
     )
   end
 
-  # extract data while preserving BOM from a Compiler::File object
-  def extract_data(file)
-    if file.io.respond_to?(:string)
-      str = file.io.string
-    else
-      str = file.io.read
-    end
-    return str.force_encoding(file.encoding) if file.encoding
-    str
-  end
-
   def commit_params
     params[:commit]["due_date"] = DateTime::strptime(params[:commit]["due_date"], "%m/%d/%Y") rescue ''
     params.require(:commit).permit(*COMMIT_ATTRIBUTES)
-  end
-
-  def already_submitted_revision?(project, revision)
-    Shuttle::Redis.get(submitted_revision_key(project, revision)) == '1'
-  end
-
-  def record_submitted_revision(project, revision)
-    Shuttle::Redis.set submitted_revision_key(project, revision), '1'
-    Shuttle::Redis.expire submitted_revision_key(project, revision), 30
-  end
-
-  def submitted_revision_key(project, revision)
-    "submitted_revision:#{project.id}:#{revision}"
   end
 
   def set_commit_issues_presenter

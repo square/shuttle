@@ -18,5 +18,26 @@ FactoryGirl.define do
     password "password934723762356"
     first_name "Sancho"
     last_name "Sample"
+
+    trait :confirmed do
+      confirmed_at { Time.now }
+    end
+
+    trait :activated do
+      role { 'monitor' }
+      confirmed_at { Time.now }
+    end
+
+    trait :translator do
+      role { 'translator' }
+    end
+
+    trait :reviewer do
+      role { 'reviewer' }
+    end
+
+    trait :admin do
+      role { 'admin' }
+    end
   end
 end

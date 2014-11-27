@@ -1,2 +1,2 @@
 ---
-db: 0
+url: "redis://shuttle-redis.example.com:PORT"

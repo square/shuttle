@@ -14,7 +14,11 @@
 #    limitations under the License.
 %>
 
+<% # Replace the entire issues html with updated html %>
 $('#issues').replaceWith('<%=j render partial: 'index', locals: {project: project, key: key, translation: translation, issues: issues, issue: issue} %>');
+
+<% # Trigger 'render' events on issue forms to selectize emails field %>
+$('#issues .issue-form').trigger('render');
 
 <% if created_issue %>
     $(window).scrollTo('#issue-wrapper-<%=created_issue.id%>', 500);

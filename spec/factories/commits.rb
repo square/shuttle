@@ -18,8 +18,14 @@ FactoryGirl.define do
     sequence(:revision) { rand(16**40).to_s(16).rjust(40, '0') }
     message "Fixed nil error in foo_controller.rb"
     committed_at { Time.now }
-    ready true
+    loaded_at { Time.now }
+    loading false
+    ready false
     skip_import true
     skip_sha_check true
+
+    trait :errored_during_import do
+      import_errors { [["StandardError", "fake error"]] }
+    end
   end
 end

@@ -66,7 +66,8 @@ Shuttle::Application.configure do
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
 
   # Use a different cache store in production.
-  # config.cache_store = :mem_cache_store
+  config.cache_store                       = Shuttle::Configuration.app.cache_store.type, Shuttle::Configuration.app.cache_store.endpoint, {expires_in: 90.minutes}
+  config.action_dispatch.rack_cache        = Shuttle::Configuration.app.action_dispatch.rack_cache.symbolize_keys
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.action_controller.asset_host = "http://assets.example.com"
@@ -88,10 +89,13 @@ Shuttle::Application.configure do
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.log_formatter                     = ::Logger::Formatter.new
 
-  config.action_mailer.default_url_options = {
-      protocol: 'https',
-      host:     'YOUR_HOST'
-  }
+  config.action_mailer.default_url_options = Shuttle::Configuration.app.default_url_options
 
   config.use_ssl = true
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings   = {
+      address: 'localhost',
+      port:    25
+  }
 end

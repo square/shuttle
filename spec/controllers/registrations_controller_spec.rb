@@ -15,5 +15,33 @@
 require 'spec_helper'
 
 describe RegistrationsController do
+  before(:each) { @request.env["devise.mapping"] = Devise.mappings[:user] }
 
+  describe '#create' do
+    it "should require email confirmation" do
+      post :create, user: {
+          email:                 'foo@example.com',
+          first_name:            'Sancho',
+          last_name:             'Sample',
+          password:              'test123',
+          password_confirmation: 'test123'
+      }
+      user = User.last
+      expect(user.email).to eql('foo@example.com')
+      expect(user.confirmed_at).to be_nil
+      expect(ActionMailer::Base.deliveries.count).to eql(1)
+      expect(ActionMailer::Base.deliveries.first.subject).to eql("[Shuttle] Confirmation instructions")
+    end
+
+    it "should handle bogus email addresses" do
+      post :create, user: {
+          email:                 'foo123',
+          first_name:            'Sancho',
+          last_name:             'Sample',
+          password:              'test123',
+          password_confirmation: 'test123'
+      }
+      expect(User.count).to be_zero
+    end
+  end
 end

@@ -3,3 +3,5 @@
 .sass-cache
 .validation
 tmp/**
+public/system/**
+.idea/**
