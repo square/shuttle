@@ -15,10 +15,10 @@ devise:
 # Used in setting `config.cache_store` in production.rb
 cache_store:
   type: :redis_store
-  endpoint: redis://ironweed.corp.squareup.com:6379/0/shuttle_rails
+  endpoint: redis://shuttle-redis.corp.squareup.com:6379/0/shuttle_rails
 
 # Used in setting `config.action_dispatch.rack_cache` in production.rb
 action_dispatch:
   rack_cache:
-    metastore: redis://ironweed.corp.squareup.com:6379/0/metastore
-    entitystore: redis://ironweed.corp.squareup.com:6379/0/entitystore
+    metastore: redis://shuttle-redis.corp.squareup.com:6379/0/metastore
+    entitystore: redis://shuttle-redis.corp.squareup.com:6379/0/entitystore

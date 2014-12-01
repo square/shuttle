@@ -1,2 +1,2 @@
 ---
-url: "redis://ironweed.corp.squareup.com:6379"
+url: "redis://shuttle-redis.corp.squareup.com:6379"
