@@ -22,8 +22,6 @@ class KeyTranslationAdderAndRemover
   # Executes this worker.
   #
   # @param [Fixnum] id The ID of a Key.
-  # @param [String] worker_queue A Redis counter that counts  the number of
-  #   completed `KeyTranslationAdderAndRemover`s for a {ProjectTranslationsAdderAndRemover}.
 
   def perform(id)
     key = Key.find(id)
