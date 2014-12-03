@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 # Recalculates readiness of Keys, Commits and KeyGroups in project
-# since readiness hooks were disabled during the previous task (ex: `ProjectTranslationAdder`).
+# since readiness hooks were disabled during the previous task (ex: `ProjectTranslationsAdderAndRemover`).
 # Also refreshes the `commit_ids` fields of Key and Translation in ElasticSearch.
 #
 # This task could also be run in the batch finisher on success directly. However, this is a long running operation and

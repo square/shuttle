@@ -117,8 +117,8 @@ describe ProjectTranslationsMassCopier do
     end
 
     it "returns errors if project translation adder is still running" do
-      @project.stub(:translation_adder_batch_status).and_return(double("batch_status"))
-      expect(ProjectTranslationsMassCopier.find_locale_errors(@project, 'en', 'en-XX')).to eql(["Project Translations Adder batch is still running. Try after it finishes."])
+      @project.stub(:translations_adder_and_remover_batch_status).and_return(double("batch_status"))
+      expect(ProjectTranslationsMassCopier.find_locale_errors(@project, 'en', 'en-XX')).to eql(["Project Translations Adder And Remover batch is still running. Try after it finishes."])
     end
   end
 

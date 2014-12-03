@@ -12,24 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Adds or removes pending {Translation Translations} for locales that have
-# been added to or removed from a {Key}'s {Project}.
-
-class KeyTranslationAdderAndRemover
-  include Sidekiq::Worker
-  sidekiq_options queue: :low
-
-  # Executes this worker.
-  #
-  # @param [Fixnum] id The ID of a Key.
-  # @param [String] worker_queue A Redis counter that counts  the number of
-  #   completed `KeyTranslationAdderAndRemover`s for a {ProjectTranslationsAdderAndRemover}.
-
-  def perform(id)
-    key = Key.find(id)
-    key.add_pending_translations
-    key.remove_excluded_pending_translations
+class RenameProjectTranslationAdderIdColumn < ActiveRecord::Migration
+  def change
+    rename_column :projects, :translation_adder_batch_id, :translations_adder_and_remover_batch_id
   end
-
-  include SidekiqLocking
 end

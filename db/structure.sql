@@ -410,7 +410,7 @@ CREATE TABLE projects (
     repository_url character varying(256),
     api_token character(36) NOT NULL,
     created_at timestamp without time zone,
-    translation_adder_batch_id character varying(255),
+    translations_adder_and_remover_batch_id character varying(255),
     disable_locale_association_checkbox_settings boolean DEFAULT false NOT NULL,
     base_rfc5646_locale character varying(255) DEFAULT 'en'::character varying NOT NULL,
     targeted_rfc5646_locales text,
@@ -1580,3 +1580,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141120007440');
 INSERT INTO schema_migrations (version) VALUES ('20141120011722');
 
 INSERT INTO schema_migrations (version) VALUES ('20141121202324');
+
+INSERT INTO schema_migrations (version) VALUES ('20141203212948');
