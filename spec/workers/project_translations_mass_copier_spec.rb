@@ -28,11 +28,11 @@ describe ProjectTranslationsMassCopier do
       expect { ProjectTranslationsMassCopier.new.perform(@project.id, 'en', 'es-XX') }.to raise_error(ArgumentError, "Source and target locales are not in the same language family (their ISO639s do not match)")
     end
 
-    it "should not run TranslationCopier or create a batch if all translations are already done in the target locale" do
+    it "should not run KeyTranslationCopier or create a batch if all translations are already done in the target locale" do
       @en_xx_translation.update! copy: "test"
       tmc = ProjectTranslationsMassCopier.new
       expect(tmc).to_not receive(:mass_copier_batch)
-      expect(TranslationCopier).to_not receive(:perform_once)
+      expect(KeyTranslationCopier).to_not receive(:perform_once)
       tmc.perform(@project.id, 'en', 'en-XX')
     end
 

@@ -41,7 +41,7 @@ class ProjectTranslationsMassCopier
 
     mass_copier_batch(project_id, from_rfc5646_locale, to_rfc5646_locale).jobs do
       key_ids.each do |key_id|
-        TranslationCopier.perform_once(key_id, from_rfc5646_locale, to_rfc5646_locale)
+        KeyTranslationCopier.perform_once(key_id, from_rfc5646_locale, to_rfc5646_locale)
       end
     end
   end
@@ -97,9 +97,9 @@ class ProjectTranslationsMassCopier
   # Returns the key ids with translations which can be copied from the given source locale to the given target locale.
   # Should only be called in the perform method of this worker.
   # This method is particularly useful for projects with a lot of keys, and a small number of not finished translations.
-  # The reason is that it contains a few of the filters TranslationCopier uses, such as from `approved` to `not translated` and ` not base`.
-  # And, these copied filters improve performance since it prevents calling TranslationCopier if it's not necessary.
-  # Nevertheless, the source of truth for filters should be the TranslationCopier worker.
+  # The reason is that it contains a few of the filters KeyTranslationCopier uses, such as from `approved` to `not translated` and ` not base`.
+  # And, these copied filters improve performance since it prevents calling KeyTranslationCopier if it's not necessary.
+  # Nevertheless, the source of truth for filters should be the KeyTranslationCopier worker.
 
   # @return [Array<Fixnum>] an array of key ids
 
