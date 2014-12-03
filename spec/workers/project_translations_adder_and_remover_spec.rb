@@ -16,39 +16,21 @@ require 'spec_helper'
 
 describe ProjectTranslationsAdderAndRemover do
   describe "#perform" do
-    it "calls KeyTranslationAdderAndRemover for keys that are associated with commits of the project, and calls ProjectTranslationsAdderAndRemover::Finisher" do
+    it "calls KeyTranslationAdderAndRemover for project's keys and ProjectTranslationsAdderAndRemover::Finisher" do
       project = FactoryGirl.create(:project)
-      commit = FactoryGirl.create(:commit, project: project)
-      key = FactoryGirl.create(:key, project: project)
-      key.commits << commit
+      key1 = FactoryGirl.create(:key, project: project)
+      key2 = FactoryGirl.create(:key, project: project)
 
-      expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key.id).once
+      expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key1.id).once
+      expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key2.id).once
       ProjectTranslationsAdderAndRemover::Finisher.any_instance.should_receive(:on_success)
       ProjectTranslationsAdderAndRemover.new.perform(project.id)
     end
 
-    it "doesn't call KeyTranslationAdderAndRemover if key is not associated with a commit" do
+    it "doesn't call KeyTranslationAdderAndRemover if project doesn't have any keys" do
       project = FactoryGirl.create(:project)
-      commit = FactoryGirl.create(:commit, project: project)
       expect(KeyTranslationAdderAndRemover).to_not receive(:perform_once)
       ProjectTranslationsAdderAndRemover.new.perform(project.id)
-    end
-  end
-
-  describe "#key_ids_with_commits" do
-    it "returns the ids of keys associated with at least 1 commit" do
-      project = FactoryGirl.create(:project)
-
-      commit1 = FactoryGirl.create(:commit, project: project)
-      commit2 = FactoryGirl.create(:commit, project: project)
-
-      key1 = FactoryGirl.create(:key, project: project)
-      key2 = FactoryGirl.create(:key, project: project)
-
-      commit1.keys << key1
-      commit2.keys << key1
-
-      expect(ProjectTranslationsAdderAndRemover.new.send(:key_ids_with_commits, project)).to eql([key1.id])
     end
   end
 end
