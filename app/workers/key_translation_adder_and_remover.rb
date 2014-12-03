@@ -15,7 +15,7 @@
 # Adds or removes pending {Translation Translations} for locales that have
 # been added to or removed from a {Key}'s {Project}.
 
-class KeyTranslationAdder
+class KeyTranslationAdderAndRemover
   include Sidekiq::Worker
   sidekiq_options queue: :low
 
@@ -23,7 +23,7 @@ class KeyTranslationAdder
   #
   # @param [Fixnum] id The ID of a Key.
   # @param [String] worker_queue A Redis counter that counts  the number of
-  #   completed `KeyTranslationAdder`s for a {ProjectTranslationAdder}.
+  #   completed `KeyTranslationAdderAndRemover`s for a {ProjectTranslationAdder}.
 
   def perform(id)
     key = Key.find(id)

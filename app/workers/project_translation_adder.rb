@@ -31,7 +31,7 @@ class ProjectTranslationAdder
 
     project.translation_adder_batch.jobs do
       key_ids.each do |key_id|
-        KeyTranslationAdder.perform_once(key_id)
+        KeyTranslationAdderAndRemover.perform_once(key_id)
       end
     end
   end
