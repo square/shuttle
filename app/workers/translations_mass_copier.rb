@@ -130,10 +130,10 @@ class TranslationsMassCopier
   class Finisher
 
     # Run by Sidekiq after a TranslationsMassCopier batch finishes successfully.
-    # Triggers a BatchKeyAndCommitRecalculator job
+    # Triggers a ProjectDescendantsRecalculator job
 
     def on_success(_status, options)
-      BatchKeyAndCommitRecalculator.perform_once options['project_id']
+      ProjectDescendantsRecalculator.perform_once options['project_id']
     end
   end
 end

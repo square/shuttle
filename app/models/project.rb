@@ -229,7 +229,7 @@ class Project < ActiveRecord::Base
     raise "Repo not ready: #{$ERROR_INFO.to_s}"
   end
 
-  # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed).
+  # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed vs article-backed).
   # It checks `repository_url` field to determine that.
   # Doesn't check if `repository_url` is valid.
   #

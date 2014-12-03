@@ -158,13 +158,13 @@ describe TranslationsMassCopier do
   end
 
   describe "#mass_copier_batch" do
-    it "returns a batch with the correct description which calls TranslationsMassCopier::Finisher (& BatchKeyAndCommitRecalculator) on success" do
+    it "returns a batch with the correct description which calls TranslationsMassCopier::Finisher (& ProjectDescendantsRecalculator) on success" do
       project = FactoryGirl.create(:project)
       batch = TranslationsMassCopier.new.mass_copier_batch(project.id, 'en', 'en-XX')
       expect(batch).to be_a_kind_of(Sidekiq::Batch)
       expect(batch.description).to eql("Translations Mass Copier #{project.id} (en -> en-XX)")
       TranslationsMassCopier::Finisher.any_instance.should_receive(:on_success).with(anything(), {'project_id' => project.id}).and_call_original
-      expect(BatchKeyAndCommitRecalculator).to receive(:perform_once).with(project.id)
+      expect(ProjectDescendantsRecalculator).to receive(:perform_once).with(project.id)
       batch.jobs {}
     end
 
@@ -180,9 +180,9 @@ end
 
 describe TranslationsMassCopier::Finisher do
   describe "#on_success" do
-    it "calls BatchKeyAndCommitRecalculator with project id" do
+    it "calls ProjectDescendantsRecalculator with project id" do
       project = FactoryGirl.create(:project)
-      expect(BatchKeyAndCommitRecalculator).to receive(:perform_once).with(project.id)
+      expect(ProjectDescendantsRecalculator).to receive(:perform_once).with(project.id)
       TranslationsMassCopier::Finisher.new.on_success(nil, { 'project_id' => project.id })
     end
   end
