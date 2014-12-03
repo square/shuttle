@@ -12,16 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Contains hooks run by Sidekiq upon completion of a ProjectTranslationAdder batch.
-
-class ProjectTranslationAdderFinisher
-
-  # Run by Sidekiq after a ProjectTranslationAdder batch finishes successfully.
-  # Triggers a BatchKeyAndCommitRecalculator job
-
-  def on_success(_status, options)
-    project = Project.find(options['project_id'])
-    project.reset_translation_adder_batch_id!
-    BatchKeyAndCommitRecalculator.perform_once project.id
+class RenameProjectTranslationAdderIdColumn < ActiveRecord::Migration
+  def change
+    rename_column :projects, :translation_adder_batch_id, :translations_adder_and_remover_batch_id
   end
 end

@@ -14,7 +14,7 @@
 
 require 'spec_helper'
 
-describe BatchKeyAndCommitRecalculator do
+describe ProjectDescendantsRecalculator do
   describe "#perform" do
     it "recalculates ready for all keys of the project and calls CommitRecalculator for each commit of the project" do
       # setup
@@ -30,7 +30,7 @@ describe BatchKeyAndCommitRecalculator do
       expect(CommitRecalculator).to receive(:perform_once).with(@commit1.id)
       expect(CommitRecalculator).to receive(:perform_once).with(@commit2.id)
 
-      BatchKeyAndCommitRecalculator.new.perform(@project.id)
+      ProjectDescendantsRecalculator.new.perform(@project.id)
       expect(@key1.reload).to be_ready
       expect(@key2.reload).to be_ready
     end

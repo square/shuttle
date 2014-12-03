@@ -14,24 +14,24 @@
 
 require 'spec_helper'
 
-describe ProjectTranslationAdder do
+describe ProjectTranslationsAdderAndRemover do
   describe "#perform" do
-    it "calls KeyTranslationAdder for keys that are associated with commits of the project, and calls ProjectTranslationAdderFinisher" do
+    it "calls KeyTranslationAdderAndRemover for keys that are associated with commits of the project, and calls ProjectTranslationsAdderAndRemover::Finisher" do
       project = FactoryGirl.create(:project)
       commit = FactoryGirl.create(:commit, project: project)
       key = FactoryGirl.create(:key, project: project)
       key.commits << commit
 
-      expect(KeyTranslationAdder).to receive(:perform_once).with(key.id).once
-      ProjectTranslationAdderFinisher.any_instance.should_receive(:on_success)
-      ProjectTranslationAdder.new.perform(project.id)
+      expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key.id).once
+      ProjectTranslationsAdderAndRemover::Finisher.any_instance.should_receive(:on_success)
+      ProjectTranslationsAdderAndRemover.new.perform(project.id)
     end
 
-    it "doesn't call KeyTranslationAdder if key is not associated with a commit" do
+    it "doesn't call KeyTranslationAdderAndRemover if key is not associated with a commit" do
       project = FactoryGirl.create(:project)
       commit = FactoryGirl.create(:commit, project: project)
-      expect(KeyTranslationAdder).to_not receive(:perform_once)
-      ProjectTranslationAdder.new.perform(project.id)
+      expect(KeyTranslationAdderAndRemover).to_not receive(:perform_once)
+      ProjectTranslationsAdderAndRemover.new.perform(project.id)
     end
   end
 
@@ -48,7 +48,18 @@ describe ProjectTranslationAdder do
       commit1.keys << key1
       commit2.keys << key1
 
-      expect(ProjectTranslationAdder.new.send(:key_ids_with_commits, project)).to eql([key1.id])
+      expect(ProjectTranslationsAdderAndRemover.new.send(:key_ids_with_commits, project)).to eql([key1.id])
+    end
+  end
+end
+
+describe ProjectTranslationsAdderAndRemover::Finisher do
+  describe "#on_success" do
+    it "runs ProjectTranslationsAdderAndRemover::Finisher; sets translations_adder_and_remover_batch_id to nil" do
+      @project = FactoryGirl.create(:project, translations_adder_and_remover_batch_id: "11111111")
+      expect(ProjectDescendantsRecalculator).to receive(:perform_once).with(@project.id)
+      ProjectTranslationsAdderAndRemover::Finisher.new.on_success(nil, { 'project_id' => @project.id })
+      expect(@project.reload.translations_adder_and_remover_batch_id).to be_nil
     end
   end
 end

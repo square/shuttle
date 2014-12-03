@@ -99,9 +99,9 @@ class Project < ActiveRecord::Base
 
   # Add import_batch and import_batch_status methods
   extend SidekiqBatchManager
-  sidekiq_batch :translation_adder_batch do |batch|
-    batch.description = "Project Translation Adder #{id} (#{name})"
-    batch.on :success, ProjectTranslationAdderFinisher, project_id: id
+  sidekiq_batch :translations_adder_and_remover_batch do |batch|
+    batch.description = "Project Translations Adder And Remover #{id} (#{name})"
+    batch.on :success, ProjectTranslationsAdderAndRemover::Finisher, project_id: id
   end
 
   extend SetNilIfBlank
@@ -229,7 +229,7 @@ class Project < ActiveRecord::Base
     raise "Repo not ready: #{$ERROR_INFO.to_s}"
   end
 
-  # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed).
+  # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed vs article-backed).
   # It checks `repository_url` field to determine that.
   # Doesn't check if `repository_url` is valid.
   #
@@ -443,12 +443,12 @@ class Project < ActiveRecord::Base
   end
 
   # If related fields changed, run
-  #   ProjectTranslationAdder for projects with {Commit Commits} and/or
+  #   ProjectTranslationsAdderAndRemover for projects with {Commit Commits} and/or
   #   ProjectTranslationAdderForKeyGroups for projects with {KeyGroup KeyGroups}
 
   def add_or_remove_pending_translations
     if git? && %w{targeted_rfc5646_locales key_exclusions key_inclusions key_locale_exclusions key_locale_inclusions}.any?{|field| previous_changes.include?(field)}
-      translation_adder_batch.jobs { ProjectTranslationAdder.perform_once(id) }
+      translations_adder_and_remover_batch.jobs { ProjectTranslationsAdderAndRemover.perform_once(id) }
     end
     if !git? && %w{targeted_rfc5646_locales}.any?{|field| previous_changes.include?(field)}
       ProjectTranslationAdderForKeyGroups.perform_once id

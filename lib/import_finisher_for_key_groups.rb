@@ -37,7 +37,7 @@ class ImportFinisherForKeyGroups
   # Recalculates readiness, first, for the {Key Keys} in the KeyGroup, and then
   # for the {KeyGroup} itself.
 
-  # TODO (yunus): BatchKeyAndCommitRecalculator can be generalized to include key_groups
+  # TODO (yunus): Key.batch_recalculate_ready! can be generalized to include key_groups
   # recalculating every key separately is slow
 
   def recalculate_full_readiness!(key_group)

@@ -16,7 +16,7 @@
 # {Key Keys} for this project for locales that have been added to or removed
 # from a {Project}.
 
-class ProjectTranslationAdder
+class ProjectTranslationsAdderAndRemover
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
@@ -29,9 +29,9 @@ class ProjectTranslationAdder
     key_ids = key_ids_with_commits(project)
     return if key_ids.empty?
 
-    project.translation_adder_batch.jobs do
+    project.translations_adder_and_remover_batch.jobs do
       key_ids.each do |key_id|
-        KeyTranslationAdder.perform_once(key_id)
+        KeyTranslationAdderAndRemover.perform_once(key_id)
       end
     end
   end
@@ -46,4 +46,19 @@ class ProjectTranslationAdder
   end
 
   include SidekiqLocking
+
+# Contains hooks run by Sidekiq upon completion of a ProjectTranslationsAdderAndRemover batch.
+
+  class Finisher
+
+    # Run by Sidekiq after a ProjectTranslationsAdderAndRemover batch finishes successfully.
+    # Triggers a ProjectDescendantsRecalculator job
+
+    def on_success(_status, options)
+      project = Project.find(options['project_id'])
+      project.reset_translations_adder_and_remover_batch_id!
+      ProjectDescendantsRecalculator.perform_once project.id
+    end
+  end
+
 end
