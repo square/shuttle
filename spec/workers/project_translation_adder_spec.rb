@@ -16,21 +16,21 @@ require 'spec_helper'
 
 describe ProjectTranslationAdder do
   describe "#perform" do
-    it "calls KeyTranslationAdder for keys that are associated with commits of the project, and calls ProjectTranslationAdder::Finisher" do
+    it "calls KeyTranslationAdderAndRemover for keys that are associated with commits of the project, and calls ProjectTranslationAdder::Finisher" do
       project = FactoryGirl.create(:project)
       commit = FactoryGirl.create(:commit, project: project)
       key = FactoryGirl.create(:key, project: project)
       key.commits << commit
 
-      expect(KeyTranslationAdder).to receive(:perform_once).with(key.id).once
+      expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key.id).once
       ProjectTranslationAdder::Finisher.any_instance.should_receive(:on_success)
       ProjectTranslationAdder.new.perform(project.id)
     end
 
-    it "doesn't call KeyTranslationAdder if key is not associated with a commit" do
+    it "doesn't call KeyTranslationAdderAndRemover if key is not associated with a commit" do
       project = FactoryGirl.create(:project)
       commit = FactoryGirl.create(:commit, project: project)
-      expect(KeyTranslationAdder).to_not receive(:perform_once)
+      expect(KeyTranslationAdderAndRemover).to_not receive(:perform_once)
       ProjectTranslationAdder.new.perform(project.id)
     end
   end
