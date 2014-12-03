@@ -146,15 +146,15 @@ describe ProjectsController do
       end
     end
 
-    it "doesn't perform TranslationsMassCopier and renders the current page again with errors if there is something wrong with the inputed locales" do
+    it "doesn't perform ProjectTranslationsMassCopier and renders the current page again with errors if there is something wrong with the inputed locales" do
       project = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es-US'=>true} )
-      expect(TranslationsMassCopier).to_not receive(:perform_once)
+      expect(ProjectTranslationsMassCopier).to_not receive(:perform_once)
       post :mass_copy_translations, { id: project.to_param, from_rfc5646_locale: 'en', to_rfc5646_locale: 'es-US' }
       expect(response).to render_template("setup_mass_copy_translations")
       expect(request.flash.now[:alert]).to eql(["Failure. Not copying translations.", "Source and target locales are not in the same language family (their ISO639s do not match)"])
     end
 
-    it "performs TranslationsMassCopier which copies all appropriate translations, updates keys and commits readiness states; redirects to the same page with success message" do
+    it "performs ProjectTranslationsMassCopier which copies all appropriate translations, updates keys and commits readiness states; redirects to the same page with success message" do
       project = FactoryGirl.create(:project,
                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                    base_rfc5646_locale: 'en',
@@ -171,7 +171,7 @@ describe ProjectsController do
       commit.keys.each { |key| expect(key).to_not be_ready }
       expect(fr_ca_translations.not_translated.count).to eql(14)
 
-      expect(TranslationsMassCopier).to receive(:perform_once).and_call_original
+      expect(ProjectTranslationsMassCopier).to receive(:perform_once).and_call_original
 
       post :mass_copy_translations, { id: project.to_param, from_rfc5646_locale: 'fr', to_rfc5646_locale: 'fr-CA' }
       expect(response).to redirect_to(mass_copy_translations_project_url(project))

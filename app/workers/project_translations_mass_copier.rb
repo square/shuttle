@@ -12,11 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# It copies all translations (their `copy` fields) from one locale to another.
+# It copies all translations of a project (their `copy` fields) from one locale to another.
 # It only copies from approved source translations into not-translated target translations.
 # It skips readiness hooks and preserves the approved state.
 
-class TranslationsMassCopier
+class ProjectTranslationsMassCopier
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
@@ -33,7 +33,7 @@ class TranslationsMassCopier
 
     # This check was performed in the projects controller, but needs to be performed again because things
     # may have changed since then.
-    errors = TranslationsMassCopier.find_locale_errors(project, from_rfc5646_locale, to_rfc5646_locale)
+    errors = ProjectTranslationsMassCopier.find_locale_errors(project, from_rfc5646_locale, to_rfc5646_locale)
     raise ArgumentError, errors.join(". ") if errors.present?
 
     key_ids = key_ids_with_copyable_translations(project, from_rfc5646_locale, to_rfc5646_locale)
@@ -90,7 +90,7 @@ class TranslationsMassCopier
     end
 
     # Don't run this if Project translation adder is still running
-    return [I18n.t('workers.translations_mass_copier.translation_adder_batch_still_running')] if project.translation_adder_batch_status
+    return [I18n.t('workers.translations_mass_copier.project_translations_adder_batch_still_running')] if project.translation_adder_batch_status
     []
   end
 
@@ -110,7 +110,7 @@ class TranslationsMassCopier
     from_translations_key_ids & to_translations_key_ids
   end
 
-  # Returns a new batch every time it's called. Runs TranslationsMassCopier::Finisher on success.
+  # Returns a new batch every time it's called. Runs ProjectTranslationsMassCopier::Finisher on success.
   # Should only be called in the perform method of this worker.
 
   # @return [Sidekiq::Batch] a sidekiq batch
@@ -118,18 +118,18 @@ class TranslationsMassCopier
   # @private
   def mass_copier_batch(project_id, from_rfc5646_locale, to_rfc5646_locale)
     b = Sidekiq::Batch.new
-    b.description = "Translations Mass Copier #{project_id} (#{from_rfc5646_locale} -> #{to_rfc5646_locale})"
-    b.on :success, TranslationsMassCopier::Finisher, project_id: project_id
+    b.description = "Project Translations Mass Copier #{project_id} (#{from_rfc5646_locale} -> #{to_rfc5646_locale})"
+    b.on :success, ProjectTranslationsMassCopier::Finisher, project_id: project_id
     b
   end
 
   include SidekiqLocking
 
-  # Contains hooks run by Sidekiq upon completion of a TranslationsMassCopier batch.
+  # Contains hooks run by Sidekiq upon completion of a ProjectTranslationsMassCopier batch.
 
   class Finisher
 
-    # Run by Sidekiq after a TranslationsMassCopier batch finishes successfully.
+    # Run by Sidekiq after a ProjectTranslationsMassCopier batch finishes successfully.
     # Triggers a ProjectDescendantsRecalculator job
 
     def on_success(_status, options)
