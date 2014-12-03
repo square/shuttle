@@ -140,7 +140,7 @@ class Commit < ActiveRecord::Base
   extend SidekiqBatchManager
   sidekiq_batch :import_batch do |batch|
     batch.description = "Import Commit #{id} (#{revision})"
-    batch.on :success, ImportFinisher, commit_id: id
+    batch.on :success, CommitImporter::Finisher, commit_id: id
   end
 
   extend SetNilIfBlank
