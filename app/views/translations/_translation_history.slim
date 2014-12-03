@@ -1,0 +1,50 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+/ Requires the following local params:
+/   - <Translation> translation
+
+- if translation.translation_changes.present?
+  fieldset
+    legend Translation History
+
+    .translation-history
+      - translation.translation_changes.reverse.each do |change|
+        .history-entry
+          strong = change.user.present? ? change.user.name : "(Automatic)"
+          .pull-right: strong = l(change.created_at, format: :long)
+
+          - if change.diff["approved"].present?
+            .change
+              - if change.diff["copy"].present?
+                .change-state class=TranslationChange.style(change.diff["approved"][0])
+                  = change.transition_from
+                .arrow
+                .change-state class=TranslationChange.style(change.diff["approved"][1])
+                  = change.transition_to
+
+          .change.copy
+            - if change.diff["copy"].present?
+              .change-state[
+                data-full=(change.full_copy_from ? change.full_copy_from : "None")
+                data-compact=(change.compact_copy_from ? change.compact_copy_from : "None")
+                ]
+                = change.compact_copy_from ? change.compact_copy_from : "None"
+              .arrow
+                i.fa.fa-double-angle-right.text-error
+              .change-state[
+                data-full=(change.full_copy_to ? change.full_copy_to : "None")
+                data-compact=(change.compact_copy_to ? change.compact_copy_to : "None")
+                ]
+                = change.compact_copy_to ? change.compact_copy_to : "None"

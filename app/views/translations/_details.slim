@@ -1,0 +1,58 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+/ Requires the following local params:
+/   - <Translation> translation
+
+fieldset.details
+  legend Details
+
+  dl
+    .item
+      dt String ID
+      dd = translation.key.id
+    .item
+      dt Key
+      dd = translation.key.original_key
+    .item
+      dt Context
+      dd = (translation.key.context || "none")
+    .item
+      dt Importer
+      dd = translation.key.importer_name
+    - if translation.key.fencers.present?
+      .item
+        dt Fencers
+        dd = translation.key.fencers.map { |f| I18n.t("fencer.#{f}") }.to_sentence
+    - if translation.key.source.present?
+      .item
+        dt Source
+        dd = translation.key.source
+    - if translation.translator
+      .item
+        dt Translator
+        dd = translation.translator.name
+    - if translation.reviewer
+      .item
+        dt Reviewer
+        dd = translation.reviewer.name
+    .item class=(if translation.approved == false then "text-error" elsif @translation.approved == true then "text-success" end)
+      dt Status
+      dd
+        - if translation.approved.nil?
+          = translation.translated? ? "Pending Approval" : "Pending Translation"
+        - elsif translation.approved == false
+          | Rejected
+        - elsif translation.approved == true
+          | Approved
