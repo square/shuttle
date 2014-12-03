@@ -218,7 +218,7 @@ en:
       from_and_to_cannot_be_equal: "Source and target locales cannot be equal to each other"
       invalid_rfc5646_locale: "Invalid %{kind} locale"
       iso639s_doesnt_match: "Source and target locales are not in the same language family (their ISO639s do not match)"
-      translation_adder_batch_still_running: "Project Translation Adder batch is still running. Try after it finishes."
+      project_translations_adder_batch_still_running: "Project Translations Adder batch is still running. Try after it finishes."
       from:
         not_a_targeted_or_base_locale: "Source locale is neither the base locale nor one of the project target locales"
       to:

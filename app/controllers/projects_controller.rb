@@ -295,10 +295,10 @@ class ProjectsController < ApplicationController
   # | `to_rfc5646_locale`   | The SHA of the commit that should be built               |
 
   def mass_copy_translations
-    errors = TranslationsMassCopier.find_locale_errors(@project, params[:from_rfc5646_locale], params[:to_rfc5646_locale])
+    errors = ProjectTranslationsMassCopier.find_locale_errors(@project, params[:from_rfc5646_locale], params[:to_rfc5646_locale])
 
     if errors.blank?
-      TranslationsMassCopier.perform_once(@project.id, params[:from_rfc5646_locale], params[:to_rfc5646_locale])
+      ProjectTranslationsMassCopier.perform_once(@project.id, params[:from_rfc5646_locale], params[:to_rfc5646_locale])
       flash[:success] = t('controllers.projects.mass_copy_translations.success',
                           from: params[:from_rfc5646_locale], to: params[:to_rfc5646_locale])
       redirect_to setup_mass_copy_translations_project_url(@project)
