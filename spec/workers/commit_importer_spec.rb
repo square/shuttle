@@ -80,3 +80,49 @@ describe CommitImporter do
     end
   end
 end
+
+describe CommitImporter::Finisher do
+  describe "#on_success" do
+    before :each do
+      @project = FactoryGirl.create(:project, :light)
+      @commit = FactoryGirl.create(:commit, project: @project, loading: true)
+      @key = FactoryGirl.create(:key, project: @project)
+      @commit.keys << @key
+      @translation = FactoryGirl.create(:translation, key: @key, copy: "test")
+    end
+
+    it "sets loading to false and sets ready to true if all translations are finished" do
+      @key.update! ready: false
+      @commit.update! ready: false
+      @translation.update! source_copy: "test", approved: true
+      expect(@commit.reload).to be_loading
+      expect(@commit).to_not be_ready
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@commit.reload).to_not be_loading
+      expect(@commit).to be_ready
+    end
+
+    it "sets loading to false and sets ready to false if some translations are not translated" do
+      @key.update! ready: false
+      @commit.update! ready: false
+      expect(@commit.reload).to be_loading
+      expect(@commit).to_not be_ready
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@commit.reload).to_not be_loading
+      expect(@commit).to_not be_ready
+    end
+
+    it "recalculates keys' readiness, sets to false if not all translations are approved" do
+      @key.update! ready: true
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@key.reload).to_not be_ready
+    end
+
+    it "recalculates keys' readiness, sets to true if all translations are approved" do
+      @translation.update! source_copy: "test", approved: true
+      @key.update! ready: false
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@key.reload).to be_ready
+    end
+  end
+end

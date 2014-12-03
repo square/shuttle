@@ -39,4 +39,45 @@ class CommitImporter
   end
 
   include SidekiqLocking
+
+  # Contains hooks run by Sidekiq upon completion of an import batch.
+
+  class Finisher
+
+    # Run by Sidekiq after an import batch finishes successfully. Unsets the
+    # {Commit}'s `loading` flag (thus running post-import hooks), and sets the
+    # parsed flag on all associated {Blob Blobs}.
+
+    def on_success(_status, options)
+      commit = Commit.find(options['commit_id'])
+
+      # mark related blobs as parsed so that we don't parse them again
+      mark_not_errored_blobs_as_parsed(commit)
+
+      # the readiness hooks were all disabled, so now we need to go through and calculate keys' readiness.
+      # This needs to happen before updating loading to false because there are hooks in CommitObserver
+      # which gets fired when loading ends, and it expects keys to reflect correct readiness states.
+      Key.batch_recalculate_ready!(commit)
+
+      # finish loading
+      commit.update!(loading: false, import_batch_id: nil)
+
+      # the readiness hooks were all disabled, so now we need to go through and calculate commit readiness and stats.
+      CommitRecalculator.new.perform commit.id
+    end
+
+    private
+
+    def mark_not_errored_blobs_as_parsed(commit)
+      # This is done here because we cannot have nested sidekiq batches.
+      # If we could nest them, we could create sub-batches for blobs, and set parsed to true at the end of that sub-batch.
+      # This would potentially be a performance optimization, too, since we would start using the parsed strings earlier
+      # instead of waiting till all blob importers are finished.
+
+      # commit.blobs.where(errored: false).update_all parsed: true
+      blob_shas = commit.blobs_commits.pluck(:sha_raw)
+      Blob.where(project_id: commit.project_id, sha_raw: blob_shas, errored: false).update_all parsed: true
+    end
+  end
+
 end
