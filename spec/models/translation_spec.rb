@@ -238,4 +238,22 @@ describe Translation do
       end
     end
   end
+
+  describe "#potential_commit" do
+    it "returns the first SHA found in Shuttle for this translation's key" do
+      project = FactoryGirl.create(:project)
+      key = FactoryGirl.create(:key, project: project)
+      translation = FactoryGirl.create(:translation, key: key)
+
+      commit1 = FactoryGirl.create(:commit, project: project)
+      commit2 = FactoryGirl.create(:commit, project: project)
+      commit1.keys = commit2.keys = [key]
+
+      expect(translation.potential_commit).to eql(commit1)
+    end
+
+    it "returns nil if it cannot find any commits linked to this translation's key" do
+      expect(FactoryGirl.create(:translation).potential_commit).to be_nil
+    end
+  end
 end

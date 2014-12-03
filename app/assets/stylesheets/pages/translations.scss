@@ -73,15 +73,13 @@ body.translations {
     float: right;
   }
 
-  .activity {
+  .details {
     margin-top: 30px;
     legend { margin-bottom: -20px };
   }
 
   .translation-history {
-    height: 450px;
-    margin-top: -20px;
-    margin-bottom: -60px;
+    max-height: 450px;
     overflow-y: auto;
 
     legend { margin-bottom: -20px };

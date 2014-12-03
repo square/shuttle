@@ -55,44 +55,8 @@ hr.divider
           textarea.resize readonly="readonly" rows=7 
             = @translation.source_copy
 
-    fieldset.activity 
-      legend Activity
-
-      dl 
-        .item
-          dt String ID 
-          dd = @translation.key.id
-        .item
-          dt Key
-          dd = @translation.key.original_key
-        .item
-          dt Context
-          dd = (@translation.key.context || "none")
-        .item
-          dt Importer
-          dd = @translation.key.importer_name
-        .item
-          dt Fencers
-          dd = @translation.key.fencers.map { |f| I18n.t("fencer.#{f}") }.to_sentence
-        .item
-          dt Source
-          dd = @translation.key.source
-        - if @translation.translator
-          .item
-            dt Translator
-            dd = @translation.translator.name
-        - if @translation.reviewer
-          .item
-            dt Reviewer
-            dd = @translation.reviewer.name
-        .item class=(if @translation.approved == false then "text-error" elsif @translation.approved == true then "text-success" end)
-          dt Status
-          dd
-            - if @translation.approved.nil?
-              = @translation.translated? ? "Pending Approval" : "Pending Translation"
-            - elsif @translation.approved == false
-              | Rejected
-            - elsif @translation.approved == true
-              | Approved
+    = render partial: 'details', locals: { translation: @translation }
+    = render partial: 'translation_history', locals: { translation: @translation }
+    = render partial: 'commit_history', locals: { translation: @translation }
 
 = render partial: 'issues/index', locals: {project: @project, key: @key, translation: @translation, issues: @issues, issue: @issue}
