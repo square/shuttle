@@ -249,7 +249,7 @@ class Key < ActiveRecord::Base
   end
 
   # This takes a Commit, a Project or a KeyGroup, and batch updates their readiness states.
-  # Called in ImportFinisher and PTAFinisher at the moment.
+  # Called in CommitImporter::Finisher and ProjectTranslationsAdderAndRemover::Finisher at the moment.
   #
   # @param [Commit, Project, KeyGroup] obj The object whose keys should be batch recalculated
 
