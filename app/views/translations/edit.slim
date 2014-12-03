@@ -67,80 +67,8 @@ hr.divider
             span.highlight
               = @translation.source_copy
 
-      fieldset.activity
-        legend Activity
-
-        dl 
-          .item
-            dt String ID 
-            dd = @translation.key.id
-          .item
-            dt Key
-            dd = @translation.key.original_key
-          .item
-            dt Context
-            dd = (@translation.key.context || "none")
-          .item
-            dt Importer
-            dd = @translation.key.importer_name
-          - if @translation.key.fencers.present?
-            .item
-              dt Fencers
-              dd = @translation.key.fencers.map { |f| I18n.t("fencer.#{f}") }.to_sentence
-          - if @translation.key.source.present?
-            .item
-              dt Source
-              dd = @translation.key.source
-          - if @translation.translator
-            .item
-              dt Translator
-              dd = @translation.translator.name
-          - if @translation.reviewer
-            .item
-              dt Reviewer
-              dd = @translation.reviewer.name
-          .item class=(if @translation.approved == false then "text-error" elsif @translation.approved == true then "text-success" end)
-            dt Status
-            dd
-              - if @translation.approved.nil?
-                = @translation.translated? ? "Pending Approval" : "Pending Translation"
-              - elsif @translation.approved == false
-                | Rejected
-              - elsif @translation.approved == true
-                | Approved
-
-      - if @translation.translation_changes.present?
-        fieldset
-          legend History
-
-          .translation-history
-            - @translation.translation_changes.reverse.each do |change|
-              .history-entry
-                strong = change.user.present? ? change.user.name : "(Automatic)"
-                .pull-right: strong = change.created_at.strftime("%l:%M %P, %B %-d, %Y")
-
-                - if change.diff["approved"].present?
-                  .change
-                    - if change.diff["copy"].present?
-                      .change-state class=TranslationChange.style(change.diff["approved"][0])
-                        = change.transition_from
-                      .arrow
-                      .change-state class=TranslationChange.style(change.diff["approved"][1])
-                        = change.transition_to
-
-                .change.copy
-                  - if change.diff["copy"].present?
-                    .change-state[
-                      data-full=(change.full_copy_from ? change.full_copy_from : "None")
-                      data-compact=(change.compact_copy_from ? change.compact_copy_from : "None")
-                      ]
-                      = change.compact_copy_from ? change.compact_copy_from : "None"
-                    .arrow
-                      i.fa.fa-double-angle-right.text-error
-                    .change-state[
-                      data-full=(change.full_copy_to ? change.full_copy_to : "None")
-                      data-compact=(change.compact_copy_to ? change.compact_copy_to : "None")
-                      ]
-                      = change.compact_copy_to ? change.compact_copy_to : "None"
+      = render partial: 'details', locals: { translation: @translation }
+      = render partial: 'translation_history', locals: { translation: @translation }
+      = render partial: 'commit_history', locals: { translation: @translation }
 
 = render partial: 'issues/index', locals: {project: @project, key: @key, translation: @translation, issues: @issues, issue: @issue}

@@ -142,6 +142,21 @@ class Translation < ActiveRecord::Base
   #   this Translation's text, or an empty hash if the copy has no fences.
   def fences() copy ? Fencer.multifence(key.fencers, copy) : {} end
 
+  # Returns the commit which probably created this Translation's Key.
+  # We cannot guarantee that this commit is actually the first ever commit that introduced this Key
+  # to the codebase for several reasons:
+  #   - `git blame` during Key creation wouldn't be very accurate because some projects such as
+  #     iOS register has a script that creates the strings files by parsing their code
+  #   - not all SHAs are submitted to Shuttle
+  #   - SHAs submitted to Shuttle may not be in the correct order
+  #   - we delete old commits, so the results returned with this method will be less accurate over time
+  #
+  # @return [Commit, nil] the first Commit in Shuttle which includes this Translation's Key
+
+  def potential_commit
+    @_potential_commit ||= key.commits.order(:id).first
+  end
+
   # @private
   def as_json(options=nil)
     options ||= {}
