@@ -39,14 +39,14 @@ describe ProjectsController do
         end
       end
 
-      it "runs ProjectTranslationAdder which adds missing translations when a new locale is added" do
-        expect(ProjectTranslationAdder).to receive(:perform_once).and_call_original
+      it "runs ProjectTranslationsAdderAndRemover which adds missing translations when a new locale is added" do
+        expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once).and_call_original
         patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
         expect(@project.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en en es es fr fr ja ja))
       end
 
-      it "runs ProjectTranslationAdder which removes unnecessary translations when a locale is removed" do
-        expect(ProjectTranslationAdder).to receive(:perform_once).and_call_original
+      it "runs ProjectTranslationsAdderAndRemover which removes unnecessary translations when a locale is removed" do
+        expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once).and_call_original
         patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
         expect(@project.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en en es es ja ja))
       end

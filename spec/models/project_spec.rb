@@ -137,16 +137,16 @@ describe Project do
     end
   end
 
-  describe "#translation_adder_batch" do
-    it "creates a new batch, saves its id, and runs ProjectTranslationAdder::Finisher on success and sets description" do
+  describe "#translations_adder_and_remover_batch" do
+    it "creates a new batch, saves its id, and runs ProjectTranslationsAdderAndRemover::Finisher on success and sets description" do
       project = FactoryGirl.create(:project)
 
-      ProjectTranslationAdder::Finisher.any_instance.should_receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'project_id' => project.id)
-      batch = project.translation_adder_batch.tap { |b| b.jobs {} }
+      ProjectTranslationsAdderAndRemover::Finisher.any_instance.should_receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'project_id' => project.id)
+      batch = project.translations_adder_and_remover_batch.tap { |b| b.jobs {} }
 
       expect(batch).to be_an_instance_of(Sidekiq::Batch)
-      expect(batch.description).to eql("Project Translation Adder #{project.id} (#{project.name})")
-      expect(project.translation_adder_batch_id).to eql(batch.bid)
+      expect(batch.description).to eql("Project Translations Adder And Remover #{project.id} (#{project.name})")
+      expect(project.translations_adder_and_remover_batch_id).to eql(batch.bid)
     end
   end
 
@@ -531,7 +531,7 @@ describe Project do
     context "[add_or_remove_pending_translations]" do
       around { |tests| Sidekiq::Testing.fake!(&tests) }
 
-      context "[ProjectTranslationAdder]" do
+      context "[ProjectTranslationsAdderAndRemover]" do
         before :each do
           @project = FactoryGirl.create(:project, name: "this is a test project",
                                         targeted_rfc5646_locales: {'en' => true},
@@ -541,52 +541,52 @@ describe Project do
                                         key_locale_inclusions: {} )
         end
 
-        it "calls ProjectTranslationAdder when targeted_rfc5646_locales changes" do
+        it "calls ProjectTranslationsAdderAndRemover when targeted_rfc5646_locales changes" do
           @project.targeted_rfc5646_locales = {'fr' => true}
-          expect(ProjectTranslationAdder).to receive(:perform_once)
+          expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once)
           @project.save!
         end
 
-        it "calls ProjectTranslationAdder when key_exclusions changes" do
+        it "calls ProjectTranslationsAdderAndRemover when key_exclusions changes" do
           @project.key_exclusions = %w{skip_me}
-          expect(ProjectTranslationAdder).to receive(:perform_once)
+          expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once)
           @project.save!
         end
 
-        it "calls ProjectTranslationAdder when key_inclusions changes" do
+        it "calls ProjectTranslationsAdderAndRemover when key_inclusions changes" do
           @project.key_inclusions = %w{include_me}
-          expect(ProjectTranslationAdder).to receive(:perform_once)
+          expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once)
           @project.save!
         end
 
-        it "calls ProjectTranslationAdder when key_locale_exclusions changes" do
+        it "calls ProjectTranslationsAdderAndRemover when key_locale_exclusions changes" do
           @project.key_locale_exclusions = {'fr-FR' => %w(*cl*)}
-          expect(ProjectTranslationAdder).to receive(:perform_once)
+          expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once)
           @project.save!
         end
 
-        it "calls ProjectTranslationAdder when key_locale_inclusions changes" do
+        it "calls ProjectTranslationsAdderAndRemover when key_locale_inclusions changes" do
           @project.key_locale_inclusions = {'fr-FR' => %w(*cl*)}
-          expect(ProjectTranslationAdder).to receive(:perform_once)
+          expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once)
           @project.save!
         end
 
-        it "doesn't call ProjectTranslationAdder fields like name, watched_branches, stash_webhook_url change" do
+        it "doesn't call ProjectTranslationsAdderAndRemover fields like name, watched_branches, stash_webhook_url change" do
           @project.name = "new name"
           @project.watched_branches = ['newbranch']
           @project.stash_webhook_url = "https://example.com"
-          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+          expect(ProjectTranslationsAdderAndRemover).to_not receive(:perform_once)
           @project.save!
         end
 
-        it "doesn't call ProjectTranslationAdder when a project is created, even if it has targeted_rfc5646_locales and key_exclusions" do
-          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+        it "doesn't call ProjectTranslationsAdderAndRemover when a project is created, even if it has targeted_rfc5646_locales and key_exclusions" do
+          expect(ProjectTranslationsAdderAndRemover).to_not receive(:perform_once)
           FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true}, key_exclusions: %w{skip_me})
         end
 
-        it "doesn't call ProjectTranslationAdder when watched branches change if project is not git-specific" do
+        it "doesn't call ProjectTranslationsAdderAndRemover when watched branches change if project is not git-specific" do
           @project.watched_branches = ['newbranch']
-          expect(ProjectTranslationAdder).to_not receive(:perform_once)
+          expect(ProjectTranslationsAdderAndRemover).to_not receive(:perform_once)
           @project.save!
         end
       end

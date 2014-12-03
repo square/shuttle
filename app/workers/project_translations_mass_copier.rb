@@ -90,7 +90,7 @@ class ProjectTranslationsMassCopier
     end
 
     # Don't run this if Project translation adder is still running
-    return [I18n.t('workers.translations_mass_copier.project_translations_adder_batch_still_running')] if project.translation_adder_batch_status
+    return [I18n.t('workers.translations_mass_copier.project_translations_adder_and_remover_batch_still_running')] if project.translations_adder_and_remover_batch_status
     []
   end
 
