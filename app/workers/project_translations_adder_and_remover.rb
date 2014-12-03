@@ -26,24 +26,16 @@ class ProjectTranslationsAdderAndRemover
 
   def perform(project_id)
     project = Project.find(project_id)
-    key_ids = key_ids_with_commits(project)
-    return if key_ids.empty?
+    return unless project.keys.exists?
 
     project.translations_adder_and_remover_batch.jobs do
-      key_ids.each do |key_id|
-        KeyTranslationAdderAndRemover.perform_once(key_id)
+      project.keys.find_each do |key|
+        KeyTranslationAdderAndRemover.perform_once(key.id)
       end
     end
   end
 
   private
-
-  # @return [Array<Key>] ids of all {Key keys} who belong to at least one {Commit} under this {Project}
-
-  def key_ids_with_commits(project)
-    key_ids = project.keys.pluck(:id)
-    CommitsKey.where(key_id: key_ids).uniq('key_id').select('key_id').map(&:key_id)
-  end
 
   include SidekiqLocking
 
