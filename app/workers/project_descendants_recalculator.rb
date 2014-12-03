@@ -12,17 +12,19 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Recalculates keys' readiness since readiness hooks were disabled during the previous task (ex: `ProjectTranslationAdder`).
-# Queues jobs to recalculate readiness of {Commit Commits} of this {Project}.
-
+# Recalculates readiness of Keys, Commits and KeyGroups in project
+# since readiness hooks were disabled during the previous task (ex: `ProjectTranslationAdder`).
+# Also refreshes the `commit_ids` fields of Key and Translation in ElasticSearch.
+#
 # This task could also be run in the batch finisher on success directly. However, this is a long running operation and
 # it's safer to run as a separate job. For example, if an error is raised in this task, it will be re-queued and
 # re-run. In the finisher, it would not be re-queued. Restarting sidekiq and deploying is also safer this way for
 # the same reason.
 
 # Also, this is generic enough that it can be run after multiple different events.
+# Should be run after making changes to multiple Keys/Translations of a Project.
 
-class BatchKeyAndCommitRecalculator
+class ProjectDescendantsRecalculator
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
@@ -39,6 +41,8 @@ class BatchKeyAndCommitRecalculator
     project.commits.each do |commit|
       CommitRecalculator.perform_once(commit.id)
     end
+
+    # TODO (yunus): recalculate key groups as well
   end
 
   include SidekiqLocking
