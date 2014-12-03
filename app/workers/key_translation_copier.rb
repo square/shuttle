@@ -16,7 +16,7 @@
 # It only copies from approved source translations into not-translated & not-base target translations.
 # It skips readiness hooks and preserves the approved state.
 
-class TranslationCopier
+class KeyTranslationCopier
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
