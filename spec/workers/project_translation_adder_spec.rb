@@ -16,14 +16,14 @@ require 'spec_helper'
 
 describe ProjectTranslationAdder do
   describe "#perform" do
-    it "calls KeyTranslationAdder for keys that are associated with commits of the project, and calls ProjectTranslationAdderFinisher" do
+    it "calls KeyTranslationAdder for keys that are associated with commits of the project, and calls ProjectTranslationAdder::Finisher" do
       project = FactoryGirl.create(:project)
       commit = FactoryGirl.create(:commit, project: project)
       key = FactoryGirl.create(:key, project: project)
       key.commits << commit
 
       expect(KeyTranslationAdder).to receive(:perform_once).with(key.id).once
-      ProjectTranslationAdderFinisher.any_instance.should_receive(:on_success)
+      ProjectTranslationAdder::Finisher.any_instance.should_receive(:on_success)
       ProjectTranslationAdder.new.perform(project.id)
     end
 
@@ -49,6 +49,17 @@ describe ProjectTranslationAdder do
       commit2.keys << key1
 
       expect(ProjectTranslationAdder.new.send(:key_ids_with_commits, project)).to eql([key1.id])
+    end
+  end
+end
+
+describe ProjectTranslationAdder::Finisher do
+  describe "#on_success" do
+    it "runs ProjectTranslationAdder::Finisher; sets translation_adder_batch_id to nil" do
+      @project = FactoryGirl.create(:project, translation_adder_batch_id: "11111111")
+      expect(ProjectDescendantsRecalculator).to receive(:perform_once).with(@project.id)
+      ProjectTranslationAdder::Finisher.new.on_success(nil, { 'project_id' => @project.id })
+      expect(@project.reload.translation_adder_batch_id).to be_nil
     end
   end
 end

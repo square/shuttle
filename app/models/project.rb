@@ -101,7 +101,7 @@ class Project < ActiveRecord::Base
   extend SidekiqBatchManager
   sidekiq_batch :translation_adder_batch do |batch|
     batch.description = "Project Translation Adder #{id} (#{name})"
-    batch.on :success, ProjectTranslationAdderFinisher, project_id: id
+    batch.on :success, ProjectTranslationAdder::Finisher, project_id: id
   end
 
   extend SetNilIfBlank

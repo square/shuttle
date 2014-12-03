@@ -46,4 +46,19 @@ class ProjectTranslationAdder
   end
 
   include SidekiqLocking
+
+# Contains hooks run by Sidekiq upon completion of a ProjectTranslationAdder batch.
+
+  class Finisher
+
+    # Run by Sidekiq after a ProjectTranslationAdder batch finishes successfully.
+    # Triggers a ProjectDescendantsRecalculator job
+
+    def on_success(_status, options)
+      project = Project.find(options['project_id'])
+      project.reset_translation_adder_batch_id!
+      ProjectDescendantsRecalculator.perform_once project.id
+    end
+  end
+
 end
