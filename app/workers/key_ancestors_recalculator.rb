@@ -14,10 +14,9 @@
 
 require 'sidekiq_locking'
 
-# Worker that recalculates {Commit} statistics. Finds all Commits that include a
-# {Key}, and recalculates translation counts for those Commits.
-#
-# Also recalculates the readiness of the associated KeyGroup if there is one.
+# Worker that recalculates readiness for a Key's ancestors, namely:
+#   - {Commit Commits}
+#   - {KeyGroup KeyGroup}.
 
 class KeyAncestorsRecalculator
   include Sidekiq::Worker

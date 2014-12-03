@@ -14,7 +14,6 @@
 
 # Recalculates readiness of Keys, Commits and KeyGroups in project
 # since readiness hooks were disabled during the previous task (ex: `ProjectTranslationsAdderAndRemover`).
-# Also refreshes the `commit_ids` fields of Key and Translation in ElasticSearch.
 #
 # This task could also be run in the batch finisher on success directly. However, this is a long running operation and
 # it's safer to run as a separate job. For example, if an error is raised in this task, it will be re-queued and
