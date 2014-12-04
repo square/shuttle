@@ -127,9 +127,6 @@ class TranslationItem
 
     context.multi_updateable_translations_and_locale_associations = @translation.multi_updateable_translations_and_locale_associations
 
-    if @options.review && (@translation.approved == null)
-      context.controls = true
-
     if @translation.key.context?
       context.context = @translation.key.context
 
@@ -158,9 +155,6 @@ class TranslationItem
     @expand_link_button = @element.find('.expand-link').first()
     @copy_source_button = @element.find('.copy-source').first()
     @convert_source_button = @element.find('.convert-source').first()
-
-    @approve_button = @element.find('button.square.approve').first()
-    @reject_button = @element.find('button.square.reject').first()
 
     @alerts = @element.find('div.alerts').first()
     @glossary_tips = @element.find('div.tips').first()
@@ -228,21 +222,6 @@ class TranslationItem
             for suggestion in result.suggestions
               do (suggestion) => this.addNote suggestion
           error: () => new Flash('alert').text("Couldn't automatically convert the source string.");
-        return false
-
-    # Set up @approve_button and @reject_button
-    if (@approve_button.size() > 0) && (@reject_button.size() > 0)
-      @approve_button.click () =>
-        $.ajax @translation.approve_url,
-          type: 'PUT'
-          success: (translation) => this.refresh translation
-          error: () => new Flash('alert').text("Couldn't approve that translation.");
-        return false
-      @reject_button.click () =>
-        $.ajax @translation.reject_url,
-          type: 'PUT'
-          success: (translation) => this.refresh translation
-          error: () => new Flash('alert').text("Couldn't reject that translation.");
         return false
 
     # Set up @alerts

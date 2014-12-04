@@ -26,8 +26,6 @@ module TranslationDecoration
           key:              translation.key.as_json,
           url:              project_key_translation_url(translation.key.project, translation.key, translation),
           edit_url:         edit_project_key_translation_url(translation.key.project, translation.key, translation),
-          approve_url:      approve_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
-          reject_url:       reject_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           suggestion_url:   match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           fuzzy_match_url:  fuzzy_match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           status:           translation_status(translation),

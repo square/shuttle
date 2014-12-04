@@ -127,66 +127,6 @@ class TranslationsController < ApplicationController
     end
   end
 
-  # Marks a Translation as approved and records the reviewer as the current
-  # User.
-  #
-  # Routes
-  # ------
-  #
-  # * `PUT /projects/:project_id/keys/:key_id/translations/:id/approve`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                                    |
-  # |:-------------|:-----------------------------------|
-  # | `project_id` | The slug of a Project.             |
-  # | `key_id`     | The Slug of a Key in that project. |
-  # | `id`         | The ID of a Translation.           |
-
-  def approve
-    @translation.approved = true
-    @translation.reviewer = current_user
-    @translation.modifier = current_user
-    @translation.save
-
-    # TODO (yunus): need to run KeyRecalculator here. or get rid of these endpoints and use `update`
-
-    respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
-      format.json { render json: decorate([@translation]).first }
-    end
-  end
-
-  # Marks a Translation as rejected and records the reviewer as the current
-  # User.
-  #
-  # Routes
-  # ------
-  #
-  # * `PUT /projects/:project_id/keys/:key_id/translations/:id/reject`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                                    |
-  # |:-------------|:-----------------------------------|
-  # | `project_id` | The slug of a Project.             |
-  # | `key_id`     | The slug of a Key in that project. |
-  # | `id`         | The ID of a Translation.           |
-
-  def reject
-    @translation.approved = false
-    @translation.reviewer = current_user
-    @translation.modifier = current_user
-    @translation.save
-
-    # TODO (yunus): need to run KeyRecalculator here. or get rid of these endpoints and use `update`
-
-    respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
-      format.json { render json: decorate([@translation]).first, location: project_key_translation_url(@project, @key, @translation) }
-    end
-  end
-
   # Returns the first eligible Translation Unit that meets the following
   # requirements:
   #
