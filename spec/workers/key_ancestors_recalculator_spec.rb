@@ -34,5 +34,21 @@ describe KeyAncestorsRecalculator do
         expect(key_group.reload).to be_ready
       end
     end
+
+    context "Commits" do
+      it "recalculates the readiness of the related Commits" do
+        project = FactoryGirl.create(:project)
+        commit1 = FactoryGirl.create(:commit, project: project, ready: false)
+        commit2 = FactoryGirl.create(:commit, project: project, ready: false)
+        key = FactoryGirl.create(:key, project: project, ready: false)
+        commit1.keys = commit2.keys = [key]
+
+        expect(KeyAncestorsRecalculator).to receive(:perform_once).once.and_call_original
+        key.recalculate_ready!
+
+        expect(commit1.reload).to be_ready
+        expect(commit2.reload).to be_ready
+      end
+    end
   end
 end

@@ -37,11 +37,13 @@ class ProjectDescendantsRecalculator
     # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
     Key.batch_recalculate_ready!(project)
 
-    project.commits.each do |commit|
+    project.commits.find_each do |commit|
       CommitRecalculator.perform_once(commit.id)
     end
 
-    # TODO (yunus): recalculate key groups as well
+    project.key_groups.find_each do |key_group|
+      KeyGroupRecalculator.perform_once(key_group.id)
+    end
   end
 
   include SidekiqLocking
