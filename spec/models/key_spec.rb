@@ -138,55 +138,23 @@ describe Key do
       key.recalculate_ready!
     end
 
-    context "[for git-based projects]" do
+    context "[readiness state]" do
       before :each do
-        @key = FactoryGirl.create(:key, project: FactoryGirl.create(:project, targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true}))
-        @en_translation = FactoryGirl.create(:translation, rfc5646_locale: 'en', source_rfc5646_locale: 'en', approved: true, key: @key)
-        @fr_translation = FactoryGirl.create(:translation, rfc5646_locale: 'fr', source_rfc5646_locale: 'en', approved: true, key: @key)
-        @de_translation = FactoryGirl.create(:translation, rfc5646_locale: 'de', source_rfc5646_locale: 'en', approved: true, key: @key)
-        @es_translation = FactoryGirl.create(:translation, rfc5646_locale: 'es', source_rfc5646_locale: 'en', approved: true, key: @key)
+        project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'ja' => true, 'fr' => true, 'es' => false})
+        @key = FactoryGirl.create(:key, ready: false, project: project)
+        @ja_translation = FactoryGirl.create(:translation, rfc5646_locale: 'fr', approved: nil, key: @key)
+        @fr_translation = FactoryGirl.create(:translation, rfc5646_locale: 'de', approved: nil, key: @key)
+        @es_translation = FactoryGirl.create(:translation, rfc5646_locale: 'es', approved: nil, key: @key)
+        expect(@key.reload).to_not be_ready
       end
 
       it "should set ready to false for keys with unapproved required translations" do
-        @en_translation.update_attribute :approved, false
         @key.recalculate_ready!
         expect(@key).not_to be_ready
       end
 
-      it "should set ready to true for keys with all required translations approved" do
-        @key.recalculate_ready!
-        expect(@key).to be_ready
-      end
-
-      it "should not care about non-required translations" do
-        @es_translation.update_attribute :approved, false
-        @key.recalculate_ready!
-        expect(@key).to be_ready
-      end
-    end
-
-    context "[for KeyGroup-based projects]" do
-      before :each do
-        @key = FactoryGirl.create(:key, key_group: FactoryGirl.create(:key_group, targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true}))
-        @en_translation = FactoryGirl.create(:translation, rfc5646_locale: 'en', source_rfc5646_locale: 'en', approved: true, key: @key)
-        @fr_translation = FactoryGirl.create(:translation, rfc5646_locale: 'fr', source_rfc5646_locale: 'en', approved: true, key: @key)
-        @de_translation = FactoryGirl.create(:translation, rfc5646_locale: 'de', source_rfc5646_locale: 'en', approved: true, key: @key)
-        @es_translation = FactoryGirl.create(:translation, rfc5646_locale: 'es', source_rfc5646_locale: 'en', approved: true, key: @key)
-      end
-
-      it "should set ready to false for keys with unapproved required translations" do
-        @en_translation.update_attribute :approved, false
-        @key.recalculate_ready!
-        expect(@key).not_to be_ready
-      end
-
-      it "should set ready to true for keys with all required translations approved" do
-        @key.recalculate_ready!
-        expect(@key).to be_ready
-      end
-
-      it "should not care about non-required translations" do
-        @es_translation.update_attribute :approved, false
+      it "should set ready to true for keys with all required translations approved, even if there are not-approved optional translations" do
+        [@ja_translation, @fr_translation].each { |t| t.update! approved: true }
         @key.recalculate_ready!
         expect(@key).to be_ready
       end
@@ -471,94 +439,6 @@ describe Key do
         key.remove_excluded_pending_translations
 
         expect(key.reload.translations.count).to eql(0)
-      end
-    end
-  end
-
-  describe "#should_become_ready?" do
-    context "[for git-based projects]" do
-      before :each do
-        @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'en' => true, 'fr' => true, 'de' => false})
-        @key     = FactoryGirl.create(:key, project: @project)
-        FactoryGirl.create :translation, rfc5646_locale: 'en', key: @key, approved: true
-        @req_translation = FactoryGirl.create(:translation, rfc5646_locale: 'fr', key: @key, approved: true)
-        FactoryGirl.create :translation, rfc5646_locale: 'de', key: @key, approved: false
-      end
-
-      context "[translations loaded]" do
-        before :each do
-          @key.reload.translations(true)
-          expect(@key.translations).to be_loaded
-        end
-
-        it "should return true if all translations in required locales are approved" do
-          expect(@key.should_become_ready?).to be_true
-        end
-
-        it "should return false if a translation in a required locale is not approved" do
-          @req_translation.update_attribute :approved, nil
-          @key.translations(true)
-          expect(@key.should_become_ready?).to be_false
-        end
-      end
-
-      context "[translations not loaded]" do
-        before :each do
-          @key.reload
-          expect(@key.translations).not_to be_loaded
-        end
-
-        it "should return true if all translations in required locales are approved" do
-          expect(@key.should_become_ready?).to be_true
-        end
-
-        it "should return false if a translation in a required locale is not approved" do
-          @req_translation.update_attribute :approved, nil
-          expect(@key.should_become_ready?).to be_false
-        end
-      end
-    end
-
-    context "[for KeyGroup based projects]" do
-      before :each do
-        @project = FactoryGirl.create(:project, repository_url: nil, targeted_rfc5646_locales: {'fr' => true, 'de' => true})
-        @key_group = FactoryGirl.create(:key_group, project: @project, targeted_rfc5646_locales: {'fr' => true, 'de' => false})
-        @key     = FactoryGirl.create(:key, project: @project, key_group: @key_group)
-        @req_translation = FactoryGirl.create(:translation, rfc5646_locale: 'fr', key: @key, approved: true)
-        FactoryGirl.create :translation, rfc5646_locale: 'de', key: @key, approved: false
-      end
-
-      context "[translations loaded]" do
-        before :each do
-          @key.reload.translations(true)
-          expect(@key.translations).to be_loaded
-        end
-
-        it "should return true if all translations in required locales are approved" do
-          expect(@key.should_become_ready?).to be_true
-        end
-
-        it "should return false if a translation in a required locale is not approved" do
-          @req_translation.update_attribute :approved, nil
-          @key.translations(true)
-          expect(@key.should_become_ready?).to be_false
-        end
-      end
-
-      context "[translations not loaded]" do
-        before :each do
-          @key.reload
-          expect(@key.translations).not_to be_loaded
-        end
-
-        it "should return true if all translations in required locales are approved" do
-          expect(@key.should_become_ready?).to be_true
-        end
-
-        it "should return false if a translation in a required locale is not approved" do
-          @req_translation.update_attribute :approved, nil
-          expect(@key.should_become_ready?).to be_false
-        end
       end
     end
   end

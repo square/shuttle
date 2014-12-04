@@ -232,38 +232,39 @@ class Key < ActiveRecord::Base
   # Recalculates the value of the `ready` column and updates the record.
 
   def recalculate_ready!
-    new_ready = should_become_ready?
+    new_ready = !translations.in_locale(*required_locales).not_approved.exists?
     return if new_ready == ready # proceed only if ready is about to change
     update ready: new_ready
     KeyAncestorsRecalculator.perform_once(id) unless skip_readiness_hooks
   end
 
-  # @return [true, false] `true` if this Key should now be marked as ready.
-
-  def should_become_ready?
-    if translations.loaded?
-      translations.select { |t| required_locales.include?(t.locale) }.all?(&:approved?)
-    else
-      !translations.in_locale(*required_locales).where('approved IS NOT TRUE').exists?
-    end
-  end
-
-  # This takes a Commit, a Project or a KeyGroup, and batch updates their readiness states.
+  # This takes a Commit, a Project or a KeyGroup, and batch updates their Keys' readiness states.
+  # Expects the inputed obj to have a `keys` and a `translations` association, and a `required_locales` method.
   # Called in CommitImporter::Finisher and ProjectTranslationsAdderAndRemover::Finisher at the moment.
   #
   # @param [Commit, Project, KeyGroup] obj The object whose keys should be batch recalculated
 
   def self.batch_recalculate_ready!(obj)
-    # TODO (yunus): look into speeding this up
-    ready_keys, not_ready_keys = obj.keys.includes(:project, :translations).partition(&:should_become_ready?)
-    ready_keys.in_groups_of(500, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: true) }
-    not_ready_keys.in_groups_of(500, false) { |group| Key.where(id: group.map(&:id)).update_all(ready: false) }
+    not_ready_key_ids = obj.translations.in_locale(*obj.required_locales).not_approved.select(:key_id).uniq.pluck(:key_id)
+    ready_key_ids = obj.keys.pluck(:id) - not_ready_key_ids
+    ready_key_ids.in_groups_of(500, false) { |group| Key.where(id: group).update_all(ready: true) }
+    not_ready_key_ids.in_groups_of(500, false) { |group| Key.where(id: group).update_all(ready: false) }
 
     # Since update_all bypasses all callbacks, `ready` field for some Keys should be out of sync in ElasticSearch at this point.
     # We need to update ElasticSearch with the new ready fields.
-    # We can just run `Key.tire.index.import obj.keys`, however this would be slow because it needs to find
-    # commit_ids for each Key. Instead, we can preload all the commits_keys for all commits,
-    # and partition them into the correct commits.
+    batch_refresh_elastic_search(obj)
+  end
+
+  # Batch updates `obj`s Keys in elastic search.
+  # Expects `obj` to have a `keys` association.
+  # This should be run after a batch update to Keys which skip callbacks (such as batch_recalculate_ready!)
+  #
+  # Running `Key.tire.index.import obj.keys` is slow since it needs to find commit_ids for each Key.
+  # Instead, this method preloads all the commit_ids for all Keys and partitions them into the correct Keys.
+  #
+  # @param [Commit, Project, KeyGroup] obj The object whose keys should be batch refreshed in ElasticSearch
+
+  def self.batch_refresh_elastic_search(obj)
     obj.keys.find_in_batches do |keys|
       commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
         hsh[key_id.to_i] ||= Set.new
