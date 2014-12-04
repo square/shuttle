@@ -16,23 +16,44 @@ require 'spec_helper'
 
 describe ProjectDescendantsRecalculator do
   describe "#perform" do
-    it "recalculates ready for all keys of the project and calls CommitRecalculator for each commit of the project" do
+    it "recalculates ready for all Keys of the project" do
       # setup
-      @project = FactoryGirl.create(:project)
-      @commit1 = FactoryGirl.create(:commit, project: @project)
-      @commit2 = FactoryGirl.create(:commit, project: @project)
-      @key1 = FactoryGirl.create(:key, project: @project)
-      @key2 = FactoryGirl.create(:key, project: @project)
-      @commit1.keys = [@key1, @key2]
-      @commit2.keys = [@key1, @key2]
+      project = FactoryGirl.create(:project)
+      key1 = FactoryGirl.create(:key, project: project)
+      key2 = FactoryGirl.create(:key, project: project)
 
-      @project.keys.update_all ready: false
-      expect(CommitRecalculator).to receive(:perform_once).with(@commit1.id)
-      expect(CommitRecalculator).to receive(:perform_once).with(@commit2.id)
+      project.keys.update_all ready: false
 
-      ProjectDescendantsRecalculator.new.perform(@project.id)
-      expect(@key1.reload).to be_ready
-      expect(@key2.reload).to be_ready
+      ProjectDescendantsRecalculator.new.perform(project.id)
+      expect(key1.reload).to be_ready
+      expect(key2.reload).to be_ready
+    end
+
+    it "recalculates ready for all Commits of the project" do
+      # setup
+      project = FactoryGirl.create(:project)
+      commit1 = FactoryGirl.create(:commit, project: project)
+      commit2 = FactoryGirl.create(:commit, project: project)
+
+      project.commits.update_all ready: false
+
+      ProjectDescendantsRecalculator.new.perform(project.id)
+      expect(commit1.reload).to be_ready
+      expect(commit2.reload).to be_ready
+    end
+
+    it "recalculates ready for all KeyGroups of the project" do
+      # setup
+      project = FactoryGirl.create(:project)
+      key_group1 = FactoryGirl.create(:key_group, project: project)
+      key_group2 = FactoryGirl.create(:key_group, project: project)
+
+      Key.delete_all
+      project.key_groups.update_all ready: false
+
+      ProjectDescendantsRecalculator.new.perform(project.id)
+      expect(key_group1.reload).to be_ready
+      expect(key_group2.reload).to be_ready
     end
   end
 end
