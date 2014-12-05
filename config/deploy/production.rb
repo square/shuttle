@@ -7,4 +7,4 @@ role :app, (web_boxes + worker_boxes).uniq
 role :web, web_boxes
 role :db, worker_boxes[1] # Migrations will be run on this box
 role :sidekiq, worker_boxes
-role :cron, worker_boxes.first
+role :primary_cron, worker_boxes.first
