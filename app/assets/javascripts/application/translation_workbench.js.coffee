@@ -156,9 +156,6 @@ class TranslationItem
     @copy_source_button = @element.find('.copy-source').first()
     @convert_source_button = @element.find('.convert-source').first()
 
-    @approve_button = @element.find('button.square.approve').first()
-    @reject_button = @element.find('button.square.reject').first()
-
     @alerts = @element.find('div.alerts').first()
     @glossary_tips = @element.find('div.tips').first()
     @fuzzy_matches = @element.find('div.item.fuzzy-matches').first()
