@@ -361,59 +361,6 @@ describe TranslationsController do
     end
   end
 
-  describe "#approve" do
-    before :each do
-      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
-      @translation = FactoryGirl.create(:translation, copy: 'hello!', translated: true, approved: nil)
-      @request.env['devise.mapping'] = Devise.mappings[:user]
-      sign_in @user
-    end
-
-    it "should approve the translation and set the reviewer" do
-      patch :approve,
-            project_id: @translation.key.project.to_param,
-            key_id: @translation.key.to_param,
-            id: @translation.to_param
-
-      expect(@translation.reload.approved).to eql(true)
-      expect(@translation.reviewer).to eql(@user)
-
-      expect(@translation.translation_changes.count).to eq(1)
-      change = @translation.translation_changes.last
-      expect(change.diff).to eq({ "approved" => [nil, true] })
-      expect(change.translation).to eq(@translation)
-      expect(change.user).to eq(@user)
-    end
-  end
-
-  describe "#reject" do
-    before :each do
-      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
-    end
-
-    before :each do
-      @translation = FactoryGirl.create(:translation, copy: 'hello!', translated: true, approved: nil)
-      @request.env['devise.mapping'] = Devise.mappings[:user]
-      sign_in @user
-    end
-
-    it "should reject the translation and set the reviewer" do
-      patch :reject,
-            project_id: @translation.key.project.to_param,
-            key_id: @translation.key.to_param,
-            id: @translation.to_param
-
-      expect(@translation.reload.approved).to eql(false)
-      expect(@translation.reviewer).to eql(@user)
-
-      expect(@translation.translation_changes.count).to eq(1)
-      change = @translation.translation_changes.last
-      expect(change.diff).to eq({ "approved" => [nil, false] })
-      expect(change.translation).to eq(@translation)
-      expect(change.user).to eq(@user)
-    end
-  end
-
   describe "#match" do
     before :each do
       @project = FactoryGirl.create(:project)
