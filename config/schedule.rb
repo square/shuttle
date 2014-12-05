@@ -14,9 +14,22 @@
 
 set :output, 'log/whenever.log'
 
-every(30.minutes) { runner 'AutoImporter.perform_once' }
+every 30.minutes, roles: [:primary_cron] do
+  runner 'AutoImporter.perform_once'
+end
 
-every(:day, at: '12:00 am')  { rake 'metrics:update' }
-every(1.minute) { rake 'touchdown:update' }
+every :day, at: '12:00 am', roles: [:primary_cron] do
+  rake 'metrics:update'
+end
 
-every(:saturday, at: '12am') { rake 'maintenance:cleanup_commits' }
+every 1.minute, roles: [:primary_cron] do
+  rake 'touchdown:update'
+end
+
+every :saturday, at: '12am', roles: [:primary_cron] do
+  rake 'maintenance:cleanup_commits'
+end
+
+every :saturday, at: '1am', roles: [:app] do
+  rake 'maintenance:cleanup_repos'
+end

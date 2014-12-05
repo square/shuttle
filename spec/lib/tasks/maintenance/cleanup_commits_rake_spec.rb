@@ -19,7 +19,7 @@ describe 'maintenance' do
   subject { Rake::Task['maintenance:cleanup_commits'].invoke }
 
   before :all do
-    Rake.application.rake_require "tasks/maintenance"
+    Rake.application.rake_require "tasks/maintenance/cleanup_commits"
     Rake::Task.define_task(:environment)
   end
 

@@ -8,4 +8,4 @@ role :app, (web_boxes + worker_boxes + db_boxes).uniq
 role :web, web_boxes
 role :db, db_boxes
 role :sidekiq, worker_boxes
-role :cron, worker_boxes.first
+role :primary_cron, worker_boxes.first
