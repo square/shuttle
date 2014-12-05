@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-source 'https://0858cb81:19556f67@www.mikeperham.com/rubygems/' # Square-specific
+source 'https://0858cb81:19556f67@gems.contribsys.com/' # Sidekiq Pro
 
 ruby '2.0.0', :patchlevel => '576'
 
