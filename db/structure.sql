@@ -636,41 +636,6 @@ ALTER SEQUENCE translation_changes_id_seq OWNED BY translation_changes.id;
 
 
 --
--- Name: translation_units; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE translation_units (
-    id integer NOT NULL,
-    source_copy text,
-    copy text,
-    source_copy_sha_raw bytea NOT NULL,
-    copy_sha_raw bytea NOT NULL,
-    source_rfc5646_locale character varying(15) NOT NULL,
-    rfc5646_locale character varying(15) NOT NULL,
-    created_at timestamp without time zone
-);
-
-
---
--- Name: translation_units_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE translation_units_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: translation_units_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE translation_units_id_seq OWNED BY translation_units.id;
-
-
---
 -- Name: translations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -867,13 +832,6 @@ ALTER TABLE ONLY translation_changes ALTER COLUMN id SET DEFAULT nextval('transl
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY translation_units ALTER COLUMN id SET DEFAULT nextval('translation_units_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
 ALTER TABLE ONLY translations ALTER COLUMN id SET DEFAULT nextval('translations_id_seq'::regclass);
 
 
@@ -1026,14 +984,6 @@ ALTER TABLE ONLY source_glossary_entries
 
 ALTER TABLE ONLY translation_changes
     ADD CONSTRAINT translation_changes_pkey PRIMARY KEY (id);
-
-
---
--- Name: translation_units_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY translation_units
-    ADD CONSTRAINT translation_units_pkey PRIMARY KEY (id);
 
 
 --
@@ -1246,13 +1196,6 @@ CREATE INDEX slugs_for_record ON slugs USING btree (sluggable_type, sluggable_id
 --
 
 CREATE UNIQUE INDEX slugs_unique ON slugs USING btree (sluggable_type, lower((scope)::text), lower((slug)::text));
-
-
---
--- Name: translation_units_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX translation_units_unique ON translation_units USING btree (source_copy_sha_raw, copy_sha_raw, source_rfc5646_locale, rfc5646_locale);
 
 
 --
@@ -1654,6 +1597,8 @@ INSERT INTO schema_migrations (version) VALUES ('20141120011722');
 INSERT INTO schema_migrations (version) VALUES ('20141121202324');
 
 INSERT INTO schema_migrations (version) VALUES ('20141203212948');
+
+INSERT INTO schema_migrations (version) VALUES ('20141205235631');
 
 INSERT INTO schema_migrations (version) VALUES ('20141212011818');
 

@@ -244,10 +244,6 @@ generated and downloaded using a {Localizer}.
 Article keeps an ordered set of {Key Keys} whereas Commit keeps an unordered
 set, so that the exporter can put the Translations back together in the right order.
 
-Because new source copy overwrites existing source copy, a translation memory
-consisting of {TranslationUnit TranslationUnits} is maintained. This is used by
-the content-matching system to provide match suggestions to translators.
-
 Models make extensive use of advanced PostgreSQL features for efficiency and
 convenience. Cached counters are updated using triggers and rules, foreign key
 constraints and hooks are enforced at the database level, and validations are

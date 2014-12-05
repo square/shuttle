@@ -13,10 +13,6 @@ en:
             copy:
               invalid_interpolations: has an invalid %{fencer} interpolation
               unmatched_fences: fences do not match the source copy fences
-        translation_unit:
-          attributes:
-            source_copy_sha_raw:
-              taken: is a duplicate of another translation unit — you may delete this translation unit
         locale_glossary_entry:
           attributes:
             rfc5646_locale:
@@ -69,13 +65,6 @@ en:
         rfc5646_locale: target locale
         source_copy: source copy
         copy: target copy
-      translation_unit:
-        source_rfc5646_locale: source locale
-        rfc5646_locale: target locale
-        source_copy: source copy
-        source_copy_sha_raw: source copy
-        copy: target text
-        copy_sha_raw: target text
       user:
         first_name: first name
         approved_rfc5646_locales: locale access privileges
@@ -127,8 +116,6 @@ en:
         update: Save Changes
       translation:
         create: Submit
-        update: Save Changes
-      translation_unit:
         update: Save Changes
       user:
         create: Sign Up
@@ -211,11 +198,6 @@ en:
       become:
         success: You are now using Shuttle as %{user}. To return to your account, you must log out and log in again.
         admin: You cannot become another administrator.
-    translation_units:
-      destroy:
-        success: The translation memory entry was deleted.
-      update:
-        success: The translation memory entry was updated.
   workers:
     translations_mass_copier:
       from_and_to_cannot_be_equal: "Source and target locales cannot be equal to each other"

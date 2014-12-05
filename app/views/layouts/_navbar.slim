@@ -32,9 +32,9 @@ div id="navbar-container"
         - if current_user.admin?
           li class=("active" if controller_name == "users")
             a href=users_url Users
-        li class=("active" if (controller_name == "search" || controller_name == "translation_units"))
+        li class=("active" if controller_name == "search")
           a href=search_url Search
-          - if (controller_name == "search" || controller_name == "translation_units")
+          - if controller_name == "search"
             .uparrow
       li id="quicknav-container" &nbsp;
       - if current_user
@@ -43,7 +43,7 @@ div id="navbar-container"
             i.fa.fa-circle
             | &nbsp; Workers
         li: a href=destroy_user_session_url data-method='delete' Log Out
-- if (controller_name == "search" || controller_name == "translation_units")
+- if controller_name == "search"
   div id="search-container" 
     nav class="container full-size-only"
       ul
@@ -53,6 +53,3 @@ div id="navbar-container"
           a href=search_keys_url Keys
         li class=("active" if action_name == "commits")
           a href=search_commits_url Commits    
-        - if current_user.reviewer?
-          li class=("active" if controller_name == "translation_units")
-            a href=translation_units_url Translation Memory
