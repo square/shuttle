@@ -643,11 +643,11 @@ describe Project do
   end
 
   context "[scopes]" do
-    context "[scope = with_repository_url]" do
+    context "[scope = git]" do
       it "returns the projects which has a repository_url" do
         project_with_repo = FactoryGirl.create(:project, repository_url: "test", watched_branches: %w(master))
         FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
-        expect(Project.with_repository_url.to_a).to eql([project_with_repo])
+        expect(Project.git.to_a).to eql([project_with_repo])
       end
     end
   end

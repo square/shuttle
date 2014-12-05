@@ -132,7 +132,7 @@ class Project < ActiveRecord::Base
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
   after_commit :add_or_remove_pending_translations, on: :update
 
-  scope :with_repository_url, -> { where("projects.repository_url IS NOT NULL") }
+  scope :git, -> { where("projects.repository_url IS NOT NULL") }
 
   # Returns a `Git::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
