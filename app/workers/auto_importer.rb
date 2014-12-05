@@ -23,7 +23,7 @@ class AutoImporter
   # Runs this worker.
 
   def perform
-    Project.with_repository_url.find_each do |project|
+    Project.git.find_each do |project|
       next unless project.watched_branches.present?
       ProjectAutoImporter.perform_once project.id
     end

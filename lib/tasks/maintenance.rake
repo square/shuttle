@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class CommitCleaner
+class CommitsCleaner
   def run
     log("Cleaning old commits for #{Date.today}")
     destroy_old_commits_which_errored_during_import
@@ -56,6 +56,6 @@ end
 namespace :maintenance do
   desc "Cleans old or errored commits from Shuttle"
   task cleanup_commits: :environment do
-    CommitCleaner.new.run
+    CommitsCleaner.new.run
   end
 end
