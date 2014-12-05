@@ -33,7 +33,7 @@ set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos 
 set :rvm_type, :system
 set :rvm_ruby_version, "2.0.0-p576@#{fetch :application}"
 
-set :whenever_roles, :cron
+set :whenever_roles, [:app, :primary_cron]
 set :sidekiq_role, :sidekiq
 
 namespace :deploy do
