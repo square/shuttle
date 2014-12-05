@@ -33,7 +33,7 @@
     dl
       .item
         dt SHA
-        dd = commit.revision
+        dd = link_to(commit.revision, commit.git_url)
         dt Created At
         dd = l(commit.created_at, format: :long)
       - if commit.user

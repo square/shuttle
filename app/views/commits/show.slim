@@ -24,6 +24,26 @@
       .nine.columns
 
         .control-group
+          = f.label 'SHA', class: 'control-label info'
+          .controls
+            = link_to @commit.revision, @commit.git_url
+        .control-group
+          = f.label 'Created At', class: 'control-label info'
+          .controls
+            = l(@commit.created_at, format: :long)
+        - if @commit.user
+          .control-group
+            = f.label 'Submitter', class: 'control-label info'
+            .controls
+              = "#{@commit.user.name} (#{@commit.user.email})"
+        .control-group
+          = f.label 'Author', class: 'control-label info'
+          .controls
+            = "#{@commit.author} (#{@commit.author_email})"
+
+        br
+
+        .control-group
           = f.label :due_date, class: 'control-label'
           .controls
             = f.text_field  :due_date, \
