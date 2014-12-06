@@ -31,5 +31,5 @@ every :saturday, at: '12am', roles: [:primary_cron] do
 end
 
 # every :saturday, at: '1am', roles: [:app] do
-#   rake 'maintenance:cleanup_repos'
+#   rake 'maintenance:cleanup_repos' # performance and disk space problems occur when this is on
 # end

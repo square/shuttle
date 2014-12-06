@@ -33,6 +33,7 @@ class ReposCleaner
   end
 
   def gc_and_remote_prune(repo)
+    repo.fetch
     repo.gc
 
     # This is a little hacky, but necessary. It basically runs "git remote prune origin",
