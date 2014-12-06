@@ -23,7 +23,6 @@ class ReposCleaner
       Rails.logger.info "[maintenance:cleanup_repos] Cleaning up #{project.name} (#{project.id})"
 
       project.repo { |repo| gc_and_remote_prune(repo) }
-      # project.working_repo { |repo| gc_and_remote_prune(repo) } # causes disk space problems for now
     end
   end
 
@@ -34,9 +33,13 @@ class ReposCleaner
 
   def gc_and_remote_prune(repo)
     repo.fetch
-    repo.gc
 
-    # This is a little hacky, but necessary. It basically runs "git remote prune origin",
+    # This is a little hacky, but necessary. It runs "git gc --prune --auto".
+    # The built in `repo.gc` method adds the '--aggressive' option which is
+    # too slow, and this avoids that.
+    repo.lib.send :command, :gc, ['--prune', '--auto']
+
+    # This is also a little hacky, but necessary. It basically runs "git remote prune origin",
     # which prunes old remote-tracking branches that have been removed from the git repo.
     # We use the `command` method of Git::Lib instead of running the naked
     # command with `system` call because `command` method provides more abstractions
