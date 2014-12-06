@@ -17,13 +17,13 @@
 # collisions between new and old branches.
 # For more reference: http://git-scm.com/docs/git-gc, http://git-scm.com/docs/git-prune
 
-class GitReposCleaner
+class ReposCleaner
   def run
     git_projects_with_unique_repos.find_each do |project|
-      Rails.logger.info "[maintenance:cleanup_git_repos] Cleaning up #{project.name} (#{project.id})"
+      Rails.logger.info "[maintenance:cleanup_repos] Cleaning up #{project.name} (#{project.id})"
 
       project.repo { |repo| gc_and_remote_prune(repo) }
-      project.working_repo { |repo| gc_and_remote_prune(repo) }
+      # project.working_repo { |repo| gc_and_remote_prune(repo) } # causes disk space problems for now
     end
   end
 
@@ -45,8 +45,8 @@ class GitReposCleaner
 end
 
 namespace :maintenance do
-  desc "Cleans up git repos by pruning"
-  task cleanup_git_repos: :environment do
-    GitReposCleaner.new.run
+  desc "Cleans up git repos by garbage collection and pruning"
+  task cleanup_repos: :environment do
+    ReposCleaner.new.run
   end
 end

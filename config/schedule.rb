@@ -30,6 +30,6 @@ every :saturday, at: '12am', roles: [:primary_cron] do
   rake 'maintenance:cleanup_commits'
 end
 
-every :saturday, at: '1am', roles: [:app] do
-  rake 'maintenance:cleanup_git_repos'
-end
+# every :saturday, at: '1am', roles: [:app] do
+#   rake 'maintenance:cleanup_repos'
+# end

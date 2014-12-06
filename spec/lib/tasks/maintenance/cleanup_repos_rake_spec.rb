@@ -17,7 +17,7 @@ require 'rake'
 
 describe 'maintenance' do
   before :all do
-    Rake.application.rake_require "tasks/maintenance/cleanup_git_repos"
+    Rake.application.rake_require "tasks/maintenance/cleanup_repos"
     Rake::Task.define_task(:environment)
   end
 
@@ -29,7 +29,7 @@ describe 'maintenance' do
         project3 = FactoryGirl.create(:project, repository_url: "repo2")
         non_git_based = FactoryGirl.create(:project, repository_url: nil)
 
-        expect(GitReposCleaner.new.git_projects_with_unique_repos.to_a).to match_array([project1, project2])
+        expect(ReposCleaner.new.git_projects_with_unique_repos.to_a).to match_array([project1, project2])
       end
     end
 
@@ -39,23 +39,23 @@ describe 'maintenance' do
         project.working_repo.update_ref("refs/remotes/origin/non-existant-branch", '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264')
 
         expect(project.working_repo.branches.remote.map(&:name)).to include("non-existant-branch")
-        GitReposCleaner.new.gc_and_remote_prune(project.working_repo)
+        ReposCleaner.new.gc_and_remote_prune(project.working_repo)
         expect(project.working_repo.branches.remote.map(&:name)).to_not include("non-existant-branch")
       end
     end
   end
 
   context "[INTEGRATION TESTS]" do
-    subject { Rake::Task['maintenance:cleanup_git_repos'].invoke }
+    subject { Rake::Task['maintenance:cleanup_repos'].invoke }
 
-    describe 'cleanup_git_repos' do
-      it "prunes remote-tracking branches from working_repo that are deleted from the remote repo" do
+    describe 'cleanup_repos' do
+      it "prunes remote-tracking branches from repo that are deleted from the remote repo" do
         project = FactoryGirl.create(:project, :light)
-        project.working_repo.update_ref("refs/remotes/origin/non-existant-branch", '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264')
+        project.repo.update_ref("refs/remotes/origin/non-existant-branch", '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264')
 
-        expect(project.working_repo.branches.remote.map(&:name)).to include("non-existant-branch")
+        expect(project.repo.branches.remote.map(&:name)).to include("non-existant-branch")
         subject
-        expect(project.working_repo.branches.remote.map(&:name)).to_not include("non-existant-branch")
+        expect(project.repo.branches.remote.map(&:name)).to_not include("non-existant-branch")
       end
     end
   end
