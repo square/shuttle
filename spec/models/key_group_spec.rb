@@ -17,6 +17,20 @@ require 'spec_helper'
 describe KeyGroup do
 
   # ======== START BASIC CRUD RELATED CODE =============================================================================
+  describe "[before_validations on create]" do
+    it "copies base_rfc5646_locale from project if it is blank" do
+      project = FactoryGirl.create(:project, base_rfc5646_locale: 'es')
+      key_group = FactoryGirl.create(:key_group, base_rfc5646_locale: '', project: project)
+      expect(key_group.base_rfc5646_locale).to eql('es')
+    end
+
+    it "copies targeted_rfc5646_locales from project if it is blank" do
+      project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr' => true})
+      key_group = FactoryGirl.create(:key_group, targeted_rfc5646_locales: {}, project: project)
+      expect(key_group.targeted_rfc5646_locales).to eql({'fr' => true})
+    end
+  end
+
   describe "[validations]" do
     it "doesn't allow creating 2 KeyGroups in the same project with the same key" do
       key_group = FactoryGirl.create(:key_group, key: "hello")
@@ -39,6 +53,26 @@ describe KeyGroup do
       key_group.save
       expect(key_group).to_not be_persisted
       expect(key_group.errors.messages).to eql({:key_sha=>["is not a valid SHA2 digest"], :key=>["can’t be blank"], :key_sha_raw=>["can’t be blank"]})
+    end
+
+    it "doesn't allow updating base_rfc5646_locale to be blank" do
+      key_group = FactoryGirl.create(:key_group, base_rfc5646_locale: 'es')
+      key_group.update base_rfc5646_locale: nil
+      expect(key_group.errors.full_messages).to include("source locale can’t be blank")
+      expect(key_group.reload.base_rfc5646_locale).to eql('es')
+      key_group.update base_rfc5646_locale: ''
+      expect(key_group.errors.full_messages).to include("source locale can’t be blank")
+      expect(key_group.reload.base_rfc5646_locale).to eql('es')
+    end
+
+    it "doesn't allow updating targeted_rfc5646_locales to be blank" do
+      key_group = FactoryGirl.create(:key_group, targeted_rfc5646_locales: {'fr' => true})
+      key_group.update targeted_rfc5646_locales: nil
+      expect(key_group.errors.full_messages).to include("targeted localizations can’t be blank")
+      expect(key_group.reload.targeted_rfc5646_locales).to eql({'fr' => true})
+      key_group.update targeted_rfc5646_locales: {}
+      expect(key_group.errors.full_messages).to include("targeted localizations can’t be blank")
+      expect(key_group.reload.targeted_rfc5646_locales).to eql({'fr' => true})
     end
   end
   # ======== END BASIC CRUD RELATED CODE ===============================================================================

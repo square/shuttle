@@ -19,20 +19,38 @@ describe Project do
 
   describe '[CRUD]' do
     it "creates a valid project even if repository_url is nil" do
-      project = Project.create(name: "Project without a repository_url")
+      project = Project.create(name: "Project without a repository_url", repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
       expect(project).to be_valid
       expect(project).to be_persisted
     end
 
     it "creates a valid project even if repository_url is empty" do
-      project = Project.create(name: "Project with an empty repository_url", repository_url: "")
+      project = Project.create(name: "Project with an empty repository_url", repository_url: "", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
       expect(project).to be_valid
       expect(project).to be_persisted
     end
 
     it "sets repository_url to nil if it's empty" do
-      project = Project.create(name: "Project with an empty repository_url", repository_url: "")
+      project = Project.create(name: "Project with an empty repository_url", repository_url: "", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
       expect(project.repository_url).to be_nil
+    end
+
+    it "doesn't create a project if base_rfc5646_locale is nil" do
+      project = Project.create(name: "test", repository_url: nil, base_rfc5646_locale: nil, targeted_rfc5646_locales: {'fr' => true})
+      expect(project).to_not be_persisted
+      expect(project.errors.full_messages).to eql(["source locale can’t be blank"])
+    end
+
+    it "doesn't create a project if targeted_rfc5646_locales is nil" do
+      project = Project.create(name: "test", base_rfc5646_locale: nil, targeted_rfc5646_locales: {'fr' => true})
+      expect(project).to_not be_persisted
+      expect(project.errors.full_messages).to eql(["source locale can’t be blank"])
+    end
+
+    it "doesn't create a project if targeted_rfc5646_locales is empty hash" do
+      project = Project.create(name: "test", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {})
+      expect(project).to_not be_persisted
+      expect(project.errors.full_messages).to eql(["targeted localizations can’t be blank"])
     end
   end
 
@@ -587,41 +605,6 @@ describe Project do
         it "doesn't call ProjectTranslationsAdderAndRemover when watched branches change if project is not git-specific" do
           @project.watched_branches = ['newbranch']
           expect(ProjectTranslationsAdderAndRemover).to_not receive(:perform_once)
-          @project.save!
-        end
-      end
-
-      context "[ProjectTranslationAdderForKeyGroups]" do
-        before :each do
-          @project = FactoryGirl.create(:project, repository_url: nil, name: "test project", targeted_rfc5646_locales: {'en' => true})
-        end
-
-        it "calls ProjectTranslationAdderForKeyGroups when targeted_rfc5646_locales changes" do
-          @project.targeted_rfc5646_locales = {'fr' => true}
-          expect(ProjectTranslationAdderForKeyGroups).to receive(:perform_once)
-          @project.save!
-        end
-
-        it "doesn't call ProjectTranslationAdderForKeyGroups fields like key_exclusions, key_inclusions, key_locale_exclusions, key_locale_inclusions, name, watched_branches, stash_webhook_url change" do
-          @project.assign_attributes key_exclusions: %w{skip_me},
-                                     key_inclusions: %w{include_me},
-                                     key_locale_exclusions: {'fr-FR' => %w(*excl*)},
-                                     key_locale_inclusions: {'es' => %w(*incl*)},
-                                     name: "new name",
-                                     watched_branches: %w(newbranch),
-                                     stash_webhook_url: "https://example.com"
-          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
-          @project.save!
-        end
-
-        it "doesn't call ProjectTranslationAdderForKeyGroups when a project is created, even if it has targeted_rfc5646_locales" do
-          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
-          FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true})
-        end
-
-        it "doesn't call ProjectTranslationAdderForKeyGroups when watched branches change if project is git-specific" do
-          @project.update! repository_url: "https://example.com"
-          expect(ProjectTranslationAdderForKeyGroups).to_not receive(:perform_once)
           @project.save!
         end
       end

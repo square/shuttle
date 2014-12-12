@@ -93,10 +93,6 @@ class Project < ActiveRecord::Base
   serialize :only_importer_paths,      Hash
   serialize :watched_branches,         Array
 
-  validates :base_rfc5646_locale, presence: true
-  validates :base_rfc5646_locale, format: { with: Locale::RFC5646_FORMAT }
-
-
   # Add import_batch and import_batch_status methods
   extend SidekiqBatchManager
   sidekiq_batch :translations_adder_and_remover_batch do |batch|
@@ -442,22 +438,13 @@ class Project < ActiveRecord::Base
     @working_repo_mutex = FileMutex.new(working_repo_path.to_s + '.lock')
   end
 
-  # If related fields changed, run
-  #   ProjectTranslationsAdderAndRemover for projects with {Commit Commits} and/or
-  #   ProjectTranslationAdderForKeyGroups for projects with {KeyGroup KeyGroups}
-
+  # If locale related fields changed, runs ProjectTranslationsAdderAndRemover for git-based projects
   def add_or_remove_pending_translations
     if git? && %w{targeted_rfc5646_locales key_exclusions key_inclusions key_locale_exclusions key_locale_inclusions}.any?{|field| previous_changes.include?(field)}
-      translations_adder_and_remover_batch.jobs { ProjectTranslationsAdderAndRemover.perform_once(id) }
+      translations_adder_and_remover_batch.jobs do
+        ProjectTranslationsAdderAndRemover.perform_once(id)
+      end
     end
-    if !git? && %w{targeted_rfc5646_locales}.any?{|field| previous_changes.include?(field)}
-      ProjectTranslationAdderForKeyGroups.perform_once id
-    end
-  end
-
-  def require_valid_locales_hash
-    errors.add(:targeted_rfc5646_locales, :invalid) unless targeted_rfc5646_locales.keys.all? { |k| k.kind_of?(String) } &&
-        targeted_rfc5646_locales.values.all? { |v| v == true || v == false }
   end
 
   # ERRORS

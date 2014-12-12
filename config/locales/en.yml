@@ -35,6 +35,9 @@ en:
             uncheck_disabled:
               cannot_disable_uncheck_if_its_not_checked: cannot disable unchecking if it's not checked by default
     attributes:
+      key_group:
+        base_rfc5646_locale: source locale
+        targeted_rfc5646_locales: targeted localizations
       project:
         name: name
         repository_url: repository URL

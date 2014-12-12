@@ -46,6 +46,20 @@ shared_examples_for "CommonLocaleLogic" do
         expect(object.errors[:targeted_rfc5646_locales]).to_not include("invalid")
       end
     end
+
+    it "doesn't create a record if base_rfc5646_locale is ill-formatted" do
+      record = FactoryGirl.build(model_name, base_rfc5646_locale: 'en-en-en-en-en')
+      record.save
+      expect(record).to_not be_persisted
+      expect(record.errors.full_messages).to eql(["source locale invalid"])
+    end
+
+    it "doesn't create a record if targeted_rfc5646_locales is ill-formatted" do
+      record = FactoryGirl.build(model_name, targeted_rfc5646_locales: {'fr' => 'true'})
+      record.save
+      expect(record).to_not be_persisted
+      expect(record.errors.full_messages).to eql(["targeted localizations invalid"])
+    end
   end
 
   describe "#base_locale" do

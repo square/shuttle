@@ -83,8 +83,8 @@ describe Api::V1::KeyGroupsController do
       expect(key_group.source_copy).to eql("<p>a</p><p>b</p>")
       expect(key_group.keys.count).to eql(2)
       expect(key_group.translations.count).to eql(6)
-      expect(key_group.base_rfc5646_locale).to be_nil
-      expect(key_group.targeted_rfc5646_locales).to eql({})
+      expect(key_group.base_rfc5646_locale).to eql('en')
+      expect(key_group.targeted_rfc5646_locales).to eql({ 'fr' => true, 'es' => false })
       expect(key_group.base_locale).to eql(Locale.from_rfc5646('en'))
       expect(key_group.targeted_locales.map(&:rfc5646).sort).to eql(%w(es fr).sort)
     end
