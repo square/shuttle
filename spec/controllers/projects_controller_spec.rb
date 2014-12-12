@@ -102,7 +102,7 @@ describe ProjectsController do
     end
 
     it "returns 400 if project doesn't have a repository_url" do
-      project = Project.create(name: "Test")
+      project = FactoryGirl.create(:project, repository_url: nil)
       expect(CommitCreator).to_not receive(:perform_once)
       post :stash_webhook, { id: project.to_param, sha: "HEAD" }
       expect(response.status).to eql(400)

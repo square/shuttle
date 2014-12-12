@@ -117,36 +117,12 @@ class KeyGroup < ActiveRecord::Base
   end
 
   # ======== START LOCALE RELATED CODE =================================================================================
-  validates :base_rfc5646_locale, format: { with: Locale::RFC5646_FORMAT, allow_nil: true }
-  set_nil_if_blank :base_rfc5646_locale
-
   include CommonLocaleLogic
 
-  # If base_locale is set in this KeyGroup, it returns that field.
-  # Otherwise, it returns the base_locale of the Project.
-  #
-  # @return [Hash<Locale, Boolean>] locale requirements for this KeyGroup
-
-  def base_locale_with_inheriting
-    base_locale_without_inheriting || project.base_locale
+  before_validation(on: :create) do |key_group|
+    key_group.base_rfc5646_locale      = key_group.project.base_rfc5646_locale      if key_group.base_rfc5646_locale.blank?
+    key_group.targeted_rfc5646_locales = key_group.project.targeted_rfc5646_locales if key_group.targeted_rfc5646_locales.blank?
   end
-
-  # If locale_requirements are set in this KeyGroup, it returns that field.
-  # Otherwise, it returns the locale_requirements of the Project.
-  #
-  # @return [Hash<Locale, Boolean>] locale requirements for this KeyGroup
-
-  def locale_requirements_with_inheriting
-    # since `targeted_rfc5646_locales` can be an empty hash, we need to check for presence here instead of checking for nil
-    locale_requirements_without_inheriting.present? ? locale_requirements_without_inheriting : project.locale_requirements
-  end
-
-  # Inherit base_locale from Project if none is provided in this KeyGroup
-  alias_method_chain(:base_locale, :inheriting)
-
-  # Inherit locale_requirements from Project if none are provided in this KeyGroup
-  alias_method_chain(:locale_requirements, :inheriting)
-
   # ======== END LOCALE RELATED CODE ===================================================================================
 
 

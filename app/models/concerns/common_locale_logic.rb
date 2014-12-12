@@ -29,16 +29,19 @@ module CommonLocaleLogic
                  reader: ->(values) { values.inject({}) { |hsh, (k, v)| hsh[Locale.from_rfc5646(k)] = v; hsh } },
                  writer: ->(values) { values.inject({}) { |hsh, (k, v)| hsh[k.rfc5646] = v; hsh } }
 
-    validate :require_valid_targeted_rfc5646_locales_hash
+    validates :base_rfc5646_locale, presence: true
+    validates :base_rfc5646_locale, format: { with: Locale::RFC5646_FORMAT }, if: "base_rfc5646_locale.present?"
     validate :prevent_base_locale_from_changing, on: :update
+
+    validates :targeted_rfc5646_locales, presence: true
+    validate :require_valid_targeted_rfc5646_locales_hash, if: "targeted_rfc5646_locales.present?"
   end
 
   # Validates the validity of the targeted_rfc5646_locales hash
   # Doesn't validate its presence
   def require_valid_targeted_rfc5646_locales_hash
-    unless targeted_rfc5646_locales.nil? ||
-        (targeted_rfc5646_locales.keys.all? { |k| k.kind_of?(String) } &&
-         targeted_rfc5646_locales.values.all? { |v| v == true || v == false })
+    if !targeted_rfc5646_locales.keys.all? { |k| k.kind_of?(String) } ||
+       !targeted_rfc5646_locales.values.all? { |v| v == true || v == false }
       errors.add(:targeted_rfc5646_locales, :invalid)
     end
   end
