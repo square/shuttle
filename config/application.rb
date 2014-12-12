@@ -41,7 +41,7 @@ module Shuttle
     config.autoload_paths << config.root.join('app', 'mediators')
 
     # Activate observers that should always be running.
-    config.active_record.observers     = :comment_observer, :commit_observer, :key_group_observer, :issue_observer, :translation_observer
+    config.active_record.observers     = :comment_observer, :commit_observer, :article_observer, :issue_observer, :translation_observer
 
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.

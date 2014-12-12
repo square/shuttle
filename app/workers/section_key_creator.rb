@@ -12,34 +12,34 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Creates a set of {Key Key} associated with a {KeyGroup}, as part of an import job.
+# Creates a {Key Key} associated with a {Section}, as part of an import job.
 # Also creates {Translation Translations} in base & targeted locales related to the {Key}.
 
-class KeyCreatorForKeyGroups
+class SectionKeyCreator
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
   # Executes this worker. Creates a Key and related Translations in base & targeted locales.
   # Since no `key` field is provided here, a `key` field will be formed using the `source_copy`.
   #
-  # @param [Fixnum] key_group_id The ID of a {KeyGroup} this Key is parsed from.
+  # @param [Fixnum] section_id The ID of a {Section} this Key is parsed from.
   # @param [String] source_copy The source copy of the Key that will be created.
   # @param [Fixnum] index The index of Key that will be created here with respect
-  #     to other Keys that will be created for this KeyGroup.
+  #     to other Keys that will be created for this {Section}.
 
-  def perform(key_group_id, source_copy, index)
-    key_group = KeyGroup.find_by_id(key_group_id)
+  def perform(section_id, source_copy, index)
+    section = Section.find_by_id(section_id)
 
     # Create key
     # `index` is included in the `key` field to make sure that we will create different keys for duplicate paragraphs
-    # in a KeyGroup, and also to make sure we can search by this field after de-activating this Key in a KeyGroup.
+    # in a Section, and also to make sure we can search by this field after de-activating this Key in a Section.
     # Read the Key model documentation for more info.
 
-    key_name = KeyCreatorForKeyGroups.generate_key_name(source_copy, index)
-    key = key_group.keys.for_key(key_name).create_or_update!(
-        project:              key_group.project,
+    key_name = self.class.generate_key_name(source_copy, index)
+    key = section.keys.for_key(key_name).create_or_update!(
+        project:              section.project,
         key:                  key_name,
-        index_in_key_group:   index,
+        index_in_section:     index,
         source_copy:          source_copy,
         skip_readiness_hooks: true,
         ready: false

@@ -12,22 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# A worker which will start an import for a {KeyGroup}.
-# This worker is only scheduled in `import!` method of {KeyGroup} after it's become
-# known that a re-import is needed.
+require 'spec_helper'
 
-class KeyGroupImporter
-  include Sidekiq::Worker
-  sidekiq_options queue: :high
-
-  # Executes this worker by calling `#import_strings` on {Importer::KeyGroup}.
-  #
-  # @param [Fixnum] key_group_id The ID of a KeyGroup.
-
-  def perform(key_group_id)
-    key_group = KeyGroup.find(key_group_id)
-    Importer::KeyGroup.new(key_group).import_strings
+describe ArticleRecalculator do
+  it "should recalculate Article readiness" do
+    ArticleImporter.any_instance.stub(:perform) # prevent it from creating keys
+    article = FactoryGirl.create(:article, ready: false)
+    ArticleRecalculator.new.perform(article.id)
+    expect(article.reload).to be_ready
   end
-
-  include SidekiqLocking
 end

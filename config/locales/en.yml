@@ -23,7 +23,7 @@ en:
               cant_equal_source_locale: can’t equal source locale
             base:
               illegal_change: Translators can’t change a translation that has been approved.
-        key_group:
+        article:
           attributes:
             base:
               not_finished: latest requested import is not yet finished
@@ -35,7 +35,7 @@ en:
             uncheck_disabled:
               cannot_disable_uncheck_if_its_not_checked: cannot disable unchecking if it's not checked by default
     attributes:
-      key_group:
+      article:
         base_rfc5646_locale: source locale
         targeted_rfc5646_locales: targeted localizations
       project:
@@ -151,9 +151,9 @@ en:
   controllers:
     api:
       v1:
-        key_groups:
+        articles:
           invalid_api_token: Invalid project API TOKEN
-          key_group_not_found: Key group doesn't exist
+          article_not_found: Article doesn't exist
     application:
       mass_assignment_security: You tried to modify something you weren’t allowed to!
       monitor_required: You must be a monitor to do that.

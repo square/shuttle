@@ -12,8 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
-
-describe KeyGroupImporter do
-
+FactoryGirl.define do
+  factory :section do
+    association :article
+    sequence(:name) { |i| "section-#{i}" }
+    sequence(:source_copy) { |i| "section source copy #{i}" }
+  end
 end

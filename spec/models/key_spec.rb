@@ -19,8 +19,8 @@ describe Key do
     context "[keys_unique]" do
       it "errors at the Rails layer if another {Key} exists under the same {Project} with the same key and source copy" do
         project = FactoryGirl.create(:project)
-        FactoryGirl.create(:key, project: project, key: "test", source_copy: "test source", key_group: nil)
-        key = FactoryGirl.build(:key, project: project, key: "test", source_copy: "test source", key_group: nil)
+        FactoryGirl.create(:key, project: project, key: "test", source_copy: "test source", section: nil)
+        key = FactoryGirl.build(:key, project: project, key: "test", source_copy: "test source", section: nil)
         expect { key.save! }.to raise_error(ActiveRecord::RecordInvalid)
         expect(key).to_not be_persisted
         expect(key.errors.messages).to eql({:key_sha_raw=>["already taken"]})
@@ -28,88 +28,88 @@ describe Key do
 
       it "errors at the database layer if there are 2 concurrent `save` requests with the same key and source copy" do
         project = FactoryGirl.create(:project)
-        FactoryGirl.create(:key, project: project, key: "test", source_copy: "test source", key_group: nil)
-        key = FactoryGirl.build(:key, project: project, key: "test", source_copy: "test source", key_group: nil)
+        FactoryGirl.create(:key, project: project, key: "test", source_copy: "test source", section: nil)
+        key = FactoryGirl.build(:key, project: project, key: "test", source_copy: "test source", section: nil)
         key.valid?
         key.errors.clear
         expect { key.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
       end
 
       it "allows to create Keys with same key and source_copy as long as they are under different projects" do
-        FactoryGirl.create(:key, project: FactoryGirl.create(:project), key: "test", source_copy: "test source", key_group: nil)
-        key = FactoryGirl.build(:key, project: FactoryGirl.create(:project), key: "test", source_copy: "test source", key_group: nil)
+        FactoryGirl.create(:key, project: FactoryGirl.create(:project), key: "test", source_copy: "test source", section: nil)
+        key = FactoryGirl.build(:key, project: FactoryGirl.create(:project), key: "test", source_copy: "test source", section: nil)
         expect { key.save! }.to_not raise_error
         expect(key).to be_persisted
       end
     end
 
-    context "[keys_in_key_group_unique]" do
-      it "errors at the Rails layer if another {Key} exists under the same {KeyGroup} with the same key" do
-        key_group = FactoryGirl.create(:key_group)
-        FactoryGirl.create(:key, key_group: key_group, key: "test")
-        key = FactoryGirl.build(:key, key_group: key_group, key: "test")
+    context "[keys_in_section_unique]" do
+      it "errors at the Rails layer if another {Key} exists under the same {Section} with the same key" do
+        section = FactoryGirl.create(:section)
+        FactoryGirl.create(:key, section: section, key: "test")
+        key = FactoryGirl.build(:key, section: section, key: "test")
         expect { key.save! }.to raise_error(ActiveRecord::RecordInvalid)
         expect(key).to_not be_persisted
         expect(key.errors.messages).to eql({:key_sha_raw=>["already taken"]})
       end
 
-      it "errors at the database layer if there are 2 concurrent `save` requests with the same key under one {KeyGroup}" do
-        key_group = FactoryGirl.create(:key_group)
-        FactoryGirl.create(:key, key_group: key_group, key: "test")
-        key = FactoryGirl.build(:key, key_group: key_group, key: "test")
+      it "errors at the database layer if there are 2 concurrent `save` requests with the same key under one {Section}" do
+        section = FactoryGirl.create(:section)
+        FactoryGirl.create(:key, section: section, key: "test")
+        key = FactoryGirl.build(:key, section: section, key: "test")
         key.valid?
         key.errors.clear
         expect { key.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
       end
 
-      it "allows to create {Key Keys} with same key as long as they are under different {KeyGroup KeyGroups}" do
-        FactoryGirl.create(:key, key_group: FactoryGirl.create(:key_group), key: "test")
-        key = FactoryGirl.build(:key, key_group: FactoryGirl.create(:key_group), key: "test")
+      it "allows to create {Key Keys} with same key as long as they are under different {Section Sections}" do
+        FactoryGirl.create(:key, section: FactoryGirl.create(:section), key: "test")
+        key = FactoryGirl.build(:key, section: FactoryGirl.create(:section), key: "test")
         expect { key.save! }.to_not raise_error
         expect(key).to be_persisted
       end
     end
 
-    context "[index_in_key_group_unique]" do
-      it "errors at the Rails layer if another {Key} exists under the same {KeyGroup} with the same index_in_key_group" do
-        key_group = FactoryGirl.create(:key_group)
+    context "[index_in_section_unique]" do
+      it "errors at the Rails layer if another {Key} exists under the same {Section} with the same index_in_section" do
+        section = FactoryGirl.create(:section)
         Key.delete_all
 
-        FactoryGirl.create(:key, key_group: key_group, index_in_key_group: 0)
-        key = FactoryGirl.build(:key, key_group: key_group, index_in_key_group: 0)
+        FactoryGirl.create(:key, section: section, index_in_section: 0)
+        key = FactoryGirl.build(:key, section: section, index_in_section: 0)
         expect { key.save! }.to raise_error(ActiveRecord::RecordInvalid)
         expect(key).to_not be_persisted
-        expect(key.errors.messages).to eql({:index_in_key_group=>["already taken"]})
+        expect(key.errors.messages).to eql({:index_in_section=>["already taken"]})
       end
 
-      it "errors at the database layer if there are 2 concurrent `save` requests with the same index_in_key_group under one {KeyGroup}" do
-        key_group = FactoryGirl.create(:key_group)
+      it "errors at the database layer if there are 2 concurrent `save` requests with the same index_in_section under one {Section}" do
+        section = FactoryGirl.create(:section)
         Key.delete_all
 
-        FactoryGirl.create(:key, key_group: key_group, index_in_key_group: 0)
-        key = FactoryGirl.build(:key, key_group: key_group, index_in_key_group: 0)
+        FactoryGirl.create(:key, section: section, index_in_section: 0)
+        key = FactoryGirl.build(:key, section: section, index_in_section: 0)
         key.valid?
         key.errors.clear
         expect { key.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
       end
 
-      it "allows to create {Key Keys} with same index_in_key_group as long as they are under different {KeyGroup KeyGroups}" do
-        key_group1 = FactoryGirl.create(:key_group)
-        key_group2 = FactoryGirl.create(:key_group)
+      it "allows to create {Key Keys} with same index_in_section as long as they are under different {Section Sections}" do
+        section1 = FactoryGirl.create(:section)
+        section2 = FactoryGirl.create(:section)
         Key.delete_all
 
-        FactoryGirl.create(:key, key_group: key_group1, index_in_key_group: 0)
-        key = FactoryGirl.build(:key, key_group: key_group2, index_in_key_group: 0)
+        FactoryGirl.create(:key, section: section1, index_in_section: 0)
+        key = FactoryGirl.build(:key, section: section2, index_in_section: 0)
         expect { key.save! }.to_not raise_error
         expect(key).to be_persisted
       end
 
-      it "allows multiple {Keys} under the same {KeyGroup} with index_in_key_group = nil" do
-        key_group = FactoryGirl.create(:key_group)
+      it "allows multiple {Keys} under the same {Section} with index_in_section = nil" do
+        section = FactoryGirl.create(:section)
         Key.delete_all
 
-        FactoryGirl.create(:key, key_group: key_group, index_in_key_group: nil)
-        key = FactoryGirl.build(:key, key_group: key_group, index_in_key_group: nil)
+        FactoryGirl.create(:key, section: section, index_in_section: nil)
+        key = FactoryGirl.build(:key, section: section, index_in_section: nil)
         expect { key.save! }.to_not raise_error
         expect(key).to be_persisted
       end
@@ -271,13 +271,15 @@ describe Key do
       end
     end
 
-    context "[for keygroup-related keys]" do
+    context "[for article-bound keys]" do
       it "should skip key for a locale that is not a targeted locale even if it would not be skipped according to project's settings" do
         project  = FactoryGirl.create(:project,
                                       base_rfc5646_locale: 'en',
                                       targeted_rfc5646_locales: {'fr' => true})
-        key_group = FactoryGirl.create(:key_group, project: project, targeted_rfc5646_locales: {'de' => true})
-        key = FactoryGirl.create(:key, project: project, key_group: key_group)
+        Article.any_instance.stub(:import) # prevent auto import
+        article = FactoryGirl.create(:article, project: project, targeted_rfc5646_locales: {'de' => true})
+        section = FactoryGirl.create(:section, article: article)
+        key = FactoryGirl.create(:key, project: project, section: section)
 
         key.add_pending_translations
 
@@ -407,13 +409,16 @@ describe Key do
       expect(key.reload.translations.to_a).to eql([translation])
     end
 
-    context "[for KeyGroup related keys]" do
-      it "should not remove a translation in a targeted locale of the KeyGroup even if it would have been removed according to the project settings" do
+    context "[for Article related keys]" do
+      it "should not remove a translation in a targeted locale of the Article even if it would have been removed according to the project settings" do
         project  = FactoryGirl.create(:project,
                                       targeted_rfc5646_locales: {'en' => true, 'fr' => true},
                                       key_locale_exclusions:    {'fr' => %w(*cl*)})
-        key_group = FactoryGirl.create(:key_group, project: project, targeted_rfc5646_locales: {'en' => true, 'fr' => true})
-        key = FactoryGirl.create(:key, key: 'included_in_key_group_excluded_from_project', project: project, key_group: key_group)
+
+        Article.any_instance.stub(:import) # prevent auto import
+        article = FactoryGirl.create(:article, project: project, targeted_rfc5646_locales: {'en' => true, 'fr' => true})
+        section = FactoryGirl.create(:section, article: article)
+        key = FactoryGirl.create(:key, key: 'included_in_article_excluded_from_project', project: project, section: section)
         FactoryGirl.create :translation, source_rfc5646_locale: 'en', rfc5646_locale: 'en', key: key, copy: nil
         FactoryGirl.create :translation, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', key: key, copy: nil
         key.remove_excluded_pending_translations
@@ -421,20 +426,24 @@ describe Key do
         expect(key.reload.translations.count).to eql(2)
       end
 
-      it "should not remove a translated Translation even if it's not in a targeted locale of the KeyGroup" do
+      it "should not remove a translated Translation even if it's not in a targeted locale of the Article" do
         project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es' => true})
-        key_group = FactoryGirl.create(:key_group, project: project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
-        key = FactoryGirl.create(:key, project: project, key_group: key_group)
+        Article.any_instance.stub(:import) # prevent auto import
+        article = FactoryGirl.create(:article, project: project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
+        section = FactoryGirl.create(:section, article: article)
+        key = FactoryGirl.create(:key, project: project, section: section)
         FactoryGirl.create :translation, source_rfc5646_locale: 'en', rfc5646_locale: 'ja', key: key, copy: "hey"
         key.remove_excluded_pending_translations
 
         expect(key.reload.translations.count).to eql(1)
       end
 
-      it "should remove a not-translated Translation if it's not in a targeted locale of the KeyGroup" do
+      it "should remove a not-translated Translation if it's not in a targeted locale of the Article" do
         project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es' => true})
-        key_group = FactoryGirl.create(:key_group, project: project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
-        key = FactoryGirl.create(:key, project: project, key_group: key_group)
+        Article.any_instance.stub(:import) # prevent auto import
+        article = FactoryGirl.create(:article, project: project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
+        section = FactoryGirl.create(:section, article: article)
+        key = FactoryGirl.create(:key, project: project, section: section)
         FactoryGirl.create :translation, source_rfc5646_locale: 'en', rfc5646_locale: 'es', key: key, copy: nil
         key.remove_excluded_pending_translations
 
@@ -472,13 +481,14 @@ describe Key do
       expect(@key2.reload).to_not be_ready
     end
 
-    it "properly recalculates ready for keys of a given key group in batch" do
-      KeyGroup.any_instance.stub(:import!)
-      key_group = FactoryGirl.create(:key_group, project: @project)
-      @key1.update! key_group: key_group, index_in_key_group: 0
-      @key2.update! key_group: key_group, index_in_key_group: 1
+    it "properly recalculates ready for keys of a given article in batch" do
+      Article.any_instance.stub(:import!)
+      article = FactoryGirl.create(:article, project: @project)
+      section = FactoryGirl.create(:section, article: article)
+      @key1.update! section: section, index_in_section: 0
+      @key2.update! section: section, index_in_section: 1
 
-      Key.batch_recalculate_ready!(key_group)
+      Key.batch_recalculate_ready!(article)
       expect(@key1.reload).to be_ready
       expect(@key2.reload).to_not be_ready
     end

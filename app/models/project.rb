@@ -40,7 +40,7 @@ require 'file_mutex'
 # | `keys`         | The {Key Keys} found in this Project.                |
 # | `translations` | The {Translation Translations} under this Project.   |
 # | `blobs`        | The Git {Blob Blobs} imported into this Project.     |
-# | `key_groups`   | The {KeyGroup KeyGroups} imported into this Project. |
+# | `articles`     | The {Article Articles} imported into this Project.   |
 #
 # Properties
 # ==========
@@ -80,7 +80,7 @@ class Project < ActiveRecord::Base
   has_many :keys, inverse_of: :project, dependent: :destroy
   has_many :blobs, inverse_of: :project, dependent: :delete_all
   has_many :translations, through: :keys
-  has_many :key_groups, inverse_of: :project
+  has_many :articles, inverse_of: :project
 
   serialize :skip_imports,             Array
   serialize :key_exclusions,           Array
@@ -135,7 +135,7 @@ class Project < ActiveRecord::Base
   # out if it hasn't been already.
   #
   # If project is not linked to a git repository, {NotLinkedToAGitRepositoryError} is raised. This may happen if
-  # this project is only used for key_groups.
+  # this project is only used for articles.
   #
   # Any Git errors that occur when attempting to clone the repository are
   # swallowed, and `nil` is returned.
@@ -182,7 +182,7 @@ class Project < ActiveRecord::Base
   # out if it hasn't been already.
   #
   # If project is not linked to a git repository, {NotLinkedToAGitRepositoryError} is raised. This may happen if
-  # this project is only used for key_groups.
+  # this project is only used for articles.
   #
   # Any Git errors that occur when attempting to clone the repository are
   # swallowed, and `nil` is returned.
