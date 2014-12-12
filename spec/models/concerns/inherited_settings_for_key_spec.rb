@@ -20,31 +20,31 @@ require 'spec_helper'
 describe InheritedSettingsForKey do
   describe "#required_locales" do
     it "returns Project's required locales for git-based Keys" do
-      key = FactoryGirl.create(:key, key_group: nil)
+      key = FactoryGirl.create(:key, article: nil)
       expect(key.required_locales).to eql(key.project.required_locales)
     end
 
-    it "returns KeyGroup's required locales for KeyGroup-based Keys" do
+    it "returns Article's required locales for Article-based Keys" do
       project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr' => true})
-      key_group = FactoryGirl.create(:key_group, project: project, targeted_rfc5646_locales: {'ja' => true})
-      key = FactoryGirl.create(:key, key_group: key_group, project: project)
-      expect(key.required_locales).to eql(key_group.required_locales)
+      article = FactoryGirl.create(:article, project: project, targeted_rfc5646_locales: {'ja' => true})
+      key = FactoryGirl.create(:key, article: article, project: project)
+      expect(key.required_locales).to eql(article.required_locales)
     end
   end
 
   describe "#skip_key?" do
     it "calls's project's skip_key? method if key is git-based" do
       project = FactoryGirl.create(:project)
-      key = FactoryGirl.create(:key, project: project, key_group: nil)
+      key = FactoryGirl.create(:key, project: project, article: nil)
       expect(project).to receive(:skip_key?)
       key.skip_key?(Locale.from_rfc5646('en'))
     end
 
-    it "calls's key group's skip_key? method if key is keygroup-based" do
+    it "calls's Article's skip_key? method if key is Article-based" do
       project = FactoryGirl.create(:project)
-      key_group = FactoryGirl.create(:key_group, project: project)
-      key = FactoryGirl.create(:key, key_group: key_group, project: project)
-      expect(key_group).to receive(:skip_key?)
+      article = FactoryGirl.create(:article, project: project)
+      key = FactoryGirl.create(:key, article: article, project: project)
+      expect(article).to receive(:skip_key?)
       expect(project).to_not receive(:skip_key?)
       key.skip_key?(Locale.from_rfc5646('en'))
     end
@@ -52,29 +52,29 @@ describe InheritedSettingsForKey do
 
   describe "#base_locale" do
     it "returns Project's base locale for git-based Keys" do
-      key = FactoryGirl.create(:key, key_group: nil)
+      key = FactoryGirl.create(:key, article: nil)
       expect(key.base_locale).to eql(key.project.base_locale)
     end
 
-    it "returns KeyGroup's base locale for KeyGroup-based Keys" do
+    it "returns Article's base locale for Article-based Keys" do
       project = FactoryGirl.create(:project, base_rfc5646_locale: 'fr')
-      key_group = FactoryGirl.create(:key_group, project: project, base_rfc5646_locale: 'ja')
-      key = FactoryGirl.create(:key, key_group: key_group, project: project)
-      expect(key.base_locale).to eql(key_group.base_locale)
+      article = FactoryGirl.create(:article, project: project, base_rfc5646_locale: 'ja')
+      key = FactoryGirl.create(:key, article: article, project: project)
+      expect(key.base_locale).to eql(article.base_locale)
     end
   end
 
   describe "#targeted_locales" do
     it "returns Project's targeted locales for git-based Keys" do
-      key = FactoryGirl.create(:key, key_group: nil)
+      key = FactoryGirl.create(:key, article: nil)
       expect(key.targeted_locales).to eql(key.project.targeted_locales)
     end
 
-    it "returns KeyGroup's targeted locales for KeyGroup-based Keys" do
+    it "returns Article's targeted locales for Article-based Keys" do
       project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr' => true})
-      key_group = FactoryGirl.create(:key_group, project: project, targeted_rfc5646_locales: {'ja' => true})
-      key = FactoryGirl.create(:key, key_group: key_group, project: project)
-      expect(key.targeted_locales).to eql(key_group.targeted_locales)
+      article = FactoryGirl.create(:article, project: project, targeted_rfc5646_locales: {'ja' => true})
+      key = FactoryGirl.create(:key, article: article, project: project)
+      expect(key.targeted_locales).to eql(article.targeted_locales)
     end
   end
 end

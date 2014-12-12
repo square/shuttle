@@ -30,6 +30,55 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: articles; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE articles (
+    id integer NOT NULL,
+    project_id integer NOT NULL,
+    name text NOT NULL,
+    name_sha_raw bytea NOT NULL,
+    sections_hash text NOT NULL,
+    base_rfc5646_locale character varying(255) NOT NULL,
+    targeted_rfc5646_locales text NOT NULL,
+    description text,
+    email character varying(255),
+    import_batch_id character varying(255),
+    loading boolean DEFAULT false NOT NULL,
+    ready boolean DEFAULT false NOT NULL,
+    first_import_requested_at timestamp without time zone,
+    last_import_requested_at timestamp without time zone,
+    first_import_started_at timestamp without time zone,
+    last_import_started_at timestamp without time zone,
+    first_import_finished_at timestamp without time zone,
+    last_import_finished_at timestamp without time zone,
+    first_completed_at timestamp without time zone,
+    last_completed_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: articles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE articles_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: articles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE articles_id_seq OWNED BY articles.id;
+
+
+--
 -- Name: blobs; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -236,56 +285,6 @@ ALTER SEQUENCE issues_id_seq OWNED BY issues.id;
 
 
 --
--- Name: key_groups; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE key_groups (
-    id integer NOT NULL,
-    project_id integer NOT NULL,
-    key text NOT NULL,
-    key_sha_raw bytea NOT NULL,
-    source_copy text NOT NULL,
-    source_copy_sha_raw bytea NOT NULL,
-    description text,
-    email character varying(255),
-    import_batch_id character varying(255),
-    loading boolean DEFAULT false NOT NULL,
-    ready boolean DEFAULT false NOT NULL,
-    first_import_requested_at timestamp without time zone,
-    last_import_requested_at timestamp without time zone,
-    first_import_started_at timestamp without time zone,
-    last_import_started_at timestamp without time zone,
-    first_import_finished_at timestamp without time zone,
-    last_import_finished_at timestamp without time zone,
-    first_completed_at timestamp without time zone,
-    last_completed_at timestamp without time zone,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    base_rfc5646_locale character varying(255),
-    targeted_rfc5646_locales text
-);
-
-
---
--- Name: key_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE key_groups_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: key_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE key_groups_id_seq OWNED BY key_groups.id;
-
-
---
 -- Name: keys; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -295,8 +294,6 @@ CREATE TABLE keys (
     key_sha_raw bytea NOT NULL,
     source_copy_sha_raw bytea NOT NULL,
     ready boolean DEFAULT true NOT NULL,
-    key_group_id integer,
-    index_in_key_group integer,
     key text NOT NULL,
     original_key text NOT NULL,
     source_copy text,
@@ -305,7 +302,9 @@ CREATE TABLE keys (
     source text,
     fencers text,
     other_data text,
-    CONSTRAINT non_negative_index_in_key_group CHECK ((index_in_key_group >= 0))
+    section_id integer,
+    index_in_section integer,
+    CONSTRAINT non_negative_index_in_section CHECK ((index_in_section >= 0))
 );
 
 
@@ -495,6 +494,42 @@ CREATE SEQUENCE screenshots_id_seq
 --
 
 ALTER SEQUENCE screenshots_id_seq OWNED BY screenshots.id;
+
+
+--
+-- Name: sections; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE sections (
+    id integer NOT NULL,
+    article_id integer NOT NULL,
+    name text NOT NULL,
+    name_sha_raw bytea NOT NULL,
+    source_copy text NOT NULL,
+    source_copy_sha_raw bytea NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: sections_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE sections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE sections_id_seq OWNED BY sections.id;
 
 
 --
@@ -734,6 +769,13 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY articles ALTER COLUMN id SET DEFAULT nextval('articles_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY comments ALTER COLUMN id SET DEFAULT nextval('comments_id_seq'::regclass);
 
 
@@ -756,13 +798,6 @@ ALTER TABLE ONLY daily_metrics ALTER COLUMN id SET DEFAULT nextval('daily_metric
 --
 
 ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY key_groups ALTER COLUMN id SET DEFAULT nextval('key_groups_id_seq'::regclass);
 
 
 --
@@ -798,6 +833,13 @@ ALTER TABLE ONLY projects ALTER COLUMN id SET DEFAULT nextval('projects_id_seq':
 --
 
 ALTER TABLE ONLY screenshots ALTER COLUMN id SET DEFAULT nextval('screenshots_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY sections ALTER COLUMN id SET DEFAULT nextval('sections_id_seq'::regclass);
 
 
 --
@@ -840,6 +882,14 @@ ALTER TABLE ONLY translations ALTER COLUMN id SET DEFAULT nextval('translations_
 --
 
 ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+
+--
+-- Name: articles_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY articles
+    ADD CONSTRAINT articles_pkey PRIMARY KEY (id);
 
 
 --
@@ -907,14 +957,6 @@ ALTER TABLE ONLY issues
 
 
 --
--- Name: key_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY key_groups
-    ADD CONSTRAINT key_groups_pkey PRIMARY KEY (id);
-
-
---
 -- Name: keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -952,6 +994,14 @@ ALTER TABLE ONLY projects
 
 ALTER TABLE ONLY screenshots
     ADD CONSTRAINT screenshots_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY sections
+    ADD CONSTRAINT sections_pkey PRIMARY KEY (id);
 
 
 --
@@ -1059,6 +1109,20 @@ CREATE UNIQUE INDEX daily_metrics_date ON daily_metrics USING btree (date);
 
 
 --
+-- Name: index_articles_on_project_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_articles_on_project_id ON articles USING btree (project_id);
+
+
+--
+-- Name: index_articles_on_project_id_and_name_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_articles_on_project_id_and_name_sha_raw ON articles USING btree (project_id, name_sha_raw);
+
+
+--
 -- Name: index_blobs_on_project_id_and_sha_raw_and_errored; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1066,10 +1130,10 @@ CREATE INDEX index_blobs_on_project_id_and_sha_raw_and_errored ON blobs USING bt
 
 
 --
--- Name: index_in_key_group_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_in_section_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE UNIQUE INDEX index_in_key_group_unique ON keys USING btree (key_group_id, index_in_key_group) WHERE ((key_group_id IS NOT NULL) AND (index_in_key_group IS NOT NULL));
+CREATE UNIQUE INDEX index_in_section_unique ON keys USING btree (section_id, index_in_section) WHERE ((section_id IS NOT NULL) AND (index_in_section IS NOT NULL));
 
 
 --
@@ -1084,6 +1148,20 @@ CREATE INDEX index_keys_on_project_id ON keys USING btree (project_id);
 --
 
 CREATE UNIQUE INDEX index_locale_associations_on_source_and_target_rfc5646_locales ON locale_associations USING btree (source_rfc5646_locale, target_rfc5646_locale);
+
+
+--
+-- Name: index_sections_on_article_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_sections_on_article_id ON sections USING btree (article_id);
+
+
+--
+-- Name: index_sections_on_article_id_and_name_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_sections_on_article_id_and_name_sha_raw ON sections USING btree (article_id, name_sha_raw);
 
 
 --
@@ -1136,31 +1214,17 @@ CREATE INDEX issues_user ON issues USING btree (user_id);
 
 
 --
--- Name: key_groups_project; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: keys_in_section_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE INDEX key_groups_project ON key_groups USING btree (project_id);
-
-
---
--- Name: key_groups_project_keys_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX key_groups_project_keys_unique ON key_groups USING btree (project_id, key_sha_raw);
-
-
---
--- Name: keys_in_key_group_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX keys_in_key_group_unique ON keys USING btree (key_group_id, key_sha_raw) WHERE (key_group_id IS NOT NULL);
+CREATE UNIQUE INDEX keys_in_section_unique ON keys USING btree (section_id, key_sha_raw) WHERE (section_id IS NOT NULL);
 
 
 --
 -- Name: keys_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE UNIQUE INDEX keys_unique ON keys USING btree (project_id, key_sha_raw, source_copy_sha_raw) WHERE (key_group_id IS NULL);
+CREATE UNIQUE INDEX keys_unique ON keys USING btree (project_id, key_sha_raw, source_copy_sha_raw) WHERE (section_id IS NULL);
 
 
 --
@@ -1231,6 +1295,14 @@ CREATE UNIQUE INDEX users_reset_token ON users USING btree (reset_password_token
 --
 
 CREATE UNIQUE INDEX users_unlock_token ON users USING btree (unlock_token);
+
+
+--
+-- Name: articles_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY articles
+    ADD CONSTRAINT articles_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 
 --
@@ -1354,27 +1426,19 @@ ALTER TABLE ONLY issues
 
 
 --
--- Name: key_groups_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY key_groups
-    ADD CONSTRAINT key_groups_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-
---
--- Name: keys_key_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY keys
-    ADD CONSTRAINT keys_key_group_id_fkey FOREIGN KEY (key_group_id) REFERENCES key_groups(id);
-
-
---
 -- Name: keys_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY keys
     ADD CONSTRAINT keys_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: keys_section_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY keys
+    ADD CONSTRAINT keys_section_id_fkey FOREIGN KEY (section_id) REFERENCES sections(id);
 
 
 --
@@ -1407,6 +1471,14 @@ ALTER TABLE ONLY locale_glossary_entries
 
 ALTER TABLE ONLY screenshots
     ADD CONSTRAINT screenshots_commit_id_fkey FOREIGN KEY (commit_id) REFERENCES commits(id) ON DELETE CASCADE;
+
+
+--
+-- Name: sections_article_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY sections
+    ADD CONSTRAINT sections_article_id_fkey FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE;
 
 
 --
@@ -1582,3 +1654,9 @@ INSERT INTO schema_migrations (version) VALUES ('20141120011722');
 INSERT INTO schema_migrations (version) VALUES ('20141121202324');
 
 INSERT INTO schema_migrations (version) VALUES ('20141203212948');
+
+INSERT INTO schema_migrations (version) VALUES ('20141212011818');
+
+INSERT INTO schema_migrations (version) VALUES ('20141212012945');
+
+INSERT INTO schema_migrations (version) VALUES ('20141212232303');

@@ -14,22 +14,23 @@
 
 require 'spec_helper'
 
-describe KeyCreatorForKeyGroups do
+describe SectionKeyCreator do
   describe "#perform" do
+    before :each do
+      Article.any_instance.stub(:import!) # prevent imports, we want to handle things manually
+      @article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } )
+      @section = FactoryGirl.create(:section, article: @article)
+    end
+
     it "creates Key and related Translations in base & targeted locales" do
-      KeyGroup.any_instance.stub(:import!) # prevent imports, we want to handle things manually
-      key_group = FactoryGirl.create(:key_group, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } )
+      SectionKeyCreator.new.perform(@section.id, "<p>test</p>", 3)
+      expect(@section.reload.keys.count).to eql(1)
 
-      Key.delete_all
-      Translation.delete_all
-      KeyCreatorForKeyGroups.new.perform(key_group.id, "<p>test</p>", 3)
-      expect(key_group.reload.keys.count).to eql(1)
-
-      key = key_group.keys.first
+      key = @section.keys.first
 
       expect(key.key).to eql("3:5aec4fa35b3f3ed05e784fcd81b10863230e44a8bbf3b0cfd963580da045401a")
-      expect(key.index_in_key_group).to eql(3)
-      expect(key.project).to eql(key_group.project)
+      expect(key.index_in_section).to eql(3)
+      expect(key.project).to eql(@section.project)
       expect(key.source_copy).to eql("<p>test</p>")
       expect(key.ready).to be_false
 
@@ -41,30 +42,31 @@ describe KeyCreatorForKeyGroups do
       expect(base_translation).to be_approved
     end
 
-    it "doesn't create new Key or Translations if a KeyGroup is submitted for re-import with the same settings" do
-      key_group = FactoryGirl.create(:key_group, source_copy: "<p>test</p>", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } )
-      expect(key_group.translations.count).to eql(4)
+    it "doesn't create new Key or Translations if a Article is submitted for re-import with the same settings, ie. SectionKeyCreator is run twice with same args" do
+      SectionKeyCreator.new.perform(@section.id, "<p>test</p>", 0)
+      expect(@section.reload.translations.count).to eql(4)
 
       last_key_id = Key.order(:id).last
       last_translation_id = Translation.order(:id).last
-      KeyCreatorForKeyGroups.new.perform(key_group.id, "<p>test</p>", 0)
+      SectionKeyCreator.new.perform(@section.id, "<p>test</p>", 0)
 
       expect(Key.order(:id).last).to         eql(last_key_id)
       expect(Translation.order(:id).last).to eql(last_translation_id)
     end
 
     it "adds new required Translations and removes old unnecessary ones while keeping the unnecessary but translated Translations" do
-      key_group = FactoryGirl.create(:key_group, source_copy: "<p>test</p>", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } )
-      expect(key_group.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr ja es).sort)
+      SectionKeyCreator.new.perform(@section.id, "<p>test</p>", 0)
+      expect(@section.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr ja es).sort)
 
-      key_group.update! targeted_rfc5646_locales: { 'fr' => true, 'tr' => true, 'es' => false }
-      expect(key_group.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr tr es).sort)
+      @article.update! targeted_rfc5646_locales: { 'fr' => true, 'tr' => true, 'es' => false }
+      SectionKeyCreator.new.perform(@section.id, "<p>test</p>", 0)
+      expect(@section.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr tr es).sort)
     end
   end
 
   describe "#generate_key_name" do
     it "generates the key name using the index and the sha info" do
-      expect(KeyCreatorForKeyGroups.generate_key_name("hello", 7)).to eql("7:2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")
+      expect(SectionKeyCreator.generate_key_name("hello", 7)).to eql("7:2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")
     end
   end
 end

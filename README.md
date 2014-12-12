@@ -29,25 +29,25 @@ One typical **Shuttle workflow** is as follows:
 Another typical **Shuttle workflow** is as follows:
 
 1. An engineer makes an API call using a Project's api_token to submit a
-   new {KeyGroup} (this can be an Article, Email, or anything else).
-2. Shuttle parses the {KeyGroup}, splits it up into small pieces of strings.
+   new {Article} (this can be an Article, Email, or anything else).
+2. Shuttle parses the {Article}, splits it up into small pieces of strings.
 3. Shuttle determines which strings need translation while optimizing for
    efficiency and accuracy. These strings appear on the translators’ dashboard.
 4. Translators translate all these strings. They then appear on the reviewers’
    dashboard.
 5. Reviewers review and approve translations.
-6. Once all translations applying to a {KeyGroup} are approved for all of a
-   Project's required localizations, the {KeyGroup} is marked as ready.
-7. An engineer makes an API call to retrieve the translated KeyGroups.
+6. Once all translations applying to a {Article} are approved for all of a
+   Project's required localizations, the {Article} is marked as ready.
+7. An engineer makes an API call to retrieve the translated Articles.
 
 The whole process is extremely parallelizable: while one commit might be pending
 translation or review, an engineer can make additional commits with new copy,
 and they will also sit in the queue awaiting translation. Once any commit is
 fully localized, it is marked as ready for release. Most of this applies to
-KeyGroups as well, except, Shuttle doesn't keep versions for KeyGroups and
+Articles as well, except, Shuttle doesn't keep versions for Articles and
 any new submission will override the contents of the previous submission.
 
-Shuttle will refuse to deliver a manifest for a commit or a KeyGroup that
+Shuttle will refuse to deliver a manifest for a commit or a Article that
 has not been fully translated and reviewed. To prevent such deploys, engineers
 should add a test to their CI script that ensures that the manifest endpoint
 does not return 404.
@@ -223,8 +223,8 @@ For information about requests and responses, see {ApplicationController}.
 
 ### Models
 
-Each {Project} has multiple {Commit Commits} or {KeyGroup KeyGroups}.
-When a Commit or KeyGroup is created, it is scanned by {Importer Importers} for
+Each {Project} has multiple {Commit Commits} or {Article Articles}.
+When a Commit or Article is created, it is scanned by {Importer Importers} for
 localizable strings. These strings are represented as {Translation} records.
 A base Translation is created in the project's base locale, and preapproved,
 and pending, untranslated Translations are created for each target locale.
@@ -235,13 +235,13 @@ otherwise generating new Keys and new Translations for the new source copy.
 {User Users} with the translator role then fill out pending Translations, and
 reviewers approve them.
 
-When all of a Commit's/KeyGroup's Translations in all of a Project's required
-locales are marked as approved, the Commit/KeyGroup is marked as ready.
-This Commit's/KeyGroup's translated copy can then be exported to a manifest
+When all of a Commit's/Article's Translations in all of a Project's required
+locales are marked as approved, the Commit/Article is marked as ready.
+This Commit's/Article's translated copy can then be exported to a manifest
 file using an {Exporter}, or localized versions of project files can be
 generated and downloaded using a {Localizer}.
 
-KeyGroup keeps an ordered set of {Key Keys} whereas Commit keeps an unordered
+Article keeps an ordered set of {Key Keys} whereas Commit keeps an unordered
 set, so that the exporter can put the Translations back together in the right order.
 
 Because new source copy overwrites existing source copy, a translation memory

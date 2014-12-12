@@ -12,21 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'sidekiq_locking'
-
-# Worker that recalculates KeyGroup readiness
-
-class KeyGroupRecalculator
-  include Sidekiq::Worker
-  sidekiq_options queue: :low
-
-  # Executes this worker.
-  #
-  # @param [Fixnum] key_group_id The ID of a KeyGroup to process.
-
-  def perform(key_group_id)
-    KeyGroup.find(key_group_id).recalculate_ready!
+FactoryGirl.define do
+  factory :article do
+    association :project, repository_url: nil
+    sequence(:name) { |i| "article-#{i}" }
+    sections_hash { { "title" => "Hello, world", "body" => "How are you?" } }
   end
-
-  include SidekiqLocking
 end

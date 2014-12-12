@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Recalculates readiness of Keys, Commits and KeyGroups in project
+# Recalculates readiness of Keys, Commits and Articles in project
 # since readiness hooks were disabled during the previous task (ex: `ProjectTranslationsAdderAndRemover`).
 #
 # This task could also be run in the batch finisher on success directly. However, this is a long running operation and
@@ -41,8 +41,8 @@ class ProjectDescendantsRecalculator
       CommitRecalculator.perform_once(commit.id)
     end
 
-    project.key_groups.find_each do |key_group|
-      KeyGroupRecalculator.perform_once(key_group.id)
+    project.articles.find_each do |article|
+      ArticleRecalculator.perform_once(article.id)
     end
   end
 

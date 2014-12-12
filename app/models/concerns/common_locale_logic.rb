@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# This abstracts out some common Locale logic, used by the Project and KeyGroup models.
+# This abstracts out some common Locale logic, used by the Project and Article models.
 
 require 'active_support/concern'
 

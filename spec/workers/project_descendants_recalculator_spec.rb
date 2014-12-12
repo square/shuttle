@@ -42,18 +42,18 @@ describe ProjectDescendantsRecalculator do
       expect(commit2.reload).to be_ready
     end
 
-    it "recalculates ready for all KeyGroups of the project" do
+    it "recalculates ready for all Articles of the project" do
       # setup
+      ArticleImporter.any_instance.stub(:perform) # prevent it from creating keys
       project = FactoryGirl.create(:project)
-      key_group1 = FactoryGirl.create(:key_group, project: project)
-      key_group2 = FactoryGirl.create(:key_group, project: project)
+      article1 = FactoryGirl.create(:article, project: project)
+      article2 = FactoryGirl.create(:article, project: project)
 
-      Key.delete_all
-      project.key_groups.update_all ready: false
+      project.articles.update_all ready: false
 
       ProjectDescendantsRecalculator.new.perform(project.id)
-      expect(key_group1.reload).to be_ready
-      expect(key_group2.reload).to be_ready
+      expect(article1.reload).to be_ready
+      expect(article2.reload).to be_ready
     end
   end
 end

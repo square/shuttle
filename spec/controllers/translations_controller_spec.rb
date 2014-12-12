@@ -731,18 +731,19 @@ describe TranslationsController do
         end
       end
 
-      context "[KeyGroup]" do
+      context "[Article]" do
         before :each do
           @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
           @request.env['devise.mapping'] = Devise.mappings[:user]
           sign_in @user
 
           @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
-          @key_group = FactoryGirl.create(:key_group, project: @project)
-          Key.delete_all
+          Article.any_instance.stub(:import!) # prevent auto import
+          @article = FactoryGirl.create(:article, project: @project, sections_hash: {"main" => "hello"})
+          @section = FactoryGirl.create(:section, article: @article)
 
-          @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project, key_group: @key_group, index_in_key_group: 0)
-          @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project, key_group: @key_group, index_in_key_group: 1)
+          @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project, section: @section, index_in_section: 0)
+          @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project, section: @section, index_in_section: 1)
 
           [@key1, @key2].each do |key|
             %w(fr es).each do |locale|
@@ -751,40 +752,40 @@ describe TranslationsController do
           end
 
           @project.keys.each { |k| k.recalculate_ready! }
-          @project.key_groups { |kg| kg.recalculate_ready! }
+          @project.articles { |article| article.recalculate_ready! }
 
           @project.translations.each { |t| expect(t).to_not be_translated }
           @project.translations.each { |t| expect(t).to_not be_approved }
           @project.keys.each { |k| expect(k).to_not be_ready }
-          @project.key_groups { |kg| expect(kg).to_not be_ready }
+          @project.articles { |article| expect(article).to_not be_ready }
         end
 
-        it "sets key readiness to true, sets keygroup's readiness to false if the last standing translation for the key (but not for the keygroup) is approved" do
+        it "sets key readiness to true, sets article's readiness to false if the last standing translation for the key (but not for the article) is approved" do
           @key1.translations.last.update! copy: 'fake', approved: true
           @project.keys.each { |k| k.recalculate_ready! }
           translation = @key1.translations.first
           patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
 
           expect(@key1.reload).to be_ready
-          expect(@key_group.reload).to_not be_ready
+          expect(@article.reload).to_not be_ready
         end
 
-        it "sets key readiness to true, sets keygroup's readiness to true if the last standing translation for the keygroup is approved" do
+        it "sets key readiness to true, sets article's readiness to true if the last standing translation for the article is approved" do
           ([@key1.translations.last] + @key2.translations.to_a).each { |t| t.update! copy: 'fake', approved: true }
           @project.keys.each { |k| k.recalculate_ready! }
           translation = @key1.translations.first
           patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
 
           expect(@key1.reload).to be_ready
-          expect(@key_group.reload).to be_ready
+          expect(@article.reload).to be_ready
         end
 
-        it "sets key readiness to false, sets keygroup's readiness to false if a translation is approved but there are more translations in the key that are not approved" do
+        it "sets key readiness to false, sets article's readiness to false if a translation is approved but there are more translations in the key that are not approved" do
           translation = @key1.translations.first
           patch :update, translation: { copy: 'fake' }, project_id: @project.to_param, key_id: @key1.to_param, id: translation.to_param
 
           expect(@key1.reload).to_not be_ready
-          expect(@key_group.reload).to_not be_ready
+          expect(@article.reload).to_not be_ready
         end
       end
     end
