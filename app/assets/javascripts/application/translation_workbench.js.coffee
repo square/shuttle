@@ -42,17 +42,9 @@ class TranslationItem
   # Creates a new translation item manager.
   #
   # @param [TranslationWorkbench] parent The translation workbench this item belongs to.
-  # @param [Object] translation The translation (loaded from JSON) for this
-  #   item.
-  # @param [Object] options Additional options.
-  # @option options [Boolean] alternate (false) If `true`, this cell will be
-  #   rendered with a slightly darker background.
-  # @option options [Boolean] review (false) If `true`, the nomenclature for
-  #   the translation workbench will be geared towards reviewers, not translators.
-  # @option options [String] word_substitute_url If provided, a button will be
-  #   provided that submits the source copy for automatic word substitution.
+  # @param [Object] translation The translation (loaded from JSON) for this item.
 
-  constructor: (@parent, @translation, @options) ->
+  constructor: (@parent, @translation) ->
     @next = null
     @fencers = []
     for fencer_type in @translation.key.fencers
@@ -130,9 +122,6 @@ class TranslationItem
     if @translation.key.context?
       context.context = @translation.key.context
 
-    if @options.word_substitute_url
-      context.convert_source = true
-
     context.key = @translation.key.original_key
     if @translation.key.source?
       context.source = @translation.key.source
@@ -154,7 +143,6 @@ class TranslationItem
 
     @expand_link_button = @element.find('.expand-link').first()
     @copy_source_button = @element.find('.copy-source').first()
-    @convert_source_button = @element.find('.convert-source').first()
 
     @alerts = @element.find('div.alerts').first()
     @glossary_tips = @element.find('div.tips').first()
@@ -209,20 +197,6 @@ class TranslationItem
       this.setUnsaved()
       @copy_field.focus()
       return false
-
-    # Set up @convert_source_button
-    if @convert_source_button.size() > 0
-      @convert_source_button.click () =>
-        $.ajax "#{@options.word_substitute_url}&string=#{encodeURIComponent @translation.source_copy}",
-          success: (result) =>
-            this.clearNotes()
-            @copy_field.val result.string
-            for note in result.notes
-              do (note) => this.addNote note
-            for suggestion in result.suggestions
-              do (suggestion) => this.addNote suggestion
-          error: () => new Flash('alert').text("Couldn't automatically convert the source string.");
-        return false
 
     # Set up @alerts
     $('<p/>').addClass('alert token-parity-warning')
@@ -375,10 +349,8 @@ class root.TranslationWorkbench
   # @param [jQuery Object] filter The element containing the filter form.
   # @param [String] url The URL to load translations from.
   # @param [Array] glossary A JSON-decoded list of glossary entries.
-  # @param [Object] options Additional options. These are passed to the
-  #   `TranslationItem` constructor.
   #
-  constructor: (@list, @filter, @url, @search_url, @glossary, @options) ->
+  constructor: (@list, @filter, @url, @search_url, @glossary) ->
     @highlighter = $(HoganTemplates['translationworkbench/translation_tooltip'].render()) 
     @highlighter.find('.tool-item.hide').click =>
       @highlighter.hide()
@@ -416,7 +388,7 @@ class root.TranslationWorkbench
     previousItem = null
     for translation, i in translations
       do (translation) =>
-        item = new TranslationItem(this, translation, @options)
+        item = new TranslationItem(this, translation)
         previousItem.next = item if previousItem?
         item.build().appendTo @list
         @items.push item

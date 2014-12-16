@@ -61,12 +61,6 @@ class Locale::ProjectsController < ApplicationController
   # | `id`        | The slug of a {Project}.        |
 
   def show
-    @word_substitute_url = if WordSubstitutor.available?(@project.base_locale, @locale)
-                             substitute_url(from: @project.base_locale.rfc5646, to: @locale.rfc5646)
-                           else
-                             nil
-                           end
-
     @glossary_entries = LocaleGlossaryEntry.joins(:source_glossary_entry)
         .where(
             source_glossary_entries: {source_rfc5646_locale: Shuttle::Configuration.locales.source_locale},
