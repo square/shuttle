@@ -200,6 +200,25 @@ ja-JP:
   same: Same (ja)
       YAML
     end
+
+    it "should not include a required locale in the manifest if it is an exact replica of a parent locale" do
+      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'fr-CA'=> true })
+      key = FactoryGirl.create(:key, project: project, key: "test")
+      commit = FactoryGirl.create(:commit, project: project)
+      commit.keys = [key]
+      FactoryGirl.create :translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr',    source_copy: key.source_copy, copy: "Translated", approved: true
+      FactoryGirl.create :translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr-CA', source_copy: key.source_copy, copy: "Translated", approved: true
+
+      fr = Locale.from_rfc5646('fr')
+      frCA = Locale.from_rfc5646('fr-CA')
+      io = StringIO.new
+      Exporter::Yaml.new(commit).export(io, fr, frCA)
+      expect(io.string).to eql(<<-YAML)
+---
+fr:
+  test: Translated
+      YAML
+    end
   end
 
   describe ".valid?" do
