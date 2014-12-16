@@ -28,7 +28,8 @@ module Exporter
         dedupe_from = @commit.project.required_locales.select { |rl| locale.child_of?(rl) }
         dedupe_from.delete locale
 
-        hsh[locale.rfc5646] = translation_hash(locale, dedupe_from)
+        locale_translations_hash = translation_hash(locale, dedupe_from)
+        hsh[locale.rfc5646] = locale_translations_hash if locale_translations_hash.present?
         hsh
       end
 
