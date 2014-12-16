@@ -60,11 +60,7 @@ $(document).ready ->
     $(".filter-bar form"),
     "<%= locale_project_translations_url(@locale, @project, format: 'json') %>",
     "<%= search_translations_url %>",
-    JSON.parse("<%= escape_javascript @glossary_entries.to_json %>"),
-    {
-      review: <%= current_user.reviewer?.inspect %>,
-      word_substitute_url: <%= @word_substitute_url ? @word_substitute_url.inspect : 'null' %>
-    }
+    JSON.parse("<%= escape_javascript @glossary_entries.to_json %>")
   )
 
   $(".filter-bar form").submit ->
