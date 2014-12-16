@@ -13,44 +13,44 @@
 #    limitations under the License.
 
 # A concern for {Key} that providers helpers for a lot of settings that would be
-# inherited from the {Key}'s KeyGroup or Project.
+# inherited from the {Key}'s Article or Project.
 
 module InheritedSettingsForKey
 
-  # If this {Key} belongs to a {KeyGroup}, the required locales are pulled from the
-  # KeyGroup's settings. Otherwise, project's settings are used.
+  # If this {Key} belongs to an {Article}, the required locales are pulled from the
+  # Article's settings. Otherwise, project's settings are used.
   #
   # @return [Array<Locale>] array of {Locales} this {Key} must be translated to.
 
   def required_locales
-    key_group ? key_group.required_locales : project.required_locales
+    article ? article.required_locales : project.required_locales
   end
 
-  # If this {Key} belongs to a {KeyGroup}, the KeyGroup is checked to see if the key
+  # If this {Key} belongs to a {Article}, the Article is checked to see if the key
   # should be skipped. Otherwise, project is checked.
   #
   # @return [Boolean] whether or not this {Key} should be skipped.
 
   def skip_key?(locale)
-    key_group ? key_group.skip_key?(self, locale) : project.skip_key?(self.key, locale)
+    article ? article.skip_key?(self, locale) : project.skip_key?(self.key, locale)
   end
 
-  # If this {Key} belongs to a {KeyGroup}, the base locale is pulled from the
-  # KeyGroup's settings. Otherwise, project's settings are used.
+  # If this {Key} belongs to a {Article}, the base locale is pulled from the
+  # Article's settings. Otherwise, project's settings are used.
   #
   # @return [Locale] base {Locale} of this {Key}
 
   def base_locale
-    key_group ? key_group.base_locale : project.base_locale
+    article ? article.base_locale : project.base_locale
   end
 
-  # If this {Key} belongs to a {KeyGroup}, the targeted_locales are pulled from the
-  # KeyGroup's settings. Otherwise, project's settings are used.
+  # If this {Key} belongs to a {Article}, the targeted_locales are pulled from the
+  # Article's settings. Otherwise, project's settings are used.
   #
   # @return [Array<Locale>] array of {Locales} this {Key} is targeted to.
 
   def targeted_locales
-    key_group ? key_group.targeted_locales : project.targeted_locales
+    article ? article.targeted_locales : project.targeted_locales
   end
 
 end

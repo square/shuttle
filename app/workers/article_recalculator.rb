@@ -12,13 +12,21 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'sidekiq_locking'
 
-describe KeyGroupRecalculator do
-  it "should recalculate KeyGroup readiness" do
-    key_group = FactoryGirl.create(:key_group, ready: false)
-    key_group.reload.keys.delete_all
-    KeyGroupRecalculator.new.perform(key_group.id)
-    expect(key_group.reload).to be_ready
+# Worker that recalculates Article readiness
+
+class ArticleRecalculator
+  include Sidekiq::Worker
+  sidekiq_options queue: :low
+
+  # Executes this worker.
+  #
+  # @param [Fixnum] article_id The ID of a Article to process.
+
+  def perform(article_id)
+    Article.find(article_id).recalculate_ready!
   end
+
+  include SidekiqLocking
 end

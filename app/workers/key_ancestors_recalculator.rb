@@ -16,7 +16,7 @@ require 'sidekiq_locking'
 
 # Worker that recalculates readiness for a Key's ancestors, namely:
 #   - {Commit Commits}
-#   - {KeyGroup KeyGroup}.
+#   - {Article Article}.
 
 class KeyAncestorsRecalculator
   include Sidekiq::Worker
@@ -28,7 +28,7 @@ class KeyAncestorsRecalculator
 
   def perform(key_id)
     key = Key.find(key_id)
-    key.key_group.try!(:recalculate_ready!)
+    key.article.try!(:recalculate_ready!)
 
     CommitsKey.where(key_id: key_id).pluck(:commit_id).each do |commit_id|
       CommitRecalculator.perform_once commit_id.to_i
