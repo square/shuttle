@@ -1381,7 +1381,7 @@ ALTER TABLE ONLY keys
 --
 
 ALTER TABLE ONLY keys
-    ADD CONSTRAINT keys_section_id_fkey FOREIGN KEY (section_id) REFERENCES sections(id);
+    ADD CONSTRAINT keys_section_id_fkey FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE;
 
 
 --
@@ -1605,3 +1605,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141212011818');
 INSERT INTO schema_migrations (version) VALUES ('20141212012945');
 
 INSERT INTO schema_migrations (version) VALUES ('20141212232303');
+
+INSERT INTO schema_migrations (version) VALUES ('20141217214242');
