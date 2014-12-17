@@ -11,12 +11,12 @@ body.home {
         input + input { margin: 0px; }
       }
 
-      input[name="sha"] { width: 485px; text-transform: lowercase; }
-      select[name="locales"] { width: 200px; }
+      input[name="homepage_commits_filter__sha"] { width: 485px; text-transform: lowercase; }
+      select[name="homepage_commits_filter__locales"] { width: 200px; }
       .twitter-typeahead { width: 200px; }
 
-      select[name="project_id"] { width: 200px; }
-      select[name="status"] { width: 250px; }
+      select[name="homepage_commits_filter__project_id"] { width: 200px; }
+      select[name="homepage_commits_filter__status"] { width: 250px; }
     }
   }
 
