@@ -39,6 +39,8 @@ module Shuttle
     config.autoload_paths << config.root.join('app', 'models', 'observers')
     config.autoload_paths << config.root.join('app', 'presenters')
     config.autoload_paths << config.root.join('app', 'mediators')
+    config.autoload_paths << config.root.join('app', 'services')
+    config.autoload_paths << config.root.join('app', 'support')
 
     # Activate observers that should always be running.
     config.active_record.observers     = :comment_observer, :commit_observer, :article_observer, :issue_observer, :translation_observer

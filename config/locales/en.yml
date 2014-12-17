@@ -217,6 +217,12 @@ en:
         translator: translator
         reviewer: reviewer
         admin: administrator
+    article:
+      priority:
+        0: P0
+        1: P1
+        2: P2
+        3: P3
     commit:
       unknown_user: "Unknown User"
       priority:

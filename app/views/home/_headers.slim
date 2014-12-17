@@ -12,51 +12,54 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
+/ Requires the following local variables:
+/   - `item_type`. Can be 'commit' or 'article'.
+
 tr
   / Project Status
   th
   th Project
-  th SHA
+  th = item_type == 'commit' ? 'SHA' : 'Name'
   / Create Date
   th
-    - if @homepage_commits_sort__field == 'create'
-      - if @homepage_commits_sort__direction == 'asc'
-        = link_to request.parameters.merge({homepage_commits_sort__field: 'create', homepage_commits_sort__direction: 'desc'}) do
+    - if @form[:sort__field] == 'create'
+      - if @form[:sort__direction] == 'asc'
+        = link_to request.parameters.merge({:sort__field => 'create', :sort__direction => 'desc'}) do
           | Created &nbsp;
           i.fa.fa-caret-down
       - else
-        = link_to request.parameters.merge({homepage_commits_sort__field: 'create', homepage_commits_sort__direction: 'asc'}) do
+        = link_to request.parameters.merge({:sort__field => 'create', :sort__direction => 'asc'}) do
           | Created &nbsp;
           i.fa.fa-caret-up
     - else
-      = link_to 'Created', request.parameters.except(:homepage_commits_sort__direction).merge(homepage_commits_sort__field: 'create')
+      = link_to 'Created', request.parameters.except(:sort__direction).merge(:sort__field => 'create')
   / Due Date
   th
-    - if @homepage_commits_sort__field == 'due'
-      - if @homepage_commits_sort__direction == 'desc'
-        = link_to request.parameters.merge({homepage_commits_sort__field: 'due', homepage_commits_sort__direction: 'asc'}) do
+    - if @form[:sort__field] == 'due'
+      - if @form[:sort__direction] == 'desc'
+        = link_to request.parameters.merge({:sort__field => 'due', :sort__direction => 'asc'}) do
           | Due Date&nbsp;
           i.fa.fa-caret-up
       - else
-        = link_to request.parameters.merge({homepage_commits_sort__field: 'due', homepage_commits_sort__direction: 'desc'}) do
+        = link_to request.parameters.merge({:sort__field => 'due', :sort__direction => 'desc'}) do
           | Due Date&nbsp;
           i.fa.fa-caret-down
     - else
-      = link_to 'Due Date', request.parameters.except(:homepage_commits_sort__direction).merge(homepage_commits_sort__field: 'due')
+      = link_to 'Due Date', request.parameters.except(:sort__direction).merge(:sort__field => 'due')
   / Priority
   th
-    - if @homepage_commits_sort__field == 'priority' || @homepage_commits_sort__field.nil?
-      - if @homepage_commits_sort__direction == 'desc'
-        = link_to request.parameters.merge({homepage_commits_sort__field: 'priority', homepage_commits_sort__direction: 'asc'}) do
+    - if @form[:sort__field] == 'priority' || @form[:sort__field].nil?
+      - if @form[:sort__direction] == 'desc'
+        = link_to request.parameters.merge({:sort__field => 'priority', :sort__direction => 'asc'}) do
           | Priority &nbsp;
           i.fa.fa-caret-up
       - else
-        = link_to request.parameters.merge({homepage_commits_sort__field: 'priority', homepage_commits_sort__direction: 'desc'}) do
+        = link_to request.parameters.merge({:sort__field => 'priority', :sort__direction => 'desc'}) do
           | Priority &nbsp;
           i.fa.fa-caret-down
 
     - else
-      = link_to 'Priority', request.parameters.except(:homepage_commits_sort__direction).merge(homepage_commits_sort__field: 'priority')
+      = link_to 'Priority', request.parameters.except(:sort__direction).merge(:sort__field => 'priority')
 
   th Description
 

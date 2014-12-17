@@ -12,10 +12,14 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-- content_for :shuttle_title do
-  = "Dashboard - Shuttle"
-- content_for :file_name do
-  = 'views/home/index'
+/ Requires the following local variables:
+/   - `item_type`. Can be 'commit' or 'article'.
 
-= render partial: 'home/commits/commits'
-= render partial: 'home/articles/articles'
+ruby:
+  filter_name = :"#{item_type}s_filter__project_id" # ex: :commits_filter__project_id, :articles_filter__project_id
+
+  project_list = (item_type == 'commit') ? Project.git : Project.not_git
+  project_list = project_list.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+  project_list.unshift ['all projects', 'all']
+
+= select_tag filter_name, options_for_select(project_list, @form[filter_name])
