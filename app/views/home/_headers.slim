@@ -1,3 +1,17 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
 tr
   / Project Status
   th
@@ -5,44 +19,44 @@ tr
   th SHA
   / Create Date
   th
-    - if @sort_order == 'create'
-      - if @direction == 'asc'
-        = link_to request.parameters.merge({sort: 'create', direction: 'desc'}) do
+    - if @homepage_commits_sort__field == 'create'
+      - if @homepage_commits_sort__direction == 'asc'
+        = link_to request.parameters.merge({homepage_commits_sort__field: 'create', homepage_commits_sort__direction: 'desc'}) do
           | Created &nbsp;
           i.fa.fa-caret-down
       - else
-        = link_to request.parameters.merge({sort: 'create', direction: 'asc'}) do
+        = link_to request.parameters.merge({homepage_commits_sort__field: 'create', homepage_commits_sort__direction: 'asc'}) do
           | Created &nbsp;
           i.fa.fa-caret-up
     - else
-      = link_to 'Created', request.parameters.except(:direction).merge(sort: 'create')
+      = link_to 'Created', request.parameters.except(:homepage_commits_sort__direction).merge(homepage_commits_sort__field: 'create')
   / Due Date
   th
-    - if @sort_order == 'due'
-      - if @direction == 'desc'
-        = link_to request.parameters.merge({sort: 'due', direction: 'asc'}) do
+    - if @homepage_commits_sort__field == 'due'
+      - if @homepage_commits_sort__direction == 'desc'
+        = link_to request.parameters.merge({homepage_commits_sort__field: 'due', homepage_commits_sort__direction: 'asc'}) do
           | Due Date&nbsp;
           i.fa.fa-caret-up
       - else
-        = link_to request.parameters.merge({sort: 'due', direction: 'desc'}) do
+        = link_to request.parameters.merge({homepage_commits_sort__field: 'due', homepage_commits_sort__direction: 'desc'}) do
           | Due Date&nbsp;
           i.fa.fa-caret-down
     - else
-      = link_to 'Due Date', request.parameters.except(:direction).merge(sort: 'due')
+      = link_to 'Due Date', request.parameters.except(:homepage_commits_sort__direction).merge(homepage_commits_sort__field: 'due')
   / Priority
   th
-    - if @sort_order == 'priority' || @sort_order.nil?
-      - if @direction == 'desc'
-        = link_to request.parameters.merge({sort: 'priority', direction: 'asc'}) do
+    - if @homepage_commits_sort__field == 'priority' || @homepage_commits_sort__field.nil?
+      - if @homepage_commits_sort__direction == 'desc'
+        = link_to request.parameters.merge({homepage_commits_sort__field: 'priority', homepage_commits_sort__direction: 'asc'}) do
           | Priority &nbsp;
           i.fa.fa-caret-up
       - else
-        = link_to request.parameters.merge({sort: 'priority', direction: 'desc'}) do
+        = link_to request.parameters.merge({homepage_commits_sort__field: 'priority', homepage_commits_sort__direction: 'desc'}) do
           | Priority &nbsp;
           i.fa.fa-caret-down
 
     - else
-      = link_to 'Priority', request.parameters.except(:direction).merge(sort: 'priority')
+      = link_to 'Priority', request.parameters.except(:homepage_commits_sort__direction).merge(homepage_commits_sort__field: 'priority')
 
   th Description
 

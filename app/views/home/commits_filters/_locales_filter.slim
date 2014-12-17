@@ -1,0 +1,25 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+ruby:
+  if current_user.approved_locales.any?
+    approved_locales = current_user.approved_locales.map { |locale| [locale.name, locale.rfc5646] }
+    approved_locales.unshift ['my locales', current_user.approved_locales.map(&:rfc5646).join(',')]
+    approved_locales.unshift ['all locales', nil]
+  end
+
+- if current_user.approved_locales.any?
+  = select_tag 'homepage_commits_filter__rfc5646_locales', options_for_select(approved_locales, @homepage_commits_filter__rfc5646_locales.join(','))
+- else
+  = text_field_tag 'homepage_commits_filter__rfc5646_locales', @homepage_commits_filter__rfc5646_locales.join(','), placeholder: 'Locale', class: 'locale-field'

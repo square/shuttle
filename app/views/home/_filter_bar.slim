@@ -1,59 +1,54 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
 .filter-bar#filter
   = form_tag({}, id: 'filter', method: 'get')
     ruby:
-      project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-      project_list.unshift ['projects in my locales', 'my-locales'] if current_user.approved_locales.any?
-      project_list.unshift ['all projects', nil]
-
-      if current_user.approved_locales.any?
-        locales = current_user.approved_locales.map { |locale| [locale.name, locale.rfc5646] }
-        locales.unshift ['my locales', current_user.approved_locales.map(&:rfc5646).join(',')]
-        locales.unshift ['all locales', nil]
-      end
+      project_list = Project.git.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
+      project_list.unshift ['all projects', 'all']
 
     .main
       .pull-right#expand-search
         i.fa.fa-chevron-right
 
-      = text_field_tag 'sha', @sha, placeholder: '9d613f'
-      = select_tag 'project_id', options_for_select(project_list, params[:project_id])
+      = text_field_tag 'homepage_commits_filter__sha', @homepage_commits_filter__sha, placeholder: '9d613f'
+      = select_tag 'homepage_commits_filter__project_id', options_for_select(project_list, @homepage_commits_filter__project_id)
 
       - if current_user.monitor?
-        = select_tag 'status', options_for_select(\
-          %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
-          @status\
-        )
+        = render partial: 'home/commits_filters/status_filter'
       - else
-        - if current_user.approved_locales.any?
-          = select_tag 'locales', options_for_select(locales, @locales.map(&:rfc5646).join(','))
-        - else
-          = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: 'Locale', class: 'locale-field'
+        = render partial: 'home/commits_filters/locales_filter'
 
       = submit_tag 'Filter', class: 'primary'
 
     .collapse
       .control-group
         - if current_user.monitor?
-          = label_tag 'locales', 'Locales', class: 'control-label'
+          = label_tag 'homepage_commits_filter__locales', 'Locales', class: 'control-label'
           .controls
-            - if current_user.approved_locales.any?
-              = select_tag 'locales', options_for_select(locales, @locales.map(&:rfc5646).join(','))
-            - else
-              = text_field_tag 'locales', @locales.map(&:rfc5646).join(','), placeholder: 'Locale', class: 'locale-field'
+            = render partial: 'home/commits_filters/locales_filter'
         - else
-          = label_tag 'status', 'Project Status', class: 'control-label'
+          = label_tag 'homepage_commits_filter__status', 'Status', class: 'control-label'
           .controls
-            = select_tag 'status', options_for_select(\
-              %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
-              @status\
-            )
+            = render partial: 'home/commits_filters/status_filter'
 
         .controls
-          = check_box_tag 'email', current_user.email, params[:email] == current_user.email
-          | Only commits from me
+          = check_box_tag 'homepage_commits_filter__show_only_mine', 'true', @homepage_commits_filter__show_only_mine
+          | Show only my commits
         .controls
-          = check_box_tag 'exported', 'true', params[:exported] == 'true'
-          | Show exported commits
+          = check_box_tag 'homepage_commits_filter__hide_exported', 'true', @homepage_commits_filter__hide_exported
+          | Hide exported commits
         .controls
-          = check_box_tag 'show_autoimport', 'true', params[:show_autoimport] == 'true'
-          | Show auto-imported commits
+          = check_box_tag 'homepage_commits_filter__hide_autoimported', 'true', @homepage_commits_filter__hide_autoimported
+          | Hide auto-imported commits
