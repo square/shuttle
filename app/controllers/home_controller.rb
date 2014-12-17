@@ -144,7 +144,7 @@ class HomeController < ApplicationController
   end
 
   def set_homepage_commits_filter__locales
-    rfc5646_locales = params[:homepage_commits_filter__rfc5646_locales].presence || cookies[:homepage_commits_filter__rfc5646_locales].presence || ""
+    rfc5646_locales = params[:homepage_commits_filter__rfc5646_locales] || cookies[:homepage_commits_filter__rfc5646_locales] || ""
     @homepage_commits_filter__locales = rfc5646_locales = rfc5646_locales.split(',').map { |l| Locale.from_rfc5646(l) }.compact
     @homepage_commits_filter__rfc5646_locales = cookies[:homepage_commits_filter__rfc5646_locales] = @homepage_commits_filter__locales.map(&:rfc5646)
   end
