@@ -35,105 +35,48 @@ class HomeController < ApplicationController
   # | `status`     | The readiness status of Commits to show: "completed", "uncompleted", or "all" (default depends on role). |
   # | `project_id` | A Project ID to filter by (default all Projects).                                                        |
 
+  before_action :set_homepage_filters_and_sorts, only: :index
+
   def index
-    page = Integer(params[:page]) rescue 1
-    @offset = (page - 1)*PER_PAGE
-    offset  = @offset
+    @commits = find_commits
+    @home_presenter = HomePresenter.new(@commits, @homepage_commits_filter__locales)
+  end
 
-    # Filter by status
-    @status = if params[:status].present?
-                params[:status]
-              elsif cookies[:home_status_filter].present?
-                cookies[:home_status_filter]
-              else
-                'uncompleted'
-              end
+  private
 
-    unless %w(uncompleted completed all).include?(@status)
-      @status = 'uncompleted'
-    end
-    status = @status
+  def find_commits
+    user = current_user
 
-    limit    = params.fetch(:limit, PER_PAGE).to_i
+    # FILTERS AND SORTING
+    sha               = @homepage_commits_filter__sha
+    status            = @homepage_commits_filter__status
+    project_id        = @homepage_commits_filter__project_id
+    locales           = @homepage_commits_filter__locales
+    hide_exported     = @homepage_commits_filter__hide_exported
+    hide_autoimported = @homepage_commits_filter__hide_autoimported
+    show_only_mine    = @homepage_commits_filter__show_only_mine
+    sort_by_field     = @homepage_commits_sort__field
+    sort_direction    = @homepage_commits_sort__direction
 
-    exported = if params[:exported].present?
-                 params[:exported] == 'true'
-               elsif cookies[:home_email_filter].present?
-                 cookies[:home_exported_filter] == 'true'
-               else
-                 false
-               end
 
-    show_autoimport = if params[:show_autoimport].present?
-                        params[:show_autoimport] == 'true'
-                      elsif cookies[:home_autoimport_filter].present?
-                        cookies[:home_autoimport_filter] == 'true'
-                      else
-                        false
-                      end
+    # PAGINATION
+    page   = Integer(params[:page]) rescue 1
+    offset = (page - 1)*PER_PAGE
+    limit  = PER_PAGE
 
-    case
-      when (exported and show_autoimport) then @filters = ''
-      when (exported) then @filters = '(Hiding auto-imported commits)'
-      when (show_autoimport) then @filters = '(Hiding exported commits)'
-      else @filters = '(Hiding exported and auto-imported commits)'
+    # UNCOMPLETED IN SPECIFIC LOCALES
+    if locales.present? && (status == 'uncompleted')
+      uncompleted_key_ids_in_locales = uncompleted_key_ids_in_locales(locales)
     end
 
-    # Filter by project
-    projects = if params[:project_id].present?
-                 params[:project_id]
-               elsif cookies[:home_project_filter].present?
-                 cookies[:home_project_filter]
-               else
-                 nil
-               end
-
-    projects = if projects == 'my-locales'
-                 Project.scoped.to_a.select do |project|
-                   (project.targeted_locales & current_user.approved_locales).any?
-                 end
-               else
-                 [Project.find_by_id(projects)].compact
-               end
-
-    @project = projects.first if projects.length == 1
-
-    # Filter by SHA
-    sha = params[:sha].presence
-    @sha = sha = (sha =~ /^[0-9A-F]+$/i ? sha.downcase : nil)
-
-    # Filter by user
-    # Changed for Jim Kingdon.  Testing feature.  Make it such that all users can see all commits.
-    # params[:email] ||= current_user.email if current_user.monitor? && !current_user.admin?
-    user =  if params[:email].present?
-              User.find_by_email(params[:email])
-            elsif cookies[:home_email_filter].present? and cookies[:home_email_filter] != 'false'
-              User.find_by_email(cookies[:home_email_filter])
-            else
-              nil
-            end
-    @filters = '(Only showing my commits)' if user
-
-    @sort_order = sort_order = params[:sort].present? ? params[:sort] : cookies[:home_sort]
-    @direction = direction = params[:direction].present? ? params[:direction] : cookies[:home_direction]
-
-    @locales = locales = if params[:locales].present?
-                           params[:locales].split(',').map { |l| Locale.from_rfc5646 l }.compact
-                         else
-                           []
-                         end
-
-    if @locales.present? && (status == 'uncompleted')
-      uncompleted_key_ids_in_locales = uncompleted_key_ids_in_locales(@locales)
-    end
-
-    @commits = Commit.search(load: {include: [:user, project: :slugs]}) do
+    # SEARCH
+    Commit.search(load: {include: [:user, project: :slugs]}) do
       filter :prefix, revision: sha if sha
-      filter :term, project_id: projects.map(&:id) if projects.any?
-      filter :term, user_id: user.id if user
-      filter :term, exported: false unless exported
+      filter :term, project_id: project_id if project_id != 'all'
 
-      filter :exists, field: :user_id unless show_autoimport
+      filter :term, exported: false if hide_exported
+      filter :exists, field: :user_id if hide_autoimported
+      filter :term, user_id: user.id if show_only_mine
 
       case status
         when 'uncompleted'
@@ -150,29 +93,106 @@ class HomeController < ApplicationController
       size limit
 
       sort do
-        case sort_order
+        case sort_by_field
           when 'due'
-            by :due_date, (direction.nil? ? 'asc' : direction)
+            by :due_date, (sort_direction.nil? ? 'asc' : sort_direction)
             by :priority, 'asc'
             by :created_at, 'desc'
           when 'create'
-            by :created_at, (direction.nil? ? 'desc' : direction)
+            by :created_at, (sort_direction.nil? ? 'desc' : sort_direction)
             by :priority, 'asc'
             by :due_date, 'asc'
           else
-            by :priority, (direction.nil? ? 'asc' : direction)
+            by :priority, (sort_direction.nil? ? 'asc' : sort_direction)
             by :due_date, 'asc'
             by :created_at, 'desc'
         end
       end
     end
-
-    @home_presenter = HomePresenter.new(@commits, @locales)
   end
-
-  private
 
   def uncompleted_key_ids_in_locales(locales)
     Translation.not_approved.in_locale(*locales).select(:key_id).uniq.pluck(:key_id)
+  end
+
+  def set_homepage_filters_and_sorts
+    @filters_summary = []
+    set_homepage_commits_filter__sha
+    set_homepage_commits_filter__status
+    set_homepage_commits_filter__project_id
+    set_homepage_commits_filter__locales
+    set_homepage_commits_filter__hide_exported
+    set_homepage_commits_filter__hide_autoimported
+    set_homepage_commits_filter__show_only_mine
+    set_homepage_sort__field_and_direction
+  end
+
+  def set_homepage_commits_filter__sha
+    sha = params[:homepage_commits_filter__sha].presence
+    @homepage_commits_filter__sha = (sha =~ /^[0-9A-F]+$/i ? sha.downcase : nil)
+  end
+
+  def set_homepage_commits_filter__status
+    status = params[:homepage_commits_filter__status].presence || cookies[:homepage_commits_filter__status].presence || 'uncompleted'
+    status = 'uncompleted' unless %w(uncompleted completed all).include?(status)
+    cookies[:homepage_commits_filter__status] = @homepage_commits_filter__status = status
+  end
+
+  def set_homepage_commits_filter__project_id
+    @homepage_commits_filter__project_id = cookies[:homepage_commits_filter__project_id] =
+        params[:homepage_commits_filter__project_id].presence || cookies[:homepage_commits_filter__project_id].presence || 'all'
+  end
+
+  def set_homepage_commits_filter__locales
+    rfc5646_locales = params[:homepage_commits_filter__rfc5646_locales].presence || cookies[:homepage_commits_filter__rfc5646_locales].presence || ""
+    @homepage_commits_filter__locales = rfc5646_locales = rfc5646_locales.split(',').map { |l| Locale.from_rfc5646(l) }.compact
+    @homepage_commits_filter__rfc5646_locales = cookies[:homepage_commits_filter__rfc5646_locales] = @homepage_commits_filter__locales.map(&:rfc5646)
+  end
+
+  def set_homepage_commits_filter__hide_exported
+    @homepage_commits_filter__hide_exported = cookies[:homepage_commits_filter__hide_exported] =
+        if params[:homepage_commits_filter__hide_exported].present?
+          params[:homepage_commits_filter__hide_exported] == 'true'
+        elsif cookies[:homepage_commits_filter__hide_exported].present?
+          cookies[:homepage_commits_filter__hide_exported] == 'true'
+        else
+          false
+        end
+
+    @filters_summary << ['Hiding exported'] if @homepage_commits_filter__hide_exported
+  end
+
+  def set_homepage_commits_filter__hide_autoimported
+    @homepage_commits_filter__hide_autoimported = cookies[:homepage_commits_filter__hide_autoimported] =
+        if params[:homepage_commits_filter__hide_autoimported].present?
+          params[:homepage_commits_filter__hide_autoimported] == 'true'
+        elsif cookies[:homepage_commits_filter__hide_autoimported].present?
+          cookies[:homepage_commits_filter__hide_autoimported] == 'true'
+        else
+          false
+        end
+
+    @filters_summary << ['Hiding auto-imported'] if @homepage_commits_filter__hide_autoimported
+  end
+
+  def set_homepage_commits_filter__show_only_mine
+    @homepage_commits_filter__show_only_mine = cookies[:homepage_commits_filter__show_only_mine] =
+        if params[:homepage_commits_filter__show_only_mine].present?
+          params[:homepage_commits_filter__show_only_mine] == 'true'
+        elsif cookies[:homepage_commits_filter__show_only_mine]
+          cookies[:homepage_commits_filter__show_only_mine] == 'true'
+        else
+          false
+        end
+
+    @filters_summary << ['Showing only mine'] if @homepage_commits_filter__show_only_mine
+  end
+
+  def set_homepage_sort__field_and_direction
+    @homepage_commits_sort__field = cookies[:homepage_commits_sort__field] =
+        params[:homepage_commits_sort__field].presence || cookies[:homepage_commits_sort__field].presence
+
+    @homepage_commits_sort__direction = cookies[:homepage_commits_sort__direction] =
+        params[:homepage_commits_sort__direction].presence || cookies[:homepage_commits_sort__direction].presence
   end
 end

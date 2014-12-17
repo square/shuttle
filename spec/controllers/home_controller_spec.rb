@@ -17,6 +17,7 @@ require 'spec_helper'
 describe HomeController do
   context "[when 'uncompleted' filter is selected and locales are specified]" do
     before :each do
+      reset_elastic_search
       @request.env['devise.mapping'] = Devise.mappings[:user]
       @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
       sign_in @user
@@ -35,7 +36,7 @@ describe HomeController do
       @key.update_columns ready: true
       @commit.update_columns ready: true
 
-      get :index, { locales: 'es', status: 'uncompleted', exported: "true", show_autoimport: "true" }
+      get :index, { homepage_commits_filter__rfc5646_locales: 'es', homepage_commits_filter__status: 'uncompleted' }
       expect(assigns(:commits).map(&:id)).to eq([@commit.id])
     end
 
@@ -44,7 +45,7 @@ describe HomeController do
       @key.update_columns ready: false
       @commit.update_columns ready: false
 
-      get :index, { locales: 'ja', status: 'uncompleted', exported: "true", show_autoimport: "true" }
+      get :index, { homepage_commits_filter__rfc5646_locales: 'ja', homepage_commits_filter__status: 'uncompleted' }
       expect(assigns(:commits).map(&:id)).to eq([])
     end
   end
