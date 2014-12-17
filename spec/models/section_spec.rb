@@ -15,9 +15,10 @@
 require 'spec_helper'
 
 describe Section do
+  before(:each) { Article.any_instance.stub(:import!) } # prevent auto-imports
+
   context "[validations]" do
     it "doesn't allow duplicate names in the scope of an Article" do
-      Article.any_instance.stub(:import!) # prevent auto-imports
       article = FactoryGirl.create(:article)
       section1 = FactoryGirl.create(:section, name: "test", article: article)
       section2 = FactoryGirl.build(:section, name: "test", article: article).tap(&:save)
@@ -29,7 +30,6 @@ describe Section do
   context "[scopes]" do
     describe "#active" do
       it "returns only active sections" do
-        Article.any_instance.stub(:import!) # prevent auto-imports
         active_sections   = 2.times.map { FactoryGirl.create(:section, active: true) }
         inactive_sections = 2.times.map { FactoryGirl.create(:section, active: false) }
         expect(Section.active.sort).to eql(active_sections.sort)
