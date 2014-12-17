@@ -12,10 +12,7 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-- content_for :shuttle_title do
-  = "Dashboard - Shuttle"
-- content_for :file_name do
-  = 'views/home/index'
-
-= render partial: 'home/commits/commits'
-= render partial: 'home/articles/articles'
+= select_tag :filter__status, options_for_select(\
+  %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
+  @form[:filter__status]\
+)

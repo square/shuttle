@@ -1,0 +1,99 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+/ Requires the following local variables:
+/   - `item`. Can be a Commit or an Article.
+
+ruby:
+  item_type = item.class.name.to_s.downcase
+
+tr.row_class
+  / Status
+  td class=(if item.loading? then 'status-loading' else (item.ready? ? 'status-ready' : 'status-translating') end)
+
+  / Project Name
+  td = item.project.name
+
+  / Commit SHA or Article Name
+  td
+    - if item.is_a?(Commit)
+      = link_to item.revision_prefix, project_commit_url(item.project, item)
+    - else
+      = item.name
+
+  / Create Date
+  td.centered = item.created_at.strftime('%m/%d/%Y')
+
+  / Due Date
+  td.due-date.centered
+    - if current_user.admin? or current_user.monitor?
+      = form_for item, url: @presenter.update_item_path(item) do |f|
+        = f.text_field  :due_date, value: (f.object.due_date.strftime('%m/%d/%Y') if !f.object.due_date.nil?), class: 'datepicker'
+    - elsif item.due_date
+      span = l(item.due_date, format: :mon_day_year)
+
+  / Priority
+  td.centered
+    - if current_user.admin?
+      = form_for item, url: @presenter.update_item_path(item) do |f|
+        = f.select :priority, t("models.#{item_type}.priority").to_a.map(&:reverse).unshift(['-', nil]), {}, class: 'styled'
+    - else
+      - if item.priority
+        span class="priority-#{item.priority}"
+          = "P" + t("models.#{item_type}.priority.#{item.priority}").to_s
+      - else
+        | -
+
+  / Description
+  td.centered
+    div.description[data-full-description=@presenter.full_description(item)
+      data-short-description=@presenter.short_description(item)
+      data-sub-description=@presenter.sub_description(item)]
+      = @presenter.short_description(item)
+
+  / Stats
+  - if current_user.translator?
+    / Word Translation Count
+    td = "#{number_with_delimiter @presenter.item_stat(item, :translations, :new)}s (#{number_with_delimiter @presenter.item_stat(item, :words, :new)}w)"
+    / Word Review Count
+    td = "#{number_with_delimiter @presenter.item_stat(item, :translations, :pending)}s (#{number_with_delimiter @presenter.item_stat(item, :words, :pending)}w)"
+  - else
+    / Progress
+    - if item.loading?
+      td
+        | Importing
+        - if item.import_batch_status
+          |  (#{pluralize_with_delimiter item.import_batch_status.pending, 'Job'} Remaining)
+        - else
+          |  (stalled!)
+    - elsif item.ready?
+      td Ready for Download
+    - else
+      - strings_remaining = @presenter.item_stat(item, :translations, :pending) + @presenter.item_stat(item, :translations, :new)
+      td = "Translating #{pluralize_with_delimiter strings_remaining, 'String'}"
+
+
+  / Translation/Monitor Button
+  - if current_user.translator?
+    - if current_user.admin? || current_user.approved_locales.any?
+      td = link_to "Translate", @presenter.translate_link_path(current_user, item), class: 'button submit'
+    - else
+      td: button.submit disabled="disabled" No locales
+  - elsif current_user.monitor?
+    td
+      - if item.is_a?(Commit)
+        button.submit href=project_commit_url(item.project, item) Monitor
+      - else
+        button.submit disabled="disabled" Monitor
+

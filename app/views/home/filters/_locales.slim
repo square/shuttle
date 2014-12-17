@@ -20,6 +20,6 @@ ruby:
   end
 
 - if current_user.approved_locales.any?
-  = select_tag 'homepage_commits_filter__rfc5646_locales', options_for_select(approved_locales, @homepage_commits_filter__rfc5646_locales.join(','))
+  = select_tag :filter__rfc5646_locales, options_for_select(approved_locales, @form[:filter__rfc5646_locales].join(','))
 - else
-  = text_field_tag 'homepage_commits_filter__rfc5646_locales', @homepage_commits_filter__rfc5646_locales.join(','), placeholder: 'Locale', class: 'locale-field'
+  = text_field_tag :filter__rfc5646_locales, @form[:filter__rfc5646_locales].join(','), placeholder: 'Locale', class: 'locale-field'

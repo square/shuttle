@@ -71,7 +71,6 @@
 Dropzone.autoDiscover = false
 
 $(document).ready ->
-  $('.filter-bar').affix(0, { shadow: true }) if $('.filter-bar').length > 0
   # enable leanModal on all modal links
   $("button[rel*=modal]").leanModal closeButton: ".close"
   $("textarea.resize").autosize()

@@ -13,21 +13,17 @@
 #    limitations under the License.
 
 $(window).ready () ->
-  if $.url().param('sort')
-    $.cookie 'home_sort', $.url().param('sort'), expires: 7
-  if $.url().param('direction')
-    $.cookie 'home_direction', $.url().param('direction'), expires: 7
 
-  $("#expand-filters").click () ->
-    $(window).scrollTop(0)
-    expand_filter_bar()
+  # GENERAL, APPLIES TO BOTH COMMITS AND ARTICLES
 
+  $('tbody tr').click () ->
+    toggle($(this))
 
   toggle = (row) ->
     entry = row.find('.description')
     full_description = entry.data('full-description')
     short_description = entry.data('short-description')
-    author = entry.data('author')
+    sub_description = entry.data('sub-description')
 
     if not entry.data("orig-height")
       orig_height = entry.prop('scrollHeight')
@@ -36,7 +32,7 @@ $(window).ready () ->
     if full_description
       if row.hasClass("expanded")
         orig_height = entry.data("orig-height")
-        entry.animate({height: orig_height}, 500, () ->
+        entry.animate({height: orig_height}, 250, () ->
           entry.text(short_description)
           row.removeClass("expanded")
         )
@@ -52,10 +48,11 @@ $(window).ready () ->
         entry.width(orig_width)
 
         entry.text(full_description)
-        entry.append('</br>')
-        entry.append($('<strong/>').text("Authored by: #{author}"))
+        if sub_description
+            entry.append('</br>')
+            entry.append($('<strong/>').text(sub_description))
 
-        entry.animate({height: entry.prop('scrollHeight')}, 500, () ->
+        entry.animate({height: entry.prop('scrollHeight')}, 250, () ->
           row.addClass("expanded")
         )
         row.addClass("expanded")
@@ -68,43 +65,7 @@ $(window).ready () ->
     startDate: new Date()
   )
 
-  $('.translate-link').click () ->
-    if ($(this).hasClass('disabled')) 
-      return false
-
-    sha = $(this).data('sha')
-    project = $(this).data('project')
-    locale = $(this).data('locale')
-    
-    if Locale.from_rfc5646( $("[name=locales]").val() ) != null
-      locale = $("[name=locales]").val()
-
-    url = '/locales/' + encodeURIComponent(locale) + '/projects/' + encodeURIComponent(project) + '?commit=' + sha
-    window.location = url
-
-    return false
-
-  $('.translate-link-locale').keydown () ->
-    if (($(this).val()).length > 0) 
-      $($(this).data('target')).removeClass('disabled')
-    else 
-      $($(this).data('target')).addClass('disabled')
-    return true
-
-  new SmartForm $('#new_commit'), (notification) -> 
-    $("#add-translation").closeModal()
-    if notification.success 
-      new Flash('success').text(notification.success);
-    else if notification.alert
-      new Flash('alert').text(notification.alert);
-
-
-  $('#new_commit_project_id').change () ->
-    project = $(this).val()
-    $('#new_commit').attr('action', '/projects/' + project + '/commits.json')
-    $.cookie 'home_new_commit_project', project, expires: 7
-
-  $('.edit_commit select, .edit_commit input[type="text"]').change () ->
+  $('.edit_commit select, .edit_commit input[type="text"], .edit_article select, .edit_article input[type="text"]').change () ->
     select = $(this)
     form = select.closest('form')
     authParam = $('meta[name=csrf-param]').attr('content')
@@ -112,7 +73,7 @@ $(window).ready () ->
     data = form.serializeObject()
     data[authParam] = authToken
 
-    $.ajax(form.attr('action'), 
+    $.ajax(form.attr('action'),
       data: data,
       type: 'PATCH',
       success: () ->
@@ -121,20 +82,32 @@ $(window).ready () ->
               .animate({backgroundColor: "white"}, 300)
       ,
       error: () ->
-        new Flash('alert').text("Couldn't change commit priority.")
+        new Flash('alert').text("Update failed!")
     )
 
-  $('tbody tr').click () ->
-    toggle($(this))
 
-  filter_form = $('#filter')
+  # COMMIT SPECIFIC
 
-  filter_form.find('input#homepage_commits_filter__hide_exported').change ->
-    $.cookie 'homepage_commits_filter__hide_exported', $(this).is(':checked')
+  new SmartForm $('#new_commit'), (notification) -> 
+    $("#add-translation").closeModal()
+    if notification.success 
+      new Flash('success').text(notification.success);
+    else if notification.alert
+      new Flash('alert').text(notification.alert);
 
-  filter_form.find('input#homepage_commits_filter__hide_autoimported').change ->
-    $.cookie 'homepage_commits_filter__hide_autoimported', $(this).is(':checked')
+  $('#new_commit_project_id').change () ->
+    project = $(this).val()
+    $('#new_commit').attr('action', '/projects/' + project + '/commits.json')
+    $.cookie 'home_index_new_commit_project', project, expires: 7
 
-  filter_form.find('input#homepage_commits_filter__show_only_mine').change ->
-    $.cookie 'homepage_commits_filter__show_only_mine', $(this).is(':checked')
+  commits_filter_form = $('#commits-filter-form')
+
+  commits_filter_form.find('input#commits_filter__hide_exported').change ->
+    $.cookie 'home_index__commits_filter__hide_exported', $(this).is(':checked')
+
+  commits_filter_form.find('input#commits_filter__hide_autoimported').change ->
+    $.cookie 'home_index__commits_filter__hide_autoimported', $(this).is(':checked')
+
+  commits_filter_form.find('input#commits_filter__show_only_mine').change ->
+    $.cookie 'home_index__commits_filter__show_only_mine', $(this).is(':checked')
 

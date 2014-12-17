@@ -19,6 +19,7 @@ describe RegistrationsController do
 
   describe '#create' do
     it "should require email confirmation" do
+      ActionMailer::Base.deliveries.clear
       post :create, user: {
           email:                 'foo@example.com',
           first_name:            'Sancho',

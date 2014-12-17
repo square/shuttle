@@ -1,26 +1,30 @@
 @import "base/vars";
 @import "css3-mixins";
 
-body.home { 
+body.home {
+  #commits {
+    margin-bottom: 50px;
+  }
+
   .filter-bar {
-    input[type="submit"] { margin-left: 15px; }
+    input[type="submit"] { width: 125px; margin-left: 15px; }
+    select[name="filter__rfc5646_locales"] { width: 200px; }
+    select[name="filter__status"] { width: 200px; }
+    input[name="commits_filter__sha"], input[name="articles_filter__name"] { width: 380px; }
+    select[name="commits_filter__project_id"], select[name="articles_filter__project_id"] { width: 160px; }
 
-    .main {
-      .twitter-typeahead {
-        margin-left: 15px;
-        input + input { margin: 0px; }
-      }
+    .twitter-typeahead {
+      margin-left: 15px;
+      input + input { margin: 0px; }
+    }
 
-      input[name="homepage_commits_filter__sha"] { width: 485px; text-transform: lowercase; }
-      select[name="homepage_commits_filter__locales"] { width: 200px; }
-      .twitter-typeahead { width: 200px; }
-
-      select[name="homepage_commits_filter__project_id"] { width: 200px; }
-      select[name="homepage_commits_filter__status"] { width: 250px; }
+    .advanced-filters-label {
+      font-weight: bold;
+      margin-right: 15px;
     }
   }
 
-  table#commits {
+  table.items-table {
     th:first-child {
       padding: 0px; 
     }
@@ -31,19 +35,17 @@ body.home {
         &:hover {cursor: pointer;}
 
         td {
-          &.commit-translating,
-          &.commit-loading,
-          &.commit-ready {
+          &.status-translating,
+          &.status-loading,
+          &.status-ready {
             padding: 0;
             width: 5px;
           }
-          &.commit-translating { background-color: $commit-red; } 
-          &.commit-loading { background-color: $commit-blue; }
-          &.commit-ready { background-color: $commit-green; }
+          &.status-translating { background-color: $commit-red; }
+          &.status-loading { background-color: $commit-blue; }
+          &.status-ready { background-color: $commit-green; }
 
           &.due-date { width: 110px;}
-          &.due-date-very-soon { }
-          &.due-date-soon { }
           &.centered { text-align: center; }
           
           select { width: 100%; }
@@ -56,10 +58,10 @@ body.home {
     }
   }
 
-  .commit-priority-0 { color: #E94239; font-weight: bold; }
-  .commit-priority-1 { color: #E98C39; font-weight: bold; }
-  .commit-priority-2 { color: #E9B039; font-weight: bold; }
-  .commit-priority-3 { color: $input-green; font-weight: bold; }
+  .priority-0 { color: #E94239; font-weight: bold; }
+  .priority-1 { color: #E98C39; font-weight: bold; }
+  .priority-2 { color: #E9B039; font-weight: bold; }
+  .priority-3 { color: $input-green; font-weight: bold; }
 
   .pagination-links {
     width: 100%;
