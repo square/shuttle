@@ -62,30 +62,4 @@ describe TranslationObserver do
       expect(change.user).to eq(nil)
     end
   end
-
-  context "[translation memory]" do
-    before :each do
-      @user = FactoryGirl.create(:user)
-      @translation = FactoryGirl.create(:translation, source_rfc5646_locale: 'en', rfc5646_locale: 'de', source_copy: "test", copy: nil)
-      expect(TranslationUnit.source_copy_matches("test").where(source_rfc5646_locale: "en", rfc5646_locale: "de").exists?).to be_false
-    end
-
-    it "create a new TranslationUnit when a translator translates and approves a Translation" do
-      @translation.update! copy: "test", approved: true, modifier: @user
-      tu = TranslationUnit.exact_matches(@translation).first
-      expect(tu.copy).to eql(@translation.copy)
-      expect(tu.locale).to eql(@translation.locale)
-    end
-
-    it "doesn't create a new TranslationUnit if a Translation is translated and approved automatically without a user (ex: mass copied from another locale)" do
-      @translation.update! copy: "test", approved: true
-      expect(TranslationUnit.source_copy_matches("test").where(source_rfc5646_locale: "en", rfc5646_locale: "de").exists?).to be_false
-    end
-
-    it "doesn't update the translation memory when translated but not approved" do
-      translation = FactoryGirl.create(:translation, approved: nil)
-      translation.update! copy: "test", translator: @user, modifier: @user
-      expect(TranslationUnit.exact_matches(@translation)).to be_empty
-    end
-  end
 end
