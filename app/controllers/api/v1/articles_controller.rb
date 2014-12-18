@@ -227,14 +227,12 @@ module Api
 
       # ===== START PARAMS RELATED CODE ================================================================================
       def params_for_create
-        hsh = params.permit(:name, :description, :email, :base_rfc5646_locale)
-        hsh[:targeted_rfc5646_locales] = params[:targeted_rfc5646_locales] if params.key?(:targeted_rfc5646_locales)
-        hsh[:sections_hash] = params[:sections_hash] if params.key?(:sections_hash)
-        hsh
+        params_for_update.merge(params.permit(:name, :base_rfc5646_locale))
       end
 
       def params_for_update
-        hsh = params.permit(:description, :email)
+        hsh = params.permit(:description, :email, :priority)
+        hsh[:due_date] = DateTime::strptime(params[:due_date], "%m/%d/%Y") rescue '' if params.key?(:due_date)
         hsh[:targeted_rfc5646_locales] = params[:targeted_rfc5646_locales] if params.key?(:targeted_rfc5646_locales)
         hsh[:sections_hash] = params[:sections_hash] if params.key?(:sections_hash)
         hsh

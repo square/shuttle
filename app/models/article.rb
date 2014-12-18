@@ -59,6 +59,8 @@
 # | `import_batch_id`           | The ID of the Sidekiq batch of import jobs.                                                                       |
 # | `loading`                   | If `true`, there is at least one Sidekiq job processing this Article.                                             |
 # | `ready`                     | `true` when every required Translation under this Article has been approved.                                      |
+# | `priority`                  | An priority defined as a number between 0 (highest) and 3 (lowest).                                               |
+# | `due_date`                  | A date displayed to translators and reviewers informing them of when the Article must be fully localized.         |
 # | `first_import_requested_at` | The timestamp of the first time an import of this Article was requested.                                          |
 # | `last_import_requested_at`  | The timestamp of the last  time an import of this Article was requested.                                          |
 # | `first_import_started_at`   | The timestamp of the first time an import of this Article was started.                                            |
@@ -74,6 +76,7 @@ class Article < ActiveRecord::Base
   FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED = %w(sections_hash targeted_rfc5646_locales)
 
   extend SetNilIfBlank
+  set_nil_if_blank :description, :due_date, :priority
 
   belongs_to :project,    inverse_of: :articles
   has_many :sections,     inverse_of: :article, dependent: :destroy
@@ -91,10 +94,12 @@ class Article < ActiveRecord::Base
   validates :name, presence: true, uniqueness: {scope: :project_id}
   validates :sections_hash, presence: true
   validate  :valid_sections_hash
-  validates :description, length: {maximum: 2000}
+  validates :description, length: {maximum: 2000}, allow_nil: true
   validates :email, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i }, allow_nil: true
   validates :ready,   inclusion: { in: [true, false] }, strict: true
   validates :loading, inclusion: { in: [true, false] }, strict: true
+  validates :priority, numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3}, allow_nil: true
+  validates :due_date, timeliness: {type: :date}, allow_nil: true
   validates :first_import_requested_at,
             :first_import_started_at,
             :first_import_finished_at,
