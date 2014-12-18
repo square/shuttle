@@ -14,7 +14,7 @@
 
 require 'spec_helper'
 
-describe HomePresenter do
+describe HomeIndexPresenter do
   describe "#commit_stat" do
     it "calculates stats for only required translations of each commit" do
       # setup project1 and commit1
@@ -51,54 +51,54 @@ describe HomePresenter do
       #---------------------------------------------------------------------------------------------------------------
 
       # Tests without locales
-      home_presenter = HomePresenter.new([commit1, commit2], [])
-      expect(home_presenter.commit_stat(commit1, :translations, :new)).to eql(4)
-      expect(home_presenter.commit_stat(commit1, :translations, :pending)).to eql(1)
-      expect(home_presenter.commit_stat(commit1, :words, :new)).to eql(12)
-      expect(home_presenter.commit_stat(commit1, :words, :pending)).to eql(3)
-      expect(home_presenter.commit_stat(commit2, :translations, :new)).to eql(1)
-      expect(home_presenter.commit_stat(commit2, :translations, :pending)).to eql(0)
-      expect(home_presenter.commit_stat(commit2, :words, :new)).to eql(3)
-      expect(home_presenter.commit_stat(commit2, :words, :pending)).to eql(0)
+      presenter = HomeIndexPresenter.new([commit1, commit2], [])
+      expect(presenter.commit_stat(commit1, :translations, :new)).to eql(4)
+      expect(presenter.commit_stat(commit1, :translations, :pending)).to eql(1)
+      expect(presenter.commit_stat(commit1, :words, :new)).to eql(12)
+      expect(presenter.commit_stat(commit1, :words, :pending)).to eql(3)
+      expect(presenter.commit_stat(commit2, :translations, :new)).to eql(1)
+      expect(presenter.commit_stat(commit2, :translations, :pending)).to eql(0)
+      expect(presenter.commit_stat(commit2, :words, :new)).to eql(3)
+      expect(presenter.commit_stat(commit2, :words, :pending)).to eql(0)
 
       # Tests with a single (required for commit1) locale: 'fr'
-      home_presenter = HomePresenter.new([commit1, commit2], %w(fr).map { |x| Locale.from_rfc5646(x) } )
-      expect(home_presenter.commit_stat(commit1, :translations, :new)).to eql(1)
-      expect(home_presenter.commit_stat(commit1, :translations, :pending)).to eql(0)
-      expect(home_presenter.commit_stat(commit1, :words, :new)).to eql(3)
-      expect(home_presenter.commit_stat(commit1, :words, :pending)).to eql(0)
+      presenter = HomeIndexPresenter.new([commit1, commit2], %w(fr).map { |x| Locale.from_rfc5646(x) } )
+      expect(presenter.commit_stat(commit1, :translations, :new)).to eql(1)
+      expect(presenter.commit_stat(commit1, :translations, :pending)).to eql(0)
+      expect(presenter.commit_stat(commit1, :words, :new)).to eql(3)
+      expect(presenter.commit_stat(commit1, :words, :pending)).to eql(0)
 
       # Tests with a single (required for commit1) locale: 'de'
-      home_presenter = HomePresenter.new([commit1, commit2], %w(de).map { |x| Locale.from_rfc5646(x) } )
-      expect(home_presenter.commit_stat(commit1, :translations, :new)).to eql(2)
-      expect(home_presenter.commit_stat(commit1, :translations, :pending)).to eql(0)
-      expect(home_presenter.commit_stat(commit1, :words, :new)).to eql(6)
-      expect(home_presenter.commit_stat(commit1, :words, :pending)).to eql(0)
+      presenter = HomeIndexPresenter.new([commit1, commit2], %w(de).map { |x| Locale.from_rfc5646(x) } )
+      expect(presenter.commit_stat(commit1, :translations, :new)).to eql(2)
+      expect(presenter.commit_stat(commit1, :translations, :pending)).to eql(0)
+      expect(presenter.commit_stat(commit1, :words, :new)).to eql(6)
+      expect(presenter.commit_stat(commit1, :words, :pending)).to eql(0)
 
       # Tests with a single (optional for commit1) locale: 'es'
-      home_presenter = HomePresenter.new([commit1, commit2], %w(es).map { |x| Locale.from_rfc5646(x) } )
-      expect(home_presenter.commit_stat(commit1, :translations, :new)).to eql(0)
-      expect(home_presenter.commit_stat(commit1, :translations, :pending)).to eql(2)
-      expect(home_presenter.commit_stat(commit1, :words, :new)).to eql(0)
-      expect(home_presenter.commit_stat(commit1, :words, :pending)).to eql(6)
+      presenter = HomeIndexPresenter.new([commit1, commit2], %w(es).map { |x| Locale.from_rfc5646(x) } )
+      expect(presenter.commit_stat(commit1, :translations, :new)).to eql(0)
+      expect(presenter.commit_stat(commit1, :translations, :pending)).to eql(2)
+      expect(presenter.commit_stat(commit1, :words, :new)).to eql(0)
+      expect(presenter.commit_stat(commit1, :words, :pending)).to eql(6)
 
       # Tests with a single (random) locale: 'tr'
-      home_presenter = HomePresenter.new([commit1, commit2], %w(tr).map { |x| Locale.from_rfc5646(x) } )
-      expect(home_presenter.commit_stat(commit1, :translations, :new)).to eql(0) # should discard translations in 'tr' because 'tr' is not a targeted locale
-      expect(home_presenter.commit_stat(commit1, :translations, :pending)).to eql(0)
-      expect(home_presenter.commit_stat(commit1, :words, :new)).to eql(0)
-      expect(home_presenter.commit_stat(commit1, :words, :pending)).to eql(0)
+      presenter = HomeIndexPresenter.new([commit1, commit2], %w(tr).map { |x| Locale.from_rfc5646(x) } )
+      expect(presenter.commit_stat(commit1, :translations, :new)).to eql(0) # should discard translations in 'tr' because 'tr' is not a targeted locale
+      expect(presenter.commit_stat(commit1, :translations, :pending)).to eql(0)
+      expect(presenter.commit_stat(commit1, :words, :new)).to eql(0)
+      expect(presenter.commit_stat(commit1, :words, :pending)).to eql(0)
 
       # Tests with a two locales (1 required, 1 optional): 'ja', 'es'
-      home_presenter = HomePresenter.new([commit1, commit2], %w(ja es).map { |x| Locale.from_rfc5646(x) } )
-      expect(home_presenter.commit_stat(commit1, :translations, :new)).to eql(1)
-      expect(home_presenter.commit_stat(commit1, :translations, :pending)).to eql(3)
-      expect(home_presenter.commit_stat(commit1, :words, :new)).to eql(3)
-      expect(home_presenter.commit_stat(commit1, :words, :pending)).to eql(9)
-      expect(home_presenter.commit_stat(commit2, :translations, :new)).to eql(2)
-      expect(home_presenter.commit_stat(commit2, :translations, :pending)).to eql(0)
-      expect(home_presenter.commit_stat(commit2, :words, :new)).to eql(6)
-      expect(home_presenter.commit_stat(commit2, :words, :pending)).to eql(0)
+      presenter = HomeIndexPresenter.new([commit1, commit2], %w(ja es).map { |x| Locale.from_rfc5646(x) } )
+      expect(presenter.commit_stat(commit1, :translations, :new)).to eql(1)
+      expect(presenter.commit_stat(commit1, :translations, :pending)).to eql(3)
+      expect(presenter.commit_stat(commit1, :words, :new)).to eql(3)
+      expect(presenter.commit_stat(commit1, :words, :pending)).to eql(9)
+      expect(presenter.commit_stat(commit2, :translations, :new)).to eql(2)
+      expect(presenter.commit_stat(commit2, :translations, :pending)).to eql(0)
+      expect(presenter.commit_stat(commit2, :words, :new)).to eql(6)
+      expect(presenter.commit_stat(commit2, :words, :pending)).to eql(0)
     end
 
     it "should memoize the stats hash so that in the second try, it shouldn't query the db" do
@@ -107,12 +107,12 @@ describe HomePresenter do
       translation = FactoryGirl.create(:translation, key: key)
       commit = FactoryGirl.create(:commit, project: project)
       commit.keys << key
-      home_presenter = HomePresenter.new([commit], [])
+      presenter = HomeIndexPresenter.new([commit], [])
 
-      expect(home_presenter).to receive(:translation_groups_with_stats).and_call_original
-      home_presenter.commit_stat(commit, :translations, :new)
-      expect(home_presenter).to_not receive(:translation_groups_with_stats)
-      home_presenter.commit_stat(commit, :translations, :pending)
+      expect(presenter).to receive(:translation_groups_with_stats).and_call_original
+      presenter.commit_stat(commit, :translations, :new)
+      expect(presenter).to_not receive(:translation_groups_with_stats)
+      presenter.commit_stat(commit, :translations, :pending)
     end
   end
 end
