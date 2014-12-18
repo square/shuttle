@@ -243,9 +243,9 @@ describe Api::V1::ArticlesController do
   describe "#params_for_create" do
     let(:project) { FactoryGirl.create(:project, repository_url: nil) }
 
-    it "permits key, sections_hash, description, email, base_rfc5646_locale targeted_rfc5646_locales; but not id or project_id fields" do
-      post :create, api_token: project.api_token, name: "t", sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
-      expect(controller.send :params_for_create).to eql({"name"=>"t", "sections_hash"=>{"t" => "t"}, "description"=>"t", "email"=>"t@example.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}})
+    it "permits name, base_rfc5646_locale, key, sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id or project_id fields" do
+      post :create, api_token: project.api_token, name: "t", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
+      expect(controller.send :params_for_create).to eql({ "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "name"=>"t", "sections_hash"=>{"t" => "t"}, "description"=>"t", "email"=>"t@example.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}})
     end
 
     it "doesn't include sections_hash or targeted_rfc5646_locales in the permitted params (this is tested separately because it's a special case due to being a hash field)" do
@@ -258,9 +258,9 @@ describe Api::V1::ArticlesController do
     let(:project) { FactoryGirl.create(:project, repository_url: nil) }
     let(:article) { FactoryGirl.create(:article, project: project, name: "t") }
 
-    it "permits sections_hash, description, email, targeted_rfc5646_locales; but not id, project_id, key or base_rfc5646_locale fields" do
-      patch :update, api_token: project.api_token, name: article.name, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
-      expect(controller.send :params_for_update).to eql({"sections_hash" => { "t" => "t" }, "description"=>"t", "email"=>"t@example.com", "targeted_rfc5646_locales"=>{"fr"=>true}})
+    it "permits sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id, project_id, key or base_rfc5646_locale fields" do
+      patch :update, api_token: project.api_token, name: article.name, due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
+      expect(controller.send :params_for_update).to eql({ "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "sections_hash" => { "t" => "t" }, "description"=>"t", "email"=>"t@example.com", "targeted_rfc5646_locales"=>{"fr"=>true}})
     end
 
     it "doesn't include sections_hash and targeted_rfc5646_locales in the permitted params (this is tested separately because it's a special case due to being a hash field)" do
