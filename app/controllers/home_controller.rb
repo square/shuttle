@@ -39,7 +39,7 @@ class HomeController < ApplicationController
 
   def index
     @commits = find_commits
-    @home_presenter = HomePresenter.new(@commits, @homepage_commits_filter__locales)
+    @home_index_presenter = HomeIndexPresenter.new(@commits, @homepage_commits_filter__locales)
   end
 
   private
