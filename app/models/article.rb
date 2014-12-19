@@ -251,7 +251,7 @@ class Article < ActiveRecord::Base
   # First and last import_started_at timestamps are also updated as necessary.
 
   def update_import_starting_fields!
-    new_attrs = { loading: true, import_batch_id: nil, ready: false, last_import_started_at: Time.current }
+    new_attrs = { loading: true, ready: false, last_import_started_at: Time.current }
     new_attrs[:first_import_started_at] = new_attrs[:last_import_started_at] unless first_import_started_at
     update!(new_attrs)
   end

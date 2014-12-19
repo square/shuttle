@@ -419,14 +419,12 @@ describe Article do
       @article.save!
     end
 
-    it "sets ready to false, loading to true, import_batch_id to nil" do
-      @article.update! loading: false, ready: true, import_batch_id: "test"
+    it "sets ready to false, loading to true" do
+      @article.update! loading: false, ready: true
       expect(@article.ready).to be_true
-      expect(@article.import_batch_id).to eql("test")
       @article.send :update_import_starting_fields!
       expect(@article.loading).to be_true
       expect(@article.ready).to be_false
-      expect(@article.import_batch_id).to be_nil
     end
 
     it "sets first_import_started_at when it is started for the first time, and doesn't re-set it on later requests" do
