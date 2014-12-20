@@ -19,7 +19,7 @@
       project_list.unshift ['all projects', 'all']
 
     .main
-      .pull-right#expand-search
+      .pull-right.expand-search
         i.fa.fa-chevron-right
 
       = text_field_tag 'homepage_commits_filter__sha', @homepage_commits_filter__sha, placeholder: '9d613f'

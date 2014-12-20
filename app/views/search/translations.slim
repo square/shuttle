@@ -26,7 +26,7 @@ hr.divider
     / translation_search_bar
     = form_tag(search_translations_url, method: 'GET', id: 'translation-search-form', class: 'filter form-inline')
       .main
-        .pull-right#expand-search
+        .pull-right.expand-search
           i.fa.fa-chevron-right
         = text_field_tag 'query', '', id: 'search-field', placeholder: 'Translation Query'
         - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }

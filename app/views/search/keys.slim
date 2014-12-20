@@ -25,7 +25,7 @@ hr.divider
   .filter-bar 
     = form_tag(search_keys_url(format: 'json'), method: :get, id: 'key-search-form', class: 'filter form-inline') do
       .main
-        .pull-right#expand-search
+        .pull-right.expand-search
           i.fa.fa-chevron-right
         = text_field_tag 'filter', '', placeholder: 'Filter by Key', id: 'key-filter-field'    
         - project_list = Project.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
