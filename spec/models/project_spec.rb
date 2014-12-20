@@ -626,11 +626,20 @@ describe Project do
   end
 
   context "[scopes]" do
+    before :each do
+      @project_with_repo =    FactoryGirl.create(:project, repository_url: "test")
+      @project_without_repo = FactoryGirl.create(:project, repository_url: nil)
+    end
+
     context "[scope = git]" do
       it "returns the projects which has a repository_url" do
-        project_with_repo = FactoryGirl.create(:project, repository_url: "test", watched_branches: %w(master))
-        FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
-        expect(Project.git.to_a).to eql([project_with_repo])
+        expect(Project.git.to_a).to eql([@project_with_repo])
+      end
+    end
+
+    context "[scope = not_git]" do
+      it "returns the projects which don't have a repository_url" do
+        expect(Project.not_git.to_a).to eql([@project_without_repo])
       end
     end
   end

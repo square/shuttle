@@ -122,6 +122,22 @@ describe Commit do
     end
   end
 
+  describe "#required_rfc5646_locales" do
+    it "returns the project's required rfc5646 locales" do
+      project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'ja'=>true, 'es'=>false})
+      commit = FactoryGirl.create(:commit, project: project)
+      expect(commit.required_rfc5646_locales).to eql(project.required_rfc5646_locales)
+    end
+  end
+
+  describe "#targeted_rfc5646_locales" do
+    it "returns the project's targeted rfc5646 locales" do
+      project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'ja'=>true, 'es'=>false})
+      commit = FactoryGirl.create(:commit, project: project)
+      expect(commit.targeted_rfc5646_locales).to eql(project.targeted_rfc5646_locales)
+    end
+  end
+
   describe "#recalculate_ready!" do
     before :each do
       @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)

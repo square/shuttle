@@ -156,7 +156,7 @@ class Commit < ActiveRecord::Base
   after_commit :initial_import, on: :create
 
   attr_readonly :revision, :message
-  delegate :required_locales, to: :project
+  delegate :required_locales, :required_rfc5646_locales, :targeted_rfc5646_locales, to: :project
 
   # Counts the total commits.
   #

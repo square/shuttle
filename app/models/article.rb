@@ -83,6 +83,10 @@ class Article < ActiveRecord::Base
   has_many :keys,         through:    :sections
   has_many :translations, through:    :keys
 
+  # Scopes
+  scope :ready, -> { where(ready: true) }
+  scope :not_ready, -> { where(ready: false) }
+
   attr_readonly :project_id
 
   serialize :sections_hash, Hash
