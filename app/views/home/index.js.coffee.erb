@@ -18,17 +18,6 @@ $(window).ready () ->
   if $.url().param('direction')
     $.cookie 'home_direction', $.url().param('direction'), expires: 7
 
-  expand_filter_bar = () ->
-    if $(".collapse").data("toggle")
-      $("#expand-search").removeClass("active")
-      $(".collapse").data("toggle", false)
-      $(".collapse").slideUp()
-    else
-      $("#expand-search").addClass("active")
-      $(".collapse").data("toggle", true)
-      $(".collapse").slideDown()
-
-  $("#expand-search").click expand_filter_bar
   $("#expand-filters").click () ->
     $(window).scrollTop(0)
     expand_filter_bar()

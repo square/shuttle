@@ -26,7 +26,7 @@ hr.divider
   .filter-bar
     = form_tag(search_commits_url(format: 'json'), method: :get, id: 'commit-search-form', class: 'filter form-inline') do
       .main
-        .pull-right#expand-search
+        .pull-right.expand-search
           i.fa.fa-chevron-right
         = text_field_tag 'sha', '', placeholder: '935ad4', id: 'commit-sha-field'
         = submit_tag 'Search', class: 'primary'

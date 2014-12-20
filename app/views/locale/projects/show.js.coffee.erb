@@ -42,19 +42,6 @@ $(document).ready ->
     else
       new Flash('alert').text('Need to select a commit to view issues')
 
-
-  expand_filter_bar = () ->
-    if $(".collapse").data("toggle")
-      $("#expand-search").removeClass("active")
-      $(".collapse").data("toggle", false)
-      $(".collapse").slideUp()
-    else
-      $("#expand-search").addClass("active")
-      $(".collapse").data("toggle", true)
-      $(".collapse").slideDown()
-
-  $("#expand-search").click expand_filter_bar
-
   new TranslationWorkbench(
     $(".translation-workbench"),
     $(".filter-bar form"),
