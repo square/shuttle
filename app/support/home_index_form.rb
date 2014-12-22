@@ -59,8 +59,8 @@ class HomeIndexForm
   # GENERAL
 
   def set_pagination_variables
-    page = Integer(params[:page]) rescue 1
-    vars[:offset] = (page - 1) * HomeController::PER_PAGE
+    vars[:page] = Integer(params[:page]) rescue 1
+    vars[:offset] = (vars[:page] - 1) * HomeController::PER_PAGE
     vars[:limit]  = HomeController::PER_PAGE
   end
 

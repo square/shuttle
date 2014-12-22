@@ -50,7 +50,7 @@ class HomeIndexPresenter
   # @return [String] the path for the translate link
 
   def translate_link_path(user, item)
-    item_specific_path_params = item.is_a?(Commit) ? { commit: item.revision } : { article: item.name }
+    item_specific_path_params = item.is_a?(Commit) ? { commit: item.revision } : { article_id: item.id }
     rfc5646_locale = user.admin? ? item.required_locales.first.rfc5646 : user.approved_locales.first.rfc5646
     locale_project_path({ locale_id: rfc5646_locale, id: item.project.to_param }.merge(item_specific_path_params) )
   end

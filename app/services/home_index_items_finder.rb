@@ -120,7 +120,7 @@ class HomeIndexItemsFinder
     end
     articles = articles.order(order_by) if order_by
 
-    articles = articles.offset(form[:offset]).limit(form[:limit]) # limit and offset
+    articles = articles.page(form[:page]).per(form[:limit]) # limit and offset
 
     articles.uniq
   end

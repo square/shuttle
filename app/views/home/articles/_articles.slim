@@ -27,3 +27,10 @@
         = render partial: 'home/headers', locals: { item_type: 'article' }
       tbody
         = render partial: 'home/item', collection: @articles
+
+  .row
+    .pagination-links
+      = paginate @articles
+  .row
+    .pagination-info
+      = page_entries_info(@articles, entry_name: 'article')
