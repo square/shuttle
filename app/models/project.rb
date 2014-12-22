@@ -81,6 +81,7 @@ class Project < ActiveRecord::Base
   has_many :blobs, inverse_of: :project, dependent: :delete_all
   has_many :translations, through: :keys
   has_many :articles, inverse_of: :project
+  has_many :sections, through: :articles
 
   serialize :skip_imports,             Array
   serialize :key_exclusions,           Array

@@ -55,6 +55,8 @@ body.projects {
     .filter-bar {
       input[type="text"] { width: 400px; }
       select[name="filter_source"] { width: 150px; }
+
+      select[name="article_id"], select[name="section_id"] { width: 180px; }
     }
   }
 
