@@ -12,10 +12,11 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-- content_for :shuttle_title do
-  = "Dashboard - Shuttle"
-- content_for :file_name do
-  = 'views/home/index'
+.filter-bar
+  = form_tag({}, id: 'articles-filter-form', method: 'get')
+    = text_field_tag 'articles_filter__name', @form[:articles_filter__name], placeholder: 'name, ex: helloworld (exact matches only)'
+    = render partial: 'home/filters/project', locals: { item_type: 'article' }
+    = render partial: 'home/filters/status'
+    = render partial: 'home/filters/locales'
 
-= render partial: 'home/commits/commits'
-= render partial: 'home/articles/articles'
+    = submit_tag 'Filter', class: 'primary'

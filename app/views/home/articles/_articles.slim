@@ -12,7 +12,18 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-= select_tag 'homepage_commits_filter__status', options_for_select(\
-  %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
-  @homepage_commits_filter__status\
-)
+
+#articles
+  .header
+    h1 Articles
+
+  hr.divider
+
+  .border
+    = render partial: 'home/articles/filter_bar'
+
+    table.table.hover-rows.items-table
+      thead
+        = render partial: 'home/headers', locals: { item_type: 'article' }
+      tbody
+        = render partial: 'home/item', collection: @articles

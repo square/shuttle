@@ -17,6 +17,8 @@ require 'spec_helper'
 describe HomeController do
   context "[when 'uncompleted' filter is selected and locales are specified]" do
     before :each do
+      Article.any_instance.stub(:import!) # prevent auto import
+
       reset_elastic_search
       @request.env['devise.mapping'] = Devise.mappings[:user]
       @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
@@ -24,29 +26,43 @@ describe HomeController do
 
       @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'ja'=>true, 'es'=>false}, base_rfc5646_locale: 'en')
       @commit = FactoryGirl.create(:commit, project: @project)
-      @key = FactoryGirl.create(:key, project: @project)
-      @commit.keys << @key
+      @commit_key = FactoryGirl.create(:key, project: @project)
+      @commit.keys << @commit_key
+
+      @article = FactoryGirl.create(:article, project: @project)
+      @section = FactoryGirl.create(:section, article: @article)
+      @article_key = FactoryGirl.create(:key, section: @section, index_in_section: 0)
 
       regenerate_elastic_search_indexes
       sleep(2)
     end
 
-    it "returns the commit with pending translations in specified locales, even if that commit is ready and the locale is optional" do
-      FactoryGirl.create(:translation, key: @key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
-      @key.update_columns ready: true
+    it "returns the commit/article with pending translations in specified locales, even if that commit/article is ready and the locale is optional" do
+      FactoryGirl.create(:translation, key: @commit_key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
+      @commit_key.update_columns ready: true
       @commit.update_columns ready: true
 
-      get :index, { homepage_commits_filter__rfc5646_locales: 'es', homepage_commits_filter__status: 'uncompleted' }
+      FactoryGirl.create(:translation, key: @article_key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
+      @article_key.update_columns ready: true
+      @article.update_columns ready: true
+
+      get :index, { filter__rfc5646_locales: 'es', filter__status: 'uncompleted' }
       expect(assigns(:commits).map(&:id)).to eq([@commit.id])
+      expect(assigns(:articles).map(&:id)).to eq([@article.id])
     end
 
-    it "doesn't return the commit with no pending translations in specified locales, even if that skipped commit is not ready and the locale is required" do
-      FactoryGirl.create(:translation, key: @key, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: true)
-      @key.update_columns ready: false
+    it "doesn't return the commit/article with no pending translations in specified locales, even if that commit/article is not ready and the locale is required" do
+      FactoryGirl.create(:translation, key: @commit_key, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: true)
+      @commit_key.update_columns ready: false
       @commit.update_columns ready: false
 
-      get :index, { homepage_commits_filter__rfc5646_locales: 'ja', homepage_commits_filter__status: 'uncompleted' }
+      FactoryGirl.create(:translation, key: @article_key, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: true)
+      @article_key.update_columns ready: false
+      @article.update_columns ready: false
+
+      get :index, { filter__rfc5646_locales: 'ja', filter__status: 'uncompleted' }
       expect(assigns(:commits).map(&:id)).to eq([])
+      expect(assigns(:articles).map(&:id)).to eq([])
     end
   end
 end
