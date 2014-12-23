@@ -15,27 +15,29 @@
 module Api
   module V1
     class ArticlesController < ApplicationController
-      respond_to :json
+      respond_to :json, :html
 
-      skip_before_filter :authenticate_user!
-      skip_before_action :verify_authenticity_token
-      before_filter :authenticate!
+      skip_before_filter :authenticate_user!,        if: :api_request?
+      skip_before_action :verify_authenticity_token, if: :api_request?
+      before_filter :authenticate_with_api_token!,   if: :api_request?
+
       before_filter :find_project
-      before_filter :find_article, only: [:show, :update, :status, :manifest]
+      before_filter :find_article, only: [:show, :update, :manifest]
 
       # Returns all Articles in the Project.
       #
       # Routes
       # ------
       #
-      # * `/api/v1/projects/:project_id/articles?api_token=:api_token`
+      # * `/api/v1/projects/:project_id/articles(.format)?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
       #
-      # |             |                              |
-      # |:------------|:-----------------------------|
-      # | `api_token` | The api token for a Project. |
+      # |              |                              |
+      # |:-------------|:-----------------------------|
+      # | `project_id` | The id of a Project.         |
+      # | `api_token`  | The api token for a Project. |
 
       def index
         respond_with @project.articles do |format|
@@ -48,14 +50,15 @@ module Api
       # Routes
       # ------
       #
-      # * `POST /api/v1/projects/:project_id/articles?api_token=:api_token`
+      # * `POST /api/v1/projects/:project_id/articles(.format)?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
       #
-      # |             |                              |
-      # |:------------|:-----------------------------|
-      # | `api_token` | The api token for a Project. |
+      # |              |                              |
+      # |:-------------|:-----------------------------|
+      # | `project_id` | The id of a Project.         |
+      # | `api_token`  | The api token for a Project. |
       #
       # Body Parameters
       # ---------------
@@ -75,7 +78,7 @@ module Api
         respond_with article do |format|
           format.json do
             if article.errors.blank?
-              render json: decorate_article(article), status: :accepted
+              render json: decorate_article(article)
             else
               render json: { error: { errors: article.errors } }, status: :bad_request
             end
@@ -88,15 +91,16 @@ module Api
       # Routes
       # ------
       #
-      # * `GET /api/v1/projects/:project_id/articles/:name?api_token=:api_token`
+      # * `GET /api/v1/projects/:project_id/articles/:name(.format)?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
       #
-      # |             |                              |
-      # |:------------|:-----------------------------|
-      # | `api_token` | The api token for a Project. |
-      # | `name`      | The `name` of the Article.   |
+      # |              |                              |
+      # |:-------------|:-----------------------------|
+      # | `project_id` | The id of a Project.         |
+      # | `api_token`  | The api token for a Project. |
+      # | `name`       | The `name` of the Article.   |
 
       def show
         respond_with @article do |format|
@@ -114,15 +118,16 @@ module Api
       # Routes
       # ------
       #
-      # * `PATCH /api/v1/projects/:project_id/articles/:name?api_token=:api_token`
+      # * `PATCH /api/v1/projects/:project_id/articles/:name(.format)?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
       #
-      # |             |                              |
-      # |:------------|:-----------------------------|
-      # | `api_token` | The api token for a Project. |
-      # | `name`      | The `name` of the Article.   |
+      # |              |                              |
+      # |:-------------|:-----------------------------|
+      # | `project_id` | The id of a Project.         |
+      # | `api_token`  | The api token for a Project. |
+      # | `name`       | The `name` of the Article.   |
       #
       # Body Parameters
       # ---------------
@@ -148,7 +153,7 @@ module Api
         respond_with @article do |format|
           format.json do
             if @article.errors.blank?
-              render json: decorate_article(@article), status: :accepted
+              render json: decorate_article(@article)
             else
               render json: { error: { errors: @article.errors } }, status: :bad_request
             end
@@ -162,15 +167,16 @@ module Api
       # Routes
       # ------
       #
-      # * `GET /api/v1/projects/:project_id/articles/:name/manifest?api_token=:api_token`
+      # * `GET /api/v1/projects/:project_id/articles/:name/manifest(.format)?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
       #
-      # |             |                              |
-      # |:------------|:-----------------------------|
-      # | `api_token` | The api token for a Project. |
-      # | `name`      | The `name` of the Article.   |
+      # |              |                              |
+      # |:-------------|:-----------------------------|
+      # | `project_id` | The id of a Project.         |
+      # | `api_token`  | The api token for a Project. |
+      # | `name`       | The `name` of the Article.   |
 
       def manifest
         respond_with @article do |format|
@@ -187,21 +193,38 @@ module Api
       private
 
       # ===== START AUTHENTICATION/AUTHORIZATION/VALIDATION ============================================================
-      def authenticate!
-        unless params[:api_token].present? && Project.where(id: params[:project_id], api_token: params[:api_token]).exists?
+      def authenticate_with_api_token!
+        unless Project.where(id: params[:project_id], api_token: params[:api_token]).exists?
           render json: { error: { errors: [{ message: t("controllers.api.v1.articles.invalid_api_token") }] } }, status: :unauthorized
         end
       end
 
       def find_project
         @project = Project.find_by_id(params[:project_id])
+
+        unless @project
+          respond_with(nil) do |format|
+            format.html { redirect_to root_path, alert: t('controllers.api.v1.articles.project_not_found') }
+            format.json { render json: { error: { errors: [{ message: t("controllers.api.v1.articles.project_not_found") }] } }, status: :not_found }
+          end
+        end
       end
 
       def find_article
-        unless @article = @project.articles.find_by_name(params[:name])
-          render json: { error: { errors: [{ message: t("controllers.api.v1.articles.article_not_found") }] } }, status: :not_found
+        @article = @project.articles.find_by_name(params[:name])
+
+        unless @article
+          respond_with(nil) do |format|
+            format.html { redirect_to root_path, alert: t("controllers.api.v1.articles.article_not_found") }
+            format.json { render json: { error: { errors: [{ message: t("controllers.api.v1.articles.article_not_found") }] } }, status: :not_found }
+          end
         end
       end
+
+      def api_request?
+        params[:api_token].present?
+      end
+
       # ===== END AUTHENTICATION/AUTHORIZATION/VALIDATION ==============================================================
 
       # ===== START DECORATORS =========================================================================================
