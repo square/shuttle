@@ -256,4 +256,29 @@ describe Translation do
       expect(FactoryGirl.create(:translation).potential_commit).to be_nil
     end
   end
+
+  describe "#batch_refresh_elastic_search" do
+    it "refreshes the ElasticSearch index (section_active field in this test) of Article's Translations" do
+      Article.any_instance.stub(:import!) # prevent auto import
+      reset_elastic_search
+
+      article = FactoryGirl.create(:article)
+      section = FactoryGirl.create(:section, article: article, active: true)
+      key = FactoryGirl.create(:key, section: section, index_in_section: 0, project: article.project)
+      translation = FactoryGirl.create(:translation, key: key)
+
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      expect(Translation.search(load: true) { filter :term, section_active: true }.first).to eql(translation)
+      expect(Translation.search(load: true) { filter :term, section_active: false }.first).to be_nil
+
+      section.update! active: false
+      Translation.batch_refresh_elastic_search(article)
+      sleep(2)
+
+      expect(Translation.search(load: true) { filter :term, section_active: true }.first).to be_nil
+      expect(Translation.search(load: true) { filter :term, section_active: false }.first).to eql(translation)
+    end
+  end
 end

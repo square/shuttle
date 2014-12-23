@@ -68,6 +68,10 @@ class Translation < ActiveRecord::Base
     indexes :source_copy, analyzer: 'snowball', as: 'source_copy'
     indexes :id, type: 'integer', index: :not_analyzed
     indexes :project_id, type: 'integer', as: 'send(:key).project_id'
+    indexes :article_id, type: 'integer', as: 'send(:key).section.try(:article_id)'
+    indexes :section_id, type: 'integer', as: 'send(:key).section_id'
+    indexes :section_active, type: 'boolean', as: 'send(:key).section.try(:active)'
+    indexes :index_in_section, type: 'integer', as: 'send(:key).index_in_section'
     indexes :translator_id, type: 'integer'
     indexes :rfc5646_locale, type: 'string', index: :not_analyzed
     indexes :created_at, type: 'date'
@@ -243,5 +247,28 @@ class Translation < ActiveRecord::Base
     # because of non-ascii characters such as the following:
     # `   "べ<span class='sales-trends'>"[1..27].hash == "<span class='sales-trends'>".hash  ` returns false
     # `   "べ<span class='sales-trends'>"[1..27] == "<span class='sales-trends'>"   `          returns true
+  end
+
+  # Batch updates `obj`s Translations in elastic search.
+  # Expects `obj` to have a `keys` association.
+  # This is currently only run in ArticleImporter::Finisher.
+  #
+  # Running `Translation.tire.index.import obj.translations` is slow since it needs to find commit_ids and sections for each Key.
+  # Instead, this method preloads all the commit_ids for all Keys and partitions them into the correct Keys.
+  #
+  # @param [Commit, Project, Article] obj The object whose keys should be batch refreshed in ElasticSearch
+
+  def self.batch_refresh_elastic_search(obj)
+    obj.keys.includes(:translations, :section).find_in_batches do |keys|
+      commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
+        hsh[key_id.to_i] ||= Set.new
+        hsh[key_id.to_i] << commit_id.to_i
+        hsh
+      end
+      # now set batched_commit_ids for each key
+      keys.each { |key| key.batched_commit_ids = commits_by_key[key.id] || Set.new }
+      # and run the import
+      Translation.tire.index.import keys.map(&:translations).flatten
+    end
   end
 end

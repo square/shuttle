@@ -51,7 +51,7 @@ namespace :search do
 
     if klasses.include?(Translation)
       print "Importing translations (#{(Translation.count/1000.0).ceil} batches)"
-      Translation.includes(key: :commits_keys).find_in_batches do |translations|
+      Translation.includes(key: [:commits_keys, { section: :article }]).find_in_batches do |translations|
         print '.'
         translations.each do |translation|
           translation.key.batched_commit_ids = translation.key.commits_keys.map(&:commit_id)

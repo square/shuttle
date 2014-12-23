@@ -695,14 +695,26 @@ describe Project do
       expect(project.git?).to be_true
     end
 
-    it "returns true if repository_url is empty" do
+    it "returns false if repository_url is empty" do
       project = FactoryGirl.create(:project, repository_url: "")
       expect(project.git?).to be_false
     end
 
-    it "returns true if repository_url is nil" do
+    it "returns false if repository_url is nil" do
       project = FactoryGirl.create(:project, repository_url: nil)
       expect(project.git?).to be_false
+    end
+  end
+
+  describe "#not_git?" do
+    it "returns false if repository_url exists" do
+      project = FactoryGirl.create(:project, repository_url: "https://example.com")
+      expect(project.not_git?).to be_false
+    end
+
+    it "returns true if repository_url is nil" do
+      project = FactoryGirl.create(:project, repository_url: nil)
+      expect(project.not_git?).to be_true
     end
   end
 end
