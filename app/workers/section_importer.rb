@@ -38,7 +38,7 @@ class SectionImporter
 
     # Imports this Section.
     #
-    # Splits into paragraphs, rebases, and runs KeyCreatorForSections for each paragraph.
+    # Splits into paragraphs, rebases, and runs SectionKeyCreator for each paragraph.
 
     def import_strings
       paragraphs = split_into_paragraphs(@section.source_copy)
@@ -59,15 +59,15 @@ class SectionImporter
 
     # The reason we rebase is that we want to re-use previous translations in case
     # someone adds and/or removes paragraphs to/from `source_copy` of the Section.
-    # Since KeyCreatorForSections searches by the `index:source_copy_sha`, we want to
-    # update the indexes of Keys before KeyCreatorForSections is run so that
+    # Since SectionKeyCreator searches by the `index:source_copy_sha`, we want to
+    # update the indexes of Keys before SectionKeyCreator is run so that
     # it will match the old Key.
     #
     # Example: [a] -> [b a]
     # In this scenario, initially we had something like: [Key(index_in_section => 0, key => "0:a")].
     # It transformed to [Key(index => 0, key => "0:b"), Key(index_in_section => 1, key => "1:a")].
     # In this rebasing step, we update the initial key to be Key(index_in_section => nil, key => "1:a").
-    # This way, in the KeyCreatorForSections step, "1:a" will be matched, and the key will be reused,
+    # This way, in the SectionKeyCreator step, "1:a" will be matched, and the key will be reused,
     # and its `index_in_section` will be set to 1.
     #
     # In case there are only changes in the `source_copy`, we also want to

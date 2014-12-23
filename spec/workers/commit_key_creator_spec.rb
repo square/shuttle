@@ -14,7 +14,7 @@
 
 require 'spec_helper'
 
-describe KeyCreator do
+describe CommitKeyCreator do
   describe "#perform" do
     context "[rescue Git::CommitNotFoundError]" do
       it "adds import errors to commit in redis when key creator fails due to a Git::CommitNotFoundError" do
@@ -22,9 +22,9 @@ describe KeyCreator do
         commit = FactoryGirl.create(:commit, project: project)
         FactoryGirl.create(:blob, sha: "abc123", project: project)
 
-        expect(KeyCreator).to receive(:update_key_associations).and_raise(Git::CommitNotFoundError, "abc123")
-        expect { KeyCreator.new.perform(project.id, "abc123", commit.id, "yaml", []) }.to_not raise_error
-        expect(commit.reload.import_errors).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in KeyCreator for commit_id #{commit.id} and blob abc123)"]])
+        expect(CommitKeyCreator).to receive(:update_key_associations).and_raise(Git::CommitNotFoundError, "abc123")
+        expect { CommitKeyCreator.new.perform(project.id, "abc123", commit.id, "yaml", []) }.to_not raise_error
+        expect(commit.reload.import_errors).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in CommitKeyCreator for commit_id #{commit.id} and blob abc123)"]])
       end
     end
   end
