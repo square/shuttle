@@ -70,7 +70,8 @@ class ArticleImporter
       article.update_import_finishing_fields!
 
       # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
-      article.full_recalculate_ready!
+      Key.batch_recalculate_ready!(article)
+      ArticleRecalculator.new.perform(article.id)
     end
   end
 end
