@@ -62,7 +62,7 @@ class HomeIndexPresenter
     if item.is_a?(Commit)
       project_commit_path(item.project, item, format: 'json')
     else
-      api_v1_article_path(item, format: 'json')
+      api_v1_project_article_path(project_id: item.project.id, name: item.name, format: 'json')
     end
   end
 end

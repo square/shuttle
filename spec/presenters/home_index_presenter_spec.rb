@@ -89,7 +89,7 @@ describe HomeIndexPresenter do
     context "[Article]" do
       it "returns the article update path" do
         article = FactoryGirl.create(:article)
-        expect(@presenter.update_item_path(article)).to eql(Rails.application.routes.url_helpers.api_v1_article_path(article, format: 'json'))
+        expect(@presenter.update_item_path(article)).to eql(Rails.application.routes.url_helpers.api_v1_project_article_path(project_id: article.project_id, name: article.name, format: 'json'))
       end
     end
   end
