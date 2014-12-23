@@ -52,15 +52,22 @@ class Locale::TranslationsController < ApplicationController
     limit        = PER_PAGE
     query_filter = params[:filter]
     commit_id    = @project.commits.for_revision(params[:commit]).first.try(:id)
+    article_id   = @project.articles.find_by_id(params[:article_id]).try(:id)
+    section_id   = @project.sections.find_by_id(params[:section_id]).try(:id)
     locale       = @locale
     project_id   = @project.id
+    project      = @project
 
     filter_source = params[:filter_source]
     catch :include_nothing do
-      @translations = Translation.search(load: {include: [{key: [:project, :translations]}, :locale_associations]}) do
+      @translations = Translation.search(load: {include: [{key: [{ section: :article }, :project, :translations]}, :locale_associations]}) do
         filter :term, project_id: project_id
         filter :term, rfc5646_locale: locale.rfc5646 if locale
-        filter :terms, { commit_ids: [commit_id] } if commit_id.present?
+        filter :terms, commit_ids: [commit_id] if commit_id.present?
+        filter :term, article_id: article_id if article_id.present?
+        filter :term, section_id: section_id if section_id.present?
+        filter :term, section_active: true if project.not_git?        # active sections
+        filter :exists, field: :index_in_section if project.not_git?  # active keys in sections
 
         if query_filter.present?
           if filter_source == 'source'
@@ -69,9 +76,6 @@ class Locale::TranslationsController < ApplicationController
             query { match 'copy', query_filter, operator: 'and' }
           end
         end
-
-        from offset
-        size limit
 
         if include_translated && include_approved && include_new
           # include everything
@@ -98,6 +102,16 @@ class Locale::TranslationsController < ApplicationController
         else
           # include nothing
           throw :include_nothing
+        end
+
+        from offset
+        size limit
+
+        if project.not_git?
+          sort do
+            by :section_id, 'asc'
+            by :index_in_section, 'asc'
+          end
         end
       end
     end
