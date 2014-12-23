@@ -58,54 +58,41 @@ class Locale::TranslationsController < ApplicationController
     filter_source = params[:filter_source]
     catch :include_nothing do
       @translations = Translation.search(load: {include: [{key: [:project, :translations]}, :locale_associations]}) do
-        query_terms = []
-        query_terms << "commit_ids:\"#{commit_id}\"" if commit_id.present?
-        query_terms << "rfc5646_locale:\"#{locale.rfc5646}\"" if locale
+        filter :term, project_id: project_id
+        filter :term, rfc5646_locale: locale.rfc5646 if locale
+        filter :terms, { commit_ids: [commit_id] } if commit_id.present?
+
         if query_filter.present?
           if filter_source == 'source'
-            query_terms << "source_copy:\"#{query_filter}\""
+            query { match 'source_copy', query_filter, operator: 'and' }
           elsif filter_source == 'translated'
-            query_terms << "copy:\"#{query_filter}\""
+            query { match 'copy', query_filter, operator: 'and' }
           end
         end
-        query { string query_terms.join(' '), default_operator: 'AND' } if query_terms.present?
 
-        sort { by :created_at, 'asc' }
         from offset
         size limit
 
         if include_translated && include_approved && include_new
           # include everything
-          filter :term, project_id: project_id
         elsif include_translated && include_approved
-          filter :and,
-                 {term: {project_id: project_id}},
-                 {term: {translated: 1}}
+          filter :term, translated: 1
         elsif include_translated && include_new
-          filter :and,
-                 {term: {project_id: project_id}},
-                 {or: [
-                          {missing: {field: 'approved', existence: true, null_value: true}},
-                          {term: {approved: 0}}]}
+          filter :or, [
+                {missing: {field: 'approved', existence: true, null_value: true}},
+                {term: {approved: 0}}]
         elsif include_approved && include_new
-          filter :and,
-                 {term: {project_id: project_id}},
-                 {or: [
-                          {term: {approved: 1}},
-                          {term: {translated: 0}}]}
+          filter :or, [
+                {term: {approved: 1}},
+                {term: {translated: 0}}]
         elsif include_approved
-          filter :and,
-                 {term: {project_id: project_id}},
-                 {term: {approved: 1}}
+          filter :term, {approved: 1}
         elsif include_new
-          filter :and,
-                 {term: {project_id: project_id}},
-                 {or: [
-                          {term: {translated: 0}},
-                          {term: {approved: 0}}]}
+          filter :or, [
+                {term: {translated: 0}},
+                {term: {approved: 0}}]
         elsif include_translated
           filter :and,
-                 {term: {project_id: project_id}},
                  {missing: {field: 'approved', existence: true, null_value: true}},
                  {term: {translated: 1}}
         else
