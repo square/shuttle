@@ -267,31 +267,6 @@ describe Article do
     end
   end
 
-  describe "#full_recalculate_ready!" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
-
-    before :each do
-      @article = FactoryGirl.create(:article, name: "test", ready: false)
-      @section = FactoryGirl.create(:section, article: @article, active: true)
-      @key1 = FactoryGirl.create(:key, section: @section, project: @article.project, index_in_section: 0, ready: false)
-      @key2 = FactoryGirl.create(:key, section: @section, project: @article.project, index_in_section: 1, ready: false)
-    end
-
-    it "recalculates all keys and article; sets their readiness to true if all are finished" do
-      @article.full_recalculate_ready!
-      expect(@article.reload).to be_ready
-      @article.keys.each do |key|
-        expect(key).to be_ready
-      end
-    end
-
-    it "sets article readiness to false if some keys are not ready" do
-      FactoryGirl.create(:translation, key: @key1, copy: nil)
-      @article.full_recalculate_ready!
-      expect(@article.reload).to_not be_ready
-    end
-  end
-
   describe "#full_reset_ready!" do
     before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
 

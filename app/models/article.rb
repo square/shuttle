@@ -185,12 +185,6 @@ class Article < ActiveRecord::Base
     self.save!
   end
 
-  # Recalculates readiness, first, for the {Key Keys}, and then for the {Article}.
-  def full_recalculate_ready!
-    Key.batch_recalculate_ready!(self)
-    ArticleRecalculator.new.perform id
-  end
-
   # Resets ready fields for this Article and its Keys.
   # It's necessary to call this after an import is scheduled, and after it's started.
   def full_reset_ready!
