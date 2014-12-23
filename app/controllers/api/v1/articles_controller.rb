@@ -19,7 +19,8 @@ module Api
 
       skip_before_filter :authenticate_user!
       skip_before_action :verify_authenticity_token
-      before_filter :authenticate_and_find_project
+      before_filter :authenticate!
+      before_filter :find_project
       before_filter :find_article, only: [:show, :update, :status, :manifest]
 
       # Returns all Articles in the Project.
@@ -27,7 +28,7 @@ module Api
       # Routes
       # ------
       #
-      # * `GET /articles?api_token=:api_token`
+      # * `/api/v1/projects/:project_id/articles?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
@@ -47,7 +48,7 @@ module Api
       # Routes
       # ------
       #
-      # * `POST /articles?api_token=:api_token`
+      # * `POST /api/v1/projects/:project_id/articles?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
@@ -87,7 +88,7 @@ module Api
       # Routes
       # ------
       #
-      # * `GET /articles/:name?api_token=:api_token`
+      # * `GET /api/v1/projects/:project_id/articles/:name?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
@@ -113,7 +114,7 @@ module Api
       # Routes
       # ------
       #
-      # * `PATCH /articles/:name?api_token=:api_token`
+      # * `PATCH /api/v1/projects/:project_id/articles/:name?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
@@ -161,7 +162,7 @@ module Api
       # Routes
       # ------
       #
-      # * `GET /articles/:name/manifest?api_token=:api_token`
+      # * `GET /api/v1/projects/:project_id/articles/:name/manifest?api_token=:api_token`
       #
       # Path/Url Parameters
       # ---------------
@@ -186,10 +187,14 @@ module Api
       private
 
       # ===== START AUTHENTICATION/AUTHORIZATION/VALIDATION ============================================================
-      def authenticate_and_find_project
-        unless params[:api_token].present? && @project = Project.find_by_api_token(params[:api_token])
+      def authenticate!
+        unless params[:api_token].present? && Project.where(id: params[:project_id], api_token: params[:api_token]).exists?
           render json: { error: { errors: [{ message: t("controllers.api.v1.articles.invalid_api_token") }] } }, status: :unauthorized
         end
+      end
+
+      def find_project
+        @project = Project.find_by_id(params[:project_id])
       end
 
       def find_article

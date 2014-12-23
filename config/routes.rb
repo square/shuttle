@@ -29,9 +29,11 @@ Shuttle::Application.routes.draw do
   # API
   namespace :api, defaults: { format: 'json' } do
     namespace :v1 do
-      resources :articles, param: :name, only: [:index, :create, :show, :update] do
-        member do
-          get :manifest
+      resources :projects, only: [] do
+        resources :articles, param: :name, only: [:index, :create, :show, :update] do
+          member do
+            get :manifest
+          end
         end
       end
     end
