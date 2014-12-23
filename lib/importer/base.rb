@@ -298,17 +298,17 @@ module Importer
       # then spawn jobs to create those keys
       if inline
         @keys.in_groups_of(100, false) do |keys|
-          KeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+          CommitKeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
         end
       elsif @commit
         @commit.import_batch.jobs do
           @keys.in_groups_of(100, false).each do |keys|
-            KeyCreator.perform_once @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+            CommitKeyCreator.perform_once @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
           end
         end
       else
         @keys.in_groups_of(100, false) do |keys|
-          KeyCreator.perform_async @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+          CommitKeyCreator.perform_async @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
         end
       end
     end
@@ -316,7 +316,7 @@ module Importer
     # Used when this blob was imported as part of an earlier commit; just
     # associates the cached list of keys for that blob with the new commit
     def import_by_using_cached_keys
-      KeyCreator.update_key_associations @blob.keys.to_a, @commit
+      CommitKeyCreator.update_key_associations @blob.keys.to_a, @commit
     end
 
     # array indexes are stored in brackets

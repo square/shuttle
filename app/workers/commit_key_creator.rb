@@ -16,7 +16,7 @@
 # part of an import job. Creates keys and then performs after-save hooks in
 # batch.
 
-class KeyCreator
+class CommitKeyCreator
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
@@ -48,7 +48,7 @@ class KeyCreator
       self.class.update_key_associations key_objects, @commit
     end
   rescue Git::CommitNotFoundError => err
-    @commit.add_import_error(err, "failed in KeyCreator for commit_id #{commit_id} and blob #{sha}") if @commit
+    @commit.add_import_error(err, "failed in CommitKeyCreator for commit_id #{commit_id} and blob #{sha}") if @commit
   end
 
   # Given a set of keys, bulk-updates their commits-keys associations and

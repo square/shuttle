@@ -76,7 +76,7 @@ class ArticleImporter
 
       # Keys are refreshed as part of `Key.batch_recalculate_ready!`.
       # Translations need to be refreshed in case section data (such as `activeness`) changed in
-      # the last re-import. KeyCreator takes care of refreshing Translations in a Commit during a Commit import.
+      # the last re-import. CommitKeyCreator takes care of refreshing Translations in a Commit during a Commit import.
       Translation.batch_refresh_elastic_search(article)
     end
   end
