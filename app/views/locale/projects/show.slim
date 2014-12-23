@@ -51,33 +51,29 @@ hr.divider
           i.fa.fa-chevron-right
 
         input type="text" name="filter" placeholder="Substring"
-        - preselected_commit = @project.commits.for_revision(params[:commit]).first
-        = select_tag 'commit' , options_for_select(\
-                                                  @project.commits\
-                                                    .order('committed_at DESC')\
-                                                    .map {|c| ["#{c.revision_prefix}: #{truncate c.message}", c.revision]}\
-                                                    .unshift(['all commits', nil])\
-                                                  , preselected_commit.try!(:revision))
-        = select_tag 'filter_source', options_for_select( [\
-                                                            ['Source', 'source'],\
-                                                            ['Translation', 'translated']\
-                                                          ])
+
+        - if @project.git?
+          = select_tag 'commit', options_for_select(@presenter.selectable_commits, @presenter.selected_commit.try!(:revision))
+        - else
+          = select_tag 'article_id', options_for_select(@presenter.selectable_articles, @presenter.selected_article.try!(:id))
+          = select_tag 'section_id', options_for_select(@presenter.selectable_sections, @presenter.selected_section.try!(:id))
+
+        = select_tag 'filter_source', options_for_select( [['Source', 'source'], ['Translation', 'translated']])
         = submit_tag 'Filter', class: 'primary'
         = button_tag id: 'gallery-link', class: 'primary square', type: 'button' do
           i.fa.fa-picture-o
         = button_tag id: 'issues-link', class: 'primary square', type: 'button' do
           i.fa.fa-comments-o
 
-
       .collapse
         .checkbox
-          input type="checkbox" name="include_translated" value="true" checked=(@mode == 'review' ? 'checked' : nil)
+          input type="checkbox" name="include_translated" value="true" checked="checked"
           label for="include_translated" Translated
         .checkbox
           input type="checkbox" name="include_approved" value="true"
           label for="include_approved" Approved
         .checkbox
-          input type="checkbox" name="include_new" value="true" checked=((@mode == 'translation' || @mode == 'review') ? 'checked' : nil)
+          input type="checkbox" name="include_new" value="true" checked="checked"
           label for="include_new" New
     
   .translation-workbench

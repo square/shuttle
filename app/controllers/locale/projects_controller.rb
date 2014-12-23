@@ -69,14 +69,7 @@ class Locale::ProjectsController < ApplicationController
         .map(&:as_translation_json)
         .compact
 
-    @mode = params[:mode] || begin
-      case current_user.role
-        when 'translator' then
-          'translation'
-        else
-          'review'
-        end
-      end
+    @presenter = LocaleProjectsShowPresenter.new(@project, params)
 
     respond_with @project
   end
