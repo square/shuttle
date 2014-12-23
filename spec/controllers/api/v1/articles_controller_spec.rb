@@ -19,27 +19,92 @@ require 'spec_helper'
 describe Api::V1::ArticlesController do
   let(:project) { FactoryGirl.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
 
-  def expect_invalid_api_token_response
-    expect(response.status).to eql(401)
-    expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project API TOKEN"}]}})
+  def sign_in_monitor_user
+    request.env['devise.mapping'] = Devise.mappings[:user]
+    sign_in FactoryGirl.create(:user, :confirmed, role: 'monitor')
   end
 
-  shared_examples_for "invalid api token" do
-    it "errors if no api_token is provided" do
-      send request_type, action, params.merge(project_id: project.id, format: :json)
-      expect(response.status).to eql(401)
-      expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project API TOKEN"}]}})
+  shared_examples_for "api-or-session-authenticateable-and-filters" do |run_find_article_filter=true|
+    context "[format=JSON]" do
+      context "[auth with api_token]" do
+        it "errors with API error message if wrong api_token is provided" do
+          send request_type, action, params.merge(project_id: project.id, format: :json, api_token: "fake")
+          expect(response.status).to eql(401)
+          expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project API TOKEN"}]}})
+        end
+
+        it "authenticates with api_token" do
+          send request_type, action, params.merge(project_id: project.id, format: :json, api_token: project.api_token)
+          expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
+        end
+      end
+
+      context "[auth without api_token]" do
+        it "errors with non-API error message if there is no signed in user" do
+          send request_type, action, params.merge(project_id: project.id, format: :json)
+          expect(response.status).to eql(401)
+          expect(JSON.parse(response.body)).to eql({"error"=>"You need to sign in or sign up before continuing."})
+        end
+
+        it "authenticates with session if there is a signed in user" do
+          sign_in_monitor_user
+          send request_type, action, params.merge(project_id: project.id, format: :json)
+          expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
+        end
+      end
+
+      it "errors with project-not-found message if project_id is invalid (only makes sense with session-auth; because for API-auth, it would error with invalid-token-api message)" do
+        sign_in_monitor_user
+        send request_type, action, params.merge(project_id: -1, format: :json)
+        expect(assigns(:project)).to be_nil
+        expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project"}]}})
+      end
+
+      if run_find_article_filter # find_article before_filter is not run for all actions
+        it "errors with article-not-found message if article_id is invalid (auth method shouldn't matter)" do
+          send request_type, action, params.merge(project_id: project.id, name: 'fakeyfake', format: :json, api_token: project.api_token)
+          expect(assigns(:project)).to eql(project)
+          expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Article doesn't exist"}]}})
+        end
+      end
     end
 
-    it "errors if wrong api_token is provided" do
-      send request_type, action, params.merge(project_id: project.id, format: :json, api_token: "fake")
-      expect(response.status).to eql(401)
-      expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project API TOKEN"}]}})
+    context "[format=HTML]" do
+      context "[auth without api_token]" do
+        it "redirects if there is no signed in user" do
+          send request_type, action, params.merge(project_id: project.id, format: :html)
+          expect(response).to be_redirect
+        end
+
+        it "authenticates with session" do
+          sign_in_monitor_user
+          pending("views don't exist yet") # TODO (yunus): remove/update after views are created\
+          send request_type, action, params.merge(project_id: project.id, format: :html)
+          expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
+        end
+      end
+
+      it "errors with project-not-found message if project_id is invalid (only makes sense with session-auth; because for API-auth, it would error with invalid-token-api message)" do
+        sign_in_monitor_user
+        send request_type, action, params.merge(project_id: -1, format: :html)
+        expect(assigns(:project)).to be_nil
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to eql("Invalid project")
+      end
+
+      if run_find_article_filter # find_article before_filter is not run for all actions
+        it "errors with article-not-found message if article_id is invalid (auth method shouldn't matter)" do
+          send request_type, action, params.merge(project_id: project.id, name: 'fakeyfake', format: :html, api_token: project.api_token)
+          expect(assigns(:project)).to eql(project)
+          expect(response).to redirect_to(root_path)
+          expect(flash[:alert]).to eql("Article doesn't exist")
+        end
+      end
     end
   end
 
   describe "#index" do
-    it_behaves_like "invalid api token" do
+    it_behaves_like "api-or-session-authenticateable-and-filters", false do
       let(:request_type) { :get }
       let(:action) { :index }
       let(:params) { {} }
@@ -62,7 +127,7 @@ describe Api::V1::ArticlesController do
   end
 
   describe "#create" do
-    it_behaves_like "invalid api token" do
+    it_behaves_like "api-or-session-authenticateable-and-filters", false do
       let(:request_type) { :post }
       let(:action) { :create }
       let(:params) { {} }
@@ -77,7 +142,7 @@ describe Api::V1::ArticlesController do
 
     it "creates an Article, its Sections, inherits locale settings from Project" do
       post :create, project_id: project.id, api_token: project.api_token, name: "testname", sections_hash: {"title" => "<p>a</p><p>b</p>", "body" => "<p>a</p><p>c</p>"}, format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       expect(Article.count).to eql(1)
       article = Article.last
       expect(article.name).to eql("testname")
@@ -92,7 +157,7 @@ describe Api::V1::ArticlesController do
 
     it "creates an Article, has its own locale settings different from those of Project's" do
       post :create, project_id: project.id, api_token: project.api_token, name: "testname", sections_hash: {"title" => "<p>a</p><p>b</p>"}, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: { 'ja' => true }, format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       expect(Article.count).to eql(1)
       article = Article.last
       expect(article.keys.count).to eql(2)
@@ -115,7 +180,7 @@ describe Api::V1::ArticlesController do
   describe "#show" do
     let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: {"main" => "<p>a</p><p>b</p>"}) }
 
-    it_behaves_like "invalid api token" do
+    it_behaves_like "api-or-session-authenticateable-and-filters" do
       let(:request_type) { :get }
       let(:action) { :show }
       let(:params) { { name: article.name } }
@@ -133,7 +198,7 @@ describe Api::V1::ArticlesController do
   describe "#update" do
     let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: { "main" => "<p>a</p><p>b</p>", "second" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }).tap(&:reload) }
 
-    it_behaves_like "invalid api token" do
+    it_behaves_like "api-or-session-authenticateable-and-filters" do
       let(:request_type) { :patch }
       let(:action) { :update }
       let(:params) { { name: article.name } }
@@ -141,7 +206,7 @@ describe Api::V1::ArticlesController do
 
     it "updates an Article's sections_hash and targeted_rfc5646_locales" do
       patch :update, project_id: project.id, api_token: project.api_token, name: article.name, sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>", "sub" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }, targeted_rfc5646_locales: { 'fr' => true, 'es' => false, 'tr' => false }, format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       article = Article.first
       expect(article.sections.count).to eql(4)
       expect(article.active_sections.count).to eql(3)
@@ -163,7 +228,7 @@ describe Api::V1::ArticlesController do
 
     it "can update targeted_rfc5646_locales" do
       patch :update, project_id: project.id, api_token: project.api_token, name: article.name, targeted_rfc5646_locales: { 'fr' => true }, format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       expect(Article.count).to eql(1)
       expect(article.reload.targeted_rfc5646_locales).to eql({ 'fr' => true })
     end
@@ -171,7 +236,7 @@ describe Api::V1::ArticlesController do
     it "can update source_copy without updating targeted_rfc5646_locales" do
       article.update! targeted_rfc5646_locales: { 'fr' => true }
       patch :update, project_id: project.id, api_token: project.api_token, name: article.name, sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>" }, format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       expect(Article.count).to eql(1)
       expect(article.reload.targeted_rfc5646_locales).to eql({ 'fr' => true })
       expect(article.active_sections.pluck(:source_copy)).to eql(["<p>a</p><p>x</p><p>b</p>"])
@@ -196,7 +261,7 @@ describe Api::V1::ArticlesController do
       expect(article.email).to eql("test@example.com")
       expect(article.description).to eql("test")
       patch :update, project_id: project.id, api_token: project.api_token, name: article.name, email: "test2@example.com", description: "test 2", format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       expect(article.reload.email).to eql("test2@example.com")
       expect(article.description).to eql("test 2")
     end
@@ -212,7 +277,7 @@ describe Api::V1::ArticlesController do
     before(:each) { project.update! targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } }
     let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: { "title" => "<p>hello</p>", "body" => "<p>a</p><p>b</p>" } ) }
 
-    it_behaves_like "invalid api token" do
+    it_behaves_like "api-or-session-authenticateable-and-filters" do
       let(:request_type) { :get }
       let(:action) { :manifest }
       let(:params) { { name: article.name } }
@@ -236,8 +301,6 @@ describe Api::V1::ArticlesController do
   end
 
   describe "#params_for_create" do
-    let(:project) { FactoryGirl.create(:project, repository_url: nil) }
-
     it "permits name, base_rfc5646_locale, key, sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id or project_id fields" do
       post :create, project_id: project.id, api_token: project.api_token, name: "t", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300, project_id: 4, format: :json
       expect(controller.send :params_for_create).to eql({ "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "name"=>"t", "sections_hash"=>{"t" => "t"}, "description"=>"t", "email"=>"t@example.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}})
@@ -250,7 +313,6 @@ describe Api::V1::ArticlesController do
   end
 
   describe "#params_for_update" do
-    let(:project) { FactoryGirl.create(:project, repository_url: nil) }
     let(:article) { FactoryGirl.create(:article, project: project, name: "t") }
 
     it "permits sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id, project_id, key or base_rfc5646_locale fields" do
@@ -264,6 +326,18 @@ describe Api::V1::ArticlesController do
     end
   end
 
+  describe "#api_request?" do
+    it "returns true if api_token exists" do
+      get :index, project_id: project.id, api_token: "test", format: :json
+      expect(controller.send(:api_request?)).to be_true
+    end
+
+    it "returns false if api_token doesn't exist" do
+      get :index, project_id: project.id, api_token: nil, format: :json
+      expect(controller.send(:api_request?)).to be_false
+    end
+  end
+
   context "[INTEGRATION TESTS]" do
     # This is a real life example. sample_article__original.html was copied and pasted from the help center's website. it was shortened to make tests faster
     it "handles creation, update, update, status, manifest, status, manifest requests in that order" do
@@ -272,7 +346,7 @@ describe Api::V1::ArticlesController do
 
       # Create
       post :create, project_id: project.id, api_token: project.api_token, name: "support-article", sections_hash: { "title" => "<p>AAA</p><p>BBB</p>", "banner" => "<p>XXX</p><p>YYY</p>", "main" => File.read(Rails.root.join('spec', 'fixtures', 'article_files', 'sample_article__original.html')) }, format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       expect(Article.count).to eql(1)
       article = Article.first
       original_article_ids = article.keys.map(&:id)
@@ -284,7 +358,7 @@ describe Api::V1::ArticlesController do
 
       # Update: change targeted_rfc5646_locales. previously this defaulted to project settings, this time, put it into the Article
       patch :update, project_id: project.id, api_token: project.api_token, name: "support-article", targeted_rfc5646_locales: { 'fr' => true, 'es' => false }, format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       updated_article_ids = article.reload.keys.map(&:id)
       expect(article.active_sections.count).to eql(3)
       expect(article.inactive_sections.count).to eql(0)
@@ -296,7 +370,7 @@ describe Api::V1::ArticlesController do
       # Update
       # this source copy has 1 changed word, 2 added divs one of which is a duplicate of an existing div, and 1 removed div
       patch :update, project_id: project.id, api_token: project.api_token, name: "support-article", sections_hash: { "title" => "<p>AAA</p><p>GGG</p><p>BBB</p>", "header" => "<p>111</p>", "footer" => "<p>111</p>", "main" => File.read(Rails.root.join('spec', 'fixtures', 'article_files', 'sample_article__updated.html')) }, format: :json
-      expect(response.status).to eql(202)
+      expect(response.status).to eql(200)
       updated_article_ids = article.reload.keys.map(&:id)
       expect(article.active_sections.count).to eql(4)
       expect(article.inactive_sections.count).to eql(1)

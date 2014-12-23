@@ -139,6 +139,7 @@ en:
     api:
       v1:
         articles:
+          project_not_found: Invalid project
           invalid_api_token: Invalid project API TOKEN
           article_not_found: Article doesn't exist
     application:
