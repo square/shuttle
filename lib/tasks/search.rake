@@ -41,6 +41,9 @@ namespace :search do
       print "Importing keys (#{(Key.count/1000.0).ceil} batches)"
       Key.includes(:commits_keys).find_in_batches do |keys|
         print '.'
+        keys.each do |key|
+          key.batched_commit_ids = key.commits_keys.map(&:commit_id)
+        end
         Key.tire.index.import keys
       end
       puts
@@ -50,6 +53,9 @@ namespace :search do
       print "Importing translations (#{(Translation.count/1000.0).ceil} batches)"
       Translation.includes(key: :commits_keys).find_in_batches do |translations|
         print '.'
+        translations.each do |translation|
+          translation.key.batched_commit_ids = translation.key.commits_keys.map(&:commit_id)
+        end
         Translation.tire.index.import translations
       end
       puts
