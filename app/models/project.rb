@@ -237,6 +237,11 @@ class Project < ActiveRecord::Base
     repository_url.present?
   end
 
+  # Reverse of git?
+  def not_git?
+    !git?
+  end
+
   # Attempts to find or create a Commit object corresponding to a SHA or other
   # ref resolvable to a SHA (like "HEAD"). If the SHA is not found, performs a
   # fetch and attempts to create a Commit. If _that_ fails, raises an exception.

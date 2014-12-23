@@ -70,8 +70,14 @@ class ArticleImporter
       article.update_import_finishing_fields!
 
       # the readiness hooks were all disabled, so now we need to go through and calculate readiness.
+      # another reason to refresh is that section/article information for article translations may be out of date
       Key.batch_recalculate_ready!(article)
       ArticleRecalculator.new.perform(article.id)
+
+      # Keys are refreshed as part of `Key.batch_recalculate_ready!`.
+      # Translations need to be refreshed in case section data (such as `activeness`) changed in
+      # the last re-import. KeyCreator takes care of refreshing Translations in a Commit during a Commit import.
+      Translation.batch_refresh_elastic_search(article)
     end
   end
 end

@@ -63,7 +63,7 @@ class KeyCreator
 
     # key.commits has been changed, need to update associated ES fields
     # load the translations associated with each commit
-    keys           = Key.where(id: keys.map(&:id)).includes(:translations)
+    keys           = Key.where(id: keys.map(&:id)).includes(:translations, :section)
     # preload commits_keys by loading all possible commit ids
     commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (cid, key_id)|
       hsh[key_id.to_i] ||= Set.new
