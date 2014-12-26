@@ -37,23 +37,20 @@ describe Article do
 
     it "doesn't allow creating 2 Articles in the same project with the same name" do
       article = FactoryGirl.create(:article, name: "hello")
-      article_new = FactoryGirl.build(:article, name: "hello", project: article.project)
-      article_new.save
+      article_new = FactoryGirl.build(:article, name: "hello", project: article.project).tap(&:save)
       expect(article_new).to_not be_persisted
       expect(article_new.errors.messages).to eql({:name =>["already taken"]})
     end
 
     it "allows creating 2 Articles with the same name under different projects" do
       FactoryGirl.create(:article, name: "hello")
-      article_new = FactoryGirl.build(:article, name: "hello", project: FactoryGirl.create(:project))
-      article_new.save
+      article_new = FactoryGirl.build(:article, name: "hello", project: FactoryGirl.create(:project)).tap(&:save)
       expect(article_new).to be_persisted
       expect(article_new.errors).to_not be_any
     end
 
     it "doesn't allow creating without a name" do
-      article = FactoryGirl.build(:article, name: nil)
-      article.save
+      article = FactoryGirl.build(:article, name: nil).tap(&:save)
       expect(article).to_not be_persisted
       expect(article.errors.messages).to eql({:name_sha=>["is not a valid SHA2 digest"], :name=>["can’t be blank"]})
     end
@@ -79,9 +76,18 @@ describe Article do
     end
 
     it "doesn't allow sections_hash to be ill-formatted" do
-      article = FactoryGirl.build(:article, sections_hash: "test")
-      article.save
-      expect(article.errors.full_messages).to include("Sections hash Wrong format")
+      article = FactoryGirl.build(:article, sections_hash: "test").tap(&:save)
+      expect(article.errors.full_messages).to include("Sections hash wrong format")
+    end
+
+    it "doesn't allow blank section source_copy" do
+      article = FactoryGirl.build(:article, sections_hash: { "test" => ""}).tap(&:save)
+      expect(article.errors.full_messages).to include("Sections hash wrong format")
+    end
+
+    it "doesn't allow name to be 'new'" do
+      article = FactoryGirl.build(:article, name: 'new').tap(&:save)
+      expect(article.errors.full_messages).to include("Name reserved")
     end
   end
   # ======== END BASIC CRUD RELATED CODE ===============================================================================

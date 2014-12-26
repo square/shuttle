@@ -91,7 +91,7 @@ class HomeIndexItemsFinder
     articles = Article
 
     # filter by name
-    articles = articles.source_copy_matches(form[:articles_filter__name]) if form[:articles_filter__name]
+    articles = articles.for_name(form[:articles_filter__name]) if form[:articles_filter__name]
 
     # filter by project
     articles = articles.where(project_id: form[:articles_filter__project_id]) unless form[:articles_filter__project_id] == 'all'

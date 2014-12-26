@@ -12,29 +12,34 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-#commits
+/ Requires the following local variables:
+/   - `item_type`. Can be 'commit' or 'article'.
+/   - `items`. Can be an array of Commits or Articles.
+
+/ will be #commits or #articles
+div id="#{item_type}s"
   .header
     - if current_user.monitor?
       .pull-right
-        button.primary href='#add-translation' rel='modal' disabled=Project.git.count.zero? Request Translation
-    h1 Commits
+        button.primary href="#add-#{item_type}-translation" rel='modal' disabled=(item_type == 'commit' ? Project.git : Project.not_git).count.zero? Request Translation
+    h1 = item_type.humanize.pluralize
 
   hr.divider
 
   .border
-    = render partial: 'home/commits/filter_bar'
+    = render partial: "home/#{item_type}s/filter_bar"
 
     table.table.hover-rows.items-table
       thead
-        = render partial: 'home/headers', locals: { item_type: 'commit' }
+        = render partial: "home/headers", locals: { item_type: item_type }
       tbody
-        = render partial: 'home/item', collection: @commits
+        = render partial: "home/item", collection: items
 
   .row
     .pagination-links
-      = paginate @commits
+      = paginate items
   .row
     .pagination-info
-      = page_entries_info(@commits, entry_name: 'commit')
+      = page_entries_info(items, entry_name: item_type)
 
-  = render partial: 'home/commits/add_translation_modal'
+  = render partial: "home/#{item_type}s/add_translation_modal"

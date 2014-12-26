@@ -12,10 +12,15 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-- content_for :shuttle_title do
-  = "Dashboard - Shuttle"
-- content_for :file_name do
-  = 'views/home/index'
+- if Project.not_git.count > 0
+  .row
+    .modal.seven.columns#add-article-translation
+      a.close ×
+      h2 Translation Request
+      .modal-body
+        strong Project
 
-= render partial: 'home/items', locals: { item_type: 'commit', items: @commits }
-= render partial: 'home/items', locals: { item_type: 'article', items: @articles }
+        - projects = Project.not_git.order('LOWER(name) ASC')
+        = select_tag 'new_project_article_id', options_for_select(projects.map { |p| [p.name, new_api_v1_project_article_path(p.id)] })
+
+        = link_to 'REQUEST', 'javascript: void(0);', class: 'button primary', id: 'request_new_project_article_button'

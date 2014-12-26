@@ -89,7 +89,7 @@ $(window).ready () ->
   # COMMIT SPECIFIC
 
   new SmartForm $('#new_commit'), (notification) -> 
-    $("#add-translation").closeModal()
+    $("#add-commit-translation").closeModal()
     if notification.success 
       new Flash('success').text(notification.success);
     else if notification.alert
@@ -111,3 +111,8 @@ $(window).ready () ->
   commits_filter_form.find('input#commits_filter__show_only_mine').change ->
     $.cookie 'home_index__commits_filter__show_only_mine', $(this).is(':checked')
 
+
+  # ARTICLE SPECIFIC
+
+  $('#request_new_project_article_button').click ->
+    window.location = $('#new_project_article_id').val()

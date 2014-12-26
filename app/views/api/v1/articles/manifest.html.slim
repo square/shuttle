@@ -12,25 +12,3 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-
-#articles
-  .header
-    h1 Articles
-
-  hr.divider
-
-  .border
-    = render partial: 'home/articles/filter_bar'
-
-    table.table.hover-rows.items-table
-      thead
-        = render partial: 'home/headers', locals: { item_type: 'article' }
-      tbody
-        = render partial: 'home/item', collection: @articles
-
-  .row
-    .pagination-links
-      = paginate @articles
-  .row
-    .pagination-info
-      = page_entries_info(@articles, entry_name: 'article')
