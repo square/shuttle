@@ -30,7 +30,7 @@ tr.row_class
     - if item.is_a?(Commit)
       = link_to item.revision_prefix, project_commit_url(item.project, item)
     - else
-      = item.name
+      = link_to item.name, api_v1_project_article_url(item.project.id, item.name)
 
   / Create Date
   td.centered = item.created_at.strftime('%m/%d/%Y')

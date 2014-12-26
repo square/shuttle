@@ -96,6 +96,7 @@ class Article < ActiveRecord::Base
 
   validates :project, presence: true, strict: true
   validates :name, presence: true, uniqueness: {scope: :project_id}
+  validates :name, exclusion: { in: %w(new) } # this word is reserved because it collides with new_article_path.
   validates :sections_hash, presence: true
   validate  :valid_sections_hash
   validates :description, length: {maximum: 2000}, allow_nil: true
@@ -116,9 +117,9 @@ class Article < ActiveRecord::Base
 
   def valid_sections_hash
     unless sections_hash.is_a?(Hash) &&
-        sections_hash.keys.all? { |k| k.is_a?(String) && k.length < 255 } &&
-        sections_hash.values.all? { |k| k.is_a?(String) }
-      errors.add(:sections_hash, "Wrong format")
+        sections_hash.keys.all? { |k| k.is_a?(String) && k.present? && k.length < 255 } &&
+        sections_hash.values.all? { |k| k.is_a?(String) && k.present? }
+      errors.add(:sections_hash, "wrong format")
     end
   end
   private :valid_sections_hash
@@ -286,4 +287,12 @@ class Article < ActiveRecord::Base
   class LastImportNotFinished < StandardError
   end
   # ======== END ERRORS RELATED CODE ===================================================================================
+
+  # `name` is picked over `id` becase we want to allow consumers of Articles API to set a unique identifier
+  # on their end. Both have disadvantages. One disadvantage of `id` is that if consumers call the `create`
+  # endpoint twice with same params, it would create 2 duplicate Articles.
+
+  def to_param
+    name
+  end
 end

@@ -5,6 +5,12 @@ body.home {
   #commits {
     margin-bottom: 50px;
   }
+  #articles {
+    #new_project_article_id {
+      width: 60%;
+      margin: 20px;
+    }
+  }
 
   .filter-bar {
     input[type="submit"] { width: 125px; margin-left: 15px; }

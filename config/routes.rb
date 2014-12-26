@@ -30,7 +30,7 @@ Shuttle::Application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :projects, only: [] do
-        resources :articles, param: :name, only: [:index, :create, :show, :update] do
+        resources :articles, param: :name, only: [:index, :new, :create, :show, :edit, :update] do
           member do
             get :manifest
           end

@@ -13,9 +13,12 @@
 /    limitations under the License.
 
 - content_for :shuttle_title do
-  = "Dashboard - Shuttle"
+  = "Create a new Article"
 - content_for :file_name do
-  = 'views/home/index'
+  = 'views/api/v1/articles/new'
 
-= render partial: 'home/items', locals: { item_type: 'commit', items: @commits }
-= render partial: 'home/items', locals: { item_type: 'article', items: @articles }
+.header
+  h1 Create a new Article
+hr.divider
+
+= render 'form'

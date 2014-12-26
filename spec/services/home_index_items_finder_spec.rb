@@ -15,5 +15,5 @@
 require 'spec_helper'
 
 describe HomeIndexItemsFinder do
-
+  # some integration tests exist in home_controller_spec.rb
 end
