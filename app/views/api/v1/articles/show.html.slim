@@ -19,6 +19,7 @@
 
 .header
   .pull-right
+    = link_to (@article.ready? ? 'Download' : 'Translating'), manifest_api_v1_project_article_path(@project.id, @article.name), class: 'button primary download-button', disabled: !@article.ready?
     = link_to 'Edit', edit_api_v1_project_article_path(@project.id, @article.name), class: 'button primary'
   h1 Article (id: #{@article.id})
 hr.divider

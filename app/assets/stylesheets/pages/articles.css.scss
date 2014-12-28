@@ -5,4 +5,25 @@ body.articles {
   .control-group label {
     padding-top: 0;
   }
+
+  &#articles-show {
+    .download-button {
+      margin-right: 10px;
+    }
+  }
+
+  &#articles-manifest {
+    .locale-manifest {
+      .locale {
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+      }
+
+      hr {
+        margin: 20px 0 30px 0;
+      }
+    }
+  }
 }
