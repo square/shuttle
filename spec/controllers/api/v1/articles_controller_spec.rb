@@ -24,87 +24,101 @@ describe Api::V1::ArticlesController do
     sign_in FactoryGirl.create(:user, :confirmed, role: 'monitor')
   end
 
-  shared_examples_for "api-or-session-authenticateable-and-filters" do |run_find_article_filter=true|
+  shared_examples_for "api-or-session-authenticateable-and-filters" do |options={}|
+    options = { runs_find_article_filter: true, accepts_json_request: true, accepts_html_request: true }.merge(options)
+
     context "[format=JSON]" do
-      context "[auth with api_token]" do
-        it "errors with API error message if wrong api_token is provided" do
-          send request_type, action, params.merge(project_id: project.id, format: :json, api_token: "fake")
-          expect(response.status).to eql(401)
-          expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project API TOKEN"}]}})
+      if options[:accepts_json_request]
+        context "[auth with api_token]" do
+          it "errors with API error message if wrong api_token is provided" do
+            send request_type, action, params.merge(project_id: project.id, format: :json, api_token: "fake")
+            expect(response.status).to eql(401)
+            expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project API TOKEN"}]}})
+          end
+
+          it "authenticates with api_token" do
+            send request_type, action, params.merge(project_id: project.id, format: :json, api_token: project.api_token)
+            expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
+          end
         end
 
-        it "authenticates with api_token" do
-          send request_type, action, params.merge(project_id: project.id, format: :json, api_token: project.api_token)
-          expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
-        end
-      end
+        context "[auth without api_token]" do
+          it "errors with non-API error message if there is no signed in user" do
+            send request_type, action, params.merge(project_id: project.id, format: :json)
+            expect(response.status).to eql(401)
+            expect(JSON.parse(response.body)).to eql({"error"=>"You need to sign in or sign up before continuing."})
+          end
 
-      context "[auth without api_token]" do
-        it "errors with non-API error message if there is no signed in user" do
-          send request_type, action, params.merge(project_id: project.id, format: :json)
-          expect(response.status).to eql(401)
-          expect(JSON.parse(response.body)).to eql({"error"=>"You need to sign in or sign up before continuing."})
+          it "authenticates with session if there is a signed in user" do
+            sign_in_monitor_user
+            send request_type, action, params.merge(project_id: project.id, format: :json)
+            expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
+          end
         end
 
-        it "authenticates with session if there is a signed in user" do
+        it "errors with project-not-found message if project_id is invalid (only makes sense with session-auth; because for API-auth, it would error with invalid-token-api message)" do
           sign_in_monitor_user
-          send request_type, action, params.merge(project_id: project.id, format: :json)
-          expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
+          send request_type, action, params.merge(project_id: -1, format: :json)
+          expect(assigns(:project)).to be_nil
+          expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project"}]}})
         end
-      end
 
-      it "errors with project-not-found message if project_id is invalid (only makes sense with session-auth; because for API-auth, it would error with invalid-token-api message)" do
-        sign_in_monitor_user
-        send request_type, action, params.merge(project_id: -1, format: :json)
-        expect(assigns(:project)).to be_nil
-        expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Invalid project"}]}})
-      end
-
-      if run_find_article_filter # find_article before_filter is not run for all actions
-        it "errors with article-not-found message if article_id is invalid (auth method shouldn't matter)" do
-          send request_type, action, params.merge(project_id: project.id, name: 'fakeyfake', format: :json, api_token: project.api_token)
-          expect(assigns(:project)).to eql(project)
-          expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Article doesn't exist"}]}})
+        if options[:runs_find_article_filter] # find_article before_filter is not run for all actions
+          it "errors with article-not-found message if article_id is invalid (auth method shouldn't matter)" do
+            send request_type, action, params.merge(project_id: project.id, name: 'fakeyfake', format: :json, api_token: project.api_token)
+            expect(assigns(:project)).to eql(project)
+            expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"Article doesn't exist"}]}})
+          end
+        end
+      else
+        it "errors with ActionController::UnknownFormat if json format is not supported" do
+          expect { send request_type, action, params.merge(project_id: project.id, format: :json, api_token: project.api_token) }.to raise_error(ActionController::UnknownFormat)
         end
       end
     end
 
     context "[format=HTML]" do
-      context "[auth without api_token]" do
-        it "redirects if there is no signed in user" do
-          send request_type, action, params.merge(project_id: project.id, format: :html)
-          expect(response).to be_redirect
+      if options[:accepts_html_request]
+        context "[auth without api_token]" do
+          it "redirects if there is no signed in user" do
+            send request_type, action, params.merge(project_id: project.id, format: :html)
+            expect(response).to be_redirect
+          end
+
+          it "authenticates with session" do
+            sign_in_monitor_user
+            send request_type, action, params.merge(project_id: project.id, format: :html)
+            expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
+          end
         end
 
-        it "authenticates with session" do
+        it "errors with project-not-found message if project_id is invalid (only makes sense with session-auth; because for API-auth, it would error with invalid-token-api message)" do
           sign_in_monitor_user
-          pending("views don't exist yet") # TODO (yunus): remove/update after views are created\
-          send request_type, action, params.merge(project_id: project.id, format: :html)
-          expect(assigns(:project)).to eq(project) # if @project is set, it means authentication was successful
-        end
-      end
-
-      it "errors with project-not-found message if project_id is invalid (only makes sense with session-auth; because for API-auth, it would error with invalid-token-api message)" do
-        sign_in_monitor_user
-        send request_type, action, params.merge(project_id: -1, format: :html)
-        expect(assigns(:project)).to be_nil
-        expect(response).to redirect_to(root_path)
-        expect(flash[:alert]).to eql("Invalid project")
-      end
-
-      if run_find_article_filter # find_article before_filter is not run for all actions
-        it "errors with article-not-found message if article_id is invalid (auth method shouldn't matter)" do
-          send request_type, action, params.merge(project_id: project.id, name: 'fakeyfake', format: :html, api_token: project.api_token)
-          expect(assigns(:project)).to eql(project)
+          send request_type, action, params.merge(project_id: -1, format: :html)
+          expect(assigns(:project)).to be_nil
           expect(response).to redirect_to(root_path)
-          expect(flash[:alert]).to eql("Article doesn't exist")
+          expect(flash[:alert]).to eql("Invalid project")
+        end
+
+        if options[:runs_find_article_filter] # find_article before_filter is not run for all actions
+          it "errors with article-not-found message if article_id is invalid (auth method shouldn't matter)" do
+            send request_type, action, params.merge(project_id: project.id, name: 'fakeyfake', format: :html, api_token: project.api_token)
+            expect(assigns(:project)).to eql(project)
+            expect(response).to redirect_to(root_path)
+            expect(flash[:alert]).to eql("Article doesn't exist")
+          end
+        end
+      else
+        it "errors with ActionController::UnknownFormat if html format is not supported" do
+          sign_in_monitor_user
+          expect { send request_type, action, params.merge(project_id: project.id, format: :html) }.to raise_error(ActionController::UnknownFormat)
         end
       end
     end
   end
 
   describe "#index" do
-    it_behaves_like "api-or-session-authenticateable-and-filters", false do
+    it_behaves_like "api-or-session-authenticateable-and-filters", runs_find_article_filter: false, accepts_html_request: false do
       let(:request_type) { :get }
       let(:action) { :index }
       let(:params) { {} }
@@ -126,8 +140,16 @@ describe Api::V1::ArticlesController do
     end
   end
 
+  describe "#new" do
+    it_behaves_like "api-or-session-authenticateable-and-filters", runs_find_article_filter: false, accepts_json_request: false do
+      let(:request_type) { :get }
+      let(:action) { :new }
+      let(:params) { { } }
+    end
+  end
+
   describe "#create" do
-    it_behaves_like "api-or-session-authenticateable-and-filters", false do
+    it_behaves_like "api-or-session-authenticateable-and-filters", runs_find_article_filter: false do
       let(:request_type) { :post }
       let(:action) { :create }
       let(:params) { {} }
@@ -192,6 +214,16 @@ describe Api::V1::ArticlesController do
       expect(response.status).to eql(200)
       response_json = JSON.parse(response.body)
       expect(response_json["sections_hash"]).to eql({"main"=>"<p>a</p><p>b</p>"})
+    end
+  end
+
+  describe "#edit" do
+    let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: {"main" => "<p>a</p><p>b</p>"}) }
+
+    it_behaves_like "api-or-session-authenticateable-and-filters", accepts_json_request: false do
+      let(:request_type) { :get }
+      let(:action) { :edit }
+      let(:params) { { name: article.name } }
     end
   end
 

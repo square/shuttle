@@ -1,0 +1,8 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.articles {
+  .control-group label {
+    padding-top: 0;
+  }
+}

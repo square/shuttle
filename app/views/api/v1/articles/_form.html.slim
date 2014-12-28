@@ -1,0 +1,82 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+= form_for @article, url: (@article.persisted? ? api_v1_project_article_path(@project.id, @article.name) : api_v1_project_articles_path(@project.id)), \
+                  method: (@article.persisted? ? :patch : :post ) do |f|
+
+  .row
+    .thirteen.columns
+      fieldset
+        .control-group
+          = f.label :project, class: 'control-label'
+          .controls
+            = @project.name
+
+        .control-group
+          = f.label :name, class: 'control-label'
+          .controls
+            - if @article.persisted?
+              = @article.name
+            - else
+              = f.text_field :name, name: :name, class: 'tooltip-parent', 'data-tooltip' => '#article-name'
+              .tooltip#article-name You CANNOT change the name later!
+
+        .control-group
+          = f.label :priority, class: 'control-label'
+          .controls
+            = @article.priority || '-'
+
+        .control-group
+          = f.label :due_date, class: 'control-label'
+          .controls
+            = @article.due_date || '-'
+
+        .control-group
+          = f.label :base_rfc5646_locale, class: 'control-label'
+          .controls
+            = (@article.persisted? ? @article : @project).base_rfc5646_locale
+
+        .control-group
+          = f.label :required_rfc5646_locales, 'Required Localizations', class: 'control-label'
+          .controls
+            = (@article.persisted? ? @article : @project).required_rfc5646_locales.join(', ').presence || '-'
+
+        .control-group
+          = f.label :other_rfc5646_locales, 'Other Localizations', class: 'control-label'
+          .controls
+            = (@article.persisted? ? @article : @project).other_rfc5646_locales.join(', ').presence || '-'
+
+        .control-group
+          = f.label :email, class: 'control-label'
+          .controls
+            = f.text_field :email, value: (@article.email || current_user.email), name: :email, class: 'tooltip-parent' , 'data-tooltip' => '#article-email'
+            .tooltip#article-email So that translators can contact you if something comes up!
+
+        .control-group
+          = f.label :description, class: 'control-label'
+          .controls
+            = f.text_area :description, name: :description, rows: 6, class: 'tooltip-parent' , 'data-tooltip' => '#article-description'
+            .tooltip#article-description So that translators understand the context!
+
+      fieldset
+        legend Sections
+        - (@article.sections_hash.presence || {'content'=>''}).each do |section_name, section_source_copy|
+          .control-group
+            = f.label section_name, class: 'control-label'
+            .controls
+              = text_area_tag "sections_hash[#{section_name}]", section_source_copy, rows: 6
+
+  .form-actions
+    = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
+    button.default href=(@article.persisted? ? api_v1_project_article_path(@project.id, @article) : root_path) Cancel

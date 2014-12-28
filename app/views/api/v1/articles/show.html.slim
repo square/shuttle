@@ -1,0 +1,81 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :shuttle_title do
+  = "Article #{@article.id}"
+- content_for :file_name do
+  = 'views/api/v1/articles/show'
+
+.header
+  .pull-right
+    = link_to 'Edit', edit_api_v1_project_article_path(@project.id, @article.name), class: 'button primary'
+  h1 Article (id: #{@article.id})
+hr.divider
+
+.row
+  .thirteen.columns
+    fieldset
+      .control-group
+        = label_tag :project, nil, class: 'control-label'
+        .controls
+          = @project.name
+
+      .control-group
+        = label_tag :name, nil, class: 'control-label'
+        .controls
+          = @article.name
+
+      .control-group
+        = label_tag :priority, nil, class: 'control-label'
+        .controls
+          = @article.priority || '-'
+
+      .control-group
+        = label_tag :due_date, nil, class: 'control-label'
+        .controls
+          = @article.due_date || '-'
+
+      .control-group
+        = label_tag :base_rfc5646_locale, nil, class: 'control-label'
+        .controls
+          = @article.base_rfc5646_locale
+
+      .control-group
+        = label_tag :required_rfc5646_locales, 'Required Localizations', class: 'control-label'
+        .controls
+          = @article.required_rfc5646_locales.join(', ').presence || '-'
+
+      .control-group
+        = label_tag :other_rfc5646_locales, 'Other Localizations', class: 'control-label'
+        .controls
+          = @article.other_rfc5646_locales.join(', ').presence || '-'
+
+      .control-group
+        = label_tag :email, nil, class: 'control-label'
+        .controls
+          = @article.email.presence || '-'
+
+      .control-group
+        = label_tag :description, nil, class: 'control-label'
+        .controls
+          = @article.description.presence || '-'
+
+    fieldset
+      legend Sections
+      - @article.sections_hash.each do |section_name, section_source_copy|
+        .control-group
+          = label_tag section_name, nil, class: 'control-label'
+          .controls
+            .well
+              = section_source_copy

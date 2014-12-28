@@ -12,19 +12,32 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+# This api can be consumed by external applications or internal views to
+# allow users to create/update/view Articles.
+#
+# If there is an `api_token`, the request will be authenticated via that token;
+# otherwise, it will be authenticated via session using the `authenticate_user!`
+# method that's used everywhere else in the application.
+
 module Api
   module V1
     class ArticlesController < ApplicationController
-      respond_to :json, :html
+      respond_to :json, only: [:create, :show, :update, :manifest, :index]
+      respond_to :html, only: [:create, :show, :update, :manifest, :new, :edit]
 
       skip_before_filter :authenticate_user!,        if: :api_request?
       skip_before_action :verify_authenticity_token, if: :api_request?
       before_filter :authenticate_with_api_token!,   if: :api_request?
 
       before_filter :find_project
-      before_filter :find_article, only: [:show, :update, :manifest]
+      before_filter :find_article, only: [:show, :edit, :update, :manifest]
 
+      # EXTERNAL ONLY
+      #
       # Returns all Articles in the Project.
+      #
+      # Since Articles are displayed on the dashboard internally, this endpoint is only
+      # for external API requests.
       #
       # Routes
       # ------
@@ -45,12 +58,14 @@ module Api
         end
       end
 
-      # Creates an Article in a Project.
+      # INTERNAL ONLY
+      #
+      # Used only internally to show a new html form to create an Article.
       #
       # Routes
       # ------
       #
-      # * `POST /api/v1/projects/:project_id/articles(.format)?api_token=:api_token`
+      # * `/api/v1/projects/:project_id/articles/new`
       #
       # Path/Url Parameters
       # ---------------
@@ -58,7 +73,26 @@ module Api
       # |              |                              |
       # |:-------------|:-----------------------------|
       # | `project_id` | The id of a Project.         |
-      # | `api_token`  | The api token for a Project. |
+
+      def new
+        @article = @project.articles.build
+        respond_with @article
+      end
+
+      # Creates an Article in a Project.
+      #
+      # Routes
+      # ------
+      #
+      # * `POST /api/v1/projects/:project_id/articles(.format)(?api_token=:api_token)`
+      #
+      # Path/Url Parameters
+      # ---------------
+      #
+      # |              |                                                                                         |
+      # |:-------------|:----------------------------------------------------------------------------------------|
+      # | `project_id` | The id of a Project.                                                                    |
+      # | `api_token`  | The api token for a Project. Not required if the request is coming from internal views. |
       #
       # Body Parameters
       # ---------------
@@ -73,34 +107,40 @@ module Api
       # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article                                   |
 
       def create
-        article = @project.articles.create(params_for_create)
+        @article = @project.articles.create(params_for_create)
 
-        respond_with article do |format|
+        if @article.errors.blank?
+          flash[:success] = 'Article is successfuly created!'
+        else
+          flash.now[:alert] = ['Article could not be created:'] + @article.errors.full_messages
+        end
+
+        respond_with @article, location: (api_v1_project_article_url(@project.id, @article.name) if @article.persisted? ) do |format|
           format.json do
-            if article.errors.blank?
-              render json: decorate_article(article)
+            if @article.errors.blank?
+              render json: decorate_article(@article)
             else
-              render json: { error: { errors: article.errors } }, status: :bad_request
+              render json: { error: { errors: @article.errors } }, status: :bad_request
             end
           end
         end
       end
 
-      # Returns a Article.
+      # Returns an Article.
       #
       # Routes
       # ------
       #
-      # * `GET /api/v1/projects/:project_id/articles/:name(.format)?api_token=:api_token`
+      # * `GET /api/v1/projects/:project_id/articles/:name(.format)(?api_token=:api_token)`
       #
       # Path/Url Parameters
       # ---------------
       #
-      # |              |                              |
-      # |:-------------|:-----------------------------|
-      # | `project_id` | The id of a Project.         |
-      # | `api_token`  | The api token for a Project. |
-      # | `name`       | The `name` of the Article.   |
+      # |              |                                                                                         |
+      # |:-------------|:----------------------------------------------------------------------------------------|
+      # | `project_id` | The id of a Project.                                                                    |
+      # | `api_token`  | The api token for a Project. Not required if the request is coming from internal views. |
+      # | `name`       | The `name` of the Article.                                                              |
 
       def show
         respond_with @article do |format|
@@ -108,6 +148,27 @@ module Api
             render json: decorate_article(@article)
           end
         end
+      end
+
+      # INTERNAL ONLY
+      #
+      # Used only internally to show an html form to edit an Article.
+      #
+      # Routes
+      # ------
+      #
+      # * `/api/v1/projects/:project_id/articles/:name/edit`
+      #
+      # Path/Url Parameters
+      # ---------------
+      #
+      # |              |                              |
+      # |:-------------|:-----------------------------|
+      # | `project_id` | The id of a Project.         |
+      # | `name`       | The `name` of the Article.   |
+
+      def edit
+        respond_with @article
       end
 
       # Updates a Article in a Project.
@@ -118,16 +179,16 @@ module Api
       # Routes
       # ------
       #
-      # * `PATCH /api/v1/projects/:project_id/articles/:name(.format)?api_token=:api_token`
+      # * `PATCH /api/v1/projects/:project_id/articles/:name(.format)(?api_token=:api_token)`
       #
       # Path/Url Parameters
       # ---------------
       #
-      # |              |                              |
-      # |:-------------|:-----------------------------|
-      # | `project_id` | The id of a Project.         |
-      # | `api_token`  | The api token for a Project. |
-      # | `name`       | The `name` of the Article.   |
+      # |              |                                                                                         |
+      # |:-------------|:----------------------------------------------------------------------------------------|
+      # | `project_id` | The id of a Project.                                                                    |
+      # | `api_token`  | The api token for a Project. Not required if the request is coming from internal views. |
+      # | `name`       | The `name` of the Article.                                                              |
       #
       # Body Parameters
       # ---------------
@@ -150,7 +211,14 @@ module Api
           @article.update(_params_for_update)
         end
 
-        respond_with @article do |format|
+        if @article.errors.blank?
+          flash[:success] = 'Article is successfuly created!'
+        else
+          flash.now[:alert] = ['Article could not be updated:'] + @article.errors.full_messages
+        end
+
+
+        respond_with @article, location: api_v1_project_article_url do |format|
           format.json do
             if @article.errors.blank?
               render json: decorate_article(@article)
@@ -167,24 +235,29 @@ module Api
       # Routes
       # ------
       #
-      # * `GET /api/v1/projects/:project_id/articles/:name/manifest(.format)?api_token=:api_token`
+      # * `GET /api/v1/projects/:project_id/articles/:name/manifest(.format)(?api_token=:api_token)`
       #
       # Path/Url Parameters
       # ---------------
       #
-      # |              |                              |
-      # |:-------------|:-----------------------------|
-      # | `project_id` | The id of a Project.         |
-      # | `api_token`  | The api token for a Project. |
-      # | `name`       | The `name` of the Article.   |
+      # |              |                                                                                         |
+      # |:-------------|:----------------------------------------------------------------------------------------|
+      # | `project_id` | The id of a Project.                                                                    |
+      # | `api_token`  | The api token for a Project. Not required if the request is coming from internal views. |
+      # | `name`       | The `name` of the Article.                                                              |
 
       def manifest
+        begin
+          @manifest = Exporter::Article.new(@article).export
+        rescue Exporter::Article::Error => @error
+        end
+
         respond_with @article do |format|
           format.json do
-            begin
-              render json: Exporter::Article.new(@article).export
-            rescue Exporter::Article::Error => e
-              render json: { error: { errors: [{ message: e.inspect }] } }, status: :bad_request
+            if @manifest
+              render json: @manifest
+            else
+              render json: { error: { errors: [{ message: @error.inspect }] } }, status: :bad_request
             end
           end
         end
