@@ -12,7 +12,7 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-= form_for @article, url: (@article.persisted? ? api_v1_project_article_path(@project.id, @article.name) : api_v1_project_articles_path(@project.id)), \
+= form_for @article, url: (@article.persisted? ? api_v1_project_article_path(@project.id, @article.name_was) : api_v1_project_articles_path(@project.id)), \
                   method: (@article.persisted? ? :patch : :post ) do |f|
 
   .row
@@ -26,11 +26,7 @@
         .control-group
           = f.label :name, class: 'control-label'
           .controls
-            - if @article.persisted?
-              = @article.name
-            - else
-              = f.text_field :name, name: :name, class: 'tooltip-parent', 'data-tooltip' => '#article-name'
-              .tooltip#article-name You CANNOT change the name later!
+            = f.text_field :name, class: 'tooltip-parent', 'data-tooltip' => '#article-name'
 
         .control-group
           = f.label :priority, class: 'control-label'
@@ -60,13 +56,13 @@
         .control-group
           = f.label :email, class: 'control-label'
           .controls
-            = f.text_field :email, value: (@article.email || current_user.email), name: :email, class: 'tooltip-parent' , 'data-tooltip' => '#article-email'
+            = f.text_field :email, value: (@article.email || current_user.email), class: 'tooltip-parent' , 'data-tooltip' => '#article-email'
             .tooltip#article-email So that translators can contact you if something comes up!
 
         .control-group
           = f.label :description, class: 'control-label'
           .controls
-            = f.text_area :description, name: :description, rows: 6, class: 'tooltip-parent' , 'data-tooltip' => '#article-description'
+            = f.text_area :description, rows: 6, class: 'tooltip-parent' , 'data-tooltip' => '#article-description'
             .tooltip#article-description So that translators understand the context!
 
       fieldset
@@ -75,8 +71,8 @@
           .control-group
             = f.label section_name, class: 'control-label'
             .controls
-              = text_area_tag "sections_hash[#{section_name}]", section_source_copy, rows: 6
+              = text_area_tag "article[sections_hash[#{section_name}]]", section_source_copy, rows: 6
 
   .form-actions
     = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
-    button.default href=(@article.persisted? ? api_v1_project_article_path(@project.id, @article) : root_path) Cancel
+    button.default href=(@article.persisted? ? api_v1_project_article_path(@project.id, @article.name_was) : root_path) Cancel
