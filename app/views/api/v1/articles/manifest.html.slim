@@ -12,3 +12,32 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
+- content_for :shuttle_title do
+  = "Article #{@article.id}"
+- content_for :file_name do
+  = 'views/api/v1/articles/manifest'
+
+.header
+  .pull-right
+    = link_to 'Back', api_v1_project_article_path(@project.id, @article.name), class: 'button primary'
+  h1 Article (id: #{@article.id})
+hr.divider
+
+- @manifest.each do |rfc5646_locale, sections|
+  .locale-manifest
+    .locale = "LOCALE: #{rfc5646_locale}"
+
+    table.table
+      thead
+        tr.row
+          td.three.columns Section Name
+          td.thirteen.columns Translation
+      tbody
+        - sections.each do |name, translation|
+          tr.row
+            td.three.columns
+              = name
+            td.thirteen.columns
+              = translation
+
+    hr.divider
