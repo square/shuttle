@@ -211,14 +211,17 @@ module Api
           @article.update(_params_for_update)
         end
 
-        if @article.errors.blank?
-          flash[:success] = 'Article is successfuly created!'
-        else
-          flash.now[:alert] = ['Article could not be updated:'] + @article.errors.full_messages
-        end
+        respond_with @article do |format|
+          format.html do
+            if @article.errors.blank?
+              flash[:success] = 'Article is successfuly created!'
+              redirect_to api_v1_project_article_url(@project.id, @article.name)
+            else
+              flash.now[:alert] = ['Article could not be updated:'] + @article.errors.full_messages
+              render 'api/v1/articles/edit'
+            end
+          end
 
-
-        respond_with @article, location: api_v1_project_article_url do |format|
           format.json do
             if @article.errors.blank?
               render json: decorate_article(@article)
@@ -328,14 +331,14 @@ module Api
 
       # ===== START PARAMS RELATED CODE ================================================================================
       def params_for_create
-        params_for_update.merge(params.permit(:name, :base_rfc5646_locale))
+        params_for_update.merge(params.require(:article).permit(:base_rfc5646_locale))
       end
 
       def params_for_update
-        hsh = params.permit(:description, :email, :priority)
-        hsh[:due_date] = DateTime::strptime(params[:due_date], "%m/%d/%Y") rescue '' if params.key?(:due_date)
-        hsh[:targeted_rfc5646_locales] = params[:targeted_rfc5646_locales] if params.key?(:targeted_rfc5646_locales)
-        hsh[:sections_hash] = params[:sections_hash] if params.key?(:sections_hash)
+        hsh = params.require(:article).permit(:name, :description, :email, :priority)
+        hsh[:due_date] = DateTime::strptime(params[:article][:due_date], "%m/%d/%Y") rescue '' if params[:article].try(:key?, :due_date)
+        hsh[:targeted_rfc5646_locales] = params[:article][:targeted_rfc5646_locales] if params[:article].try(:key?, :targeted_rfc5646_locales)
+        hsh[:sections_hash] = params[:article][:sections_hash] if params[:article].try(:key?, :sections_hash)
         hsh
       end
       # ===== END PARAMS RELATED CODE ==================================================================================
