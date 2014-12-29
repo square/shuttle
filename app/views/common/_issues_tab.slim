@@ -1,0 +1,47 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+#issues-tab
+  legend Issues
+  - if issues_presenter.issues.present?
+    dl.issues-stats
+      .dhead
+        dt Status
+        dt Count
+      - issues_presenter.status_counts.each do |status_details|
+        div
+          dt class="issue-status issue-status-#{status_details[:status]}" = status_details[:status_desc]
+          dd = status_details[:count]
+    hr.divider
+    table.table.issues
+      thead
+        tr
+          th Locale
+          th Source Copy
+          th Status
+          th Priority
+          th Type
+          th Summary
+          th Date
+      - issues_presenter.issues.each do |issue|
+        tr
+          td = issue.translation.rfc5646_locale.upcase
+          td.source-copy.ellipsis = link_to issue.translation.source_copy, issue_url(issue, current_user)
+          td.status class="issue-status issue-status-#{issue.status}" = t("models.issue.status")[issue.status]
+          td.priority = t("models.issue.priority")[issue.priority ? issue.priority : :none]
+          td.kind = t("models.issue.kind")[issue.kind_was]
+          td.summary.ellipsis = link_to (issue.summary || '---------'), issue_url(issue, current_user)
+          td = l(issue.created_at, format: :mon_day_year)
+  - else
+    .no-issues-found.text-success No Issues found!

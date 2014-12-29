@@ -30,7 +30,9 @@ hr.divider
   .three.columns.sidebar
     ul
       li class=('active' if action_name == 'show')
-        a href=api_v1_project_article_path(@project, @article) General
+        a href=api_v1_project_article_path(@project.id, @article.name) General
+      li class=('active' if action_name == 'issues')
+        a href=issues_api_v1_project_article_path(@project.id, @article) = @article_issues_presenter.issues_label_with_pending_count
 
       li.divider
 

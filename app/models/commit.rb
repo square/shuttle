@@ -90,6 +90,7 @@ class Commit < ActiveRecord::Base
   include ArticleOrCommitStats
   alias_method :active_translations, :translations # called in ArticleOrCommitStats
   alias_method :active_keys, :keys # called in ArticleOrCommitStats
+  alias_method :active_issues, :issues # called in ArticleOrCommitIssuesPresenter
 
   include Tire::Model::Search
   include Tire::Model::Callbacks
