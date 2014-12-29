@@ -491,6 +491,6 @@ class CommitsController < ApplicationController
   end
 
   def set_commit_issues_presenter
-    @commit_issues_presenter ||= CommitIssuesPresenter.new(@commit)
+    @commit_issues_presenter ||= ArticleOrCommitIssuesPresenter.new(@commit)
   end
 end

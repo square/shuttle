@@ -86,6 +86,7 @@ class Article < ActiveRecord::Base
   has_many :sections,     inverse_of: :article, dependent: :destroy
   has_many :keys,         through:    :sections
   has_many :translations, through:    :keys
+  has_many :issues,       through:    :translations
 
   # Scopes
   scope :ready, -> { where(ready: true) }
@@ -176,6 +177,11 @@ class Article < ActiveRecord::Base
   # @return [Array<Translation>] the {Translation Translations} that are actively related to this Article.
   def active_translations
     translations.merge(Section.active).merge(Key.active_in_section)
+  end
+
+  # @return [Array<Issue>] the {Issue Issues} that are actively related to this Article.
+  def active_issues
+    issues.merge(Section.active).merge(Key.active_in_section)
   end
 
   # Calculates the value of the `ready` field and saves the record.

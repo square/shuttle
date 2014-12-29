@@ -13,9 +13,9 @@
 /    limitations under the License.
 
 - content_for :shuttle_title do
-  = "Commit #{@commit.revision_prefix} - Shuttle"
+  = "Article #{@article.id}"
 - content_for :file_name do
-  = 'views/commits/issues'
+  = 'views/articles/issues'
 
-= render layout: 'commits/layout' do
-  = render partial: 'common/issues_tab', locals: { issues_presenter: @commit_issues_presenter }
+= render layout: 'api/v1/articles/layout' do
+  = render partial: 'common/issues_tab', locals: { issues_presenter: @article_issues_presenter }
