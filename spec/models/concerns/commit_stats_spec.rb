@@ -65,26 +65,4 @@ describe CommitStats do
       expect(@commit.words_new(*%w(fr de ja).map { |rfc5646| Locale.from_rfc5646(rfc5646) } )).to eql(1)
     end
   end
-
-  describe "#fetch_stat" do
-    before :each do
-      @commit = FactoryGirl.build(:commit)
-      @commit.stub(:stats).and_return( {
-                                          approved: { translations_count: 1, words_count: 2 },
-                                          pending: { translations_count: 1, words_count: 1 }
-                                       })
-    end
-
-    it "returns the default value if state is not in stats hash" do
-      expect(@commit.send :fetch_stat, [], :new, :translations_count, :doesnt_exist).to eql(:doesnt_exist)
-    end
-
-    it "returns the default value if field is not in stats hash" do
-      expect(@commit.send :fetch_stat, [], :approved, :fake_count).to eql(0)
-    end
-
-    it "returns the correct value if state and field exist in stats hash" do
-      expect(@commit.send :fetch_stat, [], :approved, :words_count).to eql(2)
-    end
-  end
 end
