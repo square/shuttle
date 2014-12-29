@@ -1,0 +1,32 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+/ Requires the following local variables:
+/   - `item`. Can be a Commit or Article.
+
+li.progress-bar
+  dl: dt Track Progress
+
+- item.locale_requirements.each do |locale, required|
+  - finished = (item.translations_not_done(locale) == 0)
+  li.progress-bar
+    dl
+      dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+        = locale.rfc5646
+        small.lowercase = " (#{required ? 'required' : 'optional'})"
+        strong = (finished ? '100%' : "#{(item.fraction_done(locale) * 100).round(2)}%")
+      dd.bar-status
+        span class=(finished ? 'finished' : 'inprogress') style="width: #{(item.fraction_done(locale) * 100).round(2)}%;"
+      dd.text-status class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+        = "#{item.translations_not_done(locale)} left (#{item.translations_total(locale)} total)"
