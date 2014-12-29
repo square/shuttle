@@ -16,10 +16,10 @@
 #
 # This abstract module expects to be included in a more concrete module/class
 # which implements the following methods:
-#   - `translations_for_stats`
-#   - `keys_for_stats`
+#   - `active_translations`
+#   - `active_keys`
 
-module ItemStats
+module ArticleOrCommitStats
 
   # Calculates the total number of Translations that have not yet been
   # translated.
@@ -99,7 +99,7 @@ module ItemStats
   #   this Commit.
 
   def strings_total
-    keys_for_stats.count
+    active_keys.count
   end
 
   # Calculates the stats for this Key.
@@ -112,7 +112,7 @@ module ItemStats
     return cached if cached
 
     locales = required_locales if locales.empty?
-    translation_groups = translations_for_stats.where(rfc5646_locale: locales.map(&:rfc5646))
+    translation_groups = active_translations.where(rfc5646_locale: locales.map(&:rfc5646))
     translation_groups = translation_groups.group("translated, approved").select("translated, approved, count(*) as translations_count, sum(words_count) as words_count")
 
     hsh = {}

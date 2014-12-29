@@ -71,7 +71,6 @@ require 'fileutils'
 class Commit < ActiveRecord::Base
   include CommitTraverser
   include ImportErrors
-  include CommitStats
 
   # @return [true, false] If `true`, does not perform an import after creating
   #   the Commit. Use this to avoid the overhead of making an HTTP request and
@@ -87,6 +86,10 @@ class Commit < ActiveRecord::Base
   has_many :blobs_commits, inverse_of: :commit, dependent: :delete_all
   has_many :blobs, through: :blobs_commits
   has_many :issues, through: :translations
+
+  include ArticleOrCommitStats
+  alias_method :active_translations, :translations # called in ArticleOrCommitStats
+  alias_method :active_keys, :keys # called in ArticleOrCommitStats
 
   include Tire::Model::Search
   include Tire::Model::Callbacks
