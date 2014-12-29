@@ -78,21 +78,7 @@
 
         li.divider
 
-        li.progress-bar
-          dl: dt Track Progress
-
-        - @project.locale_requirements.each do |locale, required|
-          - finished = @commit.all_translations_approved_for_locale?(locale)
-          li.progress-bar
-            dl
-              dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
-                = locale.rfc5646
-                small.lowercase = " (#{required ? 'required' : 'optional'})"
-                strong = (finished ? '100%' : "#{(@commit.fraction_done(locale) * 100).round(2)}%")
-              dd.bar-status
-                span class=(finished ? 'finished' : 'inprogress') style="width: #{(@commit.fraction_done(locale) * 100).round(2)}%;"
-              dd.text-status class=(required ? (finished ? 'text-success' : 'text-error') : nil)
-                = "#{@commit.translations_not_done(locale)} left (#{@commit.translations_total(locale)} total)"
+        = render partial: 'common/progress_tracker', locals: { item: @commit }
 
     .thirteen.columns.sidebar-main
       = yield
