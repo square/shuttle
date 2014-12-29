@@ -308,61 +308,6 @@ describe Commit do
     end
   end
 
-  describe "#all_translations_entered_for_locale?" do
-    before :each do
-      @commit      = FactoryGirl.create(:commit)
-      @keys        = FactoryGirl.create_list(:key, 4)
-      @commit.keys += @keys
-    end
-
-    it "should return true if every translation is either pending approval, approved, or rejected" do
-      FactoryGirl.create :translation, approved: nil, key: @keys[0], rfc5646_locale: 'de'
-      FactoryGirl.create :translation, approved: true, key: @keys[1], rfc5646_locale: 'de'
-      FactoryGirl.create :translation, approved: false, key: @keys[2], rfc5646_locale: 'de'
-
-      # red herring
-      FactoryGirl.create :translation, copy: nil, approved: nil, key: @keys[3], rfc5646_locale: 'fr'
-
-      expect(@commit.all_translations_entered_for_locale?(Locale.from_rfc5646('de'))).to be_true
-    end
-
-    it "should return false otherwise" do
-      FactoryGirl.create :translation, copy: nil, key: @keys[0], rfc5646_locale: 'de'
-      FactoryGirl.create :translation, approved: true, key: @keys[1], rfc5646_locale: 'de'
-      FactoryGirl.create :translation, approved: false, key: @keys[2], rfc5646_locale: 'de'
-
-      expect(@commit.all_translations_entered_for_locale?(Locale.from_rfc5646('de'))).to be_false
-    end
-  end
-
-  describe "#all_translations_approved_for_locale?" do
-    before :each do
-      @commit = FactoryGirl.create(:commit)
-      @keys = FactoryGirl.create_list(:key, 3)
-      @commit.keys += @keys
-    end
-
-    it "should return true if every translation is approved" do
-      FactoryGirl.create :translation, approved: true, key: @keys[0], rfc5646_locale: 'de'
-      FactoryGirl.create :translation, approved: true, key: @keys[1], rfc5646_locale: 'de'
-
-      # red herring
-      FactoryGirl.create :translation, approved: nil, key: @keys[2], rfc5646_locale: 'fr'
-
-      expect(@commit.all_translations_approved_for_locale?(Locale.from_rfc5646('de'))).to be_true
-    end
-
-    it "should return false otherwise" do
-      FactoryGirl.create :translation, approved: true, key: @keys[0], rfc5646_locale: 'de'
-      t = FactoryGirl.create(:translation, approved: nil, key: @keys[1], rfc5646_locale: 'de')
-
-      expect(@commit.all_translations_approved_for_locale?(Locale.from_rfc5646('de'))).to be_false
-
-      t.update_attribute :approved, false
-      expect(@commit.all_translations_approved_for_locale?(Locale.from_rfc5646('de'))).to be_false
-    end
-  end
-
   describe "#skip_key?" do
     before :each do
       @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)

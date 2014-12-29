@@ -156,7 +156,7 @@ class Commit < ActiveRecord::Base
   after_commit :initial_import, on: :create
 
   attr_readonly :revision, :message
-  delegate :required_locales, :required_rfc5646_locales, :targeted_rfc5646_locales, to: :project
+  delegate :required_locales, :required_rfc5646_locales, :targeted_rfc5646_locales, :locale_requirements, to: :project
 
   # Counts the total commits.
   #
@@ -287,26 +287,6 @@ class Commit < ActiveRecord::Base
     options[:except] << :revision_raw
 
     super options
-  end
-
-  # Returns whether a translator's work is entirely done for this Commit.
-  #
-  # @param [Locale] locale The locale the translator is working in.
-  # @return [true, false] `true` if all translations are complete; `false` if
-  #   the translator still has work to do.
-
-  def all_translations_entered_for_locale?(locale)
-    translations.where(rfc5646_locale: locale.rfc5646, translated: false).count == 0
-  end
-
-  # Returns whether an approver's work is entirely done for this Commit.
-  #
-  # @param [Locale] locale The locale the approver is working in.
-  # @return [true, false] `true` if all translations are approved; `false` if
-  #   the translator still has work to do.
-
-  def all_translations_approved_for_locale?(locale)
-    translations.where(rfc5646_locale: locale.rfc5646).where('approved IS NOT TRUE').count == 0
   end
 
   # Returns whether we should skip a key for this particular commit, given the

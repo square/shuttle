@@ -41,7 +41,7 @@
           tr
             th STRING
             - @project.locale_requirements.each do |locale, required|
-              - finished = @commit.all_translations_approved_for_locale?(locale)
+              - finished = (@commit.translations_not_done(locale) == 0)
               th class=(required ? (finished ? 'text-success' : 'text-error') : nil)
                 = locale.rfc5646
                 - if finished

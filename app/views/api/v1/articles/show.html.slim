@@ -17,150 +17,139 @@
 - content_for :file_name do
   = 'views/api/v1/articles/show'
 
-.header
-  .pull-right
-    = link_to (@article.ready? ? 'Download' : 'Translating'), manifest_api_v1_project_article_path(@project.id, @article.name), class: 'button primary download-button', disabled: !@article.ready?
-    = link_to 'Edit', edit_api_v1_project_article_path(@project.id, @article.name), class: 'button primary'
-  h1 Article (id: #{@article.id})
-hr.divider
-
-.row
-  .eight.columns
-    fieldset
-      .control-group
-        = label_tag :project, nil, class: 'control-label'
-        .controls
-          = @project.name
-
-      .control-group
-        = label_tag :name, nil, class: 'control-label'
-        .controls
-          = @article.name
-
-      .control-group
-        = label_tag :priority, nil, class: 'control-label'
-        .controls
-          = @article.priority || '-'
-
-      .control-group
-        = label_tag :due_date, nil, class: 'control-label'
-        .controls
-          = @article.due_date || '-'
-
-      .control-group
-        = label_tag :base_rfc5646_locale, nil, class: 'control-label'
-        .controls
-          = @article.base_rfc5646_locale
-
-      .control-group
-        = label_tag :required_rfc5646_locales, 'Required Localizations', class: 'control-label'
-        .controls
-          = @article.required_rfc5646_locales.join(', ').presence || '-'
-
-      .control-group
-        = label_tag :other_rfc5646_locales, 'Other Localizations', class: 'control-label'
-        .controls
-          = @article.other_rfc5646_locales.join(', ').presence || '-'
-
-      .control-group
-        = label_tag :email, nil, class: 'control-label'
-        .controls
-          = @article.email.presence || '-'
-
-      .control-group
-        = label_tag :description, nil, class: 'control-label'
-        .controls
-          = @article.description.presence || '-'
-
-  .eight.columns
-    fieldset
-      .control-group
-        = label_tag :readiness_status, nil, class: 'control-label'
-        .controls
-          = @article.ready? ? 'Ready' : 'Not Ready'
-
-      .control-group
-        = label_tag :loading_status, nil, class: 'control-label'
-        .controls
-          = @article.loading? ? 'Loading' : 'Loaded'
-
-      .control-group
-        = label_tag 'Import Batch Id', nil, class: 'control-label'
-        .controls
-          = @article.import_batch_id || '-'
-
-      .control-group
-        = label_tag :first_import_requested_at, nil, class: 'control-label'
-        .controls
-          = @article.first_import_requested_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :last_import_requested_at, nil, class: 'control-label'
-        .controls
-          = @article.last_import_requested_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :first_import_started_at, nil, class: 'control-label'
-        .controls
-          = @article.first_import_started_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :last_import_started_at, nil, class: 'control-label'
-        .controls
-          = @article.last_import_started_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :first_import_finished_at, nil, class: 'control-label'
-        .controls
-          = @article.first_import_finished_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :last_import_finished_at, nil, class: 'control-label'
-        .controls
-          = @article.last_import_finished_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :first_completed_at, nil, class: 'control-label'
-        .controls
-          = @article.first_completed_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :last_completed_at, nil, class: 'control-label'
-        .controls
-          = @article.last_completed_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :created_at, nil, class: 'control-label'
-        .controls
-          = @article.created_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :updated_at, nil, class: 'control-label'
-        .controls
-          = @article.updated_at.try(:to_s, :long) || '-'
-
-      .control-group
-        = label_tag :creator, nil, class: 'control-label'
-        .controls
-          = @article.creator.try(:name) || '-'
-
-      .control-group
-        = label_tag :updater, nil, class: 'control-label'
-        .controls
-          = @article.updater.try(:name) || '-'
-
-      .control-group
-        = label_tag 'Creation method', nil, class: 'control-label'
-        .controls
-          = @article.created_via_api ? 'Via API' : 'Via Website'
-
-.row
-  .sixteen.columns
-    fieldset
-      legend Sections
-      - @article.sections_hash.each do |section_name, section_source_copy|
+= render layout: 'api/v1/articles/layout' do
+  .row
+    .seven.columns
+      fieldset
         .control-group
-          = label_tag section_name, nil, class: 'control-label'
+          = label_tag :name, nil, class: 'control-label'
           .controls
-            .well
-              = section_source_copy
+            = @article.name
+
+        .control-group
+          = label_tag :priority, nil, class: 'control-label'
+          .controls
+            = @article.priority || '-'
+
+        .control-group
+          = label_tag :due_date, nil, class: 'control-label'
+          .controls
+            = @article.due_date || '-'
+
+        .control-group
+          = label_tag :base_rfc5646_locale, nil, class: 'control-label'
+          .controls
+            = @article.base_rfc5646_locale
+
+        .control-group
+          = label_tag :required_rfc5646_locales, 'Required Localizations', class: 'control-label'
+          .controls
+            = @article.required_rfc5646_locales.join(', ').presence || '-'
+
+        .control-group
+          = label_tag :other_rfc5646_locales, 'Other Localizations', class: 'control-label'
+          .controls
+            = @article.other_rfc5646_locales.join(', ').presence || '-'
+
+        .control-group
+          = label_tag :email, nil, class: 'control-label'
+          .controls
+            = @article.email.presence || '-'
+
+        .control-group
+          = label_tag :description, nil, class: 'control-label'
+          .controls
+            = @article.description.presence || '-'
+
+    .six.columns
+      fieldset
+        .control-group
+          = label_tag :readiness_status, nil, class: 'control-label'
+          .controls
+            = @article.ready? ? 'Ready' : 'Not Ready'
+
+        .control-group
+          = label_tag :loading_status, nil, class: 'control-label'
+          .controls
+            = @article.loading? ? 'Loading' : 'Loaded'
+
+        .control-group
+          = label_tag 'Import Batch Id', nil, class: 'control-label'
+          .controls
+            = @article.import_batch_id || '-'
+
+        .control-group
+          = label_tag :first_import_requested_at, nil, class: 'control-label'
+          .controls
+            = @article.first_import_requested_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :last_import_requested_at, nil, class: 'control-label'
+          .controls
+            = @article.last_import_requested_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :first_import_started_at, nil, class: 'control-label'
+          .controls
+            = @article.first_import_started_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :last_import_started_at, nil, class: 'control-label'
+          .controls
+            = @article.last_import_started_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :first_import_finished_at, nil, class: 'control-label'
+          .controls
+            = @article.first_import_finished_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :last_import_finished_at, nil, class: 'control-label'
+          .controls
+            = @article.last_import_finished_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :first_completed_at, nil, class: 'control-label'
+          .controls
+            = @article.first_completed_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :last_completed_at, nil, class: 'control-label'
+          .controls
+            = @article.last_completed_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :created_at, nil, class: 'control-label'
+          .controls
+            = @article.created_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :updated_at, nil, class: 'control-label'
+          .controls
+            = @article.updated_at.try(:to_s, :long) || '-'
+
+        .control-group
+          = label_tag :creator, nil, class: 'control-label'
+          .controls
+            = @article.creator.try(:name) || '-'
+
+        .control-group
+          = label_tag :updater, nil, class: 'control-label'
+          .controls
+            = @article.updater.try(:name) || '-'
+
+        .control-group
+          = label_tag 'Creation method', nil, class: 'control-label'
+          .controls
+            = @article.created_via_api ? 'Via API' : 'Via Website'
+
+  .row
+    .thirteen.columns
+      fieldset
+        legend Sections
+        - @article.sections_hash.each do |section_name, section_source_copy|
+          .control-group
+            = label_tag section_name, nil, class: 'control-label'
+            .controls
+              .well
+                = section_source_copy
