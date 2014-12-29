@@ -28,9 +28,10 @@ fieldset.details
     .item
       dt Context
       dd = (translation.key.context || "none")
-    .item
-      dt Importer
-      dd = translation.key.importer_name
+    - if translation.key.importer
+      .item
+        dt Importer
+        dd = translation.key.importer_name
     - if translation.key.fencers.present?
       .item
         dt Fencers

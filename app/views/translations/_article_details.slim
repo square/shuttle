@@ -1,0 +1,46 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+/ Show the best guess as to who may have created this translation.
+/ Requires the following local params:
+/   - <Translation> translation
+
+- article = translation.article
+
+- if article
+  fieldset
+    legend Article Details
+
+    dl
+      .item
+        dt Article
+        dd = link_to(article.name, api_v1_project_article_path(article.project.id, article.name))
+        dt Created At
+        dd = l(article.created_at, format: :long)
+      - if article.creator
+        .item
+          dt Creator
+          dd = article.creator.name
+          dt Creator Email
+          dd = article.creator.email
+      - if article.updater
+        .item
+          dt Updater
+          dd = article.updater.name
+          dt Updater Email
+          dd = article.updater.email
+      - if article.email.present?
+        .item
+          dt Contact Email
+          dd = article.email
