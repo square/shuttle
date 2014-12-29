@@ -45,6 +45,7 @@ require 'digest/sha2'
 # | `copy`          | The translated copy.                                  |
 
 class Translation < ActiveRecord::Base
+  has_one :article, through: :key
   belongs_to :key, inverse_of: :translations
   belongs_to :translator, class_name: 'User', foreign_key: 'translator_id', inverse_of: :authored_translations
   belongs_to :reviewer, class_name: 'User', foreign_key: 'reviewer_id', inverse_of: :reviewed_translations
@@ -185,6 +186,12 @@ class Translation < ActiveRecord::Base
 
   def base_translation?
     source_locale == locale
+  end
+
+  # @return [true, false] Whether this Translation belongs to an article or not.
+
+  def belongs_to_article?
+    !!key.section
   end
 
   # @private

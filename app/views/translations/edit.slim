@@ -69,6 +69,6 @@ hr.divider
 
       = render partial: 'details', locals: { translation: @translation }
       = render partial: 'translation_history', locals: { translation: @translation }
-      = render partial: 'commit_history', locals: { translation: @translation }
+      = render partial: (@translation.belongs_to_article? ? 'article_details' : 'commit_history'), locals: { translation: @translation }
 
 = render partial: 'issues/index', locals: {project: @project, key: @key, translation: @translation, issues: @issues, issue: @issue}
