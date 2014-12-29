@@ -32,7 +32,7 @@ Shuttle::Application.routes.draw do
       resources :projects, only: [] do
         resources :articles, param: :name, only: [:index, :new, :create, :show, :edit, :update] do
           member do
-            get :manifest
+            get :manifest, :issues
           end
         end
       end

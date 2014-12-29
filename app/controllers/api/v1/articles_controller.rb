@@ -22,15 +22,16 @@
 module Api
   module V1
     class ArticlesController < ApplicationController
-      respond_to :json, only: [:create, :show, :update, :manifest, :index]
-      respond_to :html, only: [:create, :show, :update, :manifest, :new, :edit]
+      respond_to :json, only: [:create, :show, :update, :manifest, :issues, :index]
+      respond_to :html, only: [:create, :show, :update, :manifest, :issues, :new, :edit]
 
       skip_before_filter :authenticate_user!,        if: :api_request?
       skip_before_action :verify_authenticity_token, if: :api_request?
       before_filter :authenticate_with_api_token!,   if: :api_request?
 
       before_filter :find_project
-      before_filter :find_article, only: [:show, :edit, :update, :manifest]
+      before_filter :find_article, only: [:show, :edit, :update, :manifest, :issues]
+      before_filter :set_article_issues_presenter, only: [:show, :issues]
 
       # EXTERNAL ONLY
       #
@@ -266,6 +267,28 @@ module Api
         end
       end
 
+      # Returns the active issues of an Article.
+      #
+      # Routes
+      # ------
+      #
+      # * `GET /api/v1/projects/:project_id/articles/:name/routes(.format)(?api_token=:api_token)`
+      #
+      # Path/Url Parameters
+      # ---------------
+      #
+      # |              |                                                                                         |
+      # |:-------------|:----------------------------------------------------------------------------------------|
+      # | `project_id` | The id of a Project.                                                                    |
+      # | `api_token`  | The api token for a Project. Not required if the request is coming from internal views. |
+      # | `name`       | The `name` of the Article.                                                              |
+
+      def issues
+        respond_with @article_issues_presenter do |format|
+          format.json { render json: @article_issues_presenter.as_json(only: [:priority, :kind, :status, :summary, :description, :subscribed_emails]) }
+        end
+      end
+
       private
 
       # ===== START AUTHENTICATION/AUTHORIZATION/VALIDATION ============================================================
@@ -343,6 +366,10 @@ module Api
         hsh.merge(updater_id: current_user.try(:id))
       end
       # ===== END PARAMS RELATED CODE ==================================================================================
+
+      def set_article_issues_presenter
+        @article_issues_presenter ||= ArticleOrCommitIssuesPresenter.new(@article)
+      end
     end
   end
 end

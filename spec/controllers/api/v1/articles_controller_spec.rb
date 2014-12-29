@@ -401,6 +401,62 @@ describe Api::V1::ArticlesController do
     end
   end
 
+  describe "#issue" do
+    let(:article) { FactoryGirl.create(:article, project: project) }
+
+    it_behaves_like "api-or-session-authenticateable-and-filters" do
+      let(:request_type) { :get }
+      let(:action) { :issues }
+      let(:params) { { name: article.name } }
+    end
+
+    it "returns issues and their stats" do
+      translation1 = article.translations.first
+      translation2 = article.translations.last
+      FactoryGirl.create(:issue, translation: translation1)
+      FactoryGirl.create(:issue, translation: translation2)
+
+      get :issues, project_id: project.id, api_token: project.api_token, name: article.name, format: :json
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body)).to eql(
+        {
+          "issues"=>[
+            {"summary"=>"MyString", "description"=>"MyText", "priority"=>nil, "kind"=>1, "status"=>1, "subscribed_emails"=>[]},
+            {"summary"=>"MyString", "description"=>"MyText", "priority"=>nil, "kind"=>1, "status"=>1, "subscribed_emails"=>[]}
+          ],
+
+          "status_counts"=>[
+            {"status"=>1, "status_desc"=>"Open", "count"=>2},
+            {"status"=>2, "status_desc"=>"In progress", "count"=>0},
+            {"status"=>3, "status_desc"=>"Resolved", "count"=>0},
+            {"status"=>4, "status_desc"=>"IceBox", "count"=>0}
+          ]
+        }
+      )
+    end
+
+    it "doesn't return issues of inactive keys" do
+      key = FactoryGirl.create(:key, section: article.sections.last, index_in_section: nil, project: article.project)
+      translation = FactoryGirl.create(:translation, key: key)
+      FactoryGirl.create(:issue, translation: translation)
+
+      get :issues, project_id: project.id, api_token: project.api_token, name: article.name, format: :json
+      expect(response.status).to eql(200)
+      expect(JSON.parse(response.body)).to eql(
+        {
+          "issues"=>[],
+
+          "status_counts"=>[
+            {"status"=>1, "status_desc"=>"Open", "count"=>0},
+            {"status"=>2, "status_desc"=>"In progress", "count"=>0},
+            {"status"=>3, "status_desc"=>"Resolved", "count"=>0},
+            {"status"=>4, "status_desc"=>"IceBox", "count"=>0}
+          ]
+        }
+      )
+    end
+  end
+
   describe "#params_for_create" do
     it "permits name, base_rfc5646_locale, key, sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id or project_id fields" do
       post :create, project_id: project.id, api_token: project.api_token, article: {name: "t", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300}, format: :json
