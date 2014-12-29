@@ -57,7 +57,14 @@
               <dd>{{context}}</dd>
             </div>
           {{/context}}
-          
+
+          {{#article_name}}
+              <div class="item">
+                <dt> Article </dt>
+                <dd> <a href="{{article_url}}">{{article_name}}</a> </dd>
+              </div>
+          {{/article_name}}
+
           <div class="item">
             <dt> Key </dt>
             <dd>{{key}}</dd>
