@@ -78,6 +78,8 @@ class Article < ActiveRecord::Base
   extend SetNilIfBlank
   set_nil_if_blank :description, :due_date, :priority
 
+  belongs_to :creator,    class_name: 'User'
+  belongs_to :updater,    class_name: 'User'
   belongs_to :project,    inverse_of: :articles
   has_many :sections,     inverse_of: :article, dependent: :destroy
   has_many :keys,         through:    :sections
