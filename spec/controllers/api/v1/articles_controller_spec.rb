@@ -18,10 +18,11 @@ require 'spec_helper'
 
 describe Api::V1::ArticlesController do
   let(:project) { FactoryGirl.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
+  let(:monitor_user) { FactoryGirl.create(:user, :confirmed, role: 'monitor') }
 
   def sign_in_monitor_user
     request.env['devise.mapping'] = Devise.mappings[:user]
-    sign_in FactoryGirl.create(:user, :confirmed, role: 'monitor')
+    sign_in monitor_user
   end
 
   shared_examples_for "api-or-session-authenticateable-and-filters" do |options={}|
@@ -197,6 +198,40 @@ describe Api::V1::ArticlesController do
       expect(Article.count).to eql(1)
       expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>{"name"=>["already taken"]}}})
     end
+
+    context "[API_REQUEST]" do
+      before(:each) do
+        expect(Article.count).to eql(0)
+      end
+
+      it "sets creator to nil" do
+        post :create, project_id: project.id, api_token: project.api_token, article: { name: "test", sections_hash: {"title" => "hello"}}, format: :json
+        expect(Article.last.creator).to be_nil
+      end
+
+      it "sets created_via_api to true" do
+        post :create, project_id: project.id, api_token: project.api_token, article: { name: "test", sections_hash: {"title" => "hello"}}, format: :json
+        expect(Article.last.created_via_api).to be_true
+      end
+    end
+
+    context "[NOT API_REQUEST]" do
+      before(:each) do
+        sign_in_monitor_user
+        expect(Article.count).to eql(0)
+      end
+
+      it "sets creator & updater to current_user" do
+        post :create, project_id: project.id, article: { name: "test", sections_hash: {"title" => "hello"}}, format: :json
+        expect(Article.last.creator).to eql(monitor_user)
+        expect(Article.last.updater).to eql(monitor_user)
+      end
+
+      it "sets created_via_api to false" do
+        post :create, project_id: project.id, article: { name: "test", sections_hash: {"title" => "hello"}}, format: :json
+        expect(Article.last.created_via_api).to be_false
+      end
+    end
   end
 
   describe "#show" do
@@ -314,6 +349,29 @@ describe Api::V1::ArticlesController do
         expect(response.body).to_not include(api_v1_project_article_path(project.id, "updated_name"))
       end
     end
+
+    context "[API_REQUEST]" do
+      it "sets updater to nil" do
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { priority: 2 }, format: :json
+        expect(Article.last.creator).to be_nil
+      end
+    end
+
+    context "[NOT API_REQUEST]" do
+      before(:each) { sign_in_monitor_user }
+
+      it "sets updater to current_user" do
+        patch :update, project_id: project.id, name: article.name, article: { priority: 2 }, format: :json
+        expect(Article.last.updater).to eql(monitor_user)
+      end
+
+      it "doesn't change creator" do
+        article.update creator_id: nil
+        patch :update, project_id: project.id, name: article.name, article: { priority: 2 }, format: :json
+        expect(Article.last.creator).to be_nil
+      end
+    end
+
   end
 
   describe "#manifest" do
@@ -345,13 +403,35 @@ describe Api::V1::ArticlesController do
 
   describe "#params_for_create" do
     it "permits name, base_rfc5646_locale, key, sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id or project_id fields" do
-      post :create, project_id: project.id, api_token: project.api_token, article: {name: "t", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300}, project_id: 4, format: :json
-      expect(controller.send :params_for_create).to eql({ "name"=>"t", "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "name"=>"t", "sections_hash"=>{"t" => "t"}, "description"=>"t", "email"=>"t@example.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}})
+      post :create, project_id: project.id, api_token: project.api_token, article: {name: "t", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300}, format: :json
+      expect(controller.send :params_for_create).to eql({ "name"=>"t", "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "name"=>"t", "sections_hash"=>{"t" => "t"}, "description"=>"t", "email"=>"t@example.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}, "created_via_api"=>true, "creator_id"=>nil, "updater_id"=>nil})
     end
 
     it "doesn't include sections_hash or targeted_rfc5646_locales in the permitted params (this is tested separately because it's a special case due to being a hash field)" do
       post :create, project_id: project.id, api_token: project.api_token, name: "t", article: { priority: 2 }, format: :json
-      expect(controller.send :params_for_create).to eql({"priority"=>2})
+      expect(controller.send(:params_for_create).key?("sections_hash")).to be_false
+      expect(controller.send(:params_for_create).key?("targeted_rfc5646_locales")).to be_false
+    end
+
+    context "[API_REQUEST]" do
+      it "sets creator_id to nil" do
+        post :create, project_id: project.id, api_token: project.api_token, article: { priority: 1 }, format: :json
+        params_for_create = controller.send(:params_for_create)
+        expect(params_for_create["creator_id"]).to be_nil
+        expect(params_for_create["updater_id"]).to be_nil
+        expect(params_for_create["created_via_api"]).to be_true
+      end
+    end
+
+    context "[NOT API_REQUEST]" do
+      it "sets creator_id to current_user's id" do
+        sign_in_monitor_user
+        post :create, project_id: project.id, article: { priority: 1 }, format: :json
+        params_for_create = controller.send(:params_for_create)
+        expect(params_for_create["creator_id"]).to eql(monitor_user.id)
+        expect(params_for_create["updater_id"]).to eql(monitor_user.id)
+        expect(params_for_create["created_via_api"]).to be_false
+      end
     end
   end
 
@@ -359,13 +439,29 @@ describe Api::V1::ArticlesController do
     let(:article) { FactoryGirl.create(:article, project: project, name: "t") }
 
     it "permits name, sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id, project_id, key or base_rfc5646_locale fields" do
-      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { name: "t2", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300}, project_id: 4, format: :json
-      expect(controller.send :params_for_update).to eql({ "name" => "t2", "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "sections_hash" => { "t" => "t" }, "description"=>"t", "email"=>"t@example.com", "targeted_rfc5646_locales"=>{"fr"=>true}})
+      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { name: "t2", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300}, format: :json
+      expect(controller.send :params_for_update).to eql({ "name" => "t2", "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "sections_hash" => { "t" => "t" }, "description"=>"t", "email"=>"t@example.com", "targeted_rfc5646_locales"=>{"fr"=>true}, "updater_id" => nil})
     end
 
     it "doesn't include sections_hash and targeted_rfc5646_locales in the permitted params (this is tested separately because it's a special case due to being a hash field)" do
       patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { priority: 2 }, format: :json
-      expect(controller.send :params_for_update).to eql({ "priority" => 2})
+      expect(controller.send(:params_for_update).key?("sections_hash")).to be_false
+      expect(controller.send(:params_for_update).key?("targeted_rfc5646_locales")).to be_false
+    end
+
+    context "[API_REQUEST]" do
+      it "sets updater_id to nil" do
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { priority: 1 }, format: :json
+        expect(controller.send(:params_for_update)["updater_id"]).to be_nil
+      end
+    end
+
+    context "[NOT API_REQUEST]" do
+      it "sets updater_id to current_user's id" do
+        sign_in_monitor_user
+        patch :update, project_id: project.id, name: article.name, article: { priority: 1 }, format: :json
+        expect(controller.send(:params_for_update)["updater_id"]).to eql(monitor_user.id)
+      end
     end
   end
 

@@ -57,7 +57,10 @@ CREATE TABLE articles (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     due_date date,
-    priority integer
+    priority integer,
+    creator_id integer,
+    updater_id integer,
+    created_via_api boolean DEFAULT true NOT NULL
 );
 
 
@@ -1611,3 +1614,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141212232303');
 INSERT INTO schema_migrations (version) VALUES ('20141217214242');
 
 INSERT INTO schema_migrations (version) VALUES ('20141218002351');
+
+INSERT INTO schema_migrations (version) VALUES ('20141229041151');

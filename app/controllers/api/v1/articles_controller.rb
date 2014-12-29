@@ -331,7 +331,8 @@ module Api
 
       # ===== START PARAMS RELATED CODE ================================================================================
       def params_for_create
-        params_for_update.merge(params.require(:article).permit(:base_rfc5646_locale))
+        params_for_update.merge(params.require(:article).permit(:base_rfc5646_locale)).
+                          merge(created_via_api: api_request?, creator_id: current_user.try(:id))
       end
 
       def params_for_update
@@ -339,7 +340,7 @@ module Api
         hsh[:due_date] = DateTime::strptime(params[:article][:due_date], "%m/%d/%Y") rescue '' if params[:article].try(:key?, :due_date)
         hsh[:targeted_rfc5646_locales] = params[:article][:targeted_rfc5646_locales] if params[:article].try(:key?, :targeted_rfc5646_locales)
         hsh[:sections_hash] = params[:article][:sections_hash] if params[:article].try(:key?, :sections_hash)
-        hsh
+        hsh.merge(updater_id: current_user.try(:id))
       end
       # ===== END PARAMS RELATED CODE ==================================================================================
     end

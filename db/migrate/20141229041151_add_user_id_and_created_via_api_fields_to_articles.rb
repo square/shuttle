@@ -12,9 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class AddDueDateAndPriorityToArticles < ActiveRecord::Migration
+class AddUserIdAndCreatedViaApiFieldsToArticles < ActiveRecord::Migration
   def change
-    add_column :articles, :due_date, :date
-    add_column :articles, :priority, :integer
+    add_column :articles, :creator_id, :integer
+    add_column :articles, :updater_id, :integer
+    add_column :articles, :created_via_api, :boolean, default: true, null: false
   end
 end
