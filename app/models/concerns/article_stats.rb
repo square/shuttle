@@ -12,20 +12,20 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Includes the helper statistics methods for {Commit}
+# Includes the helper statistics methods for {Article}
 
-module CommitStats
+module ArticleStats
   include ItemStats
 
   private
 
   # The Translations association that will be used to calculate stats
   def translations_for_stats
-    translations
+    active_translations
   end
 
   # The Keys association that will be used to calculate stats
   def keys_for_stats
-    keys
+    active_keys
   end
 end
