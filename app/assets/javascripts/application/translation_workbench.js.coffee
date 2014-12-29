@@ -119,6 +119,11 @@ class TranslationItem
 
     context.multi_updateable_translations_and_locale_associations = @translation.multi_updateable_translations_and_locale_associations
 
+    if @translation.article_name
+      context.article_name = @translation.article_name
+    if @translation.article_url
+      context.article_url = @translation.article_url
+
     if @translation.key.context?
       context.context = @translation.key.context
 
