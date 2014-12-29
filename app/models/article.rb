@@ -73,6 +73,8 @@
 # | `locale_requirements`       | An hash mapping locales this Article can be localized to, to whether those locales are required.                  |
 
 class Article < ActiveRecord::Base
+  include ArticleStats
+
   FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED = %w(sections_hash targeted_rfc5646_locales)
 
   extend SetNilIfBlank
