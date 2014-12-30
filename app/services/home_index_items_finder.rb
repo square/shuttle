@@ -88,7 +88,7 @@ class HomeIndexItemsFinder
   end
 
   def find_articles
-    articles = Article
+    articles = Article.includes(:project)
 
     # filter by name
     articles = articles.for_name(form[:articles_filter__name]) if form[:articles_filter__name]
