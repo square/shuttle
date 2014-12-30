@@ -119,7 +119,7 @@ class Project < ActiveRecord::Base
   validates :api_token,
             presence:   true,
             uniqueness: true,
-            length:     {is: 36},
+            length:     {is: 240},
             format:     {with: /[0-9a-f\-]+/},
             strict:     true
 
@@ -287,7 +287,7 @@ class Project < ActiveRecord::Base
   end
 
   # Generates a new API token for the Project. Does not save the Project.
-  def create_api_token() self.api_token = SecureRandom.uuid end
+  def create_api_token(); self.api_token = SecureRandom.urlsafe_base64(180); end
 
   # Returns the number of Translations pending translation.
   #
