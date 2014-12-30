@@ -28,8 +28,8 @@ module TranslationDecoration
           edit_url:         edit_project_key_translation_url(translation.key.project, translation.key, translation),
           suggestion_url:   match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
           fuzzy_match_url:  fuzzy_match_project_key_translation_url(translation.key.project, translation.key, translation, format: 'json'),
-          article_name:     translation.article.try(:name),
-          article_url:      translation.belongs_to_article? ? api_v1_project_article_url(translation.key.project.id, translation.article.name) : nil,
+          article_name:     translation.key.article.try(:name),
+          article_url:      translation.belongs_to_article? ? api_v1_project_article_url(translation.key.project.id, translation.key.article.name) : nil,
           status:           translation_status(translation),
           translator:       translation.translator.as_json,
           reviewer:         translation.reviewer.as_json, # not sure why it's necessary to explicitly include these, but it is

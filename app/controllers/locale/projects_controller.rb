@@ -61,7 +61,7 @@ class Locale::ProjectsController < ApplicationController
   # | `id`        | The slug of a {Project}.        |
 
   def show
-    @glossary_entries = LocaleGlossaryEntry.joins(:source_glossary_entry)
+    @glossary_entries = LocaleGlossaryEntry.includes(:source_glossary_entry).joins(:source_glossary_entry)
         .where(
             source_glossary_entries: {source_rfc5646_locale: Shuttle::Configuration.locales.source_locale},
             rfc5646_locale:          @locale.rfc5646,
