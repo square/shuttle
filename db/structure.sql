@@ -412,7 +412,6 @@ CREATE TABLE projects (
     id integer NOT NULL,
     name character varying(256) NOT NULL,
     repository_url character varying(256),
-    api_token character(36) NOT NULL,
     created_at timestamp without time zone,
     translations_adder_and_remover_batch_id character varying(255),
     disable_locale_association_checkbox_settings boolean DEFAULT false NOT NULL,
@@ -434,6 +433,7 @@ CREATE TABLE projects (
     manifest_filename character varying(255),
     github_webhook_url text,
     stash_webhook_url text,
+    api_token character(240) NOT NULL,
     CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0))
 );
 
@@ -1106,6 +1106,13 @@ CREATE UNIQUE INDEX index_locale_associations_on_source_and_target_rfc5646_local
 
 
 --
+-- Name: index_projects_on_api_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_projects_on_api_token ON projects USING btree (api_token);
+
+
+--
 -- Name: index_sections_on_article_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1208,13 +1215,6 @@ CREATE UNIQUE INDEX slugs_unique ON slugs USING btree (sluggable_type, lower((sc
 --
 
 CREATE UNIQUE INDEX translations_by_key ON translations USING btree (key_id, rfc5646_locale);
-
-
---
--- Name: unique_api_token; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX unique_api_token ON projects USING btree (api_token);
 
 
 --
@@ -1616,3 +1616,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141217214242');
 INSERT INTO schema_migrations (version) VALUES ('20141218002351');
 
 INSERT INTO schema_migrations (version) VALUES ('20141229041151');
+
+INSERT INTO schema_migrations (version) VALUES ('20141230094906');

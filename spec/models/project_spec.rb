@@ -611,9 +611,10 @@ describe Project do
     end
 
     context "[create_api_token]" do
-      it "sets a 36 character api token on create" do
+      it "sets a 240 character api token on create" do
         project = FactoryGirl.create(:project, name: "Test", api_token: '')
-        expect(project.api_token.length).to eql(36)
+        expect(project.api_token).to be_present
+        expect(project.api_token.length).to eql(240)
       end
 
       it "doesn't change the api_token on update" do
