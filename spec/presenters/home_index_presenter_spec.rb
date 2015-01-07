@@ -93,4 +93,33 @@ describe HomeIndexPresenter do
       end
     end
   end
+
+  describe "#translate_link_path" do
+    before :each do
+      @url_helpers = Rails.application.routes.url_helpers
+      @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'en-CA'=>true, 'fr'=> true, 'ja'=> true })
+      @admin_user = FactoryGirl.create(:user, :admin, approved_rfc5646_locales: [])
+      @reviewer_user = FactoryGirl.create(:user, :reviewer, approved_rfc5646_locales: %w(es fr))
+    end
+
+    context "[Commit]" do
+      it "returns the commit translate link path" do
+        commit = FactoryGirl.create(:commit, project: @project)
+        expect(@presenter.translate_link_path(@admin_user, commit)).
+            to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: commit.project, commit: commit.revision))
+        expect(@presenter.translate_link_path(@reviewer_user, commit)).
+            to eql(@url_helpers.locale_project_path(locale_id: 'fr', id: commit.project, commit: commit.revision))
+      end
+    end
+
+    context "[Article]" do
+      it "returns the article translate link path" do
+        article = FactoryGirl.create(:article, project: @project)
+        expect(@presenter.translate_link_path(@admin_user, article)).
+            to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: article.project, article_id: article.id))
+        expect(@presenter.translate_link_path(@reviewer_user, article)).
+            to eql(@url_helpers.locale_project_path(locale_id: 'fr', id: article.project, article_id: article.id))
+      end
+    end
+  end
 end

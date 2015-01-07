@@ -16,10 +16,11 @@ class HomeIndexPresenter
   include Rails.application.routes.url_helpers
   include ActionView::Helpers::TextHelper
 
-  attr_reader :stats
+  attr_reader :locales, :stats
   delegate :item_stat, to: :stats
 
   def initialize(commits, articles, locales)
+    @locales = locales
     @stats = ArticleAndCommitNotApprovedTranslationStats.new(commits, articles, locales)
   end
 
@@ -50,8 +51,11 @@ class HomeIndexPresenter
   # @return [String] the path for the translate link
 
   def translate_link_path(user, item)
+    approved_locales = user.admin? ? item.required_locales : user.approved_locales
+    selected_locales = locales.presence || item.required_locales
+    rfc5646_locale = ((approved_locales & selected_locales).presence || approved_locales).first.rfc5646
+
     item_specific_path_params = item.is_a?(Commit) ? { commit: item.revision } : { article_id: item.id }
-    rfc5646_locale = user.admin? ? item.required_locales.first.rfc5646 : user.approved_locales.first.rfc5646
     locale_project_path({ locale_id: rfc5646_locale, id: item.project.to_param }.merge(item_specific_path_params) )
   end
 
