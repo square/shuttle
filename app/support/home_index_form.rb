@@ -71,9 +71,11 @@ class HomeIndexForm
   end
 
   def set_filter__rfc5646_locales
-    rfc5646_locales = params[:filter__rfc5646_locales].to_s.presence || cookies[:home_index__filter__rfc5646_locales].to_s.presence || ""
+    from_param = params.key?(:filter__rfc5646_locales) ? params[:filter__rfc5646_locales] : nil
+    rfc5646_locales = from_param || cookies[:home_index__filter__rfc5646_locales] || ""
     vars[:filter__locales] = rfc5646_locales.split(',').map { |l| Locale.from_rfc5646(l) }.compact
-    vars[:filter__rfc5646_locales] = cookies[:home_index__filter__rfc5646_locales] = vars[:filter__locales].map(&:rfc5646)
+    vars[:filter__rfc5646_locales] = vars[:filter__locales].map(&:rfc5646)
+    cookies[:home_index__filter__rfc5646_locales] = vars[:filter__rfc5646_locales].join(',')
   end
 
   def set_sort__field
