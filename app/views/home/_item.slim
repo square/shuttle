@@ -51,7 +51,7 @@ tr.row_class
     - else
       - if item.priority
         span class="priority-#{item.priority}"
-          = "P" + t("models.#{item_type}.priority.#{item.priority}").to_s
+          = t("models.#{item_type}.priority")[item.priority]
       - else
         | -
 
