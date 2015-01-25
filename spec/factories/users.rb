@@ -36,6 +36,10 @@ FactoryGirl.define do
       role { 'reviewer' }
     end
 
+    trait :monitor do
+      role { 'monitor' }
+    end
+
     trait :admin do
       role { 'admin' }
     end

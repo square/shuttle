@@ -104,6 +104,8 @@ class ProjectsController < ApplicationController
 
   def new
     @project ||= Project.new
+    # Default targeted_rfc5646_locales to display to user.
+    @project.targeted_rfc5646_locales = {@project.base_rfc5646_locale => true}
     respond_with @project
   end
 
@@ -326,13 +328,23 @@ class ProjectsController < ApplicationController
 
   def project_params
     # too hard to do this with strong parameters :(
-    targeted_rfc5646_locales = Hash[params[:project][:required_rfc5646_locales].map {|locale| [locale, true]}]
-    targeted_rfc5646_locales = targeted_rfc5646_locales.merge(
-      Hash[params[:project][:other_rfc5646_locales].map {|locale| [locale, false]}]
-    )
+    if current_user.try!(:admin?)
+      # Only admins can change required locales
+      targeted_rfc5646_locales = Hash[params[:project][:required_rfc5646_locales].map {|locale| [locale, true]}]
+      targeted_rfc5646_locales = targeted_rfc5646_locales.merge(
+        Hash[params[:project][:other_rfc5646_locales].map {|locale| [locale, false]}]
+      )
+    elsif @project
+      # Other roles are forced to maintain the same required locales.
+      targeted_rfc5646_locales = @project.targeted_rfc5646_locales
+    else
+      # Set required locales to just base locale
+      base_rfc5646_locale = Project.columns_hash['base_rfc5646_locale'].default
+      targeted_rfc5646_locales = {base_rfc5646_locale => true}
+    end
 
     params[:project][:skip_imports] = Importer::Base.implementations.map(&:ident) - params[:project][:use_imports]
-    
+
     if params[:project][:use_key_exclusions]
       params[:project][:key_inclusions] = []
     else
@@ -344,7 +356,7 @@ class ProjectsController < ApplicationController
     else
       params[:project][:skip_paths] = []
     end
-    
+
     project_params = params[:project].to_hash.slice(*%w(
         name repository_url base_rfc5646_locale due_date
         github_webhook_url stash_webhook_url skip_imports default_manifest_format key_exclusions
