@@ -84,6 +84,7 @@ legend {
   }
 
   .controls {
+    min-height: 30px;
     margin-left: 180px;
     & + .controls { margin-top: 15px; }
     & > * { width: 100%; }
@@ -93,6 +94,9 @@ legend {
     input[type="checkbox"] { margin-top: 0px; }
     input + input {
       margin-top: 8px;
+    }
+    .spaced-field + .spaced-field {
+      margin-top: 5px;
     }
 
     .twitter-typeahead * {

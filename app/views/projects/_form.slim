@@ -15,9 +15,9 @@
 = form_for @project do |f|
   .row
     .eight.columns
-      fieldset 
+      fieldset
         legend General Settings
-        .control-group 
+        .control-group
           = f.label :name, class: 'control-label'
           .controls
             = f.text_field :name
@@ -27,7 +27,7 @@
           .controls
             = f.text_field :repository_url, class: 'tooltip-parent', :'data-tooltip' => '#repository_url_tooltip'
             .tooltip#repository_url_tooltip
-              | This is the URL you use to check out the project in Git, 
+              | This is the URL you use to check out the project in Git,
               strong not
               |  the GitHub website URL.
 
@@ -36,11 +36,11 @@
           .controls
             = f.text_field :github_webhook_url, class: 'tooltip-parent', :'data-tooltip' => '#github_webhook_url_tooltip'
             .tooltip#github_webhook_url_tooltip
-              | This URL will be posted to when a commit is marked as 'ready'. HTTP Post body will contain 
+              | This URL will be posted to when a commit is marked as 'ready'. HTTP Post body will contain
               tt commit_revision
-              | , 
+              | ,
               tt project_name
-              |  and 
+              |  and
               tt ready
               |  status.
         .control-group
@@ -61,41 +61,42 @@
               |  and,
               tt description
               |  .
-
-      fieldset 
+      fieldset
         legend Locale Settings
-        .control-group 
+        .control-group
           = f.label :base_rfc5646_locale, class: 'control-label'
           .controls
-            = f.text_field :base_rfc5646_locale, class: 'locale-field tooltip-parent',\ 
-                                                 :'data-tooltip' => '#base_rfc5646_tooltip' 
+            = f.text_field :base_rfc5646_locale, class: 'locale-field tooltip-parent',\
+                                                 :'data-tooltip' => '#base_rfc5646_tooltip',\
+                                                 disabled: !current_user.try!(:admin?)
             .tooltip#base_rfc5646_tooltip
               | The locale that the original copy is written in.
 
         .control-group
           = f.label :required_rfc5646_locales, 'Required Localizations', class: 'control-label'
           .controls
-            = f.content_tag_field 'div', :required_rfc5646_locales, \
-              class: 'array-field', 'data-value' => @project.required_rfc5646_locales.to_json
+            - if current_user.try!(:admin?)
+              = f.content_tag_field 'div', :required_rfc5646_locales, \
+                class: 'array-field', 'data-value' => @project.required_rfc5646_locales.to_json
+            - else
+              - @project.required_rfc5646_locales.each do |locale|
+                .spaced-field: input type="text" class='locale-field' value=locale disabled=true
 
         .control-group
           = f.label :other_rfc5646_locales, 'Other Localizations', class: 'control-label'
           .controls
-            = f.content_tag_field 'div', :other_rfc5646_locales, \
-              class: 'array-field', 'data-value' => @project.other_rfc5646_locales.to_json
-            / .tooltip#target_rfc5646_tooltip
-            /   | A comma-delimited list of locales to target. Include any of 
-            /   - if PseudoTranslator.supported_rfc5646_locales.count > 1
-            /     - PseudoTranslator.supported_rfc5646_locales.each do |l|
-            /       code = l
-            /       |  
-            /   | to generate pseudo-translations.
+            - if current_user.try!(:admin?)
+              = f.content_tag_field 'div', :other_rfc5646_locales, \
+                class: 'array-field', 'data-value' => @project.other_rfc5646_locales.to_json
+            - else
+              - @project.other_rfc5646_locales.each do |locale|
+                .spaced-field: input type="text" class='locale-field' value=locale disabled=true
 
-      fieldset 
+      fieldset
         legend Import Settings
 
         / Skip Imports
-        .control-group 
+        .control-group
           = f.label :use_imports, "Use These Importers", class: 'control-label'
             / create a hidden field first so that if all checkboxes are unchecked, we at least get an empty array
           = hidden_field_tag 'project[use_imports][]', ''
@@ -105,9 +106,9 @@
                 = importer.human_name
               = check_box_tag "project[use_imports][]", importer.ident, !@project.skip_imports.include?(importer.ident), id: "project_use_imports_#{index}"
           / p.help-block
-          / | A comma-delimited list of locales to target. Include 
+          / | A comma-delimited list of locales to target. Include
           / - if PseudoTranslator.supported_rfc5646_locales.count > 1
-          /   | any of 
+          /   | any of
           / - PseudoTranslator.supported_rfc5646_locales.each do |l|
           /   code l
           / |  to generate pseudo-translations.
@@ -147,7 +148,7 @@
               | If the filename is specified, then Shuttle will create a
               | file using the given filename.  Otherwise, it will default to
               | manifest.[default_file_extension]
-      fieldset 
+      fieldset
         legend Export Settings
 
         .control-group
@@ -176,7 +177,7 @@
           p.help-block List the keys that must be translated. If at least one inclusion is given, keys not matching will not be translated. UNIX-style globs are supported.
           .controls
             = f.content_tag_field 'div', :key_inclusions, class: 'array-field', 'data-value' => @project.key_inclusions.to_json
-        
+
         .space-group#key-flipswitch-checked
           = f.label :key_exclusions, class: 'control-label'
           p.help-block List the keys you do not want to be translated. UNIX-style globs are supported.
@@ -185,14 +186,14 @@
 
       fieldset
         legend Locale Key Filtering
-        
+
         .space-group
           = f.label :key_locale_inclusions, class: 'control-label'
           p.help-block List the keys that must be translated. If at least one inclusion is given, keys not matching will not be translated. UNIX-style globs are supported.
           .controls
             = f.content_tag_field 'div', :key_locale_inclusions, class: 'hash-field', 'data-value' => @project.key_locale_inclusions.to_json
-          
-        
+
+
         .space-group
           = f.label :key_locale_exclusions, class: 'control-label'
           p.help-block List the keys you do not want to be translated. UNIX-style globs are supported.
@@ -205,7 +206,7 @@
           label.flipswitch-label for="path-flipswitch"
             .flipswitch-inner
             .flipswitch-switch
-      fieldset 
+      fieldset
         legend Path Filtering
 
         .space-group#path-flipswitch-unchecked
@@ -213,8 +214,8 @@
           p.help-block List paths that importers will search for strings. Paths not in this list will not be searched.
           .controls
             = f.content_tag_field 'div', :only_paths, class: 'array-field', 'data-value' => @project.only_paths.to_json
-        
-        
+
+
         .space-group#path-flipswitch-checked
           = f.label :skip_paths, class: 'control-label'
           p.help-block List paths you do not want any importers to scan under for strings.
@@ -223,15 +224,15 @@
 
       fieldset
         legend Importer Path Filtering
-        
-        .space-group        
+
+        .space-group
           = f.label :only_importer_paths, class: 'control-label'
           p.help-block List paths for specific importers to search on. Paths not in this list will not be searched by that importer.
           .controls
             = f.content_tag_field 'div', :only_importer_paths, class: 'hash-field', 'data-value' => @project.only_importer_paths.to_json
-            
-        
-        .space-group        
+
+
+        .space-group
           = f.label :skip_importer_paths, class: 'control-label'
           p.help-block List paths that you want specific importers to skip.
           .controls
@@ -259,9 +260,9 @@
 
   .form-actions
     = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
-    button.default href=projects_url Cancel           
-          
-- content_for :javascript do 
+    button.default href=projects_url Cancel
+
+- content_for :javascript do
   script type='text/javascript'
     - file_name = 'views/projects/_form'
     - js_coffee_erb_file  = Rails.root.join('app', file_name + '.js.coffee.erb')
