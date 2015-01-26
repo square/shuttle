@@ -17,11 +17,81 @@ require 'spec_helper'
 describe ProjectsController do
   render_views
 
+  describe '#create' do
+    context "[monitor role]" do
+      before :each do
+        @request.env['devise.mapping'] = Devise.mappings[:user]
+        @user = FactoryGirl.create(:user, :activated, :monitor)
+        sign_in @user
+
+        @base_rfc5646_locale = 'en'
+        @project_params = FactoryGirl.attributes_for(:project, :light, base_rfc5646_locale: @base_rfc5646_locale).
+                            except(:targeted_rfc5646_locales, :validate_repo_connectivity)
+      end
+
+      it "sets the targeted rfc5646 locales to the base locale regardless of input" do
+        post :create, { project: @project_params.merge({required_rfc5646_locales: %w{es fr}, other_rfc5646_locales: %w{ja}, use_imports: Importer::Base.implementations.map(&:ident)}) }
+        expect(Project.count).to eql(1)
+        project = Project.last
+        expect(project.targeted_rfc5646_locales).to eql({@base_rfc5646_locale => true})
+      end
+    end
+
+    context "[admin role]" do
+      before :each do
+        @request.env['devise.mapping'] = Devise.mappings[:user]
+        @user = FactoryGirl.create(:user, :activated, :admin)
+        sign_in @user
+
+        @base_rfc5646_locale = 'en'
+        @project_params = FactoryGirl.attributes_for(:project, :light, base_rfc5646_locale: @base_rfc5646_locale).
+                            except(:targeted_rfc5646_locales, :validate_repo_connectivity)
+      end
+
+      it "sets the targeted rfc5646 locales to the base locale regardless of input" do
+        post :create, { project: @project_params.merge({required_rfc5646_locales: %w{es fr}, other_rfc5646_locales: %w{ja}, use_imports: Importer::Base.implementations.map(&:ident)}) }
+        expect(Project.count).to eql(1)
+        project = Project.last
+        expect(project.targeted_rfc5646_locales).to eql({'es' => true, 'fr' => true, 'ja' => false})
+      end
+    end
+  end
+
   describe '#update' do
+    context "[monitor role]" do
+      before :each do
+        @request.env['devise.mapping'] = Devise.mappings[:user]
+        @user = FactoryGirl.create(:user, :activated, :monitor)
+        sign_in @user
+
+        @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
+      end
+
+      it "retains the same targeted rfc5646 locales" do
+        patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr}, other_rfc5646_locales: %w{ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+        expect(@project.reload.targeted_rfc5646_locales).to eql({'fr' => true})
+      end
+    end
+
+    context "[admin role]" do
+      before :each do
+        @request.env['devise.mapping'] = Devise.mappings[:user]
+        @user = FactoryGirl.create(:user, :activated, :admin)
+        sign_in @user
+
+        @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
+      end
+
+      it "updates targeted rfc5646 locales" do
+        patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr}, other_rfc5646_locales: %w{ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+        expect(@project.reload.targeted_rfc5646_locales).to eql({'es' => true, 'fr' => true, 'ja' => false})
+      end
+    end
+
     context "[git-based]" do
       before :each do
         @request.env['devise.mapping'] = Devise.mappings[:user]
-        @user = FactoryGirl.create(:user, :activated)
+        @user = FactoryGirl.create(:user, :activated, :admin)
         sign_in @user
 
         @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true}, base_rfc5646_locale: 'en')

@@ -106,6 +106,8 @@ group :development, :test do
   gem 'spring'
   gem 'spring-commands-rspec'
   gem 'mailcatcher'
+  gem 'better_errors'
+  gem 'binding_of_caller'
   #gem 'jasminerice'
   #gem 'guard-jasmine'
 end
