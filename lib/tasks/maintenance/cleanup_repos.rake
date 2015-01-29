@@ -32,8 +32,6 @@ class ReposCleaner
   end
 
   def gc_and_remote_prune(repo)
-    repo.fetch
-
     # This is a little hacky, but necessary. It runs "git gc --prune --auto".
     # The built in `repo.gc` method adds the '--aggressive' option which is
     # too slow, and this avoids that.
