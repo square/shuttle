@@ -54,8 +54,8 @@ describe Importer::Ember do
       it "should add error to commit" do
         expect(@commit.import_errors.sort).to eql([["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
                                                    ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]].sort)
-        expect(@commit.blobs.where(errored: true).count).to eql(1) # these 2 files have the same contents, so they map to the same blob
-        expect(@commit.blobs.where(parsed: false).count).to eql(1)
+        expect(@commit.blobs.where(errored: true).count).to eql(2)
+        expect(@commit.blobs.where(parsed: false).count).to eql(2)
         expect(@commit.blobs.where(parsed: true).count).to eql(0)
       end
     end

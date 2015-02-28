@@ -86,15 +86,13 @@ module Importer
     # Prepares an importer for use with a Blob.
     #
     # @param [Blob] blob A Blob whose strings will be imported.
-    # @param [String] path The path to this blob in the commit currently being
-    #   imported.
     # @param [Commit] commit If given, new Keys will be added to this Commit's
     #   `keys` association.
 
-    def initialize(blob, path, commit=nil)
+    def initialize(blob, commit=nil)
       @blob   = blob
       @commit = commit
-      @file   = File.new(path, nil, nil)
+      @file   = File.new(blob.path, nil, nil)
 
       if @commit
         blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
@@ -298,17 +296,17 @@ module Importer
       # then spawn jobs to create those keys
       if inline
         @keys.in_groups_of(100, false) do |keys|
-          CommitKeyCreator.new.perform @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+          CommitKeyCreator.new.perform @blob.id, @commit.try!(:id), self.class.ident, keys
         end
       elsif @commit
         @commit.import_batch.jobs do
           @keys.in_groups_of(100, false).each do |keys|
-            CommitKeyCreator.perform_once @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+            CommitKeyCreator.perform_once @blob.id, @commit.try!(:id), self.class.ident, keys
           end
         end
       else
         @keys.in_groups_of(100, false) do |keys|
-          CommitKeyCreator.perform_async @blob.project_id, @blob.sha, @commit.try!(:id), self.class.ident, keys
+          CommitKeyCreator.perform_async @blob.id, @commit.try!(:id), self.class.ident, keys
         end
       end
     end

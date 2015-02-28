@@ -16,6 +16,7 @@ FactoryGirl.define do
   factory :blob do
     association :project
     sequence(:sha) { |i| i.to_s(16).rjust(40, '0') }
+    sequence(:path) { |i| "/path/to/#{i}.yaml" }
     skip_sha_check true
   end
 

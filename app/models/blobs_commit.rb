@@ -12,8 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Join table between {Blob} and {Commit}. Indicates what blobs are accessible
-# from what commits.
+# Join table between {Blob} and {Commit}.
 #
 # Associations
 # ------------
@@ -24,6 +23,6 @@
 # | `commit` | The {Commit} with the Blob.     |
 
 class BlobsCommit < ActiveRecord::Base
-  belongs_to :blob, foreign_key: [:project_id, :sha_raw], inverse_of: :blobs_commits
+  belongs_to :blob, inverse_of: :blobs_commits
   belongs_to :commit, inverse_of: :blobs_commits
 end

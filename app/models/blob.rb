@@ -31,16 +31,15 @@
 # |           |                                                                                                                                                                         |
 # |:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 # | `sha`     | The Git identifier for the blob.                                                                                                                                        |
+# | `path`    | The file path for the blob.                                                                                                                                             |
 # | `parsed`  | If `true`, at least one worker finished parsing the {Key Keys} for this blob. Set to true when {Commit commit} import is finished if parsing the blob didn't error out. |
 # | `errored` | If `true`, parsing this blob has failed. Defaults to false.                                                                                                             |
 
 class Blob < ActiveRecord::Base
-  self.primary_keys = :project_id, :sha_raw
-
   belongs_to :project, inverse_of: :blobs
-  has_many :blobs_keys, foreign_key: [:project_id, :sha_raw], inverse_of: :blob, dependent: :delete_all
+  has_many :blobs_keys, inverse_of: :blob, dependent: :delete_all
   has_many :keys, through: :blobs_keys
-  has_many :blobs_commits, foreign_key: [:project_id, :sha_raw], inverse_of: :blob, dependent: :delete_all
+  has_many :blobs_commits, inverse_of: :blob, dependent: :delete_all
   has_many :commits, through: :blobs_commits
 
   extend GitObjectField
@@ -50,12 +49,17 @@ class Blob < ActiveRecord::Base
                    repo_must_exist: true,
                    scope:           :with_sha
 
+  extend DigestField
+  digest_field :path, scope: :with_path
+
   validates :project,
             presence: true
   validates :sha,
             presence: true
+  validates :path,
+            presence: true
 
-  attr_readonly :project_id, :sha_raw
+  attr_readonly :project_id, :sha_raw, :path_sha_raw
 
   # Searches the blob for translatable strings, creates or updates Translations,
   # and associates them with this Blob. Imported strings are approved by
@@ -64,8 +68,6 @@ class Blob < ActiveRecord::Base
   # matches if possible).
   #
   # @param [Class] importer The Importer::Base subclass to process this blob.
-  # @param [String] path The path to this blob under the commit currently being
-  #   imported.
   # @param [Hash] options Additional options.
   # @option options [Locale, nil] locale The locale to scan for strings in (by
   #   default it's the Project's base locale).
@@ -76,9 +78,9 @@ class Blob < ActiveRecord::Base
   # @raise [Git::BlobNotFoundError] If the blob could not be found in the Git
   #   repository.
 
-  def import_strings(importer, path, options={})
+  def import_strings(importer, options={})
     blob! # make sure blob exists
-    importer = importer.new(self, path, options[:commit])
+    importer = importer.new(self, options[:commit])
     importer.inline = options[:inline]
     options[:locale] ? importer.import_locale(options[:locale]) : importer.import
   end
