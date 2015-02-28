@@ -308,6 +308,31 @@ describe Commit do
     end
   end
 
+  describe "#import_blob" do
+    before :each do
+      BlobImporter.stub(:perform_once)
+      allow_any_instance_of(Blob).to receive(:skip_sha_check).and_return(true)
+      @project = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)))
+      @commit = FactoryGirl.create(:commit, project: @project)
+      @file1 = double(Git::Object::Blob, contents: 'hello, world1', sha: 'abc123')
+      @file2 = double(Git::Object::Blob, contents: 'hello, world1', sha: 'abc123')
+    end
+
+    it "should create 2 different blobs for 2 different files even if their contents (thus SHAs) are same" do
+      @commit.send(:import_blob, '/config/locales/en.yml', @file1)
+      @commit.send(:import_blob, '/config/locales/en-US.yml', @file2)
+
+      expect(@commit.reload.blobs.count).to eql(2)
+    end
+
+    it "doesn't create a new blob if the file has already been imported before" do
+      @commit.send(:import_blob, '/config/locales/en.yml', @file1)
+      expect(@commit.reload.blobs.count).to eql(1)
+      @commit.send(:import_blob, '/config/locales/en.yml', @file2)
+      expect(@commit.reload.blobs.count).to eql(1)
+    end
+  end
+
   describe "#skip_key?" do
     before :each do
       @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)

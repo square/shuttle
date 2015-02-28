@@ -20,11 +20,11 @@ describe CommitKeyCreator do
       it "adds import errors to commit in redis when key creator fails due to a Git::CommitNotFoundError" do
         project = FactoryGirl.create(:project)
         commit = FactoryGirl.create(:commit, project: project)
-        FactoryGirl.create(:blob, sha: "abc123", project: project)
+        blob = FactoryGirl.create(:blob, sha: "abc123", project: project)
 
         expect(CommitKeyCreator).to receive(:update_key_associations).and_raise(Git::CommitNotFoundError, "abc123")
-        expect { CommitKeyCreator.new.perform(project.id, "abc123", commit.id, "yaml", []) }.to_not raise_error
-        expect(commit.reload.import_errors).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in CommitKeyCreator for commit_id #{commit.id} and blob abc123)"]])
+        expect { CommitKeyCreator.new.perform(blob.id, commit.id, "yaml", []) }.to_not raise_error
+        expect(commit.reload.import_errors).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in CommitKeyCreator for commit_id #{commit.id} and blob_id #{blob.id})"]])
       end
     end
   end

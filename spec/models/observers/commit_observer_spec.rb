@@ -27,7 +27,7 @@ describe CommitObserver do
                                                     ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
                                                     ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]].sort)
 
-          expect(Blob.where(errored: true).count).to eql(2) # en-US.coffee and en-US.js files have the same contents, so they map to the same blob
+          expect(Blob.where(errored: true).count).to eql(3)
         end
 
         it "should email if commit has import errors after submitting twice" do
@@ -35,10 +35,10 @@ describe CommitObserver do
           project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
 
           commit_and_expect_import_errors(project, 'a82cf69f11618883e534189dea61f234da914462', user)
-          expect(Blob.count).to eql(2) # see above
+          expect(Blob.count).to eql(3)
 
           commit_and_expect_import_errors(project, 'c04aeaa2bd9d8ff21c12eda2cb56e8622abb4727', user) # this is (almost) an empty commit
-          expect(Blob.count).to eql(3)  # see above
+          expect(Blob.count).to eql(4)
         end
       end
 

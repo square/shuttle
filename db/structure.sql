@@ -91,7 +91,12 @@ CREATE TABLE blobs (
     project_id integer NOT NULL,
     sha_raw bytea NOT NULL,
     parsed boolean DEFAULT false NOT NULL,
-    errored boolean DEFAULT false NOT NULL
+    errored boolean DEFAULT false NOT NULL,
+    id integer NOT NULL,
+    path text NOT NULL,
+    path_sha_raw bytea NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 
 
@@ -100,10 +105,50 @@ CREATE TABLE blobs (
 --
 
 CREATE TABLE blobs_commits (
-    project_id integer NOT NULL,
-    sha_raw bytea NOT NULL,
-    commit_id integer NOT NULL
+    commit_id integer NOT NULL,
+    id integer NOT NULL,
+    blob_id integer NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
+
+
+--
+-- Name: blobs_commits_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE blobs_commits_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: blobs_commits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE blobs_commits_id_seq OWNED BY blobs_commits.id;
+
+
+--
+-- Name: blobs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE blobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: blobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE blobs_id_seq OWNED BY blobs.id;
 
 
 --
@@ -111,10 +156,31 @@ CREATE TABLE blobs_commits (
 --
 
 CREATE TABLE blobs_keys (
-    project_id integer NOT NULL,
-    sha_raw bytea NOT NULL,
-    key_id integer NOT NULL
+    key_id integer NOT NULL,
+    id integer NOT NULL,
+    blob_id integer NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
+
+
+--
+-- Name: blobs_keys_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE blobs_keys_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: blobs_keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE blobs_keys_id_seq OWNED BY blobs_keys.id;
 
 
 --
@@ -746,6 +812,27 @@ ALTER TABLE ONLY articles ALTER COLUMN id SET DEFAULT nextval('articles_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY blobs ALTER COLUMN id SET DEFAULT nextval('blobs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_commits ALTER COLUMN id SET DEFAULT nextval('blobs_commits_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_keys ALTER COLUMN id SET DEFAULT nextval('blobs_keys_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY comments ALTER COLUMN id SET DEFAULT nextval('comments_id_seq'::regclass);
 
 
@@ -860,7 +947,7 @@ ALTER TABLE ONLY articles
 --
 
 ALTER TABLE ONLY blobs_commits
-    ADD CONSTRAINT blobs_commits_pkey PRIMARY KEY (project_id, sha_raw, commit_id);
+    ADD CONSTRAINT blobs_commits_pkey PRIMARY KEY (id);
 
 
 --
@@ -868,7 +955,7 @@ ALTER TABLE ONLY blobs_commits
 --
 
 ALTER TABLE ONLY blobs_keys
-    ADD CONSTRAINT blobs_keys_pkey PRIMARY KEY (project_id, sha_raw, key_id);
+    ADD CONSTRAINT blobs_keys_pkey PRIMARY KEY (id);
 
 
 --
@@ -876,7 +963,7 @@ ALTER TABLE ONLY blobs_keys
 --
 
 ALTER TABLE ONLY blobs
-    ADD CONSTRAINT blobs_pkey PRIMARY KEY (project_id, sha_raw);
+    ADD CONSTRAINT blobs_pkey PRIMARY KEY (id);
 
 
 --
@@ -1078,10 +1165,24 @@ CREATE UNIQUE INDEX index_articles_on_project_id_and_name_sha_raw ON articles US
 
 
 --
--- Name: index_blobs_on_project_id_and_sha_raw_and_errored; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_blobs_commits_on_blob_id_and_commit_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE INDEX index_blobs_on_project_id_and_sha_raw_and_errored ON blobs USING btree (project_id, sha_raw, errored);
+CREATE UNIQUE INDEX index_blobs_commits_on_blob_id_and_commit_id ON blobs_commits USING btree (blob_id, commit_id);
+
+
+--
+-- Name: index_blobs_keys_on_blob_id_and_key_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_blobs_keys_on_blob_id_and_key_id ON blobs_keys USING btree (blob_id, key_id);
+
+
+--
+-- Name: index_blobs_on_project_id_and_sha_raw_and_path_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_blobs_on_project_id_and_sha_raw_and_path_sha_raw ON blobs USING btree (project_id, sha_raw, path_sha_raw);
 
 
 --
@@ -1254,6 +1355,14 @@ ALTER TABLE ONLY articles
 
 
 --
+-- Name: blobs_commits_blob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY blobs_commits
+    ADD CONSTRAINT blobs_commits_blob_id_fkey FOREIGN KEY (blob_id) REFERENCES blobs(id) ON DELETE CASCADE;
+
+
+--
 -- Name: blobs_commits_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1262,11 +1371,11 @@ ALTER TABLE ONLY blobs_commits
 
 
 --
--- Name: blobs_commits_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs_keys_blob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY blobs_commits
-    ADD CONSTRAINT blobs_commits_project_id_fkey FOREIGN KEY (project_id, sha_raw) REFERENCES blobs(project_id, sha_raw) ON DELETE CASCADE;
+ALTER TABLE ONLY blobs_keys
+    ADD CONSTRAINT blobs_keys_blob_id_fkey FOREIGN KEY (blob_id) REFERENCES blobs(id) ON DELETE CASCADE;
 
 
 --
@@ -1275,22 +1384,6 @@ ALTER TABLE ONLY blobs_commits
 
 ALTER TABLE ONLY blobs_keys
     ADD CONSTRAINT blobs_keys_key_id_fkey FOREIGN KEY (key_id) REFERENCES keys(id) ON DELETE CASCADE;
-
-
---
--- Name: blobs_keys_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY blobs_keys
-    ADD CONSTRAINT blobs_keys_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-
---
--- Name: blobs_keys_project_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY blobs_keys
-    ADD CONSTRAINT blobs_keys_project_id_fkey1 FOREIGN KEY (project_id, sha_raw) REFERENCES blobs(project_id, sha_raw) ON DELETE CASCADE;
 
 
 --
@@ -1618,3 +1711,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141218002351');
 INSERT INTO schema_migrations (version) VALUES ('20141229041151');
 
 INSERT INTO schema_migrations (version) VALUES ('20141230094906');
+
+INSERT INTO schema_migrations (version) VALUES ('20150228020547');

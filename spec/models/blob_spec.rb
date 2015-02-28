@@ -22,15 +22,14 @@ describe Blob do
   end
 
   describe "#import_strings" do
-
     it "should call #import on an importer subclass" do
       expect(@blob).to receive(:blob!).and_return(double(Git::Object::Blob))
       imp      = Importer::Base.implementations
       instance = double(imp.to_s, :skip? => false)
-      expect(imp).to receive(:new).once.with(@blob, 'some/path', nil).and_return(instance)
+      expect(imp).to receive(:new).once.with(@blob, nil).and_return(instance)
       allow(instance).to receive(:inline=)
       expect(instance).to receive(:import).once
-      @blob.import_strings imp, 'some/path'
+      @blob.import_strings imp
     end
 
     it "should pass a commit if given using :commit" do
@@ -39,16 +38,16 @@ describe Blob do
       imp      = Importer::Base.implementations.first
       instance = double(imp.to_s, :skip? => false)
       allow(instance).to receive(:inline=)
-      expect(imp).to receive(:new).once.with(@blob, 'some/path', commit).and_return(instance)
+      expect(imp).to receive(:new).once.with(@blob, commit).and_return(instance)
       expect(instance).to receive(:import).once
-      @blob.import_strings imp, 'some/path', commit: commit
+      @blob.import_strings imp, commit: commit
     end
 
     it "should raise an exception if sha is still unknown after fetching" do
       allow(@project).to receive(:repo).and_yield(@repo)
       expect(@repo).to receive(:fetch).once
       expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
-      expect { @blob.import_strings(double(Importer::Yaml), 'some/path') }.to raise_error(Git::BlobNotFoundError)
+      expect { @blob.import_strings(double(Importer::Yaml)) }.to raise_error(Git::BlobNotFoundError)
     end
   end
 
