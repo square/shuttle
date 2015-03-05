@@ -21,29 +21,25 @@ class BlobImporter
   # Executes this worker.
   #
   # @param [String] importer The ident of an importer.
-  # @param [Fixnum] project_id The ID of a Project.
-  # @param [Fixnum] sha The SHA of a blob in the Project's repository.
-  # @param [String] path The path to the blob being imported, in the repository.
+  # @param [Fixnum] blob_id The ID of the blob being imported.
   # @param [Fixnum] commit_id The ID of the Commit with this blob.
   # @param [String] rfc5646_locale The RFC 5646 code of a locale to import
   #   existing translations from. If `nil`, the base locale is imported as
   #   base translations.
 
-  def perform(importer, project_id, sha, path, commit_id, rfc5646_locale)
-    commit  = Commit.find_by_id(commit_id)
-    locale  = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
-    project = Project.find(project_id)
-    blob    = project.blobs.with_sha(sha).first!
+  def perform(importer, blob_id, commit_id, rfc5646_locale)
+    commit = Commit.find_by_id(commit_id)
+    locale = rfc5646_locale ? Locale.from_rfc5646(rfc5646_locale) : nil
+    blob   = Blob.find(blob_id)
 
     importer = Importer::Base.find_by_ident(importer)
 
     blob.import_strings importer,
-                        path,
                         commit: commit,
                         locale: locale,
                         inline: jid.nil?
   rescue Git::CommitNotFoundError, Git::BlobNotFoundError => err
-    commit.add_import_error(err, "failed in BlobImporter for commit_id #{commit_id} and blob #{sha}")
+    commit.add_import_error(err, "failed in BlobImporter for commit_id #{commit_id} and blob_id #{blob_id}")
   end
 
   include SidekiqLocking

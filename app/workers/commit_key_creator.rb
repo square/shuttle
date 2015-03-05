@@ -22,17 +22,15 @@ class CommitKeyCreator
 
   # Executes this worker.
   #
-  # @param [Fixnum] project_id The ID of a {Blob}'s {Project} these Keys were
-  #   all imported from.
-  # @param [Fixnum] sha The SHA of a Blob these Keys were all imported from.
-  # @param [String] commit_id The ID of a {Commit} these Keys will be associated
+  # @param [Fixnum] blob_id The ID of a Blob these Keys were all imported from.
+  # @param [Fixnum] commit_id The ID of a {Commit} these Keys will be associated
   #   with.
   # @param [String] importer The identifier for the {Importer::Base} subclass
   #   that imported these keys.
   # @param [Array<Hash>] keys An array of key data.
 
-  def perform(project_id, sha, commit_id, importer, keys, shuttle_jid=nil)
-    @blob     = Blob.where(project_id: project_id).with_sha(sha).first!
+  def perform(blob_id, commit_id, importer, keys, shuttle_jid=nil)
+    @blob     = Blob.find(blob_id)
     @commit   = Commit.find(commit_id) if commit_id
     @importer = Importer::Base.find_by_ident(importer)
 
@@ -48,7 +46,7 @@ class CommitKeyCreator
       self.class.update_key_associations key_objects, @commit
     end
   rescue Git::CommitNotFoundError => err
-    @commit.add_import_error(err, "failed in CommitKeyCreator for commit_id #{commit_id} and blob #{sha}") if @commit
+    @commit.add_import_error(err, "failed in CommitKeyCreator for commit_id #{commit_id} and blob_id #{@blob.id}") if @commit
   end
 
   # Given a set of keys, bulk-updates their commits-keys associations and

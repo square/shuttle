@@ -18,7 +18,7 @@ describe CommitImporter do
   context "[unit-tests]" do
     describe "#perform" do
       context "[rescue Git::CommitNotFoundError]" do
-        it "adds import errors to commit in redis when commit importer fails due to a Git::CommitNotFoundError" do
+        it "adds import errors to commit when commit importer fails due to a Git::CommitNotFoundError" do
           allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_return(nil)
           project = FactoryGirl.create(:project)
           commit = FactoryGirl.create(:commit, revision: "abc123", project: project)
@@ -56,9 +56,12 @@ describe CommitImporter do
           ActionMailer::Base.deliveries.clear
           commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
 
+          blob_not_found = commit.blobs.with_sha("88e5b52732c23a4e33471d91cf2281e62021512a").first
+          blob_for_which_commit_not_found = commit.blobs.with_sha("b80d7482dba100beb55e65e82c5edb28589fa045").first
+
           expected_errors = [["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
-                             ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"],
-                             ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in CommitKeyCreator for commit_id #{commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"],
+                             ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob_id #{blob_not_found.id})"],
+                             ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in CommitKeyCreator for commit_id #{commit.id} and blob_id #{blob_for_which_commit_not_found.id})"],
                              ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
                              ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]]
 

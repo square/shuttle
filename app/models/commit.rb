@@ -226,13 +226,11 @@ class Commit < ActiveRecord::Base
     clear_import_errors! # clear out any previous import errors
 
     import_batch.jobs do
-      blobs = project.blobs.includes(:project) # preload blobs for performance
-
       # clear out existing keys so that we can import all new keys
       commits_keys.delete_all unless options[:locale]
       # perform the recursive import
-      traverse(commit!) do |path, blob|
-        import_blob path, blob, options.merge(blobs: blobs)
+      traverse(commit!) do |path, git_blob|
+        import_blob path, git_blob, options
       end
     end
   end
@@ -366,26 +364,14 @@ class Commit < ActiveRecord::Base
     end
   end
 
-  def import_blob(path, blob, options={})
+  def import_blob(path, git_blob, options={})
     return if project.skip_tree?(path)
     imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
 
-    blob_object = if options[:blobs]
-                    begin
-                      options[:blobs].detect { |b| b.sha == blob.sha } || begin
-                        blob = project.blobs.with_sha(blob.sha).create!(sha: blob.sha)
-                        options[:blobs] << blob
-                        blob
-                      end
-                    rescue ActiveRecord::RecordNotUnique
-                      project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
-                    end
-                  else
-                    project.blobs.with_sha(blob.sha).find_or_create!(sha: blob.sha)
-                  end
+    blob = project.blobs.with_sha(git_blob.sha).with_path(path).find_or_create!(sha: git_blob.sha, path: path)
 
     imps.each do |importer|
-      importer = importer.new(blob_object, path, self)
+      importer = importer.new(blob, self)
 
       # we can't do a force import on a loading blob -- if we delete all the
       # blobs_keys while another sidekiq job is doing the import, when that job
@@ -394,20 +380,17 @@ class Commit < ActiveRecord::Base
       # might start, see the blob as not loading, and then do a fast import of
       # the cached keys (even though not all keys have been loaded by the second
       # import).
-      if options[:force] && blob_object.parsed?
-        blob_object.blobs_keys.delete_all
-        blob_object.update_column :parsed, false
+      if options[:force] && blob.parsed?
+        blob.blobs_keys.delete_all
+        blob.update_column :parsed, false
       end
 
-      if importer.skip?(options[:locale])
-        #Importer::SKIP_LOG.info "commit=#{revision} blob=#{blob.sha} path=#{blob_path} importer=#{importer.class.ident} #skip? returned true for #{options[:locale].inspect}"
-        next
-      end
+      next if importer.skip?(options[:locale])
 
       if options[:inline]
-        BlobImporter.new.perform importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
+        BlobImporter.new.perform importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
       else
-        BlobImporter.perform_once importer.class.ident, project.id, blob.sha, path, id, options[:locale].try!(:rfc5646)
+        BlobImporter.perform_once importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
       end
     end
   end

@@ -163,7 +163,6 @@ class Key < ActiveRecord::Base
 
   attr_readonly :project_id, :source_copy
 
-  scope :in_blob, ->(blob) { where(project_id: blob.project_id, sha_raw: blob.sha_raw) }
   scope :active_in_section, -> { where("keys.index_in_section IS NOT NULL") } # these are keys that are active in a Section
   scope :ready, -> { where( keys: { ready: true} ) }
   scope :not_ready, -> { where( keys: { ready: false} ) }
