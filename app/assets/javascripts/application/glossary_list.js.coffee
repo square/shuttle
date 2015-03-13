@@ -101,7 +101,7 @@ class root.GlossaryList
         error: =>
           this.error("Couldn’t add new term.")
           this.loadGlossaryEntries()
-      @addEntryModal.modal('hide')
+      @addEntryModal.closeModal()
       return false
 
   # @private
