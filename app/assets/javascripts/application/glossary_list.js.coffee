@@ -79,7 +79,7 @@ class root.GlossaryList
       glossaryAnchor = $('<tbody/>', 
         id: 'glossary-table-' + letter,
         class: 'glossary-table-anchor'
-      ).hide().fadeIn().appendTo(@glossaryTable)
+      ).appendTo(@glossaryTable)
       glossaryAnchor.append($('<tr/>').append($('<td/>').append($('<strong/>').text(letter))))
 
   # @private
@@ -101,7 +101,7 @@ class root.GlossaryList
         error: =>
           this.error("Couldn’t add new term.")
           this.loadGlossaryEntries()
-      @addEntryModal.modal('hide')
+      @addEntryModal.closeModal()
       return false
 
   # @private
@@ -223,10 +223,10 @@ class root.GlossaryList
             firstLetter = sourceEntry.source_copy.substr(0, 1).toUpperCase()
             if firstLetter.match(/[A-Z]/)
               $('#glossary-table-' + firstLetter)
-                .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
+                .after($(HoganTemplates['glossary/glossary_entry'].render(context)))
             else 
               $('#glossary-table-\\#')
-                .after($(HoganTemplates['glossary/glossary_entry'].render(context)).hide().fadeIn())
+                .after($(HoganTemplates['glossary/glossary_entry'].render(context)))
 
         for domLocaleEntry in $('.glossary-table-locale-entry')
           locale = $(domLocaleEntry).data('locale') 
@@ -275,7 +275,7 @@ class root.GlossaryList
                       .hide().removeClass("text-info text-success").addClass("text-error").fadeIn(500)
           )(domLocaleEntry, addLocaleEntryUrl, rejectLocaleEntryUrl, locale, localeId))
 
-        @glossaryTable.find("input, textarea, button, a").click (e) -> 
+        @glossaryTable.find("input, textarea, button, a").click (e) ->
           e.stopPropagation()
 
         new TableAccordion(@glossaryTable)
