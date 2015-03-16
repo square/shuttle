@@ -60,17 +60,6 @@ class LocaleGlossaryEntry < ActiveRecord::Base
   extend LocaleField
   locale_field :locale
 
-  include Tire::Model::Search
-  include Tire::Model::Callbacks
-  mapping do
-    indexes :copy, analyzer: 'snowball', as: 'copy'
-    indexes :id, type: 'integer', index: :not_analyzed
-    indexes :source_glossary_entry_id, type: 'integer'
-    indexes :rfc5646_locale, type: 'string'
-    indexes :translated, type: 'boolean'
-    indexes :approved, type: 'integer', as: 'if approved==true then 1 elsif approved==false then 0 else nil end'
-  end
-
   before_update :reset_reviewed
 
   # Checks to ensure that the targeted locale is not the same as the source
