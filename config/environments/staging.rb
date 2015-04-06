@@ -26,7 +26,7 @@ Shuttle::Application.configure do
 
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = false
-  config.action_controller.perform_caching = false
+  config.action_controller.perform_caching = true
 
   # Enable Rack::Cache to put a simple HTTP cache in front of your application
   # Add `rack-cache` to your Gemfile before enabling this.
@@ -64,6 +64,10 @@ Shuttle::Application.configure do
 
   # Use a different logger for distributed setups.
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
+
+  # Use a different cache store in production.
+  config.cache_store                       = Shuttle::Configuration.app.cache_store.type, Shuttle::Configuration.app.cache_store.endpoint, {expires_in: 90.minutes}
+  config.action_dispatch.rack_cache        = Shuttle::Configuration.app.action_dispatch.rack_cache.symbolize_keys
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.action_controller.asset_host = "http://assets.example.com"
