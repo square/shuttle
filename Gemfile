@@ -7,6 +7,7 @@ ruby '2.0.0', :patchlevel => '576'
 gem 'rails', '4.0.9'
 gem 'configoro'
 gem 'redis-rails'
+gem 'redis-rack-cache'
 gem 'rack-cache', require: 'rack/cache'
 gem 'boolean'
 

@@ -242,6 +242,9 @@ GEM
     redis-rack (1.5.0)
       rack (~> 1.5)
       redis-store (~> 1.1.0)
+    redis-rack-cache (1.2.2)
+      rack-cache (~> 1.2)
+      redis-store (~> 1.1.0)
     redis-rails (4.0.0)
       redis-actionpack (~> 4)
       redis-activesupport (~> 4)
@@ -417,6 +420,7 @@ DEPENDENCIES
   redcarpet
   redis-mutex
   redis-namespace
+  redis-rack-cache
   redis-rails
   rspec-rails (< 3.0.0)
   sass-rails (= 4.0.3)
