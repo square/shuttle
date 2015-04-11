@@ -145,6 +145,7 @@ en:
     application:
       mass_assignment_security: You tried to modify something you weren’t allowed to!
       monitor_required: You must be a monitor to do that.
+      monitor_or_reviewer_required: You must be a monitor or a reviewer to do that.
       translator_required: You must be a translator to do that.
       reviewer_required: You must be a reviewer to do that.
       admin_required: You must be an administrator to do that.
