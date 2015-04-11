@@ -197,6 +197,21 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # `before_filter` that requires that a user be logged in and have the role of
+  # monitor or reviewer.
+
+  def monitor_or_reviewer_required
+    if current_user.try!(:monitor?) or current_user.try!(:reviewer?)
+      return true
+    else
+      respond_to do |format|
+        format.html { redirect_to root_url, alert: t('controllers.application.monitor_or_reviewer_required') }
+        format.any { head :forbidden }
+      end
+      return false
+    end
+  end
+
   # @private
   def after_sign_out_path_for(resource_or_scope)
     new_user_session_url
