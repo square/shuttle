@@ -58,33 +58,54 @@ describe ProjectsController do
   end
 
   describe '#update' do
-    context "[monitor role]" do
-      before :each do
-        @request.env['devise.mapping'] = Devise.mappings[:user]
-        @user = FactoryGirl.create(:user, :activated, :monitor)
-        sign_in @user
+    %i(monitor reviewer).each do |role|
+      context "[#{role} role]" do
+        before :each do
+          @request.env['devise.mapping'] = Devise.mappings[:user]
+          @user = FactoryGirl.create(:user, :activated, role)
+          sign_in @user
 
-        @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
-      end
+          @project = FactoryGirl.create(:project, :light, repository_url: nil, name: "test1")
+        end
 
-      it "retains the same targeted rfc5646 locales" do
-        patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr}, other_rfc5646_locales: %w{ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
-        expect(@project.reload.targeted_rfc5646_locales).to eql({'fr' => true})
+        it "can update basic attributes such as name" do
+          patch :update, { id: @project.to_param, project: { name: "test2", use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+          expect(@project.reload.name).to eql("test2")
+        end
       end
     end
 
-    context "[admin role]" do
-      before :each do
-        @request.env['devise.mapping'] = Devise.mappings[:user]
-        @user = FactoryGirl.create(:user, :activated, :admin)
-        sign_in @user
+    context "[rfc5646 locales]" do
+      %i(monitor reviewer).each do |role|
+        context "[#{role} role]" do
+          before :each do
+            @request.env['devise.mapping'] = Devise.mappings[:user]
+            @user = FactoryGirl.create(:user, :activated, role)
+            sign_in @user
 
-        @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
+            @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
+          end
+
+          it "retains the same targeted rfc5646 locales" do
+            patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr}, other_rfc5646_locales: %w{ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+            expect(@project.reload.targeted_rfc5646_locales).to eql({'fr' => true})
+          end
+        end
       end
 
-      it "updates targeted rfc5646 locales" do
-        patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr}, other_rfc5646_locales: %w{ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
-        expect(@project.reload.targeted_rfc5646_locales).to eql({'es' => true, 'fr' => true, 'ja' => false})
+      context "[admin role]" do
+        before :each do
+          @request.env['devise.mapping'] = Devise.mappings[:user]
+          @user = FactoryGirl.create(:user, :activated, :admin)
+          sign_in @user
+
+          @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
+        end
+
+        it "updates targeted rfc5646 locales" do
+          patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr}, other_rfc5646_locales: %w{ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+          expect(@project.reload.targeted_rfc5646_locales).to eql({'es' => true, 'fr' => true, 'ja' => false})
+        end
       end
     end
 
