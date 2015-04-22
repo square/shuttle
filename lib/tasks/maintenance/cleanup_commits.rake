@@ -31,11 +31,11 @@ class CommitsCleaner
   end
 
   # Destroys old commits from projects if there are too many of them.
-  # For each project, only keep 250 most recent `ready` commits.
+  # For each project, only keep 100 most recent `ready` commits.
   def destroy_old_excess_commits_per_project
     log("[destroy_old_excess_commits_per_project]")
     Project.find_each do |project|
-      project.commits.ready.order('created_at DESC').offset(250).find_each do |commit|
+      project.commits.ready.order('created_at DESC').offset(100).find_each do |commit|
         destroy_and_notify_stash(commit)
       end
     end
