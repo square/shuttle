@@ -37,24 +37,40 @@ module Localizer
     def localize(input_file, output_file, locale)
       xml = Nokogiri::XML(input_file.content)
 
+      # xml.css is a costly method, calling it for each key separately is very slow.
+      # So, we create a temporary cache in the form of a hash.
+      xml_strings_hash = xml.css("string").reduce({}) do |hsh, elt|
+        key = elt.attr(:name)
+        raise "Multiple tags with key #{key} found" if hsh.key?(key)
+        hsh.tap { |hsh| hsh[key] = elt }
+      end
+
+      xml_string_arrays_hash = xml.css("string-array").reduce({}) do |hsh, elt|
+        key = elt.attr(:name)
+        raise "Multiple string-array tags with key #{key} found" if hsh.key?(key)
+        hsh.tap { |hsh| hsh[key] = elt }
+      end
+
+      xml_plurals_hash = xml.css("plurals").reduce({}) do |hsh, elt|
+        key = elt.attr(:name)
+        raise "Multiple tags with key #{key} found" if hsh.key?(key)
+        hsh.tap { |hsh| hsh[key] = elt }
+      end
+
       @translations.each do |translation|
         key = translation.key.key.split(':').last
         case key
           when /^(\w+)\[(\d+)\]$/
-            tags = xml.css("string-array[name=#{$1}]")
-            raise "Multiple string-array tags with key #{$1} found" if tags.size > 1
-            raise "No string-array tag with key #{$1} found" if tags.empty?
-            tag = tags.first
+            tag = xml_string_arrays_hash[$1]
+            raise "No string-array tag with key #{$1} found" unless tag
 
             subtag = tag.css('item')[$2.to_i]
             raise "No string-array child tag with key #{$1}[#{$2}] found" unless subtag
 
             subtag.inner_html = escape(translation.copy)
           when /^(\w+)\[(\w+)\]$/
-            tags = xml.css("plurals[name=#{$1}]")
-            raise "Multiple tags with key #{$1} found" if tags.size > 1
-            raise "No tag with key #{$1} found" if tags.empty?
-            tag = tags.first
+            tag = xml_plurals_hash[$1]
+            raise "No tag with key #{$1} found" unless tag
 
             subtags = tag.css("item[quantity=#{$2}]")
             raise "Multiple plurals child tags with key #{$1} found" if subtags.size > 1
@@ -62,11 +78,8 @@ module Localizer
 
             subtags.first.inner_html = escape(translation.copy)
           else
-            tags = xml.css("string[name=#{key}]")
-            raise "Multiple tags with key #{key} found" if tags.size > 1
-            raise "No tag with key #{key} found" if tags.empty?
-            tag = tags.first
-
+            tag = xml_strings_hash[key]
+            raise "No tag with key #{key} found" unless tag
             tag.inner_html = escape(translation.copy)
         end
       end
