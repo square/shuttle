@@ -19,7 +19,7 @@ div id="navbar-container"
         a href="/#"
           = content_for?(:shuttle_logo) ? yield(:shuttle_logo) : image_tag("shuttle.png")
       - if current_user
-        - if current_user.monitor?
+        - if current_user.monitor? or current_user.reviewer?
           li class=("active" if controller_name == "projects")
             a href=projects_url Projects
         - if current_user.translator?
