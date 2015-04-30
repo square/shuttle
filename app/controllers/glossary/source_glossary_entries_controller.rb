@@ -32,7 +32,7 @@ class Glossary::SourceGlossaryEntriesController < ApplicationController
   # * `GET /glossary/sources`
 
   def index
-    @entries = SourceGlossaryEntry.eager_load(:locale_glossary_entries).sort_by(&:source_copy)
+    @entries = SourceGlossaryEntry.eager_load(:locale_glossary_entries).sort_by { |e| e.source_copy.downcase }
 
     respond_with @entries do |format|
       format.json { render json: decorate(@entries).to_json }
