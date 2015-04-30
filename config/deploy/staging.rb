@@ -1,7 +1,7 @@
 set :stage, :staging
 set :rails_env, :staging
 
-single_server = "square@shuttle-stage-a-01.corp.squareup.com"
+single_server = "square@shuttle-stage-b-01.corp.squareup.com"
 
 role :app,          [single_server]
 role :web,          [single_server]
