@@ -24,7 +24,7 @@ class CommitsCleaner
   # Destroys any commit older than 2 days, which errored during an import.
   def destroy_old_commits_which_errored_during_import
     log("[destroy_old_commits_which_errored_during_import]")
-    Commit.errored_during_import.where("created_at < ?", 2.days.ago).find_each do |commit|
+    Commit.errored_during_import.where("created_at < ?", 2.days.ago).each do |commit|
       log("import errors for #{commit.revision}: #{commit.import_errors}")
       destroy_and_notify_stash(commit)
     end
@@ -35,7 +35,7 @@ class CommitsCleaner
   def destroy_old_excess_commits_per_project
     log("[destroy_old_excess_commits_per_project]")
     Project.find_each do |project|
-      project.commits.ready.order('created_at DESC').offset(100).find_each do |commit|
+      project.commits.ready.order('created_at DESC').offset(100).each do |commit|
         destroy_and_notify_stash(commit)
       end
     end
