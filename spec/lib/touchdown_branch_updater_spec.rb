@@ -91,6 +91,14 @@ describe TouchdownBranchUpdater do
         TouchdownBranchUpdater.new(project).update
       end
 
+      it "logs an info and doesn't raise an error if the touchdown branch doesn't exist" do
+        project.update! watched_branches: %w(master), touchdown_branch: 'doesntexist'
+        commit_and_translate(project, head_revision)
+
+        expect(Rails.logger).to receive(:info).with("[TouchdownBranchUpdater] Touchdown branch doesntexist doesn't exist in #{project.inspect}")
+        expect { TouchdownBranchUpdater.new(project).update }.to_not raise_error
+      end
+
       it "logs an error if updating the touchdown branch takes longer than 1 minute" do
         project.update! watched_branches: %w(master)
         commit_and_translate(project, head_revision)
