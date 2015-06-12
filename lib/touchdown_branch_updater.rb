@@ -29,7 +29,14 @@ class TouchdownBranchUpdater
 
       working_repo.fetch
       working_repo.reset_hard # cleanup any lingering changes
-      working_repo.update_ref("refs/heads/#{touchdown_branch}", working_repo.object("origin/#{touchdown_branch}").sha)
+
+      touchdown_branch_git_obj = working_repo.object("origin/#{touchdown_branch}")
+      unless touchdown_branch_git_obj
+        Rails.logger.info "[TouchdownBranchUpdater] Touchdown branch #{touchdown_branch} doesn't exist in #{project.inspect}"
+        return
+      end
+
+      working_repo.update_ref("refs/heads/#{touchdown_branch}", touchdown_branch_git_obj.sha)
       working_repo.reset_hard # cleanup any lingering changes
       working_repo.checkout(source_branch)
       working_repo.reset_hard("origin/#{source_branch}")

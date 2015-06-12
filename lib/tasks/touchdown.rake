@@ -16,7 +16,7 @@ namespace :touchdown do
     Shuttle::Redis.expire TOUCHDOWN_BRANCH_KEY, 5.minutes
     Rails.logger.info "[touchdown:update] Successfully obtained lock.  Updating touchdown branch."
 
-    Project.all.each do |p| 
+    Project.git.each do |p|
       project_start_time = Time.now 
       Rails.logger.info "[touchdown:update] Starting update for project #{p.name}."
       TouchdownBranchUpdater.new(p).update
