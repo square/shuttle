@@ -9,7 +9,7 @@ namespace :autotranslate do
     word_substitutor = WordSubstitutor.new(source_locale, target_locale)
     untranslated_strings = Translation.in_locale(target_locale).not_translated
 
-    untranslated_strings.each do |translation|
+    untranslated_strings.includes(:key).each do |translation|
       copy = word_substitutor.substitutions(translation.source_copy).string
       begin
         translation.update!(copy: copy)
