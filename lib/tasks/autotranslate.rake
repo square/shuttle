@@ -13,8 +13,9 @@ namespace :autotranslate do
       copy = word_substitutor.substitutions(translation.source_copy).string
       begin
         translation.update!(copy: copy)
-      rescue
-        Rails.logger.info "[autotranslate:en_gb] Autotranslation failed for translation #{translation.id}."
+      rescue => e
+        Rails.logger.info "[autotranslate:en_gb] Autotranslation failed for translation #{translation.id} due to #{e}"
+        translation.update(copy: translation.source_copy)
       end
     end
 
