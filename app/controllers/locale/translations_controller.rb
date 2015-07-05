@@ -51,7 +51,7 @@ class Locale::TranslationsController < ApplicationController
     offset       = params[:offset].to_i
     limit        = PER_PAGE
     query_filter = params[:filter]
-    commit_id    = @project.commits.for_revision(params[:commit]).first.try(:id)
+    translation_ids_in_commit = @project.commits.for_revision(params[:commit]).first.try(:translations).try(:pluck, :id)
     article_id   = @project.articles.find_by_id(params[:article_id]).try(:id)
     section_id   = @project.sections.find_by_id(params[:section_id]).try(:id)
     locale       = @locale
@@ -63,7 +63,7 @@ class Locale::TranslationsController < ApplicationController
       @translations = Translation.search(load: {include: [{key: [:project, :translations, :section, { article: :project} ]}, :locale_associations]}) do
         filter :term, project_id: project_id
         filter :term, rfc5646_locale: locale.rfc5646 if locale
-        filter :terms, commit_ids: [commit_id] if commit_id.present?
+        filter :ids, values: translation_ids_in_commit if translation_ids_in_commit
         filter :term, article_id: article_id if article_id.present?
         filter :term, section_id: section_id if section_id.present?
         filter :term, section_active: true if project.not_git?        # active sections
