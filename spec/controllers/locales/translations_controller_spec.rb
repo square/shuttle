@@ -138,6 +138,14 @@ describe Locale::TranslationsController do
         expect(JSON.parse(response.body).map { |t| t['key']['key'] }.sort).
             to eql([@translated.key.key, @approved.key.key, @rejected.key.key, @new.key.key].sort)
       end
+
+      it "should filter with commit" do
+        commit = FactoryGirl.create(:commit, project: @project)
+        commit.keys << @new_key
+        get :index, project_id: @project.to_param, locale_id: 'fr-CA', format: 'json', commit: commit.revision, include_translated: 'true', include_approved: 'true', include_new: 'true'
+        expect(response.status).to eql(200)
+        expect(JSON.parse(response.body).first['key']['key']).to eql(@new.key.key)
+      end
     end
 
     context "[Article-specific]" do

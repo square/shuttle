@@ -24,15 +24,10 @@ describe Commit::KeysController do
                                     targeted_rfc5646_locales: {'en' => true, 'fr' => true},
                                     repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
 
-      @commit       = @project.commit!('HEAD', skip_import: true)
-      @keys         = FactoryGirl.create_list(:key, 51, project: @project).sort_by(&:key)
-      @translations = @keys.map do |key|
-        FactoryGirl.create :translation,
-                           key:                   key, rfc5646_locale: 'en',
-                           source_rfc5646_locale: 'en',
-                           approved:              true,
-                           translated:            true
-      end.sort_by { |t| t.key.key }
+      @commit = @project.commit!('HEAD', skip_import: true)
+      other_commit = FactoryGirl.create(:commit, project: @project)
+      other_commit.keys = [FactoryGirl.create(:key, project: @project).tap(&:add_pending_translations)]
+      @keys = FactoryGirl.create_list(:key, 51, project: @project).sort_by(&:key)
       @keys.each &:add_pending_translations
       @commit.keys = @keys
 

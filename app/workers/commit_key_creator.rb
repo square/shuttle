@@ -49,8 +49,7 @@ class CommitKeyCreator
     @commit.add_import_error(err, "failed in CommitKeyCreator for commit_id #{commit_id} and blob_id #{@blob.id}") if @commit
   end
 
-  # Given a set of keys, bulk-updates their commits-keys associations and
-  # ElasticSearch `commit_ids` associations.
+  # Given a set of keys, bulk-updates their commits-keys associations.
   #
   # @param [Array<Key>] keys A set of Keys to update.
   # @param [Commit] commit A Commit these keys are associated with.
@@ -58,25 +57,6 @@ class CommitKeyCreator
   def self.update_key_associations(keys, commit)
     keys.reject! { |key| skip_key?(key, commit) }
     keys.map(&:id).uniq.each { |k| commit.commits_keys.where(key_id: k).find_or_create! }
-
-    # key.commits has been changed, need to update associated ES fields
-    # load the translations associated with each commit
-    keys           = Key.where(id: keys.map(&:id)).includes(:translations, :section)
-    # preload commits_keys by loading all possible commit ids
-    commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (cid, key_id)|
-      hsh[key_id.to_i] ||= Set.new
-      hsh[key_id.to_i] << cid.to_i
-      hsh
-    end
-    # organize them into their keys add add this new commit
-    keys.each do |key|
-      key.batched_commit_ids = commits_by_key[key.id] || Set.new
-      key.batched_commit_ids << commit.id
-    end
-    # and run the import
-    Key.tire.index.import keys
-    # now update translations with the keys still having the cached commit ids
-    Translation.tire.index.import keys.map(&:translations).flatten
   end
 
   include SidekiqLocking
@@ -90,8 +70,7 @@ class CommitKeyCreator
             source_copy:          value,
             importer:             @importer.ident,
             fencers:              @importer.fencers,
-            skip_readiness_hooks: true,
-            batched_commit_ids:   []) # we'll fill this out later
+            skip_readiness_hooks: true)
     )
 
     # add additional pending translations if necessary
