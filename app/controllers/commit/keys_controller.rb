@@ -65,18 +65,15 @@ class Commit::KeysController < ApplicationController
         sort { by :original_key_exact, 'asc' }
       end
 
+      filter :term, commit_ids: commit_id
+
       case status
         when 'approved'
-          filter :and,
-                 {term: {commit_ids: commit_id}},
-                 {term: {ready: 1}}
+          filter :term, ready: 1
         when 'pending'
-          filter :and,
-                 {term: {commit_ids: commit_id}},
-                 {term: {ready: 0}}
-        else
-          filter :term, commit_ids: commit_id
+          filter :term, ready: 0
       end
+
       from offset
       size limit
     end
