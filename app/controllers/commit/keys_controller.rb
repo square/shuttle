@@ -54,7 +54,7 @@ class Commit::KeysController < ApplicationController
     offset       = params[:offset].to_i
     limit        = params.fetch(:limit, PER_PAGE).to_i
     status       = params[:status]
-    commit_id    = @commit.id
+    key_ids      = @commit.keys.pluck(:id)
 
     @keys = Key.search(load: {include: [:translations]}) do
       if query_filter.present?
@@ -65,7 +65,7 @@ class Commit::KeysController < ApplicationController
         sort { by :original_key_exact, 'asc' }
       end
 
-      filter :term, commit_ids: commit_id
+      filter :ids, values: key_ids
 
       case status
         when 'approved'

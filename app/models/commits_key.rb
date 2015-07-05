@@ -13,9 +13,7 @@
 #    limitations under the License.
 
 # A `has_and_belongs_to_many` join table between {Commit} and {Key} that has
-# been upgraded to a full model class. This is so it can be eager-loaded with
-# keys to speed the process of populating the `commit_ids` field on the Key's
-# ElasticSearch index.
+# been upgraded to a full model class.
 
 class CommitsKey < ActiveRecord::Base
   belongs_to :commit, inverse_of: :commits_keys

@@ -79,7 +79,6 @@ class Translation < ActiveRecord::Base
     indexes :updated_at, type: 'date'
     indexes :translated, type: 'boolean'
     indexes :approved, type: 'integer', as: 'if approved==true then 1 elsif approved==false then 0 else nil end'
-    indexes :commit_ids, as: 'send(:key).batched_commit_ids.try!(:to_a) || send(:key).commits_keys.pluck(:commit_id)'
   end
 
   validates :key,
@@ -260,21 +259,10 @@ class Translation < ActiveRecord::Base
   # Expects `obj` to have a `keys` association.
   # This is currently only run in ArticleImporter::Finisher.
   #
-  # Running `Translation.tire.index.import obj.translations` is slow since it needs to find commit_ids and sections for each Key.
-  # Instead, this method preloads all the commit_ids for all Keys and partitions them into the correct Keys.
-  #
-  # @param [Commit, Project, Article] obj The object whose keys should be batch refreshed in ElasticSearch
+  # @param [Commit, Project, Article] obj The object whose translations should be batch refreshed in ElasticSearch
 
   def self.batch_refresh_elastic_search(obj)
     obj.keys.includes(:translations, :section).find_in_batches do |keys|
-      commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
-        hsh[key_id.to_i] ||= Set.new
-        hsh[key_id.to_i] << commit_id.to_i
-        hsh
-      end
-      # now set batched_commit_ids for each key
-      keys.each { |key| key.batched_commit_ids = commits_by_key[key.id] || Set.new }
-      # and run the import
       Translation.tire.index.import keys.map(&:translations).flatten
     end
   end
