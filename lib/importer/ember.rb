@@ -26,22 +26,20 @@ module Importer
 
     def import_file?(locale=nil)
       %W(
-          #{locale_to_use(locale).rfc5646}.js
-          #{locale_to_use(locale).rfc5646}.coffee
+          #{base_rfc5646_locale}.js
+          #{base_rfc5646_locale}.coffee
       ).include?(::File.basename(file.path))
     end
 
     def import_strings(receiver)
-      rfc = locale_to_use(receiver.locale).rfc5646
-
-      unless has_translations_for_locale?(rfc)
-        log_skip nil, "No translations for #{rfc}"
+      unless has_translations_for_locale?(base_rfc5646_locale)
+        log_skip nil, "No translations for #{base_rfc5646_locale}"
         return
       end
 
       contents = file.contents
       contents = CoffeeScript.compile(contents) if ::File.extname(file.path) == '.coffee'
-      hash = extract_hash_from_file(contents, rfc)
+      hash = extract_hash_from_file(contents, base_rfc5646_locale)
 
       extract_hash(hash) { |key, value| receiver.add_string key, value }
     # TODO: We need to move this over to NodeJS instead.  RubyRacer has an issue where ExecJS will randomly fail with a ProgramError.

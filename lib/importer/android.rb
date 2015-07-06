@@ -40,7 +40,7 @@ module Importer
                                  nil,
                                  qualifiers['region'].try!(:[], 1, 2) || @blob.project.base_locale.region)
 
-      file_locale == locale_to_use(locale) && FILENAMES.include?(::File.basename(file.path))
+      (file_locale == @blob.project.base_locale) && FILENAMES.include?(::File.basename(file.path))
     end
 
     def import_strings(receiver)

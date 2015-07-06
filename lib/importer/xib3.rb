@@ -37,7 +37,7 @@ module Importer
     protected
 
     def import_file?(locale=nil)
-      file.path =~ /#{Regexp.escape(locale_to_use(locale).rfc5646)}\.lproj\/[^\/]+\.xib$/
+      file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.xib$/
     end
 
     def import_strings(receiver)

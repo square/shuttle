@@ -53,7 +53,7 @@ module Importer
     protected
 
     def import_file?(locale=nil)
-      file.path =~ /#{Regexp.escape(locale_to_use(locale).rfc5646)}\.lproj\/[^\/]+\.storyboard$/
+      file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.storyboard$/
     end
 
     def import_strings(receiver)

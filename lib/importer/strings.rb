@@ -27,7 +27,7 @@ module Importer
     protected
 
     def import_file?(locale=nil)
-      file.path =~ /#{Regexp.escape(locale_to_use(locale).rfc5646)}\.lproj\/[^\/]+\.strings$/
+      file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.strings$/
     end
 
     def self.encoding() %w(UTF-8 UTF-16BE UTF-16LE) end

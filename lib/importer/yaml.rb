@@ -35,9 +35,8 @@ module Importer
         return
       end
 
-      locale = locale_to_use(receiver.locale).rfc5646
-      return unless yml[locale]
-      extract_hash(yml[locale]) do |key, string|
+      return unless yml[base_rfc5646_locale]
+      extract_hash(yml[base_rfc5646_locale]) do |key, string|
         receiver.add_string(key, string)
       end
     end
