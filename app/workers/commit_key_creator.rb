@@ -29,7 +29,7 @@ class CommitKeyCreator
   #   that imported these keys.
   # @param [Array<Hash>] keys An array of key data.
 
-  def perform(blob_id, commit_id, importer, keys, shuttle_jid=nil)
+  def perform(blob_id, commit_id, importer, keys)
     @blob     = Blob.find(blob_id)
     @commit   = Commit.find(commit_id) if commit_id
     @importer = Importer::Base.find_by_ident(importer)
