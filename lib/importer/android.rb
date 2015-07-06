@@ -33,7 +33,7 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
+    def import_file?
       _, qualifiers = parse_qualifiers(::File.basename(::File.dirname(file.path)))
       file_locale   = Locale.new(qualifiers['language'] || @blob.project.base_locale.iso639,
                                  nil,

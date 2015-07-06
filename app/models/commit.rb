@@ -368,7 +368,7 @@ class Commit < ActiveRecord::Base
 
     imps.each do |importer|
       importer = importer.new(blob, self)
-      next if importer.skip?(options[:locale])
+      next if importer.skip?
       BlobImporter.perform_once importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
     end
   end

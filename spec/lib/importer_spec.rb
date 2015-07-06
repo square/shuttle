@@ -15,6 +15,14 @@
 require 'spec_helper'
 
 describe Importer::Base do
+  describe "#base_rfc5646_locale" do
+    it "returns blob's project's base rfc5646 locale" do
+      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-TR')
+      blob = FactoryGirl.create(:fake_blob, project: project)
+      expect(Importer::Android.new(blob).base_rfc5646_locale).to eql('en-TR')
+    end
+  end
+
   describe "[importing strings]" do
     before :each do
       @project = FactoryGirl.create(:project,
