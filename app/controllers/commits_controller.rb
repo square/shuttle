@@ -29,7 +29,7 @@ class CommitsController < ApplicationController
   before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
 
   respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
-                                  :import, :sync, :match, :clear, :recalculate, :ping_stash]
+                                  :sync, :match, :clear, :recalculate, :ping_stash]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -226,35 +226,6 @@ class CommitsController < ApplicationController
     respond_with(@commit) do |format|
       format.html { redirect_to root_url, notice: t('controllers.commits.destroy.deleted', sha: @commit.revision_prefix) }
     end
-  end
-
-  # Scans a revision of the code for already-localized strings in a given
-  # locale and adds them to the database as approved Translation objects.
-  #
-  # Routes
-  # ------
-  #
-  # * `POST /projects/:project_id/commits/:id/import`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `id`         | The SHA of a Commit.   |
-  #
-  # Query Parameters
-  #
-  # |          |                                       |
-  # |:---------|:--------------------------------------|
-  # | `locale` | The RFC 5646 identifier for a locale. |
-
-  def import
-    @commit.import_batch.jobs do
-      CommitImporter.perform_once @commit.id, locale: params[:locale]
-    end
-    respond_with @commit, location: nil
   end
 
   # Re-scans a revision for strings and adds new Translation records as

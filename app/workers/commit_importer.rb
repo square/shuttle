@@ -21,16 +21,10 @@ class CommitImporter
   # Executes this worker.
   #
   # @param [Fixnum] commit_id The ID of a Commit.
-  # @param [Hash] options Additional options.
-  # @option options [String] :locale The RFC 5646 code of a locale to import
-  #   existing translations from. If `nil`, the base locale is imported as
-  #   base translations.
 
-  def perform(commit_id, options={})
-    options.symbolize_keys!
-    locale = options[:locale] ? Locale.from_rfc5646(options[:locale]) : nil
+  def perform(commit_id)
     commit = Commit.find(commit_id)
-    commit.import_strings(locale: locale)
+    commit.import_strings
   rescue Git::CommitNotFoundError => err
     commit.add_import_error(err, "failed in CommitImporter for commit_id #{commit_id}")
   end
