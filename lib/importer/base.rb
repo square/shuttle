@@ -83,41 +83,25 @@ module Importer
     # Prepares an importer for use with a Blob.
     #
     # @param [Blob] blob A Blob whose strings will be imported.
-    # @param [Commit] commit If given, new Keys will be added to this Commit's
+    # @param [Commit] commit New Keys will be added to this Commit's
     #   `keys` association.
 
-    def initialize(blob, commit=nil)
+    def initialize(blob, commit)
       @blob   = blob
       @commit = commit
-      @file   = File.new(blob.path, nil, nil)
+      @file   = File.new(blob.path, nil)
 
-      if @commit
-        blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
-      end
+      blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
     end
 
     # Scans the Blob for localizable strings, and creates or updates
     # corresponding Translation records.
 
     def import
-      if @blob.parsed? && @commit
+      if @blob.parsed?
         import_by_using_cached_keys
       else
         import_by_parsing_blob
-      end
-    end
-
-    # Scans the blob for localizable strings, assumes their values are of a
-    # given locale, and creates unapproved Translations for those strings. This
-    # will not work for localization frameworks that use the value of the string
-    # as its key, since the value changes with each locale.
-
-    def import_locale(locale)
-      raise "Can't perform a locale import without an associated commit" unless @commit
-
-      load_contents
-      Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
-        process_blob_for_translation_extraction locale
       end
     end
 
@@ -188,34 +172,6 @@ module Importer
       @keys << {key: key, value: value, options: { source: file.path }.merge(options)}
     end
 
-    # @private
-    def add_translation(key, value, locale)
-      if @blob.project.skip_key?(key, locale)
-        log_skip key, "skip_key? returned true for #{locale.inspect}"
-        return
-      end
-
-      key_obj = @commit.keys.for_key(key).first
-      unless key_obj
-        log_skip key, "Couldn't find key"
-        return
-      end
-
-      base = key_obj.translations.base.first
-      unless base
-        log_skip key, "Couldn't find base translation"
-        return
-      end
-
-      key_obj.translations.in_locale(locale).create_or_update!(
-          source_copy:              base.copy,
-          copy:                     value,
-          approved:                 true,
-          source_rfc5646_locale:    base.rfc5646_locale,
-          rfc5646_locale:           locale.rfc5646,
-          preserve_reviewed_status: true)
-    end
-
     protected
 
     # Given a nested hash of keys, such as this JSON hash:
@@ -280,19 +236,13 @@ module Importer
 
       # first load the list of keys we'll need to create
       Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
-        process_blob_for_string_extraction
+        import_strings Receiver.new(self)
       end
 
       # then spawn jobs to create those keys
-      if @commit
-        @commit.import_batch.jobs do
-          @keys.in_groups_of(100, false).each do |keys|
-            CommitKeyCreator.perform_once @blob.id, @commit.try!(:id), self.class.ident, keys
-          end
-        end
-      else
-        @keys.in_groups_of(100, false) do |keys|
-          CommitKeyCreator.perform_async @blob.id, @commit.try!(:id), self.class.ident, keys
+      @commit.import_batch.jobs do
+        @keys.in_groups_of(100, false).each do |keys|
+          CommitKeyCreator.perform_once @blob.id, @commit.id, self.class.ident, keys
         end
       end
     end
@@ -327,16 +277,6 @@ module Importer
         else
           log_skip key, "Value is a #{value.class.to_s}"
       end
-    end
-
-    def process_blob_for_string_extraction
-      file.locale = nil
-      import_strings Receiver.new(self)
-    end
-
-    def process_blob_for_translation_extraction(locale)
-      file.locale = locale
-      import_strings Receiver.new(self, locale)
     end
 
     def utf8_encode(string)
@@ -388,22 +328,16 @@ module Importer
       @commit.add_import_error(err, "in #{file.path}") if @commit
     end
 
-    File = Struct.new(:path, :contents, :locale)
+    File = Struct.new(:path, :contents)
 
     class Receiver
-      attr_reader :importer, :locale
-
-      def initialize(importer, locale=nil)
+      # TODO (yunus): redundant - remove
+      def initialize(importer)
         @importer = importer
-        @locale   = locale
       end
 
       def add_string(key, value, options={})
-        if locale
-          @importer.add_translation key, value, locale
-        else
-          @importer.add_string key, value, options
-        end
+        @importer.add_string key, value, options
       end
     end
   end

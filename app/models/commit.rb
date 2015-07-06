@@ -210,23 +210,20 @@ class Commit < ActiveRecord::Base
   # Recursively locates blobs in this commit, creates Blobs for each of them if
   # necessary, and calls {Blob#import_strings} on them.
   #
-  # @param [Hash] options Import options.
-  # @option options [Locale] locale The locale to assume the base copy is
-  #   written in (by default it's the Project's base locale).
   # @raise [Git::CommitNotFoundError] If the commit could not be found in
   #   the Git repository.
 
-  def import_strings(options={})
+  def import_strings
     update_attribute :loading, true
     commit! # Make sure commit exists
     clear_import_errors! # clear out any previous import errors
 
     import_batch.jobs do
       # clear out existing keys so that we can import all new keys
-      commits_keys.delete_all unless options[:locale]
+      commits_keys.delete_all
       # perform the recursive import
       traverse(commit!) do |path, git_blob|
-        import_blob path, git_blob, options
+        import_blob path, git_blob
       end
     end
   end
@@ -360,7 +357,7 @@ class Commit < ActiveRecord::Base
     end
   end
 
-  def import_blob(path, git_blob, options={})
+  def import_blob(path, git_blob)
     return if project.skip_tree?(path)
     imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
 
@@ -369,7 +366,7 @@ class Commit < ActiveRecord::Base
     imps.each do |importer|
       importer = importer.new(blob, self)
       next if importer.skip?
-      BlobImporter.perform_once importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
+      BlobImporter.perform_once importer.class.ident, blob.id, id
     end
   end
 

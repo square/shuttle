@@ -18,34 +18,37 @@ require 'spec_helper'
 
 describe Importer::Android do
   describe "#import_file?" do
+    before :each do
+      @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en')
+      @commit = FactoryGirl.create(:commit, project: @project)
+      @blob = FactoryGirl.create(:fake_blob, project: @project)
+    end
+
     it "should return false if it's not an XML file" do
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en')
-      blob = FactoryGirl.create(:fake_blob, project: project, path: 'res/values/hello.txt')
-      expect(Importer::Android.new(blob).send(:import_file?)).to be_false
+      @blob.update! path: 'res/values/hello.txt'
+      expect(Importer::Android.new(@blob, @commit).send(:import_file?)).to be_false
     end
 
     it "should return false if it's in the wrong locale" do
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'fr-CA')
-      blob = FactoryGirl.create(:fake_blob, project: project, path: 'res/values-fr-rFR/strings.xml')
-      expect(Importer::Android.new(blob).send(:import_file?)).to be_false
+      @project.update_column :base_rfc5646_locale, 'fr-CA'
+      @blob.update! path: 'res/values-fr-rFR/strings.xml'
+      expect(Importer::Android.new(@blob, @commit).send(:import_file?)).to be_false
     end
 
     it "should return true if the file is in the base resources directory" do
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en')
-      blob = FactoryGirl.create(:fake_blob, project: project, path: 'res/values/strings.xml')
-      expect(Importer::Android.new(blob).send(:import_file?)).to be_true
+      @blob.update! path: 'res/values/strings.xml'
+      expect(Importer::Android.new(@blob, @commit).send(:import_file?)).to be_true
     end
 
     it "should return false if it's not named strings.xml" do
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en')
-      blob = FactoryGirl.create(:fake_blob, project: project, path: 'res/values/hello.xml')
-      expect(Importer::Android.new(blob).send(:import_file?)).to be_false
+      @blob.update! path: 'res/values/hello.xml'
+      expect(Importer::Android.new(@blob, @commit).send(:import_file?)).to be_false
     end
 
     it "should return true if locale matches the directory locale" do
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'fr-FR')
-      blob = FactoryGirl.create(:fake_blob, project: project, path: 'res/values-fr-rFR/strings.xml')
-      expect(Importer::Android.new(blob).send(:import_file?)).to be_true
+      @project.update_column :base_rfc5646_locale, 'fr-FR'
+      @blob.update! path: 'res/values-fr-rFR/strings.xml'
+      expect(Importer::Android.new(@blob, @commit).send(:import_file?)).to be_true
     end
   end
 

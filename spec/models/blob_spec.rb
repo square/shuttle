@@ -19,6 +19,7 @@ describe Blob do
     @project = FactoryGirl.create(:project)
     @repo = double('Git::Repo')
     @blob = FactoryGirl.create(:blob, sha: 'abc123', project: @project)
+    @commit = FactoryGirl.create(:commit, project: @project)
   end
 
   describe "#import_strings" do
@@ -26,26 +27,25 @@ describe Blob do
       expect(@blob).to receive(:blob!).and_return(double(Git::Object::Blob))
       imp      = Importer::Base.implementations
       instance = double(imp.to_s, :skip? => false)
-      expect(imp).to receive(:new).once.with(@blob, nil).and_return(instance)
+      expect(imp).to receive(:new).once.with(@blob, @commit).and_return(instance)
       expect(instance).to receive(:import).once
-      @blob.import_strings imp
+      @blob.import_strings imp, @commit
     end
 
     it "should pass a commit if given using :commit" do
       expect(@blob).to receive(:blob!).and_return(double(Git::Object::Blob))
-      commit   = FactoryGirl.create(:commit, project: @project)
       imp      = Importer::Base.implementations.first
       instance = double(imp.to_s, :skip? => false)
-      expect(imp).to receive(:new).once.with(@blob, commit).and_return(instance)
+      expect(imp).to receive(:new).once.with(@blob, @commit).and_return(instance)
       expect(instance).to receive(:import).once
-      @blob.import_strings imp, commit: commit
+      @blob.import_strings imp, @commit
     end
 
     it "should raise an exception if sha is still unknown after fetching" do
       allow(@project).to receive(:repo).and_yield(@repo)
       expect(@repo).to receive(:fetch).once
       expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
-      expect { @blob.import_strings(double(Importer::Yaml)) }.to raise_error(Git::BlobNotFoundError)
+      expect { @blob.import_strings(double(Importer::Yaml), @commit) }.to raise_error(Git::BlobNotFoundError)
     end
   end
 

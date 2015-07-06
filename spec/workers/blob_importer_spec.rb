@@ -24,7 +24,7 @@ describe BlobImporter do
         @blob = FactoryGirl.create(:blob, sha: "abc123", project: @project)
         @commit.blobs << @blob
 
-        expect { BlobImporter.new.perform("yaml", @blob.id, @commit.id, nil) }.to_not raise_error
+        expect { BlobImporter.new.perform("yaml", @blob.id, @commit.id) }.to_not raise_error
         expect(@commit.reload.import_errors).to eql([["Git::BlobNotFoundError", "Blob not found in git repo: abc123 (failed in BlobImporter for commit_id #{@commit.id} and blob_id #{@blob.id})"]])
       end
     end

@@ -31,7 +31,7 @@ class CommitKeyCreator
 
   def perform(blob_id, commit_id, importer, keys)
     @blob     = Blob.find(blob_id)
-    @commit   = Commit.find(commit_id) if commit_id
+    @commit   = Commit.find(commit_id)
     @importer = Importer::Base.find_by_ident(importer)
 
     key_objects = keys.map do |key|
@@ -42,9 +42,7 @@ class CommitKeyCreator
 
     key_objects.map(&:id).uniq.each { |k| @blob.blobs_keys.where(key_id: k).find_or_create! }
 
-    if @commit
-      self.class.update_key_associations key_objects, @commit
-    end
+    self.class.update_key_associations key_objects, @commit
   rescue Git::CommitNotFoundError => err
     @commit.add_import_error(err, "failed in CommitKeyCreator for commit_id #{commit_id} and blob_id #{@blob.id}") if @commit
   end

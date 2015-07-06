@@ -68,18 +68,13 @@ class Blob < ActiveRecord::Base
   # matches if possible).
   #
   # @param [Class] importer The Importer::Base subclass to process this blob.
-  # @param [Hash] options Additional options.
-  # @option options [Locale, nil] locale The locale to scan for strings in (by
-  #   default it's the Project's base locale).
-  # @option options [Commit, nil] commit If given, new Keys will be added to
-  #   this Commit's `keys` association.
+  # @param [Commit] commit New Keys will be added to this Commit's `keys` association.
   # @raise [Git::BlobNotFoundError] If the blob could not be found in the Git
   #   repository.
 
-  def import_strings(importer, options={})
+  def import_strings(importer, commit)
     blob! # make sure blob exists
-    importer = importer.new(self, options[:commit])
-    options[:locale] ? importer.import_locale(options[:locale]) : importer.import
+    importer.new(self, commit).import
   end
 
   # @return [Git::Object::Blob] The Git blob this Blob represents.
