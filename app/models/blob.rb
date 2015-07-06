@@ -73,15 +73,12 @@ class Blob < ActiveRecord::Base
   #   default it's the Project's base locale).
   # @option options [Commit, nil] commit If given, new Keys will be added to
   #   this Commit's `keys` association.
-  # @option options [true, false] inline If `true`, Sidekiq workers will be run
-  #   synchronously.
   # @raise [Git::BlobNotFoundError] If the blob could not be found in the Git
   #   repository.
 
   def import_strings(importer, options={})
     blob! # make sure blob exists
     importer = importer.new(self, options[:commit])
-    importer.inline = options[:inline]
     options[:locale] ? importer.import_locale(options[:locale]) : importer.import
   end
 
