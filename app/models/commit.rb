@@ -213,10 +213,6 @@ class Commit < ActiveRecord::Base
   # @param [Hash] options Import options.
   # @option options [Locale] locale The locale to assume the base copy is
   #   written in (by default it's the Project's base locale).
-  # @option options [true, false] inline (false) If `true`, does not spawn
-  #   Sidekiq workers to perform the import in parallel.
-  # @option options [true, false] force (false) If `true`, blobs will be
-  #   re-scanned for keys even if they have already been scanned.
   # @raise [Git::CommitNotFoundError] If the commit could not be found in
   #   the Git repository.
 
@@ -372,26 +368,8 @@ class Commit < ActiveRecord::Base
 
     imps.each do |importer|
       importer = importer.new(blob, self)
-
-      # we can't do a force import on a loading blob -- if we delete all the
-      # blobs_keys while another sidekiq job is doing the import, when that job
-      # finishes the blob will unset loading, even though the former job is still
-      # adding keys to the blob. at this point a third import (with force=false)
-      # might start, see the blob as not loading, and then do a fast import of
-      # the cached keys (even though not all keys have been loaded by the second
-      # import).
-      if options[:force] && blob.parsed?
-        blob.blobs_keys.delete_all
-        blob.update_column :parsed, false
-      end
-
       next if importer.skip?(options[:locale])
-
-      if options[:inline]
-        BlobImporter.new.perform importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
-      else
-        BlobImporter.perform_once importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
-      end
+      BlobImporter.perform_once importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
     end
   end
 
