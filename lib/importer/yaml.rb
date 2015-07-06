@@ -26,7 +26,7 @@ module Importer
           %w(.yaml .yml).include?(::File.extname(file.path))
     end
 
-    def import_strings(receiver)
+    def import_strings
       begin
         yml = YAML.load(file.contents)
       rescue Psych::SyntaxError => err
@@ -37,7 +37,7 @@ module Importer
 
       return unless yml[base_rfc5646_locale]
       extract_hash(yml[base_rfc5646_locale]) do |key, string|
-        receiver.add_string(key, string)
+        add_string(key, string)
       end
     end
   end

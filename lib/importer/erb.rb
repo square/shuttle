@@ -25,7 +25,7 @@ module Importer
       ::File.basename(file.path) =~ /\.#{Regexp.escape base_rfc5646_locale}\..+?\.erb$/
     end
 
-    def import_strings(receiver)
+    def import_strings
       # build a key that's the file name less the locale
       path       = ::File.dirname(file.path)
       name_parts = ::File.basename(file.path).split('.')
@@ -36,7 +36,7 @@ module Importer
 
       fencers = self.class.fencers
       fencers << 'Html' if ::File.basename(file.path) =~ /\.html\.erb$/
-      receiver.add_string key, file.contents, fencers: fencers
+      add_string key, file.contents, fencers: fencers
     end
   end
 end
