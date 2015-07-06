@@ -179,15 +179,12 @@ module Importer
     #   until one produces a valid encoding.
     def self.encoding() %w(UTF-8) end
 
-    # Returns either the given locale or the Project's base locale if `nil` is
-    # given.
+    # Returns Blob's Project's base rfc5646 locale. This will be used as the base
+    # locale of the Key & Translations that will be created.
     #
-    # @param [Locale] locale A locale to use for a translation import.
-    # @return [Locale] The given locale (translation import) or the base locale
-    #   (string import).
-
-    def locale_to_use(locale=nil)
-      locale || @blob.project.base_locale
+    # @return [Locale] Blob's Project's base rfc5646 locale
+    def base_rfc5646_locale
+      @blob.project.base_locale.rfc5646
     end
 
     # @private

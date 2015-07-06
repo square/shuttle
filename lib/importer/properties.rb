@@ -24,7 +24,7 @@ module Importer
     protected
 
     def import_file?(locale=nil)
-      ::File.basename(file.path) =~ /#{(Regexp.escape(locale_to_use(locale).rfc5646)).sub('-', '_')}\.properties$/
+      ::File.basename(file.path) =~ /#{(Regexp.escape(base_rfc5646_locale)).sub('-', '_')}\.properties$/
     end
 
     def import_strings(receiver)

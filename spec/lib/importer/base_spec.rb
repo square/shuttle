@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Copyright 2014 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +14,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-module Importer
+require 'spec_helper'
 
-  # Parses translatable strings from SVG files.
-
-  class Svg < Base
-    def self.fencers() %w(Html) end
-
-    protected
-
-    def import_file?(locale=nil)
-      file.path.end_with?("-#{base_rfc5646_locale}.svg")
-    end
-
-    def import_strings(receiver)
-      xml = Nokogiri::XML(file.contents)
-
-      xml.css('text, textpath').each do |element|
-        receiver.add_string "#{file.path}:#{element.path}", element.inner_html,
-                            original_key: element.path
-      end
+describe Importer::Base do
+  describe "#base_rfc5646_locale" do
+    it "returns blob's project's base rfc5646 locale" do
+      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-TR')
+      blob = FactoryGirl.create(:fake_blob, project: project)
+      expect(Importer::Android.new(blob).base_rfc5646_locale).to eql('en-TR')
     end
   end
 end

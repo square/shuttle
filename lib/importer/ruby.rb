@@ -33,18 +33,16 @@ module Importer
         output = eval(file.contents)
       end.join
 
-      locale = locale_to_use(receiver.locale).rfc5646
-
       unless output.kind_of?(Hash)
         log_skip nil, "Does not evaluate to a Hash"
         return
       end
-      unless output.stringify_keys![locale]
-        log_skip nil, "No translations for #{locale}"
+      unless output.stringify_keys![base_rfc5646_locale]
+        log_skip nil, "No translations for #{base_rfc5646_locale}"
         return
       end
 
-      extract_hash(output[locale]) do |key, string|
+      extract_hash(output[base_rfc5646_locale]) do |key, string|
         receiver.add_string(key, string)
       end
     end

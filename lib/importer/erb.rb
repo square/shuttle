@@ -22,7 +22,7 @@ module Importer
     protected
 
     def import_file?(locale=nil)
-      ::File.basename(file.path) =~ /\.#{Regexp.escape locale_to_use(locale).rfc5646}\..+?\.erb$/
+      ::File.basename(file.path) =~ /\.#{Regexp.escape base_rfc5646_locale}\..+?\.erb$/
     end
 
     def import_strings(receiver)

@@ -25,8 +25,8 @@ module Importer
 
     def import_file?(locale=nil)
       %W(
-          #{locale_to_use(locale).rfc5646}.module.js
-          #{locale_to_use(locale).rfc5646}.module.coffee
+          #{base_rfc5646_locale}.module.js
+          #{base_rfc5646_locale}.module.coffee
       ).include?(::File.basename(file.path))
     end
 
