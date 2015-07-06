@@ -195,7 +195,7 @@ module Importer
 
     # @private
     def add_string(key, value, options={})
-      @keys << {key: key, value: value, options: options}
+      @keys << {key: key, value: value, options: { source: file.path }.merge(options)}
     end
 
     # @private
@@ -416,7 +416,7 @@ module Importer
         if locale
           @importer.add_translation key, value, locale
         else
-          @importer.add_string key, value, {source: importer.file.path}.merge(options)
+          @importer.add_string key, value, options
         end
       end
     end
