@@ -23,13 +23,13 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
-      ::File.basename(file.path) =~ /#{(Regexp.escape(locale_to_use(locale).rfc5646)).sub('-', '_')}\.properties$/
+    def import_file?
+      ::File.basename(file.path) =~ /#{(Regexp.escape(base_rfc5646_locale)).sub('-', '_')}\.properties$/
     end
 
-    def import_strings(receiver)
+    def import_strings
       file.contents.scan(/^(.+?)=(.+)$/u).each do |(key, value)|
-        receiver.add_string key, value
+        add_string key, value
       end
     end
   end

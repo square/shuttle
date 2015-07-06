@@ -40,4 +40,3 @@ describe Importer::Xib3 do
     end
   end
 end
-

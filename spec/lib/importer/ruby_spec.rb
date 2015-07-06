@@ -17,9 +17,12 @@ require 'spec_helper'
 describe Importer::Ruby do
   describe "#import_file?" do
     it "should only import from Ruby files under config/locales" do
-      @project = FactoryGirl.create(:project)
-      expect(Importer::Ruby.new(FactoryGirl.create(:fake_blob, project: @project, path: '/config/locales/en-US.rb')).send(:import_file?)).to be_true
-      expect(Importer::Ruby.new(FactoryGirl.create(:fake_blob, project: @project, path: '/config/languages/en-US.rb')).send(:import_file?)).to be_false
+      project = FactoryGirl.create(:project)
+      commit = FactoryGirl.create(:commit, project: project)
+      locales_blob = FactoryGirl.create(:fake_blob, project: project, path: '/config/locales/en-US.rb')
+      languages_blob = FactoryGirl.create(:fake_blob, project: project, path: '/config/languages/en-US.rb')
+      expect(Importer::Ruby.new(locales_blob, commit).send(:import_file?)).to be_true
+      expect(Importer::Ruby.new(languages_blob, commit).send(:import_file?)).to be_false
     end
   end
 

@@ -666,10 +666,6 @@ de:
     end
   end
 
-  describe "#import" do
-    it_behaves_like "returns error string if repository_url is blank", :import
-  end
-
   describe "#sync" do
     it_behaves_like "returns error string if repository_url is blank", :sync
   end

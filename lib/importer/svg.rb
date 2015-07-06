@@ -21,16 +21,15 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
-      file.path.end_with?("-#{locale_to_use(locale).rfc5646}.svg")
+    def import_file?
+      file.path.end_with?("-#{base_rfc5646_locale}.svg")
     end
 
-    def import_strings(receiver)
+    def import_strings
       xml = Nokogiri::XML(file.contents)
 
       xml.css('text, textpath').each do |element|
-        receiver.add_string "#{file.path}:#{element.path}", element.inner_html,
-                            original_key: element.path
+        add_string "#{file.path}:#{element.path}", element.inner_html, original_key: element.path
       end
     end
   end
