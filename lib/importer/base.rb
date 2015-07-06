@@ -134,25 +134,24 @@ module Importer
     # @abstract
     #
     # Given the contents of a file, locates translatable strings, and imports
-    # them to Translation records using the `receiver`. Implementations of this
-    # method should scan the file's contents for localizable strings, and then
-    # pass those strings to the receiver by calling `add_string`.
+    # them to Translation records. Implementations of this method should scan
+    # the file's contents for localizable strings, and then
+    # pass those strings to the `add_string` method.
     #
     # Importers that work with keys constructed of nested hash keys (such as
     # Ruby YAML importers and Ember importers) can use the {#extract_hash}
     # method as a convenience to convert those nested keys into period-delimited
     # keys.
     #
-    # @param [Importer::Base::Receiver] receiver A proxy object that receives
-    #   strings to import.
-    #
     # @example Importing strings from a CSV file ("key,string")
-    #   def import_strings(receiver)
+    #   def import_strings
     #     CSV.parse(file.contents) do |row|
-    #       receiver.add_string row[0], row[1]
+    #       add_string row[0], row[1]
     #     end
     #   end
-    def import_strings(receiver) raise NotImplementedError end
+    def import_strings
+      raise NotImplementedError
+    end
 
     # @return [String, Array<String>] The character encoding to assume files
     #   use. If multiple encodings are provided, they are each tried in order
@@ -236,7 +235,7 @@ module Importer
 
       # first load the list of keys we'll need to create
       Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
-        import_strings Receiver.new(self)
+        import_strings
       end
 
       # then spawn jobs to create those keys
@@ -329,17 +328,6 @@ module Importer
     end
 
     File = Struct.new(:path, :contents)
-
-    class Receiver
-      # TODO (yunus): redundant - remove
-      def initialize(importer)
-        @importer = importer
-      end
-
-      def add_string(key, value, options={})
-        @importer.add_string key, value, options
-      end
-    end
   end
 
   # @private

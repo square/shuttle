@@ -48,7 +48,7 @@ module Importer
       file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.xib$/
     end
 
-    def import_strings(receiver)
+    def import_strings
       xml = Nokogiri::XML(file.contents)
       return unless xml.root.name == 'archive'
 
@@ -95,7 +95,7 @@ module Importer
             comment = [note, generated_comment].compact.join(': ')
             key     = "#{object_id}.#{text_class_path.join('.')}"
 
-            receiver.add_string "#{file.path}:#{key}", text, context: comment, original_key: key
+            add_string "#{file.path}:#{key}", text, context: comment, original_key: key
           else
             item_index = 0
             node.element_children.each_with_index do |child, array_index|
@@ -115,7 +115,7 @@ module Importer
               comment = [note, generated_comment].compact.join(': ')
               key     = "#{object_id}.#{text_class_path.join('.')}[#{array_index}]"
 
-              receiver.add_string "#{file.path}:#{key}", text, context: comment, original_key: key
+              add_string "#{file.path}:#{key}", text, context: comment, original_key: key
             end
           end
         end

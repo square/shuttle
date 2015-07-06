@@ -56,7 +56,7 @@ module Importer
       file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.storyboard$/
     end
 
-    def import_strings(receiver)
+    def import_strings
       xml = Nokogiri::XML(file.contents)
 
       XPATHS.each do |xpath|
@@ -90,7 +90,7 @@ module Importer
           view_controller_name = display_name_for_class(view_controller_node['customClass']) if view_controller_node && view_controller_node['customClass']
 
           add_strings_for_node(node, object_node, note, view_controller_name, text_node_path, file).each do |(key, value, comment)|
-            receiver.add_string "#{file.path}:#{key}", value,
+            add_string "#{file.path}:#{key}", value,
                                 original_key: key,
                                 context:      comment
           end

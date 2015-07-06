@@ -43,7 +43,7 @@ module Importer
       (file_locale == @blob.project.base_locale) && FILENAMES.include?(::File.basename(file.path))
     end
 
-    def import_strings(receiver)
+    def import_strings
       xml = Nokogiri::XML(file.contents)
 
       xml.xpath('/resources/string').each do |tag|
@@ -53,7 +53,7 @@ module Importer
         end
 
         context = find_comment(tag).try!(:content)
-        receiver.add_string "#{file.path}:#{tag['name']}",
+        add_string "#{file.path}:#{tag['name']}",
                             unescape(strip(tag.content)),
                             context:      clean_comment(context),
                             original_key: tag['name']
@@ -68,7 +68,7 @@ module Importer
         global_context = find_comment(tag).try!(:content)
         tag.xpath('item').each_with_index do |item_tag, index|
           context = find_comment(item_tag).try!(:content)
-          receiver.add_string "#{file.path}:#{tag['name']}[#{index}]",
+          add_string "#{file.path}:#{tag['name']}[#{index}]",
                               unescape(strip(item_tag.content)),
                               context:      clean_comment(context || global_context),
                               original_key: "#{tag['name']}[#{index}]"
@@ -84,7 +84,7 @@ module Importer
         global_context = find_comment(tag).try!(:content)
         tag.xpath('item').each do |subtag|
           context = find_comment(subtag).try!(:content)
-          receiver.add_string "#{file.path}:#{tag['name']}[#{subtag['quantity']}]",
+          add_string "#{file.path}:#{tag['name']}[#{subtag['quantity']}]",
                               unescape(strip(subtag.content)),
                               context:      clean_comment(context || global_context),
                               original_key: "#{tag['name']}[#{subtag['quantity']}]"

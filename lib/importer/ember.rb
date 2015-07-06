@@ -31,7 +31,7 @@ module Importer
       ).include?(::File.basename(file.path))
     end
 
-    def import_strings(receiver)
+    def import_strings
       unless has_translations_for_locale?(base_rfc5646_locale)
         log_skip nil, "No translations for #{base_rfc5646_locale}"
         return
@@ -41,7 +41,7 @@ module Importer
       contents = CoffeeScript.compile(contents) if ::File.extname(file.path) == '.coffee'
       hash = extract_hash_from_file(contents, base_rfc5646_locale)
 
-      extract_hash(hash) { |key, value| receiver.add_string key, value }
+      extract_hash(hash) { |key, value| add_string key, value }
     # TODO: We need to move this over to NodeJS instead.  RubyRacer has an issue where ExecJS will randomly fail with a ProgramError.
     # RuntimeError catches for syntax issues though which is most likely what we're interested in.
     # https://github.com/sstephenson/execjs/blob/master/lib/execjs/ruby_racer_runtime.rb

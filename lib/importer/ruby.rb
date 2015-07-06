@@ -26,7 +26,7 @@ module Importer
           ::File.extname(file.path) == '.rb'
     end
 
-    def import_strings(receiver)
+    def import_strings
       output = nil
       Thread.start do
         $SAFE  = 4
@@ -43,7 +43,7 @@ module Importer
       end
 
       extract_hash(output[base_rfc5646_locale]) do |key, string|
-        receiver.add_string(key, string)
+        add_string(key, string)
       end
     end
   end

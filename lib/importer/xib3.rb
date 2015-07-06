@@ -40,7 +40,7 @@ module Importer
       file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.xib$/
     end
 
-    def import_strings(receiver)
+    def import_strings
       xml = Nokogiri::XML(file.contents)
       return unless xml.root.name == 'document'
 
