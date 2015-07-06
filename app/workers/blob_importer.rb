@@ -34,10 +34,7 @@ class BlobImporter
 
     importer = Importer::Base.find_by_ident(importer)
 
-    blob.import_strings importer,
-                        commit: commit,
-                        locale: locale,
-                        inline: jid.nil?
+    blob.import_strings importer, commit: commit, locale: locale
   rescue Git::CommitNotFoundError, Git::BlobNotFoundError => err
     commit.add_import_error(err, "failed in BlobImporter for commit_id #{commit_id} and blob_id #{blob_id}")
   end

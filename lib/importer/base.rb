@@ -53,9 +53,6 @@ module Importer
     class_attribute :implementations
     self.implementations = []
 
-    # @return [true, false] If `true`, Sidekiq workers will be run inline.
-    attr_accessor :inline
-
     # @private
     def self.inherited(subclass)
       self.implementations << subclass
@@ -294,11 +291,7 @@ module Importer
       end
 
       # then spawn jobs to create those keys
-      if inline
-        @keys.in_groups_of(100, false) do |keys|
-          CommitKeyCreator.new.perform @blob.id, @commit.try!(:id), self.class.ident, keys
-        end
-      elsif @commit
+      if @commit
         @commit.import_batch.jobs do
           @keys.in_groups_of(100, false).each do |keys|
             CommitKeyCreator.perform_once @blob.id, @commit.try!(:id), self.class.ident, keys

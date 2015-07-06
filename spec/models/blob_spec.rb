@@ -27,7 +27,6 @@ describe Blob do
       imp      = Importer::Base.implementations
       instance = double(imp.to_s, :skip? => false)
       expect(imp).to receive(:new).once.with(@blob, nil).and_return(instance)
-      allow(instance).to receive(:inline=)
       expect(instance).to receive(:import).once
       @blob.import_strings imp
     end
@@ -37,7 +36,6 @@ describe Blob do
       commit   = FactoryGirl.create(:commit, project: @project)
       imp      = Importer::Base.implementations.first
       instance = double(imp.to_s, :skip? => false)
-      allow(instance).to receive(:inline=)
       expect(imp).to receive(:new).once.with(@blob, commit).and_return(instance)
       expect(instance).to receive(:import).once
       @blob.import_strings imp, commit: commit
