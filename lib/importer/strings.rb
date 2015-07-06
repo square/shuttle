@@ -26,7 +26,7 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
+    def import_file?
       file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.strings$/
     end
 

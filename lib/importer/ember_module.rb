@@ -23,7 +23,7 @@ module Importer
   class EmberModule < Ember
     protected
 
-    def import_file?(locale=nil)
+    def import_file?
       %W(
           #{base_rfc5646_locale}.module.js
           #{base_rfc5646_locale}.module.coffee

@@ -24,7 +24,7 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
+    def import_file?
       %W(
           #{base_rfc5646_locale}.js
           #{base_rfc5646_locale}.coffee

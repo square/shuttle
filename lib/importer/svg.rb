@@ -21,7 +21,7 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
+    def import_file?
       file.path.end_with?("-#{base_rfc5646_locale}.svg")
     end
 

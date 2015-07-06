@@ -132,23 +132,19 @@ module Importer
     # Determines if the filename stored in `file.path` is one that would contain
     # localizable content.
     #
-    # @param [String] locale The locale to assume the strings are in. By default
-    #   it should assume the Project's base locale. If the file does not match
-    #   the locale (e.g., the locale is en-US but the file is `strings.fr.yml`),
-    #   this method should return `false`.
     # @return [true, false] Whether this file should be scanned for strings.
-    def import_file?(locale=nil) raise NotImplementedError end
+    def import_file?
+      raise NotImplementedError
+    end
 
     # Returns whether this importer should not be used, based on the Project's
     # whitelisted/blacklisted file path settings and the implementation of the
     # {#import_file?} method.
     #
-    # @param [Locale, nil] locale A locale to import, or `nil` if this is a base
-    #   language import.
     # @return [true, false] Whether this importer should not be run.
 
-    def skip?(locale)
-      @blob.project.skip_path?(file.path, self.class) || !import_file?(locale)
+    def skip?
+      @blob.project.skip_path?(file.path, self.class) || !import_file?
     end
 
     # @abstract

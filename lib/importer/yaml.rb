@@ -21,7 +21,7 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
+    def import_file?
       ::File.dirname(file.path).starts_with?('/config/locales') &&
           %w(.yaml .yml).include?(::File.extname(file.path))
     end
