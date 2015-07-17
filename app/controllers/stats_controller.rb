@@ -18,7 +18,7 @@ class StatsController < ApplicationController
 
   # Displays the statistics page.
   def index
-    metrics_offset_in_days = params[:metrics_offset_in_days] || 30
+    metrics_offset_in_days = (params[:metrics_offset_in_days] || 30).to_i
     metrics = DailyMetric.
       where(date: (metrics_offset_in_days.days.ago)...Date.today).
       order(:date)
