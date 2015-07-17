@@ -19,7 +19,7 @@ class StatsController < ApplicationController
   # Displays the statistics page.
   def index
     metrics = DailyMetric.
-      where(date: (30.days.ago)...Date.today).
+#      where(date: (30.days.ago)...Date.today).
       order(:date)
 
     this_week_metrics = DailyMetric.
