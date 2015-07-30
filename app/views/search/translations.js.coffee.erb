@@ -13,8 +13,6 @@
 #    limitations under the License.
 
 $(window).ready ->
-  firstTime = true
-
   $(".datepicker").datepicker(autoclose: true)
 
   translationSearchForm = $('#translation-search-form')
@@ -31,34 +29,7 @@ $(window).ready ->
 
   prefillForm()
 
-  table = $('#translations')
+#  TODO: Use Select2 instead
+
   $('select[name="translator_id"]').chosen
     width: "100%"
-
-  sr = new GlobalSearch(table, table.data('url'))
-
-  makeURL = ->
-    "#{table.data('url')}?#{translationSearchForm.serialize()}"
-  scroll = table.infiniteScroll makeURL,
-    windowScroll: true
-    renderer: (translations) =>
-      for translation in translations
-        do (translation) ->
-          sr.addTranslation(translation)
-    dataSourceOptions: {type: 'GET'}
-
-  sr.scroll = scroll
-
-  renewSearch = ->
-    prefillForm()
-    sr.refresh()
-
-  translationSearchForm.submit ->
-    # ONLY HTML5
-    window.history.pushState("params", "", "?#{translationSearchForm.serialize()}")
-    sr.refresh()
-    false
-
-  window.onpopstate = ->
-    renewSearch() unless firstTime
-    firstTime = false

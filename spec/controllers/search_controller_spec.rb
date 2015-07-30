@@ -51,97 +51,84 @@ describe SearchController do
       sleep(1)
     end
 
-    it "should search the copy field by default" do
-      get :translations, query: 'term1', format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
-      expect(results.size).to eql(2)
-      results.each { |r| expect(r['copy']).to eql('foo term1 bar') }
+    it "should filter by page" do
+      (1..50).each do
+        FactoryGirl.create(:translation)
+      end
+      sleep(1)
+      get :translations, page: '2'
+      results = assigns(:results)
+      expect(results.size).to eql(8)
     end
 
-    it "should search the source_copy field" do
-      get :translations, query: 'term1', field: 'searchable_source_copy', format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+    it "should search the copy field by default" do
+      get :translations, query: 'term1'
+      results = assigns(:results)
       expect(results.size).to eql(2)
-      results.each { |r| expect(r['source_copy']).to eql('foo term1 bar') }
+      results.each { |r| expect(r.copy).to eql('foo term1 bar') }
+    end
+    #
+    it "should search the source_copy field" do
+      get :translations, query: 'term1', field: 'searchable_source_copy'
+      results = assigns(:results)
+      expect(results.size).to eql(2)
+      results.each { |r| expect(r.source_copy).to eql('foo term1 bar') }
     end
 
     it "should filter by target locale" do
-      get :translations, query: 'term1', target_locales: 'ja-JP', format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+      get :translations, query: 'term1', target_locales: 'ja-JP'
+      results = assigns(:results)
       expect(results.size).to eql(1)
-      expect(results.first['copy']).to eql('foo term1 bar')
-      expect(results.first['locale']['rfc5646']).to eql('ja-JP')
+      expect(results.first.copy).to eql('foo term1 bar')
+      expect(results.first.locale.rfc5646).to eql('ja-JP')
     end
 
     it "should filter by more than one target locale" do
-      get :translations, query: 'term1', target_locales: 'ja-JP, en', format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+      get :translations, query: 'term1', target_locales: 'ja-JP, en'
+      results = assigns(:results).entries
       # Ensure ordering since ElasticSearch does not guarantee ordering
-      results.sort_by! { |r| r['locale']['rfc5646'] }
-      expect(results.first['copy']).to eql('foo term1 bar')
-      expect(results.first['locale']['rfc5646']).to eql('en')
-      expect(results.last['copy']).to eql('foo term1 bar')
-      expect(results.last['locale']['rfc5646']).to eql('ja-JP')
+      results.sort_by! { |r| r.locale.rfc5646 }
+      expect(results.first.copy).to eql('foo term1 bar')
+      expect(results.first.locale.rfc5646).to eql('en')
+      expect(results.last.copy).to eql('foo term1 bar')
+      expect(results.last.locale.rfc5646).to eql('ja-JP')
     end
 
     it "should filter by translator" do
-      get :translations, translator_id: @user.id, format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+      get :translations, translator_id: @user.id
+      results = assigns(:results)
       expect(results.size).to eql(8)
 
-      get :translations, translator_id: @user.id + 1, format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+      get :translations, translator_id: @user.id + 1
+      results = assigns(:results)
       expect(results.size).to eql(0)
     end
 
     it "should filter by start date" do
-      get :translations, start_date: @start_date, format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+      get :translations, start_date: @start_date
+      results = assigns(:results)
       expect(results.size).to eql(8)
 
-      get :translations, start_date: @end_date, format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+      get :translations, start_date: @end_date
+      results = assigns(:results)
       expect(results.size).to eql(0)
     end
 
     it "should filter by end date" do
-      get :translations, end_date: @end_date, format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+      get :translations, end_date: @end_date
+      results = assigns(:results)
       expect(results.size).to eql(8)
 
-      get :translations, end_date: @start_date, format: 'json'
-      expect(response.status).to eql(200)
-      results = JSON.parse(response.body)
+      get :translations, end_date: @start_date
+      results = assigns(:results)
       expect(results.size).to eql(0)
     end
 
     it "should respond with a 422 if the locale is unknown" do
-      get :translations, query: 'term1', target_locales: 'ja-JP, foobar?', format: 'json'
+      user = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      sign_in user
+      get :translations, query: 'term1', target_locales: 'ja-JP, foobar?'
       expect(response.status).to eql(422)
-      expect(response.body).to be_blank
-    end
-
-    it "should accept a limit and offset" do
-      get :translations, query: 'term1', offset: 0, limit: 1, format: 'json'
-      expect(response.status).to eql(200)
-      results1 = JSON.parse(response.body)
-      expect(results1.size).to eql(1)
-
-      get :translations, query: 'term1', offset: 1, limit: 1, format: 'json'
-      expect(response.status).to eql(200)
-      results2 = JSON.parse(response.body)
-      expect(results2.size).to eql(1)
-
-      expect(results1.first['id']).not_to eql(results2.first['id'])
     end
   end
 
