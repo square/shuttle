@@ -31,6 +31,7 @@ gem 'twitter-typeahead-rails', '0.9.3' # 0.10.2 breaks locale key filtering
 gem 'dropzonejs-rails'
 gem 'kaminari'
 gem 'slim-rails'
+gem 'autoprefixer-rails'
 
 # UTILITIES
 gem 'json'
@@ -88,7 +89,6 @@ group :test do
   gem 'rspec-rails', '< 3.0.0'
   gem 'factory_girl_rails'
   gem 'timecop'
-  gem 'pry'
   gem 'pry-nav'
   gem 'database_cleaner'
 end
@@ -110,6 +110,7 @@ group :development, :test do
   gem 'binding_of_caller'
   #gem 'jasminerice'
   #gem 'guard-jasmine'
+  gem 'pry'
 end
 
 # ERROR NOTIFICATIONS
