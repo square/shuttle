@@ -126,18 +126,16 @@ class CommitsController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def search
-    respond_with @commit do |format|
-      format.html do
-        @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
-          hsh[locale.rfc5646] = {
-            required: required,
-            targeted: true,
-            finished: @commit.translations.where('approved IS NOT TRUE AND rfc5646_locale = ?', locale.rfc5646).first.nil?
-          }
-          hsh
-        end
-      end
+    @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
+      hsh[locale.rfc5646] = {
+        required: required,
+        targeted: true,
+        finished: @commit.translations.where('approved IS NOT TRUE AND rfc5646_locale = ?', locale.rfc5646).first.nil?
+      }
+      hsh
     end
+    @keys = CommitsSearchKeysFinder.new(params, @commit).find_keys
+    @keys_presenter = CommitsSearchPresenter.new(params[:locales], current_user.translator?, @project)
   end
 
   # Marks a commit as needing localization. Creates a CommitCreator job to do the
