@@ -1,6 +1,5 @@
-update
-install libarchive
-install postgresql
-install redis
-install elasticsearch
-install qt
+brew 'libarchive'
+brew 'postgresql'
+brew 'redis'
+brew 'elasticsearch'
+brew 'qt'
