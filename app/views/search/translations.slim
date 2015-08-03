@@ -20,8 +20,7 @@
   h1 Translation Search
 
 hr.divider
-
-.border
+div
   .filter-bar
     / translation_search_bar
     = form_tag(search_translations_url, method: 'GET', id: 'translation-search-form', class: 'filter form-inline')
@@ -37,17 +36,17 @@ hr.divider
                                                      %w(translation searchable_copy),\
                                                  ]), id: 'field-select', class: 'span2'
         = submit_tag 'Search', class: 'primary'
-        
+
       .collapse
-        .control-group 
+        .control-group
           = label_tag 'target_locales', 'Target Locales', class: 'control-label'
           .controls
             - if current_user.approved_locales.any?
               = select_tag 'target_locales', options_for_select(current_user.approved_locales.map { |l| [l.name, l.rfc5646] })
-            - else 
+            - else
               = text_field_tag 'target_locales', '', class: 'locale-field', id: '', placeholder: 'any target locale'
 
-        .control-group 
+        .control-group
           = label_tag 'translator_id', 'Translator', class: 'control-label'
           .controls
             = select_tag 'translator_id', options_for_select(User.order('email ASC').map { |u| [u.name, u.id] }.unshift(['Anyone', nil]))
@@ -62,6 +61,34 @@ hr.divider
           .controls
             = text_field_tag 'end_date', '', class: 'datepicker'
 
+  .pagination-links
+    = paginate @results
 
   / translation_grid
-  table.table#translations data-url=search_translations_url(format: 'json')
+  table.border.table#translations data-url=search_translations_url(format: 'json')
+    thead
+      tr
+        th Project
+        th ID
+        th From
+        th Source
+        th To
+        th Translation
+        th Key
+    tbody
+      - @results.each do |translation|
+        tr
+          td = @presenter.project(translation)
+          td
+            a href=@presenter.url(translation) = @presenter.url_text(translation)
+          td = @presenter.from(translation)
+          td = @presenter.source(translation)
+          td = @presenter.to(translation)
+          td.translation-entry[class=@presenter.translation_class_name(translation)] = @presenter.translation_text(translation)
+          td.key = @presenter.key(translation)
+.row
+  .pagination-links
+    = paginate @results
+.row
+  .pagination-info
+    = page_entries_info(@results, entry_name: 'translations')
