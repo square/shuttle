@@ -60,6 +60,9 @@ GEM
       rails (>= 4.0)
     ansi (1.4.3)
     arel (4.0.2)
+    autoprefixer-rails (5.2.1.1)
+      execjs
+      json
     aws-sdk (1.43.2)
       json (~> 1.4)
       nokogiri (>= 1.4.4)
@@ -376,6 +379,7 @@ PLATFORMS
 DEPENDENCIES
   CFPropertyList
   after-commit-on-action
+  autoprefixer-rails
   aws-sdk
   better_errors
   binding_of_caller
