@@ -162,15 +162,24 @@ class CommitsController < ApplicationController
 
   def create
     revision = params[:commit][:revision].strip
-    respond_to do |format|
-      format.json do
-        other_fields           = commit_params.stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
-        other_fields[:user_id] = current_user.id
+    other_fields           = commit_params.stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
+    other_fields[:user_id] = current_user.id
 
-        CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-        render json: {success: t('controllers.commits.create.success', revision: revision)}
-      end
-    end
+    options = other_fields.symbolize_keys
+    @project = Project.find(@project.id)
+    @commit = @project.commit!(revision, other_fields: options)
+
+    respond_with @commit, location: project_commit_url(@project, @commit)
+  rescue Git::CommitNotFoundError
+    flash[:alert] = t('controllers.commits.create.commit_not_found_error', revision: revision)
+    redirect_to root_url
+  rescue Project::NotLinkedToAGitRepositoryError
+    flash[:alert] = t('controllers.commits.create.project_not_linked_error', revision: params[:commit][:revision].strip)
+    redirect_to root_url
+  rescue Timeout::Error
+    Squash::Ruby.notify err, project_id: project_id, sha: sha
+    flash[:alert] = t('controllers.commits.create.timeout', revision: revision)
+    redirect_to root_url
   end
 
   # Updates Commit metadata.
@@ -220,7 +229,7 @@ class CommitsController < ApplicationController
     @commit.destroy
 
     Commit.tire.index.refresh
-    
+
     respond_with(@commit) do |format|
       format.html { redirect_to root_url, notice: t('controllers.commits.destroy.deleted', sha: @commit.revision_prefix) }
     end
@@ -440,7 +449,7 @@ class CommitsController < ApplicationController
 
   def find_format
     @format = @project.default_manifest_format
-  end 
+  end
 
   def decorate(commit)
     commit.as_json.merge(
