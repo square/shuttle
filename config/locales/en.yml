@@ -154,6 +154,9 @@ en:
       create:
         success: Your commit %{revision} has been received and is being processed.
         already_submitted: You have already submitted that revision for translation. Once it is loaded from the repository, it will appear on Shuttle and the import process will begin.
+        commit_not_found_error: "No commit with the given SHA was found"
+        project_not_linked_error: "The project is not linked to a Git repository"
+        timeout: "The action timed out. Please try again at a later time."
       update:
         success: Commit %{sha} has been successfully updated.
       export:
