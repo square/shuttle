@@ -1,5 +1,6 @@
 @import "base/vars";
 @import "css3-mixins";
+@import "partials/_pagination";
 
 body.projects {
   .header .pull-right {
@@ -45,6 +46,10 @@ body.projects {
         }
       }
     }
+  }
+
+  .translation-workbench {
+    border-top: 1px solid #dfdfdf;
   }
   
   &#projects-show {

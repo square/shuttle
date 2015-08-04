@@ -1,0 +1,23 @@
+@import "css3-mixins";
+
+.pagination-links {
+  width: 100%;
+  font-size: 20px;
+  margin: 10px 0px;
+  .pagination {
+    display: flex;
+  }
+  .switch-page {
+    width: 198px;
+    flex-grow: 1;
+    &.left { text-align: left; }
+    &.right { text-align: right; }
+  }
+  .pages {
+    @include flex;
+    text-align: center;
+    .page + .page { margin-left: 8px; }
+  }
+}
+
+.pagination-info { width: 100%; text-align: center; }

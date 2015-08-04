@@ -43,14 +43,14 @@
 hr.divider
 
 / Filter Bar
-.border 
+div
   .filter-bar
     form
       .main
         .pull-right.expand-search
           i.fa.fa-chevron-right
 
-        input type="text" name="filter" placeholder="Substring"
+        = text_field_tag 'filter', @presenter.filter_string, placeholder:'Substring'
 
         - if @project.git?
           = select_tag 'commit', options_for_select(@presenter.selectable_commits, @presenter.selected_commit.try!(:revision))
@@ -58,8 +58,8 @@ hr.divider
           = select_tag 'article_id', options_for_select(@presenter.selectable_articles, @presenter.selected_article.try!(:id))
           = select_tag 'section_id', options_for_select(@presenter.selectable_sections, @presenter.selected_section.try!(:id))
 
-        = select_tag 'filter_source', options_for_select( [['Source', 'source'], ['Translation', 'translated']])
-        = submit_tag 'Filter', class: 'primary'
+        = select_tag 'filter_source', options_for_select( [['Source', 'source'], ['Translation', 'translated']], @presenter.selected_filter_source)
+        = submit_tag 'Filter', {name: 'submit', class: 'primary'}
         = button_tag id: 'gallery-link', class: 'primary square', type: 'button' do
           i.fa.fa-picture-o
         = button_tag id: 'issues-link', class: 'primary square', type: 'button' do
@@ -67,13 +67,23 @@ hr.divider
 
       .collapse
         .checkbox
-          input type="checkbox" name="include_translated" value="true" checked="checked"
+          = check_box_tag 'include_translated', '1', @presenter.include_translated?
           label for="include_translated" Translated
         .checkbox
-          input type="checkbox" name="include_approved" value="true"
+          = check_box_tag 'include_approved', '1', @presenter.include_approved?
           label for="include_approved" Approved
         .checkbox
-          input type="checkbox" name="include_new" value="true" checked="checked"
+          = check_box_tag 'include_new', '1', @presenter.include_new?
           label for="include_new" New
-    
-  .translation-workbench
+  .pagination-links
+    = paginate @translations
+  .translation-workbench.border
+
+.row
+  .pagination-links
+    = paginate @translations
+.row
+  .pagination-info
+    = page_entries_info(@translations, entry_name: 'translations')
+
+

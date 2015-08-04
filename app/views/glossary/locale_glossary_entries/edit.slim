@@ -90,7 +90,7 @@ hr.divider
           - if @source_entry.due_date
             .item
               dt Due Date
-              dd = "#{l DateTime.strptime(@source_entry.due_date, "%m/%d/%Y"), format: :short_full}"
+              dd = "#{l @source_entry.due_date.to_datetime, format: :short_full}"
           .item
             dt Created at
             dd = "#{l @source_entry.created_at, format: :short_full}"
