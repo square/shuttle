@@ -18,7 +18,7 @@ class SectionImporter
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
-  # Executes this worker by calling `#import_strings` on {Importer::Section}.
+  # Executes this worker by calling `#import_strings` on {SectionImporter::Core}.
   #
   # @param [Fixnum] section_id The ID of a Section.
 
