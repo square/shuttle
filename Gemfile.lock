@@ -452,3 +452,6 @@ DEPENDENCIES
   validates_timeliness
   whenever
   yard
+
+BUNDLED WITH
+   1.10.3

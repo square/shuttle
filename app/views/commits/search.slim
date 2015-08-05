@@ -21,26 +21,35 @@
   fieldset
     legend Commit Strings
 
-    .border
+    div
       .filter-bar#filter
-        = form_tag(nil, method: 'GET', id: 'filter-form', class: 'filter') do
+        = form_tag(search_project_commit_url, method: 'GET', id: 'filter-form', class: 'filter') do
           = text_field_tag 'filter', '', placeholder: 'Filter by Key', id: 'filter-field'
           = select_tag 'status', options_for_select(\
               [\
-                ['all', nil],\
-                ['approved', 'approved'],\
-                ['pending', 'pending']\
+                ['All', nil],\
+                ['Approved', 'approved'],\
+                ['Pending', 'pending']\
               ]\
             ), id: 'filter-select'
+          - required_locales, not_required_locales = @project.locale_requirements.partition { |locale, required| required }
+          select#locales name="locales[]" multiple="multiple" data-placeholder="Filter by locales"
+            optgroup label="Required"
+              - required_locales.each do |locale, _|
+                option value=locale.rfc5646 = locale.rfc5646
+            optgroup label="Not Required"
+              - not_required_locales.each do |locale, _|
+                option value=locale.rfc5646 = locale.rfc5646
           = submit_tag 'Filter', class: 'primary'
 
-      table.table.table-striped#translations[
-          data-url=project_commit_keys_url(@project, @commit, format: 'json')
-          data-locales=@project.targeted_rfc5646_locales.keys.join(',') ]
+      .pagination-links
+        = paginate @keys
+      - locales_to_show = @keys_presenter.locales_to_show
+      table.table.table-striped.border#translations data-locales=locales_to_show.keys.map(&:rfc5646)
         thead
           tr
             th STRING
-            - @project.locale_requirements.each do |locale, required|
+            - locales_to_show.each do |locale, required|
               - finished = (@commit.translations_not_done(locale) == 0)
               th class=(required ? (finished ? 'text-success' : 'text-error') : nil)
                 = locale.rfc5646
@@ -50,4 +59,24 @@
                 - else
                   | &nbsp;
                   i.fa.fa-circle-o
+        tbody
+          - @keys.each do |key|
+            tr
+              td
+                = @keys_presenter.original_key(key)
+                br
+                small.muted = @keys_presenter.source(key)
+              - locales_to_show.keys.each do |locale|
+                - translation = @keys_presenter.translation_for_locale(key, locale)
+                - if translation
+                  td
+                    a href=@keys_presenter.translation_url(translation) class=@keys_presenter.translation_class(translation) = @keys_presenter.translation_text(translation)
+                - else
+                  td
 
+    .row
+      .pagination-links
+        = paginate @keys
+    .row
+      .pagination-info
+        = page_entries_info(@keys, entry_name: 'keys')

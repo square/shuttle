@@ -525,6 +525,73 @@ de:
     it_behaves_like "returns error string if repository_url is blank", :localize
   end
 
+  describe '#search' do
+    before :each do
+      reset_elastic_search
+
+      @project = FactoryGirl.create(:project,
+                                    base_rfc5646_locale:      'en',
+                                    targeted_rfc5646_locales: { 'en' => true, 'fr' => true, 'es' => false },
+                                    repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+
+      @commit = @project.commit!('HEAD', skip_import: true)
+      other_commit = FactoryGirl.create(:commit, project: @project)
+      other_commit.keys = [FactoryGirl.create(:key, project: @project).tap(&:add_pending_translations)]
+      @keys = FactoryGirl.create_list(:key, 51, project: @project, ready: false).sort_by(&:key)
+      @keys.each &:add_pending_translations
+      @commit.keys = @keys
+
+      @user = FactoryGirl.create(:user, :activated)
+
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in @user
+      sleep 2
+    end
+
+    it 'should return the first page of keys if page not specified' do
+      get :search, project_id: @project.to_param, id: @commit.to_param
+      expect(response.status).to eql(200)
+      keys = assigns(:keys)
+      expect(keys.length).to eql 50
+    end
+
+    it 'should return up to PER_PAGE (50) keys from the specified page' do
+      get :search, project_id: @project.to_param, id: @commit.to_param, page: 2
+      expect(response.status).to eql(200)
+      keys = assigns(:keys)
+      expect(keys.length).to eql 1
+    end
+
+    it 'should filter by the key name' do
+      new_key = FactoryGirl.create(:key, project: @project, key: 'test_key').tap(&:add_pending_translations)
+      @commit.keys = @keys << new_key
+      sleep 1
+
+      get :search, project_id: @project.to_param, id: @commit.to_param, filter: 'test_key'
+      expect(response.status).to eql 200
+      keys = assigns(:keys)
+      expect(keys.length).to eql 1
+    end
+
+    it 'filters by requested status' do
+      approved_key = FactoryGirl.create(:key, project: @project, key: 'approved_key', ready: true)
+      @commit.keys = @keys << approved_key
+      sleep 1
+
+      get :search, project_id: @project.to_param, id: @commit.to_param, status: 'approved'
+      expect(response.status).to eql 200
+      keys = assigns(:keys)
+      expect(keys.length).to eql 1
+
+      get :search, project_id: @project.to_param, id: @commit.to_param, status: 'pending'
+      expect(response.status).to eql 200
+      keys = assigns(:keys)
+      expect(keys.length).to eql 50
+    end
+
+
+  end
+
   describe '#create' do
     before :each do
       @project = FactoryGirl.create(:project,

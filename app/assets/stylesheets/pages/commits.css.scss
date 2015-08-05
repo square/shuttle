@@ -20,13 +20,16 @@ body.commits {
   .form-action { margin-top: 40px; }
 
   .filter-bar {
-    form { display: inline-block; }
-    select {
-      text-transform: capitalize;
-      width: 150px;
+    display: flex;
+
+    form > * {
+      margin-right: 15px;
+      margin-left: 0px;
     }
-    input[type="text"] { width: 500px; }
+
+    input[type="text"] { width: 350px; }
     input[type="checkbox"] { margin-left: 30px; }
+    #locales { width: 300px; }
   }
 
   .dropzone {
