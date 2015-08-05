@@ -20,7 +20,7 @@ class ArticleImporter
   include Sidekiq::Worker
   sidekiq_options queue: :high
 
-  # Executes this worker by calling `#import_strings` on {Importer::Article}.
+  # Executes this worker by calling `#import_strings` on {SectionImporter::Core}.
   # Sets `loading` to true.
   #
   # @param [Fixnum] article_id The ID of a Article

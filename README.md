@@ -202,8 +202,7 @@ JavaScript files are organized into four possible locations:
   alongside, the `.html.rb` view file. For example, if
   `app/views/projects/new.html.rb` needed a bit of JS glue code, it would be
   placed in `app/views/projects/new.js`. This code is placed in a `<SCRIPT>` tag
-  at the end of the view by the {Views::Layouts::Application#inline_javascript}
-  method.
+  at the end of the view by the `application.slim` layout.
 
 CSS files are similarly organized:
 
