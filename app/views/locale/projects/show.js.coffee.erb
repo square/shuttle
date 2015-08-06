@@ -66,5 +66,5 @@ $(document).ready ->
     $(".translation-workbench"),
     "<%= search_translations_url %>",
     JSON.parse("<%= escape_javascript @glossary_entries.to_json %>"),
-    <%= @presenter.decorate_translations(@translations) %>
+    JSON.parse('<%= escape_javascript @presenter.decorate_translations(@translations) %>')
   )
