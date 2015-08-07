@@ -18,7 +18,7 @@
       a.close ×
       - projects = Project.git.order('LOWER(name) ASC')
       - cur_project = cookies[:home_index_new_commit_project] ? cookies[:home_index_new_commit_project] : projects.first
-      = form_for(Commit.new, url: project_commits_path(cur_project, format: 'json')) do |f|
+      = form_for(Commit.new, url: project_commits_path(cur_project)) do |f|
         h2 Translation Request
         .modal-body
           .half
@@ -43,4 +43,4 @@
               = f.label :description, class: 'control-label'
               .controls
                 = f.text_area :description, rows: 7, placeholder: 'Short description or link to a JIRA ticket'
-            = f.submit class: 'primary'
+            = f.submit class: 'primary', name: 'submit_button'
