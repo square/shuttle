@@ -361,7 +361,7 @@ class root.TranslationWorkbench
       @highlighter.hide()
     @highlighter.find('.tool-item.search').click =>
       if window.getSelection().toString().length > 0
-        window.open "#{@search_url}?query=#{encodeURIComponent(window.getSelection().toString())}",
+        window.open "#{@search_url}&field=searchable_source_copy&query=#{encodeURIComponent(window.getSelection().toString())}",
           "_blank", 'toolbar=0,location=0,menubar=0,height=800,width=1280,left=0'
 
     @items = []
