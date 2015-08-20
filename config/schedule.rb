@@ -26,10 +26,6 @@ every 1.minute, roles: [:primary_cron] do
   rake 'touchdown:update'
 end
 
-every 5.minute, roles: [:primary_cron] do
-  rake 'autotranslate:en_gb'
-end
-
 every :saturday, at: '12am', roles: [:primary_cron] do
   rake 'maintenance:cleanup_commits'
 end
