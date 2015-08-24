@@ -16,6 +16,8 @@
 
 class ProjectsController < ApplicationController
   skip_before_filter :authenticate_user!, only: [:stash_webhook]
+  skip_before_action :verify_authenticity_token, only: [:stash_webhook]
+
   before_filter :monitor_or_reviewer_required, only: [:new, :create, :edit, :update]
   before_filter :admin_required, only: [:setup_mass_copy_translations, :mass_copy_translations]
   before_filter :find_project, except: [:index, :new, :create]
