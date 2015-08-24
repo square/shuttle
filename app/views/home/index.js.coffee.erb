@@ -85,9 +85,9 @@ $(window).ready () ->
         new Flash('alert').text("Update failed!")
     )
 
-    # COMMIT SPECIFIC
+  # COMMIT SPECIFIC
 
-    $('#new_commit_project_id').change () ->
+  $('#new_commit_project_id').change () ->
     project = $(this).val()
     $('#new_commit').attr('action', '/projects/' + project + '/commits.json')
     $.cookie 'home_index_new_commit_project', project, expires: 7
