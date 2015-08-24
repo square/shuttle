@@ -89,7 +89,7 @@ $(window).ready () ->
 
   $('#new_commit_project_id').change () ->
     project = $(this).val()
-    $('#new_commit').attr('action', '/projects/' + project + '/commits.json')
+    $('#new_commit').attr('action', '/projects/' + project + '/commits')
     $.cookie 'home_index_new_commit_project', project, expires: 7
 
   commits_filter_form = $('#commits-filter-form')
