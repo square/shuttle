@@ -258,6 +258,17 @@
           .space-group
             = link_to "Mass Copy Translations From One Locale Into Another", setup_mass_copy_translations_project_url
 
+    - unless @project.git?
+      .row
+        .eight.columns
+          fieldset
+            legend Article API Token
+
+            .space-group
+              .controls
+                code
+                  = @project.api_token
+
   .form-actions
     = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
     button.default href=projects_url Cancel
