@@ -54,7 +54,6 @@ en:
         watched_branches: watched branches
       commit:
         revision: revision
-        revision_raw: revision
         description: description
         due_date: due date
         project_id: project

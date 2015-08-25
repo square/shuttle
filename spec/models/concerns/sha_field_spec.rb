@@ -16,11 +16,11 @@ require 'spec_helper'
 
 describe ShaField do
   it "should read and write a SHA to a BYTEA column" do
-    c = FactoryGirl.build(:commit)
-    c.revision = 'aeae59c36b4849bc7f7a5e29d979baba2941760a'
-    expect(c.revision_raw).to eql(ShaField::unhex('aeae59c36b4849bc7f7a5e29d979baba2941760a'))
-    c.revision_raw = ShaField::unhex('38ac2197e79bde048828e51d6616c9247f5029c0')
-    expect(c.revision).to eql('38ac2197e79bde048828e51d6616c9247f5029c0')
+    b = FactoryGirl.build(:blob)
+    b.sha = 'aeae59c36b4849bc7f7a5e29d979baba2941760a'
+    expect(b.sha_raw).to eql(ShaField::unhex('aeae59c36b4849bc7f7a5e29d979baba2941760a'))
+    b.sha_raw = ShaField::unhex('38ac2197e79bde048828e51d6616c9247f5029c0')
+    expect(b.sha).to eql('38ac2197e79bde048828e51d6616c9247f5029c0')
   end
 
   it "should allow a custom column name" do

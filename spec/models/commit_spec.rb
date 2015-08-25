@@ -34,6 +34,35 @@ describe Commit do
     end
   end
 
+  context "[validations]" do
+    context "[unique revision per project]" do
+      it "errors at the Rails layer if another Commit exists under the same Project with the same sha" do
+        project = FactoryGirl.create(:project)
+        FactoryGirl.create(:commit, project: project, revision: 'abc123')
+        commit = FactoryGirl.build(:commit, project: project, revision: 'abc123')
+        expect { commit.save! }.to raise_error(ActiveRecord::RecordInvalid)
+        expect(commit).to_not be_persisted
+        expect(commit.errors.messages).to eql(revision: ["already taken"])
+      end
+
+      it "errors at the database layer if there are 2 concurrent `save` requests with the same revision in the same Project" do
+        project = FactoryGirl.create(:project)
+        FactoryGirl.create(:commit, project: project, revision: 'abc123')
+        commit = FactoryGirl.build(:commit, project: project, revision: 'abc123')
+        commit.valid?
+        commit.errors.clear
+        expect { commit.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+      end
+
+      it "allows to create Commits with same key and source_copy as long as they are under different Projects" do
+        FactoryGirl.create(:commit, project: FactoryGirl.create(:project), revision: 'abc123')
+        commit = FactoryGirl.build(:commit, project: FactoryGirl.create(:project), revision: 'abc123')
+        expect { commit.save! }.to_not raise_error
+        expect(commit).to be_persisted
+      end
+    end
+  end
+
   context "[callbacks]" do
     before :each do
       @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
