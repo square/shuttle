@@ -223,7 +223,6 @@ ALTER SEQUENCE comments_id_seq OWNED BY comments.id;
 CREATE TABLE commits (
     id integer NOT NULL,
     project_id integer NOT NULL,
-    revision_raw bytea NOT NULL,
     message character varying(256) NOT NULL,
     committed_at timestamp without time zone NOT NULL,
     ready boolean DEFAULT false NOT NULL,
@@ -241,6 +240,7 @@ CREATE TABLE commits (
     pull_request_url text,
     import_batch_id character varying(255),
     import_errors text,
+    revision character varying(40) NOT NULL,
     CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0)),
     CONSTRAINT commits_priority_check CHECK (((priority >= 0) AND (priority <= 3)))
 );
@@ -1137,13 +1137,6 @@ CREATE INDEX commits_ready_date ON commits USING btree (project_id, ready, commi
 
 
 --
--- Name: commits_rev; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX commits_rev ON commits USING btree (project_id, revision_raw);
-
-
---
 -- Name: daily_metrics_date; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1183,6 +1176,13 @@ CREATE UNIQUE INDEX index_blobs_keys_on_blob_id_and_key_id ON blobs_keys USING b
 --
 
 CREATE UNIQUE INDEX index_blobs_on_project_id_and_sha_raw_and_path_sha_raw ON blobs USING btree (project_id, sha_raw, path_sha_raw);
+
+
+--
+-- Name: index_commits_on_project_id_and_revision; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_commits_on_project_id_and_revision ON commits USING btree (project_id, revision);
 
 
 --
@@ -1713,3 +1713,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141229041151');
 INSERT INTO schema_migrations (version) VALUES ('20141230094906');
 
 INSERT INTO schema_migrations (version) VALUES ('20150228020547');
+
+INSERT INTO schema_migrations (version) VALUES ('20150825010811');

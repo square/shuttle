@@ -108,8 +108,7 @@ class Commit < ActiveRecord::Base
 
   validates :project,
             presence: true
-  validates :revision_raw,
-            presence:   true,
+  validates :revision,
             uniqueness: {scope: :project_id, on: :create}
   validates :message,
             presence: true,
@@ -127,18 +126,12 @@ class Commit < ActiveRecord::Base
             timeliness: {type: :date},
             allow_nil:  true
 
-  attr_readonly :project_id, :revision_raw, :message, :committed_at
-
-  extend GitObjectField
-  git_object_field :revision,
-                   git_type:        :commit,
-                   repo:            ->(c) { c.project.try!(:repo) },
-                   repo_must_exist: true,
-                   scope:           :for_revision
+  attr_readonly :project_id, :revision, :message, :committed_at
 
   # Scopes
   scope :ready, -> { where(ready: true) }
   scope :not_ready, -> { where(ready: false) }
+  scope :for_revision, -> (r) { where(revision: r) }
 
   # Add import_batch and import_batch_status methods
   extend SidekiqBatchManager
@@ -159,7 +152,6 @@ class Commit < ActiveRecord::Base
   before_create :set_author
   after_commit :initial_import, on: :create
 
-  attr_readonly :revision, :message
   delegate :required_locales, :required_rfc5646_locales, :targeted_rfc5646_locales, :locale_requirements, to: :project
 
   # Counts the total commits.
@@ -274,13 +266,8 @@ class Commit < ActiveRecord::Base
   # @private
   def as_json(options=nil)
     options ||= {}
-
     options[:methods] = Array.wrap(options[:methods])
-    options[:methods] << :git_url << :revision
-
-    options[:except] = Array.wrap(options[:except])
-    options[:except] << :revision_raw
-
+    options[:methods] << :git_url
     super options
   end
 

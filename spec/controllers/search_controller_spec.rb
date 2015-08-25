@@ -198,7 +198,7 @@ describe SearchController do
 
   describe "#commits" do
     def finish_sha(prefix="")
-      prefix + rand(16**(40 - prefix.length)).to_s(16).rjust(40, '0')
+      prefix + rand(16**(40 - prefix.length)).to_s(16)
     end
 
     let(:prefix1) { "abcdef" }

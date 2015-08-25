@@ -22,7 +22,6 @@ FactoryGirl.define do
     loading false
     ready false
     skip_import true
-    skip_sha_check true
 
     trait :errored_during_import do
       import_errors { [["StandardError", "fake error"]] }
