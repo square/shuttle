@@ -113,8 +113,6 @@ describe Project do
     before :each do
       @project = FactoryGirl.create(:project)
       @repo = double('Git::Repo')
-      # for GitObjectField checking
-      allow_any_instance_of(Project).to receive(:repo).and_return(double('Git::Repo', object: double('Git::Object::Commit', :commit? => true)))
       # for commit! creation
       allow(@project).to receive(:repo).and_yield(@repo)
       @commit_obj = double('Git::Object::Commit',
