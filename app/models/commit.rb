@@ -109,6 +109,7 @@ class Commit < ActiveRecord::Base
   validates :project,
             presence: true
   validates :revision,
+            presence: true,
             uniqueness: {scope: :project_id, on: :create}
   validates :message,
             presence: true,
