@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2015 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,16 +12,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
-  factory :blob do
-    association :project
-    sequence(:sha) { |i| i.to_s(16).rjust(40, '0') }
-    sequence(:path) { |i| "/path/to/#{i}.yaml" }
-  end
+class CreateShaFieldOnBlobs < ActiveRecord::Migration
+  def change
+    add_column :blobs, :sha, :string, limit: 40
 
-  factory :fake_blob, parent: :blob do
-    after(:create) do |blob, evaluator|
-      blob.stub(:blob).and_return(OpenStruct.new(contents: 'hello, world', sha: evaluator.sha))
+    Blob.define_singleton_method(:readonly_attributes) { [] }
+    Blob.find_each do |blob|
+      blob.update! sha: blob.sha_raw.unpack('H*').first
     end
+    change_column_null :blobs, :sha, false
+
+    add_index :blobs, [:project_id, :sha, :path_sha_raw], unique: true
+
+    remove_column :blobs, :sha_raw
   end
 end

@@ -340,7 +340,6 @@ describe Commit do
   describe "#import_blob" do
     before :each do
       BlobImporter.stub(:perform_once)
-      allow_any_instance_of(Blob).to receive(:skip_sha_check).and_return(true)
       @project = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)))
       @commit = FactoryGirl.create(:commit, project: @project)
       @file1 = double(Git::Object::Blob, contents: 'hello, world1', sha: 'abc123')
