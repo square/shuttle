@@ -89,14 +89,14 @@ ALTER SEQUENCE articles_id_seq OWNED BY articles.id;
 
 CREATE TABLE blobs (
     project_id integer NOT NULL,
-    sha_raw bytea NOT NULL,
     parsed boolean DEFAULT false NOT NULL,
     errored boolean DEFAULT false NOT NULL,
     id integer NOT NULL,
     path text NOT NULL,
     path_sha_raw bytea NOT NULL,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    sha character varying(40) NOT NULL
 );
 
 
@@ -1172,10 +1172,10 @@ CREATE UNIQUE INDEX index_blobs_keys_on_blob_id_and_key_id ON blobs_keys USING b
 
 
 --
--- Name: index_blobs_on_project_id_and_sha_raw_and_path_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_blobs_on_project_id_and_sha_and_path_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE UNIQUE INDEX index_blobs_on_project_id_and_sha_raw_and_path_sha_raw ON blobs USING btree (project_id, sha_raw, path_sha_raw);
+CREATE UNIQUE INDEX index_blobs_on_project_id_and_sha_and_path_sha_raw ON blobs USING btree (project_id, sha, path_sha_raw);
 
 
 --
@@ -1715,3 +1715,5 @@ INSERT INTO schema_migrations (version) VALUES ('20141230094906');
 INSERT INTO schema_migrations (version) VALUES ('20150228020547');
 
 INSERT INTO schema_migrations (version) VALUES ('20150825010811');
+
+INSERT INTO schema_migrations (version) VALUES ('20150828004150');

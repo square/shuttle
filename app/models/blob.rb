@@ -42,24 +42,21 @@ class Blob < ActiveRecord::Base
   has_many :blobs_commits, inverse_of: :blob, dependent: :delete_all
   has_many :commits, through: :blobs_commits
 
-  extend GitObjectField
-  git_object_field :sha,
-                   git_type:        :blob,
-                   repo:            ->(t) { t.project.try!(:repo) },
-                   repo_must_exist: true,
-                   scope:           :with_sha
-
   extend DigestField
   digest_field :path, scope: :with_path
 
   validates :project,
             presence: true
   validates :sha,
-            presence: true
+            presence: true,
+            uniqueness: {scope: [:project_id, :path_sha_raw], on: :create}
   validates :path,
             presence: true
 
-  attr_readonly :project_id, :sha_raw, :path_sha_raw
+  attr_readonly :project_id, :sha, :path_sha_raw
+
+  # Scopes
+  scope :with_sha, -> (s) { where(sha: s) }
 
   # Searches the blob for translatable strings, creates or updates Translations,
   # and associates them with this Blob. Imported strings are approved by
