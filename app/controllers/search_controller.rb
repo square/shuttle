@@ -17,68 +17,16 @@ class SearchController < ApplicationController
   PER_PAGE = 50
 
   def translations
-    respond_to do |format|
-      format.html # translations.html.rb
-
-      format.json do
-        offset        = params[:offset].to_i
-        limit         = params.fetch(:limit, PER_PAGE)
-        project_id    = params[:project_id].to_i
-        query_filter  = params[:query]
-        field         = params[:field]
-        translator_id = params[:translator_id].to_i
-
-        start_date    = Date.strptime(params[:start_date], "%m/%d/%Y") rescue nil
-        end_date      = Date.strptime(params[:end_date], "%m/%d/%Y") rescue nil
-
-        if params[:target_locales].present?
-          target_locales = params[:target_locales].split(',').map { |l| Locale.from_rfc5646(l.strip) }
-          return head(:unprocessable_entity) unless target_locales.all?
-        end
-        @results = Translation.search(load: {include: {key: :project}}) do
-          if target_locales
-            if target_locales.size > 1
-              locale_filters = target_locales.map do |locale|
-                {term: {rfc5646_locale: locale.rfc5646}}
-              end
-              filter :or, *locale_filters
-            else
-              filter :term, rfc5646_locale: target_locales.map(&:rfc5646)[0]
-            end
-          end
-          size limit
-          from offset
-
-          if project_id and project_id > 0
-            filter :term, project_id: project_id
-          end
-          if translator_id and translator_id > 0
-            filter :term, translator_id: translator_id
-          end
-
-          if start_date
-            filter :range, updated_at: { gte: start_date }
-          end
-
-          if end_date
-            filter :range, updated_at: { lte: end_date }
-          end
-
-          if query_filter.present?
-            case field
-              when 'searchable_source_copy' then
-                query { match 'source_copy', query_filter, operator: 'or' }
-              else
-                query { match 'copy', query_filter, operator: 'or' }
-            end
-          else
-            sort { by :id, 'desc' }
-          end
-        end
-        render json: decorate_translations(@results).to_json
-      end
+    @presenter = TranslationsSearchPresenter.new(current_user.translator?)
+    form  = SearchTranslationsForm.new(params)
+    if form[:target_locales].present?
+      return head(:unprocessable_entity) unless form[:target_locales].all?
     end
+    translations_finder = SearchTranslationsFinder.new(form)
+    @results = translations_finder.find_translations
   end
+
+
 
   def keys
     respond_to do |format|

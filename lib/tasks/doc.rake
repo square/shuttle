@@ -29,7 +29,7 @@ if Rails.env.development?
     doc.options << '-o' << 'doc/app'
     doc.options << '--title' << "Shuttle Documentation"
 
-    doc.files = %w( app/**/*.rb lib/**/*.rb README.md )
+    doc.files = %w( app/**/*.rb lib/**/*.rb )
   end
 end
 

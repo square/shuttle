@@ -26,16 +26,16 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
-      file.path =~ /#{Regexp.escape(locale_to_use(locale).rfc5646)}\.lproj\/[^\/]+\.strings$/
+    def import_file?
+      file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.strings$/
     end
 
     def self.encoding() %w(UTF-8 UTF-16BE UTF-16LE) end
 
-    def import_strings(receiver)
+    def import_strings
       file.contents.scan(/(?:\/*\*\s*(.+?)\s*\*\/)?\s*"(.+?)"\s*=\s*"(.+?)";/um).each do |(context, key, value)|
         unless value.start_with?(DO_NOT_LOCALIZE_TOKEN)
-          receiver.add_string "#{file.path}:#{unescape(key)}", unescape(value),
+          add_string "#{file.path}:#{unescape(key)}", unescape(value),
                               context:      context,
                               original_key: unescape(key)
         else

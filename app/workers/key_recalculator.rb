@@ -22,7 +22,7 @@ class KeyRecalculator
 
   # Executes this worker.
   #
-  # @param [Fixnum] key__id The ID of a Key to process.
+  # @param [Fixnum] key_id The ID of a Key to process.
 
   def perform(key_id)
     Key.find(key_id).recalculate_ready!

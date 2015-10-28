@@ -108,8 +108,8 @@ class Commit < ActiveRecord::Base
 
   validates :project,
             presence: true
-  validates :revision_raw,
-            presence:   true,
+  validates :revision,
+            presence: true,
             uniqueness: {scope: :project_id, on: :create}
   validates :message,
             presence: true,
@@ -127,18 +127,12 @@ class Commit < ActiveRecord::Base
             timeliness: {type: :date},
             allow_nil:  true
 
-  attr_readonly :project_id, :revision_raw, :message, :committed_at
-
-  extend GitObjectField
-  git_object_field :revision,
-                   git_type:        :commit,
-                   repo:            ->(c) { c.project.try!(:repo) },
-                   repo_must_exist: true,
-                   scope:           :for_revision
+  attr_readonly :project_id, :revision, :message, :committed_at
 
   # Scopes
   scope :ready, -> { where(ready: true) }
   scope :not_ready, -> { where(ready: false) }
+  scope :for_revision, -> (r) { where(revision: r) }
 
   # Add import_batch and import_batch_status methods
   extend SidekiqBatchManager
@@ -159,7 +153,6 @@ class Commit < ActiveRecord::Base
   before_create :set_author
   after_commit :initial_import, on: :create
 
-  attr_readonly :revision, :message
   delegate :required_locales, :required_rfc5646_locales, :targeted_rfc5646_locales, :locale_requirements, to: :project
 
   # Counts the total commits.
@@ -210,27 +203,20 @@ class Commit < ActiveRecord::Base
   # Recursively locates blobs in this commit, creates Blobs for each of them if
   # necessary, and calls {Blob#import_strings} on them.
   #
-  # @param [Hash] options Import options.
-  # @option options [Locale] locale The locale to assume the base copy is
-  #   written in (by default it's the Project's base locale).
-  # @option options [true, false] inline (false) If `true`, does not spawn
-  #   Sidekiq workers to perform the import in parallel.
-  # @option options [true, false] force (false) If `true`, blobs will be
-  #   re-scanned for keys even if they have already been scanned.
   # @raise [Git::CommitNotFoundError] If the commit could not be found in
   #   the Git repository.
 
-  def import_strings(options={})
+  def import_strings
     update_attribute :loading, true
     commit! # Make sure commit exists
     clear_import_errors! # clear out any previous import errors
 
     import_batch.jobs do
       # clear out existing keys so that we can import all new keys
-      commits_keys.delete_all unless options[:locale]
+      commits_keys.delete_all
       # perform the recursive import
       traverse(commit!) do |path, git_blob|
-        import_blob path, git_blob, options
+        import_blob path, git_blob
       end
     end
   end
@@ -281,13 +267,8 @@ class Commit < ActiveRecord::Base
   # @private
   def as_json(options=nil)
     options ||= {}
-
     options[:methods] = Array.wrap(options[:methods])
-    options[:methods] << :git_url << :revision
-
-    options[:except] = Array.wrap(options[:except])
-    options[:except] << :revision_raw
-
+    options[:methods] << :git_url
     super options
   end
 
@@ -364,7 +345,7 @@ class Commit < ActiveRecord::Base
     end
   end
 
-  def import_blob(path, git_blob, options={})
+  def import_blob(path, git_blob)
     return if project.skip_tree?(path)
     imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
 
@@ -372,26 +353,8 @@ class Commit < ActiveRecord::Base
 
     imps.each do |importer|
       importer = importer.new(blob, self)
-
-      # we can't do a force import on a loading blob -- if we delete all the
-      # blobs_keys while another sidekiq job is doing the import, when that job
-      # finishes the blob will unset loading, even though the former job is still
-      # adding keys to the blob. at this point a third import (with force=false)
-      # might start, see the blob as not loading, and then do a fast import of
-      # the cached keys (even though not all keys have been loaded by the second
-      # import).
-      if options[:force] && blob.parsed?
-        blob.blobs_keys.delete_all
-        blob.update_column :parsed, false
-      end
-
-      next if importer.skip?(options[:locale])
-
-      if options[:inline]
-        BlobImporter.new.perform importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
-      else
-        BlobImporter.perform_once importer.class.ident, blob.id, id, options[:locale].try!(:rfc5646)
-      end
+      next if importer.skip?
+      BlobImporter.perform_once importer.class.ident, blob.id, id
     end
   end
 

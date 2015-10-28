@@ -36,11 +36,11 @@ module Importer
 
     protected
 
-    def import_file?(locale=nil)
-      file.path =~ /#{Regexp.escape(locale_to_use(locale).rfc5646)}\.lproj\/[^\/]+\.xib$/
+    def import_file?
+      file.path =~ /#{Regexp.escape(base_rfc5646_locale)}\.lproj\/[^\/]+\.xib$/
     end
 
-    def import_strings(receiver)
+    def import_strings
       xml = Nokogiri::XML(file.contents)
       return unless xml.root.name == 'document'
 

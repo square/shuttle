@@ -16,6 +16,7 @@
 # locale.
 
 class Locale::ProjectsController < ApplicationController
+
   before_filter :translator_required
   before_filter :locale_access_required
   before_filter :find_locale
@@ -50,7 +51,7 @@ class Locale::ProjectsController < ApplicationController
   # Routes
   # ------
   #
-  # * `GET /locales/:locale_id/projects/:id.json`
+  # * `GET /locales/:locale_id/projects/:id
   #
   # Path Parameters
   # ---------------
@@ -61,6 +62,9 @@ class Locale::ProjectsController < ApplicationController
   # | `id`        | The slug of a {Project}.        |
 
   def show
+    translations_form = LocaleProjectsShowForm.new(params)
+    translations_finder = LocaleProjectsShowFinder.new(translations_form)
+    @translations = translations_finder.find_translations
     @glossary_entries = LocaleGlossaryEntry.includes(:source_glossary_entry).joins(:source_glossary_entry)
         .where(
             source_glossary_entries: {source_rfc5646_locale: Shuttle::Configuration.locales.source_locale},
@@ -68,9 +72,7 @@ class Locale::ProjectsController < ApplicationController
             approved:                true)
         .map(&:as_translation_json)
         .compact
-
-    @presenter = LocaleProjectsShowPresenter.new(@project, params)
-
+    @presenter = LocaleProjectsShowPresenter.new(@project, translations_form)
     respond_with @project
   end
 

@@ -333,22 +333,26 @@ class WordSubstitutor
       self.modified_ranges ||= []
     end
 
+    # This is currently unused because this is just used for auto-translations.
+    # Note that this slows down the word substitutor TREMENDOUSLY.  Computing levenshtein
+    # distance that often for every word is _awful_.
+    #
     # @private also adjusts all note and suggestion ranges
-    def string=(new_string)
-      return super if string.nil? || new_string.nil? || string == new_string
+    # def string=(new_string)
+    #   return super if string.nil? || new_string.nil? || string == new_string
 
-      # we'll calculate which ranges to shift how much by getting the edit
-      # distance of the string. in the process of getting the edit distance,
-      # we'll record the position of additions and deletions.
-      range_changes = offsets(string, new_string)
-      range_changes.each do |(from_index, delta)|
-        notes.each { |note| note.range = shift_range(note.range, from_index, delta) }
-        suggestions.each { |sugg| sugg.range = shift_range(sugg.range, from_index, delta) }
-      end
+    #   # we'll calculate which ranges to shift how much by getting the edit
+    #   # distance of the string. in the process of getting the edit distance,
+    #   # we'll record the position of additions and deletions.
+    #   range_changes = offsets(string, new_string)
+    #   range_changes.each do |(from_index, delta)|
+    #     notes.each { |note| note.range = shift_range(note.range, from_index, delta) }
+    #     suggestions.each { |sugg| sugg.range = shift_range(sugg.range, from_index, delta) }
+    #   end
 
-      # now update the string
-      super
-    end
+    #   # now update the string
+    #   super
+    # end
 
     # @private
     def as_json(*)

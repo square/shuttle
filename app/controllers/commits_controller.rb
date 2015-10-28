@@ -29,7 +29,7 @@ class CommitsController < ApplicationController
   before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
 
   respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
-                                  :import, :sync, :match, :clear, :recalculate, :ping_stash]
+                                  :sync, :match, :clear, :recalculate, :ping_stash]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -126,18 +126,16 @@ class CommitsController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def search
-    respond_with @commit do |format|
-      format.html do
-        @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
-          hsh[locale.rfc5646] = {
-            required: required,
-            targeted: true,
-            finished: @commit.translations.where('approved IS NOT TRUE AND rfc5646_locale = ?', locale.rfc5646).first.nil?
-          }
-          hsh
-        end
-      end
+    @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
+      hsh[locale.rfc5646] = {
+        required: required,
+        targeted: true,
+        finished: @commit.translations.where('approved IS NOT TRUE AND rfc5646_locale = ?', locale.rfc5646).first.nil?
+      }
+      hsh
     end
+    @keys = CommitsSearchKeysFinder.new(params, @commit).find_keys
+    @keys_presenter = CommitsSearchPresenter.new(params[:locales], current_user.translator?, @project)
   end
 
   # Marks a commit as needing localization. Creates a CommitCreator job to do the
@@ -164,15 +162,24 @@ class CommitsController < ApplicationController
 
   def create
     revision = params[:commit][:revision].strip
-    respond_to do |format|
-      format.json do
-        other_fields           = commit_params.stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
-        other_fields[:user_id] = current_user.id
+    other_fields           = commit_params.stringify_keys.slice(*COMMIT_ATTRIBUTES.map(&:to_s)).except('revision')
+    other_fields[:user_id] = current_user.id
 
-        CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-        render json: {success: t('controllers.commits.create.success', revision: revision)}
-      end
-    end
+    options = other_fields.symbolize_keys
+    @project = Project.find(@project.id)
+    @commit = @project.commit!(revision, other_fields: options)
+
+    respond_with @commit, location: project_commit_url(@project, @commit)
+  rescue Git::CommitNotFoundError
+    flash[:alert] = t('controllers.commits.create.commit_not_found_error', revision: revision)
+    redirect_to root_url
+  rescue Project::NotLinkedToAGitRepositoryError
+    flash[:alert] = t('controllers.commits.create.project_not_linked_error', revision: params[:commit][:revision].strip)
+    redirect_to root_url
+  rescue Timeout::Error
+    Squash::Ruby.notify err, project_id: project_id, sha: sha
+    flash[:alert] = t('controllers.commits.create.timeout', revision: revision)
+    redirect_to root_url
   end
 
   # Updates Commit metadata.
@@ -222,39 +229,10 @@ class CommitsController < ApplicationController
     @commit.destroy
 
     Commit.tire.index.refresh
-    
+
     respond_with(@commit) do |format|
       format.html { redirect_to root_url, notice: t('controllers.commits.destroy.deleted', sha: @commit.revision_prefix) }
     end
-  end
-
-  # Scans a revision of the code for already-localized strings in a given
-  # locale and adds them to the database as approved Translation objects.
-  #
-  # Routes
-  # ------
-  #
-  # * `POST /projects/:project_id/commits/:id/import`
-  #
-  # Path Parameters
-  # ---------------
-  #
-  # |              |                        |
-  # |:-------------|:-----------------------|
-  # | `project_id` | The slug of a Project. |
-  # | `id`         | The SHA of a Commit.   |
-  #
-  # Query Parameters
-  #
-  # |          |                                       |
-  # |:---------|:--------------------------------------|
-  # | `locale` | The RFC 5646 identifier for a locale. |
-
-  def import
-    @commit.import_batch.jobs do
-      CommitImporter.perform_once @commit.id, locale: params[:locale]
-    end
-    respond_with @commit, location: nil
   end
 
   # Re-scans a revision for strings and adds new Translation records as
@@ -471,7 +449,7 @@ class CommitsController < ApplicationController
 
   def find_format
     @format = @project.default_manifest_format
-  end 
+  end
 
   def decorate(commit)
     commit.as_json.merge(

@@ -124,9 +124,6 @@ class Key < ActiveRecord::Base
   #   processing a large batch of Keys.
   attr_accessor :skip_readiness_hooks
 
-  # @private
-  attr_accessor :batched_commit_ids
-
   def apply_readiness_hooks?() !skip_readiness_hooks end
   private :apply_readiness_hooks?
 
@@ -145,7 +142,6 @@ class Key < ActiveRecord::Base
     }
     indexes :project_id, type: 'integer'
     indexes :ready, type: 'boolean'
-    indexes :commit_ids, as: 'batched_commit_ids.try!(:to_a) || commits_keys.pluck(:commit_id)'
   end
 
   validates :project,
@@ -257,30 +253,7 @@ class Key < ActiveRecord::Base
 
     # Since update_all bypasses all callbacks, `ready` field for some Keys should be out of sync in ElasticSearch at this point.
     # We need to update ElasticSearch with the new ready fields.
-    batch_refresh_elastic_search(obj)
-  end
-
-  # Batch updates `obj`s Keys in elastic search.
-  # Expects `obj` to have a `keys` association.
-  # This should be run after a batch update to Keys which skip callbacks (such as batch_recalculate_ready!)
-  #
-  # Running `Key.tire.index.import obj.keys` is slow since it needs to find commit_ids for each Key.
-  # Instead, this method preloads all the commit_ids for all Keys and partitions them into the correct Keys.
-  #
-  # @param [Commit, Project, Article] obj The object whose keys should be batch refreshed in ElasticSearch
-
-  def self.batch_refresh_elastic_search(obj)
-    obj.keys.find_in_batches do |keys|
-      commits_by_key = CommitsKey.connection.select_rows(CommitsKey.select('commit_id, key_id').where(key_id: keys.map(&:id)).to_sql).inject({}) do |hsh, (commit_id, key_id)|
-        hsh[key_id.to_i] ||= Set.new
-        hsh[key_id.to_i] << commit_id.to_i
-        hsh
-      end
-      # now set batched_commit_ids for each key
-      keys.each { |key| key.batched_commit_ids = commits_by_key[key.id] || Set.new }
-      # and run the import
-      Key.tire.index.import keys
-    end
+    Key.tire.index.import obj.keys
   end
 
   # @private

@@ -14,11 +14,13 @@
 
 class LocaleProjectsShowPresenter
   include ActionView::Helpers::TextHelper
+  include TranslationDecoration
+  include Rails.application.routes.url_helpers
 
-  attr_reader :params
-  def initialize(project, params)
+  attr_reader :form
+  def initialize(project, form)
     @project = project
-    @params = params
+    @form = form
   end
 
   # @return [Hash<Integer, Array<Pair<String, Integer>>>] a hash whose keys are article_ids, and
@@ -42,7 +44,7 @@ class LocaleProjectsShowPresenter
   # @return [Commit, nil] selected Commit if there is one
 
   def selected_commit
-    @_selected_commit ||= @project.commits.for_revision(params[:commit]).first
+    @_selected_commit ||= @project.commits.for_revision(form[:commit]).first
   end
 
   # @return [Array<Pair<String, String>>] an array of selectable options for Articles
@@ -54,7 +56,7 @@ class LocaleProjectsShowPresenter
   # @return [Article, nil] selected Article if there is one
 
   def selected_article
-    @_selected_article ||= @project.articles.find_by_id(params[:article_id])
+    @_selected_article ||= @project.articles.find_by_id(form[:article_id])
   end
 
   # @return [Array<Pair<String, String>>] an array of selectable options for Sections
@@ -69,6 +71,30 @@ class LocaleProjectsShowPresenter
   # @return [Section, nil] selected Section if there is one.
 
   def selected_section
-    @_selected_section ||= (selected_article ? selected_article : @project).sections.merge(Section.active).find_by_id(params[:section_id])
+    @_selected_section ||= (selected_article ? selected_article : @project).sections.merge(Section.active).find_by_id(form[:section_id])
+  end
+
+  def filter_string
+    form[:query_filter]
+  end
+
+  def selected_filter_source
+    form[:filter_source]
+  end
+
+  def include_translated?
+    form[:include_translated]
+  end
+
+  def include_new?
+    form[:include_new]
+  end
+
+  def include_approved?
+    form[:include_approved]
+  end
+
+  def decorate_translations(translations)
+    @_decorate_translations ||= decorate(translations).to_json
   end
 end

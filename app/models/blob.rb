@@ -42,24 +42,21 @@ class Blob < ActiveRecord::Base
   has_many :blobs_commits, inverse_of: :blob, dependent: :delete_all
   has_many :commits, through: :blobs_commits
 
-  extend GitObjectField
-  git_object_field :sha,
-                   git_type:        :blob,
-                   repo:            ->(t) { t.project.try!(:repo) },
-                   repo_must_exist: true,
-                   scope:           :with_sha
-
   extend DigestField
   digest_field :path, scope: :with_path
 
   validates :project,
             presence: true
   validates :sha,
-            presence: true
+            presence: true,
+            uniqueness: {scope: [:project_id, :path_sha_raw], on: :create}
   validates :path,
             presence: true
 
-  attr_readonly :project_id, :sha_raw, :path_sha_raw
+  attr_readonly :project_id, :sha, :path_sha_raw
+
+  # Scopes
+  scope :with_sha, -> (s) { where(sha: s) }
 
   # Searches the blob for translatable strings, creates or updates Translations,
   # and associates them with this Blob. Imported strings are approved by
@@ -68,21 +65,13 @@ class Blob < ActiveRecord::Base
   # matches if possible).
   #
   # @param [Class] importer The Importer::Base subclass to process this blob.
-  # @param [Hash] options Additional options.
-  # @option options [Locale, nil] locale The locale to scan for strings in (by
-  #   default it's the Project's base locale).
-  # @option options [Commit, nil] commit If given, new Keys will be added to
-  #   this Commit's `keys` association.
-  # @option options [true, false] inline If `true`, Sidekiq workers will be run
-  #   synchronously.
+  # @param [Commit] commit New Keys will be added to this Commit's `keys` association.
   # @raise [Git::BlobNotFoundError] If the blob could not be found in the Git
   #   repository.
 
-  def import_strings(importer, options={})
+  def import_strings(importer, commit)
     blob! # make sure blob exists
-    importer = importer.new(self, options[:commit])
-    importer.inline = options[:inline]
-    options[:locale] ? importer.import_locale(options[:locale]) : importer.import
+    importer.new(self, commit).import
   end
 
   # @return [Git::Object::Blob] The Git blob this Blob represents.

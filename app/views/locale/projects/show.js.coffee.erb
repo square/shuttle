@@ -64,8 +64,7 @@ $(document).ready ->
   # TRANSLATION WORKBENCH
   new TranslationWorkbench(
     $(".translation-workbench"),
-    $(".filter-bar form"),
-    "<%= locale_project_translations_url(@locale, @project, format: 'json') %>",
-    "<%= search_translations_url %>",
-    JSON.parse("<%= escape_javascript @glossary_entries.to_json %>")
+    "<%= search_translations_url(:target_locales => @locale.rfc5646) %>",
+    JSON.parse("<%= escape_javascript @glossary_entries.to_json %>"),
+    JSON.parse('<%= escape_javascript @presenter.decorate_translations(@translations) %>')
   )

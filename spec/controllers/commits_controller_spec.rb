@@ -525,6 +525,73 @@ de:
     it_behaves_like "returns error string if repository_url is blank", :localize
   end
 
+  describe '#search' do
+    before :each do
+      reset_elastic_search
+
+      @project = FactoryGirl.create(:project,
+                                    base_rfc5646_locale:      'en',
+                                    targeted_rfc5646_locales: { 'en' => true, 'fr' => true, 'es' => false },
+                                    repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+
+      @commit = @project.commit!('HEAD', skip_import: true)
+      other_commit = FactoryGirl.create(:commit, project: @project)
+      other_commit.keys = [FactoryGirl.create(:key, project: @project).tap(&:add_pending_translations)]
+      @keys = FactoryGirl.create_list(:key, 51, project: @project, ready: false).sort_by(&:key)
+      @keys.each &:add_pending_translations
+      @commit.keys = @keys
+
+      @user = FactoryGirl.create(:user, :activated)
+
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in @user
+      sleep 2
+    end
+
+    it 'should return the first page of keys if page not specified' do
+      get :search, project_id: @project.to_param, id: @commit.to_param
+      expect(response.status).to eql(200)
+      keys = assigns(:keys)
+      expect(keys.length).to eql 50
+    end
+
+    it 'should return up to PER_PAGE (50) keys from the specified page' do
+      get :search, project_id: @project.to_param, id: @commit.to_param, page: 2
+      expect(response.status).to eql(200)
+      keys = assigns(:keys)
+      expect(keys.length).to eql 1
+    end
+
+    it 'should filter by the key name' do
+      new_key = FactoryGirl.create(:key, project: @project, key: 'test_key').tap(&:add_pending_translations)
+      @commit.keys = @keys << new_key
+      sleep 1
+
+      get :search, project_id: @project.to_param, id: @commit.to_param, filter: 'test_key'
+      expect(response.status).to eql 200
+      keys = assigns(:keys)
+      expect(keys.length).to eql 1
+    end
+
+    it 'filters by requested status' do
+      approved_key = FactoryGirl.create(:key, project: @project, key: 'approved_key', ready: true)
+      @commit.keys = @keys << approved_key
+      sleep 1
+
+      get :search, project_id: @project.to_param, id: @commit.to_param, status: 'approved'
+      expect(response.status).to eql 200
+      keys = assigns(:keys)
+      expect(keys.length).to eql 1
+
+      get :search, project_id: @project.to_param, id: @commit.to_param, status: 'pending'
+      expect(response.status).to eql 200
+      keys = assigns(:keys)
+      expect(keys.length).to eql 50
+    end
+
+
+  end
+
   describe '#create' do
     before :each do
       @project = FactoryGirl.create(:project,
@@ -541,7 +608,7 @@ de:
 
     it "should strip the commit revision of whitespace" do
       post :create, project_id: @project.to_param, commit: {revision: "  HEAD     "}, format: 'json'
-      expect(response.status).to eql(200)
+      expect(response.status).to eql(201) # 201 is Created, the proper response after a POST
     end
 
     it "should associate the commit with the current user" do
@@ -557,65 +624,38 @@ de:
     end
 
     it "should allow to import the same revision twice in quick succession" do
-      expect(CommitCreator).to receive(:perform_once).once
-      post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
-      expect(JSON.parse(response.body)['success']).to include('has been received')
+      expect(Project).to receive(:find).twice.and_return(@project)
+      commit1 = double('commit1')
+      commit2 = double('commit2')
+      expect(@project).to receive(:commit!).twice.and_return(commit1, commit2)
+      expect(
+        post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}
+      ).to redirect_to(project_commit_url(@project, commit1))
 
-      expect(CommitCreator).to receive(:perform_once).once
-      post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}, format: 'json'
-      expect(JSON.parse(response.body)['success']).to include('has been received')
+      expect(
+        post :create, project_id: @project.to_param, commit: {revision: 'HEAD'}
+      ).to redirect_to(project_commit_url(@project, commit2))
     end
 
-    it "should not call CommitCreator if repository_url is blank" do
+    it "should not create a commit if repository_url is blank" do
       project = FactoryGirl.create(:project, repository_url: nil)
-      expect(CommitCreator).to_not receive(:perform_once)
-      post :create, project_id: project.to_param, commit: {revision: 'HEAD'}, format: 'json'
+      expect(Project).to_not receive(:find)
+      post :create, project_id: project.to_param, commit: {revision: 'HEAD'}
       expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
     end
 
-    it "sends an email to current user if invalid sha is submitted or sha goes invalid before CommitCreator is run" do
-      ActionMailer::Base.deliveries.clear
-      expect { post :create, project_id: @project.to_param, commit: {revision: 'xyz123'}, format: 'json' }.to_not raise_error
-      expect(ActionMailer::Base.deliveries.size).to eql(1)
-      mail = ActionMailer::Base.deliveries.first
-      expect(mail.to).to eql([@user.email])
-      expect(mail.subject).to eql("[Shuttle] Import Failed for sha: xyz123")
-      expect(mail.body).to include("Error Class:   Git::CommitNotFoundError", "Error Message: Commit not found in git repo: xyz123")
-      expect(mail.body).to include("Shuttle couldn't find your sha 'xyz123' in the git repo. This typically happens when your commit gets rebased away or the sha was invalid. Please submit the new sha to be able to get your strings translated.")
+    it "renders an appropriate error when the project is not linked to a Git repository" do
+      expect(Project).to receive(:find).and_raise(Project::NotLinkedToAGitRepositoryError)
+      expect(post :create, project_id: @project.to_param, commit: {revision: 'xyz123'}).to redirect_to(root_url)
+      expect(request.flash[:alert]).to include("not linked")
+
     end
 
-    it "sends an email to current user and the commit author if valid sha is submitted but sha goes invalid after CommitCreator finished and before import is finished" do
-      project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
-      ActionMailer::Base.deliveries.clear
+    it "renders an appropriate error when the SHA is invalid" do
+      expect_any_instance_of(Project).to receive(:commit!).and_raise(Git::CommitNotFoundError, "fake_sha")
+      expect(post :create, project_id: @project.to_param, commit: {revision: 'xyz123'}).to redirect_to(root_url)
+      expect(request.flash[:alert]).to include("No commit")
 
-      allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_call_original
-      allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).with("88e5b52732c23a4e33471d91cf2281e62021512a").and_return(nil) # fake a Git::BlobNotFoundError in CommitImporter
-      allow_any_instance_of(Commit).to receive(:skip_key?).with("how_are_you").and_raise(Git::CommitNotFoundError, "fake_sha") # fake a CommitNotFoundError error in CommitKeyCreator failure
-      expect { post :create, project_id: project.to_param, commit: {revision: 'e5f5704af3c1f84cf42c4db46dcfebe8ab842bde'}, format: 'json' }.to_not raise_error
-
-      commit = project.commits.last
-      blob_not_found = commit.blobs.with_sha("88e5b52732c23a4e33471d91cf2281e62021512a").first
-      blob_for_which_commit_not_found = commit.blobs.with_sha("b80d7482dba100beb55e65e82c5edb28589fa045").first
-
-      expected_errors = [["ExecJS::RuntimeError", "[stdin]:2:5: error: unexpected this\n    this is some invalid javascript code\n    ^^^^ (in /ember-broken/en-US.coffee)"],
-                         ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob_id #{blob_not_found.id})"],
-                         ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in CommitKeyCreator for commit_id #{commit.id} and blob_id #{blob_for_which_commit_not_found.id})"],
-                         ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
-                         ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]]
-
-      # expect to persist errors
-      expect(commit.ready? || commit.tap(&:recalculate_ready!).ready? ).to be_falsey
-      expect(commit.import_errors.sort).to eql(expected_errors.sort)
-
-      # expect sending email
-      expect(ActionMailer::Base.deliveries.size).to eql(1)
-      mail = ActionMailer::Base.deliveries.first
-      expect(mail.to).to eql(["yunus@squareup.com", @user.email])
-      expect(mail.subject).to eql("[Shuttle] Error(s) occurred during the import")
-      expected_errors.each do |err_class, err_message|
-        expect(mail.body).to include("#{err_class} - #{err_message}")
-      end
-      expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated.")
     end
   end
 
@@ -664,10 +704,6 @@ de:
       expect(response).to be_ok
       expect(response.body.to_s).to include(*issues.map{|issue| "#issue-wrapper-#{issue.id}"})
     end
-  end
-
-  describe "#import" do
-    it_behaves_like "returns error string if repository_url is blank", :import
   end
 
   describe "#sync" do

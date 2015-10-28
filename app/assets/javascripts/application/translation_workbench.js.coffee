@@ -351,42 +351,22 @@ class root.TranslationWorkbench
   #
   # @param [jQuery Object] list The element that the translation list will be
   #   rendered into.
-  # @param [jQuery Object] filter The element containing the filter form.
-  # @param [String] url The URL to load translations from.
   # @param [Array] glossary A JSON-decoded list of glossary entries.
+  # @param [String] url of the translations search page
+  # @param [Object] JSON of translation information
   #
-  constructor: (@list, @filter, @url, @search_url, @glossary) ->
-    @highlighter = $(HoganTemplates['translationworkbench/translation_tooltip'].render()) 
+  constructor: (@list, @search_url, @glossary, @translations) ->
+    @highlighter = $(HoganTemplates['translationworkbench/translation_tooltip'].render())
     @highlighter.find('.tool-item.hide').click =>
       @highlighter.hide()
     @highlighter.find('.tool-item.search').click =>
       if window.getSelection().toString().length > 0
-        window.open "#{@search_url}?query=#{encodeURIComponent(window.getSelection().toString())}",
+        window.open "#{@search_url}&field=searchable_source_copy&query=#{encodeURIComponent(window.getSelection().toString())}",
           "_blank", 'toolbar=0,location=0,menubar=0,height=800,width=1280,left=0'
 
     @items = []
-    @scroll = @list.infiniteScroll (=> @makeURL()),
-      windowScroll: true
-      renderer: (items) =>
-        @highlighter.appendTo @list
-        @addItems items
-
-    @filter.submit => 
-      @search() 
-      return false
-
-  # Submits a filter query and refreshes the strings list.
-  #
-  search: ->
-    @empty()
-    @scroll.loadNextPage()
-
-  # Removes all items from the strings list.
-  #
-  empty: ->
-    @items = []
-    @scroll.reset()
-    @list.empty()
+    @highlighter.appendTo @list
+    @addItems @translations
 
   # @private
   addItems: (translations) ->
@@ -399,7 +379,3 @@ class root.TranslationWorkbench
         @items.push item
         previousItem = item
     @list.find(".translation-area").autosize()
-
-  # @private
-  makeURL: -> 
-    @url + "?" + @filter.serialize()

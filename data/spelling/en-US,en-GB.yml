@@ -1720,7 +1720,7 @@
     waiting for you for ever.” “Forever” means continually, always, as in “They are
     forever arguing.”
 - - shrivel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -1755,7 +1755,7 @@
   - utilise
   - :auto
 - - counsel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -1794,7 +1794,7 @@
   - oxidise
   - :auto
 - - snorkel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -1888,9 +1888,6 @@
 - - distill
   - distil
   - :auto
-- - learned
-  - learnt
-  - :auto
 - - theater
   - theatre
   - :auto
@@ -1976,7 +1973,7 @@
   - dueller
   - :auto
 - - marvel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -1984,7 +1981,7 @@
   - succour
   - :auto
 - - barrel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2027,7 +2024,7 @@
   - lept
   - :auto
 - - dispel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2057,7 +2054,7 @@
   - :prompt
   - use “toward” only as an adjective
 - - travel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2071,7 +2068,7 @@
   - dialogue
   - :auto
 - - tunnel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2088,7 +2085,7 @@
   - diversion
   - :auto
 - - cancel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2182,7 +2179,7 @@
   - :stemmed
   - 42: "%{root:0..-2}l%{suffix}"
 - - signal
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2203,7 +2200,7 @@
   - :prompt
   - using one’s turn signal when driving
 - - pommel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2241,7 +2238,7 @@
   - a set of television or radio broadcasts on the same subject or using the same
     characters but in different situations
 - - pummel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2288,7 +2285,7 @@
   - :prompt
   - curriculum vitae
 - - funnel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2315,7 +2312,7 @@
   - e-mail
   - :auto
 - - revel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2343,7 +2340,7 @@
   - :prompt
   - the snack, not the electronic component
 - - ravel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2360,7 +2357,7 @@
   - savour
   - :auto
 - - yodel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2403,7 +2400,7 @@
   - valour
   - :auto
 - - hovel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2424,7 +2421,7 @@
   - fibre
   - :auto
 - - panel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2467,7 +2464,7 @@
   - mummy
   - :auto
 - - jewel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2507,7 +2504,7 @@
   - doughnut
   - :auto
 - - model
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2554,7 +2551,7 @@
   - :prompt
   - referring to the sky, or the defunct concept in physics
 - - label
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2568,7 +2565,7 @@
   - litre
   - :auto
 - - level
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2583,7 +2580,7 @@
   - toffee
   - :auto
 - - libel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2625,7 +2622,7 @@
   - post
   - :prompt
 - - duet
-  - 
+  -
   - :stemmed
   - 22:
     - t
@@ -2634,7 +2631,7 @@
     - t
     - tt
 - - duel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"
@@ -2661,7 +2658,7 @@
   - :prompt
   - referring to the season
 - - fuel
-  - 
+  -
   - :stemmed
   - 12.2: "%{root}l%{suffix}"
     42.1: "%{root}l%{suffix}"

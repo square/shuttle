@@ -20,7 +20,7 @@ module InheritedSettingsForKey
   # If this {Key} belongs to an {Article}, the required locales are pulled from the
   # Article's settings. Otherwise, project's settings are used.
   #
-  # @return [Array<Locale>] array of {Locales} this {Key} must be translated to.
+  # @return [Array<Locale>] An array of {Locale Locales} this {Key} must be translated to.
 
   def required_locales
     article ? article.required_locales : project.required_locales
@@ -29,7 +29,7 @@ module InheritedSettingsForKey
   # If this {Key} belongs to a {Article}, the Article is checked to see if the key
   # should be skipped. Otherwise, project is checked.
   #
-  # @return [Boolean] whether or not this {Key} should be skipped.
+  # @return [Boolean] Whether or not this {Key} should be skipped.
 
   def skip_key?(locale)
     article ? article.skip_key?(self, locale) : project.skip_key?(self.key, locale)
@@ -38,7 +38,7 @@ module InheritedSettingsForKey
   # If this {Key} belongs to a {Article}, the base locale is pulled from the
   # Article's settings. Otherwise, project's settings are used.
   #
-  # @return [Locale] base {Locale} of this {Key}
+  # @return [Locale] Base {Locale} of this {Key}
 
   def base_locale
     article ? article.base_locale : project.base_locale
@@ -47,7 +47,7 @@ module InheritedSettingsForKey
   # If this {Key} belongs to a {Article}, the targeted_locales are pulled from the
   # Article's settings. Otherwise, project's settings are used.
   #
-  # @return [Array<Locale>] array of {Locales} this {Key} is targeted to.
+  # @return [Array<Locale>] Array of {Locale Locales} this {Key} is targeted to.
 
   def targeted_locales
     article ? article.targeted_locales : project.targeted_locales

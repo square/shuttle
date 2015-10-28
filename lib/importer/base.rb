@@ -53,9 +53,6 @@ module Importer
     class_attribute :implementations
     self.implementations = []
 
-    # @return [true, false] If `true`, Sidekiq workers will be run inline.
-    attr_accessor :inline
-
     # @private
     def self.inherited(subclass)
       self.implementations << subclass
@@ -86,41 +83,25 @@ module Importer
     # Prepares an importer for use with a Blob.
     #
     # @param [Blob] blob A Blob whose strings will be imported.
-    # @param [Commit] commit If given, new Keys will be added to this Commit's
+    # @param [Commit] commit New Keys will be added to this Commit's
     #   `keys` association.
 
-    def initialize(blob, commit=nil)
+    def initialize(blob, commit)
       @blob   = blob
       @commit = commit
-      @file   = File.new(blob.path, nil, nil)
+      @file   = File.new(blob.path, nil)
 
-      if @commit
-        blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
-      end
+      blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
     end
 
     # Scans the Blob for localizable strings, and creates or updates
     # corresponding Translation records.
 
     def import
-      if @blob.parsed? && @commit
+      if @blob.parsed?
         import_by_using_cached_keys
       else
         import_by_parsing_blob
-      end
-    end
-
-    # Scans the blob for localizable strings, assumes their values are of a
-    # given locale, and creates unapproved Translations for those strings. This
-    # will not work for localization frameworks that use the value of the string
-    # as its key, since the value changes with each locale.
-
-    def import_locale(locale)
-      raise "Can't perform a locale import without an associated commit" unless @commit
-
-      load_contents
-      Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
-        process_blob_for_translation_extraction locale
       end
     end
 
@@ -135,95 +116,59 @@ module Importer
     # Determines if the filename stored in `file.path` is one that would contain
     # localizable content.
     #
-    # @param [String] locale The locale to assume the strings are in. By default
-    #   it should assume the Project's base locale. If the file does not match
-    #   the locale (e.g., the locale is en-US but the file is `strings.fr.yml`),
-    #   this method should return `false`.
     # @return [true, false] Whether this file should be scanned for strings.
-    def import_file?(locale=nil) raise NotImplementedError end
+    def import_file?
+      raise NotImplementedError
+    end
 
     # Returns whether this importer should not be used, based on the Project's
     # whitelisted/blacklisted file path settings and the implementation of the
     # {#import_file?} method.
     #
-    # @param [Locale, nil] locale A locale to import, or `nil` if this is a base
-    #   language import.
     # @return [true, false] Whether this importer should not be run.
 
-    def skip?(locale)
-      @blob.project.skip_path?(file.path, self.class) || !import_file?(locale)
+    def skip?
+      @blob.project.skip_path?(file.path, self.class) || !import_file?
     end
 
     # @abstract
     #
     # Given the contents of a file, locates translatable strings, and imports
-    # them to Translation records using the `receiver`. Implementations of this
-    # method should scan the file's contents for localizable strings, and then
-    # pass those strings to the receiver by calling `add_string`.
+    # them to Translation records. Implementations of this method should scan
+    # the file's contents for localizable strings, and then
+    # pass those strings to the `add_string` method.
     #
     # Importers that work with keys constructed of nested hash keys (such as
     # Ruby YAML importers and Ember importers) can use the {#extract_hash}
     # method as a convenience to convert those nested keys into period-delimited
     # keys.
     #
-    # @param [Importer::Base::Receiver] receiver A proxy object that receives
-    #   strings to import.
-    #
     # @example Importing strings from a CSV file ("key,string")
-    #   def import_strings(receiver)
+    #   def import_strings
     #     CSV.parse(file.contents) do |row|
-    #       receiver.add_string row[0], row[1]
+    #       add_string row[0], row[1]
     #     end
     #   end
-    def import_strings(receiver) raise NotImplementedError end
+    def import_strings
+      raise NotImplementedError
+    end
 
     # @return [String, Array<String>] The character encoding to assume files
     #   use. If multiple encodings are provided, they are each tried in order
     #   until one produces a valid encoding.
     def self.encoding() %w(UTF-8) end
 
-    # Returns either the given locale or the Project's base locale if `nil` is
-    # given.
+    # Returns Blob's Project's base rfc5646 locale. This will be used as the base
+    # locale of the Key & Translations that will be created.
     #
-    # @param [Locale] locale A locale to use for a translation import.
-    # @return [Locale] The given locale (translation import) or the base locale
-    #   (string import).
-
-    def locale_to_use(locale=nil)
-      locale || @blob.project.base_locale
+    # @return [Locale] Blob's Project's base rfc5646 locale
+    def base_rfc5646_locale
+      @blob.project.base_locale.rfc5646
     end
 
     # @private
     def add_string(key, value, options={})
-      @keys << {key: key, value: value, options: options}
-    end
-
-    # @private
-    def add_translation(key, value, locale)
-      if @blob.project.skip_key?(key, locale)
-        log_skip key, "skip_key? returned true for #{locale.inspect}"
-        return
-      end
-
-      key_obj = @commit.keys.for_key(key).first
-      unless key_obj
-        log_skip key, "Couldn't find key"
-        return
-      end
-
-      base = key_obj.translations.base.first
-      unless base
-        log_skip key, "Couldn't find base translation"
-        return
-      end
-
-      key_obj.translations.in_locale(locale).create_or_update!(
-          source_copy:              base.copy,
-          copy:                     value,
-          approved:                 true,
-          source_rfc5646_locale:    base.rfc5646_locale,
-          rfc5646_locale:           locale.rfc5646,
-          preserve_reviewed_status: true)
+      @keys << {key: key, value: value, options: { source: file.path }.merge(options)}
     end
 
     protected
@@ -290,23 +235,13 @@ module Importer
 
       # first load the list of keys we'll need to create
       Rails.logger.tagged("#{self.class.to_s} #{@blob.sha}") do
-        process_blob_for_string_extraction
+        import_strings
       end
 
       # then spawn jobs to create those keys
-      if inline
-        @keys.in_groups_of(100, false) do |keys|
-          CommitKeyCreator.new.perform @blob.id, @commit.try!(:id), self.class.ident, keys
-        end
-      elsif @commit
-        @commit.import_batch.jobs do
-          @keys.in_groups_of(100, false).each do |keys|
-            CommitKeyCreator.perform_once @blob.id, @commit.try!(:id), self.class.ident, keys
-          end
-        end
-      else
-        @keys.in_groups_of(100, false) do |keys|
-          CommitKeyCreator.perform_async @blob.id, @commit.try!(:id), self.class.ident, keys
+      @commit.import_batch.jobs do
+        @keys.in_groups_of(100, false).each do |keys|
+          CommitKeyCreator.perform_once @blob.id, @commit.id, self.class.ident, keys
         end
       end
     end
@@ -341,16 +276,6 @@ module Importer
         else
           log_skip key, "Value is a #{value.class.to_s}"
       end
-    end
-
-    def process_blob_for_string_extraction
-      file.locale = nil
-      import_strings Receiver.new(self)
-    end
-
-    def process_blob_for_translation_extraction(locale)
-      file.locale = locale
-      import_strings Receiver.new(self, locale)
     end
 
     def utf8_encode(string)
@@ -402,24 +327,7 @@ module Importer
       @commit.add_import_error(err, "in #{file.path}") if @commit
     end
 
-    File = Struct.new(:path, :contents, :locale)
-
-    class Receiver
-      attr_reader :importer, :locale
-
-      def initialize(importer, locale=nil)
-        @importer = importer
-        @locale   = locale
-      end
-
-      def add_string(key, value, options={})
-        if locale
-          @importer.add_translation key, value, locale
-        else
-          @importer.add_string key, value, {source: importer.file.path}.merge(options)
-        end
-      end
-    end
+    File = Struct.new(:path, :contents)
   end
 
   # @private
