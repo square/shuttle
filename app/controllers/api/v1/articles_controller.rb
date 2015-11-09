@@ -98,14 +98,17 @@ module Api
       # Body Parameters
       # ---------------
       #
-      # |                            |                                                                            |
-      # |:---------------------------|:---------------------------------------------------------------------------|
-      # | `name`                     | The `name` of the Article                                                  |
-      # | `sections_hash`            | A hash mapping Section names to Section source copies                      |
-      # | `description`              | The description of the Article                                             |
-      # | `email`                    | An email address which can be used for communication regarding the Article |
-      # | `base_rfc5646_locale`      | Base rfc5646 locale of the Article                                         |
-      # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article                                   |
+      # |                            |                                                                                                               |
+      # |:---------------------------|:--------------------------------------------------------------------------------------------------------------|
+      # | `name`                     | The name of the Article.                                                                                      |
+      # | `description`              | The description of the Article                                                                                |
+      # | `sections_hash`            | A hash mapping Section names to Section source copies { 'title' => '<p>hello</p>', 'body' => '<p>world</p>' } |
+      # | `email`                    | An email address which can be used for communication regarding the Article .                                  |
+      # | `base_rfc5646_locale`      | Base rfc5646 locale of the Article. Ex: 'en'                                                                  |
+      # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article. Ex: { 'fr' => true, 'es-US' => false }                              |
+      # | `priority`                 | Priority for translation. Potential values: 0 (higher priority) to 3, nil.                                    |
+      # | `due_date`                 | Due date for translation. Format: '%m/%d/%Y', Ex: '01/17/2015'                                                |
+
 
       def create
         @article = @project.articles.create(params_for_create)
@@ -194,12 +197,15 @@ module Api
       # Body Parameters
       # ---------------
       #
-      # |                            |                                                                            |
-      # |:---------------------------|:---------------------------------------------------------------------------|
-      # | `sections_hash`            | A hash mapping Section names to Section source copies                      |
-      # | `description`              | The description of the Article                                             |
-      # | `email`                    | An email address which can be used for communication regarding the Article |
-      # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article                                   |
+      # |                            |                                                                                                               |
+      # |:---------------------------|:--------------------------------------------------------------------------------------------------------------|
+      # | `name`                     | The new name of the Article (ie. update the name via this field.)                                             |
+      # | `description`              | The description of the Article                                                                                |
+      # | `sections_hash`            | A hash mapping Section names to Section source copies { 'title' => '<p>hello</p>', 'body' => '<p>world</p>' } |
+      # | `email`                    | An email address which can be used for communication regarding the Article .                                  |
+      # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article. Ex: { 'fr' => true, 'es-US' => false }                              |
+      # | `priority`                 | Priority for translation. Potential values: 0 (higher priority) to 3, nil.                                    |
+      # | `due_date`                 | Due date for translation. Format: '%m/%d/%Y', Ex: '01/17/2015'                                                |
 
       def update
         _params_for_update = params_for_update # cache
