@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2015 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -739,7 +739,11 @@ describe TranslationsController do
 
           @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
           Article.any_instance.stub(:import!) # prevent auto import
-          @article = FactoryGirl.create(:article, project: @project, sections_hash: {"main" => "hello"})
+          @article = FactoryGirl.create(:article,
+                                        project: @project,
+                                        sections_hash: {"main" => "hello"},
+                                        last_import_requested_at: 2.hours.ago,
+                                        last_import_finished_at: 1.hour.ago)
           @section = FactoryGirl.create(:section, article: @article)
 
           @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project, section: @section, index_in_section: 0)
