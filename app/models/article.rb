@@ -90,6 +90,8 @@ class Article < ActiveRecord::Base
   # Scopes
   scope :ready, -> { where(ready: true) }
   scope :not_ready, -> { where(ready: false) }
+  # considered loading if import wasn't requested, wasn't finished, or re-requested since last finish time.
+  scope :loading, -> { where("last_import_requested_at IS NULL OR last_import_finished_at IS NULL OR last_import_finished_at < last_import_requested_at") }
 
   attr_readonly :project_id
 
@@ -185,7 +187,7 @@ class Article < ActiveRecord::Base
   # Calculates the value of the `ready` field and saves the record.
   def recalculate_ready!
     keys_are_ready = !active_keys.merge(Key.not_ready).exists?
-    ready_new = keys_are_ready && last_import_finished?
+    ready_new = keys_are_ready && !loading?
     if !ready? && ready_new # if it just became ready
       self.last_completed_at = Time.current
       self.first_completed_at ||= self.last_completed_at
@@ -230,7 +232,7 @@ class Article < ActiveRecord::Base
   # Updates import_requested_at timestamps.
 
   def import!(force_import_sections=false)
-    raise Article::LastImportNotFinished unless last_import_finished?
+    raise Article::LastImportNotFinished if !!last_import_requested_at && loading?
     update_import_requested_at!
     full_reset_ready! # reset ready immediately without waiting for the ArticleImporter job to be processed
     import_batch.jobs { ArticleImporter.perform_once(id, force_import_sections) }
@@ -276,20 +278,15 @@ class Article < ActiveRecord::Base
     update!(new_attrs)
   end
 
-  # The last scheduled import is considered finished if the import has started and finished successfully.
-  # If the import is scheduled but didn't start yet, it's considered 'not finished'.
-  # If the import is scheduled and started, it's also considered 'not finished'.
+  # Loading is finished if the import has been requested & finished successfully, and have not been re-requested since.
+  # If the import is scheduled but didn't start yet, it's considered 'loading'.
+  # If the import is scheduled and started, it's also considered 'loading'.
   #
-  # @return [true, false] true if the last scheduled import has been finished,
+  # @return [true, false] true if the last import has been finished,
   #                       false otherwise.
-  def last_import_finished?
-    !last_import_requested_at || ( !!last_import_finished_at && ( last_import_finished_at >= last_import_requested_at))
-  end
-
   def loading?
-    !last_import_finished?
+    !last_import_requested_at || !last_import_finished_at || (last_import_requested_at > last_import_finished_at)
   end
-
   alias_method :loading, :loading?
 
   # ======== END IMPORT RELATED CODE ===================================================================================
