@@ -23,11 +23,10 @@ describe ArticleImporter do
       @sections = @article.reload.sections
     end
 
-    it "sets loading to true, ready to false, and last_import_started_at to current Time" do
+    it "sets ready to false, and last_import_started_at to current Time" do
       ArticleImporter::Finisher.any_instance.stub(:on_success) # prevent import from finishing
       ArticleImporter.new.perform(@article.id)
 
-      expect(@article.reload).to be_loading
       expect(@article).to_not be_ready
       expect(@article.last_import_started_at).to_not be_nil
     end
@@ -148,10 +147,12 @@ describe ArticleImporter::Finisher do
       expect(@article.reload).to be_ready
     end
 
-    it "sets loading to false" do
-      @article.update! loading: true
+    it "finishes loading" do
+      @article.update! last_import_requested_at: 1.day.ago, last_import_finished_at: nil
+      expect(@article.reload).to be_loading
       ArticleImporter::Finisher.new.on_success(nil, {'article_id' => @article.id})
       expect(@article.reload).to_not be_loading
+      expect(@article.last_import_finished_at).to_not be_nil
     end
 
     it "sets import_batch_id to false" do

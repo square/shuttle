@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2015 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -325,6 +325,7 @@ describe Article do
 
       expect(article.first_import_requested_at).to be_present
       expect(article.last_import_requested_at).to be_present
+      expect(article.last_import_finished?).to be_false
       expect(article).to_not be_ready
       expect(article.keys.ready.exists?).to be_false
     end
@@ -400,11 +401,10 @@ describe Article do
       @article.save!
     end
 
-    it "sets ready to false, loading to true" do
-      @article.update! loading: false, ready: true
+    it "sets ready to false" do
+      @article.update! ready: true
       expect(@article.ready).to be_true
       @article.send :update_import_starting_fields!
-      expect(@article.loading).to be_true
       expect(@article.ready).to be_false
     end
 
@@ -442,10 +442,9 @@ describe Article do
       @article.save!
     end
 
-    it "sets loading to false, import_batch_id to nil" do
-      @article.update! loading: true, import_batch_id: "123"
+    it "sets import_batch_id to nil" do
+      @article.update! import_batch_id: "123"
       @article.send :update_import_finishing_fields!
-      expect(@article.loading).to be_false
       expect(@article.import_batch_id).to be_nil
     end
 

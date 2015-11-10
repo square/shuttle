@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2015 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@
 # | `description`               | A user submitted description. Can be used to provide context or instructions.                                     |
 # | `email`                     | The email address that should be used for communications.                                                         |
 # | `import_batch_id`           | The ID of the Sidekiq batch of import jobs.                                                                       |
-# | `loading`                   | If `true`, there is at least one Sidekiq job processing this Article.                                             |
 # | `ready`                     | `true` when every required Translation under this Article has been approved.                                      |
 # | `priority`                  | An priority defined as a number between 0 (highest) and 3 (lowest).                                               |
 # | `due_date`                  | A date displayed to translators and reviewers informing them of when the Article must be fully localized.         |
@@ -107,7 +106,6 @@ class Article < ActiveRecord::Base
   validates :description, length: {maximum: 2000}, allow_nil: true
   validates :email, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i }, allow_nil: true
   validates :ready,   inclusion: { in: [true, false] }, strict: true
-  validates :loading, inclusion: { in: [true, false] }, strict: true
   validates :priority, numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3}, allow_nil: true
   validates :due_date, timeliness: {type: :date}, allow_nil: true
   validates :first_import_requested_at,
@@ -255,12 +253,12 @@ class Article < ActiveRecord::Base
   # Right now, the Articles controller doesn't allow a re-import if the import is not finished,
   # but in the future, there can be an advanced action for admins to bypass that.
   #
-  # Loading is set to true and ready is set to false.
+  # Ready is set to false.
   #
   # First and last import_started_at timestamps are also updated as necessary.
 
   def update_import_starting_fields!
-    new_attrs = { loading: true, ready: false, last_import_started_at: Time.current }
+    new_attrs = { ready: false, last_import_started_at: Time.current }
     new_attrs[:first_import_started_at] = new_attrs[:last_import_started_at] unless first_import_started_at
     update!(new_attrs)
   end
@@ -270,12 +268,10 @@ class Article < ActiveRecord::Base
   #
   # Clears the `import_batch_id` because we are done with that batch id and should not re-use it.
   #
-  # Loading is set to false.
-  #
   # First and last import_finished_at timestamps are also updated as necessary.
 
   def update_import_finishing_fields!
-    new_attrs = { loading: false, import_batch_id: nil, last_import_finished_at: Time.current }
+    new_attrs = { import_batch_id: nil, last_import_finished_at: Time.current }
     new_attrs[:first_import_finished_at] = new_attrs[:last_import_finished_at] unless first_import_finished_at
     update!(new_attrs)
   end
@@ -289,6 +285,12 @@ class Article < ActiveRecord::Base
   def last_import_finished?
     !last_import_requested_at || ( !!last_import_finished_at && ( last_import_finished_at >= last_import_requested_at))
   end
+
+  def loading?
+    !last_import_finished?
+  end
+
+  alias_method :loading, :loading?
 
   # ======== END IMPORT RELATED CODE ===================================================================================
 
