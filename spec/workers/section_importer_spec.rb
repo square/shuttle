@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2015 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -109,7 +109,10 @@ describe SectionImporter::Core do
     before(:each) { Article.any_instance.stub(:import!) } # prevent automatic import
 
     before :each do
-      @article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true })
+      @article = FactoryGirl.create(:article,
+                                    targeted_rfc5646_locales: { 'fr' => true },
+                                    last_import_requested_at: 2.hours.ago,
+                                    last_import_finished_at: 1.hour.ago)
       @section = FactoryGirl.create(:section, article: @article, source_copy: "<p>a</p><p>b</p><p>c</p>")
     end
 

@@ -90,6 +90,24 @@ describe Article do
       expect(article.errors.full_messages).to include("Name reserved")
     end
   end
+
+  describe '[scopes]' do
+    describe '#loading?' do
+      before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+
+      it 'returns only the loading articles' do
+        a1 = FactoryGirl.create(:article, last_import_requested_at: nil, last_import_finished_at: nil)
+        a2 = FactoryGirl.create(:article, last_import_requested_at: 1.hour.ago, last_import_finished_at: nil)
+        a3 = FactoryGirl.create(:article, last_import_requested_at: nil, last_import_finished_at: 1.hour.ago)
+        a4 = FactoryGirl.create(:article, last_import_requested_at: 1.hours.ago, last_import_finished_at: 2.hour.ago)
+        FactoryGirl.create(:article, last_import_requested_at: 2.hours.ago, last_import_finished_at: 1.hour.ago)
+        now = Time.now
+        FactoryGirl.create(:article, last_import_requested_at: now, last_import_finished_at: now)
+
+        expect(Article.loading).to match_array([a1, a2, a3, a4])
+      end
+    end
+  end
   # ======== END BASIC CRUD RELATED CODE ===============================================================================
 
   # ======== START LOCALE RELATED CODE =================================================================================
@@ -209,7 +227,11 @@ describe Article do
     before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
 
     before :each do
-      @article = FactoryGirl.create(:article, name: "test", ready: false)
+      @article = FactoryGirl.create(:article,
+                                    name: "test",
+                                    ready: false,
+                                    last_import_finished_at: 3.hours.ago,
+                                    last_import_requested_at: 4.hour.ago)
       @active_section = FactoryGirl.create(:section, article: @article, active: true)
       @inactive_section = FactoryGirl.create(:section, article: @article, active: false)
     end
@@ -325,7 +347,7 @@ describe Article do
 
       expect(article.first_import_requested_at).to be_present
       expect(article.last_import_requested_at).to be_present
-      expect(article.last_import_finished?).to be_false
+      expect(article.loading?).to be_true
       expect(article).to_not be_ready
       expect(article.keys.ready.exists?).to be_false
     end
@@ -475,7 +497,7 @@ describe Article do
     end
   end
 
-  describe "#last_import_finished?" do
+  describe "#loading?" do
     before :each do
       @article = FactoryGirl.build(:article, name: "test")
       @article.stub(:import!) # prevent the import because we want to handle this manually
@@ -484,28 +506,28 @@ describe Article do
 
     it "returns true if neither `last_import_requested_at` nor `last_import_finished_at` is set" do
       @article.update! last_import_requested_at: nil, last_import_finished_at: nil
-      expect(@article.last_import_finished?).to be_true
+      expect(@article.loading?).to be_true
     end
 
-    it "returns false if `last_import_requested_at` is set but `last_import_finished_at` is not set (after a Article is first created)" do
+    it "returns true if `last_import_requested_at` is set but `last_import_finished_at` is not set (after a Article is first created)" do
       @article.update! last_import_requested_at: Time.now, last_import_finished_at: nil
-      expect(@article.last_import_finished?).to be_false
+      expect(@article.loading?).to be_true
     end
 
-    it "returns true if `last_import_finished_at` is greater than `last_import_requested_at` (after an import is finished)" do
+    it "returns false if `last_import_finished_at` is greater than `last_import_requested_at` (after an import is finished)" do
       @article.update! last_import_requested_at: 2.minutes.ago, last_import_finished_at: 1.minutes.ago
-      expect(@article.last_import_finished?).to be_true
+      expect(@article.loading?).to be_false
     end
 
-    it "returns false if `last_import_finished_at` is less than `last_import_requested_at` (after a re-import is scheduled)" do
+    it "returns true if `last_import_finished_at` is less than `last_import_requested_at` (after a re-import is scheduled)" do
       @article.update! last_import_requested_at: 1.minutes.ago, last_import_finished_at: 2.minutes.ago
-      expect(@article.last_import_finished?).to be_false
+      expect(@article.loading?).to be_true
     end
 
-    it "returns true if `last_import_finished_at` is equal to `last_import_requested_at` (an import finished very fast)" do
+    it "returns false if `last_import_finished_at` is equal to `last_import_requested_at` (an import finished very fast)" do
       t = Time.now
       @article.update! last_import_requested_at: t, last_import_finished_at: t
-      expect(@article.last_import_finished?).to be_true
+      expect(@article.loading?).to be_false
     end
   end
 

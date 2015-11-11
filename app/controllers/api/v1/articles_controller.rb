@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2015 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -209,7 +209,7 @@ module Api
 
       def update
         _params_for_update = params_for_update # cache
-        if !@article.last_import_finished? && Article::FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED.any? do |field|
+        if @article.loading? && Article::FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED.any? do |field|
                     # if there is a pending import or an import is in progress, and an import triggering field is trying to be changed
                     _params_for_update.key?(field) && (_params_for_update[field] != @article.send(field.to_sym))
                   end
