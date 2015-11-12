@@ -23,17 +23,6 @@ class LocaleProjectsShowPresenter
     @form = form
   end
 
-  # @return [Hash<Integer, Array<Pair<String, Integer>>>] a hash whose keys are article_ids, and
-  #      values are arrays of pairs where each pair consists of truncated section name and section id
-
-  def sections_by_article_id
-    @_sections_by_article_id ||= @project.sections.order(:id).group_by(&:article_id).tap do |hsh|
-      hsh.each do |article_id, sections|
-        hsh[article_id] = sections.map { |s| [truncate(s.name), s.id] }
-      end
-    end
-  end
-
   # @return [Array<Pair<String, String>>] an array of selectable options for Commits
 
   def selectable_commits
@@ -45,12 +34,6 @@ class LocaleProjectsShowPresenter
 
   def selected_commit
     @_selected_commit ||= @project.commits.for_revision(form[:commit]).first
-  end
-
-  # @return [Array<Pair<String, String>>] an array of selectable options for Articles
-
-  def selectable_articles
-    @_selectable_articles ||= @project.articles.map { |a| [truncate(a.name), a.id] }.unshift(['ALL ARTICLES', nil])
   end
 
   # @return [Article, nil] selected Article if there is one

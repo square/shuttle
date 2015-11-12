@@ -15,7 +15,7 @@
 $(document).ready ->
   locale_field = $('#locale-field')
   commit_select = $("select[name='commit']")
-  article_select = $("select[name='article_id']")
+  article_id = $("input[name='article_id']").val()
   section_select = $("select[name='section_id']")
   translate_link = $("#translate-link")
   gallery_link = $('#gallery-link')
@@ -25,12 +25,11 @@ $(document).ready ->
 
   translate_link.click () ->
     commit_sha = commit_select.val()
-    article_id = article_select.val()
     section_id = section_select.val()
     locale = locale_field.val()
     url = '/locales/' + encodeURIComponent(locale) + '/projects/<%= @project.to_param %>?'
-    url += "&commit=#{commit_sha}" if commit_sha
-    url += "&article_id=#{article_id}" if article_id
+    url += "commit=#{commit_sha}" if commit_sha
+    url += "article_id=#{article_id}" if article_id
     url += "&section_id=#{section_id}" if section_id
     window.location = url
 
@@ -47,19 +46,6 @@ $(document).ready ->
       window.open "/projects/<%= @project.to_param %>/commits/#{commit_sha}/issues"
     else
       new Flash('alert').text('Need to select a commit to view issues')
-
-  $(".filter-bar form").submit ->
-    window.history.pushState("params", "", "?#{$(this).serialize()}")
-
-  # SELECTING ARTICLES AND SECTIONS
-  all_sections = <%= @presenter.sections_by_article_id.values.flatten(1).to_json %>
-  sections_by_article_id = <%= @presenter.sections_by_article_id.to_json %>
-  article_select.change ->
-    article_id = article_select.val()
-    sections = if article_id then sections_by_article_id[article_id] else all_sections
-    section_select.empty()
-    for section in [["ALL SECTIONS", '']].concat(sections)
-      section_select.append($("<option></option>").attr("value", section[1]).text(section[0]));
 
   # TRANSLATION WORKBENCH
   new TranslationWorkbench(
