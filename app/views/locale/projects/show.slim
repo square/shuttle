@@ -27,7 +27,11 @@
                               ),\
                               id: 'locale-field'
     = button_tag 'Translate', id: 'translate-link', class: 'submit', type: 'button'
-  h1 = @project.name
+  h1
+    => @project.name
+    - unless @project.git?
+      small
+        = link_to @presenter.selected_article.name, api_v1_project_article_path(@project.id, @presenter.selected_article.name)
 
   h6
     strong
