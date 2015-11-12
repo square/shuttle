@@ -44,7 +44,6 @@ CREATE TABLE articles (
     description text,
     email character varying(255),
     import_batch_id character varying(255),
-    loading boolean DEFAULT false NOT NULL,
     ready boolean DEFAULT false NOT NULL,
     first_import_requested_at timestamp without time zone,
     last_import_requested_at timestamp without time zone,
@@ -1717,3 +1716,5 @@ INSERT INTO schema_migrations (version) VALUES ('20150228020547');
 INSERT INTO schema_migrations (version) VALUES ('20150825010811');
 
 INSERT INTO schema_migrations (version) VALUES ('20150828004150');
+
+INSERT INTO schema_migrations (version) VALUES ('20151110220302');

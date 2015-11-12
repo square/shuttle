@@ -27,7 +27,11 @@
                               ),\
                               id: 'locale-field'
     = button_tag 'Translate', id: 'translate-link', class: 'submit', type: 'button'
-  h1 = @project.name
+  h1
+    => @project.name
+    - unless @project.git?
+      small
+        = link_to @presenter.selected_article.name, api_v1_project_article_path(@project.id, @presenter.selected_article.name)
 
   h6
     strong
@@ -55,7 +59,7 @@ div
         - if @project.git?
           = select_tag 'commit', options_for_select(@presenter.selectable_commits, @presenter.selected_commit.try!(:revision))
         - else
-          = select_tag 'article_id', options_for_select(@presenter.selectable_articles, @presenter.selected_article.try!(:id))
+          = hidden_field_tag 'article_id', @presenter.selected_article.id
           = select_tag 'section_id', options_for_select(@presenter.selectable_sections, @presenter.selected_section.try!(:id))
 
         = select_tag 'filter_source', options_for_select( [['Source', 'source'], ['Translation', 'translated']], @presenter.selected_filter_source)

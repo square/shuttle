@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2015 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -98,14 +98,17 @@ module Api
       # Body Parameters
       # ---------------
       #
-      # |                            |                                                                            |
-      # |:---------------------------|:---------------------------------------------------------------------------|
-      # | `name`                     | The `name` of the Article                                                  |
-      # | `sections_hash`            | A hash mapping Section names to Section source copies                      |
-      # | `description`              | The description of the Article                                             |
-      # | `email`                    | An email address which can be used for communication regarding the Article |
-      # | `base_rfc5646_locale`      | Base rfc5646 locale of the Article                                         |
-      # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article                                   |
+      # |                            |                                                                                                               |
+      # |:---------------------------|:--------------------------------------------------------------------------------------------------------------|
+      # | `name`                     | The name of the Article.                                                                                      |
+      # | `description`              | The description of the Article                                                                                |
+      # | `sections_hash`            | A hash mapping Section names to Section source copies { 'title' => '<p>hello</p>', 'body' => '<p>world</p>' } |
+      # | `email`                    | An email address which can be used for communication regarding the Article .                                  |
+      # | `base_rfc5646_locale`      | Base rfc5646 locale of the Article. Ex: 'en'                                                                  |
+      # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article. Ex: { 'fr' => true, 'es-US' => false }                              |
+      # | `priority`                 | Priority for translation. Potential values: 0 (higher priority) to 3, nil.                                    |
+      # | `due_date`                 | Due date for translation. Format: '%m/%d/%Y', Ex: '01/17/2015'                                                |
+
 
       def create
         @article = @project.articles.create(params_for_create)
@@ -194,16 +197,19 @@ module Api
       # Body Parameters
       # ---------------
       #
-      # |                            |                                                                            |
-      # |:---------------------------|:---------------------------------------------------------------------------|
-      # | `sections_hash`            | A hash mapping Section names to Section source copies                      |
-      # | `description`              | The description of the Article                                             |
-      # | `email`                    | An email address which can be used for communication regarding the Article |
-      # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article                                   |
+      # |                            |                                                                                                               |
+      # |:---------------------------|:--------------------------------------------------------------------------------------------------------------|
+      # | `name`                     | The new name of the Article (ie. update the name via this field.)                                             |
+      # | `description`              | The description of the Article                                                                                |
+      # | `sections_hash`            | A hash mapping Section names to Section source copies { 'title' => '<p>hello</p>', 'body' => '<p>world</p>' } |
+      # | `email`                    | An email address which can be used for communication regarding the Article .                                  |
+      # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article. Ex: { 'fr' => true, 'es-US' => false }                              |
+      # | `priority`                 | Priority for translation. Potential values: 0 (higher priority) to 3, nil.                                    |
+      # | `due_date`                 | Due date for translation. Format: '%m/%d/%Y', Ex: '01/17/2015'                                                |
 
       def update
         _params_for_update = params_for_update # cache
-        if !@article.last_import_finished? && Article::FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED.any? do |field|
+        if @article.loading? && Article::FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED.any? do |field|
                     # if there is a pending import or an import is in progress, and an import triggering field is trying to be changed
                     _params_for_update.key?(field) && (_params_for_update[field] != @article.send(field.to_sym))
                   end

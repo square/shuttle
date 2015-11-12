@@ -19,22 +19,6 @@ describe LocaleProjectsShowPresenter do
     Article.any_instance.stub(:import!) # prevent auto imports
   end
 
-  describe "#sections_by_article_id" do
-    it "returns Sections' name and id, grouped by Article ids" do
-      project = FactoryGirl.create(:project)
-      article1 = FactoryGirl.create(:article, project: project)
-      article2 = FactoryGirl.create(:article, project: project)
-
-      section1 = FactoryGirl.create(:section, name: "section1", article: article1)
-      section2 = FactoryGirl.create(:section, name: "section2", article: article2)
-      section3 = FactoryGirl.create(:section, name: "section3", article: article2)
-
-      presenter = LocaleProjectsShowPresenter.new(project, {})
-      expect(presenter.sections_by_article_id).to eql(
-                { article1.id=>[["section1", section1.id]], article2.id=>[["section2", section2.id], ["section3", section3.id]] })
-    end
-  end
-
   describe "#selectable_commits" do
     it "returns selectable Commits" do
       project = FactoryGirl.create(:project)
@@ -51,17 +35,6 @@ describe LocaleProjectsShowPresenter do
       commit = FactoryGirl.create(:commit, revision: 'abcd')
       presenter = LocaleProjectsShowPresenter.new(commit.project, {commit: 'abcd'})
       expect(presenter.selected_commit).to eql(commit)
-    end
-  end
-
-  describe "#selectable_articles" do
-    it "returns selectable Articles" do
-      project = FactoryGirl.create(:project)
-      article1 = FactoryGirl.create(:article, name: 'abcd', project: project)
-      article2 = FactoryGirl.create(:article, name: '1234', project: project)
-
-      presenter = LocaleProjectsShowPresenter.new(project, {})
-      expect(presenter.selectable_articles.sort).to eql( [["ALL ARTICLES", nil], ["abcd", article1.id], ["1234", article2.id]].sort )
     end
   end
 
