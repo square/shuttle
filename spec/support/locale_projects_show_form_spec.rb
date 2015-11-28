@@ -76,6 +76,15 @@ describe LocaleProjectsShowForm do
       expect(form[:section_id]).to eql section.id
     end
 
+    it 'should get the article name if article name specified' do
+      article = FactoryGirl.create(:article, project: project)
+      section = FactoryGirl.create(:section, article: article)
+      params = { id: project.to_param, article_name: article.name, section_id: section.id }
+      form = LocaleProjectsShowForm.new(params)
+      expect(form[:article_name]).to eql article.name
+      expect(form[:section_id]).to eql section.id
+    end
+
     it 'builds a locale from the specified locale' do
       params = { id: project.to_param, locale_id: 'en' }
       form = LocaleProjectsShowForm.new(params)
