@@ -39,20 +39,10 @@ describe LocaleProjectsShowPresenter do
   end
 
   describe "#selected_article" do
-    let!(:article) { FactoryGirl.create(:article, name: 'abcd')}
-
-    context "article_id provided" do
-      it "returns the selected Article if there is one" do
-        presenter = LocaleProjectsShowPresenter.new(article.project, { article_id: article.id })
-        expect(presenter.selected_article).to eql(article)
-      end
-    end
-
-    context "article_name provided" do
-      it "returns the selected Article if there is one" do
-        presenter = LocaleProjectsShowPresenter.new(article.project, { article_name: article.name })
-        expect(presenter.selected_article).to eql(article)
-      end
+    it "returns the selected Article if there is one" do
+      article = FactoryGirl.create(:article, name: 'abcd')
+      presenter = LocaleProjectsShowPresenter.new(article.project, { article_id: article.id })
+      expect(presenter.selected_article).to eql(article)
     end
   end
 

@@ -39,12 +39,7 @@ class LocaleProjectsShowPresenter
   # @return [Article, nil] selected Article if there is one
 
   def selected_article
-    @_selected_article ||=
-      if form[:article_id].present?
-        @project.articles.find_by_id(form[:article_id])
-      elsif form[:article_name].present?
-        @project.articles.find_by_name(form[:article_name])
-      end
+    @_selected_article ||= @project.articles.find_by_id(form[:article_id])
   end
 
   # @return [Array<Pair<String, String>>] an array of selectable options for Sections
