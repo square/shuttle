@@ -16,7 +16,6 @@ class LocaleProjectsShowFinder
     query_filter = form[:query_filter]
     translation_ids_in_commit = form[:translation_ids_in_commit]
     article_id   = form[:article_id]
-    article_name = form[:article_name]
     section_id   = form[:section_id]
     locale       = form[:locale]
     project_id   = form[:project_id]
@@ -27,7 +26,6 @@ class LocaleProjectsShowFinder
       filter :term, project_id: project_id
       filter :term, rfc5646_locale: locale.rfc5646 if locale
       filter :ids, values: translation_ids_in_commit if translation_ids_in_commit
-      filter :term, article_name: article_name if article_name.present?
       filter :term, article_id: article_id if article_id.present?
       filter :term, section_id: section_id if section_id.present?
       filter :term, section_active: true if project.not_git?        # active sections
