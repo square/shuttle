@@ -1,5 +1,4 @@
 source 'https://rubygems.org'
-source 'https://0858cb81:19556f67@gems.contribsys.com/' # Sidekiq Pro
 
 ruby '2.0.0', :patchlevel => '576'
 
@@ -64,7 +63,9 @@ gem 'faker'
 
 # BACKGROUND JOBS
 gem 'sidekiq', '<3.0.0'
-gem 'sidekiq-pro'
+source 'https://0858cb81:19556f67@gems.contribsys.com/' do
+  gem 'sidekiq-pro'
+end
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil

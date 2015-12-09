@@ -433,7 +433,7 @@ DEPENDENCIES
   sass-rails (= 4.0.3)
   sidekiq (< 3.0.0)
   sidekiq-failures!
-  sidekiq-pro
+  sidekiq-pro!
   similar_text (~> 0.0.4)
   sinatra
   slim-rails
