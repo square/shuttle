@@ -50,4 +50,7 @@ Shuttle::Application.configure do
 
   # Add stack traces to SQL logs
   config.after_initialize { SQLOrigin.append_to_log }
+
+  # for PseudoTranslator specs
+  config.i18n.available_locales = %w(en en-pseudo)
 end
