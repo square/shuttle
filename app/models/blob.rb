@@ -92,10 +92,4 @@ class Blob < ActiveRecord::Base
     end
     blob_object
   end
-
-  # @private
-  def inspect(default_behavior=false)
-    return super() if default_behavior
-    "#<#{self.class.to_s} #{sha} (#{parsed? ? 'parsed' : 'not parsed'}, #{errored? ? 'errored' : 'not errored'})>"
-  end
 end

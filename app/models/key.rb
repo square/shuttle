@@ -255,11 +255,4 @@ class Key < ActiveRecord::Base
     # We need to update ElasticSearch with the new ready fields.
     Key.tire.index.import obj.keys
   end
-
-  # @private
-  def inspect(default_behavior=false)
-    return super() if default_behavior
-    state = ready? ? 'ready' : 'not ready'
-    "#<#{self.class.to_s} #{id}: #{key} (#{state})>"
-  end
 end
