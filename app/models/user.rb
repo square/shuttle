@@ -177,12 +177,6 @@ class User < ActiveRecord::Base
   end
 
   # @private
-  def inspect(default_behavior=false)
-    return super() if default_behavior
-    "#<#{self.class.to_s} #{id}: #{email} (#{role})>"
-  end
-
-  # @private
   def email_domain
     Mail::Address.new(email).domain
   end

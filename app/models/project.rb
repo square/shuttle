@@ -395,12 +395,6 @@ class Project < ActiveRecord::Base
     super options
   end
 
-  # @private
-  def inspect(default_behavior=false)
-    return super() if default_behavior
-    "#<#{self.class.to_s} #{id}: #{name}>"
-  end
-
   private
 
   def repo_path
