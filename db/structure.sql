@@ -3,7 +3,6 @@
 --
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -1143,6 +1142,13 @@ CREATE UNIQUE INDEX daily_metrics_date ON daily_metrics USING btree (date);
 
 
 --
+-- Name: index_articles_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_articles_name ON articles USING btree (name);
+
+
+--
 -- Name: index_articles_on_project_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1154,6 +1160,13 @@ CREATE INDEX index_articles_on_project_id ON articles USING btree (project_id);
 --
 
 CREATE UNIQUE INDEX index_articles_on_project_id_and_name_sha_raw ON articles USING btree (project_id, name_sha_raw);
+
+
+--
+-- Name: index_articles_ready; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_articles_ready ON articles USING btree (ready);
 
 
 --
@@ -1199,6 +1212,20 @@ CREATE INDEX index_keys_on_project_id ON keys USING btree (project_id);
 
 
 --
+-- Name: index_keys_ready; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_keys_ready ON keys USING btree (ready);
+
+
+--
+-- Name: index_keys_source_copy; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_keys_source_copy ON keys USING btree (source_copy);
+
+
+--
 -- Name: index_locale_associations_on_source_and_target_rfc5646_locales; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1210,6 +1237,13 @@ CREATE UNIQUE INDEX index_locale_associations_on_source_and_target_rfc5646_local
 --
 
 CREATE UNIQUE INDEX index_projects_on_api_token ON projects USING btree (api_token);
+
+
+--
+-- Name: index_sections_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_sections_name ON sections USING btree (name);
 
 
 --
@@ -1227,10 +1261,24 @@ CREATE UNIQUE INDEX index_sections_on_article_id_and_name_sha_raw ON sections US
 
 
 --
+-- Name: index_translation_changes_translation_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_translation_changes_translation_id ON translation_changes USING btree (translation_id);
+
+
+--
 -- Name: index_translations_on_rfc5646_locale; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_translations_on_rfc5646_locale ON translations USING btree (rfc5646_locale);
+
+
+--
+-- Name: index_translations_source_copy_source_rfc5646_locale; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_translations_source_copy_source_rfc5646_locale ON translations USING btree (source_copy, rfc5646_locale);
 
 
 --
@@ -1718,3 +1766,13 @@ INSERT INTO schema_migrations (version) VALUES ('20150825010811');
 INSERT INTO schema_migrations (version) VALUES ('20150828004150');
 
 INSERT INTO schema_migrations (version) VALUES ('20151110220302');
+
+INSERT INTO schema_migrations (version) VALUES ('20151209165404');
+
+INSERT INTO schema_migrations (version) VALUES ('20151210163604');
+
+INSERT INTO schema_migrations (version) VALUES ('20151210165453');
+
+INSERT INTO schema_migrations (version) VALUES ('20151210165629');
+
+INSERT INTO schema_migrations (version) VALUES ('20151210170111');
