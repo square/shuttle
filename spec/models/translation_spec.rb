@@ -136,9 +136,9 @@ describe Translation do
       expect(trans.errors[:approved]).to eql(["cannot be set when translation is pending"])
     end
 
-    it "should allow translations with blank source copy" do
+    it "should not allow translations with blank source copy" do
       trans = FactoryGirl.build(:translation, source_copy: "", copy: nil)
-      expect(trans).to be_valid
+      expect(trans).to_not be_valid
     end
 
     context "[fencing]" do
