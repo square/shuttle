@@ -60,9 +60,6 @@ class Translation < ActiveRecord::Base
   locale_field :source_locale, from: :source_rfc5646_locale
   locale_field :locale
 
-  extend DigestField
-  digest_field :source_copy, scope: :source_copy_matches
-
   include Tire::Model::Search
   include Tire::Model::Callbacks
   mapping do
@@ -92,8 +89,6 @@ class Translation < ActiveRecord::Base
   validates :rfc5646_locale,
             presence:   true,
             uniqueness: {scope: :key_id, on: :create}
-  validates :source_copy,
-            presence: true
   validates :notes, length: { maximum: 1024 }
   validate :cannot_approve_or_reject_untranslated
   validate :valid_interpolations, on: :update
