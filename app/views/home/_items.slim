@@ -19,9 +19,8 @@
 / will be #commits or #articles
 div id="#{item_type}s"
   .header
-    - if current_user.monitor?
-      .pull-right
-        button.primary href="#add-#{item_type}-translation" rel='modal' disabled=(item_type == 'commit' ? Project.git : Project.not_git).count.zero? Request Translation
+    .pull-right
+      button.primary href="#add-#{item_type}-translation" rel='modal' disabled=(item_type == 'commit' ? Project.git : Project.not_git).count.zero? Request Translation
     h1 = item_type.humanize.pluralize
 
   hr.divider
