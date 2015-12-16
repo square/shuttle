@@ -12,8 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class RemoveLoadingFromArticles < ActiveRecord::Migration
+class AddIndicesToKeys < ActiveRecord::Migration
   def change
-    remove_column :articles, :loading
+    add_index :keys, :ready
+    add_index :keys, :source_copy_sha_raw
   end
 end
