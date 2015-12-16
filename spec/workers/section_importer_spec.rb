@@ -258,8 +258,9 @@ describe SectionImporter::Core do
         { text:        "<html><body><div>paragraph a<p>paragraph b</p>paragraph c</div></body></html>",
           paragraphs: ["<html><body>", "<div>paragraph a", "<p>paragraph b</p>", "paragraph c</div>", "</body></html>"]},
         { text:        "<html><body><div>paragraph a <img src='fake' alt='hello' /></div></body></html>",
-          paragraphs: ["<html><body>", "<div>paragraph a <img src='fake' alt='hello' /></div>", "</body></html>"]
-        }
+          paragraphs: ["<html><body>", "<div>paragraph a <img src='fake' alt='hello' /></div>", "</body></html>"]},
+        { text:        "<html><body><table><thead><th>header</th></thead><tbody><tr><td>data</td></tr></tbody></body></html>",
+          paragraphs: ["<html><body><table>", "<thead>","<th>header</th>", "</thead><tbody><tr>", "<td>data</td>", "</tr></tbody></body></html>"]},
     ]
 
     let(:importer) { SectionImporter::Core.new(nil) }
