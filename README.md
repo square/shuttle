@@ -43,7 +43,7 @@ Another typical **Shuttle workflow** is as follows:
 The whole process is extremely parallelizable: while one commit might be pending
 translation or review, an engineer can make additional commits with new copy,
 and they will also sit in the queue awaiting translation. Once any commit is
-fully localized, it is marked as ready for release. Most of this applies to
+fully localized, it is marked as ready for release. This is true for
 Articles as well, except, Shuttle doesn't keep versions for Articles and
 any new submission will override the contents of the previous submission.
 
@@ -52,13 +52,14 @@ has not been fully translated and reviewed. To prevent such deploys, engineers
 should add a test to their CI script that ensures that the manifest endpoint
 does not return 404.
 
+
 Getting Started
 ---------------
 
 ### Starting the server
 
 Developing for Shuttle requires Ruby 2.0.0, PostgreSQL, Redis, Tidy, Sidekiq Pro
-and a modern version of libarchive. To run Shuttle for the first time:
+ElasticSearch, and a modern version of libarchive. To run Shuttle for the first time:
 
 1. Clone this project. You can run `brew bundle` to install all dependencies available 
    via Homebrew, which are specified in the `Brewfile`, or install them sequentially
@@ -159,6 +160,7 @@ the code and starting the Rails server,
    this), and
 2. install the cron entries (the Whenever gem has scripts for this).
 
+
 Documentation
 -------------
 
@@ -173,54 +175,13 @@ generate the CoffeeScript docs, but as of now Codo does not recognize the ERb
 files, and does not use the full set of Markdown syntax features used in the
 documenttion.
 
+
 Architecture
 ------------
 
-### Views
-
-This is a pretty typical Rails website, save for the views, which are written
-using Erector. The views forgo the traditional Rails concepts of partials and
-templates in favor of analogous OOP concepts more familiar to software
-developers: methods and inheritance. All views inherit from an abstract Erector
-widget which provides layout; and all views have their content split into
-multiple private methods.
-
-In addition to the usual helpers (in `app/helpers`), there are view mixins under
-`app/views/additions` that simplify view coding.
-
-JavaScript files are organized into four possible locations:
-
-* Third-party JavaScript libraries are in `vendor/assets/javascripts` and
-  loaded in the `application.js.coffee` manifest.
-* JavaScript modules or helpers that are not specific to a particular page or
-  site area are in `lib/assets/javascripts` and also loaded in
-  `application.js.coffee`.
-* JavaScript modules or helpers specific to a particular area of the site are in
-  `app/assets/javascripts` and also loaded in `application.js.coffee`.
-* Small JavaScript snippets, glue code, or other code intended to add dynamic
-  behavior to a specific page is in a `.js` file named the same as, and placed
-  alongside, the `.html.rb` view file. For example, if
-  `app/views/projects/new.html.rb` needed a bit of JS glue code, it would be
-  placed in `app/views/projects/new.js`. This code is placed in a `<SCRIPT>` tag
-  at the end of the view by the `application.slim` layout.
-
-CSS files are similarly organized:
-
-* Third-party CSS files are in `vendor/assets/stylesheets` and loaded in the
-   `application.css` manifest.
-* CSS styles or helpers global to the entire website are in
-  `lib/assets/stylesheets` and also loaded in `application.css`.
-* CSS styles specific to a single page or a related group of pages are placed in
-  `app/assets/stylesheets` and also loaded in `application.css`. Each `<BODY>`
-  tag is given a class name equal to the controller name, and an ID equal to
-  the controller and action name separated with a dash. For instance, the
-  `projects/new` action's body would be `<body class=projects id=projects-new>`.
-
-### Controllers
-
-For information about requests and responses, see {ApplicationController}.
-
 ### Models
+
+![Object Model](doc/images/objectmodel.png)
 
 Each {Project} has multiple {Commit Commits} or {Article Articles}.
 When a Commit or Article is created, it is scanned by {Importer Importers} for
@@ -269,10 +230,77 @@ a password.
 Shuttle uses a role-based authorization system. See the {User} model for details
 on the available user roles and their privileges.
 
+### Controllers
+
+For information about requests and responses, see {ApplicationController}.
+
+### Views
+
+This is a pretty typical Rails website, save for the views, which are written
+using Erector. The views forgo the traditional Rails concepts of partials and
+templates in favor of analogous OOP concepts more familiar to software
+developers: methods and inheritance. All views inherit from an abstract Erector
+widget which provides layout; and all views have their content split into
+multiple private methods.
+
+In addition to the usual helpers (in `app/helpers`), there are view mixins under
+`app/views/additions` that simplify view coding.
+
+JavaScript files are organized into four possible locations:
+
+* Third-party JavaScript libraries are in `vendor/assets/javascripts` and
+  loaded in the `application.js.coffee` manifest.
+* JavaScript modules or helpers that are not specific to a particular page or
+  site area are in `lib/assets/javascripts` and also loaded in
+  `application.js.coffee`.
+* JavaScript modules or helpers specific to a particular area of the site are in
+  `app/assets/javascripts` and also loaded in `application.js.coffee`.
+* Small JavaScript snippets, glue code, or other code intended to add dynamic
+  behavior to a specific page is in a `.js` file named the same as, and placed
+  alongside, the `.html.rb` view file. For example, if
+  `app/views/projects/new.html.rb` needed a bit of JS glue code, it would be
+  placed in `app/views/projects/new.js`. This code is placed in a `<SCRIPT>` tag
+  at the end of the view by the `application.slim` layout.
+
+CSS files are similarly organized:
+
+* Third-party CSS files are in `vendor/assets/stylesheets` and loaded in the
+   `application.css` manifest.
+* CSS styles or helpers global to the entire website are in
+  `lib/assets/stylesheets` and also loaded in `application.css`.
+* CSS styles specific to a single page or a related group of pages are placed in
+  `app/assets/stylesheets` and also loaded in `application.css`. Each `<BODY>`
+  tag is given a class name equal to the controller name, and an ID equal to
+  the controller and action name separated with a dash. For instance, the
+  `projects/new` action's body would be `<body class=projects id=projects-new>`.
+
 ### Tasks
 
 Various Rake tasks are available under `lib/tasks`. These include tasks for
-importing locale data and development tasks.
+importing locale data, bulk-importing trados data, server cleanup and other 
+development tasks.
+
+### Others
+
+Shuttle also utilizes other design patterns such as:
+
+* `Presenters` (layer between `Controllers` and `Views`),
+* `Mediators` (layer between `Controllers` and `Models`),
+* `Helpers` (for generating views)
+* `Services` (to interact with other services or data stores such as Redis or ElasticSearch)
+
+
+Distributed Processing
+----------------------
+
+![Worker Interactions](doc/images/workers.png)
+
+Shuttle is designed to handle large code bases. Fast processing of these code bases is 
+achieved through highly parallelizing common tasks which are expected to take a non-trivial 
+amount of time, using Sidekiq. All Sidekiq workers live in `app/workers`. Best examples 
+are CommitImporter and ArticleImporter. These both kick off sub-workers in a batch, 
+and run other tasks when all the jobs in the batch are finished.
+
 
 Importing and Exporting
 -----------------------
@@ -334,6 +362,7 @@ importers from descending into specific paths.
 See {Project#skip_key?}, {Project#skip_path?}, and {Commit#skip_key?} for more
 information.
 
+
 Fencing
 -------
 
@@ -350,11 +379,11 @@ informal interface.
 Specs
 -----
 
-All models, controllers, and library files are unit-tested with RSpec specs
-under the `spec` directory. Run unit tests with the `rspec spec` command. Views
-and JavaScript files are not specced. No integration or acceptance tests are
-written. Almost all unit tests use factories rather than mocks, putting them
-somewhat closer to integration tests.
+All models, controllers, and library files are unit or integration-tested with 
+RSpec specs under the `spec` directory. Run unit tests with the `rspec spec` 
+command. Views and JavaScript files are not specced. Almost all unit tests use 
+factories rather than mocks, putting them somewhat closer to integration tests.
+
 
 To-Do Items
 -----------
@@ -381,7 +410,6 @@ To-Do Items
 
 * Segmentation for large files
 * `<STYLE>`/`<SCRIPT>` tag content should not be localizable
-
 
 ### Performance optimizations
 
