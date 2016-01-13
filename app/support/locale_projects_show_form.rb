@@ -19,7 +19,12 @@ class LocaleProjectsShowForm
     processed[:query_filter] = form[:filter]
     processed[:commit] = form[:commit]
     processed[:translation_ids_in_commit] = project.commits.for_revision(form[:commit]).first.try(:translations).try(:pluck, :id)
-    processed[:article_id]   = project.articles.find_by_id(form[:article_id]).try(:id)
+    processed[:article_id]  =
+      if form[:article_id].present?
+        project.articles.find_by_id(form[:article_id]).try(:id)
+      elsif form[:article_name].present?
+        project.articles.find_by_name(form[:article_name]).try(:id)
+      end
     processed[:section_id]  = project.sections.find_by_id(form[:section_id]).try(:id)
     processed[:locale]       = if form[:locale_id]
                                  Locale.from_rfc5646(form[:locale_id])

@@ -30,7 +30,7 @@ class SectionImporter
   include SidekiqLocking
 
   class Core
-    BLOCK_LEVEL_TAGS = %w(p div li address article aside blockquote dl dd footer header section h1 h2 h3 h4 h5 h6)
+    BLOCK_LEVEL_TAGS = %w(p div li address article aside blockquote dl dd footer header section h1 h2 h3 h4 h5 h6 th td)
 
     def initialize(section)
       @section = section
