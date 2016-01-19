@@ -149,6 +149,10 @@ class Issue < ActiveRecord::Base
     order('issues.status ASC, issues.priority ASC, issues.created_at DESC')
   end
 
+  def self.order_default_with_comments
+    order('issues.status ASC, issues.priority ASC, issues.created_at DESC, comments.created_at ASC')
+  end
+
   # This method is used instead of the `summary` method, where appropriate because `summary` can sometimes be `nil`.
   #   @return [String] which includes kind and summary (if exists) information
 
