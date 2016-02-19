@@ -163,7 +163,7 @@ class Commit < ActiveRecord::Base
     Commit.all.count
   end
 
-  # Counts the number of incomplete commits.  
+  # Counts the number of incomplete commits.
   #
   # @return [Fixnum] The number of incomplete commits
 
