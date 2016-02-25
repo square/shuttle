@@ -248,19 +248,19 @@ describe SectionImporter::Core do
   describe "#split_into_paragraphs" do
     TEXT_TO_EXPECTED_PARAGRAPHS = [
         { text:        "<p>paragraph a</p>",
-          paragraphs: ["<p>paragraph a</p>"]},
+          paragraphs: ["<p>", "paragraph a", "</p>"]},
         { text:        "<span>paragraph a</span><span>paragraph b</span>",
           paragraphs: ["<span>paragraph a</span><span>paragraph b</span>"]},
         { text:        "<body><p>paragraph a</p><p>paragraph b</p><p>paragraph c</p></body>",
-          paragraphs: ["<body>", "<p>paragraph a</p>", "<p>paragraph b</p>", "<p>paragraph c</p>", "</body>"]},
+          paragraphs: ["<body>", "<p>", "paragraph a", "</p>", "<p>", "paragraph b", "</p>", "<p>", "paragraph c", "</p>", "</body>"]},
         { text:        "<html><meta bla=bla> \>   <body>   <p>paragraph a</p>  \n\n <div>paragraph b</div>paragraph c<ul>  \n <li>paragraph d</li></ul>  paragraph e</body></html>",
-          paragraphs: ["<html><meta bla=bla> >   <body>   ", "<p>paragraph a</p>", "<div>paragraph b</div>", "paragraph c<ul>  \n ", "<li>paragraph d</li>", "</ul>  paragraph e</body></html>"]},
+          paragraphs: ["<html>", "<meta bla=bla> \>", "   <body>   ", "<p>", "paragraph a", "</p>  \n\n ", "<div>", "paragraph b", "</div>", "paragraph c", "<ul>  \n ", "<li>", "paragraph d", "</li>", "</ul>  ", "paragraph e", "</body>", "</html>"]},
         { text:        "<html><body><div>paragraph a<p>paragraph b</p>paragraph c</div></body></html>",
-          paragraphs: ["<html><body>", "<div>paragraph a", "<p>paragraph b</p>", "paragraph c</div>", "</body></html>"]},
+          paragraphs: ["<html>", "<body>", "<div>", "paragraph a", "<p>", "paragraph b", "</p>", "paragraph c", "</div>", "</body>", "</html>"]},
         { text:        "<html><body><div>paragraph a <img src='fake' alt='hello' /></div></body></html>",
-          paragraphs: ["<html><body>", "<div>paragraph a <img src='fake' alt='hello' /></div>", "</body></html>"]},
+          paragraphs: ["<html>", "<body>", "<div>", "paragraph a <img src='fake' alt='hello' />", "</div>", "</body>", "</html>"]},
         { text:        "<html><body><table><thead><th>header</th></thead><tbody><tr><td>data</td></tr></tbody></body></html>",
-          paragraphs: ["<html><body><table>", "<thead>","<th>header</th>", "</thead><tbody><tr>", "<td>data</td>", "</tr></tbody></body></html>"]},
+          paragraphs: ["<html>", "<body>", "<table>", "<thead>","<th>", "header", "</th>", "</thead>", "<tbody>", "<tr>", "<td>", "data", "</td>", "</tr>", "</tbody>", "</body>", "</html>"]},
     ]
 
     let(:importer) { SectionImporter::Core.new(nil) }

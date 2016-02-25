@@ -30,7 +30,7 @@ class SectionImporter
   include SidekiqLocking
 
   class Core
-    BLOCK_LEVEL_TAGS = %w(p div li address article aside blockquote dl dd footer header section h1 h2 h3 h4 h5 h6 th td)
+    include BlockHelper
 
     def initialize(section)
       @section = section
@@ -166,10 +166,7 @@ class SectionImporter
     # @return [Array<String>] array of paragraphs which can be translated as a unit
 
     def split_into_paragraphs(text)
-      ### text.split(/(?=<.+?<\/p>)/m).map {|t| t.split(/(?<=<\/p>)/m)}.flatten
-      arr = text.split( /#{BLOCK_LEVEL_TAGS.map{ |tag| "(?=<" + tag + ".+?<\/" + tag + ">)"}.join("|") }/m )
-      arr = arr.map {|t| t.split(/#{BLOCK_LEVEL_TAGS.map{ |tag| "(?<=<\/" + tag + ">)" }.join("|") }/m)}
-      arr.flatten.select(&:present?)
+      text.split(BLOCK_SPLIT_REGEX).flatten.select(&:present?)
     end
 
     # Cleans associations between sections and keys so that we can start fresh.

@@ -269,6 +269,16 @@ describe Key do
         expect(excluded.translations.count).to eql(2)
         expect(excluded.translations.pluck(:rfc5646_locale).sort).to eql(%w(de en-US))
       end
+
+      it "should not auto-translate block tags" do
+        project  = FactoryGirl.create(:project, targeted_rfc5646_locales: { 'en-US' => true, 'de' => true })
+        key      = FactoryGirl.create(:key, source_copy: '<p>', project: project)
+
+        key.add_pending_translations
+
+        translation = Translation.find_by(key: key, rfc5646_locale: 'de')
+        expect(translation.translated).to be_falsey
+      end
     end
 
     context "[for article-bound keys]" do
@@ -284,6 +294,26 @@ describe Key do
         key.add_pending_translations
 
         expect(key.translations.map(&:rfc5646_locale).sort).to eql(%w(en de).sort)
+      end
+
+      it "should auto-translate block tags" do
+        article = FactoryGirl.create(:article, targeted_rfc5646_locales: {'de' => true})
+        section = FactoryGirl.create(:section, article: article)
+        tag_key = FactoryGirl.create(:key, section: section, source_copy: '<p>')
+        content_key = FactoryGirl.create(:key, section: section, source_copy: 'I am content')
+
+        tag_key.add_pending_translations
+        content_key.add_pending_translations
+
+        tag_translation = Translation.find_by(key: tag_key, rfc5646_locale: 'de')
+        expect(tag_translation.copy).to eql('<p>')
+        expect(tag_translation.approved).to be true
+        expect(tag_translation.translated).to be true
+
+        content_translation = Translation.find_by(key: content_key, rfc5646_locale: 'de')
+        expect(content_translation.copy).to be_nil
+        expect(content_translation.approved).to be_falsey
+        expect(content_translation.translated).to be_falsey
       end
     end
   end
@@ -449,6 +479,38 @@ describe Key do
 
         expect(key.reload.translations.count).to eql(0)
       end
+    end
+  end
+
+  describe "#is_block_tag" do
+    it "matches opening tag" do
+      expect(FactoryGirl.create(:key, source_copy: '<p>').is_block_tag).to be_truthy
+      expect(FactoryGirl.create(:key, source_copy: '<div>').is_block_tag).to be_truthy
+    end
+
+    it "matches closing tag" do
+      expect(FactoryGirl.create(:key, source_copy: '</p>').is_block_tag).to be_truthy
+      expect(FactoryGirl.create(:key, source_copy: '</div>').is_block_tag).to be_truthy
+    end
+
+    it "disregards whitespace" do
+      expect(FactoryGirl.create(:key, source_copy: "  <p>   ").is_block_tag).to be_truthy
+      expect(FactoryGirl.create(:key, source_copy: "\n\t<div>\r\n").is_block_tag).to be_truthy
+    end
+
+    it "allows attributes" do
+      expect(FactoryGirl.create(:key, source_copy: '<p class="class">').is_block_tag).to be_truthy
+      expect(FactoryGirl.create(:key, source_copy: '<div disabled>').is_block_tag).to be_truthy
+    end
+
+    it "disallows non-block tags" do
+      expect(FactoryGirl.create(:key, source_copy: '<a>').is_block_tag).to be_falsey
+      expect(FactoryGirl.create(:key, source_copy: '<strong>').is_block_tag).to be_falsey
+    end
+
+    it "disallows content outside the tag" do
+      expect(FactoryGirl.create(:key, source_copy: 'thing<p>').is_block_tag).to be_falsey
+      expect(FactoryGirl.create(:key, source_copy: '<div>  thing').is_block_tag).to be_falsey
     end
   end
 

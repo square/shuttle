@@ -71,6 +71,7 @@ class Translation < ActiveRecord::Base
     indexes :project_id, type: 'integer', as: 'send(:key).project_id'
     indexes :article_id, type: 'integer', as: 'send(:key).section.try(:article_id)'
     indexes :section_id, type: 'integer', as: 'send(:key).section_id'
+    indexes :is_block_tag, type: 'boolean', as: 'send(:key).is_block_tag'
     indexes :section_active, type: 'boolean', as: 'send(:key).section.try(:active)'
     indexes :index_in_section, type: 'integer', as: 'send(:key).index_in_section'
     indexes :translator_id, type: 'integer'

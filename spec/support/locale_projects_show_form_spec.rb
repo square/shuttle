@@ -15,6 +15,10 @@ describe LocaleProjectsShowForm do
       params = { id: project.to_param, include_new: '1' }
       form = LocaleProjectsShowForm.new(params)
       expect(form[:include_new]).to be true
+
+      params = { id: project.to_param, include_block_tags: '1' }
+      form = LocaleProjectsShowForm.new(params)
+      expect(form[:include_block_tags]).to be true
     end
 
     it 'should default to include_translated and include_new if no flags specified' do
