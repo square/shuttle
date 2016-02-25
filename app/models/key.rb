@@ -110,6 +110,7 @@ class Key < ActiveRecord::Base
   belongs_to :section, inverse_of: :keys
   has_one :article, through: :section
 
+  include BlockHelper
   include InheritedSettingsForKey
 
   serialize :fencers, Array
@@ -192,6 +193,9 @@ class Key < ActiveRecord::Base
   # If this key is associated with an Article, base_locale and targeted_locales are
   # retrieved from the Article. Otherwise, they are retrieved from Project.
   #
+  # If the key is associated with an Article and it contains an HTML block tag,
+  # it is auto-translated.
+  #
   # This is used, for example, when a Project adds a new required localization,
   # to create pending Translation requests for each string in the new locale.
 
@@ -207,11 +211,20 @@ class Key < ActiveRecord::Base
 
     targeted_locales.each do |locale|
       next if skip_key?(locale)
-      translations.in_locale(locale).find_or_create!(
+      t = translations.in_locale(locale).find_or_create!(
         source_copy:          source_copy,
         source_locale:        base_locale,
         locale:               locale,
       )
+
+      if article.present? && is_block_tag
+        t.update_attributes(
+          copy: source_copy,
+          approved: true,
+          translated: true,
+          preserve_reviewed_status: true,
+        )
+      end
     end
   end
 
@@ -227,6 +240,12 @@ class Key < ActiveRecord::Base
         translation.destroy
       end
     end
+  end
+
+  # Indicates whether this key contains only a block tag (eg '<p>', '</ul>', '<div class="class">')
+
+  def is_block_tag
+    BLOCK_TAG_REGEX.match(source_copy.strip).present?
   end
 
   # Recalculates the value of the `ready` column and updates the record.
