@@ -25,14 +25,11 @@ class SectionImporter
   def perform(section_id)
     section = Section.find(section_id)
     SectionImporter::Core.new(section).import_strings
-    Translation.tire.index.refresh
   end
 
   include SidekiqLocking
 
   class Core
-    include BlockHelper
-
     def initialize(section)
       @section = section
     end
@@ -173,13 +170,13 @@ class SectionImporter
     # @return [Array<String>] array of paragraphs which can be translated as a unit
 
     def split_into_paragraphs(text)
-      text.split(BLOCK_SPLIT_REGEX).flatten.select(&:present?)
+      text.split(BlockPatterns::BLOCK_SPLIT_REGEX).flatten.select(&:present?)
     end
 
-    # Indicates whether this key contains only a block tag (eg '<p>', '</ul>', '<div class="class">')
+    # Indicates whether text contains only a block tag (eg '<p>', '</ul>', '<div class="class">')
 
     def is_block_tag(text)
-      BLOCK_TAG_REGEX.match(text.strip).present?
+      BlockPatterns::BLOCK_TAG_REGEX.match(text.strip).present?
     end
 
     # Cleans associations between sections and keys so that we can start fresh.

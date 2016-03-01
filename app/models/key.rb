@@ -110,7 +110,6 @@ class Key < ActiveRecord::Base
   belongs_to :section, inverse_of: :keys
   has_one :article, through: :section
 
-  include BlockHelper
   include InheritedSettingsForKey
 
   serialize :fencers, Array
@@ -118,7 +117,7 @@ class Key < ActiveRecord::Base
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }
   before_validation(on: :create) do |obj|
-    obj.is_block_tag = BLOCK_TAG_REGEX.match(source_copy.strip).present?
+    obj.is_block_tag = BlockPatterns::BLOCK_TAG_REGEX.match(source_copy.strip).present?
     obj.original_key ||= obj.key
   end
   validates :key, :original_key, presence: true
@@ -221,10 +220,11 @@ class Key < ActiveRecord::Base
       )
 
       if article.present? && is_block_tag
-        t.update_attributes(
+        t.update!(
           copy: source_copy,
           approved: true,
           translated: true,
+          preserve_reviewed_status: true,
         )
       end
     end
