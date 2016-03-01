@@ -170,8 +170,8 @@ describe Api::V1::ArticlesController do
       article = Article.last
       expect(article.name).to eql("testname")
       expect(article.sections.map { |section| [section.name, section.source_copy, section.active] }.sort).to eql([["title", "<p>a</p><p>b</p>", true], ["body", "<p>a</p><p>c</p>", true]].sort)
-      expect(article.keys.count).to eql(4)
-      expect(article.translations.count).to eql(12)
+      expect(article.keys.count).to eql(12)
+      expect(article.translations.count).to eql(36)
       expect(article.base_rfc5646_locale).to eql('en')
       expect(article.targeted_rfc5646_locales).to eql({ 'fr' => true, 'es' => false })
       expect(article.base_locale).to eql(Locale.from_rfc5646('en'))
@@ -183,8 +183,8 @@ describe Api::V1::ArticlesController do
       expect(response.status).to eql(200)
       expect(Article.count).to eql(1)
       article = Article.last
-      expect(article.keys.count).to eql(2)
-      expect(article.translations.count).to eql(4)
+      expect(article.keys.count).to eql(6)
+      expect(article.translations.count).to eql(12)
       expect(article.base_rfc5646_locale).to eql('en-US')
       expect(article.targeted_rfc5646_locales).to eql({ 'ja' => true })
       expect(article.base_locale).to eql(Locale.from_rfc5646('en-US'))
@@ -283,14 +283,14 @@ describe Api::V1::ArticlesController do
       third_section = article.active_sections.for_name("third").first
       second_section = article.inactive_sections.for_name("second").first
 
-      expect(main_section.keys.count).to eql(3)
-      expect(main_section.translations.count).to eql(12) # a new locale is added with the update
-      expect(sub_section.keys.count).to eql(2)
-      expect(sub_section.translations.count).to eql(8)
-      expect(third_section.keys.count).to eql(1)
-      expect(third_section.translations.count).to eql(4)
-      expect(second_section.keys.count).to eql(2)
-      expect(second_section.translations.count).to eql(6) # since this is inactivated, this shouldn't have picked the new locale's translations
+      expect(main_section.keys.count).to eql(9)
+      expect(main_section.translations.count).to eql(36) # a new locale is added with the update
+      expect(sub_section.keys.count).to eql(6)
+      expect(sub_section.translations.count).to eql(24)
+      expect(third_section.keys.count).to eql(3)
+      expect(third_section.translations.count).to eql(12)
+      expect(second_section.keys.count).to eql(6)
+      expect(second_section.translations.count).to eql(18) # since this is inactivated, this shouldn't have picked the new locale's translations
     end
 
     it "can update targeted_rfc5646_locales" do
@@ -391,13 +391,13 @@ describe Api::V1::ArticlesController do
     end
 
     it "downloads the manifest of a Article" do
-      article.translations.in_locale(*article.required_locales).each do |translation|
-        translation.update! copy: "<p>translated</p>", approved: true
+      article.translations.in_locale(*article.required_locales).reload.each do |translation|
+        translation.update! copy: translation.source_copy.upcase, approved: true
       end
       article.keys.reload.each(&:recalculate_ready!)
       get :manifest, project_id: project.id, api_token: project.api_token, name: article.name, format: :json
       expect(response.status).to eql(200)
-      expect(JSON.parse(response.body)).to eql({ "fr" => { "title" => "<p>translated</p>", "body" => "<p>translated</p><p>translated</p>" }, "ja" => { "title" => "<p>translated</p>", "body" => "<p>translated</p><p>translated</p>" } })
+      expect(JSON.parse(response.body)).to eql({ "fr" => { "title" => "<P>HELLO</P>", "body" => "<P>A</P><P>B</P>" }, "ja" => { "title" => "<P>HELLO</P>", "body" => "<P>A</P><P>B</P>" } })
     end
   end
 
@@ -547,9 +547,9 @@ describe Api::V1::ArticlesController do
       original_article_ids = article.keys.map(&:id)
       expect(article.active_sections.count).to eql(3)
       expect(article.inactive_sections.count).to eql(0)
-      expect(article.keys.count).to eql(65)
-      expect(article.active_keys.count).to eql(65)
-      expect(article.translations.count).to eql(130)
+      expect(article.keys.count).to eql(151)
+      expect(article.active_keys.count).to eql(151)
+      expect(article.translations.count).to eql(302)
 
       # Update: change targeted_rfc5646_locales. previously this defaulted to project settings, this time, put it into the Article
       patch :update, project_id: project.id, api_token: project.api_token, name: "support-article", article: { targeted_rfc5646_locales: { 'fr' => true, 'es' => false }}, format: :json
@@ -557,10 +557,10 @@ describe Api::V1::ArticlesController do
       updated_article_ids = article.reload.keys.map(&:id)
       expect(article.active_sections.count).to eql(3)
       expect(article.inactive_sections.count).to eql(0)
-      expect(article.keys.count).to eql(65)
+      expect(article.keys.count).to eql(151)
       expect((updated_article_ids - original_article_ids).length).to eql(0) # to make sure that we reused the old keys
-      expect(article.active_keys.count).to eql(65)
-      expect(article.translations.count).to eql(195)
+      expect(article.active_keys.count).to eql(151)
+      expect(article.translations.count).to eql(453)
 
       # Update
       # this source copy has 1 changed word, 2 added divs one of which is a duplicate of an existing div, and 1 removed div
@@ -569,10 +569,10 @@ describe Api::V1::ArticlesController do
       updated_article_ids = article.reload.keys.map(&:id)
       expect(article.active_sections.count).to eql(4)
       expect(article.inactive_sections.count).to eql(1)
-      expect(article.keys.count).to eql(71) # +3 comes from file changes => 2 (addition) + 1 (change)
-      expect((updated_article_ids - original_article_ids).length).to eql(6) # just to make sure that we reused the old keys
-      expect(article.active_keys.count).to eql(67) # +1 comes from file changes => 2 (addition) - 1 (removal)
-      expect(article.translations.count).to eql(213)
+      expect(article.keys.count).to eql(165) # +3 comes from file changes => 2 (addition) + 1 (change)
+      expect((updated_article_ids - original_article_ids).length).to eql(16) # just to make sure that we reused the old keys
+      expect(article.active_keys.count).to eql(157) # +1 comes from file changes => 2 (addition) - 1 (removal)
+      expect(article.translations.count).to eql(495)
 
       # Manifest
       get :manifest, project_id: project.id, api_token: project.api_token, name: "support-article", format: :json
@@ -580,7 +580,7 @@ describe Api::V1::ArticlesController do
       expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>[{"message"=>"#<Exporter::Article::NotReadyError: Exporter::Article::NotReadyError>"}]}})
 
       # Assume all translations are done now
-      article.reload.translations.where(approved: nil).each do |translation|
+      article.reload.translations.each do |translation|
         translation.update! copy: "test", approved: true
       end
       article.keys.reload.each(&:recalculate_ready!)
@@ -588,7 +588,7 @@ describe Api::V1::ArticlesController do
       # Manifest
       get :manifest, project_id: project.id, api_token: project.api_token, name: "support-article", format: :json
       expect(response.status).to eql(200)
-      expect(JSON.parse(response.body)).to eql({ "fr" => { "title" => "test"*3, "header" => "test", "footer" => "test", "main" => "test"*62 } })
+      expect(JSON.parse(response.body)).to eql({ "fr" => { "title" => "test"*9, "header" => "test"*3, "footer" => "test"*3, "main" => "test"*142 } })
     end
   end
 end

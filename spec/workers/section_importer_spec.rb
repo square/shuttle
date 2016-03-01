@@ -47,24 +47,27 @@ describe SectionImporter::Core do
 
       keys = section.reload.keys.order(:index_in_section)
 
-      expect(keys.length).to eql(2)
-      expect(keys[0].source_copy).to eql("<p>a</p>")
+      expect(keys.length).to eql(6)
+      expect(keys[0].source_copy).to eql("<p>")
       expect(keys[0].index_in_section).to eql(0)
-      expect(keys[1].source_copy).to eql("<p>b</p>")
+      expect(keys[1].source_copy).to eql("a")
       expect(keys[1].index_in_section).to eql(1)
 
-      expect(section.translations.length).to eql(6)
+      expect(section.translations.length).to eql(18)
       keys.each do |key|
-        expect(key).to_not be_ready
         expect(key.project).to eql(section.project)
         expect(key.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr es).sort)
+
+        key.translations.not_block_tag.each do |translation|
+          expect(key).to_not  be_ready
+        end
 
         key.translations.each do |translation|
           expect(translation.source_copy).to eql(key.source_copy) # check source copies
           expect(translation.source_rfc5646_locale).to eql('en')
         end
 
-        key.translations.not_base.each do |translation|
+        key.translations.not_base.not_block_tag.each do |translation|
           expect(translation.copy).to eql(nil) # check copies
         end
 
@@ -81,8 +84,8 @@ describe SectionImporter::Core do
       SectionImporter::Core.new(section).import_strings
 
       keys = section.reload.keys.order(:index_in_section)
-      expect(keys.length).to eql(5)
-      expect(section.translations.length).to eql(15)
+      expect(keys.length).to eql(15)
+      expect(section.translations.length).to eql(45)
 
       keys[1].translations.in_locale(Locale.from_rfc5646('fr')).first.update! copy: "<p>translated</p>", approved: true
       keys[1].translations.in_locale(Locale.from_rfc5646('es')).first.update! copy: "<p>translated</p>"
@@ -97,11 +100,11 @@ describe SectionImporter::Core do
       SectionImporter::Core.new(section).import_strings
 
       keys = section.reload.keys.order(:index_in_section)
-      expect(keys.length).to eql(7) # with the old unused keys
+      expect(keys.length).to eql(17) # with the old unused keys
 
-      expect(section.active_translations.length).to eql(17)
-      expect(section.active_translations.not_base.approved.count).to eql(1)
-      expect(section.translations.not_base.approved.count).to eql(1)
+      expect(section.active_translations.length).to eql(54)
+      expect(section.active_translations.not_base.approved.count).to eql(28)
+      expect(section.translations.not_base.approved.count).to eql(28)
     end
   end
 
@@ -126,17 +129,19 @@ describe SectionImporter::Core do
 
     it "handles addition to the start" do
       SectionImporter.new.perform(@section.id)
-      expect(@section.reload.keys.count).to eql(3)
+      expect(@section.reload.keys.count).to eql(9)
 
-      @section.translations.not_base.each { |translation| translation.update! copy: "<p>translated</p>", approved: true }
+      @section.translations.not_base.each do |translation|
+        translation.update_attributes! copy: "<p>translated</p>", approved: true
+      end
       @section.keys.each(&:recalculate_ready!)
       expect(@article.reload.tap(&:recalculate_ready!)).to be_ready
       SectionImporter::Core.new(@section).send :rebase_existing_keys, ["<p>x</p>", "<p>a</p>", "<p>b</p>", "<p>c</p>"]
 
       existing_keys = @section.reload.sorted_active_keys_with_translations
-      expect(existing_keys[0].key).to start_with('1:')
-      expect(existing_keys[1].key).to start_with('2:')
-      expect(existing_keys[2].key).to start_with('3:')
+      expect(existing_keys[0].key).to start_with('0:')
+      expect(existing_keys[1].key).to start_with('1:')
+      expect(existing_keys[2].key).to start_with('2:')
     end
   end
 
@@ -161,28 +166,27 @@ describe SectionImporter::Core do
     SCENARIOS_REGARDING_NEIGHBOR_RESETING.each do |original_existing_paragraphs, new_paragraphs, expected_approved_states, handles_what|
       it handles_what do
         tag = "p"
-        original_existing_paragraphs = original_existing_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
-        new_paragraphs = new_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
+        tagged_existing_paragraphs = original_existing_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
 
         Article.any_instance.stub(:import!)
         article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true })
-        section = FactoryGirl.create(:section, article: article, source_copy: original_existing_paragraphs.join)
+        section = FactoryGirl.create(:section, article: article, source_copy: tagged_existing_paragraphs.join)
         SectionImporter.new.perform(section.id)
 
-        existing_keys = section.reload.sorted_active_keys_with_translations
-        section.translations.each { |key| key.update! approved: true, copy: "<#{tag}>translated</#{tag}>" }
+        existing_keys = section.reload.sorted_active_keys_with_translations.reject(&:is_block_tag)
+        section.translations.each { |key| key.update! approved: true, copy: key.key.is_block_tag ? key.source_copy : 'translated' }
         expect(section.reload.translations.all? { |t| t.approved? }).to be_true
         existing_paragraphs = existing_keys.map(&:source_copy)
 
         expect(existing_paragraphs).to eql(original_existing_paragraphs)
         sdiff = Diff::LCS.sdiff(existing_paragraphs, new_paragraphs)
 
-        SectionImporter::Core.new(section).send :reset_approved_if_neighbor_changed!, existing_keys, sdiff
+        SectionImporter::Core.new(section).send :reset_approved_if_neighbor_changed!, existing_keys.reject(&:is_block_tag), sdiff
 
         existing_keys = section.reload.sorted_active_keys_with_translations # reload them to get the latest changes
 
         expected_approved_states.each_with_index do |expected_approved_state, index|
-          existing_keys[index].translations.not_base.each do |translation|
+          existing_keys.reject(&:is_block_tag)[index].translations.not_base.each do |translation|
             expect(translation.approved?).to eql(expected_approved_state)
           end
         end
@@ -204,28 +208,29 @@ describe SectionImporter::Core do
     SCENARIOS_REGARDING_INDEX_UPDATES.each do |original_existing_paragraphs, new_paragraphs, expected_new_indexes_in_key_name, handles_what|
       it handles_what do
         tag = "p"
-        original_existing_paragraphs = original_existing_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
-        new_paragraphs = new_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
+        tagged_existing_paragraphs = original_existing_paragraphs.map { |prgh| ["<#{tag}>", prgh, "</#{tag}>"] }.flatten
 
         article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true })
-        section = FactoryGirl.create(:section, article: article, source_copy: original_existing_paragraphs.join)
+        section = FactoryGirl.create(:section, article: article, source_copy: tagged_existing_paragraphs.join)
         SectionImporter.new.perform(section.id)
 
         existing_keys = section.reload.sorted_active_keys_with_translations
-        expect(existing_keys.count).to eql(original_existing_paragraphs.count)
-        existing_paragraphs = existing_keys.map(&:source_copy)
+        expect(existing_keys.count).to eql(original_existing_paragraphs.count * 3)
+        existing_paragraphs_with_tags = existing_keys.map(&:source_copy)
+        new_paragraphs_with_tags = new_paragraphs.map { |prgh| ["<#{tag}>", prgh, "</#{tag}>"] }.flatten
 
-        sdiff = Diff::LCS.sdiff(existing_paragraphs, new_paragraphs)
+        sdiff = Diff::LCS.sdiff(existing_paragraphs_with_tags, new_paragraphs_with_tags)
 
-        original_existing_paragraphs.each_with_index do |paragraph, index|
+        tagged_existing_paragraphs.each_with_index do |paragraph, index|
           expect(existing_keys[index].index_in_section).to eql(index)
-          expect(existing_keys[index].key).to eql(SectionKeyCreator.generate_key_name(existing_keys[index].source_copy, index))
+          expect(existing_keys[index].key).to eql(SectionKeyCreator.generate_key_name(existing_keys[index].source_copy, existing_keys[index].index_in_section))
         end
 
         SectionImporter::Core.new(section).send :update_indexes_of_unchanged_keys!, existing_keys, sdiff
 
-        original_existing_paragraphs.each_with_index do |_, index|
-          expect(existing_keys[index].reload.key).to eql(SectionKeyCreator.generate_key_name(existing_keys[index].source_copy, expected_new_indexes_in_key_name[index]))
+        tagged_existing_paragraphs.each_with_index do |_, index|
+          next if existing_keys[index].is_block_tag
+          expect(existing_keys[index].reload.key).to eql(SectionKeyCreator.generate_key_name(existing_keys[index].source_copy, (expected_new_indexes_in_key_name.shift * 3) + 1))
         end
       end
     end
@@ -276,11 +281,11 @@ describe SectionImporter::Core do
     it "inactivates all Keys in an Article" do
       article = FactoryGirl.create(:article, sections_hash: { "main" => "<p>a</p><p>b</p><p>c</p>" })
       section = article.sections.first
-      expect(section.reload.keys.where('index_in_section IS NOT NULL').count).to eql(3)
+      expect(section.reload.keys.where('index_in_section IS NOT NULL').count).to eql(9)
       expect(section.keys.where('index_in_section IS NULL').count).to eql(0)
       SectionImporter::Core.new(section).send :deactivate_all_keys
       expect(section.reload.keys.where('index_in_section IS NOT NULL').count).to eql(0)
-      expect(section.keys.where('index_in_section IS NULL').count).to eql(3)
+      expect(section.keys.where('index_in_section IS NULL').count).to eql(9)
     end
   end
 end

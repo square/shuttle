@@ -482,7 +482,7 @@ describe Key do
     end
   end
 
-  describe "#is_block_tag" do
+  describe "is_block_tag" do
     it "matches opening tag" do
       expect(FactoryGirl.create(:key, source_copy: '<p>').is_block_tag).to be_truthy
       expect(FactoryGirl.create(:key, source_copy: '<div>').is_block_tag).to be_truthy

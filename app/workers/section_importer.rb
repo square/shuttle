@@ -25,6 +25,7 @@ class SectionImporter
   def perform(section_id)
     section = Section.find(section_id)
     SectionImporter::Core.new(section).import_strings
+    Translation.tire.index.refresh
   end
 
   include SidekiqLocking
@@ -84,7 +85,13 @@ class SectionImporter
       existing_paragraphs = existing_keys.map(&:source_copy) # Ex: ["Hello a", "Hello b", "Hello c", "Hello d"]
       sdiff = Diff::LCS.sdiff(existing_paragraphs, new_paragraphs) # Ex: [["=", [0, "Hello a"], [0, "Hello a"]], ["-", [1, "Hello b"], [1, nil]], ["=", [2, "Hello c"], [1, "Hello c"]], ["!", [3, "Hello d"], [2, "Hello e"]]]
 
-      reset_approved_if_neighbor_changed!(existing_keys, sdiff)
+      # disregard block tags when determining neighbor changes
+      existing_keys_tagless = existing_keys.reject(&:is_block_tag)
+      existing_paragraphs_tagless = existing_keys_tagless.map(&:source_copy)
+      new_paragraphs_tagless = new_paragraphs.reject { |p| is_block_tag(p) }
+      sdiff_tagless = Diff::LCS.sdiff(existing_paragraphs_tagless, new_paragraphs_tagless) # Ex: [["=", [0, "Hello a"], [0, "Hello a"]], ["-", [1, "Hello b"], [1, nil]], ["=", [2, "Hello c"], [1, "Hello c"]], ["!", [3, "Hello d"], [2, "Hello e"]]]
+
+      reset_approved_if_neighbor_changed!(existing_keys_tagless, sdiff_tagless)
       update_indexes_of_unchanged_keys!(existing_keys, sdiff)
     end
 
@@ -167,6 +174,12 @@ class SectionImporter
 
     def split_into_paragraphs(text)
       text.split(BLOCK_SPLIT_REGEX).flatten.select(&:present?)
+    end
+
+    # Indicates whether this key contains only a block tag (eg '<p>', '</ul>', '<div class="class">')
+
+    def is_block_tag(text)
+      BLOCK_TAG_REGEX.match(text.strip).present?
     end
 
     # Cleans associations between sections and keys so that we can start fresh.
