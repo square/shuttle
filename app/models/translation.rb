@@ -99,8 +99,6 @@ class Translation < ActiveRecord::Base
   before_validation :count_words
   before_validation :populate_pseudo_translation
 
-  after_initialize { |obj| obj.preserve_reviewed_status ||= obj.key.try(:is_block_tag) }
-
   before_save { |obj| obj.translated = obj.copy.to_bool; true } # in case validation was skipped
   before_update :reset_reviewed, unless: :preserve_reviewed_status
 
@@ -216,7 +214,7 @@ class Translation < ActiveRecord::Base
   end
 
   def reset_reviewed
-    if (copy != copy_was || source_copy != source_copy_was) && !base_translation? && !approved_changed?
+    if (copy != copy_was || source_copy != source_copy_was) && !base_translation? && !approved_changed? && !key.try(:is_block_tag)
       self.reviewer_id = nil
       self.approved    = nil
     end
