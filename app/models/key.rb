@@ -117,7 +117,10 @@ class Key < ActiveRecord::Base
   serialize :other_data, Hash
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }
-  before_validation(on: :create) { |obj| obj.original_key ||= obj.key }
+  before_validation(on: :create) do |obj|
+    obj.is_block_tag = BLOCK_TAG_REGEX.match(source_copy.strip).present?
+    obj.original_key ||= obj.key
+  end
   validates :key, :original_key, presence: true
 
   # @return [true, false] If `true`, the after-save hooks that recalculate
@@ -222,7 +225,6 @@ class Key < ActiveRecord::Base
           copy: source_copy,
           approved: true,
           translated: true,
-          preserve_reviewed_status: true,
         )
       end
     end
@@ -242,12 +244,6 @@ class Key < ActiveRecord::Base
     end
   end
 
-  # Indicates whether this key contains only a block tag (eg '<p>', '</ul>', '<div class="class">')
-
-  def is_block_tag
-    BLOCK_TAG_REGEX.match(source_copy.strip).present?
-  end
-
   # Recalculates the value of the `ready` column and updates the record.
 
   def recalculate_ready!
@@ -265,7 +261,7 @@ class Key < ActiveRecord::Base
   # @param [Commit, Project, Article] obj The object whose keys should be batch recalculated
 
   def self.batch_recalculate_ready!(obj)
-    not_ready_key_ids = obj.translations.in_locale(*obj.required_locales).not_approved.select(:key_id).uniq.pluck(:key_id)
+    not_ready_key_ids = obj.translations.in_locale(*obj.required_locales).not_approved.not_block_tag.select(:key_id).uniq.pluck(:key_id)
     ready_key_ids = obj.keys.pluck(:id) - not_ready_key_ids
     ready_key_ids.in_groups_of(500, false) { |group| Key.where(id: group).update_all(ready: true) }
     not_ready_key_ids.in_groups_of(500, false) { |group| Key.where(id: group).update_all(ready: false) }

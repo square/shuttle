@@ -99,6 +99,8 @@ class Translation < ActiveRecord::Base
   before_validation :count_words
   before_validation :populate_pseudo_translation
 
+  after_initialize { |obj| obj.preserve_reviewed_status ||= obj.key.try(:is_block_tag) }
+
   before_save { |obj| obj.translated = obj.copy.to_bool; true } # in case validation was skipped
   before_update :reset_reviewed, unless: :preserve_reviewed_status
 
@@ -130,6 +132,8 @@ class Translation < ActiveRecord::Base
   scope :approved, -> { where(translations: { approved: true }) }
   scope :not_approved, -> { where("translations.approved IS NOT TRUE") }
   scope :not_translated, -> { where(translations: { translated: false } ) }
+  scope :block_tag, -> { joins(:key).where(keys: { is_block_tag: true }) }
+  scope :not_block_tag, -> { joins(:key).where(keys: { is_block_tag: false }) }
   scope :base, -> { where('translations.source_rfc5646_locale = translations.rfc5646_locale') }
   scope :not_base, -> { where('translations.source_rfc5646_locale != translations.rfc5646_locale') }
   scope :in_commit, ->(commit) {

@@ -16,7 +16,7 @@
 
 module BlockHelper
   # HTML block tags
-  BLOCK_LEVEL_TAGS = %w(html head body p div li address article aside blockquote dl dd footer header section h1 h2 h3 h4 h5 h6 th td tr thead tbody ul ol)
+  BLOCK_LEVEL_TAGS = %w(html head body p div li address article aside blockquote dl dd footer header section h1 h2 h3 h4 h5 h6 th td tr thead tfoot tbody caption ul ol)
 
   # Matches start and end block tags, including any tag attributes
   BLOCK_TAG_REGEX   = /\A(#{BLOCK_LEVEL_TAGS.map { |tag| '<\/?' + tag + '[^>]*?>' }.join('|')})\Z/

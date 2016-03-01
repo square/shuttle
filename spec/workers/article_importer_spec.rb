@@ -120,8 +120,8 @@ describe ArticleImporter::Finisher do
     before :each do
       # creation triggers the initial import
       @article = FactoryGirl.create(:article, sections_hash: { "main" => "<p>hello</p><p>world</p>" }, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
-      expect(@article.reload.keys.count).to eql(2)
-      expect(@article.translations.count).to eql(8)
+      expect(@article.reload.keys.count).to eql(6)
+      expect(@article.translations.count).to eql(24)
       @article.reload
     end
 
@@ -134,10 +134,10 @@ describe ArticleImporter::Finisher do
       @article.update! ready: true
       ArticleImporter::Finisher.new.on_success(nil, {'article_id' => @article.id}) # finish re-import
       expect(@article.reload).to_not be_ready
-      expect(@article.keys.where(ready: true).exists?).to_not be_true
+      expect(@article.keys.where(ready: false).count).to eql(2)
     end
 
-    it "sets Article's ready = true at the end of a re-import if all translations were  already approved" do
+    it "sets Article's ready = true at the end of a re-import if all translations were already approved" do
       @article.translations.in_locale(*@article.required_locales).each do |translation|
         translation.update! copy: "<p>test</p>", approved: true
       end

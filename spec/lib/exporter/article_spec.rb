@@ -30,7 +30,7 @@ describe Exporter::Article do
                                       sections_hash: { "title" => "a", "body" => "<p>hello</p><p>world</p>" },
                                       base_rfc5646_locale: 'en',
                                       targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
-      expect(@article.reload.keys.count).to eql(3)
+      expect(@article.reload.keys.count).to eql(7)
 
       @title_section = @article.sections.for_name("title").first
       @body_section = @article.sections.for_name("body").first
@@ -44,10 +44,10 @@ describe Exporter::Article do
 
       @title_fr_translations[0].update! copy: "b", approved: true
       @title_es_translations[0].update! copy: "c", approved: true
-      @body_fr_translations[0].update! copy: "<p>bonjour</p>", approved: true
-      @body_es_translations[0].update! copy: "<p>hola</p>", approved: true
-      @body_fr_translations[1].update! copy: "<p>monde</p>", approved: true
-      @body_es_translations[1].update! copy: "<p>mundo</p>", approved: true
+      @body_fr_translations[1].update! copy: "bonjour", approved: true
+      @body_es_translations[1].update! copy: "hola", approved: true
+      @body_fr_translations[4].update! copy: "monde", approved: true
+      @body_es_translations[4].update! copy: "mundo", approved: true
 
       @article.keys.reload.each(&:recalculate_ready!)
       expect(@article.reload).to be_ready
@@ -99,8 +99,8 @@ describe Exporter::Article do
                                     base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'fr' => true })
 
-      @article.translations.update_all copy: "<p>translated</p>", approved: true
-      expect(Exporter::Article.new(@article).send(:export_locale, @fr_locale)).to eql({"body"=>"<p>translated</p><p>translated</p>", "title"=>"<p>translated</p>"})
+      @article.translations.reject { |t| t.key.is_block_tag}.each { |t| t.update(copy: "translated", approved: true) }
+      expect(Exporter::Article.new(@article).send(:export_locale, @fr_locale)).to eql({"body"=>"<p>translated</p><p>translated</p>", "title"=>"translated"})
     end
   end
 
@@ -116,13 +116,13 @@ describe Exporter::Article do
                                     base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'fr' => true, 'es' => true })
       @section = @article.sections.last
-      expect(@section.keys.count).to eql(2)
+      expect(@section.keys.count).to eql(6)
       @fr_translations = @section.translations.in_locale(@fr_locale).order("keys.index_in_section")
     end
 
     it "returns the full translation of Section in the given locale" do
-      @fr_translations[0].update! copy: "<p>bonjour</p>"
-      @fr_translations[1].update! copy: "<p>monde</p>"
+      @fr_translations[1].update! copy: "bonjour"
+      @fr_translations[4].update! copy: "monde"
       expect(Exporter::Article.new(@article).send(:export_section_locale, @section, @fr_locale)).to eql("<p>bonjour</p><p>monde</p>")
     end
 
