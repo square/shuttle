@@ -15,19 +15,9 @@
 require 'spec_helper'
 
 describe DigestField do
-  it "should allow a custom field using the :to option" do
-    pending "No models use this option yet"
-  end
-
-  it "should allow a custom width with the :width option" do
-    pending "No models use this option yet"
-  end
-
   it "should create a named scope using the :scope option" do
     expect(Key.source_copy_matches('test').to_sql).
         to eql("SELECT \"keys\".* FROM \"keys\"  WHERE (\"keys\".\"source_copy_sha_raw\" = E'\\\\237\\\\206\\\\320\\\\201\\\\210\\\\114\\\\175\\\\145\\\\232\\\\057\\\\352\\\\240\\\\305\\\\132\\\\320\\\\025\\\\243\\\\277\\\\117\\\\033\\\\053\\\\013\\\\202\\\\054\\\\321\\\\135\\\\154\\\\025\\\\260\\\\360\\\\012\\\\010'::bytea)")
-    expect(Key.source_copy_matches('test', 'test2').to_sql).
-        to eql("SELECT \"keys\".* FROM \"keys\"  WHERE (\"keys\".\"source_copy_sha_raw\" IN (E'\\\\237\\\\206\\\\320\\\\201\\\\210\\\\114\\\\175\\\\145\\\\232\\\\057\\\\352\\\\240\\\\305\\\\132\\\\320\\\\025\\\\243\\\\277\\\\117\\\\033\\\\053\\\\013\\\\202\\\\054\\\\321\\\\135\\\\154\\\\025\\\\260\\\\360\\\\012\\\\010'::bytea, E'\\\\140\\\\060\\\\072\\\\342\\\\053\\\\231\\\\210\\\\141\\\\274\\\\343\\\\262\\\\217\\\\063\\\\356\\\\301\\\\276\\\\165\\\\212\\\\041\\\\074\\\\206\\\\311\\\\074\\\\007\\\\155\\\\276\\\\237\\\\125\\\\214\\\\021\\\\307\\\\122'::bytea))")
   end
 
   it "should automatically set the value from a different field" do
@@ -37,5 +27,19 @@ describe DigestField do
     k.key = 'foo bar'
     expect(k).to be_valid
     expect(k.key_sha_raw).to eql(Digest::SHA2.digest('foo bar'))
+  end
+
+  it "should define _sha field" do
+    k = FactoryGirl.build(:key, key: 'hello world')
+    expect(k).to be_valid
+    expect(k.key_sha).to eql(Digest::SHA2.hexdigest('hello world'))
+  end
+
+  it "should validate _sha_raw field" do
+    k = FactoryGirl.build(:key, key: nil)
+    expect(k).to_not be_valid
+    expect(k.errors.messages).to eql(key: ["can’t be blank"],
+                                     original_key: ["can’t be blank"],
+                                     key_sha_raw: ["is not a valid SHA2 digest", "can’t be blank"])
   end
 end
