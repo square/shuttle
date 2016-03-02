@@ -17,67 +17,67 @@
 # @example
 #   class Model < ActiveRecord::Base
 #     extend DigestField
-#     digest_field :my_field, from: :text_field
+#     digest_field :my_field, scope: :for_my_field
 #   end
 
 module DigestField
-  include ShaField
 
-  # @overload digest_field(field, ..., options={})
-  #   Specifies that the field(s) save their digested SHA2 values to a different
-  #   field automatically. See the {ShaField} module for more information about
-  #   how SHA2 values are stored and accessed, and additional options that can
-  #   be passed to this method.
+  SHA_FORMAT = /^[0-9a-fA-F]+$/
+
+  # @overload digest_field(field, options={})
+  #   Specifies that the field save its digested SHA2 value to a different
+  #   field as bytea, automatically.
   #
   #   @param [Symbol] field The name of a field whose value should be digested.
   #   @param [Hash] options Additional options.
-  #   @option options [Symbol] to The name of a `BYTEA` column to treat as a
-  #     SHA2 value. By default, it's the field name with "_sha" appended.
-  #   @option options [Fixnum] width (32) The size of the SHA2 value, in bytes.
-  #     The number of characters necessary to represent the SHA2 in hex is twice
-  #     this value.
   #   @option options [Symbol] scope If set, also creates a named scope that
-  #     filters by the given **original column** (not hex digest) values.
+  #     filters by the given **original column** (not hex digest) value.
 
-  def digest_field(*fields)
-    options = fields.extract_options!
-
-    width      = options.delete(:width) || 32
+  def digest_field(field, options={})
     scope_name = options.delete(:scope) # don't fall back to sha_field's scope feature
-    source_fields    = []
+    sha_field_name = :"#{field}_sha"
+    raw_db_column = :"#{field}_sha_raw"
 
-    fields.each do |field|
-      source_field = options[:to] || :"#{field}_sha"
-      source_fields << source_field
-      column = :"#{source_field}_raw"
+    define_method(sha_field_name) do
+      DigestField::hex_to_bytea send(raw_db_column)
+    end
 
-      before_validation do |object|
-        if (value = object.send(field))
-          object.send :"#{source_field}=", Digest::SHA2.hexdigest(value)[0, width*2]
-        else
-          object.send :"#{source_field}=", nil
-        end
-      end
+    before_validation do |object|
+      value = object.send(field)
+      value_sha_raw = value ? Digest::SHA2.digest(value) : nil
+      object.send :"#{raw_db_column}=", value_sha_raw
+    end
 
-      # custom named scope handling: searches not by the digested value but the original value
-      if scope_name
-        scope scope_name, ->(*values) {
-          column_query = "#{connection.quote_table_name table_name}.#{connection.quote_column_name column}"
-          if values.size == 1 && values.first.kind_of?(Enumerable)
-            raw = values.first.map { |v| Digest::SHA2.digest(v) }
-            where("#{column_query} IN (#{raw.map { |v| quote_bytea(v) }.join(', ')})")
-          elsif values.size == 1
-            raw = Digest::SHA2.digest(values.first)
-            where("#{column_query} = #{quote_bytea raw}")
-          else
-            raw = values.map { |v| Digest::SHA2.digest(v) }
-            where("#{column_query} IN (#{raw.map { |v| quote_bytea(v) }.join(', ')})")
-          end
-        }
+    validate do |object|
+      value_sha = DigestField::bytea_to_hex(object.send(raw_db_column))
+      unless SHA_FORMAT =~ value_sha
+        object.errors.add(raw_db_column, I18n.t('errors.messages.invalid_sha'))
       end
     end
 
-    source_fields << options
-    sha_field *source_fields
+    # custom named scope handling: searches not by the digested value but the original value
+    if scope_name
+      scope scope_name, ->(value) {
+        column_query = "#{connection.quote_table_name table_name}.#{connection.quote_column_name raw_db_column}"
+        raw = Digest::SHA2.digest(value)
+        where("#{column_query} = #{quote_bytea raw}")
+      }
+    end
+  end
+
+  private
+
+  # @private
+  def self.bytea_to_hex(val)
+    val ? val.unpack('H*').first : nil
+  end
+
+  # @private
+  def self.hex_to_bytea(val)
+    val ? val.unpack('H*').first : nil
+  end
+
+  def quote_bytea(raw)
+    "E'#{connection.escape_bytea raw}'::bytea"
   end
 end
