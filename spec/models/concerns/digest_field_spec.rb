@@ -29,10 +29,10 @@ describe DigestField do
     expect(k.key_sha_raw).to eql(Digest::SHA2.digest('foo bar'))
   end
 
-  it "should define _sha field" do
+  it "should define _sha_legacy field" do
     k = FactoryGirl.build(:key, key: 'hello world')
     expect(k).to be_valid
-    expect(k.key_sha).to eql(Digest::SHA2.hexdigest('hello world'))
+    expect(k.key_sha_legacy).to eql(Digest::SHA2.hexdigest('hello world'))
   end
 
   it "should validate _sha_raw field" do
