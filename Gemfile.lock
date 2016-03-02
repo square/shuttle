@@ -6,14 +6,6 @@ GIT
     git (1.2.6)
 
 GIT
-  remote: git://github.com/composite-primary-keys/composite_primary_keys.git
-  revision: f85acb1b8a8cd74dde5671f6474fa5ae7d540853
-  branch: ar_4.0.x
-  specs:
-    composite_primary_keys (6.0.6)
-      activerecord (~> 4.0.6)
-
-GIT
   remote: git://github.com/mhfs/sidekiq-failures.git
   revision: d04ba8443314761242c8169aff57586ac133a88b
   specs:
@@ -393,7 +385,6 @@ DEPENDENCIES
   capistrano-rvm (>= 0.1.0)
   coffee-rails
   coffee-script
-  composite_primary_keys!
   configoro
   database_cleaner
   devise

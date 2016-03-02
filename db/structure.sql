@@ -974,14 +974,6 @@ ALTER TABLE ONLY comments
 
 
 --
--- Name: commits_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY commits_keys
-    ADD CONSTRAINT commits_keys_pkey PRIMARY KEY (commit_id, key_id);
-
-
---
 -- Name: commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1189,6 +1181,13 @@ CREATE UNIQUE INDEX index_blobs_keys_on_blob_id_and_key_id ON blobs_keys USING b
 --
 
 CREATE UNIQUE INDEX index_blobs_on_project_id_and_sha_and_path_sha_raw ON blobs USING btree (project_id, sha, path_sha_raw);
+
+
+--
+-- Name: index_commits_keys_on_commit_id_and_key_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_commits_keys_on_commit_id_and_key_id ON commits_keys USING btree (commit_id, key_id);
 
 
 --
@@ -1768,3 +1767,5 @@ INSERT INTO schema_migrations (version) VALUES ('20151210165453');
 INSERT INTO schema_migrations (version) VALUES ('20151210165629');
 
 INSERT INTO schema_migrations (version) VALUES ('20151210170111');
+
+INSERT INTO schema_migrations (version) VALUES ('20160302033924');
