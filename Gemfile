@@ -19,7 +19,6 @@ gem 'stringex', '2.2.0' # 2.5.2 forces config.enforce_available_locales to true 
 gem 'slugalicious'
 gem 'validates_timeliness'
 gem 'find_or_create_on_scopes'
-gem 'composite_primary_keys', github: 'composite-primary-keys/composite_primary_keys', branch: 'ar_4.0.x'
 gem 'rails-observers'
 gem 'tire'
 gem 'after-commit-on-action'
