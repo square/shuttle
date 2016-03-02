@@ -53,7 +53,7 @@ class SectionKeyCreator
   end
 
   def self.generate_key_name(source_copy, index)
-    "#{index}:#{Key.new(source_copy: source_copy).tap(&:valid?).source_copy_sha}"
+    "#{index}:#{Key.new(source_copy: source_copy).tap(&:valid?).source_copy_sha_legacy}"
   end
 
   include SidekiqLocking
