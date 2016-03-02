@@ -16,7 +16,7 @@
 
 class BlockPatterns
   # HTML block tags
-  BLOCK_LEVEL_TAGS = %w(html head body p div li address article aside blockquote dl dd footer header section h1 h2 h3 h4 h5 h6 th td tr thead tfoot tbody caption ul ol)
+  BLOCK_LEVEL_TAGS = %w(address article aside blockquote body caption dd div dl footer h1 h2 h3 h4 h5 h6 head header html li ol p section table tbody td tfoot th thead tr ul)
 
   # Matches start and end block tags, including any tag attributes
   BLOCK_TAG_REGEX   = /\A(#{BLOCK_LEVEL_TAGS.map { |tag| '<\/?' + tag + '[^>]*?>' }.join('|')})\Z/
