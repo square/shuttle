@@ -52,7 +52,7 @@ describe Article do
     it "doesn't allow creating without a name" do
       article = FactoryGirl.build(:article, name: nil).tap(&:save)
       expect(article).to_not be_persisted
-      expect(article.errors.messages).to eql({:name_sha_raw=>["is not a valid SHA2 digest"], :name=>["can’t be blank"]})
+      expect(article.errors.messages).to eql({name_sha_raw: ["is not a valid SHA2 digest"], name_sha: ["is not a valid SHA2 digest"], name: ["can’t be blank"]})
     end
 
     it "doesn't allow updating base_rfc5646_locale to be blank" do
