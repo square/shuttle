@@ -40,6 +40,7 @@ describe DigestField do
     expect(k).to_not be_valid
     expect(k.errors.messages).to eql(key: ["can’t be blank"],
                                      original_key: ["can’t be blank"],
+                                     key_sha: ["is not a valid SHA2 digest"],
                                      key_sha_raw: ["is not a valid SHA2 digest", "can’t be blank"])
   end
 end
