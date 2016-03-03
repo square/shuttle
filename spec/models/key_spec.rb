@@ -23,7 +23,7 @@ describe Key do
         key = FactoryGirl.build(:key, project: project, key: "test", source_copy: "test source", section: nil)
         expect { key.save! }.to raise_error(ActiveRecord::RecordInvalid)
         expect(key).to_not be_persisted
-        expect(key.errors.messages).to eql({:key_sha_raw=>["already taken"]})
+        expect(key.errors.messages).to eql({:key_sha=>["already taken"]})
       end
 
       it "errors at the database layer if there are 2 concurrent `save` requests with the same key and source copy" do
@@ -50,7 +50,7 @@ describe Key do
         key = FactoryGirl.build(:key, section: section, key: "test")
         expect { key.save! }.to raise_error(ActiveRecord::RecordInvalid)
         expect(key).to_not be_persisted
-        expect(key.errors.messages).to eql({:key_sha_raw=>["already taken"]})
+        expect(key.errors.messages).to eql({:key_sha=>["already taken"]})
       end
 
       it "errors at the database layer if there are 2 concurrent `save` requests with the same key under one {Section}" do

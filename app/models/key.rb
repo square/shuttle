@@ -32,7 +32,7 @@
 # a key if one is for landscape and the other for portrait orientations.
 #
 # To deal with this, this type of metadata is serialized into the `key` field
-# (and therefore represented in the `key_sha_raw` column, on which uniqueness is
+# (and therefore represented in the `key_sha` column, on which uniqueness is
 # enforced). The original value of the key without this metadata is written to
 # the `original_key` field.
 #
@@ -149,13 +149,13 @@ class Key < ActiveRecord::Base
 
   validates :project,
             presence: true
-  validates :source_copy_sha_raw,
+  validates :source_copy_sha,
             presence:   true
-  validates :key_sha_raw,
+  validates :key_sha,
             presence:   true
-  validates :key_sha_raw,
-            uniqueness: {scope: [:project_id, :source_copy_sha_raw], if: "section_id.nil?", on: :create}
-  validates :key_sha_raw,
+  validates :key_sha,
+            uniqueness: {scope: [:project_id, :source_copy_sha], if: "section_id.nil?", on: :create}
+  validates :key_sha,
             uniqueness: {scope: [:section_id], if: "section_id", on: :create}
   validates :index_in_section,
             uniqueness: {scope: [:section_id], if: "section_id && index_in_section", on: :create}
@@ -175,9 +175,9 @@ class Key < ActiveRecord::Base
     options[:methods] << :importer_name
 
     options[:except] = Array.wrap(options[:except])
-    options[:except] << :key_sha_raw << :searchable_key
+    options[:except] << :key_sha << :searchable_key
     options[:except] << :project_id
-    options[:except] << :source_copy_sha_raw
+    options[:except] << :source_copy_sha
 
     super options
   end

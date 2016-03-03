@@ -46,7 +46,7 @@ class SourceGlossaryEntry < ActiveRecord::Base
             presence: true
   validates :source_copy,
             presence: true
-  validates :source_copy_sha_raw,
+  validates :source_copy_sha,
             uniqueness: true
 
   attr_readonly :source_rfc5646_locale
