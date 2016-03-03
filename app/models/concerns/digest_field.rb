@@ -35,10 +35,10 @@ module DigestField
 
   def digest_field(field, options={})
     scope_name = options.delete(:scope) # don't fall back to sha_field's scope feature
-    sha_field_name = :"#{field}_sha"
+    legacy_sha_field_name = :"#{field}_sha_legacy"
     raw_db_column = :"#{field}_sha_raw"
 
-    define_method(sha_field_name) do
+    define_method(legacy_sha_field_name) do
       DigestField::hex_to_bytea send(raw_db_column)
     end
 
