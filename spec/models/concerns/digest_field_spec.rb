@@ -17,30 +17,23 @@ require 'spec_helper'
 describe DigestField do
   it "should create a named scope using the :scope option" do
     expect(Key.source_copy_matches('test').to_sql).
-        to eql("SELECT \"keys\".* FROM \"keys\"  WHERE (\"keys\".\"source_copy_sha_raw\" = E'\\\\237\\\\206\\\\320\\\\201\\\\210\\\\114\\\\175\\\\145\\\\232\\\\057\\\\352\\\\240\\\\305\\\\132\\\\320\\\\025\\\\243\\\\277\\\\117\\\\033\\\\053\\\\013\\\\202\\\\054\\\\321\\\\135\\\\154\\\\025\\\\260\\\\360\\\\012\\\\010'::bytea)")
+        to eql("SELECT \"keys\".* FROM \"keys\"  WHERE \"keys\".\"source_copy_sha\" = '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'")
   end
 
   it "should automatically set the value from a different field" do
     k = FactoryGirl.build(:key, key: 'hello world')
     expect(k).to be_valid
-    expect(k.key_sha_raw).to eql(Digest::SHA2.digest('hello world'))
+    expect(k.key_sha).to eql(Digest::SHA2.hexdigest('hello world'))
     k.key = 'foo bar'
     expect(k).to be_valid
-    expect(k.key_sha_raw).to eql(Digest::SHA2.digest('foo bar'))
+    expect(k.key_sha).to eql(Digest::SHA2.hexdigest('foo bar'))
   end
 
-  it "should define _sha_legacy field" do
-    k = FactoryGirl.build(:key, key: 'hello world')
-    expect(k).to be_valid
-    expect(k.key_sha_legacy).to eql(Digest::SHA2.hexdigest('hello world'))
-  end
-
-  it "should validate _sha_raw field" do
+  it "should validate _sha field" do
     k = FactoryGirl.build(:key, key: nil)
     expect(k).to_not be_valid
     expect(k.errors.messages).to eql(key: ["can’t be blank"],
                                      original_key: ["can’t be blank"],
-                                     key_sha: ["is not a valid SHA2 digest"],
-                                     key_sha_raw: ["is not a valid SHA2 digest", "can’t be blank"])
+                                     key_sha: ["is not a valid SHA2 digest", "can’t be blank"])
   end
 end

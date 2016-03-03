@@ -37,7 +37,6 @@ CREATE TABLE articles (
     id integer NOT NULL,
     project_id integer NOT NULL,
     name text NOT NULL,
-    name_sha_raw bytea NOT NULL,
     sections_hash text NOT NULL,
     base_rfc5646_locale character varying(255) NOT NULL,
     targeted_rfc5646_locales text NOT NULL,
@@ -93,7 +92,6 @@ CREATE TABLE blobs (
     errored boolean DEFAULT false NOT NULL,
     id integer NOT NULL,
     path text NOT NULL,
-    path_sha_raw bytea NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     sha character varying(40) NOT NULL,
@@ -363,8 +361,6 @@ ALTER SEQUENCE issues_id_seq OWNED BY issues.id;
 CREATE TABLE keys (
     id integer NOT NULL,
     project_id integer NOT NULL,
-    key_sha_raw bytea NOT NULL,
-    source_copy_sha_raw bytea NOT NULL,
     ready boolean DEFAULT true NOT NULL,
     key text NOT NULL,
     original_key text NOT NULL,
@@ -579,9 +575,7 @@ CREATE TABLE sections (
     id integer NOT NULL,
     article_id integer NOT NULL,
     name text NOT NULL,
-    name_sha_raw bytea NOT NULL,
     source_copy text NOT NULL,
-    source_copy_sha_raw bytea NOT NULL,
     active boolean DEFAULT true NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -651,7 +645,6 @@ ALTER SEQUENCE slugs_id_seq OWNED BY slugs.id;
 CREATE TABLE source_glossary_entries (
     id integer NOT NULL,
     source_rfc5646_locale character varying(15) DEFAULT 'en'::character varying NOT NULL,
-    source_copy_sha_raw bytea,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     source_copy text NOT NULL,
@@ -1150,13 +1143,6 @@ CREATE INDEX index_articles_on_name_sha ON articles USING btree (name_sha);
 
 
 --
--- Name: index_articles_on_name_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_articles_on_name_sha_raw ON articles USING btree (name_sha_raw);
-
-
---
 -- Name: index_articles_on_project_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1168,13 +1154,6 @@ CREATE INDEX index_articles_on_project_id ON articles USING btree (project_id);
 --
 
 CREATE UNIQUE INDEX index_articles_on_project_id_and_name_sha ON articles USING btree (project_id, name_sha);
-
-
---
--- Name: index_articles_on_project_id_and_name_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX index_articles_on_project_id_and_name_sha_raw ON articles USING btree (project_id, name_sha_raw);
 
 
 --
@@ -1203,13 +1182,6 @@ CREATE UNIQUE INDEX index_blobs_keys_on_blob_id_and_key_id ON blobs_keys USING b
 --
 
 CREATE UNIQUE INDEX index_blobs_on_project_id_and_sha_and_path_sha ON blobs USING btree (project_id, sha, path_sha);
-
-
---
--- Name: index_blobs_on_project_id_and_sha_and_path_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX index_blobs_on_project_id_and_sha_and_path_sha_raw ON blobs USING btree (project_id, sha, path_sha_raw);
 
 
 --
@@ -1262,13 +1234,6 @@ CREATE INDEX index_keys_on_source_copy_sha ON keys USING btree (source_copy_sha)
 
 
 --
--- Name: index_keys_on_source_copy_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_keys_on_source_copy_sha_raw ON keys USING btree (source_copy_sha_raw);
-
-
---
 -- Name: index_locale_associations_on_source_and_target_rfc5646_locales; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1297,24 +1262,10 @@ CREATE UNIQUE INDEX index_sections_on_article_id_and_name_sha ON sections USING 
 
 
 --
--- Name: index_sections_on_article_id_and_name_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX index_sections_on_article_id_and_name_sha_raw ON sections USING btree (article_id, name_sha_raw);
-
-
---
 -- Name: index_sections_on_name_sha; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_sections_on_name_sha ON sections USING btree (name_sha);
-
-
---
--- Name: index_sections_on_name_sha_raw; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_sections_on_name_sha_raw ON sections USING btree (name_sha_raw);
 
 
 --
@@ -1374,24 +1325,10 @@ CREATE INDEX issues_user ON issues USING btree (user_id);
 
 
 --
--- Name: keys_in_section_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX keys_in_section_unique ON keys USING btree (section_id, key_sha_raw) WHERE (section_id IS NOT NULL);
-
-
---
 -- Name: keys_in_section_unique_new; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX keys_in_section_unique_new ON keys USING btree (section_id, key_sha) WHERE (section_id IS NOT NULL);
-
-
---
--- Name: keys_unique; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX keys_unique ON keys USING btree (project_id, key_sha_raw, source_copy_sha_raw) WHERE (section_id IS NULL);
 
 
 --
@@ -1844,3 +1781,5 @@ INSERT INTO schema_migrations (version) VALUES ('20160229212753');
 INSERT INTO schema_migrations (version) VALUES ('20160302033924');
 
 INSERT INTO schema_migrations (version) VALUES ('20160303001118');
+
+INSERT INTO schema_migrations (version) VALUES ('20160303235403');
