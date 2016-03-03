@@ -3,7 +3,6 @@
 --
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -374,6 +373,7 @@ CREATE TABLE keys (
     other_data text,
     section_id integer,
     index_in_section integer,
+    is_block_tag boolean DEFAULT false,
     CONSTRAINT non_negative_index_in_section CHECK ((index_in_section >= 0))
 );
 
@@ -1205,6 +1205,13 @@ CREATE UNIQUE INDEX index_in_section_unique ON keys USING btree (section_id, ind
 
 
 --
+-- Name: index_keys_on_is_block_tag; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_keys_on_is_block_tag ON keys USING btree (is_block_tag);
+
+
+--
 -- Name: index_keys_on_project_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1767,5 +1774,7 @@ INSERT INTO schema_migrations (version) VALUES ('20151210165453');
 INSERT INTO schema_migrations (version) VALUES ('20151210165629');
 
 INSERT INTO schema_migrations (version) VALUES ('20151210170111');
+
+INSERT INTO schema_migrations (version) VALUES ('20160229212753');
 
 INSERT INTO schema_migrations (version) VALUES ('20160302033924');

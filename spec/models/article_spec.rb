@@ -358,7 +358,7 @@ describe Article do
       expect { article.import! }.to raise_error(Article::LastImportNotFinished)
     end
   end
-  
+
   describe "#import_batch" do
     it "creates a new batch and updates import_batch_id of the Article if import_batch_id is initially nil" do
       article = FactoryGirl.build(:article, name: "test")
@@ -551,7 +551,7 @@ describe Article do
 
   it "Article's ready is set to true when the last Translation is translated, but not before" do
     article = FactoryGirl.create(:article, ready: false, sections_hash: { "main" => "<p>hello</p><p>world</p>" }, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
-    expect(article.reload.keys.count).to eql(2)
+    expect(article.reload.keys.count).to eql(6)
 
     last_es_translation = article.translations.in_locale(Locale.from_rfc5646('es')).last
 
@@ -567,7 +567,7 @@ describe Article do
 
   it "Article's ready is set to false when all Translations were initially approved but one of them gets unapproved" do
     article = FactoryGirl.create(:article, ready: false, sections_hash: { "main" => "<p>hello</p><p>world</p>" }, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
-    expect(article.reload.keys.count).to eql(2)
+    expect(article.reload.keys.count).to eql(6)
 
     article.translations.where(approved: nil).each { |translation| translation.update!  copy: "<p>test</p>", approved: true }
     article.keys.reload.each(&:recalculate_ready!)

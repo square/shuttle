@@ -11,6 +11,7 @@ class LocaleProjectsShowForm
     processed[:include_translated] = form[:include_translated].parse_bool
     processed[:include_approved]   = form[:include_approved].parse_bool
     processed[:include_new]        = form[:include_new].parse_bool
+    processed[:include_block_tags] = form[:include_block_tags].parse_bool
     unless processed[:include_translated] || processed[:include_approved] || processed[:include_new]
       processed[:include_translated] = processed[:include_new] = true
     end

@@ -71,6 +71,7 @@ class Translation < ActiveRecord::Base
     indexes :project_id, type: 'integer', as: 'send(:key).project_id'
     indexes :article_id, type: 'integer', as: 'send(:key).section.try(:article_id)'
     indexes :section_id, type: 'integer', as: 'send(:key).section_id'
+    indexes :is_block_tag, type: 'boolean', as: 'send(:key).is_block_tag'
     indexes :section_active, type: 'boolean', as: 'send(:key).section.try(:active)'
     indexes :index_in_section, type: 'integer', as: 'send(:key).index_in_section'
     indexes :translator_id, type: 'integer'
@@ -129,6 +130,8 @@ class Translation < ActiveRecord::Base
   scope :approved, -> { where(translations: { approved: true }) }
   scope :not_approved, -> { where("translations.approved IS NOT TRUE") }
   scope :not_translated, -> { where(translations: { translated: false } ) }
+  scope :block_tag, -> { joins(:key).where(keys: { is_block_tag: true }) }
+  scope :not_block_tag, -> { joins(:key).where(keys: { is_block_tag: false }) }
   scope :base, -> { where('translations.source_rfc5646_locale = translations.rfc5646_locale') }
   scope :not_base, -> { where('translations.source_rfc5646_locale != translations.rfc5646_locale') }
   scope :in_commit, ->(commit) {
@@ -211,7 +214,7 @@ class Translation < ActiveRecord::Base
   end
 
   def reset_reviewed
-    if (copy != copy_was || source_copy != source_copy_was) && !base_translation? && !approved_changed?
+    if (copy != copy_was || source_copy != source_copy_was) && !base_translation? && !approved_changed? && !key.try(:is_block_tag)
       self.reviewer_id = nil
       self.approved    = nil
     end

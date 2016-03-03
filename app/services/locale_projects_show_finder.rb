@@ -11,6 +11,7 @@ class LocaleProjectsShowFinder
     include_translated = form[:include_translated]
     include_approved   = form[:include_approved]
     include_new        = form[:include_new]
+    include_block_tags = form[:include_block_tags]
 
     page       = form[:page]
     query_filter = form[:query_filter]
@@ -30,6 +31,7 @@ class LocaleProjectsShowFinder
       filter :term, section_id: section_id if section_id.present?
       filter :term, section_active: true if project.not_git?        # active sections
       filter :exists, field: :index_in_section if project.not_git?  # active keys in sections
+      filter :not, { term: { is_block_tag: true } } if project.not_git? && !include_block_tags
 
       if query_filter.present?
         if filter_source == 'source'

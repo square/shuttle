@@ -174,10 +174,12 @@ describe Locale::ProjectsController do
         @key2 = FactoryGirl.create(:key, section: @section1, index_in_section: 1, project: @project)
         @key3 = FactoryGirl.create(:key, section: @section1, index_in_section: 2, project: @project)
         @key4 = FactoryGirl.create(:key, section: @section2, index_in_section: 0, project: @project)
+        @key5 = FactoryGirl.create(:key, section: @section2, index_in_section: 1, project: @project, source_copy: '<p>')
         @translation1 = FactoryGirl.create(:translation, key: @key1, copy: nil, rfc5646_locale: 'fr')
         @translation2 = FactoryGirl.create(:translation, key: @key2, copy: nil, rfc5646_locale: 'fr')
         @translation3 = FactoryGirl.create(:translation, key: @key3, copy: nil, rfc5646_locale: 'fr')
         @translation4 = FactoryGirl.create(:translation, key: @key4, copy: nil, rfc5646_locale: 'fr')
+        @translation5 = FactoryGirl.create(:translation, key: @key5, copy: nil, rfc5646_locale: 'fr')
 
         regenerate_elastic_search_indexes
         sleep(2)
@@ -200,6 +202,13 @@ describe Locale::ProjectsController do
         expect(response.status).to eql(200)
         translations = assigns(:translations)
         expect(translations.map { |t| t.id }).to eql([@translation4.id])
+      end
+
+      it "filters with include_block_tags" do
+        get :show, id: @project.to_param, article_id: @article.id, section_id: @section2.id, locale_id: 'fr', include_new: 'true', include_block_tags: 'true'
+        expect(response.status).to eql(200)
+        translations = assigns(:translations)
+        expect(translations.map { |t| t.id }).to eql([@translation4.id, @translation5.id])
       end
     end
   end
