@@ -49,11 +49,11 @@ class Blob < ActiveRecord::Base
             presence: true
   validates :sha,
             presence: true,
-            uniqueness: {scope: [:project_id, :path_sha_raw], on: :create}
+            uniqueness: {scope: [:project_id, :path_sha], on: :create}
   validates :path,
             presence: true
 
-  attr_readonly :project_id, :sha, :path_sha_raw
+  attr_readonly :project_id, :sha, :path_sha
 
   # Scopes
   scope :with_sha, -> (s) { where(sha: s) }
