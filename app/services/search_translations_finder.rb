@@ -61,6 +61,6 @@ class SearchTranslationsFinder
     end
 
     translations = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
-    PaginatableObjects.new(translations, translations_in_es.total, form[:page], limit)
+    PaginatableObjects.new(translations, translations_in_es, form[:page], limit)
   end
 end
