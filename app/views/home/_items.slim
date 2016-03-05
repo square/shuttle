@@ -32,7 +32,8 @@ div id="#{item_type}s"
       thead
         = render partial: "home/headers", locals: { item_type: item_type }
       tbody
-        = render partial: "home/item", collection: items
+        - items.each do |item|
+          = render partial: "home/item", locals: { item: item }
 
   .row
     .pagination-links

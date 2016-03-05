@@ -45,9 +45,9 @@ class SearchController < ApplicationController
           offset       = params[:offset].to_i
           id           = params[:project_id]
           limit        = params.fetch(:limit, PER_PAGE)
-          not_elastic  = params[:not_elastic_search] 
+          not_elastic  = params[:not_elastic_search]
 
-          @results = Key.search(load: {include: [:translations, :project]}) do
+          keys_in_es = Key.search do
             if query_filter.present?
               if not_elastic
                 filter :term, original_key_exact: query_filter
@@ -66,6 +66,8 @@ class SearchController < ApplicationController
             from offset
             size limit
           end
+
+          @results = Key.where(id: keys_in_es.map(&:id)).includes(:translations, :project)
           render json: decorate_keys(@results).to_json
         end
       end
@@ -82,13 +84,14 @@ class SearchController < ApplicationController
         project_id = params[:project_id].to_i
         limit = params.fetch(:limit, 50)
 
-        @results = Commit.search(load: {include: :project}) do
+        commits_in_es = Commit.search do
           filter :prefix, revision: sha if sha
           filter :term, project_id: project_id if project_id > 0
           size limit
           sort { by :created_at, 'desc' }
         end
 
+        @results = Commit.where(id: commits_in_es.map(&:id)).includes(:project)
         render json: decorate_commits(@results).to_json
       end
     end
