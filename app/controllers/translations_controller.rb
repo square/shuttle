@@ -222,8 +222,8 @@ class TranslationsController < ApplicationController
           query { match 'source_copy', query_filter, operator: 'or' }
         end
 
-        @results = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
-
+        translations = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
+        @results = SortingHelper.order_by_elasticsearch_result_order(translations, translations_in_es)
         render json: decorate_fuzzy_match(@results, query_filter).to_json
       end
     end

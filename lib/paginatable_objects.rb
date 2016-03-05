@@ -14,7 +14,7 @@
 
 class PaginatableObjects
 
-  attr_reader :total_count, :current_page, :limit_value
+  attr_reader :objects, :total_count, :current_page, :limit_value
   delegate :map, :each, :first, :length, :size, :sort_by, to: :objects
 
   def initialize(objects, objects_in_es, current_page, limit_value)
@@ -34,11 +34,5 @@ class PaginatableObjects
 
   def last_page?
     current_page == total_pages
-  end
-
-  private
-
-  def objects
-    @objects
   end
 end

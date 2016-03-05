@@ -36,7 +36,7 @@ describe PaginatableObjects do
 
   describe '#initialize' do
     it 'keeps objects sorted' do
-      ordered_commits = PaginatableObjects.new(@commits, @es_objects, 1, 5).map { |o| o }
+      ordered_commits = PaginatableObjects.new(@commits, @es_objects, 1, 5).objects
       expect(ordered_commits).to eql([@commit4, @commit1, @commit5, @commit2, @commit3])
     end
   end
