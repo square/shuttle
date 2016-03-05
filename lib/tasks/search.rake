@@ -19,7 +19,7 @@ namespace :search do
                   klass.constantize
                 end
               else
-                ActiveRecord::Base.subclasses
+                [Commit, Key, Translation]
               end
 
     klasses.each do |klass|

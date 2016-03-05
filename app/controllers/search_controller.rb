@@ -26,8 +26,6 @@ class SearchController < ApplicationController
     @results = translations_finder.find_translations
   end
 
-
-
   def keys
     respond_to do |format|
       format.html # keys.html.erb
@@ -67,7 +65,8 @@ class SearchController < ApplicationController
             size limit
           end
 
-          @results = Key.where(id: keys_in_es.map(&:id)).includes(:translations, :project)
+          keys = Key.where(id: keys_in_es.map(&:id)).includes(:translations, :project)
+          @results = SortingHelper.order_by_elasticsearch_result_order(keys, keys_in_es)
           render json: decorate_keys(@results).to_json
         end
       end
@@ -91,7 +90,8 @@ class SearchController < ApplicationController
           sort { by :created_at, 'desc' }
         end
 
-        @results = Commit.where(id: commits_in_es.map(&:id)).includes(:project)
+        commits = Commit.where(id: commits_in_es.map(&:id)).includes(:project)
+        @results = SortingHelper.order_by_elasticsearch_result_order(commits, commits_in_es)
         render json: decorate_commits(@results).to_json
       end
     end
@@ -118,7 +118,7 @@ class SearchController < ApplicationController
 
   def decorate_keys(keys)
     keys.map do |key|
-      translations = if current_user.approved_locales.empty? then
+      translations = if current_user.approved_locales.empty?
                        key.translations
                      else
                        key.translations.select { |t| current_user.approved_locales.include?(t.locale) }
