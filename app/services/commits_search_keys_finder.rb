@@ -17,7 +17,7 @@ class CommitsSearchKeysFinder
     key_ids      = commit.keys.pluck(:id)
     page         = form.fetch(:page, 1).to_i
 
-    Key.search(load: {include: [:translations]}) do
+    keys_in_es = Key.search do
       if query_filter.present?
         query do
           match 'original_key', query_filter, operator: 'and'
@@ -38,5 +38,8 @@ class CommitsSearchKeysFinder
       from (page - 1) * PER_PAGE
       size PER_PAGE
     end
+
+    keys = Key.where(id: keys_in_es.map(&:id)).includes(:translations)
+    PaginatableObjects.new(keys, keys_in_es.total, page, PER_PAGE)
   end
 end
