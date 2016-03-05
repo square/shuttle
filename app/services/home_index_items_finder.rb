@@ -90,7 +90,7 @@ class HomeIndexItemsFinder
     commits = Commit
                   .where(id: commits_in_es.map(&:id))
                   .includes(:user, project: :slugs)
-    PaginatableObjects.new(commits, commits_in_es.total, form[:page], form[:limit])
+    PaginatableObjects.new(commits, commits_in_es, form[:page], form[:limit])
   end
 
   def find_articles

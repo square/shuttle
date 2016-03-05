@@ -97,6 +97,6 @@ class LocaleProjectsShowFinder
                        .where(id: translations_in_es.map(&:id))
                        .includes({key: [:project, :translations, :section, {article: :project}]}, :locale_associations)
 
-    PaginatableObjects.new(translations, translations_in_es.total, page, PER_PAGE)
+    PaginatableObjects.new(translations, translations_in_es, page, PER_PAGE)
   end
 end

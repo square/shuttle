@@ -14,26 +14,31 @@
 
 class PaginatableObjects
 
-  attr_reader :objects, :total_count, :current_page, :limit_value
+  attr_reader :total_count, :current_page, :limit_value
   delegate :map, :each, :first, :length, :size, :sort_by, to: :objects
 
-  def initialize(objects, total_count, current_page, limit_value)
-    @objects = objects
-    # TODO: sort the sql_objects
-    @total_count = total_count
+  def initialize(objects, objects_in_es, current_page, limit_value)
+    @objects = SortingHelper.order_by_elasticsearch_result_order(objects, objects_in_es)
+    @total_count = objects_in_es.total
     @current_page = current_page
     @limit_value = limit_value
   end
 
   def offset_value
-    (@current_page-1)*@limit_value
+    (@current_page - 1) * @limit_value
   end
 
   def total_pages
-    ((total_count-1)/limit_value)+1
+    ((total_count - 1) / limit_value) + 1
   end
 
   def last_page?
     current_page == total_pages
+  end
+
+  private
+
+  def objects
+    @objects
   end
 end
