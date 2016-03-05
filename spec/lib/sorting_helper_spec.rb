@@ -23,9 +23,9 @@ describe SortingHelper do
       @commit3 = FactoryGirl.create(:commit, project: project)
 
       @commits = [@commit1, @commit2, @commit3]
-      @es_objects = [double('es_result', id: '2'),
-                     double('es_result', id: '3'),
-                     double('es_result', id: '1')]
+      @es_objects = [double('es_result', id: @commit2.id),
+                     double('es_result', id: @commit3.id),
+                     double('es_result', id: @commit1.id)]
     end
 
     it "orders items with the elasticsearch results order" do

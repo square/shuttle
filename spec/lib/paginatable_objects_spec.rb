@@ -25,11 +25,11 @@ describe PaginatableObjects do
     @commit5 = FactoryGirl.create(:commit, project: project)
 
     @commits = [@commit1, @commit2, @commit3, @commit4, @commit5]
-    @es_objects = [double('es_result', id: '4'),
-                   double('es_result', id: '1'),
-                   double('es_result', id: '5'),
-                   double('es_result', id: '2'),
-                   double('es_result', id: '3')]
+    @es_objects = [double('es_result', id: @commit4.id),
+                   double('es_result', id: @commit1.id),
+                   double('es_result', id: @commit5.id),
+                   double('es_result', id: @commit2.id),
+                   double('es_result', id: @commit3.id)]
 
     @es_objects.stub(:total) { 10 }
   end
