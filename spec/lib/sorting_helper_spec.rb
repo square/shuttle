@@ -16,17 +16,22 @@ require 'spec_helper'
 
 describe SortingHelper do
   describe "#order_by_elasticsearch_result_order" do
-    it "orders items with the elasticsearch results order" do
+    before do
       project = FactoryGirl.create(:project)
-      commit1 = FactoryGirl.create(:commit, project: project)
-      commit2 = FactoryGirl.create(:commit, project: project)
-      commit3 = FactoryGirl.create(:commit, project: project)
+      @commit1 = FactoryGirl.create(:commit, project: project)
+      @commit2 = FactoryGirl.create(:commit, project: project)
+      @commit3 = FactoryGirl.create(:commit, project: project)
 
-      commits = [commit1, commit2, commit3]
-      es_objects = [double('es_result', id: '2'), double('es_result', id: '3'), double('es_result', id: '1')]
-      ordered_commits = SortingHelper.order_by_elasticsearch_result_order(commits, es_objects)
+      @commits = [@commit1, @commit2, @commit3]
+      @es_objects = [double('es_result', id: '2'),
+                     double('es_result', id: '3'),
+                     double('es_result', id: '1')]
+    end
 
-      expect(ordered_commits).to eql([commit2, commit3, commit1])
+    it "orders items with the elasticsearch results order" do
+      ordered_commits = SortingHelper.order_by_elasticsearch_result_order(@commits, @es_objects)
+
+      expect(ordered_commits).to eql([@commit2, @commit3, @commit1])
     end
   end
 end
