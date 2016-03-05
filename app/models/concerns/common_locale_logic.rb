@@ -14,8 +14,6 @@
 
 # This abstracts out some common Locale logic, used by the Project and Article models.
 
-require 'active_support/concern'
-
 module CommonLocaleLogic
   extend ActiveSupport::Concern
 

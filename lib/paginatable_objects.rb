@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2016 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,26 +12,28 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Worker that recalculates readiness for a Key's ancestors, namely:
-#   - {Commit Commits}
-#   - {Article Article}.
+class PaginatableObjects
 
-class KeyAncestorsRecalculator
-  include Sidekiq::Worker
-  sidekiq_options queue: :low
+  attr_reader :objects, :total_count, :current_page, :limit_value
+  delegate :map, :each, :first, :length, :size, :sort_by, to: :objects
 
-  # Executes this worker.
-  #
-  # @param [Fixnum] key_id The ID of a Key.
-
-  def perform(key_id)
-    key = Key.find(key_id)
-    key.article.try!(:recalculate_ready!)
-
-    CommitsKey.where(key_id: key_id).pluck(:commit_id).each do |commit_id|
-      CommitRecalculator.perform_once commit_id.to_i
-    end
+  def initialize(objects, total_count, current_page, limit_value)
+    @objects = objects
+    # TODO: sort the sql_objects
+    @total_count = total_count
+    @current_page = current_page
+    @limit_value = limit_value
   end
 
-  include SidekiqLocking
+  def offset_value
+    (@current_page-1)*@limit_value
+  end
+
+  def total_pages
+    ((total_count-1)/limit_value)+1
+  end
+
+  def last_page?
+    current_page == total_pages
+  end
 end

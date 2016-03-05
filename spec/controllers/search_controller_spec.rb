@@ -85,9 +85,9 @@ describe SearchController do
 
     it "should filter by more than one target locale" do
       get :translations, query: 'term1', target_locales: 'ja-JP, en'
-      results = assigns(:results).entries
+      results = assigns(:results)
       # Ensure ordering since ElasticSearch does not guarantee ordering
-      results.sort_by! { |r| r.locale.rfc5646 }
+      results = results.sort_by { |r| r.locale.rfc5646 }
       expect(results.first.copy).to eql('foo term1 bar')
       expect(results.first.locale.rfc5646).to eql('en')
       expect(results.last.copy).to eql('foo term1 bar')

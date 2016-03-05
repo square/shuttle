@@ -103,9 +103,15 @@ describe TouchdownBranchUpdater do
         project.update! watched_branches: %w(master)
         commit_and_translate(project, head_revision)
 
+        logger = double("logger")
+        original_logger = Rails.logger
+        Rails.logger = logger
+
         allow(project.working_repo).to receive('push').and_raise(Timeout::Error)
-        expect(Rails.logger).to receive(:error).with("[TouchdownBranchUpdater] Timed out on updating touchdown branch for #{project.inspect}")
+        allow(logger).to receive(:info)
+        expect(logger).to receive(:error).with("[TouchdownBranchUpdater] Timed out on updating touchdown branch for #{project.inspect}")
         TouchdownBranchUpdater.new(project).update
+        Rails.logger = original_logger
       end
     end
 

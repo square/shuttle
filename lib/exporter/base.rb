@@ -163,11 +163,11 @@ module Exporter
       end
 
       # de-duplicate translations
-      translations.reject! do |translation|
+      translations = translations.reject do |translation|
         possible_duplicates[translation.key.key].include?(translation.copy)
       end if deduplicate.present?
 
-      translations.sort_by! { |t| t.key.key }
+      translations = translations.sort_by { |t| t.key.key }
 
       translations.each do |translation|
         begin

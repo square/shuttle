@@ -47,7 +47,4 @@ Shuttle::Application.configure do
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation                 = :stderr
-
-  # Add stack traces to SQL logs
-  config.after_initialize { SQLOrigin.append_to_log }
 end

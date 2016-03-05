@@ -213,7 +213,7 @@ class TranslationsController < ApplicationController
         limit = 5
         query_filter = params[:source_copy] || @translation.source_copy
         target_locales = @translation.locale.fallbacks.map(&:rfc5646)
-        @results = Translation.search(load: { include: { key: :project } }) do
+        translations_in_es = Translation.search do
           # TODO: Remove duplicate where source_copy, copy are same
           filter :term, { approved: 1 }
           filter :terms, { rfc5646_locale: target_locales }
@@ -221,6 +221,9 @@ class TranslationsController < ApplicationController
           size limit
           query { match 'source_copy', query_filter, operator: 'or' }
         end
+
+        @results = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
+
         render json: decorate_fuzzy_match(@results, query_filter).to_json
       end
     end
@@ -241,7 +244,7 @@ class TranslationsController < ApplicationController
   end
 
   def find_issues
-    @issues = @translation.issues.includes(:user, comments: :user).order_default_with_comments
+    @issues = @translation.issues.includes(:user, comments: :user).references(:comments).order_default_with_comments
     @issue = Issue.new_with_defaults
   end
 
