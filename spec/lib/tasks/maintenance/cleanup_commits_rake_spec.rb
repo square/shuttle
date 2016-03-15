@@ -27,7 +27,7 @@ describe 'maintenance' do
     describe "#destroy_old_commits_which_errored_during_import" do
       it "deletes the errored Commits which are older than 2 days, keeps other errored Commits" do
         project = FactoryGirl.create(:project)
-        standing = FactoryGirl.create(:commit, :errored_during_import, project: project, created_at: 47.hours.ago)
+        standing = FactoryGirl.create(:commit, :errored_during_import, project: project, created_at: 3.hours.ago)
         FactoryGirl.create(:commit, :errored_during_import, project: project, created_at: 49.hours.ago)
         FactoryGirl.create(:commit, :errored_during_import, project: project, created_at: 72.hours.ago)
 
