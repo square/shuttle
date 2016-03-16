@@ -48,7 +48,7 @@ class StashWebhookHelper
   def webhook_post_parameters(commit, opts={})
     post_parameters = {
       key: "SHUTTLE-#{commit.project.slug}",
-      name: "SHUTTLE-#{commit.revision_prefix}",
+      name: "SHUTTLE-#{commit.project.slug}-#{commit.revision_prefix}",
       url: project_commit_url(commit.project,
                               commit,
                               host: Shuttle::Configuration.app.default_url_options.host,
