@@ -37,11 +37,11 @@
     strong
       - last_commit = @project.commits.order('committed_at DESC').first
       - if last_commit
-        | Last imported 
+        | Last imported
         = "#{time_ago_in_words(last_commit.committed_at)} ago"
-        |  / 
+        |  /
         = "#{last_commit.revision_prefix}"
-      - else 
+      - else
         | Never imported before
 
 hr.divider
