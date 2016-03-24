@@ -1,0 +1,47 @@
+- content_for :shuttle_title do
+  = "Issues Search - Shuttle"
+- content_for :file_name do
+  = 'views/search/issues'
+
+.header
+  h1 Issues Search
+
+hr.divider
+.border
+  .filter-bar
+    = form_tag(search_issues_url, method: :get, id: 'issues-search-form', class: 'filter form-inline')
+      .main
+        .pull-right.expand-search
+        = text_field_tag 'user_name', '', placeholder: 'User', id: 'user-search-field'
+        = submit_tag 'Search', class: 'primary'
+
+  .pagination-links
+    = paginate @issues
+
+  table.table#issues
+    thead
+      tr
+        th.project Project
+        th.status Status
+        th.creator Creator
+        th.updater Updater
+        th.source Source
+        th.summary Summary
+    tbody
+      - @issues.each do |issue|
+        tr
+          td = issue.project.name
+          td = issue.status
+          td = issue.user.name
+          td = issue.updater.name
+          td = issue.translation.source_copy
+          td
+            a href=issue_url(issue) = issue.summary
+
+.row
+  .pagination-links
+    = paginate @issues
+.row
+  .pagination-info
+    = page_entries_info(@issues, entry_name: 'issues')
+
