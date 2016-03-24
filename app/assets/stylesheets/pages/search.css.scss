@@ -30,7 +30,7 @@ body.search {
       table-layout: fixed;
       th:nth-child(1) {
         width: 90px;
-      } 
+      }
       th:nth-child(2) {
         width: 450px;
       }
@@ -40,4 +40,32 @@ body.search {
     }
   }
   table a { text-decoration: underline; }
+
+  &#search-issues {
+    table {
+      table-layout: fixed;
+      th.project {
+        width: 70px;
+      }
+      th.status {
+        width: 50px;
+      }
+      th.creator {
+        width: 100px;
+      }
+      th.updater {
+        width: 100px;
+      }
+      th.source {
+        width: 350px;
+      }
+      th.summary {
+        width: 350px;
+      }
+      a {
+        text-decoration: underline;
+      }
+    }
+  }
+
 }

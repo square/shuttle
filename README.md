@@ -102,9 +102,12 @@ ElasticSearch 1.7, and a modern version of libarchive. To run Shuttle for the fi
 9. Run `rake db:migrate db:seed` to seed the database.
 10. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
 11. Verify that all specs pass with `rspec spec`
-12. To run the server, use `rails server`
-13. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
-to run the Sidekiq development server.
+
+These steps can be run with `foreman start` if foreman is installed.
+  12. To run the server, use `rails server`
+  13. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
+  to run the Sidekiq development server.
+
 14. Visit [http://localhost:3000](http://localhost:3000) and log in with the
    credentials:
 

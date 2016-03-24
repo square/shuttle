@@ -253,4 +253,42 @@ describe SearchController do
       expect(results.size).to eq(5)
     end
   end
+
+  describe '#issues' do
+    let!(:issue_user) { FactoryGirl.create(:user, first_name: 'James', last_name: 'Chang') }
+
+    before(:each) do
+      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
+
+      FactoryGirl.create_list(:issue, 20)
+      FactoryGirl.create_list(:issue, 10, user: issue_user)
+
+      sign_in @user
+    end
+
+    it 'should assign expected issues for no page param' do
+      get :issues
+      expect(assigns(:issues).length).to eq(20)
+    end
+
+    it 'should assign expected issues for first page' do
+      get :issues, page: 1
+      expect(assigns(:issues).length).to eq(20)
+    end
+
+    it 'should assign expected issues for last page' do
+      get :issues, page: 2
+      expect(assigns(:issues).length).to eq(10)
+    end
+
+    it 'should assign expected issues when first name is specified' do
+      get :issues, user_name: issue_user.first_name
+      expect(assigns(:issues).length).to eq(10)
+    end
+
+    it 'should assign expected issues when last name is specified' do
+      get :issues, user_name: issue_user.last_name
+      expect(assigns(:issues).length).to eq(10)
+    end
+  end
 end

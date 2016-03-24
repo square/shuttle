@@ -97,6 +97,18 @@ class SearchController < ApplicationController
     end
   end
 
+  def issues
+    user_name_param = params[:user_name].try(:downcase)
+
+    if user_name_param
+      names = user_name_param.split(' ')
+      user_ids = User.where("lower(first_name) LIKE ? OR lower(last_name) LIKE ?", "%#{names.first}%", "%#{names.last}%").pluck(:id)
+      @issues = Issue.where("user_id IN (?) OR updater_id IN (?)", user_ids, user_ids).page(params[:page])
+    else
+      @issues = Issue.includes(:user, :updater, translation: {key: :project}).page(params[:page])
+    end
+  end
+
   private
 
   def decorate_translations(translations)

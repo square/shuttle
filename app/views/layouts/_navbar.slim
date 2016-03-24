@@ -44,7 +44,7 @@ div id="navbar-container"
             | &nbsp; Workers
         li: a href=destroy_user_session_url data-method='delete' Log Out
 - if controller_name == "search"
-  div id="search-container" 
+  div id="search-container"
     nav class="container full-size-only"
       ul
         li class=("active" if action_name == "translations")
@@ -52,4 +52,6 @@ div id="navbar-container"
         li class=("active" if action_name == "keys")
           a href=search_keys_url Keys
         li class=("active" if action_name == "commits")
-          a href=search_commits_url Commits    
+          a href=search_commits_url Commits
+        li class=("active" if action_name == "issues")
+          a href=search_issues_url Issues
