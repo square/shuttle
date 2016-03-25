@@ -200,6 +200,15 @@ describe TranslationUpdateMediator do
       expect(translation.translator).to eql(translator)
     end
 
+    it "updates with empty string if copy is only whitespace" do
+      params = ActionController::Parameters.new(translation: { copy: " " }, blank_string: "1" )
+      mediator = TranslationUpdateMediator.new(translation, translator, params)
+      mediator.send(:update_single_translation!, translation)
+      expect(translation.copy).to eql(" ")
+      expect(translation.translated).to be_true
+      expect(translation.translator).to eql(translator)
+    end
+
     it "raises an ActiveRecord::RecordInvalid error if translation couldn't be saved" do
       translation.source_rfc5646_locale = nil # should cause save! to fail
       params = ActionController::Parameters.new(translation: { copy: "test" } )
