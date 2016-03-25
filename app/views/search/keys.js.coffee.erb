@@ -49,8 +49,10 @@ $(window).ready ->
 
           copy = if translation.translated == false
             "(not yet translated)"
+          else if translation.copy.length == 0
+            "(empty string)"
           else if /\A\s*\z/.test(translation.copy)
-            "(blank string)"
+            "(#{translation.copy.length} whitespace string)"
           else
             translation.copy[0..30]
 

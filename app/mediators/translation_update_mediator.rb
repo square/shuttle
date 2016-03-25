@@ -115,7 +115,7 @@ class TranslationUpdateMediator < BasicMediator
     translation.assign_attributes(@params.require(:translation).permit(:copy, :notes))
 
     # un-translate translation if empty but blank_string is not specified
-    if translation.copy.blank? && !@params[:blank_string].parse_bool
+    if (translation.copy || "").empty? && !@params[:blank_string].parse_bool
       untranslate(translation)
     else
       translation.translator = @user if translation.copy != translation.copy_was

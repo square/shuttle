@@ -57,8 +57,10 @@ class CommitsSearchPresenter
   def translation_text(translation)
     if !translation.translated?
       '(not yet translated)'
+    elsif translation.copy.empty?
+      '(empty string)'
     elsif /\A\s*\z/ =~ translation.copy
-      '(blank string)'
+      "(#{translation.copy.length} whitespace string)"
     else
       translation.copy[0..30]
     end
