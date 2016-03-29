@@ -89,7 +89,7 @@ class Issue < ActiveRecord::Base
   end
 
   def resolve(resolver)
-    update status: Issue::Status::RESOLVED, subscribed_emails: (subscribed_emails + [resolver.email])
+    update status: Issue::Status::RESOLVED
   end
   # ===== END SCOPES BY STATUS =====
 

@@ -102,12 +102,12 @@ describe Issue do
   end
 
   context "#resolve" do
-    it "resolves an issue by setting its status to resolved, subscribes the user to the issue" do
+    it "resolves an issue by setting its status to resolved, does not subscribe the user to the issue" do
       issue = FactoryGirl.create(:issue, status: Issue::Status::OPEN, subscribed_emails: ["test@example.com"])
       user = FactoryGirl.create(:user, email: "test2@example.com")
       issue.resolve(user)
       expect(issue.reload.status).to eql(Issue::Status::RESOLVED)
-      expect(issue.subscribed_emails).to eql(["test@example.com", "test2@example.com"])
+      expect(issue.subscribed_emails).to eql(["test@example.com"])
     end
 
     it "resolves an issue by setting its status to resolved; doesn't change subscriptions if the user is already subscribed" do

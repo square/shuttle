@@ -140,10 +140,10 @@ describe IssuesController do
       expect(issue).to_not be_resolved
       xhr :patch, :resolve, @path_params.merge({ id: issue.id })
       expect(issue.reload).to be_resolved
-      expect(issue.reload.subscribed_emails).to eql(["test@example.com", "foo@bar.com"])
+      expect(issue.reload.subscribed_emails).to eql(["test@example.com"])
       expect(ActionMailer::Base.deliveries.size).to eql(1)
       expect(ActionMailer::Base.deliveries.first.subject).to include("updated an issue. Issue Summary:")
-      expect(ActionMailer::Base.deliveries.first.to).to eql(["test@example.com", "foo@bar.com"])
+      expect(ActionMailer::Base.deliveries.first.to).to eql(["test@example.com"])
     end
   end
 
