@@ -59,7 +59,10 @@
         .control-group
           = label_tag :description, nil, class: 'control-label'
           .controls
-            = @article.description.presence || '-'
+            - if @article.description.present?
+              = sanitize @article.description, tags: %w(strong em a br), attributes: %w(href)
+            - else
+              = '-'
 
     .six.columns
       fieldset
