@@ -15,6 +15,7 @@
 # Contains landing pages appropriate for each of the User roles.
 
 class HomeController < ApplicationController
+
   # Typical number of commits to show per page.
   PER_PAGE = 15
 

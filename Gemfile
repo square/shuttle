@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '2.0.0', :patchlevel => '576'
 
 # FRAMEWORK
-gem 'rails', '4.0.9'
+gem 'rails', '4.1.14.2'
 gem 'configoro'
 gem 'redis-rails'
 gem 'redis-rack-cache'
@@ -19,7 +19,6 @@ gem 'stringex', '2.2.0' # 2.5.2 forces config.enforce_available_locales to true 
 gem 'slugalicious'
 gem 'validates_timeliness'
 gem 'find_or_create_on_scopes'
-gem 'composite_primary_keys', github: 'composite-primary-keys/composite_primary_keys', branch: 'ar_4.0.x'
 gem 'rails-observers'
 gem 'tire'
 gem 'after-commit-on-action'
@@ -93,23 +92,11 @@ group :test do
   gem 'database_cleaner'
 end
 
-# Include these gems if you're running acceptance tests.
-group :acceptance do
-  # gem 'capybara'
-  # gem 'capybara-webkit'
-end
-
-gem 'sql_origin', groups: [:development, :test]
-
 # Doesn't work in Rails 4
 group :development, :test do
-  gem 'spring'
-  gem 'spring-commands-rspec'
   gem 'mailcatcher'
   gem 'better_errors'
   gem 'binding_of_caller'
-  #gem 'jasminerice'
-  #gem 'guard-jasmine'
   gem 'pry'
 end
 

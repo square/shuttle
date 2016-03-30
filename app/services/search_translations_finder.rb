@@ -19,7 +19,7 @@ class SearchTranslationsFinder
     offset = (form[:page] - 1) * SearchController::PER_PAGE
     limit = SearchController::PER_PAGE
 
-    Translation.search(load: {include: {key: :project}}) do
+    translations_in_es = Translation.search do
       if target_locales
         if target_locales.size > 1
           locale_filters = target_locales.map do |locale|
@@ -59,5 +59,8 @@ class SearchTranslationsFinder
         sort { by :id, 'desc' }
       end
     end
+
+    translations = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
+    PaginatableObjects.new(translations, translations_in_es, form[:page], limit)
   end
 end

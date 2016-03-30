@@ -79,8 +79,8 @@ describe StashWebhookPinger do
         @commit.project.save!
 
         expect(HTTParty).to receive(:post).with("#{@url}/#{@commit.revision}", hash_including(body: {
-            key: 'SHUTTLE',
-            name: "SHUTTLE-#{@commit.revision_prefix}",
+            key: "SHUTTLE-#{@commit.project.slug}",
+            name: "SHUTTLE-#{@commit.project.slug}-#{@commit.revision_prefix}",
             url: project_commit_url(@commit.project,
                                     @commit,
                                     host: Shuttle::Configuration.app.default_url_options.host,
@@ -105,8 +105,8 @@ describe StashWebhookPinger do
 
     it "sends an request when the commit loading state changes" do
       expect(HTTParty).to receive(:post).with("#{@url}/#{@commit.revision}", hash_including(body: {
-          key: 'SHUTTLE',
-          name: "SHUTTLE-#{@commit.revision_prefix}",
+          key: "SHUTTLE-#{@commit.project.slug}",
+          name: "SHUTTLE-#{@commit.project.slug}-#{@commit.revision_prefix}",
           url: project_commit_url(@commit.project,
                                   @commit,
                                   host: Shuttle::Configuration.app.default_url_options.host,
@@ -125,8 +125,8 @@ describe StashWebhookPinger do
 
     it "sends an request when the commit ready state changes" do
       expect(HTTParty).to receive(:post).with("#{@url}/#{@commit.revision}", hash_including(body: {
-          key: 'SHUTTLE',
-          name: "SHUTTLE-#{@commit.revision_prefix}",
+          key: "SHUTTLE-#{@commit.project.slug}",
+          name: "SHUTTLE-#{@commit.project.slug}-#{@commit.revision_prefix}",
           url: project_commit_url(@commit.project,
                                   @commit,
                                   host: Shuttle::Configuration.app.default_url_options.host,

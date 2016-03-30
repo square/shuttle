@@ -1,3 +1,17 @@
+# Copyright 2016 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
 class LocaleProjectsShowFinder
   attr_reader :form
   PER_PAGE = 50
@@ -11,6 +25,7 @@ class LocaleProjectsShowFinder
     include_translated = form[:include_translated]
     include_approved   = form[:include_approved]
     include_new        = form[:include_new]
+    include_block_tags = form[:include_block_tags]
 
     page       = form[:page]
     query_filter = form[:query_filter]
@@ -22,7 +37,7 @@ class LocaleProjectsShowFinder
     project      = form[:project]
     filter_source = form[:filter_source]
 
-    translations = Translation.search(load: {include: [{key: [:project, :translations, :section, { article: :project} ]}, :locale_associations]}) do
+    translations_in_es = Translation.search do
       filter :term, project_id: project_id
       filter :term, rfc5646_locale: locale.rfc5646 if locale
       filter :ids, values: translation_ids_in_commit if translation_ids_in_commit
@@ -30,6 +45,7 @@ class LocaleProjectsShowFinder
       filter :term, section_id: section_id if section_id.present?
       filter :term, section_active: true if project.not_git?        # active sections
       filter :exists, field: :index_in_section if project.not_git?  # active keys in sections
+      filter :not, { term: { is_block_tag: true } } if project.not_git? && !include_block_tags
 
       if query_filter.present?
         if filter_source == 'source'
@@ -76,7 +92,11 @@ class LocaleProjectsShowFinder
         end
       end
     end
-    translations ||= []
-    translations
+
+    translations = Translation
+                       .where(id: translations_in_es.map(&:id))
+                       .includes({key: [:project, :translations, :section, {article: :project}]}, :locale_associations)
+
+    PaginatableObjects.new(translations, translations_in_es, page, PER_PAGE)
   end
 end

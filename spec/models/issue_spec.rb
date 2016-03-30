@@ -96,18 +96,18 @@ describe Issue do
   end
 
   context "#new_with_defaults" do
-    it "initializes a new Issue with default subscribed_emails which contains the translators_list email address" do
-      expect(Issue.new_with_defaults.subscribed_emails).to eql([Shuttle::Configuration.app.mailer.translators_list])
+    it "initializes a new Issue with default no subscribed emails" do
+      expect(Issue.new_with_defaults.subscribed_emails).to eql([])
     end
   end
 
   context "#resolve" do
-    it "resolves an issue by setting its status to resolved, subscribes the user to the issue" do
+    it "resolves an issue by setting its status to resolved, does not subscribe the user to the issue" do
       issue = FactoryGirl.create(:issue, status: Issue::Status::OPEN, subscribed_emails: ["test@example.com"])
       user = FactoryGirl.create(:user, email: "test2@example.com")
       issue.resolve(user)
       expect(issue.reload.status).to eql(Issue::Status::RESOLVED)
-      expect(issue.subscribed_emails).to eql(["test@example.com", "test2@example.com"])
+      expect(issue.subscribed_emails).to eql(["test@example.com"])
     end
 
     it "resolves an issue by setting its status to resolved; doesn't change subscriptions if the user is already subscribed" do

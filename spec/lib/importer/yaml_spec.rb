@@ -38,6 +38,27 @@ describe Importer::Yaml do
       end
     end
 
+    context "[repo with nested config/locales directory]" do
+      before :each do
+        @project = FactoryGirl.create(:project,
+                                      repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
+                                      only_paths:     %w(go/config/locales/),
+                                      skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
+        @commit  = @project.commit!('HEAD')
+      end
+
+      it "should import strings from YAML files" do
+        expect(@project.keys.for_key('root').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
+        expect(@project.keys.for_key('nested.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
+        expect(@project.keys.for_key('nested.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
+      end
+
+      it "should import string arrays" do
+        expect(@project.keys.for_key('abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Feb')
+        expect(@project.keys.for_key('abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Dec')
+      end
+    end
+
     context "[repo with broken files]" do
       before :each do
         @project = FactoryGirl.create(:project,

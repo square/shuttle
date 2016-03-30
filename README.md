@@ -59,12 +59,12 @@ Getting Started
 ### Starting the server
 
 Developing for Shuttle requires Ruby 2.0.0, PostgreSQL, Redis, Tidy, Sidekiq Pro
-ElasticSearch, and a modern version of libarchive. To run Shuttle for the first time:
+ElasticSearch 1.7, and a modern version of libarchive. To run Shuttle for the first time:
 
-1. Clone this project. You can run `brew bundle` to install all dependencies available 
+1. Clone this project. You can run `brew bundle` to install all dependencies available
    via Homebrew, which are specified in the `Brewfile`, or install them sequentially
    specified below.
-   
+
 2. Buy SidekiqPro, place your private repo url in Gemfile.
 
 3. Install a modern version of libarchive, one that supports the GNU tar format.
@@ -87,9 +87,10 @@ ElasticSearch, and a modern version of libarchive. To run Shuttle for the first 
 
         gem install libarchive -- --with-opt-dir=/usr/local/Cellar/libarchive/3.1.2
 
-6. Install Redis and ElasticSearch. For Homebrew, run
+6. Install Redis and ElasticSearch 1.7. For Homebrew, run
 
-        brew install redis elasticsearch
+        brew install redis
+        brew install elasticsearch17
 
    and start them, following the post-install instructions for each of them.
 7. Install Qt, the cross-platform application framework, which is used for capybara-webkit.
@@ -277,7 +278,7 @@ CSS files are similarly organized:
 ### Tasks
 
 Various Rake tasks are available under `lib/tasks`. These include tasks for
-importing locale data, bulk-importing trados data, server cleanup and other 
+importing locale data, bulk-importing trados data, server cleanup and other
 development tasks.
 
 ### Others
@@ -295,10 +296,10 @@ Distributed Processing
 
 ![Worker Interactions](doc/images/workers.png)
 
-Shuttle is designed to handle large code bases. Fast processing of these code bases is 
-achieved through highly parallelizing common tasks which are expected to take a non-trivial 
-amount of time, using Sidekiq. All Sidekiq workers live in `app/workers`. Best examples 
-are CommitImporter and ArticleImporter. These both kick off sub-workers in a batch, 
+Shuttle is designed to handle large code bases. Fast processing of these code bases is
+achieved through highly parallelizing common tasks which are expected to take a non-trivial
+amount of time, using Sidekiq. All Sidekiq workers live in `app/workers`. Best examples
+are CommitImporter and ArticleImporter. These both kick off sub-workers in a batch,
 and run other tasks when all the jobs in the batch are finished.
 
 
@@ -379,9 +380,9 @@ informal interface.
 Specs
 -----
 
-All models, controllers, and library files are unit or integration-tested with 
-RSpec specs under the `spec` directory. Run unit tests with the `rspec spec` 
-command. Views and JavaScript files are not specced. Almost all unit tests use 
+All models, controllers, and library files are unit or integration-tested with
+RSpec specs under the `spec` directory. Run unit tests with the `rspec spec`
+command. Views and JavaScript files are not specced. Almost all unit tests use
 factories rather than mocks, putting them somewhat closer to integration tests.
 
 

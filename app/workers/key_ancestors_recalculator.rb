@@ -12,8 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'sidekiq_locking'
-
 # Worker that recalculates readiness for a Key's ancestors, namely:
 #   - {Commit Commits}
 #   - {Article Article}.

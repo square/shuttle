@@ -45,7 +45,7 @@ class HomeIndexItemsFinder
     end
 
     # SEARCH
-    Commit.search(load: {include: [:user, project: :slugs]}) do
+    commits_in_es = Commit.search do
       filter :prefix, revision: sha if sha
       filter :term, project_id: project_id unless project_id == 'all'
 
@@ -85,6 +85,12 @@ class HomeIndexItemsFinder
         end
       end
     end
+
+    # LOAD
+    commits = Commit
+                  .where(id: commits_in_es.map(&:id))
+                  .includes(:user, project: :slugs)
+    PaginatableObjects.new(commits, commits_in_es, form[:page], form[:limit])
   end
 
   def find_articles

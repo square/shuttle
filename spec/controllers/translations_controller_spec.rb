@@ -661,6 +661,26 @@ describe TranslationsController do
       sorted_results.each { |r| expect(r).to be >= 70 }
       expect(sorted_results).to eql(sorted_results.sort.reverse)
     end
+
+    context "when show project related information" do
+      before :each do
+        Project.any_instance.stub(:name).and_return('w' * 40)
+      end
+
+      it "should truncate project name exceeds 30 chars" do
+        regenerate_elastic_search_indexes
+        sleep(2)
+
+        get :fuzzy_match,
+            project_id: @translation.key.project.to_param,
+            key_id: @translation.key.to_param,
+            id: @translation.to_param,
+            format: 'json'
+        expect(response.status).to eql(200)
+        project_name = JSON.parse(response.body).first['project_name']
+        expect(project_name).to eql('w' * 27 + '...')
+      end
+    end
   end
 
   context "[INTEGRATION TESTS]" do
