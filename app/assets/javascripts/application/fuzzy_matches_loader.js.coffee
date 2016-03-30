@@ -30,6 +30,7 @@ root.loadFuzzyMatches = ($fuzzy_matches, $copy_field, fuzzy_match_url, source_co
                     do (match) =>
                         match_percentage = $('<span/>').addClass("match-percentage").text("(#{match.match_percentage.toString()[0..4]}%) ")
                         match_element = $('<a/>').append($('<span/>').text("(#{match.rfc5646_locale}) "))
+                                                 .append($('<span/>').text("(#{match.project_name}) "))
                                                  .append(match_percentage)
                                                  .append($('<span/>').addClass('fuzzy-matched-copy').text(match.copy))
                                                  .append($('<span/>').addClass('changed').text(source_copy).hide())

@@ -258,7 +258,8 @@ class TranslationsController < ApplicationController
           source_copy: translation.source_copy,
           copy: translation.copy,
           match_percentage: source_copy.similar(translation.source_copy),
-          rfc5646_locale: translation.rfc5646_locale
+          rfc5646_locale: translation.rfc5646_locale,
+          project_name: translation.key.project.name.truncate(30)
       }
     end.reject { |t| t[:match_percentage] < 70 }
     translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
