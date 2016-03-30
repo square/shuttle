@@ -74,7 +74,7 @@ class Issue < ActiveRecord::Base
   validates :status, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 4}
 
   def self.new_with_defaults
-    new(subscribed_emails: [Shuttle::Configuration.app.mailer.translators_list])
+    new(subscribed_emails: [])
   end
 
   # ===== START STATUS RELATED CODE =====
@@ -89,7 +89,7 @@ class Issue < ActiveRecord::Base
   end
 
   def resolve(resolver)
-    update status: Issue::Status::RESOLVED, subscribed_emails: (subscribed_emails + [resolver.email])
+    update status: Issue::Status::RESOLVED
   end
   # ===== END SCOPES BY STATUS =====
 
