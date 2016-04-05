@@ -1,3 +1,17 @@
+# Copyright 2016 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicabcle law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
 class SearchTranslationsFinder
 
   attr_reader :form
@@ -15,6 +29,7 @@ class SearchTranslationsFinder
     start_date    = form[:start_date]
     end_date      = form[:end_date]
     target_locales = form[:target_locales] if form[:target_locales].present?
+    hidden_keys = form[:hidden_keys] if form[:hidden_keys].present?
 
     offset = (form[:page] - 1) * SearchController::PER_PAGE
     limit = SearchController::PER_PAGE
@@ -46,6 +61,13 @@ class SearchTranslationsFinder
 
       if end_date
         filter :range, updated_at: { lte: end_date }
+      end
+
+      if hidden_keys
+        filter :term, { hidden_in_search: true }
+      else
+        # exclude translations whose keys translators want hidden
+        filter :term, { hidden_in_search: false }
       end
 
       if query_filter.present?

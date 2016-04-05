@@ -46,5 +46,8 @@ hr.divider
           .controls
             = check_box_tag 'not_elastic_search', true
             | Search for exact matches
+          .controls
+            = check_box_tag 'hidden_in_search', true
+            | Search for hidden keys only
 
   table.table#keys data-url=search_keys_url(format: 'json')

@@ -99,6 +99,7 @@
 # | `source`           | The path to the project file where the base string was found.                                                            |
 # | `fencers`          | An array of fencers that should be applied to the Translations of this string.                                           |
 # | `other_data`       | A hash of importer-specific information applied to the string. Not used by anyone except possible the importer/exporter. |
+# | `hidden_in_search` | A boolean field to indicate if we should include this key in search result. `true` indicates we should exclude it.       |
 
 class Key < ActiveRecord::Base
   belongs_to :project, inverse_of: :keys
@@ -145,6 +146,7 @@ class Key < ActiveRecord::Base
     }
     indexes :project_id, type: 'integer'
     indexes :ready, type: 'boolean'
+    indexes :hidden_in_search,  type: 'boolean', as: '!!hidden_in_search'
   end
 
   validates :project,
