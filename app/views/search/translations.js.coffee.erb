@@ -22,10 +22,15 @@ $(window).ready ->
       .not('[type=hidden]')
       .not('[type=submit]').each (i, elt) ->
         prefillVal = $.url().param( $(elt).attr('name') )
-        if $(elt).is('select') and !prefillVal
-          $(elt).prop('selectedIndex', 0)
-        else
+        if prefillVal
           $(elt).val(prefillVal)
+          if $(elt).attr('type') == 'checkbox'
+            $(elt).prop('checked', 'checked')
+        else
+          if $(elt).is('select')
+            $(elt).prop('selectedIndex', 0)
+          else if $(elt).attr('type') == 'checkbox'
+            $(elt).val('true')
 
   prefillForm()
 

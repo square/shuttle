@@ -146,6 +146,11 @@ body.translations {
     }
   }
 
+  .hide-btn, .show-btn {
+    width: 100px;
+    margin-left: 10px;
+  }
+
   .form-actions { 
     input+input, button+button, button+input, input + button {
       margin: 0px;
