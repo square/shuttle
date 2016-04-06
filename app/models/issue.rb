@@ -40,6 +40,7 @@
 # | `subscribed_emails` | An array email addresses to notify after an issue is created or updated.                                            |
 
 class Issue < ActiveRecord::Base
+  paginates_per 20
 
   module Status
     OPEN = 1
