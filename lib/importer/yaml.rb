@@ -23,7 +23,8 @@ module Importer
 
     def import_file?
       ::File.dirname(file.path).include?('config/locales') &&
-          %w(.yaml .yml).include?(::File.extname(file.path))
+          %w(.yaml .yml).include?(::File.extname(file.path)) &&
+          ::File.basename(file.path, '.*').downcase != 'owners'
     end
 
     def import_strings

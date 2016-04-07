@@ -23,7 +23,7 @@ describe Importer::Yaml do
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                       only_paths:     %w(config/locales/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
-        @commit  = @project.commit!('HEAD')
+        @commit  = @project.commit!('26685620f8d961796ba6fab19a4f4baed0db620a')
       end
 
       it "should import strings from YAML files" do
@@ -35,6 +35,13 @@ describe Importer::Yaml do
       it "should import string arrays" do
         expect(@project.keys.for_key('abbr_month_names[2]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Feb')
         expect(@project.keys.for_key('abbr_month_names[12]').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Dec')
+      end
+
+      it 'should not import OWNERS.yaml file' do
+        blobs = @project.blobs.select { |blob| blob.path.downcase.include?('owners') }.to_a
+        expect(blobs.size).to eql(1)
+        blob = blobs.first
+        expect(blob.keys.count).to eql(0)
       end
     end
 
