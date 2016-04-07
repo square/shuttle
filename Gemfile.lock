@@ -43,7 +43,7 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
-    after-commit-on-action (0.0.2)
+    after-commit-on-action (0.0.3)
       rails (>= 4.0)
     ansi (1.4.3)
     arel (5.0.1.20140414130214)
