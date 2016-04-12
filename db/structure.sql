@@ -3,7 +3,6 @@
 --
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -375,6 +374,7 @@ CREATE TABLE keys (
     is_block_tag boolean DEFAULT false NOT NULL,
     key_sha character varying(64) NOT NULL,
     source_copy_sha character varying(64) NOT NULL,
+    hidden_in_search boolean DEFAULT false,
     CONSTRAINT non_negative_index_in_section CHECK ((index_in_section >= 0))
 );
 
@@ -1783,4 +1783,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160302033924');
 INSERT INTO schema_migrations (version) VALUES ('20160303001118');
 
 INSERT INTO schema_migrations (version) VALUES ('20160303235403');
+
+INSERT INTO schema_migrations (version) VALUES ('20160404235737');
 

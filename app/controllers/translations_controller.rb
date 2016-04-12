@@ -19,11 +19,12 @@ class TranslationsController < ApplicationController
   include TranslationDecoration
 
   before_filter :translator_required, only: [:edit, :update]
+  before_filter :reviewer_required, only: [:show_in_search, :hide_in_search]
 
   before_filter :find_project
   before_filter :find_key
   before_filter :find_translation
-  before_filter :find_issues, only: [:show, :edit]
+  before_filter :find_issues, only: [:show, :edit, :hide_in_search, :show_in_search]
 
   respond_to :html, except: [:match, :fuzzy_match]
   respond_to :json, only: [:show, :match, :fuzzy_match]
@@ -127,6 +128,56 @@ class TranslationsController < ApplicationController
     end
   end
 
+  # Update a translation's key, hidden_in_search, to exclude the key and corresponding translations
+  # in search result.
+  #
+  # Routes
+  # ------
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:translation_id/hide_in_search`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |                  |                                    |
+  # |:-----------------|:-----------------------------------|
+  # | `project_id`     | The slug of a Project.             |
+  # | `key_id`         | The slug of a Key in that project. |
+  # | `translation_id` | The ID of a Translation.           |
+
+  def hide_in_search
+    if @key.hidden_in_search
+      redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { alert: 'This translation state has been modified, please refresh and try again'}
+    else
+      change_hidden_in_search_to(true)
+      redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { success: 'This translation is now hidden from search'}
+    end
+  end
+
+  # Update a translation's key, hidden_in_search, to include the key and corresponding translations
+  # in search result.
+  #
+  # Routes
+  # ------
+  # * `PATCH /projects/:project_id/keys/:key_id/translations/:translation_id/show_in_search`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |                  |                                    |
+  # |:-----------------|:-----------------------------------|
+  # | `project_id`     | The slug of a Project.             |
+  # | `key_id`         | The slug of a Key in that project. |
+  # | `translation_id` | The ID of a Translation.           |
+
+  def show_in_search
+    unless @key.hidden_in_search
+      redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { alert: 'This translation state has been modified, please refresh and try again'}
+    else
+      change_hidden_in_search_to(false)
+      redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { success: 'This translation is now available in search'}
+    end
+  end
+
   # Returns the first eligible Translation Unit that meets the following
   # requirements:
   #
@@ -217,6 +268,7 @@ class TranslationsController < ApplicationController
           # TODO: Remove duplicate where source_copy, copy are same
           filter :term, { approved: 1 }
           filter :terms, { rfc5646_locale: target_locales }
+          filter :term, { hidden_in_search: false }
 
           size limit
           query { match 'source_copy', query_filter, operator: 'or' }
@@ -250,6 +302,11 @@ class TranslationsController < ApplicationController
 
   def translation_params
     params.require(:translation).permit(:copy, :notes)
+  end
+
+  def change_hidden_in_search_to(state)
+    @key.update!(hidden_in_search: state)
+    @translation.update_index
   end
 
   def decorate_fuzzy_match(translations, source_copy)
