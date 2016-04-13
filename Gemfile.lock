@@ -80,7 +80,7 @@ GEM
     chronic (0.10.2)
     climate_control (0.0.3)
       activesupport (>= 3.0)
-    cocaine (0.5.4)
+    cocaine (0.5.8)
       climate_control (>= 0.0.3, < 1.0)
     coderay (1.1.0)
     coffee-rails (4.0.1)
@@ -152,6 +152,7 @@ GEM
       thin (~> 1.5.0)
     method_source (0.8.2)
     mime-types (2.99.1)
+    mimemagic (0.3.0)
     mini_portile2 (2.0.0)
     minitest (5.8.4)
     multi_json (1.11.2)
@@ -163,11 +164,12 @@ GEM
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
     orm_adapter (0.5.0)
-    paperclip (4.1.1)
-      activemodel (>= 3.0.0)
-      activesupport (>= 3.0.0)
-      cocaine (~> 0.5.3)
+    paperclip (4.3.6)
+      activemodel (>= 3.2.0)
+      activesupport (>= 3.2.0)
+      cocaine (~> 0.5.5)
       mime-types
+      mimemagic (= 0.3.0)
     parslet (1.6.1)
       blankslate (~> 2.0)
     pg (0.17.1)
@@ -397,7 +399,7 @@ DEPENDENCIES
   mailcatcher (~> 0.6.4)
   mustache
   nokogiri (>= 1.6.7.2)
-  paperclip
+  paperclip (>= 4.2.2)
   parslet
   pg
   pry
@@ -435,5 +437,8 @@ DEPENDENCIES
   whenever
   yard
 
+RUBY VERSION
+   ruby 2.2.4p230
+
 BUNDLED WITH
-   1.11.2
+   1.12.1
