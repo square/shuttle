@@ -1,2 +1,2 @@
 ---
-url: "http://localhost:9200"
+url: <%= ENV['ELASTICSEARCH_URL'] || 'http://localhost:9200' %>
