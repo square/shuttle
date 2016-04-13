@@ -46,11 +46,7 @@ function stop_elasticsearch() {
 
 function install_bundler_if_needed() {
   echo "Checking for Bundler ${bundler_version}..."
-  if gem list --installed bundler>/dev/null; then
-    gem update bundler
-  else
-    gem install bundler
-  fi
+  gem install bundler --conservative
 }
 
 function update_gems_if_needed() {
