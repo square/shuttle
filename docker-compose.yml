@@ -1,0 +1,45 @@
+version: '2'
+services:
+  elasticsearch:
+    image: elasticsearch:1.7.5
+  mailcatcher:
+    build: .
+    command: mailcatcher --ip 0.0.0.0 --foreground
+    ports:
+    - '1025:1025'
+    - '1080:1080'
+  postgres:
+    image: postgres:9.3.12
+    ports:
+    - '5432:5432'
+    environment:
+      POSTGRES_USER: shuttle
+  redis:
+    image: redis:2.8.23
+  sidekiq:
+    build: .
+    command: dockerize -timeout 1m -wait tcp://redis:6379 -wait http://elasticsearch:9200 bundle exec sidekiq -C config/sidekiq.yml
+    links:
+    - elasticsearch
+    - redis
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      REDIS_URL: redis://redis:6379
+  web:
+    build: .
+    command: dockerize -timeout 1m -wait tcp://redis:6379 -wait http://elasticsearch:9200 -wait tcp://mailcatcher:1025 bundle exec rails s -b '0.0.0.0'
+    volumes:
+    - .:/app
+    ports:
+    - '3000:3000'
+    links:
+    - elasticsearch
+    - mailcatcher
+    - postgres
+    - redis
+    environment:
+      DATABASE_HOST: postgres
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      HOSTNAME: web
+      REDIS_URL: redis://redis:6379
+      SMTP_HOST: mailcatcher

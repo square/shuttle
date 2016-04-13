@@ -114,6 +114,26 @@ These steps can be run with `foreman start` if foreman is installed.
    username: **admin@example.com**<br>
    password: **password123**
 
+### Starting the server (Docker)
+
+To run Shuttle for the first time using `docker-compose`:
+
+1. Clone this project. You can run `brew bundle` to install all dependencies available
+  via Homebrew, which are specified in the `Brewfile`, or install them sequentially
+  specified below.
+2. Buy SidekiqPro, place your private repo url in Gemfile.
+3. Install the [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
+4. Build the Docker containers by running `docker-compose build`.
+5. Run `docker-compose run web rake db:create db:migrate db:seed` to seed the database.
+6. Run `docker-compose run -e "RAILS_ENV=test" web rake db:migrate` to setup the test database.
+7. Verify that all specs pass with `docker-compose run web rspec spec`.
+8. To run the server, use `docker-compose up`.
+9. Run `docker-machine ip` to get the IP of the server.
+9. Visit http://IP:3000 and log in with the credentials:
+
+  username: **admin@example.com**<br>
+  password: **password123**
+
 ### Adding your first project
 
 You are now an admin user on Shuttle. You can click the "Add Project" button to
