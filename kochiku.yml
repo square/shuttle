@@ -1,6 +1,6 @@
 language: ruby
 ruby:
- - ruby-2.0.0-p576
+ - ruby-2.0.0-p648
 test_command: 'script/ci'
 targets:
 - type: specs
