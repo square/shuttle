@@ -44,7 +44,7 @@ gem 'aws-sdk'
 
 # IMPORTING
 gem 'therubyracer', platform: :mri, require: 'v8'
-gem 'nokogiri'
+gem 'nokogiri', '>= 1.6.7.2'
 gem 'CFPropertyList', require: 'cfpropertylist'
 gem 'parslet'
 gem 'mustache'
