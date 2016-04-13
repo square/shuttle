@@ -93,7 +93,7 @@ end
 
 # Doesn't work in Rails 4
 group :development, :test do
-  gem 'mailcatcher'
+  gem 'mailcatcher', '~> 0.6.4'
   gem 'better_errors'
   gem 'binding_of_caller'
   gem 'pry'
