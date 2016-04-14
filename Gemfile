@@ -78,7 +78,6 @@ gem 'sprockets-rails'
 gem 'sass-rails', '4.0.3' # bugfix for sass 3.3 (in)compatibility
 gem 'coffee-rails'
 gem 'uglifier'
-gem 'less-rails'
 gem 'hogan_assets'
 
 group :development do
