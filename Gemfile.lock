@@ -91,7 +91,6 @@ GEM
       execjs
     coffee-script-source (1.7.0)
     colorize (0.7.3)
-    commonjs (0.2.7)
     configoro (1.4.0)
       activesupport
     connection_pool (2.0.0)
@@ -141,11 +140,6 @@ GEM
     kaminari (0.16.1)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
-    less (2.5.1)
-      commonjs (~> 0.2.7)
-    less-rails (2.5.0)
-      actionpack (>= 3.1)
-      less (~> 2.5.0)
     libarchive (0.1.2)
     libv8 (3.16.14.7)
     mail (2.6.3)
@@ -396,7 +390,6 @@ DEPENDENCIES
   jquery-rails
   json
   kaminari
-  less-rails
   libarchive
   mailcatcher
   mustache
