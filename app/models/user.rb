@@ -121,6 +121,11 @@ class User < ActiveRecord::Base
     %w(translator reviewer admin).include? role
   end
 
+  # @return [true, false] whether or not the user is reviewer or admin
+  def reviewer?
+    %w(reviewer admin).include? role
+  end
+
   # @return [String] The URL to the user's Gravatar.
   def gravatar
     "http://www.gravatar.com/avatar/#{Digest::MD5.hexdigest email}?s=600"

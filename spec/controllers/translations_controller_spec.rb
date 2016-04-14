@@ -497,6 +497,100 @@ describe TranslationsController do
     end
   end
 
+  describe "#hide_in_search" do
+    before :each do
+      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in @user
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @key = FactoryGirl.create(:key,
+                                project: @project,
+                                key: 'key',
+                                hidden_in_search: false)
+      @translation = FactoryGirl.create :translation,
+                                        key: @key,
+                                        source_copy: 'foo bar 1',
+                                        copy: 'something else',
+                                        approved: true,
+                                        source_rfc5646_locale: 'en',
+                                        rfc5646_locale: 'fr'
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+    end
+
+    it "should reject roles that are below reviewer" do
+      translator_uesr = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in translator_uesr
+
+      patch :show_in_search,
+            project_id: @translation.key.project.to_param,
+            key_id: @translation.key.to_param,
+            id: @translation.to_param,
+            format: 'json'
+
+      expect(response.status).to eq(403)
+    end
+
+    it "should set hidden_in_search field of the key to true" do
+      expect(@translation.key.hidden_in_search).to be false
+      patch :hide_in_search,
+            project_id: @translation.key.project.to_param,
+            key_id: @translation.key.to_param,
+            id: @translation.to_param,
+            format: 'json'
+
+      expect(response.status).to eq(302)
+      expect(@translation.key.reload.hidden_in_search).to be true
+    end
+  end
+
+  describe "#show_in_search" do
+    before :each do
+      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in @user
+      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @key = FactoryGirl.create(:key,
+                                project: @project,
+                                key: 'key',
+                                hidden_in_search: true)
+      @translation = FactoryGirl.create :translation,
+                                        key: @key,
+                                        source_copy: 'foo bar 1',
+                                        copy: 'something else',
+                                        approved: true,
+                                        source_rfc5646_locale: 'en',
+                                        rfc5646_locale: 'fr'
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+    end
+
+    it "should reject roles that are below reviewer" do
+      translator_uesr = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      sign_in translator_uesr
+
+      patch :show_in_search,
+            project_id: @translation.key.project.to_param,
+            key_id: @translation.key.to_param,
+            id: @translation.to_param,
+            format: 'json'
+
+      expect(response.status).to eq(403)
+    end
+
+    it "should set hidden_in_search field of the key to false" do
+      expect(@translation.key.hidden_in_search).to be true
+      patch :show_in_search,
+            project_id: @translation.key.project.to_param,
+            key_id: @translation.key.to_param,
+            id: @translation.to_param,
+            format: 'json'
+
+      expect(response.status).to eq(302)
+      expect(@translation.key.reload.hidden_in_search).to be false
+    end
+  end
+
   describe "#fuzzy_match" do
     before :each do
       @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
@@ -679,6 +773,39 @@ describe TranslationsController do
         expect(response.status).to eql(200)
         project_name = JSON.parse(response.body).first['project_name']
         expect(project_name).to eql('w' * 27 + '...')
+      end
+    end
+
+    context "when translation key hidden_in_search is true" do
+      before :each do
+        @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+        @key = FactoryGirl.create(:key,
+                                  project: @project,
+                                  key: 'key',
+                                  hidden_in_search: true)
+        @hidden_translation = FactoryGirl.create :translation,
+                                                 key: @key,
+                                                 source_copy: "foo bar 2",
+                                                 approved: true,
+                                                 copy: 'something else',
+                                                 source_rfc5646_locale: 'en',
+                                                 rfc5646_locale: 'fr'
+      end
+
+      it "should not show in search result" do
+        regenerate_elastic_search_indexes
+        sleep(2)
+
+        get :fuzzy_match,
+            project_id: @translation.key.project.to_param,
+            key_id: @translation.key.to_param,
+            id: @translation.to_param,
+            format: 'json'
+
+        expect(response.status).to eq(200)
+        results = JSON.parse(response.body)
+        expect(results.size).to eq(1)
+        expect(results.first["source_copy"]).to eq(@translation.source_copy)
       end
     end
   end

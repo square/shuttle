@@ -44,7 +44,10 @@ class SearchController < ApplicationController
           id           = params[:project_id]
           limit        = params.fetch(:limit, PER_PAGE)
           not_elastic  = params[:not_elastic_search]
+          hidden_keys  = params[:hidden_in_search]
 
+          # TODO: Refactor code below after updating elasticsearch client as
+          # Tire hasn't been updating for a long time
           keys_in_es = Key.search do
             if query_filter.present?
               if not_elastic
@@ -59,6 +62,13 @@ class SearchController < ApplicationController
 
             unless status.blank?
               filter :term, ready: status
+            end
+
+            if hidden_keys
+              filter :term, { hidden_in_search: true }
+            else
+              # exclude keys that translators want hidden
+              filter :term, { hidden_in_search: false }
             end
 
             from offset

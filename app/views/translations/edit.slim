@@ -23,7 +23,11 @@
     strong &nbsp;>&nbsp;
     | Translation #{@translation.id}
   = render partial: 'issues/notifications_on_translation_page_header', locals: { issues: @issues }
-
+  - if current_user.reviewer?
+    .pull-right
+      .row
+        = button_to 'Re-Open', show_in_search_project_key_translation_path, disabled: !@key.hidden_in_search,  method: 'patch', class: 'button submit show-btn'
+        = button_to 'Hide', hide_in_search_project_key_translation_path, disabled: @key.hidden_in_search, method: 'patch', class: 'button submit hide-btn'
 
 hr.divider
 
@@ -53,8 +57,6 @@ hr.divider
 
       .form-actions
         = f.submit class: 'primary', value: 'Save'
-            
-        
 
     / Information Side
     .eight.columns.info-side

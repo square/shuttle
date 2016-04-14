@@ -64,6 +64,7 @@ Shuttle::Application.routes.draw do
     resources :keys, only: [] do
       resources :translations, only: [:show, :new, :create, :edit, :update] do
         member do
+          patch :hide_in_search, :show_in_search
           get :match, :fuzzy_match
         end
       end

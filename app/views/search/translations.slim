@@ -60,6 +60,10 @@ div
           = label_tag 'end_date', 'End Date', class: 'control-label'
           .controls
             = text_field_tag 'end_date', '', class: 'datepicker'
+        .control-group
+          = label_tag 'hidden_keys', 'Hidden Translations', class: 'control-label'
+          .controls
+            = check_box_tag 'hidden_keys', 'true'
 
   .pagination-links
     = paginate @results

@@ -80,6 +80,7 @@ class Translation < ActiveRecord::Base
     indexes :updated_at, type: 'date'
     indexes :translated, type: 'boolean'
     indexes :approved, type: 'integer', as: 'if approved==true then 1 elsif approved==false then 0 else nil end'
+    indexes :hidden_in_search, type: 'boolean', as: '!!send(:key).hidden_in_search'
   end
 
   validates :key,

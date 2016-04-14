@@ -155,6 +155,28 @@ describe SearchController do
       expect(results.map { |r| r['original_key'] }.sort).to eql(%w(t1_n0 t1_n1 t1_n2 t1_n3 t1_n4))
     end
 
+    it "should exlcude hidden key" do
+      FactoryGirl.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      get :keys, project_id: @project.id, format: 'json'
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eq(10)
+    end
+
+    it "should search for hidden key only" do
+      FactoryGirl.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      get :keys, project_id: @project.id, hidden_in_search: '', format: 'json'
+      expect(response.status).to eql(200)
+      results = JSON.parse(response.body)
+      expect(results.size).to eq(1)
+    end
+
     it "should respond with a 422 if the project ID is not given" do
       get :keys, filter: 't1', format: 'json'
       expect(response.status).to eql(422)
