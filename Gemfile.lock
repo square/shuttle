@@ -109,7 +109,7 @@ GEM
       rails (> 3.1)
     erubis (2.7.0)
     eventmachine (1.0.3)
-    execjs (2.2.0)
+    execjs (2.6.0)
     factory_girl (4.4.0)
       activesupport (>= 3.0.0)
     factory_girl_rails (4.4.1)
@@ -142,7 +142,6 @@ GEM
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     libarchive (0.1.2)
-    libv8 (3.16.14.7)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
     mailcatcher (0.2.4)
@@ -234,7 +233,6 @@ GEM
       redis-store (~> 1.1.0)
     redis-store (1.1.4)
       redis (>= 2.2)
-    ref (1.0.5)
     rest-client (1.6.7)
       mime-types (>= 1.16)
     rspec-collection_matchers (1.0.0)
@@ -317,9 +315,6 @@ GEM
       net-ssh (>= 2.8.0)
     stringex (2.2.0)
     temple (0.6.7)
-    therubyracer (0.12.1)
-      libv8 (~> 3.16.14.0)
-      ref
     thin (1.5.1)
       daemons (>= 1.0.9)
       eventmachine (>= 0.12.6)
@@ -380,6 +375,7 @@ DEPENDENCIES
   devise
   diff-lcs
   dropzonejs-rails
+  execjs
   factory_girl_rails
   faker
   find_or_create_on_scopes
@@ -422,7 +418,6 @@ DEPENDENCIES
   squash_rails
   squash_ruby
   stringex (= 2.2.0)
-  therubyracer
   timecop
   tire
   twitter-typeahead-rails (= 0.9.3)

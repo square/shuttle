@@ -36,11 +36,10 @@ class EmberModule < Base
     def self.valid?(contents)
       return false if contents.blank?
 
-      context  = V8::Context.new
-      context['module'] = {}
-      context.eval contents
+      contents.prepend("var module = {};\n")
+      context = ExecJS.compile(contents)
       return true
-    rescue V8::Error
+    rescue ExecJS::Error
       return false
     end
   end
