@@ -37,11 +37,8 @@ module Importer
     private
 
     def extract_hash_from_file(contents, rfc)
-      context           = V8::Context.new
-      context['module'] = {'exports' => {}}
-      context.eval contents
-
-      context.eval('module.exports')
+      contents.prepend("var module = {exports: {}};\n")
+      context = ExecJS.compile contents
 
       context.eval('module.exports').to_hash
     end

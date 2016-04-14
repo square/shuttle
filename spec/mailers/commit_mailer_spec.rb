@@ -39,7 +39,7 @@ describe CommitMailer do
                        ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{@commit.id} and blob 88e5b52732c23a4e33471d91cf2281e62021512a)"],
                        ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in CommitKeyCreator for commit_id #{@commit.id} and blob b80d7482dba100beb55e65e82c5edb28589fa045)"],
                        ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
-                       ["V8::Error", "Unexpected identifier at <eval>:2:12 (in /ember-broken/en-US.js)"]]
+                       ["ExecJS::RuntimeError", "SyntaxError: Unexpected identifier (in /ember-broken/en-US.js)"]]
 
         mail = set_import_errors_and_expect_an_email_with_them_return_mail_object(@commit, fake_errors)
         expect(mail.body).to include("Shuttle couldn't find at least one sha from your commit in the git repo. This typically happens when your commit gets rebased away. Please submit the new sha to be able to get your strings translated.")

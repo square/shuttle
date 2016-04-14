@@ -42,10 +42,11 @@ module Importer
       hash = extract_hash_from_file(contents, base_rfc5646_locale)
 
       extract_hash(hash) { |key, value| add_string key, value }
-    # TODO: We need to move this over to NodeJS instead.  RubyRacer has an issue where ExecJS will randomly fail with a ProgramError.
-    # RuntimeError catches for syntax issues though which is most likely what we're interested in.
-    # https://github.com/sstephenson/execjs/blob/master/lib/execjs/ruby_racer_runtime.rb
-    rescue ExecJS::RuntimeError, V8::Error => err
+    rescue ExecJS::RuntimeError => err
+      err = ExecJS::RuntimeError.new /([\w]*: [\w ]*)/.match(err.message).captures[0]
+      log_skip nil, "Invalid Ember file: #{err}"
+      handle_import_error(err)
+    rescue ExecJS::ProgramError => err
       log_skip nil, "Invalid Ember file: #{err}"
       handle_import_error(err)
     end
@@ -59,13 +60,8 @@ module Importer
     private
 
     def extract_hash_from_file(contents, rfc)
-      context  = V8::Context.new
-      context['Ember'] = {'I18n' => {'locales' => {'translations' => {}}}}
-      context.eval contents
-
-      context.eval("Ember.I18n.locales.translations")
-      context.eval("Ember.I18n.locales.translations").to_hash
-
+      contents.prepend("var Ember = {I18n: {locales: {translations: {}}}};\n")
+      context = ExecJS.compile(contents)
       context.eval("Ember.I18n.locales.translations")[rfc].to_hash.except('CLDRDefaultLanguage')
     end
   end

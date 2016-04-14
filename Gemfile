@@ -41,9 +41,9 @@ gem 'httparty'
 gem 'similar_text', '~> 0.0.4'
 gem 'paperclip'
 gem 'aws-sdk'
+gem 'execjs'
 
 # IMPORTING
-gem 'therubyracer', platform: :mri, require: 'v8'
 gem 'nokogiri', '>= 1.6.7.2'
 gem 'CFPropertyList', require: 'cfpropertylist'
 gem 'parslet'
