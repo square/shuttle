@@ -246,12 +246,22 @@ GEM
       rspec-core (~> 2.99.0)
       rspec-expectations (~> 2.99.0)
       rspec-mocks (~> 2.99.0)
+    ruby2ruby (2.3.0)
+      ruby_parser (~> 3.1)
+      sexp_processor (~> 4.0)
+    ruby_parser (3.8.1)
+      sexp_processor (~> 4.1)
+    safemode (1.2.4)
+      ruby2ruby (>= 2.0.6)
+      ruby_parser (>= 3.2.0)
+      sexp_processor (>= 4.3.0)
     sass (3.2.19)
     sass-rails (4.0.3)
       railties (>= 4.0.0, < 5.0)
       sass (~> 3.2.0)
       sprockets (~> 2.8, <= 2.11.0)
       sprockets-rails (~> 2.0)
+    sexp_processor (4.7.0)
     sidekiq (2.17.7)
       celluloid (>= 0.15.2)
       connection_pool (>= 1.0.0)
@@ -399,6 +409,7 @@ DEPENDENCIES
   redis-rack-cache
   redis-rails
   rspec-rails (< 3.0.0)
+  safemode
   sass-rails (= 4.0.3)
   sidekiq (< 3.0.0)
   sidekiq-failures!
@@ -423,4 +434,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   1.10.6
+   1.11.2

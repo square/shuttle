@@ -203,6 +203,10 @@ describe Exporter::Ruby do
       expect(Exporter::Ruby.valid?('$!$*()%(@*&%@(*%^(')).to be_false
     end
 
+    it "should return false for Ruby code that is dangerous" do
+      expect(Exporter::Ruby.valid?('exit')).to be_false
+    end
+
     it "should return false for an empty file" do
       expect(Exporter::Ruby.valid?('')).to be_false
     end
