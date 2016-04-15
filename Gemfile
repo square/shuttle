@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.0.0', :patchlevel => '648'
+ruby '2.2.4'
 
 # FRAMEWORK
 gem 'rails', '4.1.14.2'
