@@ -16,9 +16,11 @@ Shuttle::Application.routes.draw do
   # Redirect request with not matching hosts or protocol to a default url.
   # For example, `http://shuttle.server1.example.com` would redirect to `https://shuttle.example.com`
   # if the default url provided in the configs were `https://shuttle.example.com`.
-  full_root_url = lambda { |opts| opts.fetch(:protocol, 'http') + '://' + opts.host + (opts.key?(:port) ? ':' + opts.port.to_s : '')}.call(Shuttle::Configuration.app.default_url_options)
-  constraints(lambda { |req| !req.url.start_with?(full_root_url) }) do
-    match '*glob' => redirect(full_root_url), via: [:get, :post, :put, :patch, :delete]
+  if !Rails.env.development?
+    full_root_url = lambda { |opts| opts.fetch(:protocol, 'http') + '://' + opts.host + (opts.key?(:port) ? ':' + opts.port.to_s : '')}.call(Shuttle::Configuration.app.default_url_options)
+    constraints(lambda { |req| !req.url.start_with?(full_root_url) }) do
+      match '*glob' => redirect(full_root_url), via: [:get, :post, :put, :patch, :delete]
+    end
   end
 
   # AUTHENTICATION
