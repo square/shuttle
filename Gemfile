@@ -42,6 +42,7 @@ gem 'similar_text', '~> 0.0.4'
 gem 'paperclip'
 gem 'aws-sdk'
 gem 'execjs'
+gem 'safemode'
 
 # IMPORTING
 gem 'nokogiri', '>= 1.6.7.2'
