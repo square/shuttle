@@ -203,13 +203,13 @@ describe Issue do
     it "should return true if the given user's email is in the subscribed_emails list" do
       issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
       user = FactoryGirl.create(:user, email: "test@example.com")
-      expect(issue.subscribed?(user)).to be_true
+      expect(issue.subscribed?(user)).to be_truthy
     end
 
     it "should return false if the given user's email is not in the subscribed_emails list" do
       issue = FactoryGirl.create(:issue, subscribed_emails: ["other@example.com"])
       user = FactoryGirl.create(:user, email: "test@example.com")
-      expect(issue.subscribed?(user)).to be_false
+      expect(issue.subscribed?(user)).to be_falsey
     end
   end
 

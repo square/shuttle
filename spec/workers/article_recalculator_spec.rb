@@ -16,7 +16,7 @@ require 'spec_helper'
 
 describe ArticleRecalculator do
   it "should recalculate Article readiness" do
-    ArticleImporter.any_instance.stub(:perform) # prevent it from creating keys
+    allow_any_instance_of(ArticleImporter).to receive(:perform) # prevent it from creating keys
     article = FactoryGirl.create(:article, ready: false)
     ArticleRecalculator.new.perform(article.id)
     expect(article.reload).to be_ready

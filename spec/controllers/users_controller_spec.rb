@@ -19,7 +19,7 @@ describe UsersController do
     subject { get :search, { query: "test", format: :json } }
 
     before :each do
-      Shuttle::Configuration.stub(:app).and_return(domains_to_get_monitor_role_after_email_confirmation: ['example.com'], domains_who_can_search_users: ['example.com'])
+      allow(Shuttle::Configuration).to receive(:app).and_return(domains_to_get_monitor_role_after_email_confirmation: ['example.com'], domains_who_can_search_users: ['example.com'])
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       @activated_and_priviliged_user = FactoryGirl.create(:user, :activated, email: "someuser@example.com")

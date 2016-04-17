@@ -58,13 +58,13 @@ describe AutoImporter::ProjectAutoImporter do
     end
 
     it "does nothing if project doesn't have a repository_url" do
-      Project.any_instance.stub(:commit!).and_raise("This should not have been called")
+      allow_any_instance_of(Project).to receive(:commit!).and_raise("This should not have been called")
       project = FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
       AutoImporter::ProjectAutoImporter.new.perform(project.id)
     end
 
     it "does nothing if project doesn't have any watched_branches" do
-      Project.any_instance.stub(:commit!).and_raise("This should not have been called")
+      allow_any_instance_of(Project).to receive(:commit!).and_raise("This should not have been called")
       project = FactoryGirl.create(:project, watched_branches: %w())
       AutoImporter::ProjectAutoImporter.new.perform(project.id)
     end

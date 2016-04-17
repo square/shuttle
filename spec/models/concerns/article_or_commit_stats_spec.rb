@@ -18,7 +18,7 @@ describe ArticleOrCommitStats do
   describe "#fetch_stat" do
     before :each do
       @commit = FactoryGirl.build(:commit)
-      @commit.stub(:stats).and_return( {
+      allow(@commit).to receive(:stats).and_return( {
                                           approved: { translations_count: 1, words_count: 2 },
                                           pending: { translations_count: 1, words_count: 1 }
                                        })
@@ -78,7 +78,7 @@ describe ArticleOrCommitStats do
     end
 
     it "should calculate article statistics correctly" do
-      Article.any_instance.stub(:import!)
+      allow_any_instance_of(Article).to receive(:import!)
       @article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true, 'de' => false, 'ja' => true})
       active_section   = FactoryGirl.create(:section, article: @article)
       inactive_section = FactoryGirl.create(:section, article: @article, active: false)

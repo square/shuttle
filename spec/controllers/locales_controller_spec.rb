@@ -15,5 +15,5 @@
 require 'spec_helper'
 
 describe LocalesController do
-  pending "Write specs" #TODO
+  skip "Write specs" #TODO
 end

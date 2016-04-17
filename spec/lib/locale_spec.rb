@@ -137,27 +137,27 @@ describe Locale do
 
   describe "#child_of?" do
     it "should claim that en-US is a child of en" do
-      expect(Locale.from_rfc5646('en-US').child_of?(Locale.from_rfc5646('en'))).to be_true
+      expect(Locale.from_rfc5646('en-US').child_of?(Locale.from_rfc5646('en'))).to be_truthy
     end
 
     it "should not claim that ja is a child of en" do
-      expect(Locale.from_rfc5646('ja').child_of?(Locale.from_rfc5646('en'))).to be_false
+      expect(Locale.from_rfc5646('ja').child_of?(Locale.from_rfc5646('en'))).to be_falsey
     end
 
     it "should claim that zh-cmn-Hans-CN is a child of zh-CN" do
-      expect(Locale.from_rfc5646('zh-cmn-Hans-CN').child_of?(Locale.from_rfc5646('zh-CN'))).to be_true
+      expect(Locale.from_rfc5646('zh-cmn-Hans-CN').child_of?(Locale.from_rfc5646('zh-CN'))).to be_truthy
     end
 
     it "should not claim that zh-cmn-Hans-CN is a child of zh-yue-Hans" do
-      expect(Locale.from_rfc5646('zh-cmn-Hans-CN').child_of?(Locale.from_rfc5646('zh-yue-Hans'))).to be_false
+      expect(Locale.from_rfc5646('zh-cmn-Hans-CN').child_of?(Locale.from_rfc5646('zh-yue-Hans'))).to be_falsey
     end
 
     it "should claim that sl-rozaj-biske is a child of sl-rozaj" do
-      expect(Locale.from_rfc5646('sl-rozaj-biske').child_of?(Locale.from_rfc5646('sl-rozaj'))).to be_true
+      expect(Locale.from_rfc5646('sl-rozaj-biske').child_of?(Locale.from_rfc5646('sl-rozaj'))).to be_truthy
     end
 
     it "should not claim that sl-rozaj-biske is a child of sl-nedis" do
-      expect(Locale.from_rfc5646('en-rozaj-biske').child_of?(Locale.from_rfc5646('sl-nedis'))).to be_false
+      expect(Locale.from_rfc5646('en-rozaj-biske').child_of?(Locale.from_rfc5646('sl-nedis'))).to be_falsey
     end
   end
 end

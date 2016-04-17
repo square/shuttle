@@ -124,7 +124,7 @@ describe Commit do
     before :each do
       Timecop.freeze(Time.now)
       @created_at = Time.now
-      @commit = FactoryGirl.create(:commit, created_at: @created_at, loading: true, loaded_at: nil, loaded_at: nil)
+      @commit = FactoryGirl.create(:commit, created_at: @created_at, loading: true, loaded_at: nil)
       Timecop.freeze(3.hours.from_now)
       @commit.loading = false
       @commit.save!
@@ -339,7 +339,7 @@ describe Commit do
 
   describe "#import_blob" do
     before :each do
-      BlobImporter.stub(:perform_once)
+      allow(BlobImporter).to receive(:perform_once)
       @project = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)))
       @commit = FactoryGirl.create(:commit, project: @project)
       @file1 = double(Git::Object::Blob, contents: 'hello, world1', sha: 'abc123')
@@ -368,17 +368,17 @@ describe Commit do
 
     it "should return true if the commit has a .shuttle.yml file given an excluded key" do
       @commit = @project.commit!('339d381517fef6cabde59a373c8757d35af87558')
-      expect(@commit.skip_key?('commit_excluded_1')).to be_true
+      expect(@commit.skip_key?('commit_excluded_1')).to be_truthy
     end
 
     it "should return false if the commit has a .shuttle.yml file given a non-excluded key" do
       @commit = @project.commit!('339d381517fef6cabde59a373c8757d35af87558')
-      expect(@commit.skip_key?('other_key')).to be_false
+      expect(@commit.skip_key?('other_key')).to be_falsey
     end
 
     it "should return false if the commit does not have a .shuttle.yml file" do
       @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
-      expect(@commit.skip_key?('commit_excluded_1')).to be_false
+      expect(@commit.skip_key?('commit_excluded_1')).to be_falsey
     end
   end
 
@@ -439,7 +439,7 @@ describe Commit do
 
   describe "#git_url" do
     before :each do
-      Shuttle::Configuration.stub(:app).and_return(github_enterprise_domain: "git.example.com", stash_domain: "stash.example.com")
+      allow(Shuttle::Configuration).to receive(:app).and_return(github_enterprise_domain: "git.example.com", stash_domain: "stash.example.com")
     end
 
     context "[on github]" do

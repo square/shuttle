@@ -22,7 +22,7 @@ describe Fencer::Erb do
     end
 
     it "should properly fence ERb escapes with things that look like ERB escapes in them" do
-      pending "Hey, did you know regular ERb doesn't support this either??"
+      skip "Hey, did you know regular ERb doesn't support this either??"
       expect(Fencer::Erb.fence('A string <%= "with %> an" %> erb escape')).
           to eql('<%= "with %> an" %>' => [9..27])
     end
@@ -30,11 +30,11 @@ describe Fencer::Erb do
 
   describe ".valid?" do
     it "should return true for a string with balanced interpolation delimiters" do
-      expect(Fencer::Erb.valid?("String with <%= two %> <% tokens -%>.")).to be_true
+      expect(Fencer::Erb.valid?("String with <%= two %> <% tokens -%>.")).to be_truthy
     end
 
     it "should return false for a string with unbalanced interpolation delimiters" do
-      expect(Fencer::Erb.valid?("String with <%= two % > <% tokens -%>.")).to be_false
+      expect(Fencer::Erb.valid?("String with <%= two % > <% tokens -%>.")).to be_falsey
     end
   end
 end

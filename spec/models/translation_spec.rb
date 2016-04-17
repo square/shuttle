@@ -259,7 +259,7 @@ describe Translation do
 
   describe "#batch_refresh_elastic_search" do
     it "refreshes the ElasticSearch index (section_active field in this test) of Article's Translations" do
-      Article.any_instance.stub(:import!) # prevent auto import
+      allow_any_instance_of(Article).to receive(:import!) # prevent auto import
       reset_elastic_search
 
       article = FactoryGirl.create(:article)

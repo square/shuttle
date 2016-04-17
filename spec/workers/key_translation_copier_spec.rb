@@ -31,7 +31,7 @@ describe KeyTranslationCopier do
 
     it "sets approved state to true" do
       KeyTranslationCopier.new.perform(@key.id, 'fr', 'fr-XX')
-      expect(@fr_xx_translation.reload.approved).to be_true
+      expect(@fr_xx_translation.reload.approved).to be_truthy
     end
 
     it "doesn't copy from not-approved Translation" do
