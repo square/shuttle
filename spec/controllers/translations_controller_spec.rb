@@ -342,7 +342,7 @@ describe TranslationsController do
         expect(@fr_CA_translation.translator).to eql(@user)
         expect(@fr_FR_translation.reload.copy).to eql("test")
         expect(@fr_FR_translation.translator).to eql(@user)
-        expect(@key.reload.ready).to be_true
+        expect(@key.reload.ready).to be_truthy
       end
 
       it "doesn't update any of the requested translations because one of the translations are not linked to the primary one with a LocaleAssociation" do
@@ -356,7 +356,7 @@ describe TranslationsController do
         expect(@fr_CA_translation.translator).to be_nil
         expect(@fr_FR_translation.reload.copy).to be_nil
         expect(@fr_FR_translation.translator).to be_nil
-        expect(@key.reload.ready).to be_false
+        expect(@key.reload.ready).to be_falsey
       end
     end
   end
@@ -758,7 +758,7 @@ describe TranslationsController do
 
     context "when show project related information" do
       before :each do
-        Project.any_instance.stub(:name).and_return('w' * 40)
+        allow_any_instance_of(Project).to receive(:name).and_return('w' * 40)
       end
 
       it "should truncate project name exceeds 30 chars" do
@@ -885,7 +885,7 @@ describe TranslationsController do
           sign_in @user
 
           @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
-          Article.any_instance.stub(:import!) # prevent auto import
+          allow_any_instance_of(Article).to receive(:import!) # prevent auto import
           @article = FactoryGirl.create(:article,
                                         project: @project,
                                         sections_hash: {"main" => "hello"},

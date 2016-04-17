@@ -126,7 +126,7 @@ describe Api::V1::ArticlesController do
     end
 
     it "retrieves all Articles in the project, but not the Articles in other projects" do
-      Article.any_instance.stub(:import!) # prevent auto imports
+      allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
       project = FactoryGirl.create(:project, repository_url: nil)
       article1 = FactoryGirl.create(:article, project: project)
       article2 = FactoryGirl.create(:article, project: project)
@@ -211,7 +211,7 @@ describe Api::V1::ArticlesController do
 
       it "sets created_via_api to true" do
         post :create, project_id: project.id, api_token: project.api_token, article: { name: "test", sections_hash: {"title" => "hello"}}, format: :json
-        expect(Article.last.created_via_api).to be_true
+        expect(Article.last.created_via_api).to be_truthy
       end
     end
 
@@ -229,7 +229,7 @@ describe Api::V1::ArticlesController do
 
       it "sets created_via_api to false" do
         post :create, project_id: project.id, article: { name: "test", sections_hash: {"title" => "hello"}}, format: :json
-        expect(Article.last.created_via_api).to be_false
+        expect(Article.last.created_via_api).to be_falsey
       end
     end
   end
@@ -460,13 +460,13 @@ describe Api::V1::ArticlesController do
   describe "#params_for_create" do
     it "permits name, base_rfc5646_locale, key, sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id or project_id fields" do
       post :create, project_id: project.id, api_token: project.api_token, article: {name: "t", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300}, format: :json
-      expect(controller.send :params_for_create).to eql({ "name"=>"t", "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "name"=>"t", "sections_hash"=>{"t" => "t"}, "description"=>"t", "email"=>"t@example.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}, "created_via_api"=>true, "creator_id"=>nil, "updater_id"=>nil})
+      expect(controller.send :params_for_create).to eql({ "name"=>"t", "due_date" => DateTime::strptime("01/13/2015", "%m/%d/%Y"), "priority" => 1, "sections_hash"=>{"t" => "t"}, "description"=>"t", "email"=>"t@example.com", "base_rfc5646_locale"=>"en", "targeted_rfc5646_locales"=>{"fr"=>true}, "created_via_api"=>true, "creator_id"=>nil, "updater_id"=>nil})
     end
 
     it "doesn't include sections_hash or targeted_rfc5646_locales in the permitted params (this is tested separately because it's a special case due to being a hash field)" do
       post :create, project_id: project.id, api_token: project.api_token, name: "t", article: { priority: 2 }, format: :json
-      expect(controller.send(:params_for_create).key?("sections_hash")).to be_false
-      expect(controller.send(:params_for_create).key?("targeted_rfc5646_locales")).to be_false
+      expect(controller.send(:params_for_create).key?("sections_hash")).to be_falsey
+      expect(controller.send(:params_for_create).key?("targeted_rfc5646_locales")).to be_falsey
     end
 
     context "[API_REQUEST]" do
@@ -475,7 +475,7 @@ describe Api::V1::ArticlesController do
         params_for_create = controller.send(:params_for_create)
         expect(params_for_create["creator_id"]).to be_nil
         expect(params_for_create["updater_id"]).to be_nil
-        expect(params_for_create["created_via_api"]).to be_true
+        expect(params_for_create["created_via_api"]).to be_truthy
       end
     end
 
@@ -486,7 +486,7 @@ describe Api::V1::ArticlesController do
         params_for_create = controller.send(:params_for_create)
         expect(params_for_create["creator_id"]).to eql(monitor_user.id)
         expect(params_for_create["updater_id"]).to eql(monitor_user.id)
-        expect(params_for_create["created_via_api"]).to be_false
+        expect(params_for_create["created_via_api"]).to be_falsey
       end
     end
   end
@@ -501,8 +501,8 @@ describe Api::V1::ArticlesController do
 
     it "doesn't include sections_hash and targeted_rfc5646_locales in the permitted params (this is tested separately because it's a special case due to being a hash field)" do
       patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { priority: 2 }, format: :json
-      expect(controller.send(:params_for_update).key?("sections_hash")).to be_false
-      expect(controller.send(:params_for_update).key?("targeted_rfc5646_locales")).to be_false
+      expect(controller.send(:params_for_update).key?("sections_hash")).to be_falsey
+      expect(controller.send(:params_for_update).key?("targeted_rfc5646_locales")).to be_falsey
     end
 
     context "[API_REQUEST]" do
@@ -524,12 +524,12 @@ describe Api::V1::ArticlesController do
   describe "#api_request?" do
     it "returns true if api_token exists" do
       get :index, project_id: project.id, api_token: "test", format: :json
-      expect(controller.send(:api_request?)).to be_true
+      expect(controller.send(:api_request?)).to be_truthy
     end
 
     it "returns false if api_token doesn't exist" do
       get :index, project_id: project.id, api_token: nil, format: :json
-      expect(controller.send(:api_request?)).to be_false
+      expect(controller.send(:api_request?)).to be_falsey
     end
   end
 

@@ -17,7 +17,7 @@ require 'spec_helper'
 describe User do
   before :each do
     app_config = Shuttle::Configuration.app
-    Shuttle::Configuration.stub(:app).and_return(app_config.merge(domains_to_get_monitor_role_after_email_confirmation: ['example.com'],
+    allow(Shuttle::Configuration).to receive(:app).and_return(app_config.merge(domains_to_get_monitor_role_after_email_confirmation: ['example.com'],
                                                                   domains_who_can_search_users: ['example.com']))
   end
 
@@ -59,15 +59,15 @@ describe User do
   context 'an admin user' do
     let(:role) {'admin'}
     it '#has_access_to_locale?() returns true if the user is an admin' do
-      expect(user.has_access_to_locale?('fr')).to be_true
-      expect(user.has_access_to_locale?('jp')).to be_true
+      expect(user.has_access_to_locale?('fr')).to be_truthy
+      expect(user.has_access_to_locale?('jp')).to be_truthy
     end
   end
   context 'a translator' do
     let(:role) {'translator'}
     it '#has_access_to_locale?() returns true for non-admins only if they have access to that locale' do
-      expect(user.has_access_to_locale?('fr')).to be_true
-      expect(user.has_access_to_locale?('jp')).to be_false
+      expect(user.has_access_to_locale?('fr')).to be_truthy
+      expect(user.has_access_to_locale?('jp')).to be_falsey
     end
   end
 
@@ -96,7 +96,7 @@ describe User do
     end
 
     it "doesn't change user's role if priviliged domains are blank" do
-      Shuttle::Configuration.stub(:app).and_return({ })
+      allow(Shuttle::Configuration).to receive(:app).and_return({ })
       user = FactoryGirl.create(:user, role: nil, email: "test@example.com")
       expect(user.role).to be_nil
       user.after_confirmation
@@ -106,26 +106,26 @@ describe User do
 
   describe '#activated?' do
     it "returns true if user has a role and is confirmed" do
-      expect(FactoryGirl.create(:user, :activated).activated?).to be_true
+      expect(FactoryGirl.create(:user, :activated).activated?).to be_truthy
     end
 
     it "returns false if user doesn't have a role, even if the user is confirmed" do
-      expect(FactoryGirl.create(:user, :confirmed).activated?).to be_false
+      expect(FactoryGirl.create(:user, :confirmed).activated?).to be_falsey
     end
 
     it "returns false if user is not confirmed even if the user has a role" do
       user = FactoryGirl.create(:user, role: 'monitor')
-      expect(user.activated?).to be_false
+      expect(user.activated?).to be_falsey
     end
   end
 
   describe '#has_role?' do
     it "returns true if user's role is set" do
-      expect(FactoryGirl.create(:user, role: 'monitor').has_role?).to be_true
+      expect(FactoryGirl.create(:user, role: 'monitor').has_role?).to be_truthy
     end
 
     it "returns false if user's role is not set" do
-      expect(FactoryGirl.create(:user, role: nil).has_role?).to be_false
+      expect(FactoryGirl.create(:user, role: nil).has_role?).to be_falsey
     end
   end
 
@@ -139,12 +139,12 @@ describe User do
   describe '#can_search_users?' do
     it "returns true if user's email domain allows for searching" do
       user = FactoryGirl.create(:user, :activated, email: "test@example.com")
-      expect(user.can_search_users?).to be_true
+      expect(user.can_search_users?).to be_truthy
     end
 
     it "returns false if user's email domain doesn't allow for searching" do
       user = FactoryGirl.create(:user, :activated, email: "test@notallowed.com")
-      expect(user.can_search_users?).to be_false
+      expect(user.can_search_users?).to be_falsey
     end
   end
 

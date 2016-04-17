@@ -31,7 +31,7 @@ describe PaginatableObjects do
                    double('es_result', id: @commit2.id),
                    double('es_result', id: @commit3.id)]
 
-    @es_objects.stub(:total) { 10 }
+    allow(@es_objects).to receive(:total) { 10 }
   end
 
   describe '#initialize' do
@@ -59,12 +59,12 @@ describe PaginatableObjects do
 
   describe '#last_page?' do
     it 'returns true if last page' do
-      expect(PaginatableObjects.new([], @es_objects, 3, 4).last_page?).to be_true
+      expect(PaginatableObjects.new([], @es_objects, 3, 4).last_page?).to be_truthy
     end
 
     it 'returns false if not page' do
-      expect(PaginatableObjects.new([], @es_objects, 1, 4).last_page?).to be_false
-      expect(PaginatableObjects.new([], @es_objects, 2, 4).last_page?).to be_false
+      expect(PaginatableObjects.new([], @es_objects, 1, 4).last_page?).to be_falsey
+      expect(PaginatableObjects.new([], @es_objects, 2, 4).last_page?).to be_falsey
     end
   end
 end

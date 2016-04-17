@@ -44,18 +44,18 @@ describe Fencer::Html do
 
   describe ".valid?" do
     it "should return true for a string with valid XHTML" do
-      expect(Fencer::Html.valid?('Some <b id="bar">valid<br /> XHTML</b>.')).to be_true
+      expect(Fencer::Html.valid?('Some <b id="bar">valid<br /> XHTML</b>.')).to be_truthy
     end
 
     it "should return true for a string with valid HTML5" do
-      expect(Fencer::Html.valid?("Some <b id=bar>valid<br> HTML</b>.")).to be_true
+      expect(Fencer::Html.valid?("Some <b id=bar>valid<br> HTML</b>.")).to be_truthy
     end
 
     it "should return false for a string with invalid HTML" do
-      expect(Fencer::Html.valid?("An <unknown>tag.")).to be_false
-      expect(Fencer::Html.valid?("An <b>unclosed tag.")).to be_false
-      expect(Fencer::Html.valid?("A <b>mismatched tag</i>.")).to be_false
-      expect(Fencer::Html.valid?("An <<b>/>invalid</b>tag.")).to be_false
+      expect(Fencer::Html.valid?("An <unknown>tag.")).to be_falsey
+      expect(Fencer::Html.valid?("An <b>unclosed tag.")).to be_falsey
+      expect(Fencer::Html.valid?("A <b>mismatched tag</i>.")).to be_falsey
+      expect(Fencer::Html.valid?("An <<b>/>invalid</b>tag.")).to be_falsey
     end
   end
 end

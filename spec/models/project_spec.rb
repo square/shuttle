@@ -157,7 +157,7 @@ describe Project do
     it "creates a new batch, saves its id, and runs ProjectTranslationsAdderAndRemover::Finisher on success and sets description" do
       project = FactoryGirl.create(:project)
 
-      ProjectTranslationsAdderAndRemover::Finisher.any_instance.should_receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'project_id' => project.id)
+      expect_any_instance_of(ProjectTranslationsAdderAndRemover::Finisher).to receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'project_id' => project.id)
       batch = project.translations_adder_and_remover_batch.tap { |b| b.jobs {} }
 
       expect(batch).to be_an_instance_of(Sidekiq::Batch)
@@ -292,8 +292,8 @@ describe Project do
                                  key_locale_inclusions: {},
                                  key_locale_exclusions: {})
 
-      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_true
-      expect(@project.skip_key?('included', Locale.from_rfc5646('en-US'))).to be_false
+      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_truthy
+      expect(@project.skip_key?('included', Locale.from_rfc5646('en-US'))).to be_falsey
     end
 
     it "should return true if there is a key exclusion" do
@@ -302,7 +302,7 @@ describe Project do
                                  key_locale_inclusions: {},
                                  key_locale_exclusions: {})
 
-      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_true
+      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_truthy
     end
 
     it "should return true if there is a locale key exclusion in the given locale" do
@@ -311,7 +311,7 @@ describe Project do
                                  key_locale_exclusions: {'en-US' => %w(*cl*)},
                                  key_locale_inclusions: {})
 
-      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_true
+      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_truthy
     end
 
     it "should return false if there is a locale key exclusion in a different locale" do
@@ -320,7 +320,7 @@ describe Project do
                                  key_locale_inclusions: {},
                                  key_locale_exclusions: {'fr-FR' => %w(*cl*)})
 
-      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_false
+      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_falsey
     end
 
     it "should return true if there no matching locale key inclusion in the given locale" do
@@ -329,7 +329,7 @@ describe Project do
                                  key_locale_inclusions: {'en-US' => %w(in*)},
                                  key_locale_exclusions: {})
 
-      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_true
+      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_truthy
     end
 
     it "should return false if there is no matching locale key inclusion in a different locale" do
@@ -338,7 +338,7 @@ describe Project do
                                  key_locale_exclusions: {},
                                  key_locale_inclusions: {'fr-FR' => %w(in*)})
 
-      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_false
+      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_falsey
     end
 
     it "should return false if there is no exclusion" do
@@ -347,7 +347,7 @@ describe Project do
                                  key_locale_inclusions: {},
                                  key_locale_exclusions: {})
 
-      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_false
+      expect(@project.skip_key?('excluded', Locale.from_rfc5646('en-US'))).to be_falsey
     end
   end
 
@@ -360,8 +360,8 @@ describe Project do
                                  only_importer_paths: {},
                                  skip_importer_paths: {})
 
-      expect(@project.skip_path?('bar/foo.txt', Importer::Ruby)).to be_true
-      expect(@project.skip_path?('foo/bar.txt', Importer::Ruby)).to be_false
+      expect(@project.skip_path?('bar/foo.txt', Importer::Ruby)).to be_truthy
+      expect(@project.skip_path?('foo/bar.txt', Importer::Ruby)).to be_falsey
     end
 
     it "should return true if there is a path exclusion" do
@@ -370,7 +370,7 @@ describe Project do
                                  only_importer_paths: {},
                                  skip_importer_paths: {})
 
-      expect(@project.skip_path?('foo/bar.txt', Importer::Ruby)).to be_true
+      expect(@project.skip_path?('foo/bar.txt', Importer::Ruby)).to be_truthy
     end
 
     it "should return true if there is an importer path exclusion for the given importer" do
@@ -379,7 +379,7 @@ describe Project do
                                  skip_importer_paths: {'yaml' => %w(foo/)},
                                  only_importer_paths: {})
 
-      expect(@project.skip_path?('foo/bar.txt', Importer::Yaml)).to be_true
+      expect(@project.skip_path?('foo/bar.txt', Importer::Yaml)).to be_truthy
     end
 
     it "should return false if there is an importer path exclusion for a different importer" do
@@ -388,7 +388,7 @@ describe Project do
                                  only_importer_paths: {},
                                  skip_importer_paths: {'yaml' => %w(foo/)})
 
-      expect(@project.skip_path?('foo/bar.txt', Importer::Ruby)).to be_false
+      expect(@project.skip_path?('foo/bar.txt', Importer::Ruby)).to be_falsey
     end
 
     it "should return true if there no matching importer path inclusion for the given importer" do
@@ -397,7 +397,7 @@ describe Project do
                                  only_importer_paths: {'yaml' => %w(foo/)},
                                  skip_importer_paths: {})
 
-      expect(@project.skip_path?('bar/foo.txt', Importer::Yaml)).to be_true
+      expect(@project.skip_path?('bar/foo.txt', Importer::Yaml)).to be_truthy
     end
 
     it "should return false if there is no matching importer path inclusion for a different importer" do
@@ -406,7 +406,7 @@ describe Project do
                                  skip_importer_paths: {},
                                  only_importer_paths: {'yaml' => %w(foo/)})
 
-      expect(@project.skip_path?('bar/foo.txt', Importer::Ruby)).to be_false
+      expect(@project.skip_path?('bar/foo.txt', Importer::Ruby)).to be_falsey
     end
 
     it "should return false if there is no exclusion" do
@@ -415,7 +415,7 @@ describe Project do
                                  only_importer_paths: {},
                                  skip_importer_paths: {})
 
-      expect(@project.skip_path?('bar/foo.txt', Importer::Ruby)).to be_false
+      expect(@project.skip_path?('bar/foo.txt', Importer::Ruby)).to be_falsey
     end
   end
 
@@ -428,31 +428,31 @@ describe Project do
       end
 
       it "should return false if given an only path" do
-        expect(@project.skip_tree?('/only/path')).to be_false
+        expect(@project.skip_tree?('/only/path')).to be_falsey
       end
 
       it "should return false if given the parent of an only path" do
-        expect(@project.skip_tree?('/only')).to be_false
+        expect(@project.skip_tree?('/only')).to be_falsey
       end
 
       it "should return false if given the child of an only path" do
-        expect(@project.skip_tree?('/only/path/child')).to be_false
+        expect(@project.skip_tree?('/only/path/child')).to be_falsey
       end
 
       it "should return false if given an importer-specific only path" do
-        expect(@project.skip_tree?('/importeronly/path')).to be_false
+        expect(@project.skip_tree?('/importeronly/path')).to be_falsey
       end
 
       it "should return false if given the parent of an importer-specific only path" do
-        expect(@project.skip_tree?('/importeronly')).to be_false
+        expect(@project.skip_tree?('/importeronly')).to be_falsey
       end
 
       it "should return false if given the child of an importer-specific only path" do
-        expect(@project.skip_tree?('/importeronly/path/child')).to be_false
+        expect(@project.skip_tree?('/importeronly/path/child')).to be_falsey
       end
 
       it "should return true if true if a path that's not related to the only paths" do
-        expect(@project.skip_tree?('/foo/bar')).to be_true
+        expect(@project.skip_tree?('/foo/bar')).to be_truthy
       end
     end
 
@@ -463,31 +463,31 @@ describe Project do
                                       skip_importer_paths: {'foo' => %w(importerskip/path)})
       end
       it "should return true if given a skip path" do
-        expect(@project.skip_tree?('/skip/path')).to be_true
+        expect(@project.skip_tree?('/skip/path')).to be_truthy
       end
 
       it "should return false if given the parent of a skip path" do
-        expect(@project.skip_tree?('/skip')).to be_false
+        expect(@project.skip_tree?('/skip')).to be_falsey
       end
 
       it "should return true if given the child of a skip path" do
-        expect(@project.skip_tree?('/skip/path/child')).to be_true
+        expect(@project.skip_tree?('/skip/path/child')).to be_truthy
       end
 
       it "should return true if given an importer-specific skip path" do
-        expect(@project.skip_tree?('/importerskip/path')).to be_true
+        expect(@project.skip_tree?('/importerskip/path')).to be_truthy
       end
 
       it "should return false if given the parent of an importer-specific skip path" do
-        expect(@project.skip_tree?('/importerskip')).to be_false
+        expect(@project.skip_tree?('/importerskip')).to be_falsey
       end
 
       it "should return true if given the child of an importer-specific skip path" do
-        expect(@project.skip_tree?('/importerskip/path/child')).to be_true
+        expect(@project.skip_tree?('/importerskip/path/child')).to be_truthy
       end
 
       it "should return false if there are no applicable skip paths" do
-        expect(@project.skip_tree?('/foo/bar')).to be_false
+        expect(@project.skip_tree?('/foo/bar')).to be_falsey
       end
     end
   end
@@ -513,8 +513,8 @@ describe Project do
       expect(key1.translations.count).to eql(3)
       expect(key2.translations.count).to eql(3)
 
-      expect(key1.translations.where(rfc5646_locale: 'de').exists?).to be_true
-      expect(key2.translations.where(rfc5646_locale: 'de').exists?).to be_true
+      expect(key1.translations.where(rfc5646_locale: 'de').exists?).to be_truthy
+      expect(key2.translations.where(rfc5646_locale: 'de').exists?).to be_truthy
     end
 
     it "should recalculate commit readiness when required locales are added or removed" do
@@ -691,29 +691,29 @@ describe Project do
   describe "#git?" do
     it "returns true if repository_url exists" do
       project = FactoryGirl.create(:project, repository_url: "https://example.com")
-      expect(project.git?).to be_true
+      expect(project.git?).to be_truthy
     end
 
     it "returns false if repository_url is empty" do
       project = FactoryGirl.create(:project, repository_url: "")
-      expect(project.git?).to be_false
+      expect(project.git?).to be_falsey
     end
 
     it "returns false if repository_url is nil" do
       project = FactoryGirl.create(:project, repository_url: nil)
-      expect(project.git?).to be_false
+      expect(project.git?).to be_falsey
     end
   end
 
   describe "#not_git?" do
     it "returns false if repository_url exists" do
       project = FactoryGirl.create(:project, repository_url: "https://example.com")
-      expect(project.not_git?).to be_false
+      expect(project.not_git?).to be_falsey
     end
 
     it "returns true if repository_url is nil" do
       project = FactoryGirl.create(:project, repository_url: nil)
-      expect(project.not_git?).to be_true
+      expect(project.not_git?).to be_truthy
     end
   end
 end

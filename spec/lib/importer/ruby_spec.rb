@@ -21,8 +21,8 @@ describe Importer::Ruby do
       commit = FactoryGirl.create(:commit, project: project)
       locales_blob = FactoryGirl.create(:fake_blob, project: project, path: '/config/locales/en-US.rb')
       languages_blob = FactoryGirl.create(:fake_blob, project: project, path: '/config/languages/en-US.rb')
-      expect(Importer::Ruby.new(locales_blob, commit).send(:import_file?)).to be_true
-      expect(Importer::Ruby.new(languages_blob, commit).send(:import_file?)).to be_false
+      expect(Importer::Ruby.new(locales_blob, commit).send(:import_file?)).to be_truthy
+      expect(Importer::Ruby.new(languages_blob, commit).send(:import_file?)).to be_falsey
     end
   end
 

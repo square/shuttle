@@ -17,10 +17,10 @@ require 'spec_helper'
 describe SectionImporter do
   describe "#perform" do
     it "calls import_strings on the Core model" do
-      Article.any_instance.stub(:import!)
+      allow_any_instance_of(Article).to receive(:import!)
       section = FactoryGirl.create(:section)
       expect(SectionImporter::Core).to receive(:new).and_call_original
-      SectionImporter::Core.any_instance.should_receive(:import_strings)
+      expect_any_instance_of(SectionImporter::Core).to receive(:import_strings)
 
       SectionImporter.new.perform(section.id)
     end
@@ -29,7 +29,7 @@ end
 
 describe SectionImporter::Core do
   describe "import_strings" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent automatic import
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent automatic import
 
     it "doesn't call rebase_existing_keys or deactivate_all_keys if this is the initial import" do
       section = FactoryGirl.create(:section)
@@ -109,7 +109,7 @@ describe SectionImporter::Core do
   end
 
   describe "#rebase_existing_keys" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent automatic import
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent automatic import
 
     before :each do
       @article = FactoryGirl.create(:article,
@@ -168,14 +168,14 @@ describe SectionImporter::Core do
         tag = "p"
         tagged_existing_paragraphs = original_existing_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
 
-        Article.any_instance.stub(:import!)
+        allow_any_instance_of(Article).to receive(:import!)
         article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true })
         section = FactoryGirl.create(:section, article: article, source_copy: tagged_existing_paragraphs.join)
         SectionImporter.new.perform(section.id)
 
         existing_keys = section.reload.sorted_active_keys_with_translations.reject(&:is_block_tag)
         section.translations.each { |key| key.update! approved: true, copy: key.key.is_block_tag ? key.source_copy : 'translated' }
-        expect(section.reload.translations.all? { |t| t.approved? }).to be_true
+        expect(section.reload.translations.all? { |t| t.approved? }).to be_truthy
         existing_paragraphs = existing_keys.map(&:source_copy)
 
         expect(existing_paragraphs).to eql(original_existing_paragraphs)
@@ -195,7 +195,7 @@ describe SectionImporter::Core do
   end
 
   describe "#update_indexes_of_unchanged_keys!" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent automatic import
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent automatic import
 
     SCENARIOS_REGARDING_INDEX_UPDATES = [
         [ %w(a b), %w(x a b), [1, 2], "handles simple insertion to the start" ],

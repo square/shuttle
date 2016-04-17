@@ -44,7 +44,7 @@ describe ProjectDescendantsRecalculator do
 
     it "recalculates ready for all Articles of the project" do
       # setup
-      ArticleImporter.any_instance.stub(:perform) # prevent it from creating keys
+      allow_any_instance_of(ArticleImporter).to receive(:perform) # prevent it from creating keys
       project = FactoryGirl.create(:project)
       article1 = FactoryGirl.create(:article, project: project)
       article2 = FactoryGirl.create(:article, project: project)

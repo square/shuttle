@@ -36,13 +36,13 @@ describe Fencer::MessageFormat do
 
   describe ".valid?" do
     it "should return true for a string with valid interpolations" do
-      expect(Fencer::MessageFormat.valid?("String with {0} valid {1,number} tokens.")).to be_true
+      expect(Fencer::MessageFormat.valid?("String with {0} valid {1,number} tokens.")).to be_truthy
     end
 
     it "should return false for a string with invalid interpolations" do
-      expect(Fencer::MessageFormat.valid?("String with {foo}.")).to be_false
-      expect(Fencer::MessageFormat.valid?("String with {0,foo}.")).to be_false
-      expect(Fencer::MessageFormat.valid?("String with {0.")).to be_false
+      expect(Fencer::MessageFormat.valid?("String with {foo}.")).to be_falsey
+      expect(Fencer::MessageFormat.valid?("String with {0,foo}.")).to be_falsey
+      expect(Fencer::MessageFormat.valid?("String with {0.")).to be_falsey
     end
   end
 end

@@ -273,7 +273,7 @@ module.exports = {
 
   describe ".valid?" do
     it "should return true for a valid JS file" do
-      expect(Exporter::EmberModule.valid?(<<-JS)).to be_true
+      expect(Exporter::EmberModule.valid?(<<-JS)).to be_truthy
 module.exports = {
   "different": "Different (ja-JP)",
   "same": "Same (ja)"
@@ -282,15 +282,15 @@ module.exports = {
     end
 
     it "should return false for a syntactically invalid JS file" do
-      expect(Exporter::EmberModule.valid?('wat?!')).to be_false
+      expect(Exporter::EmberModule.valid?('wat?!')).to be_falsey
     end
 
     it "should return false for a semantically invalid JS file" do
-      expect(Exporter::EmberModule.valid?('var foo=bar;')).to be_false
+      expect(Exporter::EmberModule.valid?('var foo=bar;')).to be_falsey
     end
 
     it "should return false for an empty JS file" do
-      expect(Exporter::EmberModule.valid?('')).to be_false
+      expect(Exporter::EmberModule.valid?('')).to be_falsey
     end
   end
 end

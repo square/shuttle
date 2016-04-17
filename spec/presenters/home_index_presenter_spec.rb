@@ -16,7 +16,7 @@ require 'spec_helper'
 
 describe HomeIndexPresenter do
   before :each do
-    Article.any_instance.stub(:import!) # prevent auto imports
+    allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
     @presenter = HomeIndexPresenter.new([], [], [])
   end
 

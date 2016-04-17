@@ -44,7 +44,7 @@ describe SidekiqBatchManager do
     end
 
     it "defines an import_batch method which returns a sidekiq batch with the settings from the given proc" do
-      BatchFinisher.any_instance.should_receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'commit_id'=>@commit.id)
+      expect_any_instance_of(BatchFinisher).to receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'commit_id'=>@commit.id)
       batch = @commit.import_batch.tap { |b| b.jobs {} }
       expect(@commit.import_batch).to be_a_kind_of(Sidekiq::Batch)
       expect(@commit.import_batch_id).to eql(batch.bid)
@@ -92,7 +92,7 @@ describe SidekiqBatchManager do
       end
 
       it "adds a description and an on_success hook from the proc to the batch" do
-        BatchFinisher.any_instance.should_receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'commit_id'=>@commit.id)
+        expect_any_instance_of(BatchFinisher).to receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'commit_id'=>@commit.id)
         @commit.import_batch.jobs {}
         expect(@commit.import_batch.description).to eql("Import Commit #{@commit.id} (#{@commit.revision})")
       end

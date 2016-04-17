@@ -17,7 +17,7 @@ require 'spec_helper'
 describe HomeController do
   context "[when 'uncompleted' filter is selected and locales are specified]" do
     before :each do
-      Article.any_instance.stub(:import!) # prevent auto import
+      allow_any_instance_of(Article).to receive(:import!) # prevent auto import
 
       reset_elastic_search
       @request.env['devise.mapping'] = Devise.mappings[:user]

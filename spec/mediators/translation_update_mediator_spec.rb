@@ -44,7 +44,7 @@ describe TranslationUpdateMediator do
       TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
       expect(@fr_translation.copy).to eql("test copy")
       expect(@fr_translation.translator).to eql(reviewer)
-      expect(@fr_translation.approved).to be_true
+      expect(@fr_translation.approved).to be_truthy
       expect(@fr_translation.reviewer).to eql(reviewer)
       expect(@key.reload).to be_ready
     end
@@ -67,14 +67,14 @@ describe TranslationUpdateMediator do
         expect(@fr_CA_translation.translator).to eql(reviewer)
         expect(@fr_FR_translation.reload.copy).to eql("test")
         expect(@fr_FR_translation.translator).to eql(reviewer)
-        expect(@key.reload.ready).to be_true
+        expect(@key.reload.ready).to be_truthy
       end
 
       it "recalculates readiness of the key only once even if it's updating multiple translations" do
         params = ActionController::Parameters.new( translation: { copy: "test" }, copyToLocales: %w(fr-CA fr-FR) )
         expect_any_instance_of(Key).to receive(:recalculate_ready!).once.and_call_original
         TranslationUpdateMediator.new(@fr_translation, reviewer, params).update!
-        expect(@key.reload.ready).to be_true
+        expect(@key.reload.ready).to be_truthy
       end
 
       it "doesn't update any of the requested translations because one of the translations don't exist" do
@@ -90,7 +90,7 @@ describe TranslationUpdateMediator do
 
       it "doesn't update any of the requested translations because there is a problem with one of them" do
         @fr_translation.errors.add(:fake, 'error')
-        @fr_translation.stub!(:save!).and_raise(ActiveRecord::RecordInvalid, @fr_translation) # should cause save! to fail
+        allow(@fr_translation).to receive(:save!).and_raise(ActiveRecord::RecordInvalid, @fr_translation) # should cause save! to fail
 
         params = ActionController::Parameters.new( translation: { copy: "test" }, copyToLocales: %w(fr-CA fr-FR) )
         mediator = TranslationUpdateMediator.new(@fr_translation, reviewer, params)
@@ -146,14 +146,14 @@ describe TranslationUpdateMediator do
       fr_FR_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
       mediator = TranslationUpdateMediator.new(@fr_translation, translator, ActionController::Parameters.new( copyToLocales: %w(fr-CA fr-FR) ))
       expect(mediator.send(:translations_that_should_be_multi_updated)).to eql([fr_CA_translation, fr_FR_translation])
-      expect(mediator.success?).to be_true
+      expect(mediator.success?).to be_truthy
     end
 
     it "adds an error to the mediator if one of the locales user wanted to copy to is not valid because there is no LocaleAssociation to that locales" do
       fr_XX_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-XX')
       mediator = TranslationUpdateMediator.new(@fr_translation, translator, ActionController::Parameters.new( copyToLocales: %w(fr-XX)))
       mediator.send(:translations_that_should_be_multi_updated)
-      expect(mediator.success?).to be_false
+      expect(mediator.success?).to be_falsey
       expect(mediator.errors).to eql(["Cannot update translation in locale fr-XX"])
     end
 
@@ -161,7 +161,7 @@ describe TranslationUpdateMediator do
       fr_CA_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
       mediator = TranslationUpdateMediator.new(@fr_translation, translator, ActionController::Parameters.new( copyToLocales: %w(fr-CA fr-FR)))
       mediator.send(:translations_that_should_be_multi_updated)
-      expect(mediator.success?).to be_false
+      expect(mediator.success?).to be_falsey
       expect(mediator.errors).to eql(["Cannot update translation in locale fr-FR"])
     end
   end
@@ -180,7 +180,7 @@ describe TranslationUpdateMediator do
 
     it "untranslates an approved translation if copy is blank and blank_string was not specified" do
       translation.update copy: "test", approved: true, reviewer: reviewer, translator: translator
-      expect(translation.approved).to be_true
+      expect(translation.approved).to be_truthy
 
       params = ActionController::Parameters.new(translation: { copy: "" })
       mediator = TranslationUpdateMediator.new(translation, translator, params)
@@ -196,7 +196,7 @@ describe TranslationUpdateMediator do
       mediator = TranslationUpdateMediator.new(translation, translator, params)
       mediator.send(:update_single_translation!, translation)
       expect(translation.copy).to eql("")
-      expect(translation.translated).to be_true
+      expect(translation.translated).to be_truthy
       expect(translation.translator).to eql(translator)
     end
 
@@ -205,7 +205,7 @@ describe TranslationUpdateMediator do
       mediator = TranslationUpdateMediator.new(translation, translator, params)
       mediator.send(:update_single_translation!, translation)
       expect(translation.copy).to eql(" ")
-      expect(translation.translated).to be_true
+      expect(translation.translated).to be_truthy
       expect(translation.translator).to eql(translator)
     end
 
@@ -222,7 +222,7 @@ describe TranslationUpdateMediator do
         mediator = TranslationUpdateMediator.new(translation, translator, params)
         mediator.send(:update_single_translation!, translation)
         expect(translation.copy).to eql("test")
-        expect(translation.translated).to be_true
+        expect(translation.translated).to be_truthy
         expect(translation.translator).to eql(translator)
         expect(translation.approved).to be_nil
         expect(translation.reviewer).to be_nil
@@ -230,7 +230,7 @@ describe TranslationUpdateMediator do
 
       it "unapproves translation on update if copy changes" do
         translation.update copy: "test", approved: true, reviewer: reviewer, translator: reviewer
-        expect(translation.approved).to be_true
+        expect(translation.approved).to be_truthy
 
         params = ActionController::Parameters.new(translation: { copy: "changed" })
         mediator = TranslationUpdateMediator.new(translation, translator, params)
@@ -247,7 +247,7 @@ describe TranslationUpdateMediator do
         params = ActionController::Parameters.new(translation: { copy: "test" })
         mediator = TranslationUpdateMediator.new(translation, reviewer, params)
         mediator.send(:update_single_translation!, translation)
-        expect(translation.approved).to be_true
+        expect(translation.approved).to be_truthy
         expect(translation.translator).to eql(reviewer)
         expect(translation.reviewer).to eql(reviewer)
       end
@@ -258,7 +258,7 @@ describe TranslationUpdateMediator do
         params = ActionController::Parameters.new(translation: { copy: "test" })
         mediator = TranslationUpdateMediator.new(translation, reviewer, params)
         mediator.send(:update_single_translation!, translation)
-        expect(translation.approved).to be_true
+        expect(translation.approved).to be_truthy
         expect(translation.translator).to eql(translator)
         expect(translation.reviewer).to eql(reviewer)
       end

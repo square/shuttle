@@ -273,7 +273,7 @@ Ember.I18n.locales.translations["ja-JP"] = {
 
   describe ".valid?" do
     it "should return true for a valid JS file" do
-      expect(Exporter::Ember.valid?(<<-JS)).to be_true
+      expect(Exporter::Ember.valid?(<<-JS)).to be_truthy
 Ember.I18n.locales.translations["ja-JP"] = {
   "different": "Different (ja-JP)",
   "same": "Same (ja)"
@@ -282,15 +282,15 @@ Ember.I18n.locales.translations["ja-JP"] = {
     end
 
     it "should return false for a syntactically invalid JS file" do
-      expect(Exporter::Ember.valid?('wat?!')).to be_false
+      expect(Exporter::Ember.valid?('wat?!')).to be_falsey
     end
 
     it "should return false for a semantically invalid JS file" do
-      expect(Exporter::Ember.valid?('var foo=bar;')).to be_false
+      expect(Exporter::Ember.valid?('var foo=bar;')).to be_falsey
     end
 
     it "should return false for an empty JS file" do
-      expect(Exporter::Ember.valid?('')).to be_false
+      expect(Exporter::Ember.valid?('')).to be_falsey
     end
   end
 end

@@ -414,7 +414,7 @@ de:
     end
 
     before :each do
-      pending "Bug in RSpec causes this test to fail"
+      skip "Bug in RSpec causes this test to fail"
 
       allow_any_instance_of(Git::Base).to receive(:object).and_call_original
       allow_any_instance_of(Git::Base).to receive(:object).with('2dc20c984283bede1f45863b8f3b4dd9b5b554cc^{tree}:file-en.svg').
