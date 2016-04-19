@@ -109,7 +109,7 @@ de-DE:
       expect(io.string).to eql(<<-YAML)
 ---
 ja:
-  different: 異なる
+  different: "異なる"
   same: Same
       YAML
     end

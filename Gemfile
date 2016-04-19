@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.0.0', :patchlevel => '648'
+ruby '2.2.4'
 
 # FRAMEWORK
 gem 'rails', '4.1.14.2'
@@ -42,6 +42,7 @@ gem 'similar_text', '~> 0.0.4'
 gem 'paperclip'
 gem 'aws-sdk'
 gem 'execjs'
+gem 'safemode'
 
 # IMPORTING
 gem 'nokogiri', '>= 1.6.7.2'
