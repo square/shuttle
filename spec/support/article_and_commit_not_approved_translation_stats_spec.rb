@@ -16,7 +16,7 @@ require 'spec_helper'
 
 describe ArticleAndCommitNotApprovedTranslationStats do
   before :each do
-    Article.any_instance.stub(:import!) # prevent auto imports
+    allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
   end
 
   context "[Commit]" do
@@ -113,7 +113,7 @@ describe ArticleAndCommitNotApprovedTranslationStats do
         commit.keys << key
         translation = FactoryGirl.create(:translation, key: key)
 
-        ArticleAndCommitNotApprovedTranslationStats.any_instance.should_receive(:commit_translation_groups_with_stats).and_call_original
+        expect_any_instance_of(ArticleAndCommitNotApprovedTranslationStats).to receive(:commit_translation_groups_with_stats).and_call_original
         stats = ArticleAndCommitNotApprovedTranslationStats.new([commit], [], [])
         expect(stats).to_not receive(:commit_translation_groups_with_stats)
         stats.item_stat(commit, :translations, :new)
@@ -189,7 +189,7 @@ describe ArticleAndCommitNotApprovedTranslationStats do
         key = FactoryGirl.create(:key, project: project, section: section, index_in_section: 0)
         translation = FactoryGirl.create(:translation, key: key)
 
-        ArticleAndCommitNotApprovedTranslationStats.any_instance.should_receive(:article_translation_groups_with_stats).and_call_original
+        expect_any_instance_of(ArticleAndCommitNotApprovedTranslationStats).to receive(:article_translation_groups_with_stats).and_call_original
         stats = ArticleAndCommitNotApprovedTranslationStats.new([], [article], [])
         expect(stats).to_not receive(:article_translation_groups_with_stats)
         stats.item_stat(article, :translations, :new)

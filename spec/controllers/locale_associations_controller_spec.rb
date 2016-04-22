@@ -36,14 +36,14 @@ describe LocaleAssociationsController do
     it "assigns all locale_associations as @locale_associations" do
       locale_association = LocaleAssociation.create! valid_attributes
       get :index, {}, valid_session
-      assigns(:locale_associations).should eq([locale_association])
+      expect(assigns(:locale_associations)).to eq([locale_association])
     end
   end
 
   describe "GET new" do
     it "assigns a new locale_association as @locale_association" do
       get :new, {}, valid_session
-      assigns(:locale_association).should be_a_new(LocaleAssociation)
+      expect(assigns(:locale_association)).to be_a_new(LocaleAssociation)
     end
   end
 
@@ -51,7 +51,7 @@ describe LocaleAssociationsController do
     it "assigns the requested locale_association as @locale_association" do
       locale_association = LocaleAssociation.create! valid_attributes
       get :edit, {:id => locale_association.to_param}, valid_session
-      assigns(:locale_association).should eq(locale_association)
+      expect(assigns(:locale_association)).to eq(locale_association)
     end
   end
 
@@ -65,29 +65,29 @@ describe LocaleAssociationsController do
 
       it "assigns a newly created locale_association as @locale_association" do
         post :create, {:locale_association => valid_attributes}, valid_session
-        assigns(:locale_association).should be_a(LocaleAssociation)
-        assigns(:locale_association).should be_persisted
+        expect(assigns(:locale_association)).to be_a(LocaleAssociation)
+        expect(assigns(:locale_association)).to be_persisted
       end
 
       it "redirects to the created locale_association edit page" do
         post :create, {:locale_association => valid_attributes}, valid_session
-        response.should redirect_to(edit_locale_association_url(LocaleAssociation.last))
+        expect(response).to redirect_to(edit_locale_association_url(LocaleAssociation.last))
       end
     end
 
     describe "with invalid params" do
       it "assigns a newly created but unsaved locale_association as @locale_association" do
         # Trigger the behavior that occurs when invalid params are submitted
-        LocaleAssociation.any_instance.stub(:save).and_return(false)
+        allow_any_instance_of(LocaleAssociation).to receive(:save).and_return(false)
         post :create, {:locale_association => { "source_rfc5646_locale" => "invalid value" }}, valid_session
-        assigns(:locale_association).should be_a_new(LocaleAssociation)
+        expect(assigns(:locale_association)).to be_a_new(LocaleAssociation)
       end
 
       it "re-renders the 'new' template" do
         # Trigger the behavior that occurs when invalid params are submitted
-        LocaleAssociation.any_instance.stub(:save).and_return(false)
+        allow_any_instance_of(LocaleAssociation).to receive(:save).and_return(false)
         post :create, {:locale_association => { "source_rfc5646_locale" => "invalid value" }}, valid_session
-        response.should render_template("new")
+        expect(response).to render_template("new")
       end
     end
   end
@@ -100,20 +100,20 @@ describe LocaleAssociationsController do
         # specifies that the LocaleAssociation created on the previous line
         # receives the :update_attributes message with whatever params are
         # submitted in the request.
-        LocaleAssociation.any_instance.should_receive(:update).with({ "source_rfc5646_locale" => "MyString" })
+        expect_any_instance_of(LocaleAssociation).to receive(:update).with({ "source_rfc5646_locale" => "MyString" })
         put :update, {:id => locale_association.to_param, :locale_association => { "source_rfc5646_locale" => "MyString" }}, valid_session
       end
 
       it "assigns the requested locale_association as @locale_association" do
         locale_association = LocaleAssociation.create! valid_attributes
         put :update, {:id => locale_association.to_param, :locale_association => valid_attributes}, valid_session
-        assigns(:locale_association).should eq(locale_association)
+        expect(assigns(:locale_association)).to eq(locale_association)
       end
 
       it "redirects to the locale_association edit page" do
         locale_association = LocaleAssociation.create! valid_attributes
         put :update, {:id => locale_association.to_param, :locale_association => valid_attributes}, valid_session
-        response.should redirect_to(edit_locale_association_url(locale_association))
+        expect(response).to redirect_to(edit_locale_association_url(locale_association))
       end
     end
 
@@ -121,17 +121,17 @@ describe LocaleAssociationsController do
       it "assigns the locale_association as @locale_association" do
         locale_association = LocaleAssociation.create! valid_attributes
         # Trigger the behavior that occurs when invalid params are submitted
-        LocaleAssociation.any_instance.stub(:save).and_return(false)
+        allow_any_instance_of(LocaleAssociation).to receive(:save).and_return(false)
         put :update, {:id => locale_association.to_param, :locale_association => { "source_rfc5646_locale" => "invalid value" }}, valid_session
-        assigns(:locale_association).should eq(locale_association)
+        expect(assigns(:locale_association)).to eq(locale_association)
       end
 
       it "re-renders the 'edit' template" do
         locale_association = LocaleAssociation.create! valid_attributes
         # Trigger the behavior that occurs when invalid params are submitted
-        LocaleAssociation.any_instance.stub(:save).and_return(false)
+        allow_any_instance_of(LocaleAssociation).to receive(:save).and_return(false)
         put :update, {:id => locale_association.to_param, :locale_association => { "source_rfc5646_locale" => "invalid value" }}, valid_session
-        response.should render_template("edit")
+        expect(response).to render_template("edit")
       end
     end
   end
@@ -147,7 +147,7 @@ describe LocaleAssociationsController do
     it "redirects to the locale_associations list" do
       locale_association = LocaleAssociation.create! valid_attributes
       delete :destroy, {:id => locale_association.to_param}, valid_session
-      response.should redirect_to(locale_associations_url)
+      expect(response).to redirect_to(locale_associations_url)
     end
   end
 

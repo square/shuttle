@@ -60,12 +60,12 @@ describe ImportErrors do
   describe "#errored_during_import?" do
     it "returns true if there are import errors" do
       @commit.add_import_error(StandardError.new("This is a fake error"))
-      expect(@commit.errored_during_import?).to be_true
+      expect(@commit.errored_during_import?).to be_truthy
     end
 
     it "returns false if there are no import errors" do
       @commit.clear_import_errors!
-      expect(@commit.errored_during_import?).to be_false
+      expect(@commit.errored_during_import?).to be_falsey
     end
   end
 end

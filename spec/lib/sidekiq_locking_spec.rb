@@ -60,17 +60,17 @@ describe "SidekiqLockingSpec" do
   describe "#unlock" do
     it "unlocks a previously locked mutex (with simple hash as args)" do
       args = [{ 1 => 2 }]
-      expect(TestWorker.send(:mutex, *args).lock).to be_true
+      expect(TestWorker.send(:mutex, *args).lock).to be_truthy
       expect(Shuttle::Redis.keys('*')).to eql(["Redis::Mutex:testworker:[{\"1\":2}]"])
-      expect(TestWorker.unlock(*args)).to be_true
+      expect(TestWorker.unlock(*args)).to be_truthy
       expect(Shuttle::Redis.keys('*')).to eql([])
     end
 
     it "unlocks a previously locked mutex (with complex args)" do
       args = [1, 'a', { b: 'c', 2 => :d }]
-      expect(TestWorker.send(:mutex, *args).lock).to be_true
+      expect(TestWorker.send(:mutex, *args).lock).to be_truthy
       expect(Shuttle::Redis.keys('*')).to eql(["Redis::Mutex:testworker:[1,\"a\",{\"b\":\"c\",\"2\":\"d\"}]"])
-      expect(TestWorker.unlock(*args)).to be_true
+      expect(TestWorker.unlock(*args)).to be_truthy
       expect(Shuttle::Redis.keys('*')).to eql([])
     end
   end
@@ -114,7 +114,7 @@ describe "SidekiqLockingSpec" do
         ['complicated arguments including hashes', [18, "abc", { other_fields: { description: "This is a test job" }}]],
       ].each do |desc, args|
         it "will clean up the mutex right before a job starts running for a worker with #{desc}" do
-          TestWorker.any_instance.stub(:perform_without_locking) # to prevent the job from running so that we know the mutex is cleared before the contents of the perform action is run
+          allow_any_instance_of(TestWorker).to receive(:perform_without_locking) # to prevent the job from running so that we know the mutex is cleared before the contents of the perform action is run
           TestWorker.perform_once(*args)
           expect(Shuttle::Redis.keys('*')).to eql([])
         end

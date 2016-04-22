@@ -17,14 +17,14 @@ require 'spec_helper'
 describe ArticleImporter do
   describe "#perform" do
     before :each do
-      Article.any_instance.stub(:import!) # prevent auto imports
+      allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
       @article = FactoryGirl.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
       ArticleImporter.new.perform(@article.id) # first import
       @sections = @article.reload.sections
     end
 
     it "sets ready to false, and last_import_started_at to current Time" do
-      ArticleImporter::Finisher.any_instance.stub(:on_success) # prevent import from finishing
+      allow_any_instance_of(ArticleImporter::Finisher).to receive(:on_success) # prevent import from finishing
       ArticleImporter.new.perform(@article.id)
 
       expect(@article).to_not be_ready

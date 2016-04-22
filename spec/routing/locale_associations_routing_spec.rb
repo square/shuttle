@@ -18,27 +18,27 @@ describe LocaleAssociationsController do
   describe "routing" do
 
     it "routes to #index" do
-      get("/locale_associations").should route_to("locale_associations#index")
+      expect(get("/locale_associations")).to route_to("locale_associations#index")
     end
 
     it "routes to #new" do
-      get("/locale_associations/new").should route_to("locale_associations#new")
+      expect(get("/locale_associations/new")).to route_to("locale_associations#new")
     end
 
     it "routes to #edit" do
-      get("/locale_associations/1/edit").should route_to("locale_associations#edit", :id => "1")
+      expect(get("/locale_associations/1/edit")).to route_to("locale_associations#edit", :id => "1")
     end
 
     it "routes to #create" do
-      post("/locale_associations").should route_to("locale_associations#create")
+      expect(post("/locale_associations")).to route_to("locale_associations#create")
     end
 
     it "routes to #update" do
-      put("/locale_associations/1").should route_to("locale_associations#update", :id => "1")
+      expect(put("/locale_associations/1")).to route_to("locale_associations#update", :id => "1")
     end
 
     it "routes to #destroy" do
-      delete("/locale_associations/1").should route_to("locale_associations#destroy", :id => "1")
+      expect(delete("/locale_associations/1")).to route_to("locale_associations#destroy", :id => "1")
     end
 
   end

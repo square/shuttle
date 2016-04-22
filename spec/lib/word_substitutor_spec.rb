@@ -150,11 +150,11 @@ describe WordSubstitutor do
     end
 
     it "should automatically give priority to an exact match" do
-      pending "No words in dictionary to test this with"
+      skip "No words in dictionary to test this with"
       #result = @sub.substitutions("All the boxes were checked.")
-      result.suggestions.size.should eql(1)
-      result.suggestions.first.range.should eql(19..25)
-      result.suggestions.first.replacement.should eql("ticked, checkquered") # not "cheque, ticked"
+      expect(result.suggestions.size).to eql(1)
+      expect(result.suggestions.first.range).to eql(19..25)
+      expect(result.suggestions.first.replacement).to eql("ticked, checkquered") # not "cheque, ticked"
     end
   end
 

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Compiler do
-  pending
+  skip
 end
 
 describe Compiler::File do

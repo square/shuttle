@@ -83,24 +83,24 @@ dialogue.marta[1]=Te Quiero.
 
   describe ".valid?" do
     it "should return true for a syntactically valid properties file" do
-      expect(Exporter::Properties.valid?(<<-EOS)).to be_true
+      expect(Exporter::Properties.valid?(<<-EOS)).to be_truthy
 foo=bar
 foo[1]=bar two.
       EOS
-      expect(Exporter::Properties.valid?('a=b')).to be_true
-      expect(Exporter::Properties.valid?('a\\=b=b\\=a')).to be_true
+      expect(Exporter::Properties.valid?('a=b')).to be_truthy
+      expect(Exporter::Properties.valid?('a\\=b=b\\=a')).to be_truthy
     end
 
     it "should return false for a syntactically invalid properties file" do
-      expect(Exporter::Properties.valid?('foo=')).to be_false
-      expect(Exporter::Properties.valid?('foo=foo=foo')).to be_false
-      expect(Exporter::Properties.valid?('=foo')).to be_false
-      expect(Exporter::Properties.valid?('hi!')).to be_false
-      expect(Exporter::Properties.valid?("foo=\n=foo")).to be_false
+      expect(Exporter::Properties.valid?('foo=')).to be_falsey
+      expect(Exporter::Properties.valid?('foo=foo=foo')).to be_falsey
+      expect(Exporter::Properties.valid?('=foo')).to be_falsey
+      expect(Exporter::Properties.valid?('hi!')).to be_falsey
+      expect(Exporter::Properties.valid?("foo=\n=foo")).to be_falsey
     end
 
     it "should return false for an empty properties file" do
-      expect(Exporter::Properties.valid?('')).to be_false
+      expect(Exporter::Properties.valid?('')).to be_falsey
     end
   end
 end

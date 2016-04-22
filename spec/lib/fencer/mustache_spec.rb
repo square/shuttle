@@ -34,13 +34,13 @@ describe Fencer::Mustache do
 
   describe ".valid?" do
     it "should return true for a string with valid interpolations" do
-      expect(Fencer::Mustache.valid?("String with {{valid}} {{#foo}}interpolations{{/foo}}.")).to be_true
+      expect(Fencer::Mustache.valid?("String with {{valid}} {{#foo}}interpolations{{/foo}}.")).to be_truthy
     end
 
     it "should return false for a string with invalid interpolations" do
-      expect(Fencer::Mustache.valid?("String with {{invalid {{#foo}}interpolations{{/foo}}.")).to be_false
-      expect(Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations{{/bar}}.")).to be_false
-      expect(Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations.")).to be_false
+      expect(Fencer::Mustache.valid?("String with {{invalid {{#foo}}interpolations{{/foo}}.")).to be_falsey
+      expect(Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations{{/bar}}.")).to be_falsey
+      expect(Fencer::Mustache.valid?("String with {{invalid}} {{#foo}}interpolations.")).to be_falsey
     end
   end
 end

@@ -29,11 +29,11 @@ describe Fencer::Android do
 
   describe ".valid?" do
     it "should return true for a string that only contains a-z between { }" do
-      expect(Fencer::Android.valid?("String with {two} {tokens}.")).to be_true
+      expect(Fencer::Android.valid?("String with {two} {tokens}.")).to be_truthy
     end
 
     it "should return false for a string that only contains any other character between { }" do
-      expect(Fencer::Android.valid?("String with {{two}} {tokens}.")).to be_false
+      expect(Fencer::Android.valid?("String with {{two}} {tokens}.")).to be_falsey
     end
   end
 end

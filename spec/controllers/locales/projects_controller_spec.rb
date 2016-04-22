@@ -163,7 +163,7 @@ describe Locale::ProjectsController do
         request.env["devise.mapping"] = Devise.mappings[:user]
         sign_in user
 
-        Article.any_instance.stub(:import!) # prevent auto import
+        allow_any_instance_of(Article).to receive(:import!) # prevent auto import
         reset_elastic_search
 
         @project = FactoryGirl.create(:project, repository_url: nil)
