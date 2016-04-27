@@ -19,7 +19,7 @@ body.translations {
     position: absolute;
     top: 25px;
     right: 30px;
-    
+
     &:active {
       position: absolute !important;
       top: 24px !important;
@@ -28,7 +28,7 @@ body.translations {
   }
 
   .well {
-    white-space: pre; 
+    white-space: pre-wrap;
     padding: 5px 10px;
     background-color: #fbfcfc;
     border: 1px solid #d3d9de;
@@ -83,7 +83,7 @@ body.translations {
     overflow-y: auto;
 
     legend { margin-bottom: -20px };
-  
+
     .history-entry {
       padding: 10px 20px;
       &:hover {
@@ -95,7 +95,7 @@ body.translations {
         border-top: 1px solid $gray5;
       }
       &:last-of-type {
-        border-bottom: 1px solid $gray5; 
+        border-bottom: 1px solid $gray5;
       }
 
       .change {
@@ -151,7 +151,7 @@ body.translations {
     margin-left: 10px;
   }
 
-  .form-actions { 
+  .form-actions {
     input+input, button+button, button+input, input + button {
       margin: 0px;
       margin-left: 10px;
