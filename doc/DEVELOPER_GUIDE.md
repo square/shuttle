@@ -51,7 +51,7 @@ You should also avoid interpolating string fragments into your translations. Do
 not do this:
 
 ```` ruby
-t("Sign up to receive your %{pricing} card reader", pricing: reader_free? ? t('free'), t('low-cost'))
+t("Sign up to receive your %{pricing} card reader", pricing: reader_free? ? t('free') : t('low-cost'))
 ````
 
 Instead, see the example above.
