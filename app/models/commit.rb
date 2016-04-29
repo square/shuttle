@@ -246,6 +246,8 @@ class Commit < ActiveRecord::Base
   # @return branch names that contain this commit or nil if not found. e.g "* master\n"
   def on_any_branch?
     project.repo.lib.send(:command, :branch, ['--contains', revision]).present?
+  rescue Git::GitExecuteError
+    false
   end
 
   # @return [String, nil] The URL to this commit on GitHub, GitHub Enterprise or on Stash,
