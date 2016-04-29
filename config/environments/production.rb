@@ -91,6 +91,8 @@ Shuttle::Application.configure do
 
   config.action_mailer.default_url_options = Shuttle::Configuration.app.default_url_options
 
+  # Force cookies to be sent over https only
+  config.force_ssl = true
   config.use_ssl = true
 
   config.action_mailer.delivery_method = :smtp
