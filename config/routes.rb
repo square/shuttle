@@ -34,6 +34,7 @@ Shuttle::Application.routes.draw do
       resources :projects, only: [] do
         resources :articles, param: :name, only: [:index, :new, :create, :show, :edit, :update] do
           member do
+            patch :hide_in_dashboard, :show_in_dashboard
             get :manifest, :issues
           end
         end
