@@ -30,8 +30,9 @@ module Api
       before_filter :authenticate_with_api_token!,   if: :api_request?
 
       before_filter :find_project
-      before_filter :find_article, only: [:show, :edit, :update, :manifest, :issues]
+      before_filter :find_article, only: [:show, :edit, :update, :manifest, :issues, :show_in_dashboard, :hide_in_dashboard]
       before_filter :set_article_issues_presenter, only: [:show, :issues]
+      before_filter :reviewer_required, only: [:show_in_dashboard, :hide_in_dashboard]
 
       # EXTERNAL ONLY
       #
@@ -236,6 +237,52 @@ module Api
               render json: { error: { errors: @article.errors } }, status: :bad_request
             end
           end
+        end
+      end
+
+      # Hide an article from dashboard
+      #
+      # Routes
+      # ------
+      # * `PATCH /api/v1/projects/:project_id/articles/:name/hide_in_dashboard`
+      #
+      # Path Parameters
+      # ---------------
+      #
+      # |                  |                                    |
+      # |:-----------------|:-----------------------------------|
+      # | `project_id`     | The slug of a Project.             |
+      # | `name`           | Article name.                      |
+
+      def hide_in_dashboard
+        if @article.hidden
+          redirect_to edit_api_v1_project_article_path(@project.id, @article.name), flash: { alert: 'This article state has been modified, please refresh and try again'}
+        else
+          @article.update!(hidden: true)
+          redirect_to edit_api_v1_project_article_path(@project.id, @article.name), flash: { success: 'This article is now hidden from dashboard'}
+        end
+      end
+
+      # Update an hidden article to show on dashboard
+      #
+      # Routes
+      # ------
+      # * `PATCH /api/v1/projects/:project_id/articles/:name/show_in_dashboard`
+      #
+      # Path Parameters
+      # ---------------
+      #
+      # |                  |                                    |
+      # |:-----------------|:-----------------------------------|
+      # | `project_id`     | The slug of a Project.             |
+      # | `name`           | Article name.                      |
+
+      def show_in_dashboard
+        unless @article.hidden
+          redirect_to edit_api_v1_project_article_path(@project.id, @article.name), flash: { alert: 'This article state has been modified, please refresh and try again'}
+        else
+          @article.update!(hidden: false)
+          redirect_to edit_api_v1_project_article_path(@project.id, @article.name), flash: { success: 'This article is now showing on dashboard'}
         end
       end
 

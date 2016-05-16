@@ -66,7 +66,7 @@ class HomeIndexForm
 
   def set_filter__status
     status = params[:filter__status].to_s.presence || cookies[:home_index__filter__status].to_s.presence || 'uncompleted'
-    status = 'uncompleted' unless %w(uncompleted completed all).include?(status)
+    status = 'uncompleted' unless %w(hidden uncompleted completed all).include?(status)
     vars[:filter__status] = cookies[:home_index__filter__status] = status
   end
 

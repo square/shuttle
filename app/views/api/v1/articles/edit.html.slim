@@ -19,6 +19,11 @@
 
 .header
   h1 Article (id: #{@article.id})
+  - if current_user.reviewer?
+    .pull-right
+      .row
+        = button_to 'Re-Open', show_in_dashboard_api_v1_project_article_path, disabled: !@article.hidden, method: 'patch', class: 'button submit show-btn'
+        = button_to 'Hide', hide_in_dashboard_api_v1_project_article_path, disabled: @article.hidden, method: 'patch', class: 'button submit hide-btn'
 hr.divider
 
 = render 'form'

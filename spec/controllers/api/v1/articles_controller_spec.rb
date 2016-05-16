@@ -19,10 +19,16 @@ require 'spec_helper'
 describe Api::V1::ArticlesController do
   let(:project) { FactoryGirl.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
   let(:monitor_user) { FactoryGirl.create(:user, :confirmed, role: 'monitor') }
+  let(:reviewer_user) { FactoryGirl.create(:user, :confirmed, role: 'reviewer') }
 
   def sign_in_monitor_user
     request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in monitor_user
+  end
+
+  def sign_in_reviewer_user
+    request.env['devise.mapping'] = Devise.mappings[:user]
+    sign_in reviewer_user
   end
 
   shared_examples_for "api-or-session-authenticateable-and-filters" do |options={}|
@@ -372,6 +378,50 @@ describe Api::V1::ArticlesController do
       end
     end
 
+  end
+
+  describe "#hide_in_dashboard" do
+    before(:each) do
+      @article = FactoryGirl.create(:article, project: project, name: "article 1")
+    end
+
+    it "should not allow monitor user to hide article" do
+      sign_in_monitor_user
+      patch :hide_in_dashboard, project_id: project.id, name: @article.name
+      expect(response.status).to eql(302)
+      @article.reload
+      expect(@article.hidden).to be false
+    end
+
+    it "should allow reviewer user to hide article" do
+      sign_in_reviewer_user
+      patch :hide_in_dashboard, project_id: project.id, name: @article.name
+      expect(response.status).to eql(302)
+      @article.reload
+      expect(@article.hidden).to be true
+    end
+  end
+
+  describe "#show_in_dashboard" do
+    before(:each) do
+      @article = FactoryGirl.create(:article, project: project, name: "article 1", hidden: true)
+    end
+
+    it "should not allow monitor user to re-open hidden article" do
+      sign_in_monitor_user
+      patch :show_in_dashboard, project_id: project.id, name: @article.name
+      expect(response.status).to eql(302)
+      @article.reload
+      expect(@article.hidden).to be true
+    end
+
+    it "should allow reviewer user to re-open hidden article" do
+      sign_in_reviewer_user
+      patch :show_in_dashboard, project_id: project.id, name: @article.name
+      expect(response.status).to eql(302)
+      @article.reload
+      expect(@article.hidden).to be false
+    end
   end
 
   describe "#manifest" do

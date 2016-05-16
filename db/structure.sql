@@ -58,7 +58,8 @@ CREATE TABLE articles (
     creator_id integer,
     updater_id integer,
     created_via_api boolean DEFAULT true NOT NULL,
-    name_sha character varying(64) NOT NULL
+    name_sha character varying(64) NOT NULL,
+    hidden boolean DEFAULT false NOT NULL
 );
 
 
@@ -1785,4 +1786,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160303001118');
 INSERT INTO schema_migrations (version) VALUES ('20160303235403');
 
 INSERT INTO schema_migrations (version) VALUES ('20160404235737');
+
+INSERT INTO schema_migrations (version) VALUES ('20160516051607');
 
