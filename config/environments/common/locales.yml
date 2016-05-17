@@ -1,2 +1,6 @@
 ---
 source_locale: en
+default_filter_locales:
+  - fr
+  - jp
+
