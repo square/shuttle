@@ -1,4 +1,4 @@
-/ Copyright 2014 Square Inc.
+/ Copyright 2016 Square Inc.
 /
 /    Licensed under the Apache License, Version 2.0 (the "License");
 /    you may not use this file except in compliance with the License.
@@ -24,15 +24,13 @@
 
 hr.divider
 
-.border 
+.border
   .filter-bar#alphabet-bar
     / = button_tag 'Language', class: 'default'
     ul
       - "\#ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").each do |letter|
         li
           a href=("#glossary-table-" + letter) = letter
-  table.table.hover-rows#glossary
-        
 
 / Add Term Modal
 .row
@@ -44,22 +42,22 @@ hr.divider
 
         .control-group
           = f.label :source_copy, 'English', class: "control-label"
-          .controls 
+          .controls
             = f.text_field :source_copy, placeholder: 'English', autocomplete: 'off', required: 'true'
 
         .control-group
           = f.label :context, 'Context', class: "control-label"
-          .controls 
+          .controls
             = f.text_field :context, placeholder: 'Context', autocomplete: 'off'
 
         .control-group
           = f.label :notes, 'Notes', class: "control-label"
-          .controls                   
+          .controls
             = f.text_area :notes, rows: "4", placeholder: 'Notes', autocomplete: 'off', class: 'resize'
 
         .control-group
           = f.label :due_date, 'Due Date', class: "control-label"
-          .controls 
+          .controls
             = f.text_field :due_date, autocomplete: 'off'
 
         = submit_tag 'Submit', class: 'primary'
@@ -74,9 +72,71 @@ hr.divider
       .control-group
         = label_tag :glossary, 'Target Locales', class: 'control-label'
         .controls
-          .list 
+          .list
             = content_tag_field 'div', :glossary, :target_locales, \
               class: 'array-field', 'data-value' => []
 
-      = button_tag 'Save', class: 'primary save'
+      = button_tag 'Save', class: 'primary save-target-locales'
+
+table.table.hover-rows#glossary-table
+  thead
+    tr
+      / Empty <th> to account for the alphabet table anchors
+      th
+      th
+        = @source_locale
+      - @target_locales.each do |locale|
+        - if locale.rfc5646 != @source_locale
+          th
+            = locale.rfc5646
+
+  - @anchors.each do |letter, anchor_id|
+    tbody id=anchor_id class="glossary-table-anchor"
+      tr
+        td
+          strong
+            = letter
+    - @grouped_source_entries[letter].try(:each) do |source_entry|
+      tbody.glossary-row
+        tr.glossary-row-header
+          / Empty <td> to account for the alphabet table anchors
+          td
+          td
+              = source_entry.source_copy
+          - @target_locales.each do |locale|
+            - if locale.rfc5646 != @source_locale
+              td.glossary-row-header-source-entry
+                = source_entry.locale_glossary_entries.detect { |locale_entry| locale_entry.rfc5646_locale == locale.rfc5646 }.try(:copy)
+
+        tr.glossary-row-detail
+          / Empty <td> to account for the alphabet table anchors
+          td
+          td
+            div
+              = link_to edit_glossary_source_path(source_entry), class: 'button default square' do
+                i.fa.fa-pencil-square-o
+              p.label Context
+              p = source_entry.context
+              p.label Notes
+              p = source_entry.notes
+
+          - @target_locales.each do |locale|
+            - locale_entry = source_entry.locale_glossary_entries.detect { |locale_entry| locale_entry.rfc5646_locale == locale.rfc5646 }
+
+            - if locale_entry
+              td
+                div.locale-section data-approve-url=approve_glossary_source_locale_path(source_entry.id, locale_entry.rfc5646_locale) data-reject-url=reject_glossary_source_locale_path(source_entry.id, locale_entry.rfc5646_locale)
+                  = link_to edit_glossary_source_locale_path(source_entry, locale_entry), class: 'button default square' do
+                    i.fa.fa-pencil-square-o
+                  = button_tag class: 'glossary-reject-locale button reject square', disabled: (!locale_entry || !locale_entry.approved || locale_entry.copy.blank?) do
+                    i.fa.fa-ban
+                  = button_tag class: 'glossary-approve-locale button approve square', disabled: (!locale_entry || locale_entry.approved || locale_entry.copy.blank?) do
+                    i.fa.fa-check
+                  p.label Notes
+                  p = locale_entry.try(:notes)
+            - elsif locale.rfc5646 != @source_locale
+              td
+                div
+                  = button_to glossary_source_locales_path(source_entry), class: 'button default square', params: { 'locale_glossary_entry[rfc5646_locale]' => locale.rfc5646} do
+                    i.fa.fa-pencil-square-o
 
