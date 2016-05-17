@@ -43,6 +43,7 @@ gem 'paperclip', '>= 4.2.2'
 gem 'aws-sdk'
 gem 'execjs'
 gem 'safemode'
+gem 'sentry-raven'
 
 # IMPORTING
 gem 'nokogiri', '>= 1.6.7.2'
@@ -81,6 +82,10 @@ gem 'coffee-rails'
 gem 'uglifier'
 gem 'hogan_assets'
 
+source 'https://rails-assets.org' do
+  gem 'rails-assets-raven-js'
+end
+
 group :development do
   gem 'redcarpet', require: nil
   gem 'yard', require: nil, platform: :mri
@@ -101,11 +106,6 @@ group :development, :test do
   gem 'binding_of_caller'
   gem 'pry'
 end
-
-# ERROR NOTIFICATIONS
-gem 'squash_ruby', require: 'squash/ruby'
-gem 'squash_rails', require: 'squash/rails'
-gem 'squash_javascript', require: 'squash/javascript'
 
 # DEPLOYING
 group :development do
