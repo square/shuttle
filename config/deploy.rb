@@ -22,11 +22,8 @@ set :deploy_to, "/app/#{fetch :application}"
 set :linked_files, %w{  config/database.yml
                         config/environments/staging/app.yml
                         config/environments/staging/paperclip.yml
-                        config/environments/staging/squash.yml
                         config/environments/production/app.yml
-                        config/environments/production/paperclip.yml
-                        config/environments/production/squash.yml
-                        config/environments/production/stash.yml }
+                        config/environments/production/paperclip.yml }
 set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos tmp/working_repos}
 
 set :rvm_type, :system
@@ -55,5 +52,3 @@ namespace :deploy do
   after :finishing, 'deploy:restart'
   after :finishing, 'deploy:sidekiq:restart'
 end
-
-before 'deploy:publishing', 'squash:write_revision'
