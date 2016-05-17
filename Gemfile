@@ -85,6 +85,10 @@ source 'https://rails-assets.org' do
 end
 
 group :development do
+  gem 'capistrano', '~> 3.5'
+  gem 'capistrano-bundler', '~> 1.1'
+  gem 'capistrano-rails', '~> 1.1'
+  gem 'capistrano-rvm', '~> 0.1'
   gem 'redcarpet', require: nil
   gem 'yard', require: nil, platform: :mri
 end
@@ -103,12 +107,4 @@ group :development, :test do
   gem 'better_errors'
   gem 'binding_of_caller'
   gem 'pry'
-end
-
-# DEPLOYING
-group :development do
-  gem 'capistrano'
-  gem 'capistrano-rvm', '>= 0.1.0' # seems to really like 0.0.3
-  gem 'capistrano-bundler'
-  gem 'capistrano-rails'
 end
