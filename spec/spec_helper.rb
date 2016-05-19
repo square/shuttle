@@ -52,6 +52,12 @@ RSpec.configure do |config|
   # rspec-rails.
   config.infer_base_class_for_anonymous_controllers = false
 
+  config.before :each do
+    allow(Rugged::Repository).to receive(:clone_at).and_call_original
+    allow(Rugged::Repository).to receive(:clone_at).with(/^git:\/\/git\.example\.com\/square\/project-/, an_instance_of(String), an_instance_of(Hash)).
+      and_return(instance_double('Rugged::Repository'))
+  end
+
   config.include Devise::TestHelpers, type: :controller
   config.include Paperclip::Shoulda::Matchers
 

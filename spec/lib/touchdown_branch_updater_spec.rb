@@ -35,8 +35,17 @@ describe TouchdownBranchUpdater do
   let(:grandparent_revision) { 'a26f7f6a09aa362ff777c0bec11fa084e66efe64' }
 
   before do
-    project.working_repo.update_ref("refs/heads/#{project.touchdown_branch}", parent_revision)
-    project.working_repo.update_ref("refs/remotes/origin/#{project.touchdown_branch}", parent_revision)
+    # FIXME could this be done better?
+    if project.working_repo.branches.map(&:name).include? project.touchdown_branch
+      project.working_repo.references.update("refs/heads/#{project.touchdown_branch}", parent_revision)
+    else
+      project.working_repo.create_branch(project.touchdown_branch, parent_revision)
+    end
+    if project.working_repo.references.map(&:name).include?("refs/remotes/origin/#{project.touchdown_branch}")
+      project.working_repo.references.update("refs/remotes/origin/#{project.touchdown_branch}", parent_revision)
+    else
+      project.working_repo.references.create("refs/remotes/origin/#{project.touchdown_branch}", parent_revision)
+    end
   end
 
   describe "#update" do
@@ -84,7 +93,7 @@ describe TouchdownBranchUpdater do
         commit_and_translate(project, head_revision)
         TouchdownBranchUpdater.new(project).update
 
-        # Running touchdown branch updater should not send another push 
+        # Running touchdown branch updater should not send another push
         working_repo = project.working_repo
         allow(project).to receive(:working_repo).and_yield(working_repo)
         expect(working_repo).to_not receive(:push)
@@ -107,7 +116,7 @@ describe TouchdownBranchUpdater do
         original_logger = Rails.logger
         Rails.logger = logger
 
-        allow(project.working_repo).to receive('push').and_raise(Timeout::Error)
+        allow_any_instance_of(Rugged::Remote).to receive(:push).and_raise(Timeout::Error)
         allow(logger).to receive(:info)
         expect(logger).to receive(:error).with("[TouchdownBranchUpdater] Timed out on updating touchdown branch for #{project.inspect}")
         TouchdownBranchUpdater.new(project).update
@@ -130,19 +139,19 @@ describe TouchdownBranchUpdater do
 
         it "pushes a new commit with the correct author" do
           TouchdownBranchUpdater.new(project).update
-          expect(project.working_repo.object(project.touchdown_branch).author.name).to eql(Shuttle::Configuration.app.git.author.name)
-          expect(project.working_repo.object(project.touchdown_branch).author.email).to eql(Shuttle::Configuration.app.git.author.email)
+          expect(project.working_repo.rev_parse(project.touchdown_branch).author[:name]).to eql(Shuttle::Configuration.app.git.author.name)
+          expect(project.working_repo.rev_parse(project.touchdown_branch).author[:email]).to eql(Shuttle::Configuration.app.git.author.email)
         end
 
         it "creates a manifest file in the specified directory" do
           TouchdownBranchUpdater.new(project).update
-          manifest_filepath = Pathname.new(project.working_repo.dir.path).join(project.manifest_directory, 'manifest.yaml')
+          manifest_filepath = Pathname.new(project.working_repo.workdir).join(project.manifest_directory, 'manifest.yaml')
           expect(File.exist?(manifest_filepath)).to be_truthy
         end
 
         it "creates a valid manifest file" do
           TouchdownBranchUpdater.new(project).update
-          manifest_filepath = Pathname.new(project.working_repo.dir.path).join(project.manifest_directory, 'manifest.yaml')
+          manifest_filepath = Pathname.new(project.working_repo.workdir).join(project.manifest_directory, 'manifest.yaml')
           expect(File.read(manifest_filepath)).to include('de-DE:')
         end
 
@@ -151,23 +160,24 @@ describe TouchdownBranchUpdater do
             # head_revision is translated, but parent_revision & grandparent_revision is not.
             source_branch = 'green'
             project.update! watched_branches: [source_branch, 'master']
-            project.working_repo.update_ref("refs/heads/master", head_revision)
-            project.working_repo.checkout('master')
-            project.working_repo.push('origin', 'master', force: true)
-            project.working_repo.update_ref("refs/heads/#{project.touchdown_branch}", grandparent_revision)
-            project.working_repo.checkout(project.touchdown_branch)
-            project.working_repo.push('origin', project.touchdown_branch, force: true)
-            project.working_repo.update_ref("refs/heads/green", parent_revision)
-            project.working_repo.checkout(source_branch)
-            project.working_repo.push('origin', source_branch, force: true)
+            project.working_repo.references.update('refs/heads/master', head_revision)
+            project.working_repo.remotes['origin'].push(['+refs/heads/master'])
+            project.working_repo.references.update("refs/heads/#{project.touchdown_branch}", grandparent_revision)
+            project.working_repo.remotes['origin'].push(["+refs/heads/#{project.touchdown_branch}"])
+            if project.working_repo.references.map(&:name).include?("refs/heads/#{source_branch}")
+              project.working_repo.references.update("refs/heads/#{source_branch}", parent_revision)
+            else
+              project.working_repo.references.create("refs/heads/#{source_branch}", parent_revision)
+            end
+            project.working_repo.remotes['origin'].push(["+refs/heads/#{source_branch}"])
           end
 
           it "doesn't update touchdown branch if the tip of first watched branch (green) is not translated" do # since the tip of green is not translated
             TouchdownBranchUpdater.new(project).update
-
             project.working_repo.checkout(project.touchdown_branch)
-            project.working_repo.pull('origin', project.touchdown_branch)
-            expect(project.working_repo.object(project.touchdown_branch).sha).to eql(grandparent_revision)
+            project.working_repo.fetch('origin')
+            project.working_repo.reset("origin/#{project.touchdown_branch}", :hard)
+            expect(project.working_repo.branches[project.touchdown_branch].target_id).to eql(grandparent_revision)
           end
 
           it "updates the touchdown branch to the tip of first watched branch if the tip of first watched branch is transalted; adds a new commit with the manifest file" do
@@ -176,10 +186,11 @@ describe TouchdownBranchUpdater do
             TouchdownBranchUpdater.new(project).update
 
             project.working_repo.checkout(project.touchdown_branch)
-            project.working_repo.pull('origin', project.touchdown_branch)
-            expect(project.working_repo.log[1].sha).to eql(parent_revision)
-            expect(project.working_repo.log[0].author.name).to eql(Shuttle::Configuration.app.git.author.name)
-            expect(project.working_repo.log[0].author.email).to eql(Shuttle::Configuration.app.git.author.email)
+            project.working_repo.fetch('origin')
+            project.working_repo.reset("origin/#{project.touchdown_branch}", :hard)
+            expect(project.working_repo.head.target.parents[0].oid).to eql(parent_revision)
+            expect(project.working_repo.head.target.author[:name]).to eql(Shuttle::Configuration.app.git.author.name)
+            expect(project.working_repo.head.target.author[:email]).to eql(Shuttle::Configuration.app.git.author.email)
           end
         end
       end
@@ -196,7 +207,7 @@ describe TouchdownBranchUpdater do
 
         it "creates the non-existant directory and a manifest file in it" do
           TouchdownBranchUpdater.new(project).update
-          manifest_filepath = Pathname.new(project.working_repo.dir.path).join(project.manifest_directory)
+          manifest_filepath = Pathname.new(project.working_repo.workdir).join(project.manifest_directory)
           expect(File.exist?(manifest_filepath)).to be_truthy
         end
       end
@@ -209,7 +220,7 @@ describe TouchdownBranchUpdater do
 
         it "creates a manifest file in the specified directory" do
           TouchdownBranchUpdater.new(project).update
-          manifest_filepath = Pathname.new(project.working_repo.dir.path).join(project.manifest_directory, 'zzz_manifest.yaml')
+          manifest_filepath = Pathname.new(project.working_repo.workdir).join(project.manifest_directory, 'zzz_manifest.yaml')
           expect(File.exist?(manifest_filepath)).to be_truthy
         end
       end
@@ -227,7 +238,7 @@ describe TouchdownBranchUpdater do
           project.update! default_manifest_format: 'yaml', manifest_directory: 'config/locales'
 
           TouchdownBranchUpdater.new(project).update
-          manifest_filepath = Pathname.new(project.working_repo.dir.path).join(project.manifest_directory, 'manifest.yaml')
+          manifest_filepath = Pathname.new(project.working_repo.workdir).join(project.manifest_directory, 'manifest.yaml')
           expect(File.exist?(manifest_filepath)).to be_truthy
         end
       end
@@ -249,4 +260,3 @@ describe TouchdownBranchUpdater do
     end
   end
 end
-

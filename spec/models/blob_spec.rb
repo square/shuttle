@@ -17,14 +17,14 @@ require 'spec_helper'
 describe Blob do
   before :each do
     @project = FactoryGirl.create(:project)
-    @repo = double('Git::Repo')
+    @repo = instance_double('Rugged::Repository')
     @blob = FactoryGirl.create(:blob, sha: 'abc123', project: @project)
     @commit = FactoryGirl.create(:commit, project: @project)
   end
 
   describe "#import_strings" do
     it "should call #import on an importer subclass" do
-      expect(@blob).to receive(:blob!).and_return(double(Git::Object::Blob))
+      expect(@blob).to receive(:blob!).and_return(double(Rugged::Blob))
       imp      = Importer::Base.implementations
       instance = double(imp.to_s, :skip? => false)
       expect(imp).to receive(:new).once.with(@blob, @commit).and_return(instance)
@@ -33,7 +33,7 @@ describe Blob do
     end
 
     it "should pass a commit if given using :commit" do
-      expect(@blob).to receive(:blob!).and_return(double(Git::Object::Blob))
+      expect(@blob).to receive(:blob!).and_return(double(Rugged::Blob))
       imp      = Importer::Base.implementations.first
       instance = double(imp.to_s, :skip? => false)
       expect(imp).to receive(:new).once.with(@blob, @commit).and_return(instance)
@@ -44,7 +44,7 @@ describe Blob do
     it "should raise an exception if sha is still unknown after fetching" do
       allow(@project).to receive(:repo).and_yield(@repo)
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil)
       expect { @blob.import_strings(double(Importer::Yaml), @commit) }.to raise_error(Git::BlobNotFoundError)
     end
   end
@@ -57,10 +57,10 @@ describe Blob do
     end
 
     it "returns the git blob object" do
-      @blob_obj = double('Git::Object::Blob', sha: 'abc123')
+      @blob_obj = instance_double('Rugged::Blob', oid: 'abc123')
       expect(File).to receive(:exist?).and_return(true)
-      expect(Git).to receive(:bare).and_return(@repo)
-      expect(@repo).to receive(:object).with("abc123").and_return(@blob_obj)
+      expect(Rugged::Repository).to receive(:bare).and_return(@repo)
+      expect(@repo).to receive(:lookup).with('abc123').and_return(@blob_obj)
       expect(@blob.blob).to eql(@blob_obj)
     end
   end
@@ -68,24 +68,24 @@ describe Blob do
   describe "#blob!" do
     before :each do
       allow(@project).to receive(:repo).and_yield(@repo)
-      @blob_obj = double('Git::Object::Blob', sha: 'abc123')
+      @blob_obj = double('Rugged::Blob', sha: 'abc123')
     end
 
     it "returns the git object for the blob without fetching if it's already in local repo" do
       expect(@repo).to_not receive(:fetch)
-      expect(@repo).to receive(:object).with('abc123').once.and_return(@blob_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@blob_obj)
       expect(@blob.blob!).to eql(@blob_obj)
     end
 
     it "returns the git object for the blob after fetching if it's not initially in local repo, but is in the remote repo" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil, @blob_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil, @blob_obj)
       expect(@blob.blob!).to eql(@blob_obj)
     end
 
     it "raises Git::BlobNotFoundError if the sha is not found" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil)
       expect { @blob.blob! }.to raise_error(Git::BlobNotFoundError, "Blob not found in git repo: abc123")
     end
 

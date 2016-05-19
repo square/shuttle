@@ -342,8 +342,10 @@ describe Commit do
       allow(BlobImporter).to receive(:perform_once)
       @project = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)))
       @commit = FactoryGirl.create(:commit, project: @project)
-      @file1 = double(Git::Object::Blob, contents: 'hello, world1', sha: 'abc123')
-      @file2 = double(Git::Object::Blob, contents: 'hello, world1', sha: 'abc123')
+      @file1 = double(Rugged::Blob)
+      @file2 = double(Rugged::Blob)
+      allow(@file1).to receive(:[]).and_return('abc123')
+      allow(@file2).to receive(:[]).and_return('abc123')
     end
 
     it "should create 2 different blobs for 2 different files even if their contents (thus SHAs) are same" do
@@ -384,20 +386,21 @@ describe Commit do
 
   describe "#commit" do
     it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
-      project = FactoryGirl.create(:project, repository_url: nil)
+      project = FactoryGirl.create(:project)
       commit = FactoryGirl.create(:commit, project: project)
+      project.repository_url = nil
       expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
 
     it "returns the git commit object" do
       project = FactoryGirl.create(:project)
-      repo = double('Git::Repo')
+      repo = instance_double('Rugged::Repository')
       commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
 
-      commit_obj = double('Git::Object::Commit', revision: 'abc123')
+      commit_obj = instance_double('Rugged::Commit')
       expect(File).to receive(:exist?).and_return(true)
-      expect(Git).to receive(:bare).and_return(repo)
-      expect(repo).to receive(:object).with("abc123").and_return(commit_obj)
+      expect(Rugged::Repository).to receive(:bare).and_return(repo)
+      expect(repo).to receive(:lookup).with("abc123").and_return(commit_obj)
       expect(commit.commit).to eql(commit_obj)
     end
   end
@@ -406,33 +409,34 @@ describe Commit do
     before :each do
       @project = FactoryGirl.create(:project)
       @commit = FactoryGirl.create(:commit, revision: 'abc123', project: @project)
-      @repo = double('Git::Repo')
-      @commit_obj = double('Git::Object::Commit', sha: 'abc123')
+      @repo = double('Rugged::Repository')
+      @commit_obj = double('Rugged::Commit', sha: 'abc123')
       allow(@project).to receive(:repo).and_yield(@repo)
       allow(@commit).to receive(:commit).and_return(@commit_obj)
     end
 
     it "returns the git object for the commit without fetching if it's already in local repo" do
       expect(@repo).to_not receive(:fetch)
-      expect(@repo).to receive(:object).with('abc123').once.and_return(@commit_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@commit_obj)
       expect(@commit.commit!).to eql(@commit_obj)
     end
 
     it "returns the git object for the commit after fetching if it's not initially in local repo, but is in the remote repo" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil, @commit_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil, @commit_obj)
       expect(@commit.commit!).to eql(@commit_obj)
     end
 
     it "raises Git::CommitNotFoundError if the revision is not found" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil)
       expect { @commit.commit! }.to raise_error(Git::CommitNotFoundError, "Commit not found in git repo: abc123")
     end
 
     it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
-      project = FactoryGirl.create(:project, repository_url: nil)
+      project = FactoryGirl.create(:project)
       commit = FactoryGirl.create(:commit, project: project)
+      project.repository_url = nil
       expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end

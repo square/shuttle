@@ -1,11 +1,4 @@
 GIT
-  remote: git://github.com/RISCfuture/ruby-git.git
-  revision: 88076a50eb70fd96f2417b646fe37fb2f6c4cca4
-  ref: 88076a50eb70fd96f2417b646fe37fb2f6c4cca4
-  specs:
-    git (1.2.6)
-
-GIT
   remote: git://github.com/mhfs/sidekiq-failures.git
   revision: 4ff0e1756640bd8c77a9657ad7ea5cae73447091
   specs:
@@ -286,6 +279,7 @@ GEM
       sexp_processor (~> 4.0)
     ruby_parser (3.8.2)
       sexp_processor (~> 4.1)
+    rugged (0.24.0)
     safemode (1.2.4)
       ruby2ruby (>= 2.0.6)
       ruby_parser (>= 3.2.0)
@@ -399,7 +393,6 @@ DEPENDENCIES
   faker
   find_or_create_on_scopes
   font-awesome-rails
-  git!
   hogan_assets
   html_validation
   httparty
@@ -425,6 +418,7 @@ DEPENDENCIES
   redis-rack-cache
   redis-rails
   rspec-rails (~> 3.0)
+  rugged
   safemode
   sass-rails (= 4.0.3)
   sentry-raven

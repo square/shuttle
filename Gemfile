@@ -38,7 +38,7 @@ gem 'autoprefixer-rails'
 
 # UTILITIES
 gem 'json'
-gem 'git', github: 'RISCfuture/ruby-git', ref: '88076a50eb70fd96f2417b646fe37fb2f6c4cca4' # Fixes mirror issue
+gem 'rugged'
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'

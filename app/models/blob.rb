@@ -74,15 +74,15 @@ class Blob < ActiveRecord::Base
     importer.new(self, commit).import
   end
 
-  # @return [Git::Object::Blob] The Git blob this Blob represents.
+  # @return [Rugged::Blob] The Git blob this Blob represents.
 
   def blob
-    project.repo.object(sha)
+    project.repo.lookup(sha)
   end
 
   # Same as {#blob}, but fetches the repository of the blob SHA isn't found.
   #
-  # @return [Git::Object::Blob] The Git blob this Blob represents.
+  # @return [Rugged:Blob] The Git blob this Blob represents.
   # @raise [Git::BlobNotFoundError] If the blob could not be found in the Git
   #   repository.
 
