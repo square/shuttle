@@ -13,8 +13,8 @@ GIT
       sidekiq (>= 2.16.0)
 
 GEM
-  remote: https://rubygems.org/
-  remote: https://0858cb81:19556f67@gems.contribsys.com/
+  remote: https://gems.vip.global.square/
+  remote: https://gems.vip.global.square/private/
   remote: https://rails-assets.org/
   specs:
     CFPropertyList (2.2.8)
