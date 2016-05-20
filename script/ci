@@ -50,8 +50,16 @@ function install_bundler_if_needed() {
 }
 
 function update_gems_if_needed() {
+  set -e  # exit if bundle install fails
+
   echo "Installing gems..."
-  bundle check || bundle install
+  if [[ -n $KOCHIKU_ENV ]]; then
+    bundle_install_from_shared_cache shuttle
+  else
+    bundle check || bundle install
+  fi
+
+  set +e
 }
 
 function prepare_database() {
