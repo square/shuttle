@@ -51,7 +51,7 @@ function install_bundler_if_needed() {
 
 function update_gems_if_needed() {
   echo "Installing gems..."
-  bin/bundle check || bin/bundle install
+  bundle check || bundle install
 }
 
 function prepare_database() {
@@ -63,11 +63,11 @@ function prepare_database() {
 }
 
 function run_specs() {
-  bin/bundle exec rspec ${RUN_LIST}
+  bundle exec rspec ${RUN_LIST}
 }
 
 function run_jasmine() {
-  bin/bundle exec rake guard:jasmine -t
+  bundle exec rake guard:jasmine -t
 }
 
 function prepare() {
