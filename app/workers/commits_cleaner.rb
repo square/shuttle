@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2016 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
 
 class CommitsCleaner
   include Sidekiq::Worker
-  sidekiq_options queue: :high
+  sidekiq_options queue: :high, retry: 5
 
   def perform
     log("Cleaning old commits for #{Date.today}")
     destroy_commits_on_no_branch
-   # destroy_old_commits_which_errored_during_import
-   # destroy_old_excess_commits_per_project
-   # destroy_commits_on_no_branch
+    destroy_old_commits_which_errored_during_import
+    destroy_old_excess_commits_per_project
+    destroy_commits_on_no_branch
   end
 
   include SidekiqLocking
