@@ -2,7 +2,7 @@
 
 ROOT_DIR=$(pwd $(dirname $0)/../..)
 cd $ROOT_DIR
-mkdir vendor
+mkdir -p vendor
 cd vendor
 
-git clone /mnt/nfs/git/sq/shuttle-es.git
+git clone --quiet --shared /mnt/nfs/git/sq/shuttle-es.git
