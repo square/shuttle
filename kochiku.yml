@@ -5,4 +5,4 @@ test_command: 'script/ci'
 targets:
 - type: specs
   glob: spec/**/*_spec.rb
-  workers: 30
+  workers: 10

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-source "$HOME/.rvm/scripts/rvm"
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
@@ -50,8 +49,16 @@ function install_bundler_if_needed() {
 }
 
 function update_gems_if_needed() {
+  set -e  # exit if bundle install fails
+
   echo "Installing gems..."
-  bin/bundle check || bin/bundle install
+  if [[ -n $KOCHIKU_ENV ]]; then
+    bundle_install_from_shared_cache shuttle
+  else
+    bundle check || bundle install
+  fi
+
+  set +e
 }
 
 function prepare_database() {
@@ -63,11 +70,11 @@ function prepare_database() {
 }
 
 function run_specs() {
-  bin/bundle exec rspec ${RUN_LIST}
+  bundle exec rspec ${RUN_LIST}
 }
 
 function run_jasmine() {
-  bin/bundle exec rake guard:jasmine -t
+  bundle exec rake guard:jasmine -t
 }
 
 function prepare() {

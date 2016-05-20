@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+source 'https://gems.vip.global.square'
 
 ruby '2.2.4'
 
@@ -64,7 +64,7 @@ gem 'faker'
 
 # BACKGROUND JOBS
 gem 'sidekiq', '<3.0.0'
-source 'https://0858cb81:19556f67@gems.contribsys.com/' do
+source 'https://gems.vip.global.square/private/' do
   gem 'sidekiq-pro'
 end
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
