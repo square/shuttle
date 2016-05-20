@@ -70,6 +70,7 @@
 # | `last_completed_at`         | The timestamp of the last  time this Article was completed.                                                       |
 # | `base_locale`               | The locale the Article is initially localized in.                                                                 |
 # | `locale_requirements`       | An hash mapping locales this Article can be localized to, to whether those locales are required.                  |
+# | `hidden`                    | Hidden in dashboard or not                                                                                        |
 
 class Article < ActiveRecord::Base
   include ArticleOrCommitStats
@@ -88,6 +89,8 @@ class Article < ActiveRecord::Base
   has_many :issues,       through:    :translations
 
   # Scopes
+  scope :hidden, -> { where(hidden: true) }
+  scope :showing, -> { where(hidden: false) }
   scope :ready, -> { where(ready: true) }
   scope :not_ready, -> { where(ready: false) }
   # considered loading if import wasn't requested, wasn't finished, or re-requested since last finish time.

@@ -12,7 +12,7 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-= select_tag :filter__status, options_for_select(\
-  %w(all uncompleted completed).map { |n| ["#{n} translations", n] },\
-  @form[:filter__status]\
-)
+ruby:
+  options = %w(all uncompleted completed hidden)
+
+= select_tag :filter__status, options_for_select( options.map { |n| ["#{n} translations", n] }, @form[:filter__status] )

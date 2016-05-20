@@ -64,5 +64,12 @@ describe HomeController do
       expect(assigns(:commits).map(&:id)).to eq([])
       expect(assigns(:articles).map(&:id)).to eq([])
     end
+
+    it "should return all hidden articles" do
+      hidden_article = FactoryGirl.create(:article, project: @project, hidden: true)
+
+      get :index, { filter__status: 'hidden' }
+      expect(assigns(:articles).map(&:id)).to eq([hidden_article.id])
+    end
   end
 end
