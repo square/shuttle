@@ -18,7 +18,6 @@ class CommitsCleaner
 
   def perform
     log("Cleaning old commits for #{Date.today}")
-    destroy_commits_on_no_branch
     destroy_old_commits_which_errored_during_import
     destroy_old_excess_commits_per_project
     destroy_commits_on_no_branch
