@@ -23,7 +23,8 @@ set :linked_files, %w{  config/database.yml
                         config/environments/staging/app.yml
                         config/environments/staging/paperclip.yml
                         config/environments/production/app.yml
-                        config/environments/production/paperclip.yml }
+                        config/environments/production/paperclip.yml
+                        config/environments/production/stash.yml }
 set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos tmp/working_repos}
 
 set :rvm_type, :system
