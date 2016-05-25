@@ -1,7 +1,7 @@
 @import "base/vars";
 @import "css3-mixins";
 
-body.glossary { 
+body.glossary {
 
   .header button { margin-right: 10px;}
 
@@ -12,8 +12,8 @@ body.glossary {
     text-align: right;
     ul {
       list-style-type: none;
-      li { 
-        display: inline; 
+      li {
+        display: inline;
         a {
           color: $gray2;
           line-height: 32px;
@@ -27,109 +27,70 @@ body.glossary {
     }
   }
 
-  table#glossary {
+  table#glossary-table {
     table-layout: fixed;
     margin-bottom: 0px;
 
     th {
       padding: 10px;
       text-align: left;
-      
+
       &:first-child { width: 25px; }
-      div { 
+      div {
         padding-bottom: 5px;
-        border-bottom: 1px solid rgb(221, 221, 221); 
-      }      
+        border-bottom: 1px solid rgb(221, 221, 221);
+      }
+    }
+
+    .glossary-row-main {
+      &:hover {
+        background-color: $off-blue;
+        cursor: pointer
+      }
+    }
+
+    .glossary-row-detail {
+      display: none;
+      td > div {
+        width: 100%;
+        display: none;
+        float: left;
+      }
+
+      td {
+        vertical-align: top;
+        text-align: left;
+      }
+
+      .button {
+        margin-left: 10px;
+        float: right;
+      }
+
+      p.label {
+        font-weight: bold;
+        border-bottom: 1px solid #dfdfdf;
+      }
+
+      p {
+        width: 100%;
+        min-height: 21px;
+        padding-bottom: 15px;
+      }
     }
 
     tbody.glossary-table-anchor {
-      tr { 
-        border-style: none; 
+      tr {
+        border-style: none;
         td {
           font-size: 28px;
-          background-color: white;  
+          background-color: white;
           &:hover {
-            cursor: default;      
+            cursor: default;
           }
         }
       }
     }
-
-    tbody.glossary-table-entry {
-      background-color: $gray6;
-      border: none;
-
-      &:nth-child(odd) { background-color: white; }
-      &:hover { background-color: $off-blue; }
-
-      
-
-      tr { 
-        border: none; 
-        cursor: auto;
-      }
-      tr.accordion-toggle { cursor: pointer; }
-      tr.accordion-header { 
-        background-color: transparent; 
-        &.active {
-          font-weight: 500; 
-          background-color: $off-blue; 
-        }
-      }
-      tr.accordion-body {
-        background-color: white;
-        border-bottom: 1px solid $gray5;
-
-        td {
-          padding: 0px;
-          vertical-align: top;
-
-          div {
-            float: left;
-            padding: 10px;
-            @include box-sizing;
-            width: 100%;
-
-            p {
-              width: 100%;
-              min-height: 21px;
-              padding-bottom: 15px;
-              &.label {
-                font-weight: 500;
-                border-bottom: 1px solid $gray5;  
-              }
-            }
-
-            input {
-              width: 100%;
-              height: 30px;
-              @include box-sizing;
-              &[readonly] { background-color: #ffffff; }
-            }
-
-            textarea {
-              width: 100%;
-              height: 125px;
-              @include box-sizing;
-              resize: vertical;
-              &[readonly] { background-color: #ffffff; }
-            }
-
-            button, .button { 
-              float: right;
-              & + button {
-                margin-right: 10px;  
-              }
-            }
-
-          }
-        }
-
-      }
-
-      
-    }
-
   }
 
   .modal {
@@ -141,7 +102,6 @@ body.glossary {
     }
 
     .modal-body {
-
       .list {
         min-height: 250px;
         // border: 1px solid $gray5;
@@ -168,7 +128,7 @@ body.source_glossary_entries, body.locale_glossary_entries {
     position: absolute;
     top: 25px;
     right: 30px;
-    
+
     &:active {
       position: absolute !important;
       top: 24px !important;
@@ -221,4 +181,3 @@ body.source_glossary_entries, body.locale_glossary_entries {
     }
   }
 }
-

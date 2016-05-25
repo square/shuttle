@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2016 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ class root.TableAccordion
       closeOthers: true
     }
 
-    @animation_time = 400
+    @animation_time = 200
 
     @element.find(".accordion-body").hide()
     @element.find(".accordion-body").find("td > div").hide()
@@ -30,10 +30,10 @@ class root.TableAccordion
       accordion_toggle = $(e.currentTarget)
       accordion_target = $(accordion_toggle.data("target"))
 
-      if accordion_toggle.hasClass("active") 
+      if accordion_toggle.hasClass("active")
         this.collapseTarget(accordion_target, accordion_toggle)
-      else 
-        if @options.closeOthers 
+      else
+        if @options.closeOthers
           this.closeOthers()
         this.expandTarget(accordion_target, accordion_toggle)
 
@@ -41,15 +41,15 @@ class root.TableAccordion
     toggle.addClass("active")
     target.show()
 
-    target.find("td > div").slideDown( 
-      @animation_time, 
+    target.find("td > div").slideDown(
+      @animation_time,
       () ->
         $(this).show()
     )
 
   collapseTarget: (target, toggle) ->
-    target.find("td > div").slideUp( 
-      @animation_time, 
+    target.find("td > div").slideUp(
+      @animation_time,
       () ->
         $(this).hide()
 
@@ -58,7 +58,7 @@ class root.TableAccordion
     )
 
   closeOthers: ->
-    $.each @element.find(".accordion-toggle.active"), (i, toggle_element) => 
+    $.each @element.find(".accordion-toggle.active"), (i, toggle_element) =>
       accordion_toggle = $(toggle_element)
       accordion_target = $($(accordion_toggle).data("target"))
       this.collapseTarget(accordion_target, accordion_toggle)
