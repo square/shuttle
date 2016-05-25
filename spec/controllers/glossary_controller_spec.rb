@@ -26,7 +26,7 @@ describe GlossaryController do
       @start_date = (update_date - 1.day).strftime('%m/%d/%Y')
       @end_date = (update_date + 1.day).strftime('%m/%d/%Y')
 
-      %w(ar cn fr jp).each do |locale|
+      %w(ar cn fr ja).each do |locale|
         FactoryGirl.create :project,
                            repository_url: nil,
                            base_rfc5646_locale: 'en',
