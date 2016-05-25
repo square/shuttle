@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2016 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -25,9 +25,45 @@ class GlossaryController < ApplicationController
   # * `GET /glossary`
 
   def index
+    locales = params[:target_locales] || Shuttle::Configuration.locales.default_filter_locales
     @source_locale  = Shuttle::Configuration.locales.source_locale
-    @target_locales = Project.all.map(&:targeted_locales).flatten.uniq
+    @target_locales = Project.all.map(&:targeted_locales).flatten.uniq.select do |locale|
+      locales.include?(locale.rfc5646)
+    end
     @target_locales.delete(@source_locale)
+
+    # This will give us the following
+    #
+    # {
+    #   '#' => ['2-factor-authentication']
+    #   'A' => ['aardvark', 'apple'],
+    #   'S' => ['Square', 'szechuan']
+    # }
+    #
+    # Note that these are SourceGlossaryEntries not pure strings.
+    alphabet = ('A'..'Z').to_a
+    @grouped_source_entries = SourceGlossaryEntry
+      .includes(:locale_glossary_entries)
+      .sort_by { |se| se.source_copy.downcase }
+      .group_by do |se|
+        first_letter = se.source_copy[0].upcase
+        if alphabet.include?(first_letter)
+          first_letter
+        else
+          '#'
+        end
+      end
+
+    # [
+    #   ['#', 'glossary-table-#]
+    #   ['A', 'glossary-table-A]
+    #   ['B', 'glossary-table-B]
+    #   ['C', 'glossary-table-C]
+    #   ['Z', 'glossary-table-Z]
+    # ]
+    @anchors = (['#'] + alphabet).map do |letter|
+      [letter, "glossary-table-#{letter}"]
+    end
   end
 end
 

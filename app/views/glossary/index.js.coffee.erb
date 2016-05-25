@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2016 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -13,14 +13,17 @@
 #    limitations under the License.
 
 $(document).ready () ->
-  # Default source/target locales
+# Default source/target locales
   sourceLocale = JSON.parse("<%= escape_javascript @source_locale.to_json %>")
   targetLocales = JSON.parse("<%= escape_javascript @target_locales.to_json %>")
-  
+
   # Create a new glossary entry list
   new GlossaryList(
-    $('#glossary'), "<%= glossary_sources_url %>", "<%= glossary_sources_url(format:'json') %>"
-    sourceLocale, targetLocales,
-    $('#settings'), $('#add-entry'),
-    "<%= current_user.role %>", <%= current_user.approved_rfc5646_locales.to_json %>
+      $('#glossary-table'),
+      "<%= glossary_sources_url(format:'json') %>",
+      sourceLocale,
+      targetLocales,
+      $('#settings'),
+      $('#add-entry'),
+      <%= current_user.approved_rfc5646_locales.to_json %>
   );
