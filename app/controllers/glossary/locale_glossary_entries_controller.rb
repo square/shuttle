@@ -24,8 +24,8 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
   before_filter :find_locale_entry, except: :create
   respond_to :json, :html
 
-  # Creates a new locale glossary entry for the source glossary entry in the 
-  # specified locale.  Note that a copy and notes are optional for the new 
+  # Creates a new locale glossary entry for the source glossary entry in the
+  # specified locale.  Note that a copy and notes are optional for the new
   # locale glossary entry.
   #
   # Routes
@@ -54,7 +54,7 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     respond_with @source_entry, @locale_entry, location: edit_glossary_source_locale_url(@source_entry, @locale_entry)
   end
 
-  # Updates a locale glossary entry. 
+  # Updates a locale glossary entry.
   #
   # Routes
   # ------
@@ -86,7 +86,7 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     respond_with @source_entry, @locale_entry, location: glossary_url
   end
 
-  # Displays a large-format glossary entry edit page which contains a reference to 
+  # Displays a large-format glossary entry edit page which contains a reference to
   # its respective source glossary entry's data.
   #
   # Routes
@@ -102,9 +102,9 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
   # | `source_id` | The id of the source entry of the locale glossary entry.   |
   # | `id`        | The id of the locale glossary entry that is being editted. |
 
-  def edit 
+  def edit
     respond_with @source_entry, @locale_entry
-  end 
+  end
 
 
   # Marks a locale glossary entry as approved and records the reviewer as the current
@@ -127,7 +127,7 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     @locale_entry.approved = true
     @locale_entry.reviewer = current_user
     @locale_entry.save!
-    
+
     respond_with @source_entry, @locale_entry, location: glossary_source_locales_url
   end
 
@@ -151,7 +151,7 @@ class Glossary::LocaleGlossaryEntriesController < ApplicationController
     @locale_entry.approved = false
     @locale_entry.reviewer = current_user
     @locale_entry.save!
-    
+
     respond_with @source_entry, @locale_entry, location: glossary_source_locales_url
   end
 

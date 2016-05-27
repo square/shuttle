@@ -141,7 +141,7 @@ class TranslationItem
       context.approved = @translation.approved
       context.reviewer = @translation.reviewer.name
 
-    @element = $(HoganTemplates['translationworkbench/translation_item'].render(context)) 
+    @element = $(HoganTemplates['translationworkbench/translation_item'].render(context))
 
     @copy_field = @element.find('.translation-area').first()
     @source_copy = @element.find('.source-copy')
@@ -152,7 +152,7 @@ class TranslationItem
     @alerts = @element.find('div.alerts').first()
     @glossary_tips = @element.find('div.tips').first()
     @fuzzy_matches = @element.find('div.item.fuzzy-matches').first()
-    
+
     # Set up @source_copy
     @source_copy.highlighter(
       selector: '.highlighter-container'
@@ -185,7 +185,7 @@ class TranslationItem
       this.checkForDumbCharacters(@copy_field.val())
       this.warnForTokenParity(@copy_field.val())
       return true
-    
+
     # Set up @expand_link_button
     @expand_link_button.click (e) =>
       window.open @translation.edit_url, '_blank'
@@ -197,7 +197,7 @@ class TranslationItem
       e.preventDefault(); e.stopPropagation(); return false
 
     # Set up @copy_source_button
-    @copy_source_button.click () => 
+    @copy_source_button.click () =>
       @copy_field.val @translation.source_copy
       this.setUnsaved()
       @copy_field.focus()
@@ -295,7 +295,7 @@ class TranslationItem
       # consume the range and enclose it in a span
       $('<span/>').addClass('fenced').text(copy[range[0]..range[1]]).appendTo fenced_p
       copy_index = range[1] + 1
-    
+
     # consume from the end of the last range to the end of the string
     if copy_index < copy.length
       fenced_p.append htmlEscape(copy[copy_index..])
