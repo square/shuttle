@@ -138,14 +138,30 @@ class root.GlossaryList
       $approveLocaleButton = $(domLocaleEntry).find('.glossary-approve-locale')
       $rejectLocaleButton = $(domLocaleEntry).find('.glossary-reject-locale')
 
-      $approveLocaleButton.on 'click', () =>
+      $approveLocaleButton.on 'click', =>
         $approveLocaleButton.prop('disabled', true)
-        $rejectLocaleButton.prop('disabled', false)
-        $(domLocaleEntry).parents('.glossary-row').find('glossary-row-header-source-entry')
-          .hide().removeClass('text-info text-error').addClass('text-success').fadeIn(500)
 
-      $rejectLocaleButton.on 'click', () =>
+        # Send the approve glossary entry URL request and undisable the buttons on success
+        $.ajax approveLocaleEntryUrl,
+          type: "PATCH"
+          success: ->
+            $rejectLocaleButton.prop('disabled', false)
+            $(domLocaleEntry).parents('.glossary-row').find('glossary-row-header-source-entry')
+              .hide().removeClass('text-info text-error').addClass('text-success').fadeIn(500)
+          error: ->
+            # TODO: We should add in some messaging here that it failed.
+            $approveLocaleButton.prop('disabled', false)
+
+      $rejectLocaleButton.on 'click', =>
         $rejectLocaleButton.prop('disabled', true)
-        $approveLocaleButton.prop('disabled', false)
-        $(domLocaleEntry).parents('.glossary-row').find('glossary-row-header-source-entry')
-          .hide().removeClass('text-info text-success').addClass('text-error').fadeIn(500)
+
+        # Send the reject glossary entry URL request and undisable the buttons on success
+        $.ajax rejectLocaleEntryUrl,
+          type: "PATCH"
+          success: ->
+            $approveLocaleButton.prop('disabled', false)
+            $(domLocaleEntry).parents('.glossary-row').find('glossary-row-header-source-entry')
+              .hide().removeClass('text-info text-success').addClass('text-error').fadeIn(500)
+          error: ->
+            # TODO: We should add in some messaging here that it failed.
+            $rejectLocaleButton.prop('disabled', false)
