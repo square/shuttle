@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2016 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
 #    limitations under the License.
 
 class SearchController < ApplicationController
-  # The number of records to return by default.
-  PER_PAGE = 50
+
 
   def translations
     @presenter = TranslationsSearchPresenter.new(current_user.translator?)
@@ -38,45 +37,7 @@ class SearchController < ApplicationController
                            locales: ([@project.base_locale] + @project.targeted_locales.sort_by(&:rfc5646)).uniq
                        }.to_json
         else
-          query_filter = params[:filter]
-          status       = params[:status]
-          offset       = params[:offset].to_i
-          id           = params[:project_id]
-          limit        = params.fetch(:limit, PER_PAGE)
-          not_elastic  = params[:not_elastic_search]
-          hidden_keys  = params[:hidden_in_search]
-
-          # TODO: Refactor code below after updating elasticsearch client as
-          # Tire hasn't been updating for a long time
-          keys_in_es = Key.search do
-            if query_filter.present?
-              if not_elastic
-                filter :term, original_key_exact: query_filter
-              else
-                query { match 'original_key', query_filter, operator: 'and' }
-              end
-            else
-              sort { by :original_key, 'asc' }
-            end
-            filter :term, project_id: id
-
-            unless status.blank?
-              filter :term, ready: status
-            end
-
-            if hidden_keys
-              filter :term, { hidden_in_search: true }
-            else
-              # exclude keys that translators want hidden
-              filter :term, { hidden_in_search: false }
-            end
-
-            from offset
-            size limit
-          end
-
-          keys = Key.where(id: keys_in_es.map(&:id)).includes(:translations, :project)
-          @results = SortingHelper.order_by_elasticsearch_result_order(keys, keys_in_es)
+          @results = SearchKeysFinder.new(current_user, params).find_keys
           render json: decorate_keys(@results).to_json
         end
       end
@@ -89,19 +50,7 @@ class SearchController < ApplicationController
       format.json do
         return head(:unprocessable_entity) if params[:project_id].to_i < 0
 
-        sha = params[:sha]
-        project_id = params[:project_id].to_i
-        limit = params.fetch(:limit, 50)
-
-        commits_in_es = Commit.search do
-          filter :prefix, revision: sha if sha
-          filter :term, project_id: project_id if project_id > 0
-          size limit
-          sort { by :created_at, 'desc' }
-        end
-
-        commits = Commit.where(id: commits_in_es.map(&:id)).includes(:project)
-        @results = SortingHelper.order_by_elasticsearch_result_order(commits, commits_in_es)
+        @results = SearchCommitsFinder.new(params).find_commits
         render json: decorate_commits(@results).to_json
       end
     end

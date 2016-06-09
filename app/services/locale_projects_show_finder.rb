@@ -14,6 +14,7 @@
 
 class LocaleProjectsShowFinder
   attr_reader :form
+  include Elasticsearch::DSL
   PER_PAGE = 50
 
 
@@ -21,78 +22,99 @@ class LocaleProjectsShowFinder
     @form = form
   end
 
-  def find_translations
+  def search_query
     include_translated = form[:include_translated]
-    include_approved   = form[:include_approved]
-    include_new        = form[:include_new]
+    include_approved = form[:include_approved]
+    include_new = form[:include_new]
     include_block_tags = form[:include_block_tags]
 
-    page       = form[:page]
+    current_page = page
     query_filter = form[:query_filter]
     translation_ids_in_commit = form[:translation_ids_in_commit]
-    article_id   = form[:article_id]
-    section_id   = form[:section_id]
-    locale       = form[:locale]
-    project_id   = form[:project_id]
-    project      = form[:project]
+    article_id = form[:article_id]
+    section_id = form[:section_id]
+    locale = form[:locale]
+    project_id = form[:project_id]
+    project = form[:project]
     filter_source = form[:filter_source]
 
-    translations_in_es = Translation.search do
-      filter :term, project_id: project_id
-      filter :term, rfc5646_locale: locale.rfc5646 if locale
-      filter :ids, values: translation_ids_in_commit if translation_ids_in_commit
-      filter :term, article_id: article_id if article_id.present?
-      filter :term, section_id: section_id if section_id.present?
-      filter :term, section_active: true if project.not_git?        # active sections
-      filter :exists, field: :index_in_section if project.not_git?  # active keys in sections
-      filter :not, { term: { is_block_tag: true } } if project.not_git? && !include_block_tags
+    search {
+      query do
+        filtered do
+          if query_filter.present?
+            if filter_source == 'source'
+              query do
+                match 'source_copy' do
+                  query query_filter
+                  operator 'and'
+                end
+              end
+            elsif filter_source == 'translated'
+              query do
+                match 'copy' do
+                  query query_filter
+                  operator 'and'
+                end
+              end
+            end
+          end
 
-      if query_filter.present?
-        if filter_source == 'source'
-          query { match 'source_copy', query_filter, operator: 'and' }
-        elsif filter_source == 'translated'
-          query { match 'copy', query_filter, operator: 'and' }
+          filter do
+            bool do
+              must { term project_id: project_id }
+              must { term rfc5646_locale: locale.rfc5646 } if locale
+              must { ids values: translation_ids_in_commit } if translation_ids_in_commit
+              must { term article_id: article_id } if article_id.present?
+              must { term section_id: section_id } if section_id.present?
+              must { term section_active: true } if project.not_git? # active sections
+              must { exists field: :index_in_section } if project.not_git? # active keys in sections
+              must_not { term is_block_tag: true } if project.not_git? && !include_block_tags
+
+              if include_translated && include_approved && include_new
+                #include everything
+              elsif include_translated && include_approved
+                must { term translated: 1 }
+              elsif include_translated && include_new
+                should { missing field: 'approved', existence: true, null_value: true }
+                should { term approved: 0 }
+              elsif include_approved && include_new
+                should { term approved: 1 }
+                should { term translated: 0 }
+              elsif include_approved
+                must { term approved: 1 }
+              elsif include_new
+                should { term translated: 0 }
+                should { term approved: 0 }
+              elsif include_translated
+                must { missing field: 'approved', existence: true, null_value: true }
+                must { term translated: 1 }
+              else
+                # include nothing
+                throw :include_nothing
+              end
+            end
+          end
         end
       end
-
-      if include_translated && include_approved && include_new
-        # include everything
-      elsif include_translated && include_approved
-        filter :term, translated: 1
-      elsif include_translated && include_new
-        filter :or, [
-                      {missing: {field: 'approved', existence: true, null_value: true}},
-                      {term: {approved: 0}}]
-      elsif include_approved && include_new
-        filter :or, [
-                      {term: {approved: 1}},
-                      {term: {translated: 0}}]
-      elsif include_approved
-        filter :term, {approved: 1}
-      elsif include_new
-        filter :or, [
-                      {term: {translated: 0}},
-                      {term: {approved: 0}}]
-      elsif include_translated
-        filter :and,
-               {missing: {field: 'approved', existence: true, null_value: true}},
-               {term: {translated: 1}}
-      else
-        # include nothing
-        throw :include_nothing
-      end
-
-      from (page - 1) * PER_PAGE
-      size PER_PAGE
 
       if project.not_git?
         sort do
-          by :section_id, 'asc'
-          by :index_in_section, 'asc'
+          by :section_id, order: 'asc'
+          by :index_in_section, order: 'asc'
         end
       end
-    end
 
+      from (current_page - 1) * PER_PAGE
+      size PER_PAGE
+    }.to_hash
+  end
+
+  def page
+    form[:page]
+  end
+
+  def find_translations
+    translations_in_es = Elasticsearch::Model.search(search_query, Translation).results
     translations = Translation
                        .where(id: translations_in_es.map(&:id))
                        .includes({key: [:project, :translations, :section, {article: :project}]}, :locale_associations)

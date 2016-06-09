@@ -92,18 +92,30 @@ class Commit < ActiveRecord::Base
   alias_method :active_keys, :keys # called in ArticleOrCommitStats
   alias_method :active_issues, :issues # called in ArticleOrCommitIssuesPresenter
 
-  include Tire::Model::Search
-  include Tire::Model::Callbacks
+  include Elasticsearch::Model
+  include Elasticsearch::Model::Callbacks
+  include IndexHelper
+  Commit.index_name "shuttle_#{Rails.env}_commits"
+
   mapping do
     indexes :project_id, type: 'integer'
     indexes :user_id, type: 'integer'
     indexes :priority, type: 'integer'
     indexes :due_date, type: 'date'
     indexes :created_at, type: 'date'
-    indexes :revision, as: 'revision', index: :not_analyzed
+    indexes :revision, index: :not_analyzed
     indexes :ready, type: 'boolean'
     indexes :exported, type: 'boolean'
-    indexes :key_ids, as: 'commits_keys.pluck(:key_id)'
+  end
+
+  def regular_index_fields
+    %w(project_id user_id priority due_date created_at revision ready exported)
+  end
+
+  def special_index_fields
+    {
+      key_ids: commits_keys.pluck(:key_id)
+    }
   end
 
   validates :project,

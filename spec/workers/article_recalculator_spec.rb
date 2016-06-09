@@ -16,9 +16,15 @@ require 'spec_helper'
 
 describe ArticleRecalculator do
   it "should recalculate Article readiness" do
-    allow_any_instance_of(ArticleImporter).to receive(:perform) # prevent it from creating keys
-    article = FactoryGirl.create(:article, ready: false)
-    ArticleRecalculator.new.perform(article.id)
+    article = nil
+
+    # This call will disable all sidekiq jobs in the call chain.
+    # In this case, we only have ArticleImporter and we need to stub it to prevent
+    # it form creating keys. If you do need some sidekiq jobs to run, you need refactor this line.
+    Sidekiq::Testing.fake! do
+      article = FactoryGirl.create(:article, ready: false)
+      ArticleRecalculator.new.perform(article.id)
+    end
     expect(article.reload).to be_ready
   end
 end

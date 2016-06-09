@@ -215,20 +215,7 @@ class TranslationsController < ApplicationController
   # Returns 204 Not Content and an empty body if no match is found.
 
   def match
-    source_copy = @translation.source_copy
-
-    @translation.locale.fallbacks.each do |fallback|
-      @match = Translation.search do
-        filter :term, { approved: 1 }
-        filter :term, { rfc5646_locale: fallback.rfc5646 }
-        filter :term, { source_copy: source_copy }
-        sort { by :created_at, 'desc' }
-        size 1
-      end.first
-
-      break if @match
-    end
-
+    @match = MatchTranslationsFinder.new(@translation).find_first_match_translation
     return head(:no_content) unless @match
     respond_with @match, location: project_key_translation_url(@project, @key, @translation)
   end
@@ -259,23 +246,11 @@ class TranslationsController < ApplicationController
   #
 
   def fuzzy_match
+    query_filter = params[:source_copy] || @translation.source_copy
+    finder = FuzzyMatchTranslationsFinder.new(query_filter, @translation)
     respond_to do |format|
       format.json do
-        limit = 5
-        query_filter = params[:source_copy] || @translation.source_copy
-        target_locales = @translation.locale.fallbacks.map(&:rfc5646)
-        translations_in_es = Translation.search do
-          # TODO: Remove duplicate where source_copy, copy are same
-          filter :term, { approved: 1 }
-          filter :terms, { rfc5646_locale: target_locales }
-          filter :term, { hidden_in_search: false }
-
-          size limit
-          query { match 'source_copy', query_filter, operator: 'or' }
-        end
-
-        translations = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
-        @results = SortingHelper.order_by_elasticsearch_result_order(translations, translations_in_es)
+        @results = finder.find_fuzzy_match
         render json: decorate_fuzzy_match(@results, query_filter).to_json
       end
     end
@@ -306,7 +281,7 @@ class TranslationsController < ApplicationController
 
   def change_hidden_in_search_to(state)
     @key.update!(hidden_in_search: state)
-    @translation.update_index
+    @translation.update_elasticsearch_index
   end
 
   def decorate_fuzzy_match(translations, source_copy)

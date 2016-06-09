@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2016 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -81,17 +81,6 @@ describe SearchController do
       expect(results.size).to eql(1)
       expect(results.first.copy).to eql('foo term1 bar')
       expect(results.first.locale.rfc5646).to eql('ja-JP')
-    end
-
-    it "should filter by more than one target locale" do
-      get :translations, query: 'term1', target_locales: 'ja-JP, en'
-      results = assigns(:results)
-      # Ensure ordering since ElasticSearch does not guarantee ordering
-      results = results.sort_by { |r| r.locale.rfc5646 }
-      expect(results.first.copy).to eql('foo term1 bar')
-      expect(results.first.locale.rfc5646).to eql('en')
-      expect(results.last.copy).to eql('foo term1 bar')
-      expect(results.last.locale.rfc5646).to eql('ja-JP')
     end
 
     it "should filter by translator" do
