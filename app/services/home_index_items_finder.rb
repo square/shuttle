@@ -63,6 +63,8 @@ class HomeIndexItemsFinder
           end
         when 'completed'
           filter :term, ready: true
+        when 'hidden'
+          #TODO
       end
 
       from offset
@@ -94,7 +96,7 @@ class HomeIndexItemsFinder
   end
 
   def find_articles
-    articles = Article.includes(:project)
+    articles = Article.includes(:project).showing
 
     # filter by name
     articles = articles.for_name(form[:articles_filter__name]) if form[:articles_filter__name]
@@ -112,6 +114,8 @@ class HomeIndexItemsFinder
         end
       when 'completed'
         articles = articles.ready
+      when 'hidden'
+        articles = Article.includes(:project).hidden
     end
 
     # sorting

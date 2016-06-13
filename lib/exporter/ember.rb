@@ -40,11 +40,11 @@ class Ember < Base
     def self.valid?(contents)
       return false if contents.blank?
 
-      context  = V8::Context.new
-      context['Ember'] = {'I18n' => {'locales' => {'translations' => {}}}}
-      context.eval contents
+      contents.prepend("var Ember = {I18n: {locales: {translations: {}}}};\n")
+      context = ExecJS.compile(contents)
+      context.eval("Ember.I18n.locales.translations")
       return true
-    rescue V8::Error
+    rescue ExecJS::Error
       return false
     end
   end

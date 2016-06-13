@@ -15,7 +15,7 @@
 require 'spec_helper'
 
 describe Section do
-  before(:each) { Article.any_instance.stub(:import!) } # prevent auto-imports
+  before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto-imports
 
   context "[validations]" do
     it "doesn't allow duplicate names in the scope of an Article" do
@@ -71,7 +71,7 @@ describe Section do
 
       keys = section.sorted_active_keys_with_translations.to_a
       expect(keys).to eql([key1, key2, key3])
-      expect(keys.all? { |key| key.translations.loaded? }).to be_true
+      expect(keys.all? { |key| key.translations.loaded? }).to be_truthy
     end
   end
 end

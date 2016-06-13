@@ -109,7 +109,7 @@ de-DE:
       expect(io.string).to eql(<<-YAML)
 ---
 ja:
-  different: 異なる
+  different: "異なる"
   same: Same
       YAML
     end
@@ -223,7 +223,7 @@ fr:
 
   describe ".valid?" do
     it "should return true for a syntactically valid YAML hash" do
-      expect(Exporter::Yaml.valid?(<<-YAML)).to be_true
+      expect(Exporter::Yaml.valid?(<<-YAML)).to be_truthy
 ---
 ja-JP:
   different: Different (ja-JP)
@@ -232,7 +232,7 @@ ja-JP:
     end
 
     it "should return false for a different YAML object" do
-      expect(Exporter::Yaml.valid?(<<-YAML)).to be_false
+      expect(Exporter::Yaml.valid?(<<-YAML)).to be_falsey
 ---
 - 1
 - 2
@@ -240,14 +240,14 @@ ja-JP:
     end
 
     it "should return false for a syntactically invalid YANL file" do
-      expect(Exporter::Yaml.valid?(<<-YAML)).to be_false
+      expect(Exporter::Yaml.valid?(<<-YAML)).to be_falsey
 ---
 foo: foo: foo
       YAML
     end
 
     it "should return false for an empty file" do
-      expect(Exporter::Yaml.valid?('')).to be_false
+      expect(Exporter::Yaml.valid?('')).to be_falsey
     end
   end
 end

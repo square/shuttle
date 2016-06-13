@@ -17,7 +17,7 @@ require 'spec_helper'
 describe SectionKeyCreator do
   describe "#perform" do
     before :each do
-      Article.any_instance.stub(:import!) # prevent imports, we want to handle things manually
+      allow_any_instance_of(Article).to receive(:import!) # prevent imports, we want to handle things manually
       @article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } )
       @section = FactoryGirl.create(:section, article: @article)
     end
@@ -32,7 +32,7 @@ describe SectionKeyCreator do
       expect(key.index_in_section).to eql(3)
       expect(key.project).to eql(@section.project)
       expect(key.source_copy).to eql("<p>test</p>")
-      expect(key.ready).to be_false
+      expect(key.ready).to be_falsey
 
       expect(key.translations.count).to eql(4) # the correct number of translations are created
       expect(key.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr ja es).sort)

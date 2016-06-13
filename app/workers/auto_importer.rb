@@ -61,7 +61,7 @@ class AutoImporter
       project.save!
 
     rescue Timeout::Error => err
-      Squash::Ruby.notify err, project_id: project_id
+      Raven.capture_exception err, extra: { project_id: project_id }
       self.class.perform_in 2.minutes, project_id
     end
 

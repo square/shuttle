@@ -26,7 +26,7 @@ every 1.minute, roles: [:primary_cron] do
   rake 'touchdown:update'
 end
 
-every :saturday, at: '12am', roles: [:primary_cron] do
+every 1.hour, roles: [:primary_cron] do
   rake 'maintenance:cleanup_commits'
 end
 

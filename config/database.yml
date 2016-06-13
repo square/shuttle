@@ -1,7 +1,7 @@
 common: &common
   adapter: postgresql
   encoding: unicode
-  host: localhost
+  host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
   username: shuttle
   password:
   pool: 50

@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'pp'
+require 'safemode'
 
 module Exporter
 
@@ -38,10 +39,8 @@ module Exporter
     def self.request_format() :rb end
 
     def self.valid?(contents)
-      value = Thread.start do
-        $SAFE  = 4
-        eval contents
-      end.value
+      box = Safemode::Box.new
+      value = box.eval(contents)
       value.kind_of?(Hash)
     rescue Object
       return false

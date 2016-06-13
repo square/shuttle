@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.0.0', :patchlevel => '576'
+ruby '2.2.4'
 
 # FRAMEWORK
 gem 'rails', '4.1.14.2'
@@ -39,12 +39,14 @@ gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
 gem 'similar_text', '~> 0.0.4'
-gem 'paperclip'
+gem 'paperclip', '>= 4.2.2'
 gem 'aws-sdk'
+gem 'execjs'
+gem 'safemode'
+gem 'sentry-raven'
 
 # IMPORTING
-gem 'therubyracer', platform: :mri, require: 'v8'
-gem 'nokogiri'
+gem 'nokogiri', '>= 1.6.7.2'
 gem 'CFPropertyList', require: 'cfpropertylist'
 gem 'parslet'
 gem 'mustache'
@@ -76,16 +78,23 @@ gem 'sprockets-rails'
 gem 'sass-rails', '4.0.3' # bugfix for sass 3.3 (in)compatibility
 gem 'coffee-rails'
 gem 'uglifier'
-gem 'less-rails'
 gem 'hogan_assets'
 
+source 'https://rails-assets.org' do
+  gem 'rails-assets-raven-js'
+end
+
 group :development do
+  gem 'capistrano', '~> 3.5'
+  gem 'capistrano-bundler', '~> 1.1'
+  gem 'capistrano-rails', '~> 1.1'
+  gem 'capistrano-rvm', '~> 0.1'
   gem 'redcarpet', require: nil
   gem 'yard', require: nil, platform: :mri
 end
 
 group :test do
-  gem 'rspec-rails', '< 3.0.0'
+  gem 'rspec-rails', '~> 3.0'
   gem 'factory_girl_rails'
   gem 'timecop'
   gem 'pry-nav'
@@ -94,21 +103,8 @@ end
 
 # Doesn't work in Rails 4
 group :development, :test do
-  gem 'mailcatcher'
+  gem 'mailcatcher', '~> 0.6.4'
   gem 'better_errors'
   gem 'binding_of_caller'
   gem 'pry'
-end
-
-# ERROR NOTIFICATIONS
-gem 'squash_ruby', require: 'squash/ruby'
-gem 'squash_rails', require: 'squash/rails'
-gem 'squash_javascript', require: 'squash/javascript'
-
-# DEPLOYING
-group :development do
-  gem 'capistrano'
-  gem 'capistrano-rvm', '>= 0.1.0' # seems to really like 0.0.3
-  gem 'capistrano-bundler'
-  gem 'capistrano-rails'
 end

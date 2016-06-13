@@ -17,7 +17,7 @@ require 'spec_helper'
 describe Article do
   # ======== START BASIC CRUD RELATED CODE =============================================================================
   describe "[before_validations on create]" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     it "copies base_rfc5646_locale from project if it is blank" do
       project = FactoryGirl.create(:project, base_rfc5646_locale: 'es')
@@ -33,7 +33,7 @@ describe Article do
   end
 
   describe "[validations]" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     it "doesn't allow creating 2 Articles in the same project with the same name" do
       article = FactoryGirl.create(:article, name: "hello")
@@ -93,7 +93,7 @@ describe Article do
 
   describe '[scopes]' do
     describe '#loading?' do
-      before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+      before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
       it 'returns only the loading articles' do
         a1 = FactoryGirl.create(:article, last_import_requested_at: nil, last_import_finished_at: nil)
@@ -114,7 +114,7 @@ describe Article do
   it_behaves_like "CommonLocaleLogic"
 
   describe "#base_locale" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     let(:project) { FactoryGirl.create(:project, repository_url: nil, base_rfc5646_locale: 'en') }
 
@@ -130,7 +130,7 @@ describe Article do
   end
 
   describe "#locale_requirements" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     let(:project) { FactoryGirl.create(:project, repository_url: nil, targeted_rfc5646_locales: { 'fr' => true } ) }
 
@@ -148,7 +148,7 @@ describe Article do
 
   # ======== START KEY & READINESS RELATED CODE ========================================================================
   describe "#find_by_name" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     it "returns nil if the given string name is nil" do
       expect(Article.find_by_name(nil)).to be_nil
@@ -178,7 +178,7 @@ describe Article do
   end
 
   describe "#active_sections" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     it "returns the active keys (keys which has their index_in_section set in active sections)" do
       article = FactoryGirl.create(:article)
@@ -190,7 +190,7 @@ describe Article do
   end
 
   describe "#inactive_sections" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     it "returns the active keys (keys which has their index_in_section set in active sections)" do
       article = FactoryGirl.create(:article)
@@ -202,7 +202,7 @@ describe Article do
   end
 
   describe "#active_keys" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     it "returns the active keys (keys which has their index_in_section set in active sections)" do
       article = FactoryGirl.create(:article)
@@ -224,7 +224,7 @@ describe Article do
   end
 
   describe "#recalculate_ready!" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     before :each do
       @article = FactoryGirl.create(:article,
@@ -296,7 +296,7 @@ describe Article do
   end
 
   describe "#full_reset_ready!" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     it "resets the ready field of the Article and all of its Keys" do
       article = FactoryGirl.create(:article, name: "test", ready: true)
@@ -308,22 +308,22 @@ describe Article do
 
       article.full_reset_ready!
       expect(article).to_not be_ready
-      expect(article.keys.ready.exists?).to be_false
+      expect(article.keys.ready.exists?).to be_falsey
     end
   end
 
   describe "#skip_key?" do
-    before(:each) { Article.any_instance.stub(:import!) } # prevent auto imports
+    before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent auto imports
 
     it "skips key for a locale that is not a targeted_locale" do
       article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true, 'es' => false } )
-      expect(article.skip_key?("test", Locale.from_rfc5646('ja'))).to be_true
+      expect(article.skip_key?("test", Locale.from_rfc5646('ja'))).to be_truthy
     end
 
     it "does not skip key for locales that are targeted locales" do
       article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true, 'es' => false } )
-      expect(article.skip_key?("test", Locale.from_rfc5646('fr'))).to be_false
-      expect(article.skip_key?("test", Locale.from_rfc5646('es'))).to be_false
+      expect(article.skip_key?("test", Locale.from_rfc5646('fr'))).to be_falsey
+      expect(article.skip_key?("test", Locale.from_rfc5646('es'))).to be_falsey
     end
   end
   # ======== END KEY & READINESS RELATED CODE ==========================================================================
@@ -341,15 +341,15 @@ describe Article do
       article.reload
 
       expect(ArticleImporter).to receive(:perform_once).with(article.id, false).once
-      ArticleImporter::Finisher.any_instance.stub(:on_success)
+      allow_any_instance_of(ArticleImporter::Finisher).to receive(:on_success)
 
       article.import!
 
       expect(article.first_import_requested_at).to be_present
       expect(article.last_import_requested_at).to be_present
-      expect(article.loading?).to be_true
+      expect(article.loading?).to be_truthy
       expect(article).to_not be_ready
-      expect(article.keys.ready.exists?).to be_false
+      expect(article.keys.ready.exists?).to be_falsey
     end
 
     it "raises a Article::LastImportNotFinished if the previous import is not yet finished" do
@@ -362,7 +362,7 @@ describe Article do
   describe "#import_batch" do
     it "creates a new batch and updates import_batch_id of the Article if import_batch_id is initially nil" do
       article = FactoryGirl.build(:article, name: "test")
-      article.stub(:import!) # prevent the import because we want to create the related keys manually
+      allow(article).to receive(:import!) # prevent the import because we want to create the related keys manually
       article.save!
 
       expect(article.import_batch_id).to be_nil
@@ -372,7 +372,7 @@ describe Article do
 
     it "returns the existing import_batch if there is one" do
       article = FactoryGirl.build(:article, name: "test")
-      article.stub(:import!) # prevent the import because we want to create the related keys manually
+      allow(article).to receive(:import!) # prevent the import because we want to create the related keys manually
       article.save!
 
       article.import_batch.jobs { sleep 3 }
@@ -385,7 +385,7 @@ describe Article do
   describe "#update_import_requested_at!" do
     before :each do
       @article = FactoryGirl.build(:article, name: "test")
-      @article.stub(:import!) # prevent the import because we want to create the related keys manually
+      allow(@article).to receive(:import!) # prevent the import because we want to create the related keys manually
       @article.save!
     end
 
@@ -419,15 +419,15 @@ describe Article do
   describe "#update_import_starting_fields!" do
     before :each do
       @article = FactoryGirl.build(:article, name: "test")
-      @article.stub(:import!) # prevent the import because we want to create the related keys manually
+      allow(@article).to receive(:import!) # prevent the import because we want to create the related keys manually
       @article.save!
     end
 
     it "sets ready to false" do
       @article.update! ready: true
-      expect(@article.ready).to be_true
+      expect(@article.ready).to be_truthy
       @article.send :update_import_starting_fields!
-      expect(@article.ready).to be_false
+      expect(@article.ready).to be_falsey
     end
 
     it "sets first_import_started_at when it is started for the first time, and doesn't re-set it on later requests" do
@@ -460,7 +460,7 @@ describe Article do
   describe "#update_import_finishing_fields!" do
     before :each do
       @article = FactoryGirl.build(:article, name: "test")
-      @article.stub(:import!) # prevent the import because we want to create the related keys manually
+      allow(@article).to receive(:import!) # prevent the import because we want to create the related keys manually
       @article.save!
     end
 
@@ -500,34 +500,34 @@ describe Article do
   describe "#loading?" do
     before :each do
       @article = FactoryGirl.build(:article, name: "test")
-      @article.stub(:import!) # prevent the import because we want to handle this manually
+      allow(@article).to receive(:import!) # prevent the import because we want to handle this manually
       @article.save!
     end
 
     it "returns true if neither `last_import_requested_at` nor `last_import_finished_at` is set" do
       @article.update! last_import_requested_at: nil, last_import_finished_at: nil
-      expect(@article.loading?).to be_true
+      expect(@article.loading?).to be_truthy
     end
 
     it "returns true if `last_import_requested_at` is set but `last_import_finished_at` is not set (after a Article is first created)" do
       @article.update! last_import_requested_at: Time.now, last_import_finished_at: nil
-      expect(@article.loading?).to be_true
+      expect(@article.loading?).to be_truthy
     end
 
     it "returns false if `last_import_finished_at` is greater than `last_import_requested_at` (after an import is finished)" do
       @article.update! last_import_requested_at: 2.minutes.ago, last_import_finished_at: 1.minutes.ago
-      expect(@article.loading?).to be_false
+      expect(@article.loading?).to be_falsey
     end
 
     it "returns true if `last_import_finished_at` is less than `last_import_requested_at` (after a re-import is scheduled)" do
       @article.update! last_import_requested_at: 1.minutes.ago, last_import_finished_at: 2.minutes.ago
-      expect(@article.loading?).to be_true
+      expect(@article.loading?).to be_truthy
     end
 
     it "returns false if `last_import_finished_at` is equal to `last_import_requested_at` (an import finished very fast)" do
       t = Time.now
       @article.update! last_import_requested_at: t, last_import_finished_at: t
-      expect(@article.loading?).to be_false
+      expect(@article.loading?).to be_falsey
     end
   end
 

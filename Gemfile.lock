@@ -14,6 +14,7 @@ GIT
 
 GEM
   remote: https://rubygems.org/
+  remote: https://rails-assets.org/
   specs:
     CFPropertyList (2.2.8)
     actionmailer (4.1.14.2)
@@ -44,7 +45,9 @@ GEM
       tzinfo (~> 1.1)
     after-commit-on-action (0.0.3)
       rails (>= 4.0)
-    ansi (1.4.3)
+    airbrussh (1.0.2)
+      sshkit (>= 1.6.1, != 1.7.0)
+    ansi (1.5.0)
     arel (5.0.1.20140414130214)
     autoprefixer-rails (5.2.1.1)
       execjs
@@ -62,17 +65,20 @@ GEM
     blankslate (2.1.2.4)
     boolean (1.0.1)
     builder (3.2.2)
-    capistrano (3.2.1)
+    capistrano (3.5.0)
+      airbrussh (>= 1.0.0)
+      capistrano-harrow
       i18n
       rake (>= 10.0.0)
-      sshkit (~> 1.3)
-    capistrano-bundler (1.1.2)
-      capistrano (~> 3.0)
+      sshkit (>= 1.9.0)
+    capistrano-bundler (1.1.4)
+      capistrano (~> 3.1)
       sshkit (~> 1.2)
-    capistrano-rails (1.1.1)
+    capistrano-harrow (0.5.1)
+    capistrano-rails (1.1.6)
       capistrano (~> 3.1)
       capistrano-bundler (~> 1.1)
-    capistrano-rvm (0.1.1)
+    capistrano-rvm (0.1.2)
       capistrano (~> 3.0)
       sshkit (~> 1.2)
     celluloid (0.15.2)
@@ -80,7 +86,7 @@ GEM
     chronic (0.10.2)
     climate_control (0.0.3)
       activesupport (>= 3.0)
-    cocaine (0.5.4)
+    cocaine (0.5.8)
       climate_control (>= 0.0.3, < 1.0)
     coderay (1.1.0)
     coffee-rails (4.0.1)
@@ -90,12 +96,10 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.7.0)
-    colorize (0.7.3)
-    commonjs (0.2.7)
     configoro (1.4.0)
       activesupport
     connection_pool (2.0.0)
-    daemons (1.1.9)
+    daemons (1.2.3)
     database_cleaner (1.3.0)
     debug_inspector (0.0.2)
     devise (3.2.4)
@@ -108,8 +112,8 @@ GEM
     dropzonejs-rails (0.4.16)
       rails (> 3.1)
     erubis (2.7.0)
-    eventmachine (1.0.3)
-    execjs (2.2.0)
+    eventmachine (1.0.9.1)
+    execjs (2.6.0)
     factory_girl (4.4.0)
       activesupport (>= 3.0.0)
     factory_girl_rails (4.4.1)
@@ -117,12 +121,12 @@ GEM
       railties (>= 3.0.0)
     faker (1.3.0)
       i18n (~> 0.5)
+    faraday (0.9.2)
+      multipart-post (>= 1.2, < 3)
     find_or_create_on_scopes (1.4.0)
       activerecord (>= 3.1)
     font-awesome-rails (4.1.0.0)
       railties (>= 3.2, < 5.0)
-    haml (4.0.5)
-      tilt
     hashr (0.0.22)
     hike (1.2.3)
     hogan_assets (1.6.0)
@@ -141,43 +145,39 @@ GEM
     kaminari (0.16.1)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
-    less (2.5.1)
-      commonjs (~> 0.2.7)
-    less-rails (2.5.0)
-      actionpack (>= 3.1)
-      less (~> 2.5.0)
     libarchive (0.1.2)
-    libv8 (3.16.14.7)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
-    mailcatcher (0.2.4)
-      eventmachine
-      haml
-      i18n
-      json
-      mail
-      sinatra
-      skinny (>= 0.1.2)
-      sqlite3-ruby
-      thin
+    mailcatcher (0.6.4)
+      activesupport (~> 4.0)
+      eventmachine (= 1.0.9.1)
+      mail (~> 2.3)
+      rack (~> 1.5)
+      sinatra (~> 1.2)
+      skinny (~> 0.2.3)
+      sqlite3 (~> 1.3)
+      thin (~> 1.5.0)
     method_source (0.8.2)
     mime-types (2.99.1)
-    mini_portile (0.6.0)
+    mimemagic (0.3.0)
+    mini_portile2 (2.0.0)
     minitest (5.8.4)
     multi_json (1.11.2)
     multi_xml (0.5.5)
+    multipart-post (2.0.0)
     mustache (0.99.5)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
-    net-ssh (2.9.1)
-    nokogiri (1.6.2.1)
-      mini_portile (= 0.6.0)
+    net-ssh (3.1.1)
+    nokogiri (1.6.7.2)
+      mini_portile2 (~> 2.0.0.rc2)
     orm_adapter (0.5.0)
-    paperclip (4.1.1)
-      activemodel (>= 3.0.0)
-      activesupport (>= 3.0.0)
-      cocaine (~> 0.5.3)
+    paperclip (4.3.6)
+      activemodel (>= 3.2.0)
+      activesupport (>= 3.2.0)
+      cocaine (~> 0.5.5)
       mime-types
+      mimemagic (= 0.3.0)
     parslet (1.6.1)
       blankslate (~> 2.0)
     pg (0.17.1)
@@ -204,6 +204,7 @@ GEM
       bundler (>= 1.3.0, < 2.0)
       railties (= 4.1.14.2)
       sprockets-rails (~> 2.0)
+    rails-assets-raven-js (3.0.4)
     rails-observers (0.1.2)
       activemodel (~> 4.0)
     railties (4.1.14.2)
@@ -211,7 +212,7 @@ GEM
       activesupport (= 4.1.14.2)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
-    rake (10.5.0)
+    rake (11.1.2)
     redcarpet (3.1.2)
     redis (3.1.0)
     redis-actionpack (4.0.0)
@@ -239,30 +240,43 @@ GEM
       redis-store (~> 1.1.0)
     redis-store (1.1.4)
       redis (>= 2.2)
-    ref (1.0.5)
     rest-client (1.6.7)
       mime-types (>= 1.16)
-    rspec-collection_matchers (1.0.0)
-      rspec-expectations (>= 2.99.0.beta1)
-    rspec-core (2.99.0)
-    rspec-expectations (2.99.0)
-      diff-lcs (>= 1.1.3, < 2.0)
-    rspec-mocks (2.99.1)
-    rspec-rails (2.99.0)
-      actionpack (>= 3.0)
-      activemodel (>= 3.0)
-      activesupport (>= 3.0)
-      railties (>= 3.0)
-      rspec-collection_matchers
-      rspec-core (~> 2.99.0)
-      rspec-expectations (~> 2.99.0)
-      rspec-mocks (~> 2.99.0)
+    rspec-core (3.4.4)
+      rspec-support (~> 3.4.0)
+    rspec-expectations (3.4.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.4.0)
+    rspec-mocks (3.4.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.4.0)
+    rspec-rails (3.4.2)
+      actionpack (>= 3.0, < 4.3)
+      activesupport (>= 3.0, < 4.3)
+      railties (>= 3.0, < 4.3)
+      rspec-core (~> 3.4.0)
+      rspec-expectations (~> 3.4.0)
+      rspec-mocks (~> 3.4.0)
+      rspec-support (~> 3.4.0)
+    rspec-support (3.4.1)
+    ruby2ruby (2.3.0)
+      ruby_parser (~> 3.1)
+      sexp_processor (~> 4.0)
+    ruby_parser (3.8.1)
+      sexp_processor (~> 4.1)
+    safemode (1.2.4)
+      ruby2ruby (>= 2.0.6)
+      ruby_parser (>= 3.2.0)
+      sexp_processor (>= 4.3.0)
     sass (3.2.19)
     sass-rails (4.0.3)
       railties (>= 4.0.0, < 5.0)
       sass (~> 3.2.0)
       sprockets (~> 2.8, <= 2.11.0)
       sprockets-rails (~> 2.0)
+    sentry-raven (1.0.0)
+      faraday (>= 0.7.6)
+    sexp_processor (4.7.0)
     sidekiq (2.17.7)
       celluloid (>= 0.15.2)
       connection_pool (>= 1.0.0)
@@ -276,9 +290,9 @@ GEM
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
-    skinny (0.2.3)
+    skinny (0.2.4)
       eventmachine (~> 1.0.0)
-      thin (~> 1.5.0)
+      thin (>= 1.5, < 1.7)
     slim (2.0.2)
       temple (~> 0.6.6)
       tilt (>= 1.3.3, < 2.1)
@@ -291,7 +305,6 @@ GEM
     slugalicious (2.1.0)
       rails (>= 4.0)
       stringex
-    sourcemap (0.1.1)
     sprockets (2.11.0)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -301,30 +314,12 @@ GEM
       actionpack (>= 3.0)
       activesupport (>= 3.0)
       sprockets (>= 2.8, < 4.0)
-    sqlite3 (1.3.9)
-    sqlite3-ruby (1.3.3)
-      sqlite3 (>= 1.3.3)
-    squash_javascript (2.0.5)
-      json
-      railties (>= 3.1)
-      sourcemap
-      sprockets
-      squash_uploader
-    squash_rails (1.3.4)
-      squash_ruby
-    squash_ruby (2.0.0)
-      json
-    squash_uploader (1.0.1)
-      json
-    sshkit (1.5.1)
-      colorize
+    sqlite3 (1.3.11)
+    sshkit (1.10.0)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
     stringex (2.2.0)
     temple (0.6.7)
-    therubyracer (0.12.1)
-      libv8 (~> 3.16.14.0)
-      ref
     thin (1.5.1)
       daemons (>= 1.0.9)
       eventmachine (>= 0.12.6)
@@ -374,10 +369,10 @@ DEPENDENCIES
   better_errors
   binding_of_caller
   boolean
-  capistrano
-  capistrano-bundler
-  capistrano-rails
-  capistrano-rvm (>= 0.1.0)
+  capistrano (~> 3.5)
+  capistrano-bundler (~> 1.1)
+  capistrano-rails (~> 1.1)
+  capistrano-rvm (~> 0.1)
   coffee-rails
   coffee-script
   configoro
@@ -385,6 +380,7 @@ DEPENDENCIES
   devise
   diff-lcs
   dropzonejs-rails
+  execjs
   factory_girl_rails
   faker
   find_or_create_on_scopes
@@ -396,26 +392,28 @@ DEPENDENCIES
   jquery-rails
   json
   kaminari
-  less-rails
   libarchive
-  mailcatcher
+  mailcatcher (~> 0.6.4)
   mustache
-  nokogiri
-  paperclip
+  nokogiri (>= 1.6.7.2)
+  paperclip (>= 4.2.2)
   parslet
   pg
   pry
   pry-nav
   rack-cache
   rails (= 4.1.14.2)
+  rails-assets-raven-js!
   rails-observers
   redcarpet
   redis-mutex
   redis-namespace
   redis-rack-cache
   redis-rails
-  rspec-rails (< 3.0.0)
+  rspec-rails (~> 3.0)
+  safemode
   sass-rails (= 4.0.3)
+  sentry-raven
   sidekiq (< 3.0.0)
   sidekiq-failures!
   sidekiq-pro
@@ -424,11 +422,7 @@ DEPENDENCIES
   slim-rails
   slugalicious
   sprockets-rails
-  squash_javascript
-  squash_rails
-  squash_ruby
   stringex (= 2.2.0)
-  therubyracer
   timecop
   tire
   twitter-typeahead-rails (= 0.9.3)
@@ -439,5 +433,8 @@ DEPENDENCIES
   whenever
   yard
 
+RUBY VERSION
+   ruby 2.2.4p230
+
 BUNDLED WITH
-   1.10.6
+   1.12.1

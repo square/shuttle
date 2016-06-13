@@ -189,13 +189,13 @@ describe Key do
 
       expect(key2.translations.not_base.all? do |trans|
         trans.copy.nil? && trans.approved.nil?
-      end).to be_true
+      end).to be_truthy
       expect(key3.translations.not_base.all? do |trans|
         trans.copy.nil? && trans.approved.nil?
-      end).to be_true
+      end).to be_truthy
 
       base_translations = [key1.translations.base.first, key2.translations.base.first, key3.translations.base.first]
-      expect(base_translations.all? { |trans| trans && (trans.copy == trans.source_copy) && trans.approved? }).to be_true
+      expect(base_translations.all? { |trans| trans && (trans.copy == trans.source_copy) && trans.approved? }).to be_truthy
     end
 
     context "[for commit-related keys]" do
@@ -286,7 +286,7 @@ describe Key do
         project  = FactoryGirl.create(:project,
                                       base_rfc5646_locale: 'en',
                                       targeted_rfc5646_locales: {'fr' => true})
-        Article.any_instance.stub(:import) # prevent auto import
+        allow_any_instance_of(Article).to receive(:import) # prevent auto import
         article = FactoryGirl.create(:article, project: project, targeted_rfc5646_locales: {'de' => true})
         section = FactoryGirl.create(:section, article: article)
         key = FactoryGirl.create(:key, project: project, section: section)
@@ -445,7 +445,7 @@ describe Key do
                                       targeted_rfc5646_locales: {'en' => true, 'fr' => true},
                                       key_locale_exclusions:    {'fr' => %w(*cl*)})
 
-        Article.any_instance.stub(:import) # prevent auto import
+        allow_any_instance_of(Article).to receive(:import) # prevent auto import
         article = FactoryGirl.create(:article, project: project, targeted_rfc5646_locales: {'en' => true, 'fr' => true})
         section = FactoryGirl.create(:section, article: article)
         key = FactoryGirl.create(:key, key: 'included_in_article_excluded_from_project', project: project, section: section)
@@ -458,7 +458,7 @@ describe Key do
 
       it "should not remove a translated Translation even if it's not in a targeted locale of the Article" do
         project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es' => true})
-        Article.any_instance.stub(:import) # prevent auto import
+        allow_any_instance_of(Article).to receive(:import) # prevent auto import
         article = FactoryGirl.create(:article, project: project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
         section = FactoryGirl.create(:section, article: article)
         key = FactoryGirl.create(:key, project: project, section: section)
@@ -470,7 +470,7 @@ describe Key do
 
       it "should remove a not-translated Translation if it's not in a targeted locale of the Article" do
         project  = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es' => true})
-        Article.any_instance.stub(:import) # prevent auto import
+        allow_any_instance_of(Article).to receive(:import) # prevent auto import
         article = FactoryGirl.create(:article, project: project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
         section = FactoryGirl.create(:section, article: article)
         key = FactoryGirl.create(:key, project: project, section: section)
@@ -544,7 +544,7 @@ describe Key do
     end
 
     it "properly recalculates ready for keys of a given article in batch" do
-      Article.any_instance.stub(:import!)
+      allow_any_instance_of(Article).to receive(:import!)
       article = FactoryGirl.create(:article, project: @project)
       section = FactoryGirl.create(:section, article: article)
       @key1.update! section: section, index_in_section: 0

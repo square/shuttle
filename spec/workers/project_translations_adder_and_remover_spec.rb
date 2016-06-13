@@ -23,7 +23,7 @@ describe ProjectTranslationsAdderAndRemover do
 
       expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key1.id).once
       expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key2.id).once
-      ProjectTranslationsAdderAndRemover::Finisher.any_instance.should_receive(:on_success)
+      expect_any_instance_of(ProjectTranslationsAdderAndRemover::Finisher).to receive(:on_success)
       ProjectTranslationsAdderAndRemover.new.perform(project.id)
     end
 

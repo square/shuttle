@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'safemode'
+
 module Importer
 
   # Parses translatable strings from Ruby i18n `.rb` files.
@@ -27,11 +29,8 @@ module Importer
     end
 
     def import_strings
-      output = nil
-      Thread.start do
-        $SAFE  = 4
-        output = eval(file.contents)
-      end.join
+      box = Safemode::Box.new
+      output = box.eval(file.contents)
 
       unless output.kind_of?(Hash)
         log_skip nil, "Does not evaluate to a Hash"

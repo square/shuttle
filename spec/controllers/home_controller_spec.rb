@@ -17,7 +17,7 @@ require 'spec_helper'
 describe HomeController do
   context "[when 'uncompleted' filter is selected and locales are specified]" do
     before :each do
-      Article.any_instance.stub(:import!) # prevent auto import
+      allow_any_instance_of(Article).to receive(:import!) # prevent auto import
 
       reset_elastic_search
       @request.env['devise.mapping'] = Devise.mappings[:user]
@@ -63,6 +63,13 @@ describe HomeController do
       get :index, { filter__rfc5646_locales: 'ja', filter__status: 'uncompleted' }
       expect(assigns(:commits).map(&:id)).to eq([])
       expect(assigns(:articles).map(&:id)).to eq([])
+    end
+
+    it "should return all hidden articles" do
+      hidden_article = FactoryGirl.create(:article, project: @project, hidden: true)
+
+      get :index, { filter__status: 'hidden' }
+      expect(assigns(:articles).map(&:id)).to eq([hidden_article.id])
     end
   end
 end

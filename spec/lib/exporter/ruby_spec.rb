@@ -186,25 +186,29 @@ describe Exporter::Ruby do
 
   describe ".valid?" do
     it "should return true for a valid Ruby hash" do
-      expect(Exporter::Ruby.valid?(<<-RUBY)).to be_true
+      expect(Exporter::Ruby.valid?(<<-RUBY)).to be_truthy
 {"ja-JP"=>{"different"=>"Different (ja-JP)", "same"=>"Same (ja)"}}
       RUBY
     end
 
     it "should return false for another Ruby object" do
-      expect(Exporter::Ruby.valid?('[1,2,3]')).to be_false
+      expect(Exporter::Ruby.valid?('[1,2,3]')).to be_falsey
     end
 
     it "should return false for Ruby code that generates a runtime error" do
-      expect(Exporter::Ruby.valid?('{"foo" => bar}')).to be_false
+      expect(Exporter::Ruby.valid?('{"foo" => bar}')).to be_falsey
     end
 
     it "should return false for Ruby code that generates a syntax error" do
-      expect(Exporter::Ruby.valid?('$!$*()%(@*&%@(*%^(')).to be_false
+      expect(Exporter::Ruby.valid?('$!$*()%(@*&%@(*%^(')).to be_falsey
+    end
+
+    it "should return false for Ruby code that is dangerous" do
+      expect(Exporter::Ruby.valid?('exit')).to be_falsey
     end
 
     it "should return false for an empty file" do
-      expect(Exporter::Ruby.valid?('')).to be_false
+      expect(Exporter::Ruby.valid?('')).to be_falsey
     end
   end
 end

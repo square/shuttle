@@ -22,15 +22,13 @@ set :deploy_to, "/app/#{fetch :application}"
 set :linked_files, %w{  config/database.yml
                         config/environments/staging/app.yml
                         config/environments/staging/paperclip.yml
-                        config/environments/staging/squash.yml
                         config/environments/production/app.yml
                         config/environments/production/paperclip.yml
-                        config/environments/production/squash.yml
                         config/environments/production/stash.yml }
 set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos tmp/working_repos}
 
 set :rvm_type, :system
-set :rvm_ruby_version, "2.0.0-p576@#{fetch :application}"
+set :rvm_ruby_version, "2.2.4@#{fetch :application}"
 
 set :whenever_roles, [:app, :primary_cron]
 set :sidekiq_role, [] # make the default cap sidekiq:* commands no-ops, instead, rely on 'sv' commands as below
@@ -55,5 +53,3 @@ namespace :deploy do
   after :finishing, 'deploy:restart'
   after :finishing, 'deploy:sidekiq:restart'
 end
-
-before 'deploy:publishing', 'squash:write_revision'

@@ -39,12 +39,12 @@ describe ProjectTranslationsMassCopier do
     it "copies translations, and updates keys & commits readiness states" do
       commit = FactoryGirl.create(:commit, project: @project, ready: false)
       commit.keys << @key.reload
-      expect(commit.ready).to be_false
-      expect(@key.ready).to be_false
+      expect(commit.ready).to be_falsey
+      expect(@key.ready).to be_falsey
       ProjectTranslationsMassCopier.new.perform(@project.id, 'en', 'en-XX')
       expect(@en_xx_translation.reload.copy).to eql('test')
-      expect(commit.reload.ready).to be_true
-      expect(@key.reload.ready).to be_true
+      expect(commit.reload.ready).to be_truthy
+      expect(@key.reload.ready).to be_truthy
     end
   end
 
@@ -117,7 +117,7 @@ describe ProjectTranslationsMassCopier do
     end
 
     it "returns errors if project translation adder is still running" do
-      @project.stub(:translations_adder_and_remover_batch_status).and_return(double("batch_status"))
+      allow(@project).to receive(:translations_adder_and_remover_batch_status).and_return(double("batch_status"))
       expect(ProjectTranslationsMassCopier.find_locale_errors(@project, 'en', 'en-XX')).to eql(["Project Translations Adder And Remover batch is still running. Try after it finishes."])
     end
   end
@@ -163,7 +163,7 @@ describe ProjectTranslationsMassCopier do
       batch = ProjectTranslationsMassCopier.new.mass_copier_batch(project.id, 'en', 'en-XX')
       expect(batch).to be_a_kind_of(Sidekiq::Batch)
       expect(batch.description).to eql("Project Translations Mass Copier #{project.id} (en -> en-XX)")
-      ProjectTranslationsMassCopier::Finisher.any_instance.should_receive(:on_success).with(anything(), {'project_id' => project.id}).and_call_original
+      expect_any_instance_of(ProjectTranslationsMassCopier::Finisher).to receive(:on_success).with(anything(), {'project_id' => project.id}).and_call_original
       expect(ProjectDescendantsRecalculator).to receive(:perform_once).with(project.id)
       batch.jobs {}
     end
