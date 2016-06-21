@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2016 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -15,15 +15,14 @@
 class HomeIndexItemsFinder
 
   attr_reader :user, :form
+  include Elasticsearch::DSL
 
   def initialize(user, form)
     @user = user
     @form = form
   end
 
-  def find_commits
-    user = user()
-
+  def search_query
     # FILTERS AND SORTING
     status            = form[:filter__status]
     locales           = form[:filter__locales]
@@ -44,49 +43,56 @@ class HomeIndexItemsFinder
       uncompleted_key_ids_in_locales = uncompleted_key_ids_in_locales()
     end
 
-    # SEARCH
-    commits_in_es = Commit.search do
-      filter :prefix, revision: sha if sha
-      filter :term, project_id: project_id unless project_id == 'all'
+    search {
+      query do
+        filtered do
+          filter do
+            bool do
+              must { prefix revision: sha } if sha
+              must { term project_id: project_id } unless project_id == 'all'
+              must { term exported: false } if hide_exported
+              must { exists field: :user_id } if hide_autoimported
+              must { term  user_id: 1 } if show_only_mine
 
-      filter :term, exported: false if hide_exported
-      filter :exists, field: :user_id if hide_autoimported
-      filter :term, user_id: user.id if show_only_mine
-
-      # filter by status
-      case status
-        when 'uncompleted'
-          if locales.present?
-            filter :terms, key_ids: uncompleted_key_ids_in_locales
-          else
-            filter :term, ready: false
+              case status
+              when 'uncompleted'
+                locales.present? ? must { terms key_ids: uncompleted_key_ids_in_locales } : must { term ready: false }
+              when 'completed'
+                must { term ready: true }
+              when 'hidden'
+                # Do nothing as Commit has no such state. We have this to line up with Article since
+                # Commit and Article share the same frontend template.
+                must { match_all }
+              end
+            end
           end
-        when 'completed'
-          filter :term, ready: true
-        when 'hidden'
-          #TODO
+        end
       end
 
       from offset
       size limit
-
       sort do
         case sort_field
-          when 'due'
-            by :due_date, (sort_direction.nil? ? 'asc' : sort_direction)
-            by :priority, 'asc'
-            by :created_at, 'desc'
-          when 'create'
-            by :created_at, (sort_direction.nil? ? 'desc' : sort_direction)
-            by :priority, 'asc'
-            by :due_date, 'asc'
-          else
-            by :priority, (sort_direction.nil? ? 'asc' : sort_direction)
-            by :due_date, 'asc'
-            by :created_at, 'desc'
+        when 'due'
+          by :due_date, order: sort_direction.nil? ? 'asc' : sort_direction
+          by :priority, order: 'asc'
+          by :created_at, order: 'desc'
+        when 'create'
+          by :created_at, order: sort_direction.nil? ? 'desc' : sort_direction
+          by :priority, order: 'asc'
+          by :due_date, order: 'asc'
+        else
+          by :priority, order: sort_direction.nil? ? 'asc' : sort_direction
+          by :due_date, order: 'asc'
+          by :created_at, order: 'desc'
         end
       end
-    end
+    }.to_hash
+  end
+
+  def find_commits
+    #Search
+    commits_in_es = Elasticsearch::Model.search(search_query, Commit).results
 
     # LOAD
     commits = Commit

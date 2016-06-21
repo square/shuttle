@@ -47,7 +47,6 @@ GEM
       rails (>= 4.0)
     airbrussh (1.0.2)
       sshkit (>= 1.6.1, != 1.7.0)
-    ansi (1.5.0)
     arel (5.0.1.20140414130214)
     autoprefixer-rails (5.2.1.1)
       execjs
@@ -111,6 +110,20 @@ GEM
     diff-lcs (1.2.5)
     dropzonejs-rails (0.4.16)
       rails (> 3.1)
+    elasticsearch (1.0.17)
+      elasticsearch-api (= 1.0.17)
+      elasticsearch-transport (= 1.0.17)
+    elasticsearch-api (1.0.17)
+      multi_json
+    elasticsearch-dsl (0.1.3)
+    elasticsearch-model (0.1.9)
+      activesupport (> 3)
+      elasticsearch (> 0.4)
+      hashie
+    elasticsearch-rails (0.1.9)
+    elasticsearch-transport (1.0.17)
+      faraday
+      multi_json
     erubis (2.7.0)
     eventmachine (1.0.9.1)
     execjs (2.6.0)
@@ -127,7 +140,7 @@ GEM
       activerecord (>= 3.1)
     font-awesome-rails (4.1.0.0)
       railties (>= 3.2, < 5.0)
-    hashr (0.0.22)
+    hashie (3.4.4)
     hike (1.2.3)
     hogan_assets (1.6.0)
       execjs (>= 1.2.9)
@@ -240,8 +253,6 @@ GEM
       redis-store (~> 1.1.0)
     redis-store (1.1.4)
       redis (>= 2.2)
-    rest-client (1.6.7)
-      mime-types (>= 1.16)
     rspec-core (3.4.4)
       rspec-support (~> 3.4.0)
     rspec-expectations (3.4.0)
@@ -330,14 +341,6 @@ GEM
     timecop (0.7.1)
     timeliness (0.3.8)
     timers (1.1.0)
-    tire (0.6.2)
-      activemodel (>= 3.0)
-      activesupport
-      ansi
-      hashr (~> 0.0.19)
-      multi_json (~> 1.3)
-      rake
-      rest-client (~> 1.6)
     twitter-typeahead-rails (0.9.3)
       actionpack (>= 3.1)
       jquery-rails
@@ -380,6 +383,9 @@ DEPENDENCIES
   devise
   diff-lcs
   dropzonejs-rails
+  elasticsearch-dsl (~> 0.1.3)
+  elasticsearch-model (~> 0.1.9)
+  elasticsearch-rails (~> 0.1.9)
   execjs
   factory_girl_rails
   faker
@@ -424,7 +430,6 @@ DEPENDENCIES
   sprockets-rails
   stringex (= 2.2.0)
   timecop
-  tire
   twitter-typeahead-rails (= 0.9.3)
   uea-stemmer
   uglifier
@@ -437,4 +442,4 @@ RUBY VERSION
    ruby 2.2.4p230
 
 BUNDLED WITH
-   1.12.1
+   1.12.3

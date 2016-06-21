@@ -228,7 +228,7 @@ class CommitsController < ApplicationController
   def destroy
     @commit.destroy
 
-    Commit.tire.index.refresh
+    Commit.refresh_elasticsearch_index!
 
     respond_with(@commit) do |format|
       format.html { redirect_to root_url, notice: t('controllers.commits.destroy.deleted', sha: @commit.revision_prefix) }

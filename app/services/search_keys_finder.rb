@@ -12,29 +12,29 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class CommitsSearchKeysFinder
-
-  attr_reader :commit, :form
-  include Elasticsearch::DSL
-
+class SearchKeysFinder
   # The number of records to return by default.
   PER_PAGE = 50
+  include Elasticsearch::DSL
 
-  def initialize(form, commit)
-    @commit = commit
-    @form = form
+  def initialize(user, params)
+    @user = user
+    @params = params
   end
 
   def search_query
-    query_filter = form[:filter]
-    status = form[:status]
-    key_ids = commit.keys.pluck(:id)
-    current_page = page
+    query_filter = @params[:filter]
+    status       = @params[:status]
+    offset       = @params[:offset].to_i
+    project_id   = @params[:project_id]
+    limit        = @params.fetch(:limit, PER_PAGE)
+    not_elastic  = @params[:not_elastic_search]
+    hidden_keys  = @params[:hidden_in_search]
 
     search {
       query do
         filtered do
-          if query_filter.present?
+          if query_filter.present? && !not_elastic
             query do
               match 'original_key' do
                 query query_filter
@@ -44,31 +44,23 @@ class CommitsSearchKeysFinder
           end
           filter do
             bool do
-              must { ids values: key_ids }
-              case status
-              when 'approved'
-                must { term ready: 1 }
-              when 'pending'
-                must { term ready: 0 }
-              end
+              must { term original_key_exact: query_filter } if query_filter && not_elastic
+              must { term project_id: project_id }
+              must { term ready: status } unless status.blank?
+              hidden_keys ? must { term hidden_in_search: true } : must { term hidden_in_search: false }
             end
           end
         end
       end
-      sort { by :original_key_exact, order: 'asc' } unless query_filter
-      from (current_page - 1) * PER_PAGE
-      size PER_PAGE
+      sort { by :original_key, order: 'asc' } unless query_filter.present?
+      from offset
+      size limit
     }.to_hash
-  end
-
-  def page
-    form.fetch(:page, 1).to_i
   end
 
   def find_keys
     keys_in_es = Elasticsearch::Model.search(search_query, Key).results
-
-    keys = Key.where(id: keys_in_es.map(&:id)).includes(:translations)
-    PaginatableObjects.new(keys, keys_in_es, page, PER_PAGE)
+    keys = Key.where(id: keys_in_es.map(&:id)).includes(:translations, :project)
+    SortingHelper.order_by_elasticsearch_result_order(keys, keys_in_es)
   end
 end

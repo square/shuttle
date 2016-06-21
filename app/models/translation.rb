@@ -60,27 +60,44 @@ class Translation < ActiveRecord::Base
   locale_field :source_locale, from: :source_rfc5646_locale
   locale_field :locale
 
-  include Tire::Model::Search
-  include Tire::Model::Callbacks
+  include Elasticsearch::Model
+  include Elasticsearch::Model::Callbacks
+  include IndexHelper
+  Translation.index_name "shuttle_#{Rails.env}_translations"
+
+  def regular_index_fields
+    %w(copy source_copy id translator_id rfc5646_locale created_at updated_at translated)
+  end
   mapping do
-    # use send(:key) instead of key because there is a variable that shadows the
-    # key method.
-    indexes :copy, analyzer: 'snowball', as: 'copy'
-    indexes :source_copy, analyzer: 'snowball', as: 'source_copy'
+    indexes :copy, analyzer: 'snowball'
+    indexes :source_copy, analyzer: 'snowball'
     indexes :id, type: 'integer', index: :not_analyzed
-    indexes :project_id, type: 'integer', as: 'send(:key).project_id'
-    indexes :article_id, type: 'integer', as: 'send(:key).section.try(:article_id)'
-    indexes :section_id, type: 'integer', as: 'send(:key).section_id'
-    indexes :is_block_tag, type: 'boolean', as: 'send(:key).is_block_tag'
-    indexes :section_active, type: 'boolean', as: 'send(:key).section.try(:active)'
-    indexes :index_in_section, type: 'integer', as: 'send(:key).index_in_section'
+    indexes :project_id, type: 'integer'
+    indexes :article_id, type: 'integer'
+    indexes :section_id, type: 'integer'
+    indexes :is_block_tag, type: 'boolean'
+    indexes :section_active, type: 'boolean'
+    indexes :index_in_section, type: 'integer'
     indexes :translator_id, type: 'integer'
     indexes :rfc5646_locale, type: 'string', index: :not_analyzed
     indexes :created_at, type: 'date'
     indexes :updated_at, type: 'date'
     indexes :translated, type: 'boolean'
-    indexes :approved, type: 'integer', as: 'if approved==true then 1 elsif approved==false then 0 else nil end'
-    indexes :hidden_in_search, type: 'boolean', as: '!!send(:key).hidden_in_search'
+    indexes :approved, type: 'integer'
+    indexes :hidden_in_search, type: 'boolean'
+  end
+
+  def special_index_fields
+    {
+      project_id: self.key.project_id,
+      article_id: self.key.section.try(:article_id),
+      section_id: self.key.section_id,
+      is_block_tag: self.key.is_block_tag,
+      section_active: self.key.section.try(:active),
+      index_in_section: self.key.index_in_section,
+      approved: if approved==true then 1 elsif approved==false then 0 else nil end,
+      hidden_in_search: self.key.formatted_hidden_in_search
+    }
   end
 
   validates :key,
@@ -248,6 +265,7 @@ class Translation < ActiveRecord::Base
     # `   "べ<span class='sales-trends'>"[1..27] == "<span class='sales-trends'>"   `          returns true
   end
 
+  # TODO elasticsearch-rails doesn't have batch import, we should update this method once we find better solution
   # Batch updates `obj`s Translations in elastic search.
   # Expects `obj` to have a `keys` association.
   # This is currently only run in ArticleImporter::Finisher.
@@ -256,7 +274,9 @@ class Translation < ActiveRecord::Base
 
   def self.batch_refresh_elastic_search(obj)
     obj.keys.includes(:translations, :section).find_in_batches do |keys|
-      Translation.tire.index.import keys.map(&:translations).flatten
+      keys.map(&:translations).flatten.each do |translation|
+        translation.update_elasticsearch_index
+      end
     end
   end
 end

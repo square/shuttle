@@ -135,18 +135,32 @@ class Key < ActiveRecord::Base
   digest_field :key, scope: :for_key
   digest_field :source_copy, scope: :source_copy_matches
 
-  include Tire::Model::Search
-  include Tire::Model::Callbacks
+  include Elasticsearch::Model
+  include Elasticsearch::Model::Callbacks
+  include IndexHelper
+  Key.index_name "shuttle_#{Rails.env}_keys"
+
   settings analysis: {tokenizer: {key_tokenizer: {type: 'pattern', pattern: '[^A-Za-z0-9]'}},
            analyzer: {key_analyzer: {type: 'custom', tokenizer: 'key_tokenizer', filter: 'lowercase'}}}
+
   mapping do
-    indexes :original_key, type: 'multi_field', as: 'original_key', fields: {
+    indexes :original_key, type: 'multi_field', fields: {
         original_key:       {type: 'string', analyzer: 'key_analyzer'},
         original_key_exact: {type: 'string', index: :not_analyzed}
     }
     indexes :project_id, type: 'integer'
     indexes :ready, type: 'boolean'
-    indexes :hidden_in_search,  type: 'boolean', as: '!!hidden_in_search'
+    indexes :hidden_in_search,  type: 'boolean'
+  end
+
+  def regular_index_fields
+    %w(original_key project_id ready)
+  end
+
+  def special_index_fields
+    {
+      hidden_in_search: formatted_hidden_in_search
+    }
   end
 
   validates :project,
@@ -270,6 +284,10 @@ class Key < ActiveRecord::Base
 
     # Since update_all bypasses all callbacks, `ready` field for some Keys should be out of sync in ElasticSearch at this point.
     # We need to update ElasticSearch with the new ready fields.
-    Key.tire.index.import obj.keys
+    obj.keys.each { |key| key.update_elasticsearch_index }
+  end
+
+  def formatted_hidden_in_search
+    !!hidden_in_search
   end
 end

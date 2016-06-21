@@ -20,8 +20,12 @@ gem 'slugalicious'
 gem 'validates_timeliness'
 gem 'find_or_create_on_scopes'
 gem 'rails-observers'
-gem 'tire'
 gem 'after-commit-on-action'
+
+# ElASTICSEARCH
+gem 'elasticsearch-rails', '~> 0.1.9'
+gem 'elasticsearch-model', '~> 0.1.9'
+gem 'elasticsearch-dsl', '~> 0.1.3'
 
 # VIEWS
 gem 'jquery-rails'

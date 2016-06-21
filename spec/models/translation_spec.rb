@@ -270,15 +270,25 @@ describe Translation do
       regenerate_elastic_search_indexes
       sleep(2)
 
-      expect(Translation.search(load: true) { filter :term, section_active: true }.first).to eql(translation)
-      expect(Translation.search(load: true) { filter :term, section_active: false }.first).to be_nil
+      expect(Elasticsearch::Model.search(section_active_query(true), Translation).results.first.id.to_i).to eql(translation.id)
+      expect(Elasticsearch::Model.search(section_active_query(false), Translation).results.first).to be_nil
 
       section.update! active: false
       Translation.batch_refresh_elastic_search(article)
       sleep(2)
 
-      expect(Translation.search(load: true) { filter :term, section_active: true }.first).to be_nil
-      expect(Translation.search(load: true) { filter :term, section_active: false }.first).to eql(translation)
+      expect(Elasticsearch::Model.search(section_active_query(true), Translation).results.first).to be_nil
+      expect(Elasticsearch::Model.search(section_active_query(false), Translation).results.first.id.to_i).to eql(translation.id)
     end
+  end
+
+  def section_active_query(active)
+    {
+      filter: {
+        term: {
+          section_active: active
+        }
+      }
+    }
   end
 end
