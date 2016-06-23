@@ -64,7 +64,7 @@ RSpec.configure do |config|
 
   config.before :each do
     # Clear out Redis
-    Redis::Mutex.sweep
+    RedisMutex.sweep
     Shuttle::Redis.flushdb
   end
 

@@ -33,7 +33,7 @@ describe "SidekiqLockingSpec" do
     it "unlocks the mutex and calls perform_without_locking" do
       args = [{ 1 => 2 }]
       TestWorker.send(:mutex, *args).lock
-      expect(Shuttle::Redis.keys('*')).to eql(["Redis::Mutex:testworker:[{\"1\":2}]"])
+      expect(Shuttle::Redis.keys('*')).to eql(["RedisMutex:testworker:[{\"1\":2}]"])
 
       test_worker = TestWorker.new
       expect(test_worker).to receive(:perform_without_locking)
@@ -61,7 +61,7 @@ describe "SidekiqLockingSpec" do
     it "unlocks a previously locked mutex (with simple hash as args)" do
       args = [{ 1 => 2 }]
       expect(TestWorker.send(:mutex, *args).lock).to be_truthy
-      expect(Shuttle::Redis.keys('*')).to eql(["Redis::Mutex:testworker:[{\"1\":2}]"])
+      expect(Shuttle::Redis.keys('*')).to eql(["RedisMutex:testworker:[{\"1\":2}]"])
       expect(TestWorker.unlock(*args)).to be_truthy
       expect(Shuttle::Redis.keys('*')).to eql([])
     end
@@ -69,7 +69,7 @@ describe "SidekiqLockingSpec" do
     it "unlocks a previously locked mutex (with complex args)" do
       args = [1, 'a', { b: 'c', 2 => :d }]
       expect(TestWorker.send(:mutex, *args).lock).to be_truthy
-      expect(Shuttle::Redis.keys('*')).to eql(["Redis::Mutex:testworker:[1,\"a\",{\"b\":\"c\",\"2\":\"d\"}]"])
+      expect(Shuttle::Redis.keys('*')).to eql(["RedisMutex:testworker:[1,\"a\",{\"b\":\"c\",\"2\":\"d\"}]"])
       expect(TestWorker.unlock(*args)).to be_truthy
       expect(Shuttle::Redis.keys('*')).to eql([])
     end
@@ -93,7 +93,7 @@ describe "SidekiqLockingSpec" do
     it "returns a mutex with the correct name" do
       args = [1, 'a', { b: 'c', 2 => :d }]
       mutex = TestWorker.send(:mutex, *args)
-      expect(mutex).to be_a_kind_of(Redis::Mutex)
+      expect(mutex).to be_a_kind_of(RedisMutex)
       expect(mutex.key).to eql(TestWorker.send(:lock_name, *args))
     end
   end

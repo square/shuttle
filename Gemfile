@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '2.2.4'
 
 # FRAMEWORK
-gem 'rails', '4.1.14.2'
+gem 'rails', '4.1.15'
 gem 'configoro'
 gem 'redis-rails'
 gem 'redis-rack-cache'
