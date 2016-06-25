@@ -199,6 +199,7 @@ class Commit < ActiveRecord::Base
   def recalculate_ready!
     self.ready = successfully_loaded? && keys_are_ready? && !errored_during_import?
     self.completed_at = Time.current if self.ready && self.completed_at.nil?
+    index_elasticsearch_document
     save!
   end
 

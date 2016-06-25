@@ -19,30 +19,32 @@
 # `special_index_fields` to return a hash including all special fileds
 
 module IndexHelper
+
+  def self.included(base)
+    base.extend ClassMethods
+  end
+
   def regular_index_fields
     []
   end
 
   # override Elasticsearch::Model::Serializing.as_indexed_json method to only include mapped fields
-  def as_indexed_json(options={})
-    Hash[regular_index_fields.map { |field| [field, self.send(field)] }].merge(special_index_fields)
-  end
-
-  def special_index_fields
-    {}
+  def as_indexed_json(_options={})
+    Hash[regular_index_fields.map { |field| [field, self.send(field)] }].merge(special_index_fields.stringify_keys)
   end
 
   def update_elasticsearch_index
-    self.__elasticsearch__.update_document
+    __elasticsearch__.update_document
   end
 
-  def self.included(base)
-    base.extend(ClassMethods)
+  def index_elasticsearch_document
+    binding.pry
+    __elasticsearch__.index_document
   end
 
   module ClassMethods
     def refresh_elasticsearch_index!
-      self.__elasticsearch__.refresh_index!
+      __elasticsearch__.refresh_index!
     end
   end
 end
