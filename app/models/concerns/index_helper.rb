@@ -38,7 +38,6 @@ module IndexHelper
   end
 
   def index_elasticsearch_document
-    binding.pry
     __elasticsearch__.index_document
   end
 
