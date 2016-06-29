@@ -28,7 +28,7 @@ class HomeIndexPresenter
   # @return [String] item's full description.
 
   def full_description(item)
-    item.description || '-'
+    (sanitize item.description, tags: []) || '-'
   end
 
   # @param [Commit, Article] item The {Commit} or {Article} for which short description will be returned.
