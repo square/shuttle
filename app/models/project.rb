@@ -132,6 +132,22 @@ class Project < ActiveRecord::Base
   scope :git, -> { where("projects.repository_url IS NOT NULL") }
   scope :not_git, -> { where("projects.repository_url IS NULL") }
 
+  def credentials
+    lambda { |url, username, allowed_types|
+      host = URI.parse(url).host
+
+      if Shuttle::Configuration.credentials.key?(host)
+        return Rugged::Credentials::UserPassword.new(
+          username:  Shuttle::Configuration.credentials[host].username,
+          password: Shuttle::Configuration.credentials[host].password
+        )
+      else
+        # Returning nil causes a segmentation fault, this seems to do what we need
+        return Rugged::Credentials::UserPassword.new
+      end
+    }
+  end
+
   # Returns a `Rugged::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
@@ -419,7 +435,7 @@ class Project < ActiveRecord::Base
 
   def clone_repo
     raise NotLinkedToAGitRepositoryError unless git?
-    Rugged::Repository.clone_at repository_url, repo_path.to_s, { bare: true }
+    Rugged::Repository.clone_at repository_url, repo_path.to_s, { bare: true,  credentials: credentials }
   end
 
   def clone_working_repo

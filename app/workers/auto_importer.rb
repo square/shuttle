@@ -47,7 +47,7 @@ class AutoImporter
       project = Project.find(project_id)
       return unless project.git? && project.watched_branches.present?
 
-      project.repo.fetch('origin')
+      project.repo.fetch('origin', { credentials: project.credentials })
 
       branches_to_delete = [] # any branches that don't actually exist anymore?
       project.watched_branches.each do |branch|
