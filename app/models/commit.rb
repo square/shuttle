@@ -302,7 +302,7 @@ class Commit < ActiveRecord::Base
 
   def skip_key?(key)
     key_exclusions = Rails.cache.fetch("commit:#{revision}:exclusions") do
-      blob = project.repo.blob_at(commit.oid, '.shuttle.yml')
+      blob = project.repo.blob_at(commit!.oid, '.shuttle.yml')
       return unless blob
       settings = YAML.load(blob.content)
       settings['key_exclusions']
