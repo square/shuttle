@@ -143,7 +143,7 @@ class Project < ActiveRecord::Base
         )
       else
         # Returning nil causes a segmentation fault, this seems to do what we need
-        return Rugged::Credentials::UserPassword.new
+        return Rugged::Credentials::UserPassword.new(username: nil, password: nil)
       end
     }
   end
