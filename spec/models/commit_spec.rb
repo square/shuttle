@@ -423,13 +423,14 @@ describe Commit do
 
     it "returns the git object for the commit after fetching if it's not initially in local repo, but is in the remote repo" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil, @commit_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_raise(Rugged::ReferenceError)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@commit_obj)
       expect(@commit.commit!).to eql(@commit_obj)
     end
 
     it "raises Git::CommitNotFoundError if the revision is not found" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_raise(Rugged::ReferenceError)
       expect { @commit.commit! }.to raise_error(Git::CommitNotFoundError, "Commit not found in git repo: abc123")
     end
 

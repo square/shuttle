@@ -270,11 +270,7 @@ class Project < ActiveRecord::Base
   # @raise [Git::CommitNotFoundError] If an unknown SHA is given.
 
   def commit!(sha, options={})
-    begin
-      commit_object = find_or_fetch_git_object(sha)
-    rescue Rugged::ReferenceError
-      raise Git::CommitNotFoundError, sha
-    end
+    commit_object = find_or_fetch_git_object(sha)
     raise Git::CommitNotFoundError, sha unless commit_object
 
     if options[:skip_create]
@@ -294,7 +290,16 @@ class Project < ActiveRecord::Base
 
   def find_or_fetch_git_object(sha)
     repo do |r|
-      r.rev_parse(sha) || (r.fetch('origin'); r.rev_parse(sha))
+      begin
+        r.rev_parse(sha)
+      rescue Rugged::ReferenceError
+        r.fetch('origin')
+        begin
+          r.rev_parse(sha)
+        rescue Rugged::ReferenceError
+          nil
+        end
+      end
     end
   end
 

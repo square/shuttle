@@ -141,7 +141,8 @@ describe Project do
 
     it "should fetch the repo and return a commit if the rev is unknown" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').and_return(nil, @commit_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_raise(Rugged::ReferenceError)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@commit_obj)
       commit = @project.commit!('abc123')
       expect(commit).to be_kind_of(Commit)
       expect(commit.revision).to eql('a4b6dd88498817d4947730c7964a1a14c8f13d91')
@@ -149,7 +150,7 @@ describe Project do
 
     it "should raise an exception if the rev is still unknown after fetching" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').and_return(nil, nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_raise(Rugged::ReferenceError)
       expect { @project.commit!('abc123') }.to raise_error(Git::CommitNotFoundError)
     end
   end
@@ -249,7 +250,8 @@ describe Project do
 
     it "finds the git object in repo after fetching when it was not previously in the repo" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil, @git_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_raise(Rugged::ReferenceError)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@git_obj)
       git_obj = @project.find_or_fetch_git_object('abc123')
       expect(git_obj).to eql(@git_obj)
       expect(git_obj.sha).to eql('abc123')
@@ -257,7 +259,7 @@ describe Project do
 
     it "doesn't find the git object if it is not found in the local repo even after fetching" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_raise(Rugged::ReferenceError)
       git_obj = @project.find_or_fetch_git_object('abc123')
       expect(git_obj).to be_nil
     end

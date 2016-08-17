@@ -44,7 +44,7 @@ describe Blob do
     it "should raise an exception if sha is still unknown after fetching" do
       allow(@project).to receive(:repo).and_yield(@repo)
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_raise(Rugged::ReferenceError)
       expect { @blob.import_strings(double(Importer::Yaml), @commit) }.to raise_error(Git::BlobNotFoundError)
     end
   end
@@ -79,13 +79,14 @@ describe Blob do
 
     it "returns the git object for the blob after fetching if it's not initially in local repo, but is in the remote repo" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil, @blob_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_raise(Rugged::ReferenceError)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@blob_obj)
       expect(@blob.blob!).to eql(@blob_obj)
     end
 
     it "raises Git::BlobNotFoundError if the sha is not found" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_return(nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_raise(Rugged::ReferenceError)
       expect { @blob.blob! }.to raise_error(Git::BlobNotFoundError, "Blob not found in git repo: abc123")
     end
 
