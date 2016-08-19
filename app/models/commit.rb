@@ -349,8 +349,7 @@ class Commit < ActiveRecord::Base
     begin
       self.author = commit.author[:name]
       self.author_email = commit.author[:email]
-    rescue
-      # FIXME don't rescue all
+    rescue Rugged::OdbError
       # Don't set the author if commit doesn't exist
     end
   end
