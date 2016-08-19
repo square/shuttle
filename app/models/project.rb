@@ -133,7 +133,7 @@ class Project < ActiveRecord::Base
   scope :not_git, -> { where("projects.repository_url IS NULL") }
 
   def credentials
-    lambda { |url, username, allowed_types|
+    lambda do |url, _, _|
       host = URI.parse(url).host
 
       if Shuttle::Configuration.credentials.key?(host)
@@ -141,11 +141,8 @@ class Project < ActiveRecord::Base
           username:  Shuttle::Configuration.credentials[host].username,
           password: Shuttle::Configuration.credentials[host].password
         )
-      else
-        # Returning nil causes a segmentation fault, this seems to do what we need
-        return Rugged::Credentials::UserPassword.new(username: nil, password: nil)
       end
-    }
+    end
   end
 
   # Returns a `Rugged::Repository` proxy object that allows you to work with the

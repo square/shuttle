@@ -5,6 +5,14 @@ GIT
     sidekiq-failures (0.4.5)
       sidekiq (>= 2.16.0)
 
+GIT
+  remote: https://github.com/brandonweeks/rugged.git
+  revision: cdabe1e11ab85428c380df21cbd3117ca232a865
+  tag: v0.24.0-square0
+  submodules: true
+  specs:
+    rugged (0.24.0)
+
 GEM
   remote: https://rubygems.org/
   remote: https://rails-assets.org/
@@ -279,7 +287,6 @@ GEM
       sexp_processor (~> 4.0)
     ruby_parser (3.8.2)
       sexp_processor (~> 4.1)
-    rugged (0.24.0)
     safemode (1.2.4)
       ruby2ruby (>= 2.0.6)
       ruby_parser (>= 3.2.0)
@@ -418,7 +425,7 @@ DEPENDENCIES
   redis-rack-cache
   redis-rails
   rspec-rails (~> 3.0)
-  rugged
+  rugged!
   safemode
   sass-rails (= 4.0.3)
   sentry-raven
@@ -444,4 +451,4 @@ RUBY VERSION
    ruby 2.2.4p230
 
 BUNDLED WITH
-   1.12.3
+   1.12.5

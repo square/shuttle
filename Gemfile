@@ -38,7 +38,7 @@ gem 'autoprefixer-rails'
 
 # UTILITIES
 gem 'json'
-gem 'rugged'
+gem 'rugged', git: 'https://github.com/brandonweeks/rugged.git', tag: 'v0.24.0-square0', submodules: true
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
