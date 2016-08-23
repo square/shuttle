@@ -24,7 +24,7 @@ module Importer
     protected
 
     def import_file?
-      file.path =~ /\/locales\/#{Regexp.escape base_rfc5646_locale}\/translations\.js$/
+      file.path =~ /app\/locales\/#{Regexp.escape base_rfc5646_locale}\/translations\.js$/
     end
 
     def has_translations_for_locale?(_)

@@ -25,9 +25,9 @@ describe Importer::EmberES6Module do
     end
 
     it "should import strings from JS files" do
-      expect(@project.keys.for_key('mod_root_key').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
-      expect(@project.keys.for_key('mod_nested_key.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
-      expect(@project.keys.for_key('mod_nested_key.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
+      expect(@project.keys.for_key('mod_root_key_es6').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('root')
+      expect(@project.keys.for_key('mod_nested_key_es6.one').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('one')
+      expect(@project.keys.for_key('mod_nested_key_es6.2').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('two')
     end
   end
 
@@ -40,7 +40,7 @@ describe Importer::EmberES6Module do
                                     skip_imports:        Importer::Base.implementations.map(&:ident) - %w(ember_es6_module))
       @commit  = @project.commit!('HEAD')
 
-      expect(@project.keys.for_key('mod_dot_notation').first.translations.find_by_rfc5646_locale('en').copy).to eql('foo')
+      expect(@project.keys.for_key('mod_dot_notation_es6').first.translations.find_by_rfc5646_locale('en').copy).to eql('foo')
     end
   end
 end
