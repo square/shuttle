@@ -24,24 +24,30 @@
     return unless valid_touchdown_branch?
     project.working_repo do |working_repo|
       working_repo.fetch('origin')
-      working_repo.reset('origin/master', :hard) # cleanup any lingering changes
 
-      touchdown_branch_git_obj = working_repo.branches["origin/#{touchdown_branch}"]
-      unless touchdown_branch_git_obj
+      unless working_repo.branches["origin/#{touchdown_branch}"]
         Rails.logger.info "[TouchdownBranchUpdater] Touchdown branch #{touchdown_branch} doesn't exist in #{project.inspect}"
         return
       end
 
-      working_repo.references.update("refs/heads/#{touchdown_branch}", touchdown_branch_git_obj.target.oid)
-      working_repo.reset('origin/master', :hard) # cleanup any lingering changes
+      if working_repo.branches[touchdown_branch]
+        working_repo.checkout(touchdown_branch)
+        working_repo.reset("origin/#{touchdown_branch}", :hard)
+      else
+        working_repo.branches.create(touchdown_branch, "origin/#{touchdown_branch}")
+      end
 
-      unless working_repo.branches[source_branch]
+      unless working_repo.branches["origin/#{source_branch}"]
         Rails.logger.info "[TouchdownBranchUpdater] Watched branch #{source_branch} doesn't exist in #{project.inspect}"
         return
       end
 
-      working_repo.checkout(source_branch)
-      working_repo.reset("origin/#{source_branch}", :hard)
+      if working_repo.branches[source_branch]
+        working_repo.checkout(source_branch)
+        working_repo.reset("origin/#{source_branch}", :hard)
+      else
+        working_repo.branches.create(source_branch, "origin/#{source_branch}")
+      end
 
       translated_commit = latest_commit_in_source_branch(working_repo)
       if translated_commit.nil?
@@ -53,11 +59,9 @@
 
       if touchdown_branch_changed?(translated_commit, working_repo)
         Rails.logger.info "[TouchdownBranchUpdater] Found that touchdown branch has changed"
-        # Updates the tip of the touchdown branch to the specified SHA
+        working_repo.checkout(touchdown_branch)
+        working_repo.checkout_tree(translated_commit, :strategy => :force)
         working_repo.references.update("refs/heads/#{touchdown_branch}", translated_commit.oid)
-        # git reset --hard is needed here because updating the ref of a separate branch will cause
-        # the reset changes to populate the untracked changes
-        working_repo.reset('origin/master', :hard)
         add_manifest_commit(working_repo)
         update_touchdown_branch(working_repo)
       else
