@@ -437,7 +437,11 @@ class Project < ActiveRecord::Base
 
   def clone_repo
     raise NotLinkedToAGitRepositoryError unless git?
-    Rugged::Repository.clone_at repository_url, repo_path.to_s, { bare: true,  credentials: credentials }
+    repo = Rugged::Repository.clone_at(repository_url, repo_path.to_s, bare: true, credentials: credentials)
+    repo.config['remote.origin.fetch'] = '+refs/*:refs/*'
+    repo.config['remote.origin.mirror'] = true
+    repo.fetch('origin')
+    repo
   end
 
   def clone_working_repo

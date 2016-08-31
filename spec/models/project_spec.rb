@@ -677,7 +677,13 @@ describe Project do
 
     it "calls Rugged::Repository.clone_at once to clone the repo if repository_url exists" do
       project = Project.create(name: "Project with an non-empty repository_url", repository_url: "http://example.com")
-      expect(Rugged::Repository).to receive(:clone_at).and_return(instance_double('Rugged::Repository'))
+      repo = instance_double('Rugged::Repository')
+      repo_config = instance_double('Rugged::Config')
+      expect(Rugged::Repository).to receive(:clone_at).and_return(repo)
+      expect(repo).to receive(:config).twice.and_return(repo_config)
+      expect(repo_config).to receive(:[]=).with('remote.origin.fetch', '+refs/*:refs/*').and_return('+refs/*:refs/*')
+      expect(repo_config).to receive(:[]=).with('remote.origin.mirror', true).and_return(true)
+      expect(repo).to receive(:fetch).with('origin').and_return(Hash)
       expect { project.send :clone_repo }.to_not raise_error
     end
   end
