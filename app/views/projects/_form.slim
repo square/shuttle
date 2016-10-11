@@ -262,9 +262,13 @@
       .row
         .eight.columns
           fieldset
-            legend Article API Token
+            legend Article API
 
             .space-group
+              strong Project Id: #{@project.id}
+
+            .space-group
+              strong API Token:
               .controls
                 code
                   = @project.api_token
