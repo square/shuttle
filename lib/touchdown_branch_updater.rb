@@ -31,7 +31,6 @@
       end
 
       if working_repo.branches[touchdown_branch]
-        working_repo.checkout(touchdown_branch)
         working_repo.reset("origin/#{touchdown_branch}", :hard)
       else
         working_repo.branches.create(touchdown_branch, "origin/#{touchdown_branch}")
