@@ -1,4 +1,4 @@
- class TouchdownBranchUpdater
+class TouchdownBranchUpdater
   attr_reader :project
   attr_reader :source_branch
   attr_reader :git_author_name
@@ -27,7 +27,7 @@
 
       unless working_repo.branches["origin/#{touchdown_branch}"]
         Rails.logger.info "[TouchdownBranchUpdater] Touchdown branch #{touchdown_branch} doesn't exist in #{project.inspect}"
-        return
+        break
       end
 
       if working_repo.branches[touchdown_branch]
@@ -38,7 +38,7 @@
 
       unless working_repo.branches["origin/#{source_branch}"]
         Rails.logger.info "[TouchdownBranchUpdater] Watched branch #{source_branch} doesn't exist in #{project.inspect}"
-        return
+        break
       end
 
       if working_repo.branches[source_branch]
@@ -51,7 +51,7 @@
       translated_commit = latest_commit_in_source_branch(working_repo)
       if translated_commit.nil?
         Rails.logger.info "[TouchdownBranchUpdater] Unable to find latest translated commit for #{project.inspect}"
-        return
+        break
       end
 
       Rails.logger.info "[TouchdownBranchUpdater] Found the latest commit in source branch: #{translated_commit.oid}"
@@ -102,46 +102,52 @@
   end
 
   def add_manifest_commit(working_repo)
-    if valid_manifest_settings?
-      head_commit         = working_repo.branches[touchdown_branch].target
-      format              = project.default_manifest_format
-      manifest_directory  = Pathname.new(working_repo.workdir).join(project.manifest_directory)
-      Rails.logger.info "[TouchdownBranchUpdater] Adding translated manifest file for #{head_commit.oid}"
-      shuttle_commit = Commit.for_revision(head_commit.oid).first
-      compiler       = Compiler.new(shuttle_commit)
-      # Not an actual Ruby File.  Actually Compiler::File object.
-      file           = compiler.manifest(format)
-      manifest_filename = project.manifest_filename || file.filename
+    return unless valid_manifest_settings?
 
-      working_repo.checkout(touchdown_branch)
+    head_commit        = working_repo.branches[touchdown_branch].target
+    format             = project.default_manifest_format
+    manifest_directory = Pathname.new(working_repo.workdir).join(project.manifest_directory)
+    shuttle_commit     = Commit.for_revision(head_commit.oid).first
+    compiler           = Compiler.new(shuttle_commit)
 
-      # Create the manifest directory and write manifest file
-      FileUtils::mkdir_p manifest_directory.to_s
+    Rails.logger.info "[TouchdownBranchUpdater] Adding translated manifest file for #{head_commit.oid}"
 
-      oid = working_repo.write(file.content, :blob)
-      index = working_repo.index
-      index.read_tree(working_repo.head.target.tree)
-      index.add(path: File.join(project.manifest_directory, manifest_filename), oid: oid, :mode => 0100644)
-      index.write
+    # Not an actual Ruby File.  Actually Compiler::File object.
+    file              = compiler.manifest(format)
+    manifest_filename = project.manifest_filename.presence || file.filename
 
-      options = {}
-      options[:tree] = index.write_tree(working_repo)
+    working_repo.checkout(touchdown_branch)
 
-      options[:author] = { email: git_author_email, name: git_author_name, time: Time.now }
-      options[:committer] = { email: git_author_email, name: git_author_name, time: Time.now }
-      options[:message] ||= 'Adds translated manifest file from Shuttle'
-      options[:parents] = working_repo.empty? ? [] : [ working_repo.head.target ].compact
-      options[:update_ref] = 'HEAD'
+    # Create the manifest directory and write manifest file
+    FileUtils.mkdir_p(manifest_directory.to_s)
 
-      Rugged::Commit.create(working_repo, options)
-      working_repo.checkout(touchdown_branch, strategy: :force)
-    end
+    oid = working_repo.write(file.content, :blob)
+    index = working_repo.index
+    index.read_tree(working_repo.head.target.tree)
+    index.add(
+      path: File.join(project.manifest_directory, manifest_filename),
+      oid: oid,
+      mode: 0100644
+    )
+    index.write
+
+    options = {}
+    options[:tree] = index.write_tree(working_repo)
+
+    options[:author] = { email: git_author_email, name: git_author_name, time: Time.now }
+    options[:committer] = { email: git_author_email, name: git_author_name, time: Time.now }
+    options[:message] ||= 'Adds translated manifest file from Shuttle'
+    options[:parents] = working_repo.empty? ? [] : [working_repo.head.target].compact
+    options[:update_ref] = 'HEAD'
+
+    Rugged::Commit.create(working_repo, options)
+    working_repo.checkout(touchdown_branch, strategy: :force)
   end
 
   def update_touchdown_branch(working_repo)
     Rails.logger.info "[TouchdownBranchUpdater] Updating #{project.inspect} branch #{touchdown_branch} to #{working_repo.rev_parse('HEAD').oid}"
     begin
-      Timeout::timeout(1.minute) do
+      Timeout.timeout(1.minute) do
         working_repo.remotes['origin'].push(["+refs/heads/#{touchdown_branch}"], credentials: project.credentials)
       end
     rescue Timeout::Error
