@@ -26,7 +26,7 @@ class TmxBuilder
 
             tuvs.select! { |_, segs| segs.try(:count) == seg_count }
             if tuvs.count > 1
-              xml.tu {
+              xml.tu(tuid: tuid(tu)) {
                 tuvs.each do |lang_code, segs|
                   xml.tuv("xml:lang" => sanitize_lang_code(lang_code)) {
                     Array(segs).each do |seg|
@@ -59,6 +59,14 @@ class TmxBuilder
     end
   end
 
+  def tuid(translation_unit)
+    if translation_unit.is_a?(Key)
+      "#{translation_unit.project.name.parameterize}.#{translation_unit.original_key}"
+    elsif translation_unit.is_a?(Section)
+      "#{translation_unit.project.name.parameterize}.#{translation_unit.article.name.parameterize}"
+    end
+  end
+
   def segments_by_lang(translation_unit)
     if translation_unit.is_a?(Key)
       translation_unit.translations.map do |t|
@@ -72,10 +80,6 @@ class TmxBuilder
         [lang_code, translations.map { |t| sentence_split(t[lang_code]) }.flatten]
       end.to_h
     end
-  end
-
-  def lang_codes
-    [@project.base_rfc5646_locale] + @project.targeted_rfc5646_locales.keys
   end
 
   def sentence_split(str)
