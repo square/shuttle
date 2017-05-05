@@ -26,7 +26,7 @@
         unless perform then return
 
         if button.attr('data-method')
-          form = $('<form/>').attr(action: button.attr('href'), method: 'POST')
+          form = $('<form/>').attr(action: button.attr('href'), method: 'POST').appendTo document.body
           $('<input/>').attr(type: 'hidden', name: '_method', value: button.attr('data-method')).appendTo form
           $('<input/>').attr(type: 'hidden', name: $('meta[name=csrf-param]').attr('content'), value: $('meta[name=csrf-token]').attr('content')).appendTo form
           form.submit()
