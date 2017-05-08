@@ -23,9 +23,9 @@ describe User do
 
   let(:role) { nil }
   let :user do
-    user = FactoryGirl.create(:user, role: role)
-    user.approved_rfc5646_locales = %w(en fr)
-    user
+    FactoryGirl.create(:user, role: role).tap do |user|
+      user.approved_rfc5646_locales = %w(en fr en-CA fr-ca)
+    end
   end
 
   context "[scopes]" do
@@ -65,9 +65,19 @@ describe User do
   end
   context 'a translator' do
     let(:role) {'translator'}
-    it '#has_access_to_locale?() returns true for non-admins only if they have access to that locale' do
-      expect(user.has_access_to_locale?('fr')).to be_truthy
-      expect(user.has_access_to_locale?('jp')).to be_falsey
+
+    context '#has_access_to_locale?()' do
+      it 'returns true for non-admins only if they have access to that locale' do
+        expect(user.has_access_to_locale?('fr')).to be_truthy
+        expect(user.has_access_to_locale?('jp')).to be_falsey
+      end
+
+      it "is case-insensitive if argument is a string" do
+        expect(user.has_access_to_locale?('en-ca')).to be_truthy
+        expect(user.has_access_to_locale?('en-CA')).to be_truthy
+        expect(user.has_access_to_locale?('fr-ca')).to be_truthy
+        expect(user.has_access_to_locale?('fr-CA')).to be_truthy
+      end
     end
   end
 
