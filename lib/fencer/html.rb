@@ -20,7 +20,7 @@ module Fencer
     extend self
 
     def fence(string)
-      fence_tags(string).merge! fence_entities(string)
+      fence_tags(string)
     end
 
     def fence_tags(string)
@@ -47,6 +47,11 @@ module Fencer
       return tokens
     end
 
+    # Currently, this method is unused.  We do not want to enforce
+    # #fence_entities because many languages that will be translated may not
+    # used the fenced entities.
+    #
+    # TODO: Add optional vs required fences.
     def fence_entities(string)
       scanner = UnicodeScanner.new(string)
 
