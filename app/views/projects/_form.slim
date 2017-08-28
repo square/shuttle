@@ -137,8 +137,8 @@
             = f.text_field :manifest_directory
             p.help-block
               | If this directory is specified, Shuttle will automatically create
-              | a new commit that contains your translated manifest in the specified
-              | directory and push it to your touchdown branch.
+              |  a new commit that contains your translated manifest in the specified
+              |  directory and push it to your touchdown branch.
 
         .control-group
           = f.label :manifest_filename, class: 'control-label'
@@ -146,8 +146,8 @@
             = f.text_field :manifest_filename
             p.help-block
               | If the filename is specified, then Shuttle will create a
-              | file using the given filename.  Otherwise, it will default to
-              | manifest.[default_file_extension]
+              |  file using the given filename.  Otherwise, it will default to
+              |  manifest.[default_file_extension]
       fieldset
         legend Export Settings
 
@@ -262,9 +262,13 @@
       .row
         .eight.columns
           fieldset
-            legend Article API Token
+            legend Article API
 
             .space-group
+              strong Project Id: #{@project.id}
+
+            .space-group
+              strong API Token:
               .controls
                 code
                   = @project.api_token

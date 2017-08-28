@@ -63,6 +63,8 @@ class HomeIndexItemsFinder
                 # Do nothing as Commit has no such state. We have this to line up with Article since
                 # Commit and Article share the same frontend template.
                 must { match_all }
+              when 'all'
+                must { match_all }
               end
             end
           end

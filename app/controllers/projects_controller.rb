@@ -312,6 +312,30 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # Serves a tmx file containing the translation memory of a project
+  #
+  # Routes
+  # ------
+  #
+  # * `GET /projects/:id/tmx`
+  #
+  # Path Parameters
+  # ---------------
+  #
+  # |      |                   |
+  # |:-----|:------------------|
+  # | `id` | A Project's slug. |
+  def tmx
+    builder = TmxBuilder.new(@project)
+    tmx = if builder.generated_at > Time.zone.now - 1.day
+      builder.cached_tmx
+    else
+      builder.tmx
+    end
+
+    render plain: tmx
+  end
+
   private
 
   def find_project

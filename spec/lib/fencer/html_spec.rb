@@ -26,16 +26,6 @@ describe Fencer::Html do
           to eql('<br/>' => [6..10], '< br / >' => [18..25])
     end
 
-    it "should fence out named HTML character entities" do
-      expect(Fencer::Html.fence("Tim&rsquo;s test string &lt;hello&rt;.")).
-          to eql('&rsquo;' => [3..9], '&lt;' => [24..27], '&rt;' => [33..36])
-    end
-
-    it "should fence out numeric HTML character entities" do
-      expect(Fencer::Html.fence("Tim&#x2019;s test string &#60;hello&#62;.")).
-          to eql('&#x2019;' => [3..10], '&#60;' => [25..29], '&#62;' => [35..39])
-    end
-
     it "should not fence out things that look like HTML character tags" do
       expect(Fencer::Html.fence("Hello&; Hello & world ; also 5 > 3 and 2 < 5.")).
                 to eql({})

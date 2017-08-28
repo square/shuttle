@@ -23,6 +23,10 @@ FactoryGirl.define do
     ready false
     skip_import true
 
+    after(:build) do |commit|
+      commit.stub(:set_author)
+    end
+
     trait :errored_during_import do
       import_errors { [["StandardError", "fake error"]] }
     end

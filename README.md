@@ -114,6 +114,11 @@ These steps can be run with `foreman start` if foreman is installed.
    username: **admin@example.com**<br>
    password: **password123**
 
+15. Make sure that you initialize ElasticSearch with indexes:
+
+  bundle exec rake elasticsearch:import:model FORCE=y
+
+
 ### Starting the server (Docker)
 
 To run Shuttle for the first time using `docker-compose`:

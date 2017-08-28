@@ -199,6 +199,7 @@ class Commit < ActiveRecord::Base
   def recalculate_ready!
     self.ready = successfully_loaded? && keys_are_ready? && !errored_during_import?
     self.completed_at = Time.current if self.ready && self.completed_at.nil?
+    index_elasticsearch_document
     save!
   end
 
@@ -235,16 +236,16 @@ class Commit < ActiveRecord::Base
 
   # Returns a commit object used to interact with Git.
   #
-  # @return [Git::Object::Commit, nil] The commit object.
+  # @return [Rugged::Commit, nil] The commit object.
 
   def commit
-    project.repo.object(revision)
+    project.repo.lookup(revision)
   end
 
   # Same as {#commit}, but fetches the upstream repository changes if the commit
   # is unrecognized.
   #
-  # @return [Git::Object::Commit] The commit object.
+  # @return [Rugged::Commit] The commit object.
   # @raise [Git::CommitNotFoundError] If the commit could not be found in
   #   the Git repository.
 
@@ -301,9 +302,9 @@ class Commit < ActiveRecord::Base
 
   def skip_key?(key)
     key_exclusions = Rails.cache.fetch("commit:#{revision}:exclusions") do
-      blob = commit!.gtree.blobs['.shuttle.yml']
+      blob = project.repo.blob_at(commit!.oid, '.shuttle.yml')
       return unless blob
-      settings = YAML.load(blob.contents)
+      settings = YAML.load(blob.content)
       settings['key_exclusions']
     end
 
@@ -346,9 +347,9 @@ class Commit < ActiveRecord::Base
 
   def set_author
     begin
-      self.author = commit.author.name
-      self.author_email = commit.author.email
-    rescue
+      self.author = commit.author[:name]
+      self.author_email = commit.author[:email]
+    rescue Rugged::OdbError
       # Don't set the author if commit doesn't exist
     end
   end
@@ -357,7 +358,7 @@ class Commit < ActiveRecord::Base
     return if project.skip_tree?(path)
     imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
 
-    blob = project.blobs.with_sha(git_blob.sha).with_path(path).find_or_create!(sha: git_blob.sha, path: path)
+    blob = project.blobs.with_sha(git_blob[:oid]).with_path(path).find_or_create!(sha: git_blob[:oid], path: path)
 
     imps.each do |importer|
       importer = importer.new(blob, self)

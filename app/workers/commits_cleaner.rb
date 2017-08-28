@@ -28,7 +28,7 @@ class CommitsCleaner
   def destroy_commits_on_no_branch
     log("[destroy_commits_on_no_branch")
     Project.find_each do |project|
-      project.repo(&:fetch)
+      project.repo { |r| r.fetch('origin') }
       project.commits.not_ready.each do |commit|
         destroy_and_notify_stash(commit) unless commit.on_any_branch?
       end

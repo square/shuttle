@@ -17,9 +17,7 @@ module SortingHelper
     ordered_ids = objects_in_es.map(&:id).map(&:to_i)
     hash = objects.index_by(&:id)
     ordered_objects = []
-    ordered_ids.each do |id|
-      ordered_objects << hash[id]
-    end
+    ordered_ids.each { |id| ordered_objects << hash[id] if hash[id] }
     ordered_objects
   end
 end

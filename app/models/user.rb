@@ -138,9 +138,9 @@ class User < ActiveRecord::Base
   # @return [true, false] Whether the translator is allowed to edit Translations
   #   in that locale.
 
-  def has_access_to_locale?(locale_id)
-    locale_id = locale_id.rfc5646 if locale_id.kind_of?(Locale)
-    admin? || approved_rfc5646_locales.include?(locale_id.strip)
+  def has_access_to_locale?(locale)
+    locale = Locale.from_rfc5646(locale) unless locale.is_a?(Locale)
+    admin? || approved_locales.include?(locale)
   end
 
   # @return [true, false] whether or not the user has permissions to search other users

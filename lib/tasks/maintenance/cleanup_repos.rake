@@ -33,16 +33,11 @@ class ReposCleaner
 
   def gc_and_remote_prune(repo)
     # This is a little hacky, but necessary. It runs "git gc --prune --auto".
-    # The built in `repo.gc` method adds the '--aggressive' option which is
-    # too slow, and this avoids that.
-    repo.lib.send :command, :gc, ['--prune', '--auto']
+    Dir.chdir(repo.path) do
+      `git gc --prune --auto`
+    end
 
-    # This is also a little hacky, but necessary. It basically runs "git remote prune origin",
-    # which prunes old remote-tracking branches that have been removed from the git repo.
-    # We use the `command` method of Git::Lib instead of running the naked
-    # command with `system` call because `command` method provides more abstractions
-    # (such as `chdir`) which are needed to ensure this runs safely.
-    repo.lib.send :command, :remote, [:prune, :origin]
+    repo.fetch('origin', prune: true)
   end
 end
 

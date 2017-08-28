@@ -23,48 +23,50 @@ class TouchdownBranchUpdater
   def update
     return unless valid_touchdown_branch?
     project.working_repo do |working_repo|
-      # Set the user and email of the git repository 
-      working_repo.config('user.name', git_author_name)
-      working_repo.config('user.email', git_author_email)
+      working_repo.fetch('origin')
 
-      working_repo.fetch
-      working_repo.reset_hard # cleanup any lingering changes
-
-      touchdown_branch_git_obj = working_repo.object("origin/#{touchdown_branch}")
-      unless touchdown_branch_git_obj
+      unless working_repo.branches["origin/#{touchdown_branch}"]
         Rails.logger.info "[TouchdownBranchUpdater] Touchdown branch #{touchdown_branch} doesn't exist in #{project.inspect}"
-        return
+        break
       end
 
-      working_repo.update_ref("refs/heads/#{touchdown_branch}", touchdown_branch_git_obj.sha)
-      working_repo.reset_hard # cleanup any lingering changes
-      working_repo.checkout(source_branch)
-      working_repo.reset_hard("origin/#{source_branch}")
+      if working_repo.branches[touchdown_branch]
+        working_repo.reset("origin/#{touchdown_branch}", :hard)
+      else
+        working_repo.branches.create(touchdown_branch, "origin/#{touchdown_branch}")
+      end
+
+      unless working_repo.branches["origin/#{source_branch}"]
+        Rails.logger.info "[TouchdownBranchUpdater] Watched branch #{source_branch} doesn't exist in #{project.inspect}"
+        break
+      end
+
+      if working_repo.branches[source_branch]
+        working_repo.checkout(source_branch)
+        working_repo.reset("origin/#{source_branch}", :hard)
+      else
+        working_repo.branches.create(source_branch, "origin/#{source_branch}")
+      end
 
       translated_commit = latest_commit_in_source_branch(working_repo)
       if translated_commit.nil?
         Rails.logger.info "[TouchdownBranchUpdater] Unable to find latest translated commit for #{project.inspect}"
-        return
+        break
       end
 
-      Rails.logger.info "[TouchdownBranchUpdater] Found the latest commit in source branch: #{translated_commit.sha}"
+      Rails.logger.info "[TouchdownBranchUpdater] Found the latest commit in source branch: #{translated_commit.oid}"
 
       if touchdown_branch_changed?(translated_commit, working_repo)
         Rails.logger.info "[TouchdownBranchUpdater] Found that touchdown branch has changed"
-        # Updates the tip of the touchdown branch to the specified SHA
-        working_repo.update_ref("refs/heads/#{touchdown_branch}", translated_commit.sha)
-        # git reset --hard is needed here because updating the ref of a separate branch will cause 
-        # the reset changes to populate the untracked changes
-        working_repo.reset_hard
+        working_repo.checkout(touchdown_branch)
+        working_repo.checkout_tree(translated_commit, :strategy => :force)
+        working_repo.references.update("refs/heads/#{touchdown_branch}", translated_commit.oid)
         add_manifest_commit(working_repo)
         update_touchdown_branch(working_repo)
       else
-        Rails.logger.info "[TouchdownBranchUpdater] Tracked branch has not changed.  Touchdown branch was not updated."
+        Rails.logger.info "[TouchdownBranchUpdater] Tracked branch has not changed. Touchdown branch was not updated."
       end
     end
-  rescue RuntimeError => e
-    Rails.logger.error "[TouchdownBranchUpdater] Unable to update touchdown branch due to git runtime issues"
-    Rails.logger.error e
   end
 
   private
@@ -75,59 +77,78 @@ class TouchdownBranchUpdater
 
   def valid_manifest_settings?
     project.default_manifest_format.present? && project.manifest_directory.present?
-  end 
+  end
 
   def touchdown_branch_changed?(translated_commit, working_repo)
-    branch = working_repo.object(touchdown_branch)
+    branch = working_repo.branches[touchdown_branch]
     return true unless branch
     if valid_manifest_settings?
-      return true unless branch.author.name == git_author_name
-    end 
-
+      return true unless branch.target.author[:name] == git_author_name
+    end
     # Find the first commit that was not created by Shuttle
-    current_touchdown_commit = branch.log(50).detect { |c| c.author.name != git_author_name }
-    Rails.logger.info "[TouchdownBranchUpdater] Current touchdown commit: #{current_touchdown_commit.sha}"
+    walker = Rugged::Walker.new(working_repo)
+    walker.push(branch.target_id)
+    current_touchdown_commit = walker.detect { |c| c.author[:name] != git_author_name }
 
     # Only update the touchdown branch if the latest non-shuttle touchdown commit
     # is not equal to the latest translated commit
-    current_touchdown_commit.sha != translated_commit.sha
+    current_touchdown_commit.oid != translated_commit.oid
   end
 
   def latest_commit_in_source_branch(working_repo)
-    head_commit = working_repo.object(source_branch)
-    db_commit = project.commits.for_revision(head_commit.sha).first
+    head_commit = working_repo.branches[source_branch].target
+    db_commit = project.commits.for_revision(head_commit.oid).first
     db_commit.try(:ready?) ? head_commit : nil
   end
 
   def add_manifest_commit(working_repo)
-    if valid_manifest_settings?
-      head_commit         = working_repo.object(touchdown_branch)
-      format              = project.default_manifest_format
-      manifest_directory  = Pathname.new(working_repo.dir.path).join(project.manifest_directory)
-      Rails.logger.info "[TouchdownBranchUpdater] Adding translated manifest file for #{head_commit.sha}"
-      shuttle_commit = Commit.for_revision(head_commit.sha).first
-      compiler       = Compiler.new(shuttle_commit)
-      # Not an actual Ruby File.  Actually Compiler::File object.
-      file           = compiler.manifest(format)
-      manifest_filename = project.manifest_filename || file.filename
+    return unless valid_manifest_settings?
 
-      working_repo.checkout(touchdown_branch)
+    head_commit        = working_repo.branches[touchdown_branch].target
+    format             = project.default_manifest_format
+    manifest_directory = Pathname.new(working_repo.workdir).join(project.manifest_directory)
+    shuttle_commit     = Commit.for_revision(head_commit.oid).first
+    compiler           = Compiler.new(shuttle_commit)
 
-      # Create the manifest directory and write manifest file
-      FileUtils::mkdir_p manifest_directory.to_s
-      manifest_file = manifest_directory.join(manifest_filename).to_s
-      File.write(manifest_file, file.content)
+    Rails.logger.info "[TouchdownBranchUpdater] Adding translated manifest file for #{head_commit.oid}"
 
-      working_repo.add(manifest_file)
-      working_repo.commit('Adds translated manifest file from Shuttle')
-    end
+    # Not an actual Ruby File.  Actually Compiler::File object.
+    file              = compiler.manifest(format)
+    manifest_filename = project.manifest_filename.presence || file.filename
+
+    working_repo.checkout(touchdown_branch)
+
+    # Create the manifest directory and write manifest file
+    FileUtils.mkdir_p(manifest_directory.to_s)
+
+    oid = working_repo.write(file.content, :blob)
+    index = working_repo.index
+    index.read_tree(working_repo.head.target.tree)
+    index.add(
+      path: File.join(project.manifest_directory, manifest_filename),
+      oid: oid,
+      mode: 0100644
+    )
+    index.write
+
+    options = {}
+    options[:tree] = index.write_tree(working_repo)
+
+    options[:author] = { email: git_author_email, name: git_author_name, time: Time.now }
+    options[:committer] = { email: git_author_email, name: git_author_name, time: Time.now }
+    options[:message] ||= 'Adds translated manifest file from Shuttle'
+    options[:parents] = working_repo.empty? ? [] : [working_repo.head.target].compact
+    options[:update_ref] = 'HEAD'
+
+    Rugged::Commit.create(working_repo, options)
+    working_repo.checkout(touchdown_branch, strategy: :force)
   end
 
   def update_touchdown_branch(working_repo)
-    Rails.logger.info "[TouchdownBranchUpdater] Updating #{project.inspect} branch #{touchdown_branch} to #{working_repo.object('HEAD').sha}"
+    Rails.logger.info "[TouchdownBranchUpdater] Updating #{project.inspect} branch #{touchdown_branch} to #{working_repo.rev_parse('HEAD').oid}"
     begin
-      Timeout::timeout(1.minute) do
-        working_repo.push('origin', touchdown_branch, force: true)
+      Timeout.timeout(1.minute) do
+        working_repo.remotes['origin'].push(["+refs/heads/#{touchdown_branch}"], credentials: project.credentials)
       end
     rescue Timeout::Error
       Rails.logger.error "[TouchdownBranchUpdater] Timed out on updating touchdown branch for #{project.inspect}"

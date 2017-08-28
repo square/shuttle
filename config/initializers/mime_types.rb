@@ -56,3 +56,4 @@ Mime::Type.register 'application/javascript', :js, %w(text/javascript applicatio
 # For dependency-injected JavaScript
 #TODO this should really be an option passed to the .js URL
 Mime::Type.register_alias 'application/javascript', :jsm
+Mime::Type.register_alias 'application/javascript', :jsm2

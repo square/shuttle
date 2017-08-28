@@ -34,13 +34,13 @@ describe UsersController do
       it "returns nothing if current_user is not confirmed" do
         sign_in FactoryGirl.create(:user, role: 'monitor', email: "test@example.com") # not confirmed, has role, priviliged domain
         subject
-        expect(JSON.parse(response.body)).to eql({"error"=>"You have to confirm your account before continuing."})
+        expect(JSON.parse(response.body)).to eql({"error"=>"You have to confirm your email address before continuing."})
       end
 
       it "returns nothing if current_user doesn't have a role" do
         sign_in FactoryGirl.create(:user, :confirmed, email: "test@example.com") # confirmed, doesn't have role, priviliged domain
         subject
-        expect(JSON.parse(response.body)).to eql({"error"=>"Your account was not activated yet."})
+        expect(JSON.parse(response.body)).to eql({"error"=>"Your account is not activated yet."})
       end
 
       it "returns nothing if current_user's domain is not whitelisted in the privileged domains" do

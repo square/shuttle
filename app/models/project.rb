@@ -132,7 +132,20 @@ class Project < ActiveRecord::Base
   scope :git, -> { where("projects.repository_url IS NOT NULL") }
   scope :not_git, -> { where("projects.repository_url IS NULL") }
 
-  # Returns a `Git::Repository` proxy object that allows you to work with the
+  def credentials
+    lambda do |url, _, _|
+      host = URI.parse(url).host
+
+      if Shuttle::Configuration.credentials.key?(host)
+        return Rugged::Credentials::UserPassword.new(
+          username:  Shuttle::Configuration.credentials[host].username,
+          password: Shuttle::Configuration.credentials[host].password
+        )
+      end
+    end
+  end
+
+  # Returns a `Rugged::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
   #
@@ -143,7 +156,7 @@ class Project < ActiveRecord::Base
   # swallowed, and `nil` is returned.
   #
   # @overload repo
-  #   @return [Git::Repository, nil] The proxy object for the repository.
+  #   @return [Rugged::Repository, nil] The proxy object for the repository.
   #
   # @overload repo(&block)
   #   If passed a block, this method will lock a mutex and yield the repository,
@@ -151,19 +164,19 @@ class Project < ActiveRecord::Base
   #   performing any repository-altering operations (e.g., fetches). The mutex
   #   is freed when the block completes.
   #   @yield A block that is given exclusive control of the repository.
-  #   @yieldparam [Git::Repository] repo The proxy object for the repository.
+  #   @yieldparam [Rugged::Repository] repo The proxy object for the repository.
   #
   # @raise [Project::NotLinkedToAGitRepositoryError] If repository_url is blank.
 
   def repo
     raise NotLinkedToAGitRepositoryError unless git?
     if File.exist?(repo_path)
-      @repo ||= Git.bare(repo_path)
+      @repo ||= Rugged::Repository.bare(repo_path.to_s)
     else
       repo_mutex.synchronize do
         @repo ||= begin
           exists = File.exist?(repo_path) || clone_repo
-          exists ? Git.bare(repo_path) : nil
+          exists ? Rugged::Repository.bare(repo_path.to_s) : nil
         end
       end
     end
@@ -175,11 +188,9 @@ class Project < ActiveRecord::Base
     else
       return @repo
     end
-  rescue Git::GitExecuteError
-    raise "Repo not ready: #{$ERROR_INFO.to_s}"
   end
 
-  # Returns a `Git::Repository` working directory object that allows you to work with the
+  # Returns a `Rugged::Repository` working directory object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
   #
@@ -190,7 +201,7 @@ class Project < ActiveRecord::Base
   # swallowed, and `nil` is returned.
   #
   # @overload working_repo
-  #   @return [Git::Repository, nil] The working directory object.
+  #   @return [Rugged::Repository, nil] The working directory object.
   #
   # @overload working_repo(&block)
   #   If passed a block, this method will lock a mutex and yield the working repository,
@@ -198,20 +209,20 @@ class Project < ActiveRecord::Base
   #   performing any repository-altering operations (e.g., fetches). The mutex
   #   is freed when the block completes.
   #   @yield A block that is given exclusive control of the working repository.
-  #   @yieldparam [Git::Repository] repo The proxy object for the wokring repository.
+  #   @yieldparam [Rugged::Repository] repo The proxy object for the wokring repository.
   #
   # @raise [Project::NotLinkedToAGitRepositoryError] If repository_url is blank.
 
   def working_repo
     raise NotLinkedToAGitRepositoryError unless git?
     if File.exist?(working_repo_path)
-      @working_repo ||= Git.open(working_repo_path)
+      @working_repo ||= Rugged::Repository.new(working_repo_path.to_s)
     else
       FileUtils::mkdir_p WORKING_REPOS_DIRECTORY
       working_repo_mutex.synchronize do
         @working_repo ||= begin
           exists = File.exist?(working_repo_path) || clone_working_repo
-          exists ? Git.open(working_repo_path) : nil
+          exists ? Rugged::Repository.new(working_repo_path.to_s) : nil
         end
       end
     end
@@ -223,8 +234,6 @@ class Project < ActiveRecord::Base
     else
       return @working_repo
     end
-  rescue Git::GitExecuteError
-    raise "Repo not ready: #{$ERROR_INFO.to_s}"
   end
 
   # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed vs article-backed).
@@ -262,12 +271,12 @@ class Project < ActiveRecord::Base
     raise Git::CommitNotFoundError, sha unless commit_object
 
     if options[:skip_create]
-      commits.for_revision(commit_object.sha).first!
+      commits.for_revision(commit_object.oid).first!
     else
-      commits.for_revision(commit_object.sha).
-          find_or_create!(revision:     commit_object.sha,
+      commits.for_revision(commit_object.oid).
+          find_or_create!(revision:     commit_object.oid,
                           message:      commit_object.message,
-                          committed_at: commit_object.author.date,
+                          committed_at: commit_object.time,
                           skip_import:  options[:skip_import]) do |c|
         options[:other_fields].each do |field, value|
           c.send :"#{field}=", value
@@ -278,7 +287,16 @@ class Project < ActiveRecord::Base
 
   def find_or_fetch_git_object(sha)
     repo do |r|
-      r.object(sha) || (r.fetch; r.object(sha))
+      begin
+        r.rev_parse(sha)
+      rescue Rugged::ReferenceError
+        r.fetch('origin')
+        begin
+          r.rev_parse(sha)
+        rescue Rugged::ReferenceError
+          nil
+        end
+      end
     end
   end
 
@@ -419,12 +437,16 @@ class Project < ActiveRecord::Base
 
   def clone_repo
     raise NotLinkedToAGitRepositoryError unless git?
-    Git.clone repository_url, repo_directory, path: REPOS_DIRECTORY.to_s, mirror: true
+    repo = Rugged::Repository.clone_at(repository_url, repo_path.to_s, bare: true, credentials: credentials)
+    repo.config['remote.origin.fetch'] = '+refs/*:refs/*'
+    repo.config['remote.origin.mirror'] = true
+    repo.fetch('origin')
+    repo
   end
 
   def clone_working_repo
     raise NotLinkedToAGitRepositoryError unless git?
-    Git.clone repository_url, working_repo_directory, path: WORKING_REPOS_DIRECTORY.to_s
+    Rugged::Repository.clone_at repository_url, working_repo_path.to_s
   end
 
   def can_clone_repo
@@ -454,7 +476,7 @@ class Project < ActiveRecord::Base
   class InvalidRepositoryError < StandardError; end;
 
   # This error will be raised if project doesn't have a repository_url, and we attempt to
-  # initialize a `Git::Repository` object (project.repo) or make a remote call to a git repo.
+  # initialize a `Rugged::Repository` object (project.repo) or make a remote call to a git repo.
   class NotLinkedToAGitRepositoryError < InvalidRepositoryError
     def initialize
       super("repository_url is empty")

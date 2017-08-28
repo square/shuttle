@@ -16,7 +16,7 @@
 
 module Localizer
 
-  # Applies localized copy to SVG files.
+  # Applies localized copy to Android assets.
 
   class Android < Base
     include AndroidQualifiers
@@ -92,7 +92,7 @@ module Localizer
       path[-2]         = serialize_qualifiers(base, qualifiers)
       output_file.path = path.join('/')
 
-      output_file.content = xml.to_xml
+      output_file.content = xml.to_xml(encoding: 'utf-8')
     end
 
     private

@@ -25,7 +25,8 @@ class GlossaryController < ApplicationController
   # * `GET /glossary`
 
   def index
-    locales = params[:target_locales] || Shuttle::Configuration.locales.default_filter_locales
+    locales = params[:target_locales] || current_user.approved_locales.map(&:rfc5646)
+    locales = locales.blank? ? Shuttle::Configuration.locales.default_filter_locales : locales
     @source_locale  = Shuttle::Configuration.locales.source_locale
     @target_locales = Project.all.map(&:targeted_locales).flatten.uniq.select do |locale|
       locales.include?(locale.rfc5646)

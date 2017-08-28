@@ -14,18 +14,19 @@
 
 # A collection of Rake tasks to facilitate importing data from your models into Elasticsearch.
 #
-# Add this e.g. into the `lib/tasks/elasticsearch.rake` file in your Rails application:
+# To import all elasticsearch indexed models, run:
 #
-#     require 'elasticsearch/rails/tasks/import'
+#     $ bundle exec rake RAILS_ENV=environment elasticsearch:import:model FORCE=y
 #
 # To import the records from your `Article` model, run:
 #
-#     $ bundle exec rake environment elasticsearch:import:model CLASS='MyModel'
+#     $ bundle exec rake RAILS_ENV=environment elasticsearch:import:model CLASS='MyModel'
 #
 # Run this command to display usage instructions:
 #
 #     $ bundle exec rake -D elasticsearch
 #
+
 STDOUT.sync = true
 STDERR.sync = true
 
@@ -61,7 +62,7 @@ namespace :elasticsearch do
         $ rake environment elasticsearch:import:model CLASS='Article' SCOPE='published'
     DESC
     desc import_model_desc
-    task :model do
+    task model: :environment do
       klasses = if ENV['CLASS']
                   [eval(ENV['CLASS'].to_s)]
                 else

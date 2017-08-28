@@ -57,14 +57,14 @@ describe Project do
   describe "#repo" do
     it "should check out the repository and return a Repository object" do
       repo = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git").repo
-      expect(repo).to be_kind_of(Git::Base)
-      expect(repo.index).to be_nil # should be bare
-      expect(repo.repo.path).to eql(Rails.root.join('tmp', 'repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9.git').to_s)
+      expect(repo).to be_kind_of(Rugged::Repository)
+      expect(repo.bare?).to be_truthy # should be bare
+      expect(repo.path).to eql(Rails.root.join('tmp', 'repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9.git/').to_s)
     end
 
     it "should yield the Repository object if a block is passed" do
       project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
-      expect { |b| project.repo(&b) }.to yield_with_args(kind_of(Git::Base))
+      expect { |b| project.repo(&b) }.to yield_with_args(kind_of(Rugged::Repository))
     end
 
     it "should obtain a lock on the Repository object if a block is passed" do
@@ -85,14 +85,14 @@ describe Project do
     it "should check out the repository and return a Repository object" do
       project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       working_repo = project.working_repo
-      expect(working_repo).to be_kind_of(Git::Base)
+      expect(working_repo).to be_kind_of(Rugged::Repository)
       expect(working_repo.index).to_not be_nil # should not be bare
-      expect(working_repo.dir.path).to eql(Rails.root.join('tmp', 'working_repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9').to_s)
+      expect(working_repo.workdir).to eql(Rails.root.join('tmp', 'working_repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9/').to_s)
     end
 
     it "should yield the Repository object if a block is passed" do
       project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
-      expect { |b| project.working_repo(&b) }.to yield_with_args(kind_of(Git::Base))
+      expect { |b| project.working_repo(&b) }.to yield_with_args(kind_of(Rugged::Repository))
     end
 
     it "should obtain a lock on the Repository object if a block is passed" do
@@ -112,13 +112,14 @@ describe Project do
   describe "#commit!" do
     before :each do
       @project = FactoryGirl.create(:project)
-      @repo = double('Git::Repo')
+      @repo = instance_double('Rugged::Repository')
       # for commit! creation
       allow(@project).to receive(:repo).and_yield(@repo)
-      @commit_obj = double('Git::Object::Commit',
-                           sha:     'a4b6dd88498817d4947730c7964a1a14c8f13d91',
+      @commit_obj = instance_double('Rugged::Commit',
+                           oid:     'a4b6dd88498817d4947730c7964a1a14c8f13d91',
                            message: 'foo',
-                           author:  double('Git::Author', name: "Sancho Sample", email: 'sancho@example.com', date: Time.now))
+                           author:  {name: "Sancho Sample", email: 'sancho@example.com', time: Time.now},
+                           time:    Time.now)
       allow_any_instance_of(Commit).to receive(:import_strings)
       allow_any_instance_of(Commit).to receive(:commit).and_return(@commit_obj)
     end
@@ -126,13 +127,13 @@ describe Project do
     it "should return an existing commit" do
       commit = FactoryGirl.create(:commit, project: @project, revision: 'a4b6dd88498817d4947730c7964a1a14c8f13d91')
       allow(@repo).to receive(:fetch)
-      expect(@repo).to receive(:object).with('abc123').and_return(@commit_obj)
+      expect(@repo).to receive(:rev_parse).once.with('abc123').and_return(@commit_obj)
       expect(@project.commit!('abc123')).to eql(commit)
     end
 
     it "should create a new commit" do
       allow(@repo).to receive(:fetch)
-      expect(@repo).to receive(:object).with('abc123').and_return(@commit_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').and_return(@commit_obj)
       commit = @project.commit!('abc123')
       expect(commit).to be_kind_of(Commit)
       expect(commit.revision).to eql('a4b6dd88498817d4947730c7964a1a14c8f13d91')
@@ -140,7 +141,8 @@ describe Project do
 
     it "should fetch the repo and return a commit if the rev is unknown" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').and_return(nil, @commit_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_raise(Rugged::ReferenceError)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@commit_obj)
       commit = @project.commit!('abc123')
       expect(commit).to be_kind_of(Commit)
       expect(commit.revision).to eql('a4b6dd88498817d4947730c7964a1a14c8f13d91')
@@ -148,7 +150,7 @@ describe Project do
 
     it "should raise an exception if the rev is still unknown after fetching" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').and_return(nil, nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_raise(Rugged::ReferenceError)
       expect { @project.commit!('abc123') }.to raise_error(Git::CommitNotFoundError)
     end
   end
@@ -233,14 +235,14 @@ describe Project do
   describe "#find_or_fetch_git_object" do
     before :each do
       @project = FactoryGirl.create(:project)
-      @repo = double('Git::Repo')
-      @git_obj = double('Git::Object', sha: 'abc123')
+      @repo = double('Rugged::Repository')
+      @git_obj = double('Rugged::Commit', sha: 'abc123')
       allow(@project).to receive(:repo).and_yield(@repo)
     end
 
     it "finds the git object in repo without fetching when it's already in repo" do
       expect(@repo).to_not receive(:fetch)
-      expect(@repo).to receive(:object).with('abc123').once.and_return(@git_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@git_obj)
       git_obj = @project.find_or_fetch_git_object('abc123')
       expect(git_obj).to eql(@git_obj)
       expect(git_obj.sha).to eql('abc123')
@@ -248,7 +250,8 @@ describe Project do
 
     it "finds the git object in repo after fetching when it was not previously in the repo" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil, @git_obj)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_raise(Rugged::ReferenceError)
+      expect(@repo).to receive(:rev_parse).with('abc123').once.and_return(@git_obj)
       git_obj = @project.find_or_fetch_git_object('abc123')
       expect(git_obj).to eql(@git_obj)
       expect(git_obj.sha).to eql('abc123')
@@ -256,7 +259,7 @@ describe Project do
 
     it "doesn't find the git object if it is not found in the local repo even after fetching" do
       expect(@repo).to receive(:fetch).once
-      expect(@repo).to receive(:object).with('abc123').twice.and_return(nil)
+      expect(@repo).to receive(:rev_parse).with('abc123').twice.and_raise(Rugged::ReferenceError)
       git_obj = @project.find_or_fetch_git_object('abc123')
       expect(git_obj).to be_nil
     end
@@ -668,13 +671,19 @@ describe Project do
   describe "#clone_repo" do
     it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
       project = Project.create(name: "Project with an empty repository_url")
-      expect(Git).to_not receive(:clone)
+      expect(Rugged::Repository).to_not receive(:clone_at)
       expect { project.send :clone_repo }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
 
-    it "calls Git.clone once to clone the repo if repository_url exists" do
+    it "calls Rugged::Repository.clone_at once to clone the repo if repository_url exists" do
       project = Project.create(name: "Project with an non-empty repository_url", repository_url: "http://example.com")
-      expect(Git).to receive(:clone).once.with(anything(), anything(), {path: Project::REPOS_DIRECTORY.to_s, mirror: true})
+      repo = instance_double('Rugged::Repository')
+      repo_config = instance_double('Rugged::Config')
+      expect(Rugged::Repository).to receive(:clone_at).and_return(repo)
+      expect(repo).to receive(:config).twice.and_return(repo_config)
+      expect(repo_config).to receive(:[]=).with('remote.origin.fetch', '+refs/*:refs/*').and_return('+refs/*:refs/*')
+      expect(repo_config).to receive(:[]=).with('remote.origin.mirror', true).and_return(true)
+      expect(repo).to receive(:fetch).with('origin').and_return(Hash)
       expect { project.send :clone_repo }.to_not raise_error
     end
   end

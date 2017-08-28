@@ -25,12 +25,12 @@ describe Importer::Erb do
     end
 
     it "should import one big string from an ERb file" do
-      file = @project.repo.object('HEAD^{tree}:ruby/example.en-US.text.erb').contents
+      file = @project.repo.rev_parse('HEAD^{tree}:ruby/example.en-US.text.erb').content
       expect(@project.keys.for_key('/ruby/example.text.erb').first.translations.find_by_rfc5646_locale('en-US').copy).to eql(file)
     end
 
     it "should fence HTML tags in HTML ERB files" do
-      file        = @project.repo.object('HEAD^{tree}:ruby/example.en-US.html.erb').contents
+      file        = @project.repo.rev_parse('HEAD^{tree}:ruby/example.en-US.html.erb').content
       translation = @project.keys.for_key('/ruby/example.html.erb').first.translations.find_by_rfc5646_locale('en-US')
       expect(translation.copy).to eql(file)
       expect(translation.fences).to eql(

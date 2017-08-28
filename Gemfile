@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
-ruby '2.2.4'
+ruby '2.3.1'
 
 # FRAMEWORK
-gem 'rails', '4.1.14.2'
+gem 'rails', '4.1.15'
 gem 'configoro'
 gem 'redis-rails'
 gem 'redis-rack-cache'
@@ -38,7 +38,7 @@ gem 'autoprefixer-rails'
 
 # UTILITIES
 gem 'json'
-gem 'git', github: 'RISCfuture/ruby-git', ref: '88076a50eb70fd96f2417b646fe37fb2f6c4cca4' # Fixes mirror issue
+gem 'rugged', git: 'https://github.com/brandonweeks/rugged.git', tag: 'v0.24.0-square0', submodules: true
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'

@@ -31,6 +31,11 @@ describe HomeIndexPresenter do
         commit = FactoryGirl.create(:commit, description: nil)
         expect(@presenter.full_description(commit)).to eql('-')
       end
+
+      it "strips html from descriptions with html in them" do
+        commit = FactoryGirl.create(:commit, description: '<a href="/cool/site">you must be <strong>swift as the</strong></a><br/> coursing river')
+        expect(@presenter.full_description(commit)).to eql('you must be swift as the coursing river')
+      end
     end
 
     context "[Article]" do
@@ -43,6 +48,11 @@ describe HomeIndexPresenter do
         article = FactoryGirl.create(:article, description: nil)
         expect(@presenter.full_description(article)).to eql('-')
       end
+
+      it "strips html from descriptions with html in them" do
+        article = FactoryGirl.create(:article, description: '<a href="/cool/site">with all the <strong>force of a</strong></a><br/> great typhoon')
+        expect(@presenter.full_description(article)).to eql('with all the force of a great typhoon')
+      end
     end
   end
 
@@ -52,12 +62,22 @@ describe HomeIndexPresenter do
         commit = FactoryGirl.create(:commit, description: 'abc'*50)
         expect(@presenter.short_description(commit)).to eql('abc'*15 + 'ab...')
       end
+
+      it "strips html from descriptions with html in them and only shortens the non-html content" do
+        commit = FactoryGirl.create(:commit, description: '<a href="/cool/site">with all the <strong>strength</strong> of a <em>raging fire</em>, mysterious| as the dark side of the moon</a>')
+        expect(@presenter.short_description(commit)).to eql('with all the strength of a raging fire, mysteri...')
+      end
     end
 
     context "[Article]" do
       it "returns a truncated description" do
         article = FactoryGirl.create(:article, description: 'abc'*50)
         expect(@presenter.short_description(article)).to eql('abc'*15 + 'ab...')
+      end
+
+      it "strips html from descriptions with html in them and only shortens the non-html content" do
+        article = FactoryGirl.create(:article, description: '<a href="/cool/site">mysterious as the <strong>dark side<strong> of the moon!</a> Be a man! Im <em>never</em> gonna catch my breadth<br/>')
+        expect(@presenter.short_description(article)).to eql('mysterious as the dark side of the moon! Be a m...')
       end
     end
   end

@@ -13,4 +13,4 @@
 #    limitations under the License.
 
 Shuttle::Redis   = Redis::Namespace.new(:shuttle_cache, redis: Redis.new(Shuttle::Configuration.redis.symbolize_keys))
-Redis::Classy.db = Shuttle::Redis
+RedisClassy.redis = Shuttle::Redis
