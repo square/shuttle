@@ -333,6 +333,7 @@ class ProjectsController < ApplicationController
       builder.tmx
     end
 
+    headers['Content-Disposition'] = "attachment; filename=#{@project.name}.tmx"
     render plain: tmx
   end
 
