@@ -258,6 +258,9 @@
           .space-group
             = link_to "Mass Copy Translations From One Locale Into Another", setup_mass_copy_translations_project_url
 
+          .space-group
+            = link_to "Export Project Translations as TMX", tmx_project_url
+
     - unless @project.git?
       .row
         .eight.columns
@@ -282,4 +285,3 @@
     - file_name = 'views/projects/_form'
     - js_coffee_erb_file  = Rails.root.join('app', file_name + '.js.coffee.erb')
     = raw(CoffeeScript.compile(ERB.new(File.read(js_coffee_erb_file)).result(binding))) if File.exist?(js_coffee_erb_file)
-
