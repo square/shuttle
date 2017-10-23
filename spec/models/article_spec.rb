@@ -333,6 +333,7 @@ describe Article do
     it "updates requested_at fields, resets ready fields, and calls ArticleImporter" do
       article = FactoryGirl.create(:article, name: "test", ready: true)
       section = FactoryGirl.create(:section, article: article)
+      ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
       Key.delete_all
 
       FactoryGirl.create(:key, section: section, project: section.project, index_in_section: 0,   ready: true)
@@ -551,6 +552,7 @@ describe Article do
 
   it "Article's ready is set to true when the last Translation is translated, but not before" do
     article = FactoryGirl.create(:article, ready: false, sections_hash: { "main" => "<p>hello</p><p>world</p>" }, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
+    ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
     expect(article.reload.keys.count).to eql(6)
 
     last_es_translation = article.translations.in_locale(Locale.from_rfc5646('es')).last
@@ -567,6 +569,7 @@ describe Article do
 
   it "Article's ready is set to false when all Translations were initially approved but one of them gets unapproved" do
     article = FactoryGirl.create(:article, ready: false, sections_hash: { "main" => "<p>hello</p><p>world</p>" }, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
+    ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
     expect(article.reload.keys.count).to eql(6)
 
     article.translations.where(approved: nil).each { |translation| translation.update!  copy: "<p>test</p>", approved: true }

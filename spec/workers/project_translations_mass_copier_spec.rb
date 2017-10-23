@@ -42,6 +42,7 @@ describe ProjectTranslationsMassCopier do
       expect(commit.ready).to be_falsey
       expect(@key.ready).to be_falsey
       ProjectTranslationsMassCopier.new.perform(@project.id, 'en', 'en-XX')
+      ProjectTranslationsMassCopier::Finisher.new.on_success(nil, { 'project_id' => @project.id })
       expect(@en_xx_translation.reload.copy).to eql('test')
       expect(commit.reload.ready).to be_truthy
       expect(@key.reload.ready).to be_truthy
@@ -158,16 +159,6 @@ describe ProjectTranslationsMassCopier do
   end
 
   describe "#mass_copier_batch" do
-    it "returns a batch with the correct description which calls ProjectTranslationsMassCopier::Finisher (& ProjectDescendantsRecalculator) on success" do
-      project = FactoryGirl.create(:project)
-      batch = ProjectTranslationsMassCopier.new.mass_copier_batch(project.id, 'en', 'en-XX')
-      expect(batch).to be_a_kind_of(Sidekiq::Batch)
-      expect(batch.description).to eql("Project Translations Mass Copier #{project.id} (en -> en-XX)")
-      expect_any_instance_of(ProjectTranslationsMassCopier::Finisher).to receive(:on_success).with(anything(), {'project_id' => project.id}).and_call_original
-      expect(ProjectDescendantsRecalculator).to receive(:perform_once).with(project.id)
-      batch.jobs {}
-    end
-
     it "returns a new batch with a new bid" do
       project = FactoryGirl.create(:project)
       batch = ProjectTranslationsMassCopier.new.mass_copier_batch(project.id, 'en', 'en-XX')

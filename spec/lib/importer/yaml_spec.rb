@@ -73,6 +73,7 @@ describe Importer::Yaml do
                                       only_paths:     %w(config/locales/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
         @commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde').reload
+        CommitImporter::Finisher.new.on_success(true, 'commit_id' => @commit.id)
       end
 
       it "should add error to commit" do

@@ -277,72 +277,80 @@ describe Api::V1::ArticlesController do
       let(:params) { { name: article.name, article: { name: article.name } } } # so that it doesn't fail because Article is not found or `article` param is missing
     end
 
-    it "updates an Article's sections_hash and targeted_rfc5646_locales" do
-      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>", "sub" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }, targeted_rfc5646_locales: { 'fr' => true, 'es' => false, 'tr' => false } }, format: :json
-      expect(response.status).to eql(200)
-      article = Article.first
-      expect(article.sections.count).to eql(4)
-      expect(article.active_sections.count).to eql(3)
+    context 'when loading finished' do
+      before do
+        allow_any_instance_of(Article).to receive(:loading?).and_return(false)
+      end
 
-      main_section = article.active_sections.for_name("main").first
-      sub_section = article.active_sections.for_name("sub").first
-      third_section = article.active_sections.for_name("third").first
-      second_section = article.inactive_sections.for_name("second").first
+      it "updates an Article's sections_hash and targeted_rfc5646_locales" do
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>", "sub" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }, targeted_rfc5646_locales: { 'fr' => true, 'es' => false, 'tr' => false } }, format: :json
+        expect(response.status).to eql(200)
+        article = Article.first
+        expect(article.sections.count).to eql(4)
+        expect(article.active_sections.count).to eql(3)
 
-      expect(main_section.keys.count).to eql(9)
-      expect(main_section.translations.count).to eql(36) # a new locale is added with the update
-      expect(sub_section.keys.count).to eql(6)
-      expect(sub_section.translations.count).to eql(24)
-      expect(third_section.keys.count).to eql(3)
-      expect(third_section.translations.count).to eql(12)
-      expect(second_section.keys.count).to eql(6)
-      expect(second_section.translations.count).to eql(18) # since this is inactivated, this shouldn't have picked the new locale's translations
+        main_section = article.active_sections.for_name("main").first
+        sub_section = article.active_sections.for_name("sub").first
+        third_section = article.active_sections.for_name("third").first
+        second_section = article.inactive_sections.for_name("second").first
+
+        expect(main_section.keys.count).to eql(9)
+        expect(main_section.translations.count).to eql(36) # a new locale is added with the update
+        expect(sub_section.keys.count).to eql(6)
+        expect(sub_section.translations.count).to eql(24)
+        expect(third_section.keys.count).to eql(3)
+        expect(third_section.translations.count).to eql(12)
+        expect(second_section.keys.count).to eql(6)
+        expect(second_section.translations.count).to eql(18) # since this is inactivated, this shouldn't have picked the new locale's translations
+      end
+
+      it "can update targeted_rfc5646_locales" do
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { targeted_rfc5646_locales: { 'fr' => true } }, format: :json
+        expect(response.status).to eql(200)
+        expect(Article.count).to eql(1)
+        expect(article.reload.targeted_rfc5646_locales).to eql({ 'fr' => true })
+      end
+
+      it "can update source_copy without updating targeted_rfc5646_locales" do
+        article.update! targeted_rfc5646_locales: { 'fr' => true }
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>" } }, format: :json
+        expect(response.status).to eql(200)
+        expect(Article.count).to eql(1)
+        expect(article.reload.targeted_rfc5646_locales).to eql({ 'fr' => true })
+        expect(article.active_sections.pluck(:source_copy)).to eql(["<p>a</p><p>x</p><p>b</p>"])
+      end
+
+      it "errors if update fails" do
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: {}, email: "fake", targeted_rfc5646_locales: {'asdaf-sdfsfs-adas'=> nil}}, format: :json
+        expect(response.status).to eql(400)
+        expect(JSON.parse(response.body)).to eql({ "error" => { "errors"=> { "sections_hash" => ["can’t be blank"], "email" => ["invalid"], "targeted_rfc5646_locales" => ["invalid"] } } })
+      end
     end
 
-    it "can update targeted_rfc5646_locales" do
-      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { targeted_rfc5646_locales: { 'fr' => true } }, format: :json
-      expect(response.status).to eql(200)
-      expect(Article.count).to eql(1)
-      expect(article.reload.targeted_rfc5646_locales).to eql({ 'fr' => true })
-    end
+    context 'when loading has not finished yet' do
+      it "errors if source copy is attempted to be updated before the first import didn't finish yet" do
+        article.update! last_import_requested_at: 1.minute.ago, last_import_finished_at: nil
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>" } }, format: :json
+        expect(response.status).to eql(400)
+        expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>{"base"=>["latest requested import is not yet finished"]}}})
+      end
 
-    it "can update source_copy without updating targeted_rfc5646_locales" do
-      article.update! targeted_rfc5646_locales: { 'fr' => true }
-      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>" } }, format: :json
-      expect(response.status).to eql(200)
-      expect(Article.count).to eql(1)
-      expect(article.reload.targeted_rfc5646_locales).to eql({ 'fr' => true })
-      expect(article.active_sections.pluck(:source_copy)).to eql(["<p>a</p><p>x</p><p>b</p>"])
-    end
+      it "errors if source copy is attempted to be updated before a subsequent import didn't finish yet" do
+        article.update! last_import_requested_at: 1.hour.ago, last_import_finished_at: 2.hours.ago
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>" } }, format: :json
+        expect(response.status).to eql(400)
+        expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>{"base"=>["latest requested import is not yet finished"]}}})
+      end
 
-    it "errors if source copy is attempted to be updated before the first import didn't finish yet" do
-      article.update! last_import_requested_at: 1.minute.ago, last_import_finished_at: nil
-      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>" } }, format: :json
-      expect(response.status).to eql(400)
-      expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>{"base"=>["latest requested import is not yet finished"]}}})
-    end
-
-    it "errors if source copy is attempted to be updated before a subsequent import didn't finish yet" do
-      article.update! last_import_requested_at: 1.hour.ago, last_import_finished_at: 2.hours.ago
-      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>" } }, format: :json
-      expect(response.status).to eql(400)
-      expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>{"base"=>["latest requested import is not yet finished"]}}})
-    end
-
-    it "allows updating non-import related fields such as emails and description even if the previous import didn't finish yet" do
-      article.update! last_import_requested_at: 1.hour.ago, last_import_finished_at: 2.hours.ago, email: "test@example.com", description: "test"
-      expect(article.email).to eql("test@example.com")
-      expect(article.description).to eql("test")
-      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { email: "test2@example.com", description: "test 2" }, format: :json
-      expect(response.status).to eql(200)
-      expect(article.reload.email).to eql("test2@example.com")
-      expect(article.description).to eql("test 2")
-    end
-
-    it "errors if update fails" do
-      patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: {}, email: "fake", targeted_rfc5646_locales: {'asdaf-sdfsfs-adas'=> nil}}, format: :json
-      expect(response.status).to eql(400)
-      expect(JSON.parse(response.body)).to eql({ "error" => { "errors"=> { "sections_hash" => ["can’t be blank"], "email" => ["invalid"], "targeted_rfc5646_locales" => ["invalid"] } } })
+      it "allows updating non-import related fields such as emails and description even if the previous import didn't finish yet" do
+        article.update! last_import_requested_at: 1.hour.ago, last_import_finished_at: 2.hours.ago, email: "test@example.com", description: "test"
+        expect(article.email).to eql("test@example.com")
+        expect(article.description).to eql("test")
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { email: "test2@example.com", description: "test 2" }, format: :json
+        expect(response.status).to eql(200)
+        expect(article.reload.email).to eql("test2@example.com")
+        expect(article.description).to eql("test 2")
+      end
     end
 
     context "[format=HTML]" do
@@ -427,6 +435,10 @@ describe Api::V1::ArticlesController do
   describe "#manifest" do
     before(:each) { project.update! targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } }
     let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: { "title" => "<p>hello</p>", "body" => "<p>a</p><p>b</p>" } ) }
+
+    before do
+      ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
+    end
 
     it_behaves_like "api-or-session-authenticateable-and-filters" do
       let(:request_type) { :get }
@@ -584,6 +596,10 @@ describe Api::V1::ArticlesController do
   end
 
   context "[INTEGRATION TESTS]" do
+    before do
+      allow_any_instance_of(Article).to receive(:loading?).and_return(false)
+    end
+
     # This is a real life example. sample_article__original.html was copied and pasted from the help center's website. it was shortened to make tests faster
     it "handles creation, update, update, status, manifest, status, manifest requests in that order" do
       Article.delete_all
@@ -591,6 +607,7 @@ describe Api::V1::ArticlesController do
 
       # Create
       post :create, project_id: project.id, api_token: project.api_token, article: { name: "support-article", sections_hash: { "title" => "<p>AAA</p><p>BBB</p>", "banner" => "<p>XXX</p><p>YYY</p>", "main" => File.read(Rails.root.join('spec', 'fixtures', 'article_files', 'sample_article__original.html')) } }, format: :json
+
       expect(response.status).to eql(200)
       expect(Article.count).to eql(1)
       article = Article.first

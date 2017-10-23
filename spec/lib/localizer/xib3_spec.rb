@@ -23,6 +23,7 @@ describe Localizer::Xib3 do
                                   only_paths:     %w(apple/),
                                   skip_imports:   Importer::Base.implementations.map(&:ident) - %w(xib3))
     @commit  = @project.commit!('HEAD')
+    CommitImporter::Finisher.new.on_success(true, 'commit_id' => @commit.id)
 
     {
         '/apple/en-US.lproj/example3.xib:3.text'                                            => 'text field text',

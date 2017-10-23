@@ -171,8 +171,9 @@ describe ArticleImporter::Finisher do
     end
 
     it "sets last_import_finished_at at the end of the last import, and re-sets it again on every re-import" do
-      expect(@article.last_import_finished_at).to_not be_nil
       ArticleImporter::Finisher.new.on_success(nil, {'article_id' => @article.id})
+      @article.reload
+      expect(@article.last_import_finished_at).to_not be_nil
 
       original_last_import_finished_at = @article.reload.last_import_finished_at
       ArticleImporter::Finisher.new.on_success(nil, {'article_id' => @article.id})

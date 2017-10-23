@@ -55,7 +55,6 @@ describe CommitImporter do
 
           ActionMailer::Base.deliveries.clear
           commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
-
           blob_not_found = commit.blobs.with_sha("88e5b52732c23a4e33471d91cf2281e62021512a").first
           blob_for_which_commit_not_found = commit.blobs.with_sha("b80d7482dba100beb55e65e82c5edb28589fa045").first
 
@@ -65,6 +64,7 @@ describe CommitImporter do
                              ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
                              ["ExecJS::RuntimeError", "SyntaxError: Unexpected identifier (in /ember-broken/en-US.js)"]]
 
+          CommitImporter::Finisher.new.on_success true, 'commit_id' => commit.id
           expect(commit.reload.import_errors.sort).to eql(expected_errors.sort)
           expect_to_send_import_errors_email(expected_errors)
         end
@@ -76,6 +76,7 @@ describe CommitImporter do
           commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
 
           expected_errors = [["Git::CommitNotFoundError", "Commit not found in git repo: e5f5704af3c1f84cf42c4db46dcfebe8ab842bde (failed in CommitImporter for commit_id #{commit.id})"]]
+          CommitImporter::Finisher.new.on_success true, 'commit_id' => commit.id
           expect(commit.reload.import_errors.sort).to eql(expected_errors.sort)
           expect_to_send_import_errors_email(expected_errors)
         end

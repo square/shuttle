@@ -23,6 +23,7 @@ describe ArticleRecalculator do
     # it form creating keys. If you do need some sidekiq jobs to run, you need refactor this line.
     Sidekiq::Testing.fake! do
       article = FactoryGirl.create(:article, ready: false)
+      ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
       ArticleRecalculator.new.perform(article.id)
     end
     expect(article.reload).to be_ready

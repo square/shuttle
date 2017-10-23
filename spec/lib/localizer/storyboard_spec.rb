@@ -23,6 +23,7 @@ describe Localizer::Storyboard do
                                   only_paths:     %w(apple/),
                                   skip_imports:   Importer::Base.implementations.map(&:ident) - %w(storyboard))
     @commit  = @project.commit!('HEAD')
+    CommitImporter::Finisher.new.on_success(true, 'commit_id' => @commit.id)
 
     {
         '/apple/en-US.lproj/example.storyboard:Uku-Po-7eL.text'                                            => 'text field text',
