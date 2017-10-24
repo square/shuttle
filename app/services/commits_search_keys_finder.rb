@@ -68,7 +68,12 @@ class CommitsSearchKeysFinder
   def find_keys
     keys_in_es = Elasticsearch::Model.search(search_query, Key).results
 
-    keys = Key.where(id: keys_in_es.map(&:id)).includes(:translations)
-    PaginatableObjects.new(keys, keys_in_es, page, PER_PAGE)
+    keys = Key.where(id: keys_in_es.map(&:id))
+              .where('commits_keys.commit_id': commit.id)
+              .includes(:translations, :commits_keys)
+              .order('commits_keys.created_at asc, original_key asc')
+
+    # Don't sort the keys since they are sorted in the line above
+    PaginatableObjects.new(keys, keys_in_es, page, PER_PAGE, false)
   end
 end

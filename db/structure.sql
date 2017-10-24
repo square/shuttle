@@ -275,7 +275,8 @@ ALTER SEQUENCE commits_id_seq OWNED BY commits.id;
 
 CREATE TABLE commits_keys (
     commit_id integer NOT NULL,
-    key_id integer NOT NULL
+    key_id integer NOT NULL,
+    created_at timestamp without time zone
 );
 
 
@@ -1794,3 +1795,4 @@ INSERT INTO schema_migrations (version) VALUES ('20160404235737');
 
 INSERT INTO schema_migrations (version) VALUES ('20160516051607');
 
+INSERT INTO schema_migrations (version) VALUES ('20171024225818');
