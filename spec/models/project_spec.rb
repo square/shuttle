@@ -159,9 +159,8 @@ describe Project do
     it "creates a new batch, saves its id, and runs ProjectTranslationsAdderAndRemover::Finisher on success and sets description" do
       project = FactoryGirl.create(:project)
 
-      expect_any_instance_of(ProjectTranslationsAdderAndRemover::Finisher).to receive(:on_success).with(instance_of(Sidekiq::Batch::Status), 'project_id' => project.id)
+      ProjectTranslationsAdderAndRemover::Finisher.new.on_success(true, 'project_id' => project.id)
       batch = project.translations_adder_and_remover_batch.tap { |b| b.jobs {} }
-
       expect(batch).to be_an_instance_of(Sidekiq::Batch)
       expect(batch.description).to eql("Project Translations Adder And Remover #{project.id} (#{project.name})")
       expect(project.translations_adder_and_remover_batch_id).to eql(batch.bid)
@@ -541,6 +540,7 @@ describe Project do
 
       project.targeted_rfc5646_locales = {'en' => true, 'fr' => true}
       project.save!
+      ProjectTranslationsAdderAndRemover::Finisher.new.on_success(true, 'project_id' => project.id)
 
       expect(key1.reload).to be_ready
       expect(key2.reload).not_to be_ready

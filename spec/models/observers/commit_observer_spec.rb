@@ -20,8 +20,9 @@ describe CommitObserver do
       context "[with import errors]" do
         def commit_and_expect_import_errors(project, revision, user)
           ActionMailer::Base.deliveries.clear
-          commit  = project.commit!(revision, other_fields: {user: user}).reload
-
+          commit = project.commit!(revision, other_fields: {user: user})
+          CommitImporter::Finisher.new.on_success(true, 'commit_id' => commit.id)
+          commit.reload
           expect(ActionMailer::Base.deliveries.map(&:subject)).to include("[Shuttle] Error(s) occurred during the import")
           expect(commit.import_errors.sort).to eql([["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"],
                                                     ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],

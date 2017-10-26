@@ -8,7 +8,7 @@ require 'capistrano/deploy'
 require 'capistrano/rvm'
 require 'capistrano/bundler'
 require 'capistrano/rails'
-require 'sidekiq/capistrano'
+require 'capistrano/sidekiq'
 require 'whenever/capistrano'
 
 # Loads custom tasks from `lib/capistrano/tasks' if you have any defined.

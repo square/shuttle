@@ -20,12 +20,12 @@ describe KeyAncestorsRecalculator do
       it "recalculates the readiness of the related Article" do
         project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr' => true})
         article = FactoryGirl.create(:article, project: project, ready: false, sections_hash: {"main" => "hi"})
+        ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
         expect(article.reload.keys.length).to eql(1)
         key = article.keys.first
         expect(key).to_not be_ready
         expect(article).to_not be_ready
         expect(key.article).to eql(article)
-
         expect(KeyAncestorsRecalculator).to receive(:perform_once).once.and_call_original
         key.translations.in_locale(Locale.from_rfc5646('fr')).first.update! copy: "hi", approved: true
         key.recalculate_ready!

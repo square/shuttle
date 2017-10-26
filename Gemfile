@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '2.3.1'
 
 # FRAMEWORK
-gem 'rails', '4.1.15'
+gem 'rails', '4.1.16'
 gem 'configoro'
 gem 'redis-rails'
 gem 'redis-rack-cache'
@@ -67,7 +67,7 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-gem 'sidekiq', '<3.0.0'
+gem 'sidekiq', '4.2.10'
 gem 'sidekiq-pro'
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
@@ -89,11 +89,13 @@ source 'https://rails-assets.org' do
 end
 
 group :development do
-  gem 'capistrano', '~> 3.5'
-  gem 'capistrano-bundler', '~> 1.1'
-  gem 'capistrano-rails', '~> 1.1'
+  gem 'capistrano', '~> 3.10'
+  gem 'capistrano-bundler', '~> 1.3'
+  gem 'capistrano-rails', '~> 1.3'
   gem 'capistrano-rvm', '~> 0.1'
+  gem 'capistrano-sidekiq', github: 'seuros/capistrano-sidekiq'
   gem 'redcarpet', require: nil
+  gem 'web-console', '~> 2.0'
   gem 'yard', require: nil, platform: :mri
 end
 

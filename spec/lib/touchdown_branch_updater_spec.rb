@@ -17,6 +17,7 @@ require 'spec_helper'
 describe TouchdownBranchUpdater do
   def commit_and_translate(project, revision)
     c = project.commit!(revision)
+    CommitImporter::Finisher.new.on_success(true, 'commit_id' => c.id)
     c.reload.translations.each { |t| t.copy = t.source_copy; t.approved = true; t.save! }
     Key.batch_recalculate_ready!(c)
     c.recalculate_ready!

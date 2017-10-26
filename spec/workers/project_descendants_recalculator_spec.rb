@@ -52,6 +52,8 @@ describe ProjectDescendantsRecalculator do
         article1 = FactoryGirl.create(:article, project: project)
         article2 = FactoryGirl.create(:article, project: project)
         project.articles.update_all ready: false
+        ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article1.id})
+        ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article2.id})
         test_project_descendants_recalculator(project)
       end
       expect(article1.reload).to be_ready

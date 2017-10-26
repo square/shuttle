@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2017 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -120,6 +120,7 @@ describe ProjectsController do
         @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project)
         @commit = FactoryGirl.create(:commit, project: @project)
         @commit.keys = [@key1, @key2]
+        CommitImporter::Finisher.new.on_success(true, 'commit_id' => @commit.id)
 
         @project.keys.each do |key|
           FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en', source_copy: 'fake', copy: 'fake', approved: true)
@@ -150,7 +151,7 @@ describe ProjectsController do
         @project.reload.keys.each { |k| expect(k).to be_ready }
 
         patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
-
+        ProjectTranslationsAdderAndRemover::Finisher.new.on_success(true, 'project_id' => @project.id)
         expect(@commit.reload).to_not be_ready
         @project.reload.keys.each { |k| expect(k).to_not be_ready }
       end
@@ -160,6 +161,7 @@ describe ProjectsController do
         expect(@commit.reload).to_not be_ready
 
         patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
+        ProjectTranslationsAdderAndRemover::Finisher.new.on_success(true, 'project_id' => @project.id)
 
         expect(@commit.reload).to be_ready
         @project.reload.keys.each { |k| expect(k).to be_ready }
@@ -253,6 +255,7 @@ describe ProjectsController do
                                    skip_imports: (Importer::Base.implementations.map(&:ident) - %w(android)))
       project.commit!('a26f7f6a09aa362ff777c0bec11fa084e66efe64')
       commit = Commit.for_revision('a26f7f6a09aa362ff777c0bec11fa084e66efe64').last
+      CommitImporter::Finisher.new.on_success(true, 'commit_id' => commit.id)
 
       fr_translations = project.translations.where(rfc5646_locale: 'fr')
       fr_ca_translations = project.translations.where(rfc5646_locale: 'fr-CA')
@@ -268,6 +271,7 @@ describe ProjectsController do
       expect(response).to redirect_to(mass_copy_translations_project_url(project))
       expect(request.flash[:success]).to eql("Success. Shuttle is now mass copying translations from fr to fr-CA.")
 
+      CommitImporter::Finisher.new.on_success(true, 'commit_id' => commit.id)
       expect(commit.reload).to be_ready
       commit.keys.each { |key| expect(key).to be_ready }
       expect(fr_ca_translations.not_translated.count).to eql(0)

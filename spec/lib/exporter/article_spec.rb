@@ -30,6 +30,7 @@ describe Exporter::Article do
                                       sections_hash: { "title" => "a", "body" => "<p>hello</p><p>world</p>" },
                                       base_rfc5646_locale: 'en',
                                       targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
+      ArticleImporter::Finisher.new.on_success(nil, {'article_id' => @article.id})
       expect(@article.reload.keys.count).to eql(7)
 
       @title_section = @article.sections.for_name("title").first

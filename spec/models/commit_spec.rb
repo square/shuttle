@@ -112,6 +112,7 @@ describe Commit do
       it "should email if commit has import errors" do
         @commit.add_import_error(StandardError.new("some fake error"), "in some/path/to/file")
         @commit.import_batch.jobs {}
+        CommitImporter::Finisher.new.on_success(true, 'commit_id' => @commit.id)
         email = ActionMailer::Base.deliveries.select { |email| email.subject == "[Shuttle] Error(s) occurred during the import" }.first
         expect(email).to_not be_nil
         expect(email.to).to eql([@commit.user.email, @commit.author_email].compact.uniq)
@@ -311,7 +312,8 @@ describe Commit do
 
     it "should set all blobs as parsed" do
       @project = FactoryGirl.create(:project, :light)
-      @project.commit!('HEAD')
+      commit = @project.commit!('HEAD')
+      CommitImporter::Finisher.new.on_success(true, 'commit_id' => commit.id)
       expect(Blob.where(parsed: false).count).to be_zero
     end
 

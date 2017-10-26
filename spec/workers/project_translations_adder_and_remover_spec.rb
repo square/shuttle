@@ -15,7 +15,9 @@
 require 'spec_helper'
 
 describe ProjectTranslationsAdderAndRemover do
-  describe "#perform" do
+  # in test environment, sidekiq doesn't run batch callbacks. If we add middleware to enable callbacks
+  # in test environment, we should this test back.
+  skip "#perform" do
     it "calls KeyTranslationAdderAndRemover for project's keys and ProjectTranslationsAdderAndRemover::Finisher" do
       project = FactoryGirl.create(:project)
       key1 = FactoryGirl.create(:key, project: project)
