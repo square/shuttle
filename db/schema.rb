@@ -11,22 +11,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160302033924) do
+ActiveRecord::Schema.define(version: 20171024225818) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "articles", force: true do |t|
-    t.integer  "project_id",                                null: false
-    t.text     "name",                                      null: false
-    t.binary   "name_sha_raw",                              null: false
-    t.text     "sections_hash",                             null: false
-    t.string   "base_rfc5646_locale",                       null: false
-    t.text     "targeted_rfc5646_locales",                  null: false
+    t.integer  "project_id",                                           null: false
+    t.text     "name",                                                 null: false
+    t.text     "sections_hash",                                        null: false
+    t.string   "base_rfc5646_locale",                                  null: false
+    t.text     "targeted_rfc5646_locales",                             null: false
     t.text     "description"
     t.string   "email"
     t.string   "import_batch_id"
-    t.boolean  "ready",                     default: false, null: false
+    t.boolean  "ready",                                default: false, null: false
     t.datetime "first_import_requested_at"
     t.datetime "last_import_requested_at"
     t.datetime "first_import_started_at"
@@ -35,32 +34,34 @@ ActiveRecord::Schema.define(version: 20160302033924) do
     t.datetime "last_import_finished_at"
     t.datetime "first_completed_at"
     t.datetime "last_completed_at"
-    t.datetime "created_at",                                null: false
-    t.datetime "updated_at",                                null: false
+    t.datetime "created_at",                                           null: false
+    t.datetime "updated_at",                                           null: false
     t.date     "due_date"
     t.integer  "priority"
     t.integer  "creator_id"
     t.integer  "updater_id"
-    t.boolean  "created_via_api",           default: true,  null: false
+    t.boolean  "created_via_api",                      default: true,  null: false
+    t.string   "name_sha",                  limit: 64,                 null: false
+    t.boolean  "hidden",                               default: false, null: false
   end
 
-  add_index "articles", ["name_sha_raw"], name: "index_articles_on_name_sha_raw", using: :btree
-  add_index "articles", ["project_id", "name_sha_raw"], name: "index_articles_on_project_id_and_name_sha_raw", unique: true, using: :btree
+  add_index "articles", ["name_sha"], name: "index_articles_on_name_sha", using: :btree
+  add_index "articles", ["project_id", "name_sha"], name: "index_articles_on_project_id_and_name_sha", unique: true, using: :btree
   add_index "articles", ["project_id"], name: "index_articles_on_project_id", using: :btree
   add_index "articles", ["ready"], name: "index_articles_on_ready", using: :btree
 
   create_table "blobs", force: true do |t|
-    t.integer  "project_id",                              null: false
-    t.boolean  "parsed",                  default: false, null: false
-    t.boolean  "errored",                 default: false, null: false
-    t.text     "path",                                    null: false
-    t.binary   "path_sha_raw",                            null: false
+    t.integer  "project_id",                            null: false
+    t.boolean  "parsed",                default: false, null: false
+    t.boolean  "errored",               default: false, null: false
+    t.text     "path",                                  null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "sha",          limit: 40,                 null: false
+    t.string   "sha",        limit: 40,                 null: false
+    t.string   "path_sha",   limit: 64,                 null: false
   end
 
-  add_index "blobs", ["project_id", "sha", "path_sha_raw"], name: "index_blobs_on_project_id_and_sha_and_path_sha_raw", unique: true, using: :btree
+  add_index "blobs", ["project_id", "sha", "path_sha"], name: "index_blobs_on_project_id_and_sha_and_path_sha", unique: true, using: :btree
 
   create_table "blobs_commits", force: true do |t|
     t.integer  "commit_id",  null: false
@@ -119,11 +120,13 @@ ActiveRecord::Schema.define(version: 20160302033924) do
   add_index "commits", ["project_id", "revision"], name: "index_commits_on_project_id_and_revision", unique: true, using: :btree
 
   create_table "commits_keys", id: false, force: true do |t|
-    t.integer "commit_id", null: false
-    t.integer "key_id",    null: false
+    t.integer  "commit_id",  null: false
+    t.integer  "key_id",     null: false
+    t.datetime "created_at"
   end
 
   add_index "commits_keys", ["commit_id", "key_id"], name: "index_commits_keys_on_commit_id_and_key_id", unique: true, using: :btree
+  add_index "commits_keys", ["created_at"], name: "index_commits_keys_on_created_at", using: :btree
   add_index "commits_keys", ["key_id"], name: "commits_keys_key_id", using: :btree
 
   create_table "daily_metrics", force: true do |t|
@@ -165,12 +168,10 @@ ActiveRecord::Schema.define(version: 20160302033924) do
   add_index "issues", ["user_id"], name: "issues_user", using: :btree
 
   create_table "keys", force: true do |t|
-    t.integer "project_id",                          null: false
-    t.binary  "key_sha_raw",                         null: false
-    t.binary  "source_copy_sha_raw",                 null: false
-    t.boolean "ready",               default: true,  null: false
-    t.text    "key",                                 null: false
-    t.text    "original_key",                        null: false
+    t.integer "project_id",                                  null: false
+    t.boolean "ready",                       default: true,  null: false
+    t.text    "key",                                         null: false
+    t.text    "original_key",                                null: false
     t.text    "source_copy"
     t.text    "context"
     t.string  "importer"
@@ -179,16 +180,19 @@ ActiveRecord::Schema.define(version: 20160302033924) do
     t.text    "other_data"
     t.integer "section_id"
     t.integer "index_in_section"
-    t.boolean "is_block_tag",        default: false
+    t.boolean "is_block_tag",                default: false, null: false
+    t.string  "key_sha",          limit: 64,                 null: false
+    t.string  "source_copy_sha",  limit: 64,                 null: false
+    t.boolean "hidden_in_search",            default: false
   end
 
   add_index "keys", ["is_block_tag"], name: "index_keys_on_is_block_tag", using: :btree
-  add_index "keys", ["project_id", "key_sha_raw", "source_copy_sha_raw"], name: "keys_unique", unique: true, where: "(section_id IS NULL)", using: :btree
+  add_index "keys", ["project_id", "key_sha", "source_copy_sha"], name: "keys_unique_new", unique: true, where: "(section_id IS NULL)", using: :btree
   add_index "keys", ["project_id"], name: "index_keys_on_project_id", using: :btree
   add_index "keys", ["ready"], name: "index_keys_on_ready", using: :btree
   add_index "keys", ["section_id", "index_in_section"], name: "index_in_section_unique", unique: true, where: "((section_id IS NOT NULL) AND (index_in_section IS NOT NULL))", using: :btree
-  add_index "keys", ["section_id", "key_sha_raw"], name: "keys_in_section_unique", unique: true, where: "(section_id IS NOT NULL)", using: :btree
-  add_index "keys", ["source_copy_sha_raw"], name: "index_keys_on_source_copy_sha_raw", using: :btree
+  add_index "keys", ["section_id", "key_sha"], name: "keys_in_section_unique_new", unique: true, where: "(section_id IS NOT NULL)", using: :btree
+  add_index "keys", ["source_copy_sha"], name: "index_keys_on_source_copy_sha", using: :btree
 
   create_table "locale_associations", force: true do |t|
     t.string   "source_rfc5646_locale",                 null: false
@@ -254,19 +258,19 @@ ActiveRecord::Schema.define(version: 20160302033924) do
   end
 
   create_table "sections", force: true do |t|
-    t.integer  "article_id",                         null: false
-    t.text     "name",                               null: false
-    t.binary   "name_sha_raw",                       null: false
-    t.text     "source_copy",                        null: false
-    t.binary   "source_copy_sha_raw",                null: false
-    t.boolean  "active",              default: true, null: false
-    t.datetime "created_at",                         null: false
-    t.datetime "updated_at",                         null: false
+    t.integer  "article_id",                                null: false
+    t.text     "name",                                      null: false
+    t.text     "source_copy",                               null: false
+    t.boolean  "active",                     default: true, null: false
+    t.datetime "created_at",                                null: false
+    t.datetime "updated_at",                                null: false
+    t.string   "name_sha",        limit: 64,                null: false
+    t.string   "source_copy_sha", limit: 64,                null: false
   end
 
-  add_index "sections", ["article_id", "name_sha_raw"], name: "index_sections_on_article_id_and_name_sha_raw", unique: true, using: :btree
+  add_index "sections", ["article_id", "name_sha"], name: "index_sections_on_article_id_and_name_sha", unique: true, using: :btree
   add_index "sections", ["article_id"], name: "index_sections_on_article_id", using: :btree
-  add_index "sections", ["name_sha_raw"], name: "index_sections_on_name_sha_raw", using: :btree
+  add_index "sections", ["name_sha"], name: "index_sections_on_name_sha", using: :btree
 
   create_table "slugs", force: true do |t|
     t.integer  "sluggable_id",                              null: false
@@ -282,13 +286,13 @@ ActiveRecord::Schema.define(version: 20160302033924) do
 
   create_table "source_glossary_entries", force: true do |t|
     t.string   "source_rfc5646_locale", limit: 15, default: "en", null: false
-    t.binary   "source_copy_sha_raw"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "source_copy",                                     null: false
     t.text     "context"
     t.text     "notes"
     t.date     "due_date"
+    t.string   "source_copy_sha",       limit: 64,                null: false
   end
 
   create_table "translation_changes", force: true do |t|

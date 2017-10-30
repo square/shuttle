@@ -1199,6 +1199,13 @@ CREATE UNIQUE INDEX index_commits_keys_on_commit_id_and_key_id ON commits_keys U
 
 
 --
+-- Name: index_commits_keys_on_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_commits_keys_on_created_at ON commits_keys USING btree (created_at);
+
+
+--
 -- Name: index_commits_on_project_id_and_revision; Type: INDEX; Schema: public; Owner: -
 --
 
