@@ -17,8 +17,10 @@ class PaginatableObjects
   attr_reader :objects, :total_count, :current_page, :limit_value
   delegate :map, :each, :first, :length, :size, :sort_by, to: :objects
 
-  def initialize(objects, objects_in_es, current_page, limit_value)
-    @objects = SortingHelper.order_by_elasticsearch_result_order(objects, objects_in_es)
+  def initialize(objects, objects_in_es, current_page, limit_value, sort = true)
+    @objects = sort ?
+      SortingHelper.order_by_elasticsearch_result_order(objects, objects_in_es)
+      : objects
     @total_count = objects_in_es.total
     @current_page = current_page
     @limit_value = limit_value

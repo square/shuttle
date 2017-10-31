@@ -275,7 +275,8 @@ ALTER SEQUENCE commits_id_seq OWNED BY commits.id;
 
 CREATE TABLE commits_keys (
     commit_id integer NOT NULL,
-    key_id integer NOT NULL
+    key_id integer NOT NULL,
+    created_at timestamp without time zone
 );
 
 
@@ -1198,6 +1199,13 @@ CREATE UNIQUE INDEX index_commits_keys_on_commit_id_and_key_id ON commits_keys U
 
 
 --
+-- Name: index_commits_keys_on_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_commits_keys_on_created_at ON commits_keys USING btree (created_at);
+
+
+--
 -- Name: index_commits_on_project_id_and_revision; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1794,3 +1802,4 @@ INSERT INTO schema_migrations (version) VALUES ('20160404235737');
 
 INSERT INTO schema_migrations (version) VALUES ('20160516051607');
 
+INSERT INTO schema_migrations (version) VALUES ('20171024225818');

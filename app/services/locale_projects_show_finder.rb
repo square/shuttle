@@ -117,8 +117,12 @@ class LocaleProjectsShowFinder
     translations_in_es = Elasticsearch::Model.search(search_query, Translation).results
     translations = Translation
                        .where(id: translations_in_es.map(&:id))
+                       .joins(key: :commits)
+                       .where('commits.revision': form[:commit])
                        .includes({key: [:project, :translations, :section, {article: :project}]}, :locale_associations)
+                       .order('commits_keys.created_at, keys.original_key')
 
-    PaginatableObjects.new(translations, translations_in_es, page, PER_PAGE)
+    # Don't sort the keys since they are sorted in the line above
+    PaginatableObjects.new(translations, translations_in_es, page, PER_PAGE, false)
   end
 end
