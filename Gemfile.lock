@@ -377,7 +377,7 @@ GEM
       sprockets-rails (>= 2.0, < 4.0)
     whenever (0.9.7)
       chronic (>= 0.6.3)
-    yard (0.8.7.6)
+    yard (0.9.9)
 
 PLATFORMS
   ruby
@@ -458,5 +458,8 @@ DEPENDENCIES
   whenever
   yard
 
+RUBY VERSION
+   ruby 2.3.1p112
+
 BUNDLED WITH
-   1.12.5
+   1.16.0
