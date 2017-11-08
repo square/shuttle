@@ -731,7 +731,9 @@ CREATE TABLE translations (
     words_count integer DEFAULT 0 NOT NULL,
     source_copy text,
     copy text,
-    notes text
+    notes text,
+    tm_match numeric,
+    translation_date timestamp without time zone
 );
 
 
@@ -1803,3 +1805,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160404235737');
 INSERT INTO schema_migrations (version) VALUES ('20160516051607');
 
 INSERT INTO schema_migrations (version) VALUES ('20171024225818');
+
+INSERT INTO schema_migrations (version) VALUES ('20171103183318');
+

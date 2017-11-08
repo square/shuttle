@@ -26,7 +26,7 @@ class StatsController < ApplicationController
     this_week_metrics = DailyMetric.
       where(date: (1.week.ago)...Date.today).
       order(:date)
-      
+
     last_week_metrics = DailyMetric.
       where(date: (2.weeks.ago)...(1.week.ago)).
       order(:date)
@@ -55,6 +55,15 @@ class StatsController < ApplicationController
     end
   end
 
+  def translation_report
+    @params = params
+
+    respond_to do |format|
+      format.html
+      format.csv { render text: generate_translation_words_csv }
+    end
+  end
+
   private
 
   def generate_commit_csv
@@ -69,6 +78,46 @@ class StatsController < ApplicationController
           seconds_to_complete = (commit.loaded_at - commit.created_at)
           load_time = Time.at(seconds_to_complete).utc.strftime("%H:%M:%S")
           csv << [date_created, time_created, sha, project, load_time]
+        end
+      end
+    end
+  end
+
+  def generate_translation_words_csv
+    start_date =  Date.strptime(@params[:start_date], '%m/%d/%Y')
+    end_date =  Date.strptime(@params[:end_date], '%m/%d/%Y')
+
+    CSV.generate do |csv|
+      locales = Project.pluck(:targeted_rfc5646_locales, :base_rfc5646_locale).map { |hash, base| hash.keys - [base]}.flatten
+      translation_query = Translation
+                            .where(translation_date: start_date.beginning_of_day..end_date.end_of_day)
+                            .where(rfc5646_locale: locales)
+
+      csv << ['Start Date', @params[:start_date], '', '', '', '', '', '', '']
+      csv << ['End Date', @params[:end_date], '', '', '', '', '', '', '']
+      csv << ['Language(s)', "#{locales.join(", ").upcase}", '', '', '', '', '', '', '']
+      csv << ['', '', '', '', '', '', '', '', '']
+      csv << ['Translated Word Report', '', '', '', '', '', '', '', '']
+      csv << ['Date', 'en', 'Target Language', 'New Words (0-59%)', '60-69', '70-79', '80-89', '90-99', '100%']
+
+      start_date.upto(end_date).each do |date|
+        translation_for_date = translation_query.select do |t|
+          t[:translation_date] >= date.beginning_of_day && t[:translation_date] <= date.end_of_day
+        end
+
+        locales.each do |locale|
+          translations_for_locale = translation_for_date.select {|t| t[:rfc5646_locale] == locale.downcase }
+          total_en = translations_for_locale.count
+          next if total_en.zero?
+
+          total_lt_59 = translations_for_locale.select {|t| t[:tm_match] >= 0 && t[:tm_match] <= 59.99 }.count
+          total_60 = translations_for_locale.select {|t| t[:tm_match] >= 60 && t[:tm_match] <= 69.99 }.count
+          total_70 = translations_for_locale.select {|t| t[:tm_match] >= 70 && t[:tm_match] <= 79.99 }.count
+          total_80 = translations_for_locale.select {|t| t[:tm_match] >= 80 && t[:tm_match] <= 89.99 }.count
+          total_90 = translations_for_locale.select {|t| t[:tm_match] >= 90 && t[:tm_match] <= 99.99 }.count
+          total_100 = translations_for_locale.select {|t| t[:tm_match] == 100.0 }.count
+
+          csv << [date, total_en, locale.upcase, total_lt_59, total_60, total_70, total_80, total_90, total_100]
         end
       end
     end

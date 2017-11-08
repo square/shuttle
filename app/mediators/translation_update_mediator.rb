@@ -111,6 +111,16 @@ class TranslationUpdateMediator < BasicMediator
   # @raise [ActiveRecord::RecordInvalid] if translation is invalid
 
   def update_single_translation!(translation)
+    # determine if this is the initial translation or an update based on if the
+    # tranlation has an existing value.
+    if (translation.copy || "").empty?
+      # this is a "create", so set the translation_date
+      translation.translation_date = Time.now
+
+      # retrieve the top fuzzy match percentage for the tranlation (this may be nil)
+      translation.tm_match = (top_fuzzy_match(translation) || 0)
+    end
+
     translation.modifier = @user
     translation.assign_attributes(@params.require(:translation).permit(:copy, :notes))
 
@@ -137,5 +147,21 @@ class TranslationUpdateMediator < BasicMediator
     translation.translator = nil
     translation.approved = nil
     translation.reviewer = nil
+    translation.translation_date = nil
+    translation.tm_match = nil
+  end
+
+  private
+
+  def top_fuzzy_match(translation)
+    finder = FuzzyMatchTranslationsFinder.new(translation.source_copy, translation)
+    translations = finder.find_fuzzy_match
+    translations = translations.map do |tran|
+      {
+          match_percentage: translation.source_copy.similar(tran.source_copy),
+      }
+    end.reject { |t| t[:match_percentage] < 70 }
+    translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
+    translations.any? ? translations.first[:match_percentage] : nil
   end
 end

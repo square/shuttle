@@ -1,0 +1,12 @@
+- content_for :shuttle_title do
+  = "Word Translation Report - Shuttle"
+- content_for :file_name do
+  = 'views/stats/translation_report'
+
+.header
+  h1 Translation Word Report
+hr.dividers
+
+.translation_report
+  = form_tag stats_translation_report_path(format: :csv)
+    = render partial: 'stats/date_fields'

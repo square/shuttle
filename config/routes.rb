@@ -122,6 +122,7 @@ Shuttle::Application.routes.draw do
 
   # STATS PAGES
   get 'stats' => 'stats#index'
+  match 'stats/translation-report' => 'stats#translation_report', as: :stats_translation_report, via: [:get, :post]
 
   # GLOSSARY PAGES
   get 'glossary' => 'glossary#index', as: :glossary
