@@ -8,5 +8,5 @@
 hr.dividers
 
 .translation_report
-  = form_tag stats_translation_report_path(format: :csv)
+  = form_tag stats_generate_translation_report_path(format: :csv)
     = render partial: 'stats/date_fields'

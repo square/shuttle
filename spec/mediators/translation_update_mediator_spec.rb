@@ -287,4 +287,17 @@ describe TranslationUpdateMediator do
       expect(translation.reviewer).to be_nil
     end
   end
+
+  describe "#top_fuzzy_match" do
+    it "retrieves the top fuzzy match for a given translation" do
+      FactoryGirl.create(:translation, copy: "Testing", source_copy: 'Testing', approved: true, translated: true)
+
+      regenerate_elastic_search_indexes
+      sleep(1)
+
+      translation = FactoryGirl.build(:translation, copy: "Test", source_copy: 'Test')
+      mediator = TranslationUpdateMediator.new(translation, reviewer, ActionController::Parameters.new)
+      expect(mediator.send(:top_fuzzy_match, translation)).to eq 72.72727272727273
+    end
+  end
 end
