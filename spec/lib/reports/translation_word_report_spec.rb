@@ -47,8 +47,6 @@ describe Reports::TranslationWordReport do
         FactoryGirl.create(:translation, key: key2, rfc5646_locale: 'it', translation_date: @translation_date, tm_match: @match_percentage)
         FactoryGirl.create(:translation, key: key3, rfc5646_locale: 'it', translation_date: @translation_date, tm_match: @match_percentage)
 
-        p "Before #{Project.all.to_a}"
-
         csv = Reports::TranslationWordReport.generate_csv(@start_date, @end_date)
         @result = CSV.parse(csv)
       end

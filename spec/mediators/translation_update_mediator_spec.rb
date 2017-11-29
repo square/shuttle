@@ -26,7 +26,7 @@ describe TranslationUpdateMediator do
 
       project = FactoryGirl.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
       @key = FactoryGirl.create(:key, ready: false, project: project)
-      @fr_translation    = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr')
+      @fr_translation    = FactoryGirl.create(:translation, key: @key, copy: nil, source_copy: 'test', translator: nil, rfc5646_locale: 'fr')
       expect(@key.reload).to_not be_ready
     end
 
@@ -47,6 +47,26 @@ describe TranslationUpdateMediator do
       expect(@fr_translation.approved).to be_truthy
       expect(@fr_translation.reviewer).to eql(reviewer)
       expect(@key.reload).to be_ready
+    end
+
+    context "[update new record]" do
+      it "sets the translation_date" do
+        TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
+        expect(@fr_translation.translation_date).to_not be_nil
+      end
+
+      it "sets the tm_match" do
+        # create a translation that will be used for lookup for tm_match
+        FactoryGirl.create(:translation, copy: "test", source_copy: 'test', approved: true, translated: true, rfc5646_locale: 'fr')
+
+        # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
+        regenerate_elastic_search_indexes
+
+        TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
+
+        # this is a 100% match with the translation created above
+        expect(@fr_translation.tm_match).to eq 100.0
+      end
     end
 
     context "[update multiple]" do
@@ -285,19 +305,6 @@ describe TranslationUpdateMediator do
       expect(translation.approved).to be_nil
       expect(translation.translator).to be_nil
       expect(translation.reviewer).to be_nil
-    end
-  end
-
-  describe "#top_fuzzy_match" do
-    it "retrieves the top fuzzy match for a given translation" do
-      FactoryGirl.create(:translation, copy: "Testing", source_copy: 'Testing', approved: true, translated: true)
-
-      regenerate_elastic_search_indexes
-      sleep(1)
-
-      translation = FactoryGirl.build(:translation, copy: "Test", source_copy: 'Test')
-      mediator = TranslationUpdateMediator.new(translation, reviewer, ActionController::Parameters.new)
-      expect(mediator.send(:top_fuzzy_match, translation)).to eq 72.72727272727273
     end
   end
 end
