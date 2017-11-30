@@ -110,6 +110,6 @@ end
 def regenerate_elastic_search_indexes
   ActiveRecord::Base.subclasses.each do |model|
     next unless model.respond_to?(:__elasticsearch__)
-    model.import(force: true)
+    model.import(force: true, refresh: true)
   end
 end

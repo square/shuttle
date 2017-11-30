@@ -1,0 +1,11 @@
+.control-group
+  = label_tag :start_date
+  .controls
+    = text_field_tag :start_date, 1.month.ago.strftime('%m/%d/%Y') , class: 'datepicker form-control', required: true
+.control-group
+  = label_tag :end_date
+  .controls
+    = text_field_tag :end_date, Time.now.strftime('%m/%d/%Y'), class: 'datepicker form-control', required: true
+
+.form-actions
+  = submit_tag 'Get Report', class: 'btn btn-primary'

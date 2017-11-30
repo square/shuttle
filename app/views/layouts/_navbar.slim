@@ -55,3 +55,11 @@ div id="navbar-container"
           a href=search_commits_url Commits
         li class=("active" if action_name == "issues")
           a href=search_issues_url Issues
+- if controller_name == "stats"
+  div id="search-container"
+    nav class="container full-size-only"
+      ul
+        li class=("active" if action_name == "index")
+          a href=stats_url Translation Statistics
+        li class=("active" if action_name == "translation_report")
+          a href=stats_translation_report_url Translation Word Report

@@ -26,11 +26,10 @@ class StatsController < ApplicationController
     this_week_metrics = DailyMetric.
       where(date: (1.week.ago)...Date.today).
       order(:date)
-      
+
     last_week_metrics = DailyMetric.
       where(date: (2.weeks.ago)...(1.week.ago)).
       order(:date)
-
 
     @words_per_project   = decorate_words_per_project(Translation.total_words_per_project)
     @average_load_time   = decorate_avg_load_time(metrics)
@@ -52,6 +51,20 @@ class StatsController < ApplicationController
     respond_to do |format|
       format.html
       format.csv { render text: generate_commit_csv }
+    end
+  end
+
+  def translation_report
+  end
+
+  def generate_translation_report
+    begin
+      start_date =  Date.strptime(params[:start_date], '%m/%d/%Y')
+      end_date =  Date.strptime(params[:end_date], '%m/%d/%Y')
+      filename = "translation-word-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
+      send_data Reports::TranslationWordReport.generate_csv(start_date, end_date), filename: filename
+    rescue
+      render text: 'Be sure start_date and end_date are included and in the format of MM/DD/YYYY.', status: 400
     end
   end
 
