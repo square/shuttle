@@ -124,6 +124,8 @@ Shuttle::Application.routes.draw do
   get 'stats' => 'stats#index'
   get 'stats/translation-report' => 'stats#translation_report', as: :stats_translation_report
   post 'stats/generate-translation-report' => 'stats#generate_translation_report', as: :stats_generate_translation_report, format: :csv
+  get 'stats/project-translation-report' => 'stats#project_translation_report', as: :stats_project_translation_report
+  post 'stats/generate-project-translation-report' => 'stats#generate_project_translation_report', as: :stats_generate_project_translation_report, format: :csv
 
   # GLOSSARY PAGES
   get 'glossary' => 'glossary#index', as: :glossary

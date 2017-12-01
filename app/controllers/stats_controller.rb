@@ -68,6 +68,19 @@ class StatsController < ApplicationController
     end
   end
 
+  def project_translation_report
+  end
+
+  def generate_project_translation_report
+    begin
+      start_date =  Date.strptime(params[:start_date], '%m/%d/%Y')
+      end_date =  Date.strptime(params[:end_date], '%m/%d/%Y')
+      filename = "project-translation-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
+      send_data Reports::ProjectTranslationReport.generate_csv(start_date, end_date), filename: filename
+    rescue
+      render text: 'Be sure start_date and end_date are included and in the format of MM/DD/YYYY.', status: 400
+    end
+  end
   private
 
   def generate_commit_csv
