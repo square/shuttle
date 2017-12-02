@@ -117,8 +117,9 @@ class TranslationUpdateMediator < BasicMediator
       # this is a "create", so set the translation_date
       translation.translation_date = Time.now
 
-      # retrieve the top fuzzy match percentage for the translation (this may be nil)
-      translation.tm_match = (top_fuzzy_match(translation) || 0)
+      # retrieve the top fuzzy match percentage for the translation
+      finder = FuzzyMatchTranslationsFinder.new(translation.source_copy, translation)
+      translation.tm_match = finder.top_fuzzy_match_percentage
     end
 
     translation.modifier = @user
@@ -149,20 +150,5 @@ class TranslationUpdateMediator < BasicMediator
     translation.reviewer = nil
     translation.translation_date = nil
     translation.tm_match = nil
-  end
-
-  # Gets the top fuzzy match for a given translation
-  #
-  # @param [Translation] translation to use when looking up the fuzzy match
-  def top_fuzzy_match(translation)
-    finder = FuzzyMatchTranslationsFinder.new(translation.source_copy, translation)
-    translations = finder.find_fuzzy_match
-    translations = translations.map do |tran|
-      {
-          match_percentage: translation.source_copy.similar(tran.source_copy),
-      }
-    end.reject { |t| t[:match_percentage] < 70 }
-    translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
-    translations.any? ? translations.first[:match_percentage] : nil
   end
 end
