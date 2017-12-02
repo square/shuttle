@@ -53,4 +53,15 @@ class FuzzyMatchTranslationsFinder
     translations = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
     SortingHelper.order_by_elasticsearch_result_order(translations, translations_in_es)
   end
+
+  def top_fuzzy_match_percentage
+    translations = find_fuzzy_match
+    translations = translations.map do |tran|
+      {
+          match_percentage: @translation.source_copy.similar(tran.source_copy),
+      }
+    end.reject { |t| t[:match_percentage] < 70 }
+    translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
+    translations.any? ? translations.first[:match_percentage] : 0.0
+  end
 end

@@ -1,4 +1,4 @@
-# Copyright 2016 Square Inc.
+# Copyright 2016-2017 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -16,4 +16,39 @@ require 'rails_helper'
 
 RSpec.describe FuzzyMatchTranslationsFinder do
   # some integration tests exist in translation_controller_spec.rb
+
+  describe "#top_fuzzy_match_percentage" do
+    it "should return the top fuzzy match for a given translation" do
+      source_copy = "yes"
+
+      # create a translation that will be used for lookup for tm_match
+      FactoryGirl.create(:translation, copy: "oui", source_copy: source_copy, approved: true, translated: true, rfc5646_locale: 'fr')
+
+      # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
+      regenerate_elastic_search_indexes
+
+      translation = FactoryGirl.build(:translation, source_copy: source_copy, rfc5646_locale: 'fr')
+      finder = FuzzyMatchTranslationsFinder.new(source_copy, translation)
+      expect(finder.top_fuzzy_match_percentage).to eq 100.0
+    end
+
+    it "should return 0.0 if there isn't any matches" do
+      # there are no translation in the database, so there shouldn't be a match
+      translation = FactoryGirl.build(:translation, source_copy: 'yes', rfc5646_locale: 'fr')
+      finder = FuzzyMatchTranslationsFinder.new('yes', translation)
+      expect(finder.top_fuzzy_match_percentage).to eq 0.0
+    end
+
+    it "should return 0.0 if the top fuzzy match is < 70%" do
+      # create a translation that will be used for lookup for tm_match (note: this is a 60% match)
+      FactoryGirl.create(:translation, copy: "oui monsieur ", source_copy: 'yes sir', approved: true, translated: true, rfc5646_locale: 'fr')
+
+      # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
+      regenerate_elastic_search_indexes
+
+      translation = FactoryGirl.build(:translation, source_copy: 'yes', rfc5646_locale: 'fr')
+      finder = FuzzyMatchTranslationsFinder.new('yes', translation)
+      expect(finder.top_fuzzy_match_percentage).to eq 0.0
+    end
+  end
 end
