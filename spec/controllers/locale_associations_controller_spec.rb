@@ -12,10 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe LocaleAssociationsController do
-
+RSpec.describe LocaleAssociationsController do
   # This should return the minimal set of attributes required to create a valid
   # LocaleAssociation. As you add validations to LocaleAssociation, be sure to
   # adjust the attributes here as well.
@@ -27,7 +26,7 @@ describe LocaleAssociationsController do
   let(:valid_session) { {} }
 
   before :each do
-    user = FactoryGirl.create(:user, :confirmed, role: 'translator')
+    user = FactoryBot.create(:user, :confirmed, role: 'translator')
     @request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in user
   end

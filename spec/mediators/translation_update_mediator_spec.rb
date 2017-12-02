@@ -14,19 +14,19 @@
 
 # More specs for TranslationUpdateMediator are in translations_controller_specs#update as integration specs.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe TranslationUpdateMediator do
-  let(:translator) { FactoryGirl.create(:user, :translator) }
-  let(:reviewer) { FactoryGirl.create(:user, :reviewer) }
+RSpec.describe TranslationUpdateMediator do
+  let(:translator) { FactoryBot.create(:user, :translator) }
+  let(:reviewer) { FactoryBot.create(:user, :reviewer) }
 
   describe "#update!" do
     before :each do
       @params = ActionController::Parameters.new(translation: { copy: "test copy", notes: "test note" })
 
-      project = FactoryGirl.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
-      @key = FactoryGirl.create(:key, ready: false, project: project)
-      @fr_translation    = FactoryGirl.create(:translation, key: @key, copy: nil, source_copy: 'test', translator: nil, rfc5646_locale: 'fr')
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
+      @key = FactoryBot.create(:key, ready: false, project: project)
+      @fr_translation    = FactoryBot.create(:translation, key: @key, copy: nil, source_copy: 'test', translator: nil, rfc5646_locale: 'fr')
       expect(@key.reload).to_not be_ready
     end
 
@@ -57,7 +57,7 @@ describe TranslationUpdateMediator do
 
       it "sets the tm_match" do
         # create a translation that will be used for lookup for tm_match
-        FactoryGirl.create(:translation, copy: "test", source_copy: 'test', approved: true, translated: true, rfc5646_locale: 'fr')
+        FactoryBot.create(:translation, copy: "test", source_copy: 'test', approved: true, translated: true, rfc5646_locale: 'fr')
 
         # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
         regenerate_elastic_search_indexes
@@ -71,11 +71,11 @@ describe TranslationUpdateMediator do
 
     context "[update multiple]" do
       before :each do
-        FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
-        FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
+        FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
+        FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
 
-        @fr_CA_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
-        @fr_FR_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
+        @fr_CA_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
+        @fr_FR_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
       end
 
       it "updates the primary translation and 2 associated translations that user specified; sets key readiness to true if all translations are approved" do
@@ -98,7 +98,7 @@ describe TranslationUpdateMediator do
       end
 
       it "doesn't update any of the requested translations because one of the translations don't exist" do
-        FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-XX')
+        FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-XX')
         params = ActionController::Parameters.new( translation: { copy: "test" }, copyToLocales: %w(fr-CA fr-FR fr-XX) )
         mediator = TranslationUpdateMediator.new(@fr_translation, reviewer, params)
         mediator.update!
@@ -126,51 +126,51 @@ describe TranslationUpdateMediator do
   describe "#multi_updateable_translations_to_locale_associations_hash" do
     it "returns a hash of translations that can be updated with the same copy as the primary translation will be
           updated with, and the LocaleAssociations that connect these translations with the primary translation" do
-      la1 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
-      la2 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
-      la3 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-XX')
-      la4 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-YY')
-      la5 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr-CA', target_rfc5646_locale: 'fr')
+      la1 = FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
+      la2 = FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
+      la3 = FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-XX')
+      la4 = FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-YY')
+      la5 = FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr-CA', target_rfc5646_locale: 'fr')
 
-      project = FactoryGirl.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' => true, 'fr-FR' => false, 'fr-XX' => true })
-      key = FactoryGirl.create(:key, project: project)
-      translation1 = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'fr')
-      translation2 = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'fr-CA')
-      translation3 = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'fr-FR')
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' => true, 'fr-FR' => false, 'fr-XX' => true })
+      key = FactoryBot.create(:key, project: project)
+      translation1 = FactoryBot.create(:translation, key: key, rfc5646_locale: 'fr')
+      translation2 = FactoryBot.create(:translation, key: key, rfc5646_locale: 'fr-CA')
+      translation3 = FactoryBot.create(:translation, key: key, rfc5646_locale: 'fr-FR')
       expect(TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(translation1)).to eql(translation2 => la1, translation3 => la2)
     end
 
     it "doesn't consider base translation as a multi updateable translation" do
-      la1 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'en-XX', target_rfc5646_locale: 'en')
-      la2 = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'en-XX', target_rfc5646_locale: 'en-YY')
+      la1 = FactoryBot.create(:locale_association, source_rfc5646_locale: 'en-XX', target_rfc5646_locale: 'en')
+      la2 = FactoryBot.create(:locale_association, source_rfc5646_locale: 'en-XX', target_rfc5646_locale: 'en-YY')
 
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'en-XX' => true, 'en-YY' => true })
-      key = FactoryGirl.create(:key, project: project)
-      translation1 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX')
-      translation2 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
-      translation3 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en-YY')
+      project = FactoryBot.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'en-XX' => true, 'en-YY' => true })
+      key = FactoryBot.create(:key, project: project)
+      translation1 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX')
+      translation2 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
+      translation3 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en-YY')
       expect(TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(translation1)).to eql(translation3 => la2)
     end
   end
 
   describe "#translations_that_should_be_multi_updated" do
     before :each do
-      FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
-      FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
-      @key = FactoryGirl.create(:key)
-      @fr_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr')
+      FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
+      FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
+      @key = FactoryBot.create(:key)
+      @fr_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr')
     end
 
     it "returns the Translation objects corresponding to the user provided copyToLocales param; doesn't add an error if all are valid" do
-      fr_CA_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
-      fr_FR_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
+      fr_CA_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
+      fr_FR_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
       mediator = TranslationUpdateMediator.new(@fr_translation, translator, ActionController::Parameters.new( copyToLocales: %w(fr-CA fr-FR) ))
       expect(mediator.send(:translations_that_should_be_multi_updated)).to eql([fr_CA_translation, fr_FR_translation])
       expect(mediator.success?).to be_truthy
     end
 
     it "adds an error to the mediator if one of the locales user wanted to copy to is not valid because there is no LocaleAssociation to that locales" do
-      fr_XX_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-XX')
+      fr_XX_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-XX')
       mediator = TranslationUpdateMediator.new(@fr_translation, translator, ActionController::Parameters.new( copyToLocales: %w(fr-XX)))
       mediator.send(:translations_that_should_be_multi_updated)
       expect(mediator.success?).to be_falsey
@@ -178,7 +178,7 @@ describe TranslationUpdateMediator do
     end
 
     it "adds an error to the mediator if one of the locales user wanted to copy to is not valid because there is no Translation in one of those locales" do
-      fr_CA_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
+      fr_CA_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
       mediator = TranslationUpdateMediator.new(@fr_translation, translator, ActionController::Parameters.new( copyToLocales: %w(fr-CA fr-FR)))
       mediator.send(:translations_that_should_be_multi_updated)
       expect(mediator.success?).to be_falsey
@@ -187,7 +187,7 @@ describe TranslationUpdateMediator do
   end
 
   describe "#update_single_translation!" do
-    let(:translation) { FactoryGirl.create(:translation, copy: nil, translator: nil) }
+    let(:translation) { FactoryBot.create(:translation, copy: nil, translator: nil) }
 
     it "updates a translation with the given copy and notes, sets its translator" do
       params = ActionController::Parameters.new(translation: { copy: "test copy", notes: "test note" })
@@ -297,7 +297,7 @@ describe TranslationUpdateMediator do
 
   describe "#untranslate" do
     it "clears copy, translator, approved and reviewer fields" do
-      translation = FactoryGirl.build(:translation, copy: "Test", approved: true, reviewer: reviewer, translator: reviewer)
+      translation = FactoryBot.build(:translation, copy: "Test", approved: true, reviewer: reviewer, translator: reviewer)
       mediator = TranslationUpdateMediator.new(translation, reviewer, ActionController::Parameters.new)
       mediator.send(:untranslate, translation)
 

@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Screenshot do
+RSpec.describe Screenshot do
   it { is_expected.to have_attached_file(:image) }
   it { is_expected.to validate_attachment_presence(:image) }
   it { is_expected.to validate_attachment_content_type(:image).allowing(Screenshot::CONTENT_TYPES) }

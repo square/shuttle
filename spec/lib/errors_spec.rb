@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Git::NotFoundError do
+RSpec.describe Git::NotFoundError do
   describe "#initialize" do
     it "creates a Git::NotFoundError which is a kind of StandardError that has a message derived from the given sha and object_type" do
       err = Git::NotFoundError.new('xyz123', 'MyType')
@@ -24,7 +24,7 @@ describe Git::NotFoundError do
   end
 end
 
-describe Git::CommitNotFoundError do
+RSpec.describe Git::CommitNotFoundError do
   describe "#initialize" do
     it "creates a Git::CommitNotFoundError which is a kind of Git::NotFoundError that has a message derived from the given sha" do
       err = Git::CommitNotFoundError.new('xyz123')
@@ -34,7 +34,7 @@ describe Git::CommitNotFoundError do
   end
 end
 
-describe Git::BlobNotFoundError do
+RSpec.describe Git::BlobNotFoundError do
   describe "#initialize" do
     it "creates a Git::BlobNotFoundError which is a kind of Git::NotFoundError that has a message derived from the given sha" do
       err = Git::BlobNotFoundError.new('xyz123')

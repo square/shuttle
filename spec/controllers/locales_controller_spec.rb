@@ -12,8 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe LocalesController do
+RSpec.describe LocalesController do
   skip "Write specs" #TODO
 end

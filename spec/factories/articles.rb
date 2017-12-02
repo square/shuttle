@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :article do
     association :project, repository_url: nil
     sequence(:name) { |i| "article-#{i}" }

@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer::Android do
+RSpec.describe Fencer::Android do
   describe ".fence" do
     it "should fence a string with handlebars" do
       expect(Fencer::Android.fence("String with {two} {tokens}.")).

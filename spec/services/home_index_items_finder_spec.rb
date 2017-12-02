@@ -12,8 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe HomeIndexItemsFinder do
+RSpec.describe HomeIndexItemsFinder do
   # some integration tests exist in home_controller_spec.rb
 end

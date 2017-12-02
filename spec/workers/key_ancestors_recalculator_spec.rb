@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe KeyAncestorsRecalculator do
+RSpec.describe KeyAncestorsRecalculator do
   describe "#perform" do
     context "Article" do
       it "recalculates the readiness of the related Article" do
-        project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr' => true})
-        article = FactoryGirl.create(:article, project: project, ready: false, sections_hash: {"main" => "hi"})
+        project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr' => true})
+        article = FactoryBot.create(:article, project: project, ready: false, sections_hash: {"main" => "hi"})
         ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
         expect(article.reload.keys.length).to eql(1)
         key = article.keys.first
@@ -37,10 +37,10 @@ describe KeyAncestorsRecalculator do
 
     context "Commits" do
       it "recalculates the readiness of the related Commits" do
-        project = FactoryGirl.create(:project)
-        commit1 = FactoryGirl.create(:commit, project: project, ready: false)
-        commit2 = FactoryGirl.create(:commit, project: project, ready: false)
-        key = FactoryGirl.create(:key, project: project, ready: false)
+        project = FactoryBot.create(:project)
+        commit1 = FactoryBot.create(:commit, project: project, ready: false)
+        commit2 = FactoryBot.create(:commit, project: project, ready: false)
+        key = FactoryBot.create(:key, project: project, ready: false)
         commit1.keys = commit2.keys = [key]
 
         expect(KeyAncestorsRecalculator).to receive(:perform_once).once.and_call_original

@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe HomeIndexPresenter do
+RSpec.describe HomeIndexPresenter do
   before :each do
     allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
     @presenter = HomeIndexPresenter.new([], [], [])
@@ -23,34 +23,34 @@ describe HomeIndexPresenter do
   describe "#full_description" do
     context "[Commit]" do
       it "returns full description" do
-        commit = FactoryGirl.create(:commit, description: 'abc'*50)
+        commit = FactoryBot.create(:commit, description: 'abc'*50)
         expect(@presenter.full_description(commit)).to eql('abc'*50)
       end
 
       it "returns a dash sign if description is missing" do
-        commit = FactoryGirl.create(:commit, description: nil)
+        commit = FactoryBot.create(:commit, description: nil)
         expect(@presenter.full_description(commit)).to eql('-')
       end
 
       it "strips html from descriptions with html in them" do
-        commit = FactoryGirl.create(:commit, description: '<a href="/cool/site">you must be <strong>swift as the</strong></a><br/> coursing river')
+        commit = FactoryBot.create(:commit, description: '<a href="/cool/site">you must be <strong>swift as the</strong></a><br/> coursing river')
         expect(@presenter.full_description(commit)).to eql('you must be swift as the coursing river')
       end
     end
 
     context "[Article]" do
       it "returns full description" do
-        article = FactoryGirl.create(:article, description: 'abc'*50)
+        article = FactoryBot.create(:article, description: 'abc'*50)
         expect(@presenter.full_description(article)).to eql('abc'*50)
       end
 
       it "returns a dash sign if description is missing" do
-        article = FactoryGirl.create(:article, description: nil)
+        article = FactoryBot.create(:article, description: nil)
         expect(@presenter.full_description(article)).to eql('-')
       end
 
       it "strips html from descriptions with html in them" do
-        article = FactoryGirl.create(:article, description: '<a href="/cool/site">with all the <strong>force of a</strong></a><br/> great typhoon')
+        article = FactoryBot.create(:article, description: '<a href="/cool/site">with all the <strong>force of a</strong></a><br/> great typhoon')
         expect(@presenter.full_description(article)).to eql('with all the force of a great typhoon')
       end
     end
@@ -59,24 +59,24 @@ describe HomeIndexPresenter do
   describe "#short_description" do
     context "[Commit]" do
       it "returns a truncated description" do
-        commit = FactoryGirl.create(:commit, description: 'abc'*50)
+        commit = FactoryBot.create(:commit, description: 'abc'*50)
         expect(@presenter.short_description(commit)).to eql('abc'*15 + 'ab...')
       end
 
       it "strips html from descriptions with html in them and only shortens the non-html content" do
-        commit = FactoryGirl.create(:commit, description: '<a href="/cool/site">with all the <strong>strength</strong> of a <em>raging fire</em>, mysterious| as the dark side of the moon</a>')
+        commit = FactoryBot.create(:commit, description: '<a href="/cool/site">with all the <strong>strength</strong> of a <em>raging fire</em>, mysterious| as the dark side of the moon</a>')
         expect(@presenter.short_description(commit)).to eql('with all the strength of a raging fire, mysteri...')
       end
     end
 
     context "[Article]" do
       it "returns a truncated description" do
-        article = FactoryGirl.create(:article, description: 'abc'*50)
+        article = FactoryBot.create(:article, description: 'abc'*50)
         expect(@presenter.short_description(article)).to eql('abc'*15 + 'ab...')
       end
 
       it "strips html from descriptions with html in them and only shortens the non-html content" do
-        article = FactoryGirl.create(:article, description: '<a href="/cool/site">mysterious as the <strong>dark side<strong> of the moon!</a> Be a man! Im <em>never</em> gonna catch my breadth<br/>')
+        article = FactoryBot.create(:article, description: '<a href="/cool/site">mysterious as the <strong>dark side<strong> of the moon!</a> Be a man! Im <em>never</em> gonna catch my breadth<br/>')
         expect(@presenter.short_description(article)).to eql('mysterious as the dark side of the moon! Be a m...')
       end
     end
@@ -85,14 +85,14 @@ describe HomeIndexPresenter do
   describe "#sub_description" do
     context "[Commit]" do
       it "returns a description to display under the main description" do
-        commit = FactoryGirl.create(:commit, author: 'foo bar')
+        commit = FactoryBot.create(:commit, author: 'foo bar')
         expect(@presenter.sub_description(commit)).to eql('Authored By: foo bar')
       end
     end
 
     context "[Article]" do
       it "returns empty string" do
-        article = FactoryGirl.create(:article)
+        article = FactoryBot.create(:article)
         expect(@presenter.sub_description(article)).to eql('')
       end
     end
@@ -101,14 +101,14 @@ describe HomeIndexPresenter do
   describe "#update_item_path" do
     context "[Commit]" do
       it "returns the commit update path" do
-        commit = FactoryGirl.create(:commit)
+        commit = FactoryBot.create(:commit)
         expect(@presenter.update_item_path(commit)).to eql(Rails.application.routes.url_helpers.project_commit_path(commit.project, commit, format: 'json'))
       end
     end
 
     context "[Article]" do
       it "returns the article update path" do
-        article = FactoryGirl.create(:article)
+        article = FactoryBot.create(:article)
         expect(@presenter.update_item_path(article)).to eql(Rails.application.routes.url_helpers.api_v1_project_article_path(project_id: article.project_id, name: article.name, format: 'json'))
       end
     end
@@ -117,14 +117,14 @@ describe HomeIndexPresenter do
   describe "#translate_link_path" do
     before :each do
       @url_helpers = Rails.application.routes.url_helpers
-      @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'en-CA'=>true, 'fr'=> true, 'ja'=> true })
-      @admin_user = FactoryGirl.create(:user, :admin, approved_rfc5646_locales: [])
-      @reviewer_user = FactoryGirl.create(:user, :reviewer, approved_rfc5646_locales: %w(es fr))
+      @project = FactoryBot.create(:project, targeted_rfc5646_locales: {'en-CA'=>true, 'fr'=> true, 'ja'=> true })
+      @admin_user = FactoryBot.create(:user, :admin, approved_rfc5646_locales: [])
+      @reviewer_user = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(es fr))
     end
 
     context "[Commit]" do
       it "returns the commit translate link path" do
-        commit = FactoryGirl.create(:commit, project: @project)
+        commit = FactoryBot.create(:commit, project: @project)
         expect(@presenter.translate_link_path(@admin_user, commit)).
             to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: commit.project, commit: commit.revision))
         expect(@presenter.translate_link_path(@reviewer_user, commit)).
@@ -134,7 +134,7 @@ describe HomeIndexPresenter do
 
     context "[Article]" do
       it "returns the article translate link path" do
-        article = FactoryGirl.create(:article, project: @project)
+        article = FactoryBot.create(:article, project: @project)
         expect(@presenter.translate_link_path(@admin_user, article)).
             to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: article.project, article_id: article.id))
         expect(@presenter.translate_link_path(@reviewer_user, article)).

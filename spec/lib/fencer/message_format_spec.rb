@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer::MessageFormat do
+RSpec.describe Fencer::MessageFormat do
   describe ".fence" do
     it "should fence all the strings in the MessageFormat documentation" do
       expect(Fencer::MessageFormat.fence("'{0}'")).

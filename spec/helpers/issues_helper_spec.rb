@@ -14,10 +14,10 @@
 
 require "spec_helper"
 
-describe IssuesHelper do
+RSpec.describe IssuesHelper do
   describe "#issue_url" do
     before :each do
-      @issue = FactoryGirl.create(:issue)
+      @issue = FactoryBot.create(:issue)
       @translation = @issue.translation
       @key = @translation.key
       @project = @key.project
@@ -28,12 +28,12 @@ describe IssuesHelper do
     end
 
     it "should return the correct uri given an issue if a non-translator user is given" do
-      user = FactoryGirl.create(:user, role: "")
+      user = FactoryBot.create(:user, role: "")
       expect(helper.issue_url(@issue, user)).to eql(helper.project_key_translation_url(@project, @key, @translation) + "#issue-wrapper-#{@issue.id}")
     end
 
     it "should return the correct uri given an issue if a translator user is given" do
-      user = FactoryGirl.create(:user, role: "translator")
+      user = FactoryBot.create(:user, role: "translator")
       expect(helper.issue_url(@issue, user)).to eql(helper.edit_project_key_translation_url(@project, @key, @translation) + "#issue-wrapper-#{@issue.id}")
     end
 

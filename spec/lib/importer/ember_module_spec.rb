@@ -12,12 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Importer::EmberModule do
+RSpec.describe Importer::EmberModule do
   context "[importing]" do
     before :each do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     only_paths:     %w(ember-injection/),
                                     skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember_module))
@@ -39,7 +39,7 @@ describe Importer::EmberModule do
 
   context "[importing with dot notation]" do
     it "should properly import keys" do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en',
                                     only_paths:          %w(ember-injection/),

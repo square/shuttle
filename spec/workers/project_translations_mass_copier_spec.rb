@@ -12,16 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ProjectTranslationsMassCopier do
+RSpec.describe ProjectTranslationsMassCopier do
   describe "#perform" do
     before :each do
-      @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en',
+      @project = FactoryBot.create(:project, base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'en' => true, 'en-XX' => true, 'en-YY' => false, 'es-XX' => false })
-      @key = FactoryGirl.create(:key, project: @project, ready: false)
-      @en_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en', copy: 'test', approved: true)
-      @en_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX', copy: nil, approved: nil)
+      @key = FactoryBot.create(:key, project: @project, ready: false)
+      @en_translation    = FactoryBot.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en', copy: 'test', approved: true)
+      @en_xx_translation = FactoryBot.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX', copy: nil, approved: nil)
     end
 
     it "errors if there is a problem with the inputs such as locales not being in the same language family" do
@@ -37,7 +37,7 @@ describe ProjectTranslationsMassCopier do
     end
 
     it "copies translations, and updates keys & commits readiness states" do
-      commit = FactoryGirl.create(:commit, project: @project, ready: false)
+      commit = FactoryBot.create(:commit, project: @project, ready: false)
       commit.keys << @key.reload
       expect(commit.ready).to be_falsey
       expect(@key.ready).to be_falsey
@@ -51,7 +51,7 @@ describe ProjectTranslationsMassCopier do
 
   describe "#find_locale_errors" do
     before :each do
-      @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en',
+      @project = FactoryBot.create(:project, base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'en' => true, 'en-XX' => true, 'en-YY' => false, 'es-XX' => false })
     end
 
@@ -125,34 +125,34 @@ describe ProjectTranslationsMassCopier do
 
   describe "#key_ids_with_copyable_translations" do
     it "returns ids of keys for which we can copy translations from the the source locale to the target locale" do
-      project = FactoryGirl.create(:project)
+      project = FactoryBot.create(:project)
       # create a copyable key
-      key1 = FactoryGirl.create(:key, project: project)
-      fr_translation_1    = FactoryGirl.create(:translation, key: key1, rfc5646_locale: 'fr', copy: 'test', approved: true)
-      fr_xx_translation_1 = FactoryGirl.create(:translation, key: key1, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
+      key1 = FactoryBot.create(:key, project: project)
+      fr_translation_1    = FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', copy: 'test', approved: true)
+      fr_xx_translation_1 = FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
 
       # create another copyable key
-      key2 = FactoryGirl.create(:key, project: project)
-      fr_translation_2    = FactoryGirl.create(:translation, key: key2, rfc5646_locale: 'fr', copy: 'test', approved: true)
-      fr_xx_translation_2 = FactoryGirl.create(:translation, key: key2, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
+      key2 = FactoryBot.create(:key, project: project)
+      fr_translation_2    = FactoryBot.create(:translation, key: key2, rfc5646_locale: 'fr', copy: 'test', approved: true)
+      fr_xx_translation_2 = FactoryBot.create(:translation, key: key2, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
 
       # create a not-copyable key because translation in the target locale is already done
-      key3 = FactoryGirl.create(:key, project: project)
-      fr_translation_3    = FactoryGirl.create(:translation, key: key3, rfc5646_locale: 'fr',    copy: 'test', approved: true)
-      fr_xx_translation_3 = FactoryGirl.create(:translation, key: key3, rfc5646_locale: 'fr-XX', copy: 'test', approved: true)
+      key3 = FactoryBot.create(:key, project: project)
+      fr_translation_3    = FactoryBot.create(:translation, key: key3, rfc5646_locale: 'fr',    copy: 'test', approved: true)
+      fr_xx_translation_3 = FactoryBot.create(:translation, key: key3, rfc5646_locale: 'fr-XX', copy: 'test', approved: true)
 
       # create a not-copyable key because translation in the source locale is not approved
-      key4 = FactoryGirl.create(:key, project: project)
-      fr_translation_4    = FactoryGirl.create(:translation, key: key4, rfc5646_locale: 'fr',    copy: 'test', approved: nil)
-      fr_xx_translation_4 = FactoryGirl.create(:translation, key: key4, rfc5646_locale: 'fr-XX', copy: nil,    approved: nil)
+      key4 = FactoryBot.create(:key, project: project)
+      fr_translation_4    = FactoryBot.create(:translation, key: key4, rfc5646_locale: 'fr',    copy: 'test', approved: nil)
+      fr_xx_translation_4 = FactoryBot.create(:translation, key: key4, rfc5646_locale: 'fr-XX', copy: nil,    approved: nil)
 
       # create a not-copyable key because translation in the source locale does not exist
-      key5 = FactoryGirl.create(:key, project: project)
-      fr_xx_translation_5 = FactoryGirl.create(:translation, key: key5, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
+      key5 = FactoryBot.create(:key, project: project)
+      fr_xx_translation_5 = FactoryBot.create(:translation, key: key5, rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
 
       # create a not-copyable key because translation in the target locale does not exist
-      key6 = FactoryGirl.create(:key, project: project)
-      fr_translation_6 = FactoryGirl.create(:translation, key: key6, rfc5646_locale: 'fr', copy: 'test', approved: true)
+      key6 = FactoryBot.create(:key, project: project)
+      fr_translation_6 = FactoryBot.create(:translation, key: key6, rfc5646_locale: 'fr', copy: 'test', approved: true)
 
       expect(ProjectTranslationsMassCopier.new.key_ids_with_copyable_translations(project, 'fr', 'fr-XX').sort).to eql([key1.id, key2.id].sort)
     end
@@ -160,7 +160,7 @@ describe ProjectTranslationsMassCopier do
 
   describe "#mass_copier_batch" do
     it "returns a new batch with a new bid" do
-      project = FactoryGirl.create(:project)
+      project = FactoryBot.create(:project)
       batch = ProjectTranslationsMassCopier.new.mass_copier_batch(project.id, 'en', 'en-XX')
       initial_bid = batch.bid
       batch = ProjectTranslationsMassCopier.new.mass_copier_batch(project.id, 'en', 'en-XX')
@@ -169,10 +169,10 @@ describe ProjectTranslationsMassCopier do
   end
 end
 
-describe ProjectTranslationsMassCopier::Finisher do
+RSpec.describe ProjectTranslationsMassCopier::Finisher do
   describe "#on_success" do
     it "calls ProjectDescendantsRecalculator with project id" do
-      project = FactoryGirl.create(:project)
+      project = FactoryBot.create(:project)
       expect(ProjectDescendantsRecalculator).to receive(:perform_once).with(project.id)
       ProjectTranslationsMassCopier::Finisher.new.on_success(nil, { 'project_id' => project.id })
     end

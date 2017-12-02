@@ -17,6 +17,7 @@ class CreateShaFieldOnBlobs < ActiveRecord::Migration
     add_column :blobs, :sha, :string, limit: 40
 
     Blob.define_singleton_method(:readonly_attributes) { [] }
+    Blob.primary_key = :id # not sure why this is necessary
     Blob.find_each do |blob|
       blob.update! sha: blob.sha_raw.unpack('H*').first
     end

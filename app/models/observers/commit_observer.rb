@@ -45,15 +45,15 @@ class CommitObserver < ActiveRecord::Observer
   def send_emails(commit)
     if just_finished_loading?(commit)
       if commit.errored_during_import?
-        CommitMailer.notify_submitter_of_import_errors(commit).deliver
+        CommitMailer.notify_submitter_of_import_errors(commit).deliver_now
       else
         # This code assumes that recalculate_ready! was run on all of commit's keys
-        CommitMailer.notify_translators(commit).deliver unless commit.keys_are_ready?
+        CommitMailer.notify_translators(commit).deliver_now unless commit.keys_are_ready?
       end
     end
 
     if just_became_ready?(commit)
-      CommitMailer.notify_translation_finished(commit).deliver
+      CommitMailer.notify_translation_finished(commit).deliver_now
     end
   end
 

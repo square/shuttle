@@ -14,9 +14,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe WordSubstitutor do
+RSpec.describe WordSubstitutor do
   context "[pathfinding]" do
     before :each do
       @sub = WordSubstitutor.new(Locale.from_rfc5646('en-US'), Locale.from_rfc5646('en-GB'))

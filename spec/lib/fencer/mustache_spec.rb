@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer::Mustache do
+RSpec.describe Fencer::Mustache do
   describe ".fence" do
     it "should fence a string with handlebars" do
       expect(Fencer::Mustache.fence("String with {{two}} {{tokens}}.")).

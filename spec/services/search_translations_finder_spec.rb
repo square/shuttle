@@ -12,15 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe SearchTranslationsFinder do
+RSpec.describe SearchTranslationsFinder do
 
   describe "#find_translations" do
     before :each do
       Translation.destroy_all
       reset_elastic_search
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @key = create_key(@project)
       @translation = create_translation(@key, copy: 'some copy here', rfc5646_locale: Locale.new('de-DE').rfc5646)
       @finder = create_finder
@@ -46,7 +46,7 @@ describe SearchTranslationsFinder do
     end
 
     it "should filter project id" do
-      new_project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      new_project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       new_key = create_key(new_project)
       create_translation(new_key)
       new_finder = create_finder(project_id: new_project.id)
@@ -124,7 +124,7 @@ describe SearchTranslationsFinder do
       rfc5646_locale: Locale.new('zh-CN').rfc5646
     }.deep_merge(params)
 
-    FactoryGirl.create(:translation, data)
+    FactoryBot.create(:translation, data)
   end
 
   def create_key(project, params={})
@@ -132,6 +132,6 @@ describe SearchTranslationsFinder do
       project: project
     }.deep_merge(params)
 
-    FactoryGirl.create(:key, data)
+    FactoryBot.create(:key, data)
   end
 end

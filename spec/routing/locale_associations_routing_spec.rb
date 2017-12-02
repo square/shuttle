@@ -14,7 +14,7 @@
 
 require "spec_helper"
 
-describe LocaleAssociationsController do
+RSpec.describe LocaleAssociationsController do
   describe "routing" do
 
     it "routes to #index" do

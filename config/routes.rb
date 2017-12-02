@@ -59,7 +59,7 @@ Shuttle::Application.routes.draw do
       resources :keys, only: [:index, :show], controller: 'commit/keys'
       resources :screenshots, only: [:create] do
         collection do
-          post :request, to: :request_screenshots
+          post :request, action: :request_screenshots
         end
       end
     end

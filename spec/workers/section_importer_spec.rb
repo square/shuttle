@@ -12,13 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe SectionImporter do
+RSpec.describe SectionImporter do
   describe "#perform" do
     it "calls import_strings on the Core model" do
       allow_any_instance_of(Article).to receive(:import!)
-      section = FactoryGirl.create(:section)
+      section = FactoryBot.create(:section)
       expect(SectionImporter::Core).to receive(:new).and_call_original
       expect_any_instance_of(SectionImporter::Core).to receive(:import_strings)
 
@@ -27,12 +27,12 @@ describe SectionImporter do
   end
 end
 
-describe SectionImporter::Core do
+RSpec.describe SectionImporter::Core do
   describe "import_strings" do
     before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent automatic import
 
     it "doesn't call rebase_existing_keys or deactivate_all_keys if this is the initial import" do
-      section = FactoryGirl.create(:section)
+      section = FactoryBot.create(:section)
       importer = SectionImporter::Core.new(section)
       expect(importer).to_not receive(:rebase_existing_keys)
       expect(importer).to_not receive(:deactivate_all_keys)
@@ -41,8 +41,8 @@ describe SectionImporter::Core do
     end
 
     it "splits source_copy into paragraphs, creates Keys for each paragraph, creates base & targeted Translations for each Key" do
-      article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false })
-      section = FactoryGirl.create(:section, article: article, source_copy: "<p>a</p><p>b</p>")
+      article = FactoryBot.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false })
+      section = FactoryBot.create(:section, article: article, source_copy: "<p>a</p><p>b</p>")
       SectionImporter::Core.new(section).import_strings
 
       keys = section.reload.keys.order(:index_in_section)
@@ -79,8 +79,8 @@ describe SectionImporter::Core do
     end
 
     it "re-imports a Section, uses untouched paragraphs by default, unapproves them if their neighbors have changed" do
-      article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true, 'es' => false })
-      section = FactoryGirl.create(:section, article: article, source_copy: "<p>a</p><p>b</p><p>c</p><p>d</p><p>e</p>")
+      article = FactoryBot.create(:article, targeted_rfc5646_locales: { 'fr' => true, 'es' => false })
+      section = FactoryBot.create(:section, article: article, source_copy: "<p>a</p><p>b</p><p>c</p><p>d</p><p>e</p>")
       SectionImporter::Core.new(section).import_strings
 
       keys = section.reload.keys.order(:index_in_section)
@@ -112,11 +112,11 @@ describe SectionImporter::Core do
     before(:each) { allow_any_instance_of(Article).to receive(:import!) } # prevent automatic import
 
     before :each do
-      @article = FactoryGirl.create(:article,
+      @article = FactoryBot.create(:article,
                                     targeted_rfc5646_locales: { 'fr' => true },
                                     last_import_requested_at: 2.hours.ago,
                                     last_import_finished_at: 1.hour.ago)
-      @section = FactoryGirl.create(:section, article: @article, source_copy: "<p>a</p><p>b</p><p>c</p>")
+      @section = FactoryBot.create(:section, article: @article, source_copy: "<p>a</p><p>b</p><p>c</p>")
     end
 
     it "calls reset_approved_if_neighbor_changed! & update_indexes_of_unchanged_keys!" do
@@ -169,8 +169,8 @@ describe SectionImporter::Core do
         tagged_existing_paragraphs = original_existing_paragraphs.map { |prgh| "<#{tag}>#{prgh}</#{tag}>" }
 
         allow_any_instance_of(Article).to receive(:import!)
-        article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true })
-        section = FactoryGirl.create(:section, article: article, source_copy: tagged_existing_paragraphs.join)
+        article = FactoryBot.create(:article, targeted_rfc5646_locales: { 'fr' => true })
+        section = FactoryBot.create(:section, article: article, source_copy: tagged_existing_paragraphs.join)
         SectionImporter.new.perform(section.id)
 
         existing_keys = section.reload.sorted_active_keys_with_translations.reject(&:is_block_tag)
@@ -210,8 +210,8 @@ describe SectionImporter::Core do
         tag = "p"
         tagged_existing_paragraphs = original_existing_paragraphs.map { |prgh| ["<#{tag}>", prgh, "</#{tag}>"] }.flatten
 
-        article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true })
-        section = FactoryGirl.create(:section, article: article, source_copy: tagged_existing_paragraphs.join)
+        article = FactoryBot.create(:article, targeted_rfc5646_locales: { 'fr' => true })
+        section = FactoryBot.create(:section, article: article, source_copy: tagged_existing_paragraphs.join)
         SectionImporter.new.perform(section.id)
 
         existing_keys = section.reload.sorted_active_keys_with_translations
@@ -236,8 +236,8 @@ describe SectionImporter::Core do
     end
 
     it "removes conflicting keys before the rebase" do
-      article = FactoryGirl.create(:article, targeted_rfc5646_locales: { 'fr' => true })
-      section = FactoryGirl.create(:section, article: article, source_copy: "a")
+      article = FactoryBot.create(:article, targeted_rfc5646_locales: { 'fr' => true })
+      section = FactoryBot.create(:section, article: article, source_copy: "a")
       SectionImporter.new.perform(section.id)
 
       section.keys.create! key: "_old_:#{section.reload.keys.first.key}", project: section.project # creates a conflicting key for the first part of the rebase
@@ -279,7 +279,7 @@ describe SectionImporter::Core do
 
   describe "#deactivate_all_keys" do
     it "inactivates all Keys in an Article" do
-      article = FactoryGirl.create(:article, sections_hash: { "main" => "<p>a</p><p>b</p><p>c</p>" })
+      article = FactoryBot.create(:article, sections_hash: { "main" => "<p>a</p><p>b</p><p>c</p>" })
       section = article.sections.first
       expect(section.reload.keys.where('index_in_section IS NOT NULL').count).to eql(9)
       expect(section.keys.where('index_in_section IS NULL').count).to eql(0)

@@ -14,13 +14,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe SubstitutionController do
+RSpec.describe SubstitutionController do
   describe '#convert' do
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      sign_in FactoryGirl.create(:user, :activated)
+      sign_in FactoryBot.create(:user, :activated)
     end
 
     it "should 404 if the from locale is invalid" do

@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :user do
     sequence(:email) { |i| "email-#{i}@example.com" }
     password "password934723762356"

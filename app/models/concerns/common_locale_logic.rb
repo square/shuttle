@@ -23,16 +23,16 @@ module CommonLocaleLogic
     extend LocaleField
     locale_field :base_locale, from: :base_rfc5646_locale
     locale_field :locale_requirements,
-                 from:   :targeted_rfc5646_locales,
-                 reader: ->(values) { values.inject({}) { |hsh, (k, v)| hsh[Locale.from_rfc5646(k)] = v; hsh } },
-                 writer: ->(values) { values.inject({}) { |hsh, (k, v)| hsh[k.rfc5646] = v; hsh } }
+                 from:          :targeted_rfc5646_locales,
+                 reader:        ->(values) { values.inject({}) { |hsh, (k, v)| hsh[Locale.from_rfc5646(k)] = v; hsh } },
+                 writer:        ->(values) { values.inject({}) { |hsh, (k, v)| hsh[k.rfc5646] = v; hsh } },
+                 validate_proc: ->(req) { req.keys }
 
     validates :base_rfc5646_locale, presence: true
-    validates :base_rfc5646_locale, format: { with: Locale::RFC5646_FORMAT }, if: "base_rfc5646_locale.present?"
     validate :prevent_base_locale_from_changing, on: :update
 
     validates :targeted_rfc5646_locales, presence: true
-    validate :require_valid_targeted_rfc5646_locales_hash, if: "targeted_rfc5646_locales.present?"
+    validate :require_valid_targeted_rfc5646_locales_hash, if: 'targeted_rfc5646_locales.present?'
   end
 
   # Validates the validity of the targeted_rfc5646_locales hash

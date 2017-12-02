@@ -1,8 +1,8 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe LocaleProjectsShowForm do
+RSpec.describe LocaleProjectsShowForm do
   describe '#process_params' do
-    let (:project) { FactoryGirl.create(:project) }
+    let (:project) { FactoryBot.create(:project) }
     it 'should use the provided include flags if some specified' do
       params = { id: project.to_param, include_translated: '1' }
       form = LocaleProjectsShowForm.new(params)
@@ -56,13 +56,13 @@ describe LocaleProjectsShowForm do
     end
 
     it 'should set the commit information' do
-      proj = FactoryGirl.create(:project,
+      proj = FactoryBot.create(:project,
                                 base_rfc5646_locale:      'en',
                                 targeted_rfc5646_locales: { 'fr' => true },
                                 repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
 
       commit = proj.commit!('HEAD', skip_import: true)
-      key = FactoryGirl.create(:key, project: proj, ready: false)
+      key = FactoryBot.create(:key, project: proj, ready: false)
       key.add_pending_translations
       commit.keys = [key]
       params = { id: proj.to_param, commit: commit.to_param }
@@ -72,8 +72,8 @@ describe LocaleProjectsShowForm do
     end
 
     it 'should get the article id if article id specified' do
-      article = FactoryGirl.create(:article, project: project)
-      section = FactoryGirl.create(:section, article: article)
+      article = FactoryBot.create(:article, project: project)
+      section = FactoryBot.create(:section, article: article)
       params = { id: project.to_param, article_id: article.id, section_id: section.id }
       form = LocaleProjectsShowForm.new(params)
       expect(form[:article_id]).to eql article.id
@@ -81,8 +81,8 @@ describe LocaleProjectsShowForm do
     end
 
     it 'should get the article id if article name specified' do
-      article = FactoryGirl.create(:article, project: project)
-      section = FactoryGirl.create(:section, article: article)
+      article = FactoryBot.create(:article, project: project)
+      section = FactoryBot.create(:section, article: article)
       params = { id: project.to_param, article_name: article.name, section_id: section.id }
       form = LocaleProjectsShowForm.new(params)
       expect(form[:article_id]).to eql article.id

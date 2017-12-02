@@ -12,34 +12,34 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Exporter::Trados do
+RSpec.describe Exporter::Trados do
   context "[exporting]" do
     before :each do
-      @project = FactoryGirl.create(:project)
+      @project = FactoryBot.create(:project)
       @en      = Locale.from_rfc5646('en-US')
       @de      = Locale.from_rfc5646('de-DE')
-      person   = FactoryGirl.create(:user)
+      person   = FactoryBot.create(:user)
 
-      key1 = FactoryGirl.create(:key,
+      key1 = FactoryBot.create(:key,
                                 project: @project,
                                 key:     "rammstein.1",
                                 fencers: %w(Mustache))
-      key2 = FactoryGirl.create(:key,
+      key2 = FactoryBot.create(:key,
                                 project: @project,
                                 key:     "rammstein.2",
                                 fencers: %w(Mustache))
-      key3 = FactoryGirl.create(:key,
+      key3 = FactoryBot.create(:key,
                                 project: @project,
                                 key:     "rammstein.3",
                                 fencers: %w(Mustache))
-      key4 = FactoryGirl.create(:key,
+      key4 = FactoryBot.create(:key,
                                 project: @project,
                                 key:     "rammstein.4",
                                 fencers: %w(Mustache))
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           key1,
                          source_locale: @en,
                          locale:        @de,
@@ -47,7 +47,7 @@ describe Exporter::Trados do
                          copy:          "Tiefe Brunnen muss man graben",
                          updated_at:    Time.at(1234567890),
                          translator:    person
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           key2,
                          source_locale: @en,
                          locale:        @de,
@@ -55,7 +55,7 @@ describe Exporter::Trados do
                          copy:          "Wenn {{one}} klares Wasser will",
                          updated_at:    Time.at(1234567890),
                          translator:    person
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           key3,
                          source_locale: @en,
                          locale:        @de,
@@ -63,7 +63,7 @@ describe Exporter::Trados do
                          copy:          "Rosenrot, {oh} Rosenrot",
                          updated_at:    Time.at(1234567890),
                          translator:    person
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           key4,
                          source_locale: @en,
                          locale:        @de,
@@ -72,13 +72,13 @@ describe Exporter::Trados do
                          updated_at:    Time.at(1234567890),
                          translator:    person
 
-      @commit1      = FactoryGirl.create(:commit, project: @project)
+      @commit1      = FactoryBot.create(:commit, project: @project)
       @commit1.keys = [key1]
-      @commit2      = FactoryGirl.create(:commit, project: @project)
+      @commit2      = FactoryBot.create(:commit, project: @project)
       @commit2.keys = [key2]
-      @commit3      = FactoryGirl.create(:commit, project: @project)
+      @commit3      = FactoryBot.create(:commit, project: @project)
       @commit3.keys = [key3]
-      @commit4      = FactoryGirl.create(:commit, project: @project)
+      @commit4      = FactoryBot.create(:commit, project: @project)
       @commit4.keys = [key4]
     end
 

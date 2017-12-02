@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe TouchdownBranchUpdater do
+RSpec.describe TouchdownBranchUpdater do
   def commit_and_translate(project, revision)
     c = project.commit!(revision)
     CommitImporter::Finisher.new.on_success(true, 'commit_id' => c.id)
@@ -25,7 +25,7 @@ describe TouchdownBranchUpdater do
   end
 
   let(:project) do
-    project = FactoryGirl.create(:project, :light)
+    project = FactoryBot.create(:project, :light)
     system 'git', 'push', project.repository_url, ':refs/heads/translated'
     project.update! touchdown_branch: 'translated'
     project

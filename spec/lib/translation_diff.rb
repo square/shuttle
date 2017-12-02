@@ -13,9 +13,9 @@
 #    limitations under the License.
 
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe TranslationDiff do
+RSpec.describe TranslationDiff do
   describe "#context_ranges" do
     subject { TranslationDiff.new("", "").context_ranges(changes, @context) }
 

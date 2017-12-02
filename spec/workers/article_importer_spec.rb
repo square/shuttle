@@ -12,13 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ArticleImporter do
+RSpec.describe ArticleImporter do
   describe "#perform" do
     before :each do
       allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
-      @article = FactoryGirl.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
+      @article = FactoryBot.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
       ArticleImporter.new.perform(@article.id) # first import
       @sections = @article.reload.sections
     end
@@ -33,7 +33,7 @@ describe ArticleImporter do
 
     context "[create/update Sections]" do
       it "creates new Sections with provided source_copy and sets active to true" do
-        article = FactoryGirl.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
+        article = FactoryBot.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
         ArticleImporter.new.perform(article.id)
         sections = article.reload.sections
         expect(sections.map { |section| [section.name, section.source_copy, section.active] }.sort).to eql(
@@ -59,7 +59,7 @@ describe ArticleImporter do
 
     context "[calling SectionImporter]" do
       it "calls SectionImporter for all sections if this is the first time this Article is being imported" do
-        article = FactoryGirl.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
+        article = FactoryBot.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
         expect(SectionImporter).to receive(:perform_once).twice
         ArticleImporter.new.perform(article.id) # first import
       end
@@ -115,11 +115,11 @@ describe ArticleImporter do
   end
 end
 
-describe ArticleImporter::Finisher do
+RSpec.describe ArticleImporter::Finisher do
   describe "#on_success" do
     before :each do
       # creation triggers the initial import
-      @article = FactoryGirl.create(:article, sections_hash: { "main" => "<p>hello</p><p>world</p>" }, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
+      @article = FactoryBot.create(:article, sections_hash: { "main" => "<p>hello</p><p>world</p>" }, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
       expect(@article.reload.keys.count).to eql(6)
       expect(@article.translations.count).to eql(24)
       @article.reload

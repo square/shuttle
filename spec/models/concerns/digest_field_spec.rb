@@ -12,16 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe DigestField do
+RSpec.describe DigestField do
   it "should create a named scope using the :scope option" do
     expect(Key.source_copy_matches('test').to_sql).
-        to eql("SELECT \"keys\".* FROM \"keys\"  WHERE \"keys\".\"source_copy_sha\" = '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'")
+        to eql("SELECT \"keys\".* FROM \"keys\" WHERE \"keys\".\"source_copy_sha\" = '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'")
   end
 
   it "should automatically set the value from a different field" do
-    k = FactoryGirl.build(:key, key: 'hello world')
+    k = FactoryBot.build(:key, key: 'hello world')
     expect(k).to be_valid
     expect(k.key_sha).to eql(Digest::SHA2.hexdigest('hello world'))
     k.key = 'foo bar'
@@ -30,7 +30,7 @@ describe DigestField do
   end
 
   it "should validate _sha field" do
-    k = FactoryGirl.build(:key, key: nil)
+    k = FactoryBot.build(:key, key: nil)
     expect(k).to_not be_valid
     expect(k.errors.messages).to eql(key: ["can’t be blank"],
                                      original_key: ["can’t be blank"],

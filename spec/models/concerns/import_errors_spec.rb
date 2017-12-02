@@ -12,11 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ImportErrors do
+RSpec.describe ImportErrors do
   before(:each) do
-    @commit = FactoryGirl.create(:commit)
+    @commit = FactoryBot.create(:commit)
   end
 
   context "set_nil_if_blank" do
@@ -28,7 +28,7 @@ describe ImportErrors do
 
   describe "#errored_during_import" do
     it "returns the imports which errored during an import" do
-      FactoryGirl.create(:commit, import_errors: [])
+      FactoryBot.create(:commit, import_errors: [])
       @commit.add_import_error(StandardError.new("This is a fake error"))
       expect(Commit.errored_during_import.to_a).to eql([@commit])
     end

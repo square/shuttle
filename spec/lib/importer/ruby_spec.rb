@@ -12,15 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Importer::Ruby do
+RSpec.describe Importer::Ruby do
   describe "#import_file?" do
     it "should only import from Ruby files under config/locales" do
-      project = FactoryGirl.create(:project)
-      commit = FactoryGirl.create(:commit, project: project)
-      locales_blob = FactoryGirl.create(:fake_blob, project: project, path: '/config/locales/en-US.rb')
-      languages_blob = FactoryGirl.create(:fake_blob, project: project, path: '/config/languages/en-US.rb')
+      project = FactoryBot.create(:project)
+      commit = FactoryBot.create(:commit, project: project)
+      locales_blob = FactoryBot.create(:fake_blob, project: project, path: '/config/locales/en-US.rb')
+      languages_blob = FactoryBot.create(:fake_blob, project: project, path: '/config/languages/en-US.rb')
       expect(Importer::Ruby.new(locales_blob, commit).send(:import_file?)).to be_truthy
       expect(Importer::Ruby.new(languages_blob, commit).send(:import_file?)).to be_falsey
     end
@@ -28,7 +28,7 @@ describe Importer::Ruby do
 
   context "[importing]" do
     before :each do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     only_paths:     %w(config/locales/),
                                     skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ruby))

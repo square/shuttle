@@ -12,11 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe KeyRecalculator do
+RSpec.describe KeyRecalculator do
   it "should recalculate key readiness correctly" do
-    key = FactoryGirl.create(:key, ready: false)
+    key = FactoryBot.create(:key, ready: false)
     KeyRecalculator.new.perform(key.id)
     expect(key.reload).to be_ready
   end

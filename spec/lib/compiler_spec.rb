@@ -1,10 +1,10 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe Compiler do
+RSpec.describe Compiler do
   skip
 end
 
-describe Compiler::File do
+RSpec.describe Compiler::File do
   describe "#content" do
     it "should preserve BOM at the beginning of the IO" do
       # Calling io.string and io.read are not identical. This test ensures that the BOM

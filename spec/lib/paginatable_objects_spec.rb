@@ -12,17 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe PaginatableObjects do
+RSpec.describe PaginatableObjects do
 
   before do
-    project = FactoryGirl.create(:project)
-    @commit1 = FactoryGirl.create(:commit, project: project)
-    @commit2 = FactoryGirl.create(:commit, project: project)
-    @commit3 = FactoryGirl.create(:commit, project: project)
-    @commit4 = FactoryGirl.create(:commit, project: project)
-    @commit5 = FactoryGirl.create(:commit, project: project)
+    project = FactoryBot.create(:project)
+    @commit1 = FactoryBot.create(:commit, project: project)
+    @commit2 = FactoryBot.create(:commit, project: project)
+    @commit3 = FactoryBot.create(:commit, project: project)
+    @commit4 = FactoryBot.create(:commit, project: project)
+    @commit5 = FactoryBot.create(:commit, project: project)
 
     @commits = [@commit1, @commit2, @commit3, @commit4, @commit5]
     @es_objects = [double('es_result', id: @commit4.id),
@@ -31,7 +31,9 @@ describe PaginatableObjects do
                    double('es_result', id: @commit2.id),
                    double('es_result', id: @commit3.id)]
 
-    allow(@es_objects).to receive(:total) { 10 }
+    class << @es_objects
+      def total() 10 end
+    end
   end
 
   describe '#initialize' do

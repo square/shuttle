@@ -14,13 +14,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe LocaleGlossaryEntry do
+RSpec.describe LocaleGlossaryEntry do
   context "[hooks]" do
     before :each do
-      reviewer = FactoryGirl.create(:user, role: 'reviewer')
-      @lge = FactoryGirl.create(:locale_glossary_entry, approved: false, reviewer: reviewer)
+      reviewer = FactoryBot.create(:user, role: 'reviewer')
+      @lge = FactoryBot.create(:locale_glossary_entry, approved: false, reviewer: reviewer)
     end
 
     it "should revert the approved status if the copy is changed" do
@@ -38,15 +38,15 @@ describe LocaleGlossaryEntry do
 
   context "[validations]" do
     it "should not allow a translator to change the approved status" do
-      translator = FactoryGirl.create(:user, role: 'translator')
-      lge = FactoryGirl.create(:locale_glossary_entry, approved: nil)
+      translator = FactoryBot.create(:user, role: 'translator')
+      lge = FactoryBot.create(:locale_glossary_entry, approved: nil)
       lge.assign_attributes approved: true, translator: translator
       expect(lge).not_to be_valid
       expect(lge.errors[:base]).to eql(["Translators can’t change a translation that has been approved."])
     end
 
     it "should ensure the source and target locales are different" do
-      lge = FactoryGirl.build(:locale_glossary_entry, rfc5646_locale: 'en')
+      lge = FactoryBot.build(:locale_glossary_entry, rfc5646_locale: 'en')
       expect(lge).not_to be_valid
       expect(lge.errors[:rfc5646_locale]).to eql(["can’t equal source locale"])
     end

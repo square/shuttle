@@ -1,9 +1,9 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe DailyMetric do
+RSpec.describe DailyMetric do
   context "[validations]" do
     it "validates presence of date" do
-      metric = FactoryGirl.build :daily_metric, date: nil
+      metric = FactoryBot.build :daily_metric, date: nil
       expect(metric).to_not be_valid
     end
 
@@ -14,13 +14,13 @@ describe DailyMetric do
                      :num_words_completed]
     metric_fields.each do |field|
       it "validates presence of #{field}" do
-        metric = FactoryGirl.build :daily_metric, field => nil
+        metric = FactoryBot.build :daily_metric, field => nil
         expect(metric).to_not be_valid
       end
     end
 
     it "should be valid if all required fields are present" do
-      metric = FactoryGirl.build :daily_metric
+      metric = FactoryBot.build :daily_metric
       expect(metric).to be_valid
     end
   end

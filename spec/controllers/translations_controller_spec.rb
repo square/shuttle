@@ -12,17 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe TranslationsController do
-  include Devise::TestHelpers
-
+RSpec.describe TranslationsController do
   describe "#show" do
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @key = FactoryGirl.create(:key, project: @project)
-      @translation = FactoryGirl.create(:translation, copy: 'some copy here', key: @key)
-      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
+      @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @key = FactoryBot.create(:key, project: @project)
+      @translation = FactoryBot.create(:translation, copy: 'some copy here', key: @key)
+      @user = FactoryBot.create(:user, :confirmed, role: 'monitor')
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end
@@ -36,8 +34,8 @@ describe TranslationsController do
 
   describe "#update" do
     before :each do
-      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
-      @translation = FactoryGirl.create(:translation, copy: nil, translated: false, approved: nil)
+      @user = FactoryBot.create(:user, :confirmed, role: 'translator')
+      @translation = FactoryBot.create(:translation, copy: nil, translated: false, approved: nil)
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end
@@ -132,14 +130,14 @@ describe TranslationsController do
 
     context "[reviewer changes]" do
       before :each do
-        @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
+        @user = FactoryBot.create(:user, :confirmed, role: 'reviewer')
         @request.env['devise.mapping'] = Devise.mappings[:user]
         sign_in @user
       end
 
       it "should automatically approve reviewer changes to an approved string" do
         @translation.copy = 'hello!'
-        @translation.translator = translator = FactoryGirl.create(:user, :confirmed, role: 'translator')
+        @translation.translator = translator = FactoryBot.create(:user, :confirmed, role: 'translator')
         @translation.approved = true
         @translation.save!
         @translation.translation_changes.delete_all
@@ -187,7 +185,7 @@ describe TranslationsController do
 
       it "should automatically approve reviewer non-changes to a translated string" do
         @translation.copy = 'hello!'
-        @translation.translator = translator = FactoryGirl.create(:user, :confirmed, role: 'translator')
+        @translation.translator = translator = FactoryBot.create(:user, :confirmed, role: 'translator')
         @translation.save!
         @translation.translation_changes.delete_all
 
@@ -285,8 +283,8 @@ describe TranslationsController do
 
     context "[unmatched fences]" do
       it "should not update the translation if source_fences and fences don't match" do
-        key = FactoryGirl.create(:key, fencers: %w(Mustache Html))
-        translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong>hi</strong> {{howareyou}}", copy: nil, translated: false, approved: nil)
+        key = FactoryBot.create(:key, fencers: %w(Mustache Html))
+        translation = FactoryBot.create(:translation, key: key, source_copy: "test {{hello}} <strong>hi</strong> {{howareyou}}", copy: nil, translated: false, approved: nil)
         patch :update, project_id: key.project.to_param, key_id: key.to_param, id: translation.to_param, translation: { copy: "test <strong>hi</strong> howareyou" }, format: 'json'
 
         expect(response.status).to eql(422)
@@ -297,8 +295,8 @@ describe TranslationsController do
       end
 
       it "should not update the translation if source_copy has fences and copy is empty string" do
-        key = FactoryGirl.create(:key, fencers: %w(Mustache Html))
-        translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}}", copy: nil, translated: false, approved: nil)
+        key = FactoryBot.create(:key, fencers: %w(Mustache Html))
+        translation = FactoryBot.create(:translation, key: key, source_copy: "test {{hello}}", copy: nil, translated: false, approved: nil)
         patch :update, project_id: key.project.to_param, key_id: key.to_param, id: translation.to_param, translation: { copy: '' }, format: 'html'
 
         expect(response.status).to eql(302)
@@ -308,8 +306,8 @@ describe TranslationsController do
       end
 
       it "should update the translation if source_fences and fences counts match" do
-        key = FactoryGirl.create(:key, fencers: %w(Mustache Html))
-        translation = FactoryGirl.create(:translation, key: key, source_copy: "test {{hello}} <strong> asda </strong> {{a}}", copy: nil, translated: false, approved: nil)
+        key = FactoryBot.create(:key, fencers: %w(Mustache Html))
+        translation = FactoryBot.create(:translation, key: key, source_copy: "test {{hello}} <strong> asda </strong> {{a}}", copy: nil, translated: false, approved: nil)
         patch :update, project_id: key.project.to_param, key_id: key.to_param, id: translation.to_param, translation: { copy: "teasdst {{hello}} <strong> asdjgf  jha </strong> {{a}}" }, format: 'json'
 
         expect(response.status).to eql(200)
@@ -323,13 +321,13 @@ describe TranslationsController do
       before :each do
         @user.update role: 'reviewer'
 
-        @project = FactoryGirl.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
-        @key = FactoryGirl.create(:key, ready: false, project:@project)
-        @fr_translation    = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr')
-        @fr_CA_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
-        @fr_FR_translation = FactoryGirl.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
-        @fr_to_fr_CA = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
-        @fr_to_fr_FR = FactoryGirl.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
+        @project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
+        @key = FactoryBot.create(:key, ready: false, project:@project)
+        @fr_translation    = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr')
+        @fr_CA_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
+        @fr_FR_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
+        @fr_to_fr_CA = FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA')
+        @fr_to_fr_FR = FactoryBot.create(:locale_association, source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-FR')
         expect(@key.reload).to_not be_ready
       end
 
@@ -363,8 +361,8 @@ describe TranslationsController do
 
   describe "#match" do
     before :each do
-      @project = FactoryGirl.create(:project)
-      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
+      @project = FactoryBot.create(:project)
+      @user = FactoryBot.create(:user, :confirmed, role: 'reviewer')
     end
 
     before :each do
@@ -373,31 +371,31 @@ describe TranslationsController do
                                            %w(fr-CA fr en).map { |l| Locale.from_rfc5646 l }
                                        )
 
-      hello_123 = FactoryGirl.create(:key, project: @project, key: 'hello_123')
-      anotherkey = FactoryGirl.create(:key, project: @project, key: 'anotherkey')
+      hello_123 = FactoryBot.create(:key, project: @project, key: 'hello_123')
+      anotherkey = FactoryBot.create(:key, project: @project, key: 'anotherkey')
 
-      @original_translation = FactoryGirl.create(:translation,
+      @original_translation = FactoryBot.create(:translation,
                                                  source_copy: 'hello123',
                                                  key: hello_123,
                                                  rfc5646_locale: 'fr-CA',
                                                  copy: nil,
                                                  translated: false,
                                                  approved: nil)
-      @same_locale_sc = FactoryGirl.create(:translation,
+      @same_locale_sc = FactoryBot.create(:translation,
                                            source_copy: 'hello123',
                                            key: anotherkey,
                                            rfc5646_locale: 'fr-CA',
                                            copy: 'same_locale_sc',
                                            translated: true,
                                            approved: true)
-      @fallback1_sc = FactoryGirl.create(:translation,
+      @fallback1_sc = FactoryBot.create(:translation,
                                          source_copy: 'hello123',
                                          key: anotherkey,
                                          rfc5646_locale: 'fr',
                                          copy: 'fallback1_sc',
                                          translated: true,
                                          approved: true)
-      @fallback2_sc = FactoryGirl.create(:translation,
+      @fallback2_sc = FactoryBot.create(:translation,
                                          source_copy: 'hello123',
                                          key: anotherkey,
                                          rfc5646_locale: 'en',
@@ -427,10 +425,10 @@ describe TranslationsController do
     it "should 2. respond with the newest Translation with matching locale and source copy (if there are duplicates)" do
       Timecop.freeze(Time.now + 5.hours)
 
-      duplicate_key = FactoryGirl.create(:key,
+      duplicate_key = FactoryBot.create(:key,
                                          project: @project,
                                          key: 'duplicate_key')
-      translation = FactoryGirl.create(:translation,
+      translation = FactoryBot.create(:translation,
                          source_copy: 'hello123',
                          key: duplicate_key,
                          rfc5646_locale: 'fr-CA',
@@ -499,15 +497,15 @@ describe TranslationsController do
 
   describe "#hide_in_search" do
     before :each do
-      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
+      @user = FactoryBot.create(:user, :confirmed, role: 'reviewer')
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @key = FactoryGirl.create(:key,
+      @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @key = FactoryBot.create(:key,
                                 project: @project,
                                 key: 'key',
                                 hidden_in_search: false)
-      @translation = FactoryGirl.create :translation,
+      @translation = FactoryBot.create :translation,
                                         key: @key,
                                         source_copy: 'foo bar 1',
                                         copy: 'something else',
@@ -518,7 +516,7 @@ describe TranslationsController do
     end
 
     it "should reject roles that are below reviewer" do
-      translator_uesr = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      translator_uesr = FactoryBot.create(:user, :confirmed, role: 'translator')
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in translator_uesr
 
@@ -546,15 +544,15 @@ describe TranslationsController do
 
   describe "#show_in_search" do
     before :each do
-      @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
+      @user = FactoryBot.create(:user, :confirmed, role: 'reviewer')
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-      @key = FactoryGirl.create(:key,
+      @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @key = FactoryBot.create(:key,
                                 project: @project,
                                 key: 'key',
                                 hidden_in_search: true)
-      @translation = FactoryGirl.create :translation,
+      @translation = FactoryBot.create :translation,
                                         key: @key,
                                         source_copy: 'foo bar 1',
                                         copy: 'something else',
@@ -565,7 +563,7 @@ describe TranslationsController do
     end
 
     it "should reject roles that are below reviewer" do
-      translator_uesr = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      translator_uesr = FactoryBot.create(:user, :confirmed, role: 'translator')
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in translator_uesr
 
@@ -593,14 +591,14 @@ describe TranslationsController do
 
   describe "#fuzzy_match" do
     before :each do
-      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      @user = FactoryBot.create(:user, :confirmed, role: 'translator')
     end
 
     before :each do
       Translation.destroy_all
 
       reset_elastic_search
-      @translation = FactoryGirl.create :translation,
+      @translation = FactoryBot.create :translation,
                                         source_copy: 'foo bar 1',
                                         copy: 'something else',
                                         approved: true,
@@ -612,7 +610,7 @@ describe TranslationsController do
     end
 
     it "should return potential fuzzy matches" do
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          source_copy: 'foo bar 2',
                          approved: true,
                          copy: 'something else',
@@ -633,7 +631,7 @@ describe TranslationsController do
     end
 
     it "should return potential fuzzy matches in fallback locales" do
-      translation = FactoryGirl.create :translation,
+      translation = FactoryBot.create :translation,
                                        source_copy: 'foo bar 2',
                                        copy: 'something else',
                                        approved: true,
@@ -664,7 +662,7 @@ describe TranslationsController do
     end
 
     it "should search with the param[:source_copy] instead of translation.source_copy if provided" do
-      t = FactoryGirl.create :translation,
+      t = FactoryBot.create :translation,
                          source_copy: 'hello world',
                          approved: true,
                          copy: 'something else',
@@ -687,7 +685,7 @@ describe TranslationsController do
     end
 
     it "should not return matches where translation is not approved" do
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          source_copy: 'foo bar 2',
                          copy: nil,
                          source_rfc5646_locale: 'en',
@@ -709,7 +707,7 @@ describe TranslationsController do
 
     it "should return at most 5 fuzzy matches" do
       (1..10).each do |i|
-        FactoryGirl.create :translation,
+        FactoryBot.create :translation,
                            source_copy: "foo bar #{i}",
                            approved: true,
                            copy: 'something else',
@@ -733,7 +731,7 @@ describe TranslationsController do
 
     it "should sort fuzzy_matches by match_percentage and ensure greater than 70" do
       (10..50).step(10).each do |i|
-        FactoryGirl.create :translation,
+        FactoryBot.create :translation,
                            source_copy: "foo bar #{'a' * i}",
                            approved: true,
                            copy: 'something else',
@@ -778,12 +776,12 @@ describe TranslationsController do
 
     context "when translation key hidden_in_search is true" do
       before :each do
-        @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-        @key = FactoryGirl.create(:key,
+        @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+        @key = FactoryBot.create(:key,
                                   project: @project,
                                   key: 'key',
                                   hidden_in_search: true)
-        @hidden_translation = FactoryGirl.create :translation,
+        @hidden_translation = FactoryBot.create :translation,
                                                  key: @key,
                                                  source_copy: "foo bar 2",
                                                  approved: true,
@@ -814,23 +812,23 @@ describe TranslationsController do
     describe "#update" do
      context "[Commit]" do
         before :each do
-          @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
+          @user = FactoryBot.create(:user, :confirmed, role: 'reviewer')
           @request.env['devise.mapping'] = Devise.mappings[:user]
           sign_in @user
 
-          @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
-          @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project)
-          @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project)
-          @key3 = FactoryGirl.create(:key, key: "thirdkey", project: @project)
+          @project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
+          @key1 = FactoryBot.create(:key, key: "firstkey",  project: @project)
+          @key2 = FactoryBot.create(:key, key: "secondkey", project: @project)
+          @key3 = FactoryBot.create(:key, key: "thirdkey", project: @project)
 
           [@key1, @key2, @key3].each do |key|
             %w(fr es).each do |locale|
-              FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: locale, source_copy: 'fake', copy: nil, approved: nil)
+              FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: locale, source_copy: 'fake', copy: nil, approved: nil)
             end
           end
 
-          @commit1 = FactoryGirl.create(:commit, project: @project)
-          @commit2 = FactoryGirl.create(:commit, project: @project)
+          @commit1 = FactoryBot.create(:commit, project: @project)
+          @commit2 = FactoryBot.create(:commit, project: @project)
 
           @commit1.keys << @key1 << @key2
           @commit2.keys << @key1 << @key2 << @key3
@@ -880,25 +878,25 @@ describe TranslationsController do
 
       context "[Article]" do
         before :each do
-          @user = FactoryGirl.create(:user, :confirmed, role: 'reviewer')
+          @user = FactoryBot.create(:user, :confirmed, role: 'reviewer')
           @request.env['devise.mapping'] = Devise.mappings[:user]
           sign_in @user
 
-          @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
+          @project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
           allow_any_instance_of(Article).to receive(:import!) # prevent auto import
-          @article = FactoryGirl.create(:article,
+          @article = FactoryBot.create(:article,
                                         project: @project,
                                         sections_hash: {"main" => "hello"},
                                         last_import_requested_at: 2.hours.ago,
                                         last_import_finished_at: 1.hour.ago)
-          @section = FactoryGirl.create(:section, article: @article)
+          @section = FactoryBot.create(:section, article: @article)
 
-          @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project, section: @section, index_in_section: 0)
-          @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project, section: @section, index_in_section: 1)
+          @key1 = FactoryBot.create(:key, key: "firstkey",  project: @project, section: @section, index_in_section: 0)
+          @key2 = FactoryBot.create(:key, key: "secondkey", project: @project, section: @section, index_in_section: 1)
 
           [@key1, @key2].each do |key|
             %w(fr es).each do |locale|
-              FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: locale, source_copy: 'fake', copy: nil, approved: nil)
+              FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: locale, source_copy: 'fake', copy: nil, approved: nil)
             end
           end
 

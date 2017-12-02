@@ -14,14 +14,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Localizer::Android do
+RSpec.describe Localizer::Android do
   before :each do
-    @project = FactoryGirl.create(:project)
+    @project = FactoryBot.create(:project)
     @en      = Locale.from_rfc5646('en-US')
     @de      = Locale.from_rfc5646('de-DE')
-    @commit  = FactoryGirl.create(:commit, project: @project)
+    @commit  = FactoryBot.create(:commit, project: @project)
 
     {
         '/java/basic-hdpi/strings.xml:string'              => 'Hallo!',
@@ -40,8 +40,8 @@ describe Localizer::Android do
         '/java/basic-hdpi/strings.xml:plural[one]'         => 'Welt',
         '/java/basic-hdpi/strings.xml:plural[other]'       => 'Welten'
     }.each do |key, value|
-      key_obj = FactoryGirl.create(:key, key: key, project: @project, source: '/java/basic-hdpi/strings.xml')
-      FactoryGirl.create :translation, key: key_obj, copy: value, source_locale: @en, locale: @de
+      key_obj = FactoryBot.create(:key, key: key, project: @project, source: '/java/basic-hdpi/strings.xml')
+      FactoryBot.create :translation, key: key_obj, copy: value, source_locale: @en, locale: @de
       @commit.keys << key_obj
     end
   end

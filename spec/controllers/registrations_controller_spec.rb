@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe RegistrationsController do
+RSpec.describe RegistrationsController do
   before(:each) { @request.env["devise.mapping"] = Devise.mappings[:user] }
 
   describe '#create' do

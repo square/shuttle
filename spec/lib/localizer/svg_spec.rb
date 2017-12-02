@@ -14,33 +14,33 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Localizer::Svg do
+RSpec.describe Localizer::Svg do
   before :each do
-    @project = FactoryGirl.create(:project)
+    @project = FactoryBot.create(:project)
     @en      = Locale.from_rfc5646('en-US')
     @de      = Locale.from_rfc5646('de-DE')
-    @commit  = FactoryGirl.create(:commit, project: @project)
+    @commit  = FactoryBot.create(:commit, project: @project)
 
-    key1 = FactoryGirl.create(:key,
+    key1 = FactoryBot.create(:key,
                               project:      @project,
                               key:          'file-en-US.svg:/*/*[1]',
                               original_key: '/*/*[1]',
                               source:       'file-en-US.svg')
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           key1,
                        source_locale: @en,
                        locale:        @de,
                        source_copy:   "Hello, world!",
                        copy:          "Hallo, Welt!"
 
-    key2 = FactoryGirl.create(:key,
+    key2 = FactoryBot.create(:key,
                               project:      @project,
                               key:          'file-en-US.svg:/*/*[2]/*',
                               original_key: '/*/*[2]/*',
                               source:       'file-en-US.svg')
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           key2,
                        source_locale: @en,
                        locale:        @de,

@@ -12,11 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe CommitRecalculator do
+RSpec.describe CommitRecalculator do
   it "should recalculate commit readiness correctly" do
-    commit = FactoryGirl.create(:commit, ready: false)
+    commit = FactoryBot.create(:commit, ready: false)
     CommitRecalculator.new.perform(commit.id)
     expect(commit.reload).to be_ready
   end

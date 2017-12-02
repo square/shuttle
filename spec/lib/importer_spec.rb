@@ -12,21 +12,21 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Importer::Base do
+RSpec.describe Importer::Base do
   describe "#base_rfc5646_locale" do
     it "returns blob's project's base rfc5646 locale" do
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-TR')
-      blob = FactoryGirl.create(:fake_blob, project: project)
-      commit = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project, base_rfc5646_locale: 'en-TR')
+      blob = FactoryBot.create(:fake_blob, project: project)
+      commit = FactoryBot.create(:commit, project: project)
       expect(Importer::Android.new(blob, commit).base_rfc5646_locale).to eql('en-TR')
     end
   end
 
   describe "[importing strings]" do
     before :each do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     targeted_rfc5646_locales: {'en-US' => true, 'de-DE' => true})
       @commit  = @project.commit!('HEAD', skip_import: true)

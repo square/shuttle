@@ -12,15 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe CommitKeyCreator do
+RSpec.describe CommitKeyCreator do
   describe "#perform" do
     context "[rescue Git::CommitNotFoundError]" do
       it "adds import errors to commit in redis when key creator fails due to a Git::CommitNotFoundError" do
-        project = FactoryGirl.create(:project)
-        commit = FactoryGirl.create(:commit, project: project)
-        blob = FactoryGirl.create(:blob, sha: "abc123", project: project)
+        project = FactoryBot.create(:project)
+        commit = FactoryBot.create(:commit, project: project)
+        blob = FactoryBot.create(:blob, sha: "abc123", project: project)
 
         expect(CommitKeyCreator).to receive(:update_key_associations).and_raise(Git::CommitNotFoundError, "abc123")
         expect { CommitKeyCreator.new.perform(blob.id, commit.id, "yaml", []) }.to_not raise_error

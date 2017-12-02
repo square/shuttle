@@ -12,18 +12,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe LocaleProjectsShowPresenter do
+RSpec.describe LocaleProjectsShowPresenter do
   before :each do
     allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
   end
 
   describe "#selectable_commits" do
     it "returns selectable Commits" do
-      project = FactoryGirl.create(:project)
-      commit1 = FactoryGirl.create(:commit, revision: 'abcd', message: "hello", project: project)
-      commit2 = FactoryGirl.create(:commit, revision: '1234', message: "world", project: project)
+      project = FactoryBot.create(:project)
+      commit1 = FactoryBot.create(:commit, revision: 'abcd', message: "hello", project: project)
+      commit2 = FactoryBot.create(:commit, revision: '1234', message: "world", project: project)
 
       presenter = LocaleProjectsShowPresenter.new(project, {})
       expect(presenter.selectable_commits).to eql( [["ALL COMMITS", nil], ["1234: world", "1234"], ["abcd: hello", "abcd"]] )
@@ -32,7 +32,7 @@ describe LocaleProjectsShowPresenter do
 
   describe "#selected_commit" do
     it "returns the selected Commit if there is one" do
-      commit = FactoryGirl.create(:commit, revision: 'abcd')
+      commit = FactoryBot.create(:commit, revision: 'abcd')
       presenter = LocaleProjectsShowPresenter.new(commit.project, {commit: 'abcd'})
       expect(presenter.selected_commit).to eql(commit)
     end
@@ -40,7 +40,7 @@ describe LocaleProjectsShowPresenter do
 
   describe "#selected_article" do
     it "returns the selected Article if there is one" do
-      article = FactoryGirl.create(:article, name: 'abcd')
+      article = FactoryBot.create(:article, name: 'abcd')
       presenter = LocaleProjectsShowPresenter.new(article.project, { article_id: article.id })
       expect(presenter.selected_article).to eql(article)
     end
@@ -48,11 +48,11 @@ describe LocaleProjectsShowPresenter do
 
   describe "#selectable_sections" do
     before :each do
-      @project = FactoryGirl.create(:project)
-      @article1 = FactoryGirl.create(:article, name: 'article1', project: @project)
-      @section1 = FactoryGirl.create(:section, name: 'section1', article: @article1)
-      @article2 = FactoryGirl.create(:article, name: 'article2', project: @project)
-      @section2 = FactoryGirl.create(:section, name: 'section2', article: @article2)
+      @project = FactoryBot.create(:project)
+      @article1 = FactoryBot.create(:article, name: 'article1', project: @project)
+      @section1 = FactoryBot.create(:section, name: 'section1', article: @article1)
+      @article2 = FactoryBot.create(:article, name: 'article2', project: @project)
+      @section2 = FactoryBot.create(:section, name: 'section2', article: @article2)
     end
 
     it "returns selectable Sections under the Article if an Article is selected" do
@@ -74,11 +74,11 @@ describe LocaleProjectsShowPresenter do
 
   describe "#selected_section" do
     before :each do
-      @project = FactoryGirl.create(:project)
-      @article1 = FactoryGirl.create(:article, name: 'article1', project: @project)
-      @section1 = FactoryGirl.create(:section, name: 'section1', article: @article1)
-      @article2 = FactoryGirl.create(:article, name: 'article2', project: @project)
-      @section2 = FactoryGirl.create(:section, name: 'section2', article: @article2, active: false)
+      @project = FactoryBot.create(:project)
+      @article1 = FactoryBot.create(:article, name: 'article1', project: @project)
+      @section1 = FactoryBot.create(:section, name: 'section1', article: @article1)
+      @article2 = FactoryBot.create(:article, name: 'article2', project: @project)
+      @section2 = FactoryBot.create(:section, name: 'section2', article: @article2, active: false)
     end
 
     it "returns selected Section" do

@@ -12,10 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 require 'rake'
 
-describe 'autotranslate:en_gb' do
+RSpec.describe 'autotranslate:en_gb' do
   subject { Rake::Task['autotranslate:en_gb'].invoke }
 
   before :all do
@@ -24,8 +24,8 @@ describe 'autotranslate:en_gb' do
   end
 
   it 'autotranslates untranslated en-GB translations' do
-    en_gb_translation = FactoryGirl.create(:translation, rfc5646_locale: 'en-GB', source_copy: 'The color of love', copy: nil)
-    en_ca_translation = FactoryGirl.create(:translation, rfc5646_locale: 'en-CA', copy: nil)
+    en_gb_translation = FactoryBot.create(:translation, rfc5646_locale: 'en-GB', source_copy: 'The color of love', copy: nil)
+    en_ca_translation = FactoryBot.create(:translation, rfc5646_locale: 'en-CA', copy: nil)
 
     subject
 

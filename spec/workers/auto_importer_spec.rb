@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe AutoImporter do
+RSpec.describe AutoImporter do
   describe "#perform" do
     context "[watched branches]" do
       it "calls ProjectAutoImporter on the projects with watched_branches, removes the watched branch if it doesn't exist" do
-        project1 = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)), repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
-        project2 = FactoryGirl.create(:project, watched_branches: [])
+        project1 = FactoryBot.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)), repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
+        project2 = FactoryBot.create(:project, watched_branches: [])
 
         expect(project1.watched_branches).to eql(%w(master non_existent_branch))
         expect(project2.watched_branches).to be_blank
@@ -34,8 +34,8 @@ describe AutoImporter do
     end
 
     it "calls ProjectAutoImporter for projects with a repository_url, and doesn't for projects without a repository_url" do
-      project_with_repo = FactoryGirl.create(:project, repository_url: "test", watched_branches: %w(master))
-      project_without_repo = FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
+      project_with_repo = FactoryBot.create(:project, repository_url: "test", watched_branches: %w(master))
+      project_without_repo = FactoryBot.create(:project, repository_url: nil, watched_branches: %w(master))
       expect(AutoImporter::ProjectAutoImporter).to receive(:perform_once).once.with(project_with_repo.id)
       expect(AutoImporter::ProjectAutoImporter).to_not receive(:perform_once).with(project_without_repo.id)
       expect { AutoImporter.new.perform }.to_not raise_error
@@ -43,12 +43,12 @@ describe AutoImporter do
   end
 end
 
-describe AutoImporter::ProjectAutoImporter do
+RSpec.describe AutoImporter::ProjectAutoImporter do
   describe "#perform" do
     context "[watched branches]" do
       context "[rescue Git::CommitNotFoundError]" do
         it "removes a watched branch if the branch doesn't exist anymore" do
-          project = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)), repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
+          project = FactoryBot.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)), repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
 
           expect(project.watched_branches).to eql(%w(master non_existent_branch))
           expect { AutoImporter::ProjectAutoImporter.new.perform(project.id) }.to_not raise_error
@@ -59,13 +59,13 @@ describe AutoImporter::ProjectAutoImporter do
 
     it "does nothing if project doesn't have a repository_url" do
       allow_any_instance_of(Project).to receive(:commit!).and_raise("This should not have been called")
-      project = FactoryGirl.create(:project, repository_url: nil, watched_branches: %w(master))
+      project = FactoryBot.create(:project, repository_url: nil, watched_branches: %w(master))
       AutoImporter::ProjectAutoImporter.new.perform(project.id)
     end
 
     it "does nothing if project doesn't have any watched_branches" do
       allow_any_instance_of(Project).to receive(:commit!).and_raise("This should not have been called")
-      project = FactoryGirl.create(:project, watched_branches: %w())
+      project = FactoryBot.create(:project, watched_branches: %w())
       AutoImporter::ProjectAutoImporter.new.perform(project.id)
     end
   end

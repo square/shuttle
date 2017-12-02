@@ -12,16 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe CommitImporter do
+RSpec.describe CommitImporter do
   context "[unit-tests]" do
     describe "#perform" do
       context "[rescue Git::CommitNotFoundError]" do
         it "adds import errors to commit when commit importer fails due to a Git::CommitNotFoundError" do
           allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_return(nil)
-          project = FactoryGirl.create(:project)
-          commit = FactoryGirl.create(:commit, revision: "abc123", project: project)
+          project = FactoryBot.create(:project)
+          commit  = FactoryBot.create(:commit, revision: "abc123", project: project)
 
           expect { CommitImporter.new.perform(commit.id) }.to_not raise_error
           expect(commit.reload.import_errors).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in CommitImporter for commit_id #{commit.id})"]])
@@ -45,7 +45,7 @@ describe CommitImporter do
         end
 
         before :each do
-          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
+          @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
         end
 
         it "records all import errors and sends an email after the import if errors occured during the import (such as in BlobImporter or CommitKeyCreator)" do
@@ -54,18 +54,18 @@ describe CommitImporter do
           allow_any_instance_of(Commit).to receive(:skip_key?).with("how_are_you").and_raise(Git::CommitNotFoundError, "fake_sha") # fake a CommitNotFoundError error in CommitKeyCreator failure
 
           ActionMailer::Base.deliveries.clear
-          commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
-          blob_not_found = commit.blobs.with_sha("88e5b52732c23a4e33471d91cf2281e62021512a").first
+          commit                          = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
+          blob_not_found                  = commit.blobs.with_sha("88e5b52732c23a4e33471d91cf2281e62021512a").first
           blob_for_which_commit_not_found = commit.blobs.with_sha("b80d7482dba100beb55e65e82c5edb28589fa045").first
 
-          expected_errors = [["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"],
+          expected_errors = [["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
                              ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob_id #{blob_not_found.id})"],
                              ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in CommitKeyCreator for commit_id #{commit.id} and blob_id #{blob_for_which_commit_not_found.id})"],
-                             ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
-                             ["ExecJS::RuntimeError", "SyntaxError: Unexpected identifier (in /ember-broken/en-US.js)"]]
+                             ["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"],
+                             ["ExecJS::RuntimeError", "Exception: SyntaxError (in /ember-broken/en-US.js)"]]
 
           CommitImporter::Finisher.new.on_success true, 'commit_id' => commit.id
-          expect(commit.reload.import_errors.sort).to eql(expected_errors.sort)
+          expect(commit.reload.import_errors).to match_array(expected_errors)
           expect_to_send_import_errors_email(expected_errors)
         end
 
@@ -73,7 +73,7 @@ describe CommitImporter do
           allow_any_instance_of(Commit).to receive(:commit!).and_raise(Git::CommitNotFoundError, "e5f5704af3c1f84cf42c4db46dcfebe8ab842bde") # fake a Git::CommitNotFoundError in CommitImporter
 
           ActionMailer::Base.deliveries.clear
-          commit  = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
+          commit = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
 
           expected_errors = [["Git::CommitNotFoundError", "Commit not found in git repo: e5f5704af3c1f84cf42c4db46dcfebe8ab842bde (failed in CommitImporter for commit_id #{commit.id})"]]
           CommitImporter::Finisher.new.on_success true, 'commit_id' => commit.id
@@ -85,14 +85,14 @@ describe CommitImporter do
   end
 end
 
-describe CommitImporter::Finisher do
+RSpec.describe CommitImporter::Finisher do
   describe "#on_success" do
     before :each do
-      @project = FactoryGirl.create(:project, :light)
-      @commit = FactoryGirl.create(:commit, project: @project, loading: true)
-      @key = FactoryGirl.create(:key, project: @project)
+      @project = FactoryBot.create(:project, :light)
+      @commit  = FactoryBot.create(:commit, project: @project, loading: true)
+      @key     = FactoryBot.create(:key, project: @project)
       @commit.keys << @key
-      @translation = FactoryGirl.create(:translation, key: @key, copy: "test")
+      @translation = FactoryBot.create(:translation, key: @key, copy: "test")
     end
 
     it "sets loading to false and sets ready to true if all translations are finished" do

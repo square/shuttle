@@ -12,21 +12,21 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Blob do
+RSpec.describe Blob do
   before :each do
-    @project = FactoryGirl.create(:project)
+    @project = FactoryBot.create(:project)
     @repo = instance_double('Rugged::Repository')
-    @blob = FactoryGirl.create(:blob, sha: 'abc123', project: @project)
-    @commit = FactoryGirl.create(:commit, project: @project)
+    @blob = FactoryBot.create(:blob, sha: 'abc123', project: @project)
+    @commit = FactoryBot.create(:commit, project: @project)
   end
 
   describe "#import_strings" do
     it "should call #import on an importer subclass" do
       expect(@blob).to receive(:blob!).and_return(double(Rugged::Blob))
-      imp      = Importer::Base.implementations
-      instance = double(imp.to_s, :skip? => false)
+      imp      = Importer::Base.implementations.first
+      instance = double(imp.to_s, skip?: false)
       expect(imp).to receive(:new).once.with(@blob, @commit).and_return(instance)
       expect(instance).to receive(:import).once
       @blob.import_strings imp, @commit
@@ -51,8 +51,8 @@ describe Blob do
 
   describe "#blob" do
     it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
-      project = FactoryGirl.create(:project, repository_url: nil)
-      blob = FactoryGirl.create(:blob, project: project)
+      project = FactoryBot.create(:project, repository_url: nil)
+      blob = FactoryBot.create(:blob, project: project)
       expect { blob.blob }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
 
@@ -91,8 +91,8 @@ describe Blob do
     end
 
     it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
-      project = FactoryGirl.create(:project, repository_url: nil)
-      blob = FactoryGirl.create(:blob, project: project)
+      project = FactoryBot.create(:project, repository_url: nil)
+      blob = FactoryBot.create(:blob, project: project)
       expect { blob.blob }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
   end

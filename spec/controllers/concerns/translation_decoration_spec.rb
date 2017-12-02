@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe TranslationDecoration do
+RSpec.describe TranslationDecoration do
   before :all do
     class TranslationDecorationTester
       include TranslationDecoration
@@ -23,9 +23,9 @@ describe TranslationDecoration do
 
   before :each do
     @locale_association = LocaleAssociation.create(source_rfc5646_locale: 'fr', target_rfc5646_locale: 'fr-CA', checked: false, uncheck_disabled: false)
-    @project = FactoryGirl.create(:project, disable_locale_association_checkbox_settings: false)
-    key = FactoryGirl.create(:key, project: @project)
-    @translation = FactoryGirl.create(:translation, key: key, rfc5646_locale: 'fr-CA')
+    @project = FactoryBot.create(:project, disable_locale_association_checkbox_settings: false)
+    key = FactoryBot.create(:key, project: @project)
+    @translation = FactoryBot.create(:translation, key: key, rfc5646_locale: 'fr-CA')
   end
 
   describe "#locale_association_checked?" do

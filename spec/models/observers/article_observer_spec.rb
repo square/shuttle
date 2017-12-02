@@ -12,30 +12,30 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Article do
+RSpec.describe Article do
   context "[import!]" do
     it "triggers an import after creation" do
-      article = FactoryGirl.build(:article)
+      article = FactoryBot.build(:article)
       expect(article).to receive(:import!).once
       article.save!
     end
 
     it "triggers an import if sections_hash changes; doesn't force Article's sections to reimport" do
-      article = FactoryGirl.create(:article, sections_hash: {"main" => "hello"})
+      article = FactoryBot.create(:article, sections_hash: {"main" => "hello"})
       expect(article.reload).to receive(:import!).once.with(false)
       article.update!(sections_hash: {"main" => "hi"})
     end
 
     it "triggers an import if targeted_rfc5646_locales changes; forces Article's sections to reimport" do
-      article = FactoryGirl.create(:article, targeted_rfc5646_locales: {'en'=>true})
+      article = FactoryBot.create(:article, targeted_rfc5646_locales: {'en'=>true})
       expect(article.reload).to receive(:import!).once.with(true)
       article.update!(targeted_rfc5646_locales: {'es'=>true})
     end
 
     it "doesn't trigger an import if other fields such as description or email change" do
-      article = FactoryGirl.create(:article, description: "old description", email: "old@example.com")
+      article = FactoryBot.create(:article, description: "old description", email: "old@example.com")
       expect(article.reload).to_not receive(:import!)
       article.update!(description: "new description", email: "new@example.com")
     end

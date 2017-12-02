@@ -14,7 +14,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :source_glossary_entry do
     source_rfc5646_locale 'en'
     source_copy "Glossary entry"

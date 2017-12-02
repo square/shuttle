@@ -12,15 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ScreenshotsController do
-  let(:monitor)         { FactoryGirl.create(:user, :confirmed, role: 'monitor') }
-  let(:translator)      { FactoryGirl.create(:user, :confirmed, role: 'translator') }
-  let(:reviewer)        { FactoryGirl.create(:user, :confirmed, role: 'reviewer') }
-  let(:commit)          { FactoryGirl.create(:commit) }
-  let(:screenshot)      { FactoryGirl.attributes_for :screenshot }
-  let(:bad_screenshot)  { FactoryGirl.attributes_for :screenshot, image: File.new(Rails.root.join('spec', 'fixtures', 'test.txt')) }
+RSpec.describe ScreenshotsController do
+  let(:monitor)         { FactoryBot.create(:user, :confirmed, role: 'monitor') }
+  let(:translator)      { FactoryBot.create(:user, :confirmed, role: 'translator') }
+  let(:reviewer)        { FactoryBot.create(:user, :confirmed, role: 'reviewer') }
+  let(:commit)          { FactoryBot.create(:commit) }
+  let(:screenshot)      { FactoryBot.attributes_for :screenshot }
+  let(:bad_screenshot)  { FactoryBot.attributes_for :screenshot, image: File.new(Rails.root.join('spec', 'fixtures', 'test.txt')) }
 
   describe 'POST #create' do
     context 'is a monitor' do

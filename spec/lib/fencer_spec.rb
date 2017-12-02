@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer do
+RSpec.describe Fencer do
   describe ".multifence" do
     it "should remove invalid fences overlapped by valid fences" do
       expect(Fencer.multifence(%w(Erb Html), "<%= 'foo <b' %> b<%=a%>r <%= 'bar >' %>.")).to eql(

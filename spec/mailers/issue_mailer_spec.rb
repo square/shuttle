@@ -14,13 +14,13 @@
 
 require "spec_helper"
 
-describe IssueMailer do
+RSpec.describe IssueMailer do
   context "issue_created" do
     it "sends an email notifying people that issue was created" do
-      user = FactoryGirl.create(:user, first_name: "Test", last_name: "User")
-      issue = FactoryGirl.create(:issue, user: user, subscribed_emails: "a@example.com, b@example.com  ,   , a@example.com", summary: "my summary", kind: 1)
+      user = FactoryBot.create(:user, first_name: "Test", last_name: "User")
+      issue = FactoryBot.create(:issue, user: user, subscribed_emails: "a@example.com, b@example.com  ,   , a@example.com", summary: "my summary", kind: 1)
       ActionMailer::Base.deliveries.clear
-      IssueMailer.issue_created(issue).deliver
+      IssueMailer.issue_created(issue).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(1)
       mail = ActionMailer::Base.deliveries.first
       expect(mail.to).to eql(['a@example.com', 'b@example.com'])
@@ -30,17 +30,17 @@ describe IssueMailer do
     end
 
     it "doesn't send an email if nobody is subscribed to the issue" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: "")
+      issue = FactoryBot.create(:issue, subscribed_emails: "")
       ActionMailer::Base.deliveries.clear
-      IssueMailer.issue_created(issue).deliver
+      IssueMailer.issue_created(issue).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
   end
 
   context "issue_updated" do
     it "sends an email notifying people that issue was updated" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: "a@example.com, b@example.com", summary: "my summary", kind: 1)
-      user = FactoryGirl.create(:user, first_name: "Test", last_name: "User")
+      issue = FactoryBot.create(:issue, subscribed_emails: "a@example.com, b@example.com", summary: "my summary", kind: 1)
+      user = FactoryBot.create(:user, first_name: "Test", last_name: "User")
       ActionMailer::Base.deliveries.clear
       issue.update!(updater: user, status: Issue::Status::IN_PROGRESS, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com, c@test.com")
       expect(ActionMailer::Base.deliveries.size).to eql(1)
@@ -54,9 +54,9 @@ describe IssueMailer do
     end
 
     it "doesn't send an email if nobody is subscribed to the issue" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: "")
+      issue = FactoryBot.create(:issue, subscribed_emails: "")
       ActionMailer::Base.deliveries.clear
-      IssueMailer.issue_updated(issue).deliver
+      IssueMailer.issue_updated(issue).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
   end

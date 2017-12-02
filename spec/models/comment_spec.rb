@@ -12,18 +12,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Comment do
+RSpec.describe Comment do
   context "[validations]" do
     before :each do
-      @user = FactoryGirl.create(:user)
-      @translation = FactoryGirl.create(:translation)
-      @issue = FactoryGirl.create(:issue, user: @user, translation: @translation)
+      @user = FactoryBot.create(:user)
+      @translation = FactoryBot.create(:translation)
+      @issue = FactoryBot.create(:issue, user: @user, translation: @translation)
     end
 
     before(:each) do
-      @comment = FactoryGirl.build(:comment, user: @user, issue: @issue)
+      @comment = FactoryBot.build(:comment, user: @user, issue: @issue)
     end
 
     it "should validate user on create, should have a nil user_nil if user is deleted and should not validate user on update" do

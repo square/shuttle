@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer::Erb do
+RSpec.describe Fencer::Erb do
   describe ".fence" do
     it "should fence out ERb escapes" do
       expect(Fencer::Erb.fence('An <%= erb %> escape <%another%>.')).

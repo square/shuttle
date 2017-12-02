@@ -14,12 +14,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe API::V1::ArticlesController do
-  let(:project) { FactoryGirl.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
-  let(:monitor_user) { FactoryGirl.create(:user, :confirmed, role: 'monitor') }
-  let(:reviewer_user) { FactoryGirl.create(:user, :confirmed, role: 'reviewer') }
+RSpec.describe API::V1::ArticlesController do
+  let(:project) { FactoryBot.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
+  let(:monitor_user) { FactoryBot.create(:user, :confirmed, role: 'monitor') }
+  let(:reviewer_user) { FactoryBot.create(:user, :confirmed, role: 'reviewer') }
 
   def sign_in_monitor_user
     request.env['devise.mapping'] = Devise.mappings[:user]
@@ -31,7 +31,7 @@ describe API::V1::ArticlesController do
     sign_in reviewer_user
   end
 
-  shared_examples_for "api-or-session-authenticateable-and-filters" do |options={}|
+  RSpec.shared_examples_for "api-or-session-authenticateable-and-filters" do |options={}|
     options = { runs_find_article_filter: true, accepts_json_request: true, accepts_html_request: true }.merge(options)
 
     context "[format=JSON]" do
@@ -133,12 +133,12 @@ describe API::V1::ArticlesController do
 
     it "retrieves all Articles in the project, but not the Articles in other projects" do
       allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
-      project = FactoryGirl.create(:project, repository_url: nil)
-      article1 = FactoryGirl.create(:article, project: project)
-      article2 = FactoryGirl.create(:article, project: project)
+      project = FactoryBot.create(:project, repository_url: nil)
+      article1 = FactoryBot.create(:article, project: project)
+      article2 = FactoryBot.create(:article, project: project)
       article2.update! ready: true
 
-      2.times { FactoryGirl.create(:article) }
+      2.times { FactoryBot.create(:article) }
 
       get :index, project_id: project.id, api_token: project.api_token, format: :json
 
@@ -208,7 +208,7 @@ describe API::V1::ArticlesController do
     end
 
     it "doesn't create a Article in a Project with a duplicate key name" do
-      FactoryGirl.create(:article, project: project, name: "testname", sections_hash: {"title" => "<p>a</p><p>b</p>"})
+      FactoryBot.create(:article, project: project, name: "testname", sections_hash: {"title" => "<p>a</p><p>b</p>"})
       post :create, project_id: project.id, api_token: project.api_token, article: { name: "testname", sections_hash: {"title" => "<p>a</p><p>b</p>"}}, format: :json
       expect(response.status).to eql(400)
       expect(Article.count).to eql(1)
@@ -251,7 +251,7 @@ describe API::V1::ArticlesController do
   end
 
   describe "#show" do
-    let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: {"main" => "<p>a</p><p>b</p>"}) }
+    let(:article) { FactoryBot.create(:article, project: project, name: "test", sections_hash: {"main" => "<p>a</p><p>b</p>"}) }
 
     it_behaves_like "api-or-session-authenticateable-and-filters" do
       let(:request_type) { :get }
@@ -269,7 +269,7 @@ describe API::V1::ArticlesController do
   end
 
   describe "#edit" do
-    let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: {"main" => "<p>a</p><p>b</p>"}) }
+    let(:article) { FactoryBot.create(:article, project: project, name: "test", sections_hash: {"main" => "<p>a</p><p>b</p>"}) }
 
     it_behaves_like "api-or-session-authenticateable-and-filters", accepts_json_request: false do
       let(:request_type) { :get }
@@ -279,7 +279,7 @@ describe API::V1::ArticlesController do
   end
 
   describe "#update" do
-    let(:article) { FactoryGirl.create(:article, project: project, name: "test", human_review: true, sections_hash: { "main" => "<p>a</p><p>b</p>", "second" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }).tap(&:reload) }
+    let(:article) { FactoryBot.create(:article, project: project, name: "test", human_review: true, sections_hash: { "main" => "<p>a</p><p>b</p>", "second" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }).tap(&:reload) }
 
     it_behaves_like "api-or-session-authenticateable-and-filters" do
       let(:request_type) { :patch }
@@ -334,7 +334,7 @@ describe API::V1::ArticlesController do
       it "errors if update fails" do
         patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: {}, email: "fake", targeted_rfc5646_locales: {'asdaf-sdfsfs-adas'=> nil}}, format: :json
         expect(response.status).to eql(400)
-        expect(JSON.parse(response.body)).to eql({ "error" => { "errors"=> { "sections_hash" => ["can’t be blank"], "email" => ["invalid"], "targeted_rfc5646_locales" => ["invalid"] } } })
+        expect(JSON.parse(response.body)).to eql({ "error" => {"errors"=>{"sections_hash"=>["can’t be blank"], "email"=>["invalid"], "locale_requirements"=>["invalid"], "targeted_rfc5646_locales"=>["invalid"]}}})
       end
     end
 
@@ -401,7 +401,7 @@ describe API::V1::ArticlesController do
 
   describe "#hide_in_dashboard" do
     before(:each) do
-      @article = FactoryGirl.create(:article, project: project, name: "article 1")
+      @article = FactoryBot.create(:article, project: project, name: "article 1")
     end
 
     it "should not allow monitor user to hide article" do
@@ -423,7 +423,7 @@ describe API::V1::ArticlesController do
 
   describe "#show_in_dashboard" do
     before(:each) do
-      @article = FactoryGirl.create(:article, project: project, name: "article 1", hidden: true)
+      @article = FactoryBot.create(:article, project: project, name: "article 1", hidden: true)
     end
 
     it "should not allow monitor user to re-open hidden article" do
@@ -445,7 +445,7 @@ describe API::V1::ArticlesController do
 
   describe "#manifest" do
     before(:each) { project.update! targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } }
-    let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: { "title" => "<p>hello</p>", "body" => "<p>a</p><p>b</p>" } ) }
+    let(:article) { FactoryBot.create(:article, project: project, name: "test", sections_hash: { "title" => "<p>hello</p>", "body" => "<p>a</p><p>b</p>" } ) }
 
     before do
       ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
@@ -475,7 +475,7 @@ describe API::V1::ArticlesController do
   end
 
   describe "#issue" do
-    let(:article) { FactoryGirl.create(:article, project: project) }
+    let(:article) { FactoryBot.create(:article, project: project) }
 
     it_behaves_like "api-or-session-authenticateable-and-filters" do
       let(:request_type) { :get }
@@ -486,8 +486,8 @@ describe API::V1::ArticlesController do
     it "returns issues and their stats" do
       translation1 = article.translations.first
       translation2 = article.translations.last
-      FactoryGirl.create(:issue, translation: translation1)
-      FactoryGirl.create(:issue, translation: translation2)
+      FactoryBot.create(:issue, translation: translation1)
+      FactoryBot.create(:issue, translation: translation2)
 
       get :issues, project_id: project.id, api_token: project.api_token, name: article.name, format: :json
       expect(response.status).to eql(200)
@@ -509,9 +509,9 @@ describe API::V1::ArticlesController do
     end
 
     it "doesn't return issues of inactive keys" do
-      key = FactoryGirl.create(:key, section: article.sections.last, index_in_section: nil, project: article.project)
-      translation = FactoryGirl.create(:translation, key: key)
-      FactoryGirl.create(:issue, translation: translation)
+      key = FactoryBot.create(:key, section: article.sections.last, index_in_section: nil, project: article.project)
+      translation = FactoryBot.create(:translation, key: key)
+      FactoryBot.create(:issue, translation: translation)
 
       get :issues, project_id: project.id, api_token: project.api_token, name: article.name, format: :json
       expect(response.status).to eql(200)
@@ -565,7 +565,7 @@ describe API::V1::ArticlesController do
   end
 
   describe "#params_for_update" do
-    let(:article) { FactoryGirl.create(:article, project: project, name: "t") }
+    let(:article) { FactoryBot.create(:article, project: project, name: "t") }
 
     it "permits name, sections_hash, description, email, targeted_rfc5646_locales, due_date, priority; but not id, project_id, key or base_rfc5646_locale fields" do
       patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { name: "t2", due_date: "01/13/2015", priority: 1, sections_hash: { "t" => "t" }, description: "t", email: "t@example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true }, id: 300}, format: :json
@@ -614,7 +614,7 @@ describe API::V1::ArticlesController do
     # This is a real life example. sample_article__original.html was copied and pasted from the help center's website. it was shortened to make tests faster
     it "handles creation, update, update, status, manifest, status, manifest requests in that order" do
       Article.delete_all
-      project = FactoryGirl.create(:project, repository_url: nil, targeted_rfc5646_locales: { 'fr' => true } )
+      project = FactoryBot.create(:project, repository_url: nil, targeted_rfc5646_locales: { 'fr' => true } )
 
       # Create
       post :create, project_id: project.id, api_token: project.api_token, article: { name: "support-article", sections_hash: { "title" => "<p>AAA</p><p>BBB</p>", "banner" => "<p>XXX</p><p>YYY</p>", "main" => File.read(Rails.root.join('spec', 'fixtures', 'article_files', 'sample_article__original.html')) } }, format: :json

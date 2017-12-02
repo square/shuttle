@@ -14,22 +14,22 @@
 
 require "spec_helper"
 
-describe CommentMailer do
+RSpec.describe CommentMailer do
   context "[comment_created]" do
     it "doesn't send an email if subscribed_emails list is empty" do
-      comment = FactoryGirl.create(:comment)
+      comment = FactoryBot.create(:comment)
       comment.issue.update! subscribed_emails: []
       ActionMailer::Base.deliveries.clear
-      CommentMailer.comment_created(comment).deliver
+      CommentMailer.comment_created(comment).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
 
     it "sends an email notifying the subscribed people about the new commit" do
-      user = FactoryGirl.create(:user, first_name: "Test", last_name: "User")
-      comment = FactoryGirl.create(:comment, user: user, content: "This is awesome")
+      user = FactoryBot.create(:user, first_name: "Test", last_name: "User")
+      comment = FactoryBot.create(:comment, user: user, content: "This is awesome")
       comment.issue.update! subscribed_emails: ["test1@example.com", "test2@example.com"]
       ActionMailer::Base.deliveries.clear
-      CommentMailer.comment_created(comment).deliver
+      CommentMailer.comment_created(comment).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(1)
       email = ActionMailer::Base.deliveries.first
       expect(email.to).to eql(["test1@example.com", "test2@example.com"])

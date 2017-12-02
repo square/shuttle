@@ -12,16 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe BlobImporter do
+RSpec.describe BlobImporter do
   describe "#perform" do
     context "[rescue Git::BlobNotFoundError]" do
       it "adds import errors to commit in redis when blob importer fails due to a Git::BlobNotFoundError" do
         allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_return(nil)
-        @project = FactoryGirl.create(:project)
-        @commit = FactoryGirl.create(:commit, project: @project)
-        @blob = FactoryGirl.create(:blob, sha: "abc123", project: @project)
+        @project = FactoryBot.create(:project)
+        @commit = FactoryBot.create(:commit, project: @project)
+        @blob = FactoryBot.create(:blob, sha: "abc123", project: @project)
         @commit.blobs << @blob
 
         expect { BlobImporter.new.perform("yaml", @blob.id, @commit.id) }.to_not raise_error

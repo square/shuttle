@@ -12,8 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
-describe StashWebhookPinger do
+require 'rails_helper'
+RSpec.describe StashWebhookPinger do
   include Rails.application.routes.url_helpers
 
   before(:each) do
@@ -30,7 +30,7 @@ describe StashWebhookPinger do
 
     context "on_perform" do
       before(:each) do
-        @commit = FactoryGirl.create(:commit)
+        @commit = FactoryBot.create(:commit)
       end
 
       it "sends an http request to the project stash_webhook_url 10 times if one is defined" do
@@ -73,7 +73,7 @@ describe StashWebhookPinger do
 
     context "on_create" do
       it "sends an http request to the project stash_webhook_url when a commit is first created" do
-        @commit = FactoryGirl.build(:commit, ready: false, loading: true)
+        @commit = FactoryBot.build(:commit, ready: false, loading: true)
         @url = "http://www.example.com"
         @commit.project.stash_webhook_url = @url
         @commit.project.save!
@@ -96,7 +96,7 @@ describe StashWebhookPinger do
 
   context "on_update" do
     before(:each) do
-      @commit = FactoryGirl.build(:commit, ready: false, loading: true)
+      @commit = FactoryBot.build(:commit, ready: false, loading: true)
       @url = "http://www.example.com"
       @commit.project.stash_webhook_url = @url
       @commit.project.save!
@@ -118,8 +118,8 @@ describe StashWebhookPinger do
 
       @commit.loading = false
       # force commit not to be ready
-      @commit.keys << FactoryGirl.create(:key, project: @commit.project)
-      FactoryGirl.create :translation, key: @commit.keys.first, copy: nil
+      @commit.keys << FactoryBot.create(:key, project: @commit.project)
+      FactoryBot.create :translation, key: @commit.keys.first, copy: nil
       @commit.save!
     end
 

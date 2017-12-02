@@ -12,20 +12,20 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ProjectsController do
+RSpec.describe ProjectsController do
   render_views
 
   describe '#create' do
     context "[monitor role]" do
       before :each do
         @request.env['devise.mapping'] = Devise.mappings[:user]
-        @user = FactoryGirl.create(:user, :activated, :monitor)
+        @user = FactoryBot.create(:user, :activated, :monitor)
         sign_in @user
 
         @base_rfc5646_locale = 'en'
-        @project_params = FactoryGirl.attributes_for(:project, :light, base_rfc5646_locale: @base_rfc5646_locale).
+        @project_params = FactoryBot.attributes_for(:project, :light, base_rfc5646_locale: @base_rfc5646_locale).
                             except(:targeted_rfc5646_locales, :validate_repo_connectivity)
       end
 
@@ -40,11 +40,11 @@ describe ProjectsController do
     context "[admin role]" do
       before :each do
         @request.env['devise.mapping'] = Devise.mappings[:user]
-        @user = FactoryGirl.create(:user, :activated, :admin)
+        @user = FactoryBot.create(:user, :activated, :admin)
         sign_in @user
 
         @base_rfc5646_locale = 'en'
-        @project_params = FactoryGirl.attributes_for(:project, :light, base_rfc5646_locale: @base_rfc5646_locale).
+        @project_params = FactoryBot.attributes_for(:project, :light, base_rfc5646_locale: @base_rfc5646_locale).
                             except(:targeted_rfc5646_locales, :validate_repo_connectivity)
       end
 
@@ -62,10 +62,10 @@ describe ProjectsController do
       context "[#{role} role]" do
         before :each do
           @request.env['devise.mapping'] = Devise.mappings[:user]
-          @user = FactoryGirl.create(:user, :activated, role)
+          @user = FactoryBot.create(:user, :activated, role)
           sign_in @user
 
-          @project = FactoryGirl.create(:project, :light, repository_url: nil, name: "test1")
+          @project = FactoryBot.create(:project, :light, repository_url: nil, name: "test1")
         end
 
         it "can update basic attributes such as name" do
@@ -80,10 +80,10 @@ describe ProjectsController do
         context "[#{role} role]" do
           before :each do
             @request.env['devise.mapping'] = Devise.mappings[:user]
-            @user = FactoryGirl.create(:user, :activated, role)
+            @user = FactoryBot.create(:user, :activated, role)
             sign_in @user
 
-            @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
+            @project = FactoryBot.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
           end
 
           it "retains the same targeted rfc5646 locales" do
@@ -96,10 +96,10 @@ describe ProjectsController do
       context "[admin role]" do
         before :each do
           @request.env['devise.mapping'] = Devise.mappings[:user]
-          @user = FactoryGirl.create(:user, :activated, :admin)
+          @user = FactoryBot.create(:user, :activated, :admin)
           sign_in @user
 
-          @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
+          @project = FactoryBot.create(:project, :light, targeted_rfc5646_locales: {'fr'=>true}, base_rfc5646_locale: 'en')
         end
 
         it "updates targeted rfc5646 locales" do
@@ -112,20 +112,20 @@ describe ProjectsController do
     context "[git-based]" do
       before :each do
         @request.env['devise.mapping'] = Devise.mappings[:user]
-        @user = FactoryGirl.create(:user, :activated, :admin)
+        @user = FactoryBot.create(:user, :activated, :admin)
         sign_in @user
 
-        @project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true}, base_rfc5646_locale: 'en')
-        @key1 = FactoryGirl.create(:key, key: "firstkey",  project: @project)
-        @key2 = FactoryGirl.create(:key, key: "secondkey", project: @project)
-        @commit = FactoryGirl.create(:commit, project: @project)
+        @project = FactoryBot.create(:project, :light, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true}, base_rfc5646_locale: 'en')
+        @key1 = FactoryBot.create(:key, key: "firstkey",  project: @project)
+        @key2 = FactoryBot.create(:key, key: "secondkey", project: @project)
+        @commit = FactoryBot.create(:commit, project: @project)
         @commit.keys = [@key1, @key2]
         CommitImporter::Finisher.new.on_success(true, 'commit_id' => @commit.id)
 
         @project.keys.each do |key|
-          FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en', source_copy: 'fake', copy: 'fake', approved: true)
-          FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', source_copy: 'fake', copy: 'fake', approved: true)
-          FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: 'fake', copy: nil, approved: nil)
+          FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en', source_copy: 'fake', copy: 'fake', approved: true)
+          FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', source_copy: 'fake', copy: 'fake', approved: true)
+          FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: 'fake', copy: nil, approved: nil)
           key.recalculate_ready!
           expect(key).to_not be_ready
         end
@@ -171,9 +171,9 @@ describe ProjectsController do
 
   describe '#github_webhook' do
     before :each do
-      @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: [ 'master' ])
+      @project = FactoryBot.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: [ 'master' ])
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, :activated)
+      @user = FactoryBot.create(:user, :activated)
       sign_in @user
       @request.accept = "application/json"
       post :github_webhook, { id: @project.to_param, payload: "{\"ref\":\"refs/head/master\",\"after\":\"HEAD\"}" }
@@ -188,14 +188,14 @@ describe ProjectsController do
 
   describe '#stash_webhook' do
     it "returns 200 if project has a repository_url" do
-      project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       expect(CommitCreator).to receive(:perform_once).once
       post :stash_webhook, { id: project.to_param, sha: "HEAD" }
       expect(response).to be_ok
     end
 
     it "returns 400 if project doesn't have a repository_url" do
-      project = FactoryGirl.create(:project, repository_url: nil)
+      project = FactoryBot.create(:project, repository_url: nil)
       expect(CommitCreator).to_not receive(:perform_once)
       post :stash_webhook, { id: project.to_param, sha: "HEAD" }
       expect(response.status).to eql(400)
@@ -204,9 +204,9 @@ describe ProjectsController do
 
   describe "#setup_mass_copy_translations" do
     before :each do
-      @project = FactoryGirl.create(:project)
+      @project = FactoryBot.create(:project)
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, :confirmed, role: 'admin')
+      @user = FactoryBot.create(:user, :confirmed, role: 'admin')
       sign_in @user
     end
 
@@ -228,19 +228,19 @@ describe ProjectsController do
   describe "#mass_copy_translations" do
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, :confirmed, role: 'admin')
+      @user = FactoryBot.create(:user, :confirmed, role: 'admin')
       sign_in @user
     end
 
     it "doesn't let non-admins access this feature" do
       %w(monitor translator reviewer).each do |role|
         @user.update! role: role
-        expect( post(:mass_copy_translations, { id: FactoryGirl.create(:project).to_param }) ).to redirect_to(root_url)
+        expect( post(:mass_copy_translations, { id: FactoryBot.create(:project).to_param }) ).to redirect_to(root_url)
       end
     end
 
     it "doesn't perform ProjectTranslationsMassCopier and renders the current page again with errors if there is something wrong with the inputed locales" do
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es-US'=>true} )
+      project = FactoryBot.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'es-US'=>true} )
       expect(ProjectTranslationsMassCopier).to_not receive(:perform_once)
       post :mass_copy_translations, { id: project.to_param, from_rfc5646_locale: 'en', to_rfc5646_locale: 'es-US' }
       expect(response).to render_template("setup_mass_copy_translations")
@@ -248,7 +248,7 @@ describe ProjectsController do
     end
 
     it "performs ProjectTranslationsMassCopier which copies all appropriate translations, updates keys and commits readiness states; redirects to the same page with success message" do
-      project = FactoryGirl.create(:project,
+      project = FactoryBot.create(:project,
                                    repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                    base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' => true, 'es-US' => false},
@@ -280,7 +280,7 @@ describe ProjectsController do
     end
 
     it "doesn't override already translated translations" do
-      project = FactoryGirl.create(:project, :light,
+      project = FactoryBot.create(:project, :light,
                                    base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: { 'en-US' => true, 'en-CA' => true})
       project.commit!('fb355bb396eb3cf66e833605c835009d77054b71')

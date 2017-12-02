@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :commit do
     association :project
     sequence(:revision) { rand(16**40).to_s(16).rjust(40, '0') }
@@ -24,7 +24,7 @@ FactoryGirl.define do
     skip_import true
 
     after(:build) do |commit|
-      commit.stub(:set_author)
+      class << commit; def set_author() end; end
     end
 
     trait :errored_during_import do

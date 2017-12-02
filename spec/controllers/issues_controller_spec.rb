@@ -14,18 +14,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe IssuesController do
+RSpec.describe IssuesController do
   render_views
 
-  include Devise::TestHelpers
-
   before :each do
-    @user = FactoryGirl.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "foo@bar.com")
-    @project = FactoryGirl.create(:project)
-    @key = FactoryGirl.create(:key, project: @project)
-    @translation = FactoryGirl.create(:translation, key: @key)
+    @user = FactoryBot.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "foo@bar.com")
+    @project = FactoryBot.create(:project)
+    @key = FactoryBot.create(:key, project: @project)
+    @translation = FactoryBot.create(:translation, key: @key)
     @path_params = { translation_id: @translation.to_param, key_id: @key.to_param, project_id: @project.to_param }
     @request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in @user
@@ -89,7 +87,7 @@ describe IssuesController do
 
   describe "#update" do
     before(:each) do
-      @issue = FactoryGirl.create(:issue, user: @user, translation: @translation)
+      @issue = FactoryBot.create(:issue, user: @user, translation: @translation)
       ActionMailer::Base.deliveries.clear
     end
 
@@ -134,7 +132,7 @@ describe IssuesController do
 
   describe "#resolve" do
     it "resolves the issue, subscribes the current user, and sends an email" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
+      issue = FactoryBot.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
       ActionMailer::Base.deliveries.clear
 
       expect(issue).to_not be_resolved
@@ -149,7 +147,7 @@ describe IssuesController do
 
   describe "#subscribe" do
     it "subscribes the current user to the issue, but doesn't send an email" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
+      issue = FactoryBot.create(:issue, subscribed_emails: ["test@example.com"], translation: @translation)
       ActionMailer::Base.deliveries.clear
 
       xhr :patch, :subscribe, @path_params.merge({ id: issue.id })
@@ -160,7 +158,7 @@ describe IssuesController do
 
   describe "#unsubscribe" do
     it "unsubscribes the current user from the issue and sends an email" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com", "foo@bar.com"], translation: @translation)
+      issue = FactoryBot.create(:issue, subscribed_emails: ["test@example.com", "foo@bar.com"], translation: @translation)
       ActionMailer::Base.deliveries.clear
 
       xhr :patch, :unsubscribe, @path_params.merge({ id: issue.id })

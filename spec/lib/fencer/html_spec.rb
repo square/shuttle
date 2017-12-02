@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer::Html do
+RSpec.describe Fencer::Html do
   describe ".fence" do
     it "should fence out HTML tags" do
       expect(Fencer::Html.fence('String with <token one="two" three-four=five six>two< /token > tokens.')).

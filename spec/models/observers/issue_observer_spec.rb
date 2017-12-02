@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Issue do
+RSpec.describe Issue do
   context "[email notifications]" do
     context "after_create" do
       it "sends an email when an issue is created" do
         expect(IssueMailer).to receive(:issue_created).once.and_call_original
-        issue = FactoryGirl.build(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary", kind: 1)
+        issue = FactoryBot.build(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary", kind: 1)
         ActionMailer::Base.deliveries.clear
         issue.save!
         expect(ActionMailer::Base.deliveries.size).to eql(1)
@@ -29,7 +29,7 @@ describe Issue do
 
     context "after_update" do
       it "sends an email if an issue is updated when skip_email_notifications is not set" do
-        issue = FactoryGirl.create(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary", kind: 1)
+        issue = FactoryBot.create(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary", kind: 1)
         ActionMailer::Base.deliveries.clear
         expect(IssueMailer).to receive(:issue_updated).once.and_call_original
         issue.update!(status: Issue::Status::IN_PROGRESS, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com, c@test.com")
@@ -38,7 +38,7 @@ describe Issue do
       end
 
       it "doesn't send an email if an issue is updated when skip_email_notifications is set" do
-        issue = FactoryGirl.create(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary", kind: 1)
+        issue = FactoryBot.create(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary", kind: 1)
         ActionMailer::Base.deliveries.clear
         expect(IssueMailer).to_not receive(:issue_updated)
         issue.update!(status: Issue::Status::IN_PROGRESS, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com, c@test.com", skip_email_notifications: true)
@@ -46,7 +46,7 @@ describe Issue do
       end
 
       it "should NOT send an email if nothing was changed (other than timestamps)" do
-        issue = FactoryGirl.create(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary")
+        issue = FactoryBot.create(:issue, subscribed_emails: "a@test.com,  b@test.com  ,   , a@test.com", summary: "my summary")
         ActionMailer::Base.deliveries.clear
         expect(IssueMailer).to_not receive(:issue_updated)
         issue.update!(status: issue.status)

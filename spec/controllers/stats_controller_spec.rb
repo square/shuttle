@@ -12,12 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe StatsController do
+RSpec.describe StatsController do
   before do
     Translation.delete_all
-    user = FactoryGirl.create(:user, :activated)
+    user = FactoryBot.create(:user, :activated)
     @request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in user
   end
@@ -25,9 +25,9 @@ describe StatsController do
   describe "#index" do
     context "format: html" do
       before do
-        FactoryGirl.create :daily_metric, date: 5.days.ago
-        FactoryGirl.create :daily_metric, date: 10.days.ago
-        FactoryGirl.create :translation
+        FactoryBot.create :daily_metric, date: 5.days.ago
+        FactoryBot.create :daily_metric, date: 10.days.ago
+        FactoryBot.create :translation
         get :index
       end
 
@@ -79,11 +79,11 @@ describe StatsController do
       before do
         loaded_at = Time.utc(2014, 8, 12)
         created_at = loaded_at - 5.minutes
-        FactoryGirl.create(:commit,
+        FactoryBot.create(:commit,
                            loading: false,
                            created_at: created_at,
                            loaded_at: loaded_at)
-        FactoryGirl.create(:commit, loading: true)
+        FactoryBot.create(:commit, loading: true)
       end
 
       it "responds to format: csv" do

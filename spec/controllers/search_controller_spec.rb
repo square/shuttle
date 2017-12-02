@@ -12,17 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe SearchController do
-  include Devise::TestHelpers
-
+RSpec.describe SearchController do
   describe "#translations" do
     before :each do
       reset_elastic_search
 
       update_date = DateTime.new(2014, 1, 1)
-      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      @user = FactoryBot.create(:user, :confirmed, role: 'translator')
       @start_date = (update_date - 1.day).strftime('%m/%d/%Y')
       @end_date = (update_date + 1.day).strftime('%m/%d/%Y')
 
@@ -33,7 +31,7 @@ describe SearchController do
           other_locale_field = (field == 'copy' ? :source_rfc5646_locale : :rfc5646_locale)
           %w(en ja-JP).each do |locale|
             other_locale = (locale == 'en' ? 'ja-JP' : 'en')
-            FactoryGirl.create :translation,
+            FactoryBot.create :translation,
                                field              => "foo #{term} bar",
                                other_field        => 'something else',
                                locale_field       => locale,
@@ -53,7 +51,7 @@ describe SearchController do
 
     it "should filter by page" do
       (1..50).each do
-        FactoryGirl.create(:translation)
+        FactoryBot.create(:translation)
       end
       sleep(1)
       get :translations, page: '2'
@@ -114,7 +112,7 @@ describe SearchController do
     end
 
     it "should respond with a 422 if the locale is unknown" do
-      user = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      user = FactoryBot.create(:user, :confirmed, role: 'translator')
       sign_in user
       get :translations, query: 'term1', target_locales: 'ja-JP, foobar?'
       expect(response.status).to eql(422)
@@ -124,11 +122,11 @@ describe SearchController do
   describe '#keys' do
     before :each do
       reset_elastic_search
-      @user    = FactoryGirl.create(:user, :confirmed, role: 'translator')
-      @project = FactoryGirl.create(:project)
+      @user    = FactoryBot.create(:user, :confirmed, role: 'translator')
+      @project = FactoryBot.create(:project)
 
-      5.times { |i| FactoryGirl.create :key, project: @project, key: "t1_n#{i}" }
-      5.times { |i| FactoryGirl.create :key, project: @project, key: "t2_n#{i}" }
+      5.times { |i| FactoryBot.create :key, project: @project, key: "t1_n#{i}" }
+      5.times { |i| FactoryBot.create :key, project: @project, key: "t2_n#{i}" }
       regenerate_elastic_search_indexes
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
@@ -145,7 +143,7 @@ describe SearchController do
     end
 
     it "should exlcude hidden key" do
-      FactoryGirl.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
+      FactoryBot.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
       regenerate_elastic_search_indexes
       sleep(2)
 
@@ -156,7 +154,7 @@ describe SearchController do
     end
 
     it "should search for hidden key only" do
-      FactoryGirl.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
+      FactoryBot.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
       regenerate_elastic_search_indexes
       sleep(2)
 
@@ -188,7 +186,7 @@ describe SearchController do
 
     context "[?metadata=true]" do
       it "should return search metadata" do
-        project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: {'en-US' => true, 'aa' => true, 'ja' => false})
+        project = FactoryBot.create(:project, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: {'en-US' => true, 'aa' => true, 'ja' => false})
         get :keys, project_id: project.id, metadata: 'true', format: 'json'
         expect(response.status).to eql(200)
         expect(JSON.parse(response.body)).
@@ -219,14 +217,14 @@ describe SearchController do
     before :each do
       reset_elastic_search
 
-      @user     = FactoryGirl.create(:user, :confirmed, role: "translator")
-      @project1 = FactoryGirl.create(:project)
-      @project2 = FactoryGirl.create(:project)
+      @user     = FactoryBot.create(:user, :confirmed, role: "translator")
+      @project1 = FactoryBot.create(:project)
+      @project2 = FactoryBot.create(:project)
       Commit.delete_all
-      2.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("abcdef")) }
-      2.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("123456")) }
-      1.times { FactoryGirl.create(:commit, project: @project1, revision: finish_sha("abc111")) }
-      1.times { FactoryGirl.create(:commit, project: @project2, revision: finish_sha("abc111")) }
+      2.times { FactoryBot.create(:commit, project: @project1, revision: finish_sha("abcdef")) }
+      2.times { FactoryBot.create(:commit, project: @project1, revision: finish_sha("123456")) }
+      1.times { FactoryBot.create(:commit, project: @project1, revision: finish_sha("abc111")) }
+      1.times { FactoryBot.create(:commit, project: @project2, revision: finish_sha("abc111")) }
 
       regenerate_elastic_search_indexes
     end
@@ -266,13 +264,13 @@ describe SearchController do
   end
 
   describe '#issues' do
-    let!(:issue_user) { FactoryGirl.create(:user, first_name: 'James', last_name: 'Chang') }
+    let!(:issue_user) { FactoryBot.create(:user, first_name: 'James', last_name: 'Chang') }
 
     before(:each) do
-      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      @user = FactoryBot.create(:user, :confirmed, role: 'translator')
 
-      FactoryGirl.create_list(:issue, 20)
-      FactoryGirl.create_list(:issue, 10, user: issue_user)
+      FactoryBot.create_list(:issue, 20)
+      FactoryBot.create_list(:issue, 10, user: issue_user)
 
       sign_in @user
     end

@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :screenshot do
     image { File.new(Rails.root.join('spec', 'fixtures', 'test.png')) }
   end

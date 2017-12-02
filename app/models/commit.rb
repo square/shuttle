@@ -103,7 +103,7 @@ class Commit < ActiveRecord::Base
     indexes :priority, type: 'integer'
     indexes :due_date, type: 'date'
     indexes :created_at, type: 'date'
-    indexes :revision, index: :not_analyzed
+    indexes :revision, index: :not_analyzed, type: 'string'
     indexes :ready, type: 'boolean'
     indexes :exported, type: 'boolean'
   end

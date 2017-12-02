@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Issue do
+RSpec.describe Issue do
   context "[validations]" do
     before :each do
-      @user = FactoryGirl.create(:user)
-      @translation = FactoryGirl.create(:translation)
-      @issue = FactoryGirl.build(:issue, user: @user, translation: @translation)
+      @user = FactoryBot.create(:user)
+      @translation = FactoryBot.create(:translation)
+      @issue = FactoryBot.build(:issue, user: @user, translation: @translation)
     end
 
     context "[priority]" do
@@ -103,16 +103,16 @@ describe Issue do
 
   context "#resolve" do
     it "resolves an issue by setting its status to resolved, does not subscribe the user to the issue" do
-      issue = FactoryGirl.create(:issue, status: Issue::Status::OPEN, subscribed_emails: ["test@example.com"])
-      user = FactoryGirl.create(:user, email: "test2@example.com")
+      issue = FactoryBot.create(:issue, status: Issue::Status::OPEN, subscribed_emails: ["test@example.com"])
+      user = FactoryBot.create(:user, email: "test2@example.com")
       issue.resolve(user)
       expect(issue.reload.status).to eql(Issue::Status::RESOLVED)
       expect(issue.subscribed_emails).to eql(["test@example.com"])
     end
 
     it "resolves an issue by setting its status to resolved; doesn't change subscriptions if the user is already subscribed" do
-      issue = FactoryGirl.create(:issue, status: Issue::Status::OPEN, subscribed_emails: ["test@example.com"])
-      user = FactoryGirl.create(:user, email: "test@example.com")
+      issue = FactoryBot.create(:issue, status: Issue::Status::OPEN, subscribed_emails: ["test@example.com"])
+      user = FactoryBot.create(:user, email: "test@example.com")
       issue.resolve(user)
       expect(issue.reload.status).to eql(Issue::Status::RESOLVED)
       expect(issue.subscribed_emails).to eql(["test@example.com"])
@@ -121,9 +121,9 @@ describe Issue do
 
   context "[subscribed_emails=]" do
     before(:each) do
-      @user = FactoryGirl.create(:user)
-      @translation = FactoryGirl.create(:translation)
-      @issue = FactoryGirl.build(:issue, user: @user, translation: @translation)
+      @user = FactoryBot.create(:user)
+      @translation = FactoryBot.create(:translation)
+      @issue = FactoryBot.build(:issue, user: @user, translation: @translation)
     end
 
     it "should handle nil" do
@@ -165,17 +165,17 @@ describe Issue do
 
   context "#subscribe" do
     before :each do
-      @issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
+      @issue = FactoryBot.create(:issue, subscribed_emails: ["test@example.com"])
     end
 
     it "subscribes a new user's email address" do
-      user = FactoryGirl.create(:user, email: "test2@example.com")
+      user = FactoryBot.create(:user, email: "test2@example.com")
       @issue.subscribe(user)
       expect(@issue.reload.subscribed_emails).to eq(["test@example.com", "test2@example.com"])
     end
 
     it "doesn't change subscribed_emails if the user's email address is already subscribed" do
-      user = FactoryGirl.create(:user, email: "test@example.com")
+      user = FactoryBot.create(:user, email: "test@example.com")
       @issue.subscribe(user)
       expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
     end
@@ -183,17 +183,17 @@ describe Issue do
 
   context "#unsubscribe" do
     before :each do
-      @issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
+      @issue = FactoryBot.create(:issue, subscribed_emails: ["test@example.com"])
     end
 
     it "unsubscribes a user's email address" do
-      user = FactoryGirl.create(:user, email: "test@example.com")
+      user = FactoryBot.create(:user, email: "test@example.com")
       @issue.unsubscribe(user)
       expect(@issue.reload.subscribed_emails).to eq([])
     end
 
     it "doesn't change subscribed_emails if the email address is not in the subscribed list" do
-      user = FactoryGirl.create(:user, email: "test2@example.com")
+      user = FactoryBot.create(:user, email: "test2@example.com")
       @issue.unsubscribe(user)
       expect(@issue.reload.subscribed_emails).to eq(["test@example.com"])
     end
@@ -201,21 +201,21 @@ describe Issue do
 
   context "#subscribed?" do
     it "should return true if the given user's email is in the subscribed_emails list" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
-      user = FactoryGirl.create(:user, email: "test@example.com")
+      issue = FactoryBot.create(:issue, subscribed_emails: ["test@example.com"])
+      user = FactoryBot.create(:user, email: "test@example.com")
       expect(issue.subscribed?(user)).to be_truthy
     end
 
     it "should return false if the given user's email is not in the subscribed_emails list" do
-      issue = FactoryGirl.create(:issue, subscribed_emails: ["other@example.com"])
-      user = FactoryGirl.create(:user, email: "test@example.com")
+      issue = FactoryBot.create(:issue, subscribed_emails: ["other@example.com"])
+      user = FactoryBot.create(:user, email: "test@example.com")
       expect(issue.subscribed?(user)).to be_falsey
     end
   end
 
   context "[hooks]" do
     it "sets status to Open on create" do
-      issue = FactoryGirl.build(:issue, user: nil, translation: nil, status: -1111)
+      issue = FactoryBot.build(:issue, user: nil, translation: nil, status: -1111)
       issue.valid?
       expect(issue.status).to eql(Issue::Status::OPEN)
     end
@@ -225,11 +225,11 @@ describe Issue do
     context "[resolved]" do
       context "#resolved?" do
         it "should be resolved if issue's status is RESOLVED" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::RESOLVED)).to be_resolved
+          expect(FactoryBot.build(:issue, status: Issue::Status::RESOLVED)).to be_resolved
         end
 
         it "should not be resolved if issue's status is OPEN" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::OPEN)).to_not be_resolved
+          expect(FactoryBot.build(:issue, status: Issue::Status::OPEN)).to_not be_resolved
         end
       end
     end
@@ -237,33 +237,33 @@ describe Issue do
     context "[pending]" do
       context "#pending?" do
         it "should be pending for an issue with status OPEN" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::OPEN)).to be_pending
+          expect(FactoryBot.build(:issue, status: Issue::Status::OPEN)).to be_pending
         end
 
         it "should be pending for an issue with status IN PROGRESS" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::IN_PROGRESS)).to be_pending
+          expect(FactoryBot.build(:issue, status: Issue::Status::IN_PROGRESS)).to be_pending
         end
 
         it "should NOT be pending for an issue with status RESOLVED" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::RESOLVED)).to_not be_pending
+          expect(FactoryBot.build(:issue, status: Issue::Status::RESOLVED)).to_not be_pending
         end
 
         it "should NOT be pending for an issue with status ICEBOX" do
-          expect(FactoryGirl.build(:issue, status: Issue::Status::ICEBOX)).to_not be_pending
+          expect(FactoryBot.build(:issue, status: Issue::Status::ICEBOX)).to_not be_pending
         end
       end
 
       context "Issue.pending" do
         it "should return no issues if there are no pending issues" do
-          issue = FactoryGirl.create(:issue)
+          issue = FactoryBot.create(:issue)
           issue.update_attributes(status: Issue::Status::ICEBOX)
           expect(Issue.pending).to be_blank
         end
 
         it "should return pending issues" do
-          issue = FactoryGirl.create(:issue)
+          issue = FactoryBot.create(:issue)
           issue.update_attributes(status: Issue::Status::ICEBOX)
-          pending_issue = FactoryGirl.create(:issue)
+          pending_issue = FactoryBot.create(:issue)
           expect(Issue.pending.to_a).to eql([pending_issue])
         end
       end
@@ -272,12 +272,12 @@ describe Issue do
 
   describe "#long_summary" do
     it "returns kind and summary information in 'kind - summary' format if summary exists" do
-      issue = FactoryGirl.create(:issue, summary: "hello world", kind: 2)
+      issue = FactoryBot.create(:issue, summary: "hello world", kind: 2)
       expect(issue.long_summary).to eql("Typo - hello world")
     end
 
     it "returns kind information unless summary exists" do
-      issue = FactoryGirl.create(:issue, kind: 2, summary: nil)
+      issue = FactoryBot.create(:issue, kind: 2, summary: nil)
       expect(issue.long_summary).to eql("Typo")
     end
   end

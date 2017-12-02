@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe PseudoTranslator do
+RSpec.describe PseudoTranslator do
   context "::supported_rfc5646_locales" do
     it "should all have pseudo" do
       expect(PseudoTranslator.supported_rfc5646_locales.all? { |l| l.match /pseudo/ }).to eq(true)

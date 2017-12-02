@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Locale do
+RSpec.describe Locale do
   describe '.from_rfc5646' do
     it "should recognize a simple locale subtag" do
       locale = Locale.from_rfc5646('de')

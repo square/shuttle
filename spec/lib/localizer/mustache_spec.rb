@@ -14,20 +14,20 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Localizer::Mustache do
+RSpec.describe Localizer::Mustache do
   before :each do
-    @project = FactoryGirl.create(:project)
+    @project = FactoryBot.create(:project)
     @en      = Locale.from_rfc5646('en-US')
     @de      = Locale.from_rfc5646('de-DE')
-    @commit  = FactoryGirl.create(:commit, project: @project)
+    @commit  = FactoryBot.create(:commit, project: @project)
 
-    key = FactoryGirl.create(:key,
+    key = FactoryBot.create(:key,
                              project: @project,
                              key:     '/mustache/example.en-US.mustache',
                              source:  '/mustache/example.en-US.mustache')
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           key,
                        source_locale: @en,
                        locale:        @de,

@@ -30,8 +30,8 @@ class JsonDetailResponder < ActionController::Responder
   end
 
   # @private
-  def api_behavior(error)
-    raise error unless resourceful?
+  def api_behavior
+    raise MissingRenderer.new(format) unless has_renderer?
 
     if get?
       display resource

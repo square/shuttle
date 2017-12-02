@@ -76,9 +76,10 @@ class User < ActiveRecord::Base
 
   extend LocaleField
   locale_field :approved_locales,
-               from:   :approved_rfc5646_locales,
-               reader: ->(values) { values.map { |v| Locale.from_rfc5646 v } },
-               writer: ->(values) { values.map(&:rfc5646) }
+               from:          :approved_rfc5646_locales,
+               reader:        ->(values) { values.map { |v| Locale.from_rfc5646 v } },
+               writer:        ->(values) { values.map(&:rfc5646) },
+               validate_proc: ->(locales) { locales }
 
   validates :first_name, presence: true, length: { minimum: 1, maximum: 100 }
   validates :last_name, presence: true,  length: { minimum: 1, maximum: 100 }

@@ -12,16 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe KeyTranslationCopier do
+RSpec.describe KeyTranslationCopier do
   describe "#perform" do
     before :each do
-      @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en',
+      @project = FactoryBot.create(:project, base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'fr' => true, 'fr-XX' => true, 'fr-YY' => false, 'es-XX' => false })
-      @key = FactoryGirl.create(:key, project: @project, ready: false)
-      @fr_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'fr', copy: 'test', approved: true)
-      @fr_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
+      @key = FactoryBot.create(:key, project: @project, ready: false)
+      @fr_translation    = FactoryBot.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'fr', copy: 'test', approved: true)
+      @fr_xx_translation = FactoryBot.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'fr-XX', copy: nil, approved: nil)
     end
 
     it "copies translation.copy from the given source locale to given target locale" do
@@ -49,8 +49,8 @@ describe KeyTranslationCopier do
     end
 
     it "doesn't copy to base Translation" do
-      en_translation    = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en',    copy: nil,          approved: nil)
-      en_xx_translation = FactoryGirl.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX', copy: 'helloworld', approved: true)
+      en_translation    = FactoryBot.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en',    copy: nil,          approved: nil)
+      en_xx_translation = FactoryBot.create(:translation, key: @key, source_copy: "fake", source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX', copy: 'helloworld', approved: true)
       KeyTranslationCopier.new.perform(@key.id, 'en-XX', 'en')
       expect(en_translation.reload.copy).to be_nil
       expect(en_translation.approved).to be_nil
@@ -67,14 +67,14 @@ describe KeyTranslationCopier do
     end
 
     it "ignores from translations in other source locales than the project" do
-      FactoryGirl.create(:translation, key: @key, source_rfc5646_locale: 'en-ZZ', rfc5646_locale: 'fr-YY', copy: 'test', approved: true)
+      FactoryBot.create(:translation, key: @key, source_rfc5646_locale: 'en-ZZ', rfc5646_locale: 'fr-YY', copy: 'test', approved: true)
       KeyTranslationCopier.new.perform(@key.id, 'fr-YY', 'fr-XX')
       expect(@fr_xx_translation.reload.copy).to be_nil
       expect(@fr_xx_translation.approved).to be_nil
     end
 
     it "ignores to translations in other source locales than the project" do
-      fr_yy_translation = FactoryGirl.create(:translation, key: @key, source_rfc5646_locale: 'en-ZZ', rfc5646_locale: 'fr-YY', copy: nil, approved: nil)
+      fr_yy_translation = FactoryBot.create(:translation, key: @key, source_rfc5646_locale: 'en-ZZ', rfc5646_locale: 'fr-YY', copy: nil, approved: nil)
       KeyTranslationCopier.new.perform(@key.id, 'fr', 'fr-YY')
       expect(fr_yy_translation.reload.copy).to be_nil
       expect(fr_yy_translation.approved).to be_nil

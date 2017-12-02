@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Project do
+RSpec.describe Project do
   it_behaves_like "CommonLocaleLogic"
 
   describe '[CRUD]' do
@@ -38,13 +38,13 @@ describe Project do
     it "doesn't create a project if base_rfc5646_locale is nil" do
       project = Project.create(name: "test", repository_url: nil, base_rfc5646_locale: nil, targeted_rfc5646_locales: {'fr' => true})
       expect(project).to_not be_persisted
-      expect(project.errors.full_messages).to eql(["source locale can’t be blank"])
+      expect(project.errors.full_messages).to include("source locale can’t be blank")
     end
 
     it "doesn't create a project if targeted_rfc5646_locales is nil" do
       project = Project.create(name: "test", base_rfc5646_locale: nil, targeted_rfc5646_locales: {'fr' => true})
       expect(project).to_not be_persisted
-      expect(project.errors.full_messages).to eql(["source locale can’t be blank"])
+      expect(project.errors.full_messages).to include("source locale can’t be blank")
     end
 
     it "doesn't create a project if targeted_rfc5646_locales is empty hash" do
@@ -56,19 +56,19 @@ describe Project do
 
   describe "#repo" do
     it "should check out the repository and return a Repository object" do
-      repo = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git").repo
+      repo = FactoryBot.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git").repo
       expect(repo).to be_kind_of(Rugged::Repository)
       expect(repo.bare?).to be_truthy # should be bare
       expect(repo.path).to eql(Rails.root.join('tmp', 'repos', '55bc7a5f8df17ec2adbf954a4624ea152c3992d9.git/').to_s)
     end
 
     it "should yield the Repository object if a block is passed" do
-      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      project = FactoryBot.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       expect { |b| project.repo(&b) }.to yield_with_args(kind_of(Rugged::Repository))
     end
 
     it "should obtain a lock on the Repository object if a block is passed" do
-      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      project = FactoryBot.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       # To ensure that the repo already exists and doesn't need to synchronize
       project.repo
       expect_any_instance_of(FileMutex).to receive(:synchronize)
@@ -83,7 +83,7 @@ describe Project do
 
   describe "#working_repo" do
     it "should check out the repository and return a Repository object" do
-      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      project = FactoryBot.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       working_repo = project.working_repo
       expect(working_repo).to be_kind_of(Rugged::Repository)
       expect(working_repo.index).to_not be_nil # should not be bare
@@ -91,12 +91,12 @@ describe Project do
     end
 
     it "should yield the Repository object if a block is passed" do
-      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      project = FactoryBot.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       expect { |b| project.working_repo(&b) }.to yield_with_args(kind_of(Rugged::Repository))
     end
 
     it "should obtain a lock on the Repository object if a block is passed" do
-      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      project = FactoryBot.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
       # To ensure that the working_repo already exists and doesn't need to synchronize
       project.working_repo
       expect_any_instance_of(FileMutex).to receive(:synchronize)
@@ -111,7 +111,7 @@ describe Project do
 
   describe "#commit!" do
     before :each do
-      @project = FactoryGirl.create(:project)
+      @project = FactoryBot.create(:project)
       @repo = instance_double('Rugged::Repository')
       # for commit! creation
       allow(@project).to receive(:repo).and_yield(@repo)
@@ -125,7 +125,7 @@ describe Project do
     end
 
     it "should return an existing commit" do
-      commit = FactoryGirl.create(:commit, project: @project, revision: 'a4b6dd88498817d4947730c7964a1a14c8f13d91')
+      commit = FactoryBot.create(:commit, project: @project, revision: 'a4b6dd88498817d4947730c7964a1a14c8f13d91')
       allow(@repo).to receive(:fetch)
       expect(@repo).to receive(:rev_parse).once.with('abc123').and_return(@commit_obj)
       expect(@project.commit!('abc123')).to eql(commit)
@@ -157,7 +157,7 @@ describe Project do
 
   describe "#translations_adder_and_remover_batch" do
     it "creates a new batch, saves its id, and runs ProjectTranslationsAdderAndRemover::Finisher on success and sets description" do
-      project = FactoryGirl.create(:project)
+      project = FactoryBot.create(:project)
 
       ProjectTranslationsAdderAndRemover::Finisher.new.on_success(true, 'project_id' => project.id)
       batch = project.translations_adder_and_remover_batch.tap { |b| b.jobs {} }
@@ -169,30 +169,30 @@ describe Project do
 
   describe "#pending_translations" do
     before :each do
-      @project     = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
-      @key1        = FactoryGirl.create(:key, project: @project)
-      @key2        = FactoryGirl.create(:key, project: @project)
-      @herring_key = FactoryGirl.create(:key)
+      @project     = FactoryBot.create(:project, base_rfc5646_locale: 'en-US')
+      @key1        = FactoryBot.create(:key, project: @project)
+      @key2        = FactoryBot.create(:key, project: @project)
+      @herring_key = FactoryBot.create(:key)
     end
 
     it "should return the number of pending translations" do
-      FactoryGirl.create :translation, key: @key1, copy: nil, rfc5646_locale: 'fr-CA'
-      FactoryGirl.create :translation, key: @key2, copy: nil, rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: @key1, copy: nil, rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: @key2, copy: nil, rfc5646_locale: 'fr-CA'
       # red herring
-      FactoryGirl.create :translation, key: @herring_key, copy: nil, rfc5646_locale: 'fr-CA'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), copy: nil, rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), copy: "foo", rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: @herring_key, copy: nil, rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), copy: nil, rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), copy: "foo", rfc5646_locale: 'fr-CA'
 
       expect(@project.pending_translations(Locale.from_rfc5646('fr-CA'))).to eql(2)
     end
 
     it "should use the project's base locale by default" do
-      FactoryGirl.create :translation, key: @key1, copy: nil, rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: @key2, copy: nil, rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: @key1, copy: nil, rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: @key2, copy: nil, rfc5646_locale: 'en-US'
       # red herrings
-      FactoryGirl.create :translation, key: @herring_key, copy: nil, rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), copy: nil, rfc5646_locale: 'fr-CA'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), copy: "foo", rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: @herring_key, copy: nil, rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), copy: nil, rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), copy: "foo", rfc5646_locale: 'en-US'
 
       expect(@project.pending_translations).to eql(2)
     end
@@ -200,32 +200,32 @@ describe Project do
 
   describe "#pending_reviews" do
     before :each do
-      @project     = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
-      @key1        = FactoryGirl.create(:key, project: @project)
-      @key2        = FactoryGirl.create(:key, project: @project)
-      @herring_key = FactoryGirl.create(:key)
+      @project     = FactoryBot.create(:project, base_rfc5646_locale: 'en-US')
+      @key1        = FactoryBot.create(:key, project: @project)
+      @key2        = FactoryBot.create(:key, project: @project)
+      @herring_key = FactoryBot.create(:key)
     end
 
     it "should return the number of translations pending review" do
-      FactoryGirl.create :translation, key: @key1, approved: nil, copy: 'foo', rfc5646_locale: 'fr-CA'
-      FactoryGirl.create :translation, key: @key2, approved: nil, copy: 'foo', rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: @key1, approved: nil, copy: 'foo', rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: @key2, approved: nil, copy: 'foo', rfc5646_locale: 'fr-CA'
       # red herrings
-      FactoryGirl.create :translation, key: @herring_key, approved: nil, copy: 'foo', rfc5646_locale: 'fr-CA'
-      FactoryGirl.create :translation, key: @key1, approved: nil, copy: 'foo', rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), approved: nil, copy: nil, rfc5646_locale: 'fr-CA'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), approved: false, copy: "foo", rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: @herring_key, approved: nil, copy: 'foo', rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: @key1, approved: nil, copy: 'foo', rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), approved: nil, copy: nil, rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), approved: false, copy: "foo", rfc5646_locale: 'fr-CA'
 
       expect(@project.pending_reviews(Locale.from_rfc5646('fr-CA'))).to eql(2)
     end
 
     it "should use the project's base locale by default" do
-      FactoryGirl.create :translation, key: @key1, approved: nil, copy: 'foo', rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: @key2, approved: nil, copy: 'foo', rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: @key1, approved: nil, copy: 'foo', rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: @key2, approved: nil, copy: 'foo', rfc5646_locale: 'en-US'
       # red herrings
-      FactoryGirl.create :translation, key: @herring_key, approved: nil, copy: 'foo', rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), approved: nil, copy: 'foo', rfc5646_locale: 'fr-CA'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), approved: nil, copy: nil, rfc5646_locale: 'en-US'
-      FactoryGirl.create :translation, key: FactoryGirl.create(:key, project: @project), approved: false, copy: "foo", rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: @herring_key, approved: nil, copy: 'foo', rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), approved: nil, copy: 'foo', rfc5646_locale: 'fr-CA'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), approved: nil, copy: nil, rfc5646_locale: 'en-US'
+      FactoryBot.create :translation, key: FactoryBot.create(:key, project: @project), approved: false, copy: "foo", rfc5646_locale: 'en-US'
 
       expect(@project.pending_reviews).to eql(2)
     end
@@ -233,7 +233,7 @@ describe Project do
 
   describe "#find_or_fetch_git_object" do
     before :each do
-      @project = FactoryGirl.create(:project)
+      @project = FactoryBot.create(:project)
       @repo = double('Rugged::Repository')
       @git_obj = double('Rugged::Commit', sha: 'abc123')
       allow(@project).to receive(:repo).and_yield(@repo)
@@ -271,7 +271,7 @@ describe Project do
 
   describe "#latest_commit" do
     before :each do
-      @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
+      @project = FactoryBot.create(:project, base_rfc5646_locale: 'en-US')
     end
 
     it "should return nil when there are no commits" do
@@ -280,13 +280,13 @@ describe Project do
     end
 
     it "should return the one with the most recent committed_at when there are commits" do
-      commit = FactoryGirl.create(:commit, project: @project)
+      commit = FactoryBot.create(:commit, project: @project)
       expect(@project.latest_commit).to eq(commit)
     end
   end
 
   describe "#skip_key?" do
-    before(:each) { @project = FactoryGirl.create(:project) }
+    before(:each) { @project = FactoryBot.create(:project) }
 
     it "should return true if there is no matching key inclusion" do
       @project.update_attributes(key_exclusions:        [],
@@ -354,7 +354,7 @@ describe Project do
   end
 
   describe "#skip_path?" do
-    before(:each) { @project = FactoryGirl.create(:project) }
+    before(:each) { @project = FactoryBot.create(:project) }
 
     it "should return true if there is no matching path inclusion" do
       @project.update_attributes(skip_paths:          [],
@@ -424,7 +424,7 @@ describe Project do
   describe "#skip_tree?" do
     context '[only paths]' do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       only_paths:          %w(only/path),
                                       only_importer_paths: {'foo' => %w(importeronly/path)})
       end
@@ -460,7 +460,7 @@ describe Project do
 
     context '[skip paths]' do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       skip_paths:          %w(skip/path),
                                       skip_importer_paths: {'foo' => %w(importerskip/path)})
       end
@@ -496,18 +496,18 @@ describe Project do
 
   context "[hooks]" do
     it "should recalculate pending translations when the list of targeted locales is changed" do
-      project = FactoryGirl.create(:project,
+      project = FactoryBot.create(:project,
                                    base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: {'en' => true, 'fr' => true})
-      key1    = FactoryGirl.create(:key, project: project)
-      key2    = FactoryGirl.create(:key, project: project)
-      commit      = FactoryGirl.create(:commit, project: project)
+      key1    = FactoryBot.create(:key, project: project)
+      key2    = FactoryBot.create(:key, project: project)
+      commit      = FactoryBot.create(:commit, project: project)
       commit.keys = [key1, key2]
 
-      trans1_en = FactoryGirl.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
-      trans1_fr = FactoryGirl.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr')
-      trans2_en = FactoryGirl.create(:translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
-      trans2_fr = FactoryGirl.create(:translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'fr')
+      trans1_en = FactoryBot.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
+      trans1_fr = FactoryBot.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr')
+      trans2_en = FactoryBot.create(:translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
+      trans2_fr = FactoryBot.create(:translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'fr')
 
       project.targeted_rfc5646_locales = project.targeted_rfc5646_locales.merge('de' => false)
       project.save!
@@ -520,18 +520,18 @@ describe Project do
     end
 
     it "should recalculate commit readiness when required locales are added or removed" do
-      project = FactoryGirl.create(:project,
+      project = FactoryBot.create(:project,
                                    base_rfc5646_locale: 'en',
                                    targeted_rfc5646_locales: {'en' => true, 'fr' => false})
-      key1    = FactoryGirl.create(:key, project: project)
-      key2    = FactoryGirl.create(:key, project: project)
+      key1    = FactoryBot.create(:key, project: project)
+      key2    = FactoryBot.create(:key, project: project)
 
-      trans1_en = FactoryGirl.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'en', translated: true, approved: true)
-      trans1_fr = FactoryGirl.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', translated: true, approved: true)
-      trans2_en = FactoryGirl.create(:translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'en', translated: true, approved: true)
-      trans2_fr = FactoryGirl.create(:translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', translated: true, approved: false)
+      trans1_en = FactoryBot.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'en', translated: true, approved: true)
+      trans1_fr = FactoryBot.create(:translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', translated: true, approved: true)
+      trans2_en = FactoryBot.create(:translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'en', translated: true, approved: true)
+      trans2_fr = FactoryBot.create(:translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', translated: true, approved: false)
 
-      commit      = FactoryGirl.create(:commit, project: project)
+      commit      = FactoryBot.create(:commit, project: project)
       commit.keys = [key1, key2]
 
       expect(key1).to be_ready
@@ -552,7 +552,7 @@ describe Project do
 
       context "[ProjectTranslationsAdderAndRemover]" do
         before :each do
-          @project = FactoryGirl.create(:project, name: "this is a test project",
+          @project = FactoryBot.create(:project, name: "this is a test project",
                                         targeted_rfc5646_locales: {'en' => true},
                                         key_exclusions: [],
                                         key_inclusions: [],
@@ -600,7 +600,7 @@ describe Project do
 
         it "doesn't call ProjectTranslationsAdderAndRemover when a project is created, even if it has targeted_rfc5646_locales and key_exclusions" do
           expect(ProjectTranslationsAdderAndRemover).to_not receive(:perform_once)
-          FactoryGirl.create(:project, targeted_rfc5646_locales: {'es' => true}, key_exclusions: %w{skip_me})
+          FactoryBot.create(:project, targeted_rfc5646_locales: {'es' => true}, key_exclusions: %w{skip_me})
         end
 
         it "doesn't call ProjectTranslationsAdderAndRemover when watched branches change if project is not git-specific" do
@@ -613,13 +613,13 @@ describe Project do
 
     context "[create_api_token]" do
       it "sets a 240 character api token on create" do
-        project = FactoryGirl.create(:project, name: "Test", api_token: '')
+        project = FactoryBot.create(:project, name: "Test", api_token: '')
         expect(project.api_token).to be_present
         expect(project.api_token.length).to eql(240)
       end
 
       it "doesn't change the api_token on update" do
-        project = FactoryGirl.create(:project, name: "Test")
+        project = FactoryBot.create(:project, name: "Test")
         token = project.api_token
         project.update! name: "New test"
         expect(project.api_token).to eql(token)
@@ -629,8 +629,8 @@ describe Project do
 
   context "[scopes]" do
     before :each do
-      @project_with_repo =    FactoryGirl.create(:project, repository_url: "test")
-      @project_without_repo = FactoryGirl.create(:project, repository_url: nil)
+      @project_with_repo =    FactoryBot.create(:project, repository_url: "test")
+      @project_without_repo = FactoryBot.create(:project, repository_url: nil)
     end
 
     context "[scope = git]" do
@@ -690,7 +690,7 @@ describe Project do
 
   describe "#can_clone_repo" do
     it "adds an error if repository_url doesn't exist" do
-      project = FactoryGirl.create(:project, repository_url: nil)
+      project = FactoryBot.create(:project, repository_url: nil)
       expect(project.errors.count).to eql(0)
       project.send :can_clone_repo
       expect(project.errors.count).to eql(1)
@@ -699,29 +699,29 @@ describe Project do
 
   describe "#git?" do
     it "returns true if repository_url exists" do
-      project = FactoryGirl.create(:project, repository_url: "https://example.com")
+      project = FactoryBot.create(:project, repository_url: "https://example.com")
       expect(project.git?).to be_truthy
     end
 
     it "returns false if repository_url is empty" do
-      project = FactoryGirl.create(:project, repository_url: "")
+      project = FactoryBot.create(:project, repository_url: "")
       expect(project.git?).to be_falsey
     end
 
     it "returns false if repository_url is nil" do
-      project = FactoryGirl.create(:project, repository_url: nil)
+      project = FactoryBot.create(:project, repository_url: nil)
       expect(project.git?).to be_falsey
     end
   end
 
   describe "#not_git?" do
     it "returns false if repository_url exists" do
-      project = FactoryGirl.create(:project, repository_url: "https://example.com")
+      project = FactoryBot.create(:project, repository_url: "https://example.com")
       expect(project.not_git?).to be_falsey
     end
 
     it "returns true if repository_url is nil" do
-      project = FactoryGirl.create(:project, repository_url: nil)
+      project = FactoryBot.create(:project, repository_url: nil)
       expect(project.not_git?).to be_truthy
     end
   end

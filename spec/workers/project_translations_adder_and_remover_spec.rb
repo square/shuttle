@@ -12,16 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ProjectTranslationsAdderAndRemover do
+RSpec.describe ProjectTranslationsAdderAndRemover do
   # in test environment, sidekiq doesn't run batch callbacks. If we add middleware to enable callbacks
   # in test environment, we should this test back.
   skip "#perform" do
     it "calls KeyTranslationAdderAndRemover for project's keys and ProjectTranslationsAdderAndRemover::Finisher" do
-      project = FactoryGirl.create(:project)
-      key1 = FactoryGirl.create(:key, project: project)
-      key2 = FactoryGirl.create(:key, project: project)
+      project = FactoryBot.create(:project)
+      key1 = FactoryBot.create(:key, project: project)
+      key2 = FactoryBot.create(:key, project: project)
 
       expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key1.id).once
       expect(KeyTranslationAdderAndRemover).to receive(:perform_once).with(key2.id).once
@@ -30,17 +30,17 @@ describe ProjectTranslationsAdderAndRemover do
     end
 
     it "doesn't call KeyTranslationAdderAndRemover if project doesn't have any keys" do
-      project = FactoryGirl.create(:project)
+      project = FactoryBot.create(:project)
       expect(KeyTranslationAdderAndRemover).to_not receive(:perform_once)
       ProjectTranslationsAdderAndRemover.new.perform(project.id)
     end
   end
 end
 
-describe ProjectTranslationsAdderAndRemover::Finisher do
+RSpec.describe ProjectTranslationsAdderAndRemover::Finisher do
   describe "#on_success" do
     it "runs ProjectTranslationsAdderAndRemover::Finisher; sets translations_adder_and_remover_batch_id to nil" do
-      @project = FactoryGirl.create(:project, translations_adder_and_remover_batch_id: "11111111")
+      @project = FactoryBot.create(:project, translations_adder_and_remover_batch_id: "11111111")
       expect(ProjectDescendantsRecalculator).to receive(:perform_once).with(@project.id)
       ProjectTranslationsAdderAndRemover::Finisher.new.on_success(nil, { 'project_id' => @project.id })
       expect(@project.reload.translations_adder_and_remover_batch_id).to be_nil

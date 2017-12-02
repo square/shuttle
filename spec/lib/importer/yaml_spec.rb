@@ -13,13 +13,13 @@
 #    limitations under the License.
 
 # encoding: UTF-8
-require 'spec_helper'
+require 'rails_helper'
 
-describe Importer::Yaml do
+RSpec.describe Importer::Yaml do
   context "[importing]" do
     context "[repo with valid files]" do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                       only_paths:     %w(config/locales/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
@@ -47,7 +47,7 @@ describe Importer::Yaml do
 
     context "[repo with nested config/locales directory]" do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                       only_paths:     %w(go/config/locales/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))
@@ -68,7 +68,7 @@ describe Importer::Yaml do
 
     context "[repo with broken files]" do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
                                       only_paths:     %w(config/locales/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(yaml))

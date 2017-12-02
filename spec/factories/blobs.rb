@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :blob do
     association :project
     sequence(:sha) { |i| i.to_s(16).rjust(40, '0') }
@@ -21,7 +21,11 @@ FactoryGirl.define do
 
   factory :fake_blob, parent: :blob do
     after(:create) do |blob, evaluator|
-      allow(blob).to receive(:blob).and_return(OpenStruct.new(contents: 'hello, world', sha: evaluator.sha))
+      class << blob
+        def blob
+          OpenStruct.new(contents: 'hello, world', sha: evaluator.sha)
+        end
+      end
     end
   end
 end

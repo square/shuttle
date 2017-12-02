@@ -12,13 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Importer::Ember do
+RSpec.describe Importer::Ember do
   context "[importing]" do
     context "[repo with valid files]" do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                       only_paths:     %w(ember/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
@@ -44,7 +44,7 @@ describe Importer::Ember do
 
     context "[repo with broken files]" do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
                                       only_paths:     %w(ember-broken/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember))
@@ -52,8 +52,8 @@ describe Importer::Ember do
       end
 
       it "should add error to commit" do
-        expect(@commit.import_errors.sort).to eql([["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"],
-                                                   ["ExecJS::RuntimeError", "SyntaxError: Unexpected identifier (in /ember-broken/en-US.js)"]].sort)
+        expect(@commit.import_errors).to match_array([["ExecJS::RuntimeError", "Exception: SyntaxError (in /ember-broken/en-US.js)"],
+                                                      ["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"]])
         expect(@commit.blobs.where(errored: true).count).to eql(2)
         expect(@commit.blobs.where(parsed: false).count).to eql(2)
         expect(@commit.blobs.where(parsed: true).count).to eql(0)
@@ -63,7 +63,7 @@ describe Importer::Ember do
 
   context "[importing with dot notation]" do
     it "should properly import keys" do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en',
                                     only_paths:          %w(ember/),
@@ -76,7 +76,7 @@ describe Importer::Ember do
 
   context "[robust implementation]" do
     it "should be more robust than just a JSON parser" do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     repository_url:      Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     base_rfc5646_locale: 'en-GB',
                                     only_paths:          %w(ember/),

@@ -56,7 +56,7 @@ class ScreenshotsController < ApplicationController
   # | `commit_id`  | The SHA of a Commit.   |
 
   def request_screenshots
-    ScreenshotMailer.request_screenshot(@commit, current_user).deliver
+    ScreenshotMailer.request_screenshot(@commit, current_user).deliver_now
     respond_to do |format|
       format.any { head :ok }
     end

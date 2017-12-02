@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :daily_metric do
     date                                { Time.utc(2014, 8, 12) }
     num_commits_loaded                  5

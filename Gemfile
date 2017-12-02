@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '2.3.1'
 
 # FRAMEWORK
-gem 'rails', '4.1.16'
+gem 'rails', '4.2.10'
 gem 'configoro'
 gem 'redis-rails'
 gem 'redis-rack-cache'
@@ -25,9 +25,10 @@ gem 'rails-observers'
 gem 'after-commit-on-action'
 
 # ElASTICSEARCH
-gem 'elasticsearch-rails', '~> 0.1.9'
-gem 'elasticsearch-model', '~> 0.1.9'
-gem 'elasticsearch-dsl', '~> 0.1.3'
+gem 'elasticsearch', '< 6.0'
+gem 'elasticsearch-rails'
+gem 'elasticsearch-model'
+gem 'elasticsearch-dsl'
 
 # VIEWS
 gem 'jquery-rails'
@@ -46,7 +47,7 @@ gem 'unicode_scanner'
 gem 'httparty'
 gem 'similar_text', '~> 0.0.4'
 # temporary fix uninitialized constant Paperclip::Storage::S3::AWS bug. Should consider using latest version after upgrading rails to 4.2 or higher version
-gem 'paperclip', :git=> 'https://github.com/thoughtbot/paperclip', :ref => '523bd46c768226893f23889079a7aa9c73b57d68'
+gem 'paperclip', git: 'https://github.com/thoughtbot/paperclip', ref: '523bd46c768226893f23889079a7aa9c73b57d68'
 gem 'aws-sdk'
 gem 'execjs'
 gem 'safemode'
@@ -84,7 +85,7 @@ gem 'sprockets-rails'
 gem 'sass-rails', '4.0.3' # bugfix for sass 3.3 (in)compatibility
 gem 'coffee-rails'
 gem 'uglifier'
-gem 'hogan_assets'
+gem 'hogan_assets', github: 'rubenrails/hogan_assets', branch: 'fix_for_sprockets' # sprockets 3 compatibility
 
 group :development do
   gem 'capistrano', '~> 3.10'
@@ -99,10 +100,11 @@ end
 
 group :test do
   gem 'rspec-rails', '~> 3.0'
-  gem 'factory_girl_rails'
+  gem 'factory_bot_rails'
   gem 'timecop'
   gem 'pry-nav'
   gem 'database_cleaner'
+  gem 'capybara'
 end
 
 # Doesn't work in Rails 4

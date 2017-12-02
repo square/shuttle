@@ -12,13 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Commit do
+RSpec.describe Commit do
   context "[scopes]" do
     before :each do
-      @ready_commit = FactoryGirl.create(:commit, ready: true)
-      @not_ready_commit = FactoryGirl.create(:commit, ready: false)
+      @ready_commit = FactoryBot.create(:commit, ready: true)
+      @not_ready_commit = FactoryBot.create(:commit, ready: false)
     end
 
     describe "#ready" do
@@ -37,26 +37,26 @@ describe Commit do
   context "[validations]" do
     context "[unique revision per project]" do
       it "errors at the Rails layer if another Commit exists under the same Project with the same sha" do
-        project = FactoryGirl.create(:project)
-        FactoryGirl.create(:commit, project: project, revision: 'abc123')
-        commit = FactoryGirl.build(:commit, project: project, revision: 'abc123')
+        project = FactoryBot.create(:project)
+        FactoryBot.create(:commit, project: project, revision: 'abc123')
+        commit = FactoryBot.build(:commit, project: project, revision: 'abc123')
         expect { commit.save! }.to raise_error(ActiveRecord::RecordInvalid)
         expect(commit).to_not be_persisted
-        expect(commit.errors.messages).to eql(revision: ["already taken"])
+        expect(commit.errors.messages[:revision]).to include("already taken")
       end
 
       it "errors at the database layer if there are 2 concurrent `save` requests with the same revision in the same Project" do
-        project = FactoryGirl.create(:project)
-        FactoryGirl.create(:commit, project: project, revision: 'abc123')
-        commit = FactoryGirl.build(:commit, project: project, revision: 'abc123')
+        project = FactoryBot.create(:project)
+        FactoryBot.create(:commit, project: project, revision: 'abc123')
+        commit = FactoryBot.build(:commit, project: project, revision: 'abc123')
         commit.valid?
         commit.errors.clear
         expect { commit.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
       end
 
       it "allows to create Commits with same key and source_copy as long as they are under different Projects" do
-        FactoryGirl.create(:commit, project: FactoryGirl.create(:project), revision: 'abc123')
-        commit = FactoryGirl.build(:commit, project: FactoryGirl.create(:project), revision: 'abc123')
+        FactoryBot.create(:commit, project: FactoryBot.create(:project), revision: 'abc123')
+        commit = FactoryBot.build(:commit, project: FactoryBot.create(:project), revision: 'abc123')
         expect { commit.save! }.to_not raise_error
         expect(commit).to be_persisted
       end
@@ -65,13 +65,13 @@ describe Commit do
 
   context "[callbacks]" do
     before :each do
-      @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @project = FactoryBot.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
     context "[validations]" do
       it "should truncate commit messages" do
         @commit = @project.commit!('8c6ba82822393219431dc74e2d4594cf8699a4f2')
-        expect(FactoryGirl.create(:commit, message: 'a'*300).message).to eql('a'*253 + '...')
+        expect(FactoryBot.create(:commit, message: 'a'*300).message).to eql('a'*253 + '...')
       end
     end
 
@@ -81,7 +81,7 @@ describe Commit do
 
       it "should set loading at" do
         old_time = Time.now
-        commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil, user: FactoryGirl.create(:user))
+        commit = FactoryBot.create(:commit, loading: true, loaded_at: nil, user: FactoryBot.create(:user))
         Timecop.freeze(3.days.from_now)
         commit.loading = false
         commit.save!
@@ -99,9 +99,9 @@ describe Commit do
 
     context "[after import]" do
       before(:each) do
-        @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil)
+        @commit = FactoryBot.create(:commit, loading: true, loaded_at: nil)
         ActionMailer::Base.deliveries.clear
-        @commit.user = FactoryGirl.create(:user)
+        @commit.user = FactoryBot.create(:user)
       end
 
       it "should not send an email if commit doesnt have import errors" do
@@ -125,7 +125,7 @@ describe Commit do
     before :each do
       Timecop.freeze(Time.now)
       @created_at = Time.now
-      @commit = FactoryGirl.create(:commit, created_at: @created_at, loading: true, loaded_at: nil)
+      @commit = FactoryBot.create(:commit, created_at: @created_at, loading: true, loaded_at: nil)
       Timecop.freeze(3.hours.from_now)
       @commit.loading = false
       @commit.save!
@@ -146,31 +146,31 @@ describe Commit do
 
   describe "#required_locales" do
     it "returns the project's required locales" do
-      project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'ja'=>true, 'es'=>false})
-      commit = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'ja'=>true, 'es'=>false})
+      commit = FactoryBot.create(:commit, project: project)
       expect(commit.required_locales).to eql(project.required_locales)
     end
   end
 
   describe "#required_rfc5646_locales" do
     it "returns the project's required rfc5646 locales" do
-      project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'ja'=>true, 'es'=>false})
-      commit = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'ja'=>true, 'es'=>false})
+      commit = FactoryBot.create(:commit, project: project)
       expect(commit.required_rfc5646_locales).to eql(project.required_rfc5646_locales)
     end
   end
 
   describe "#targeted_rfc5646_locales" do
     it "returns the project's targeted rfc5646 locales" do
-      project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'ja'=>true, 'es'=>false})
-      commit = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'ja'=>true, 'es'=>false})
+      commit = FactoryBot.create(:commit, project: project)
       expect(commit.targeted_rfc5646_locales).to eql(project.targeted_rfc5646_locales)
     end
   end
 
   describe "#recalculate_ready!" do
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit  = @project.commit!('HEAD', skip_import: true)
       @commit.keys.each(&:destroy)
       @commit.update_attribute(:completed_at, nil)
@@ -198,9 +198,9 @@ describe Commit do
       end
 
       it "should set ready to false for commits with unready keys" do
-        @commit.keys << FactoryGirl.create(:key)
-        @commit.keys << FactoryGirl.create(:key)
-        FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+        @commit.keys << FactoryBot.create(:key)
+        @commit.keys << FactoryBot.create(:key)
+        FactoryBot.create(:translation, copy: nil, key: @commit.keys.last)
         @commit.keys.last.recalculate_ready!
 
         @commit.recalculate_ready!
@@ -208,9 +208,9 @@ describe Commit do
       end
 
       it "completed_at should remain nil if not ready" do
-        @commit.keys << FactoryGirl.create(:key)
-        @commit.keys << FactoryGirl.create(:key)
-        FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+        @commit.keys << FactoryBot.create(:key)
+        @commit.keys << FactoryBot.create(:key)
+        FactoryBot.create(:translation, copy: nil, key: @commit.keys.last)
         @commit.keys.last.recalculate_ready!
 
         @commit.recalculate_ready!
@@ -219,7 +219,7 @@ describe Commit do
       end
 
       it "should set ready to true for commits with all ready keys" do
-        @commit.keys << FactoryGirl.create(:key)
+        @commit.keys << FactoryBot.create(:key)
         @commit.recalculate_ready!
         expect(@commit).to be_ready
       end
@@ -233,7 +233,7 @@ describe Commit do
         Timecop.freeze(Time.now)
         start_time = Time.now
 
-        @commit.keys << FactoryGirl.create(:key)
+        @commit.keys << FactoryBot.create(:key)
         Timecop.freeze(1.day.from_now)
 
         @commit.recalculate_ready!
@@ -244,12 +244,12 @@ describe Commit do
       end
 
       it "should not change completed_at if commit goes from ready to unready." do
-        @commit.keys << FactoryGirl.create(:key)
+        @commit.keys << FactoryBot.create(:key)
         @commit.recalculate_ready!
         expect(@commit).to be_ready
         completed_time = @commit.completed_at
 
-        FactoryGirl.create(:translation, copy: nil, key: @commit.keys.last)
+        FactoryBot.create(:translation, copy: nil, key: @commit.keys.last)
         @commit.keys.last.recalculate_ready!
         @commit.recalculate_ready!
 
@@ -271,15 +271,15 @@ describe Commit do
 
   context "[hooks]" do
     it "should import strings" do
-      project = FactoryGirl.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
-      FactoryGirl.create :commit, project: project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc', skip_import: false
+      project = FactoryBot.create(:project, repository_url: "git://github.com/RISCfuture/better_caller.git")
+      FactoryBot.create :commit, project: project, revision: '2dc20c984283bede1f45863b8f3b4dd9b5b554cc', skip_import: false
       expect(project.blobs.size).to eql(36) # should import all blobs
     end
   end
 
   describe "#import_strings" do
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
     it "should call #import on all importer subclasses" do
@@ -301,7 +301,7 @@ describe Commit do
     end
 
     it "clears the previous import errors" do
-      @project = FactoryGirl.create(:project, :light)
+      @project = FactoryBot.create(:project, :light)
       commit = @project.commit!('HEAD', skip_import: true)
       commit.update! import_errors: [["StandardError", "fake error (in fakefile)"]]
       expect(commit.import_errors).to eql([["StandardError", "fake error (in fakefile)"]])
@@ -311,7 +311,7 @@ describe Commit do
     end
 
     it "should set all blobs as parsed" do
-      @project = FactoryGirl.create(:project, :light)
+      @project = FactoryBot.create(:project, :light)
       commit = @project.commit!('HEAD')
       CommitImporter::Finisher.new.on_success(true, 'commit_id' => commit.id)
       expect(Blob.where(parsed: false).count).to be_zero
@@ -328,11 +328,11 @@ describe Commit do
     end
 
     it "should only associate relevant keys with a new commit when cached blob importing is being used" do
-      @project = FactoryGirl.create(:project, :light, key_exclusions: %w(skip_me))
+      @project = FactoryBot.create(:project, :light, key_exclusions: %w(skip_me))
       commit = @project.commit!('HEAD')
       blob = commit.blobs.first
-      red_herring = FactoryGirl.create(:key, key: 'skip_me')
-      FactoryGirl.create :blobs_key, key: red_herring, blob: blob
+      red_herring = FactoryBot.create(:key, key: 'skip_me')
+      FactoryBot.create :blobs_key, key: red_herring, blob: blob
 
       commit.import_strings
       expect(commit.keys(true)).not_to include(red_herring)
@@ -342,8 +342,8 @@ describe Commit do
   describe "#import_blob" do
     before :each do
       allow(BlobImporter).to receive(:perform_once)
-      @project = FactoryGirl.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)))
-      @commit = FactoryGirl.create(:commit, project: @project)
+      @project = FactoryBot.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)))
+      @commit = FactoryBot.create(:commit, project: @project)
       @file1 = double(Rugged::Blob)
       @file2 = double(Rugged::Blob)
       allow(@file1).to receive(:[]).and_return('abc123')
@@ -367,7 +367,7 @@ describe Commit do
 
   describe "#skip_key?" do
     before :each do
-      @project = FactoryGirl.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @project = FactoryBot.create(:project, :light, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
     end
 
     it "should return true if the commit has a .shuttle.yml file given an excluded key" do
@@ -388,16 +388,16 @@ describe Commit do
 
   describe "#commit" do
     it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
-      project = FactoryGirl.create(:project)
-      commit = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project)
+      commit = FactoryBot.create(:commit, project: project)
       project.repository_url = nil
       expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
 
     it "returns the git commit object" do
-      project = FactoryGirl.create(:project)
+      project = FactoryBot.create(:project)
       repo = instance_double('Rugged::Repository')
-      commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+      commit = FactoryBot.create(:commit, revision: 'abc123', project: project)
 
       commit_obj = instance_double('Rugged::Commit')
       expect(File).to receive(:exist?).and_return(true)
@@ -409,8 +409,8 @@ describe Commit do
 
   describe "#commit!" do
     before :each do
-      @project = FactoryGirl.create(:project)
-      @commit = FactoryGirl.create(:commit, revision: 'abc123', project: @project)
+      @project = FactoryBot.create(:project)
+      @commit = FactoryBot.create(:commit, revision: 'abc123', project: @project)
       @repo = double('Rugged::Repository')
       @commit_obj = double('Rugged::Commit', sha: 'abc123')
       allow(@project).to receive(:repo).and_yield(@repo)
@@ -437,8 +437,8 @@ describe Commit do
     end
 
     it "raises Project::NotLinkedToAGitRepositoryError if repository_url is nil" do
-      project = FactoryGirl.create(:project)
-      commit = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project)
+      commit = FactoryBot.create(:commit, project: project)
       project.repository_url = nil
       expect { commit.commit }.to raise_error(Project::NotLinkedToAGitRepositoryError)
     end
@@ -451,36 +451,36 @@ describe Commit do
 
     context "[on github]" do
       it "returns the correct url for a commit where project url is for https" do
-        project = FactoryGirl.create(:project, repository_url: "https://github.com/example/my-project.git")
-        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        project = FactoryBot.create(:project, repository_url: "https://github.com/example/my-project.git")
+        commit = FactoryBot.create(:commit, revision: 'abc123', project: project)
         expect(commit.git_url).to eql("https://github.com/example/my-project/commit/abc123")
       end
 
       it "returns the correct url for a commit where project url is for ssh" do
-        project = FactoryGirl.create(:project, repository_url: "git@github.com:example/my-project.git")
-        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        project = FactoryBot.create(:project, repository_url: "git@github.com:example/my-project.git")
+        commit = FactoryBot.create(:commit, revision: 'abc123', project: project)
         expect(commit.git_url).to eql("https://github.com/example/my-project/commit/abc123")
       end
     end
 
     context "[on github enterprise]" do
       it "returns the correct url for a commit where project url is for https" do
-        project = FactoryGirl.create(:project, repository_url: "https://git.example.com/all/my-project.git")
-        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        project = FactoryBot.create(:project, repository_url: "https://git.example.com/all/my-project.git")
+        commit = FactoryBot.create(:commit, revision: 'abc123', project: project)
         expect(commit.git_url).to eql("https://git.example.com/all/my-project/commit/abc123")
       end
 
       it "returns the correct url for a commit where project url is for ssh" do
-        project = FactoryGirl.create(:project, repository_url: "git@git.example.com:all/my-project.git")
-        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        project = FactoryBot.create(:project, repository_url: "git@git.example.com:all/my-project.git")
+        commit = FactoryBot.create(:commit, revision: 'abc123', project: project)
         expect(commit.git_url).to eql("https://git.example.com/all/my-project/commit/abc123")
       end
     end
 
     context "[on stash]" do
       it "returns the correct url for a commit" do
-        project = FactoryGirl.create(:project, repository_url: "https://stash.example.com/scm/all/my-project.git")
-        commit = FactoryGirl.create(:commit, revision: 'abc123', project: project)
+        project = FactoryBot.create(:project, repository_url: "https://stash.example.com/scm/all/my-project.git")
+        commit = FactoryBot.create(:commit, revision: 'abc123', project: project)
         expect(commit.git_url).to eql("https://stash.example.com/projects/ALL/repos/my-project/commits/abc123")
       end
     end

@@ -12,18 +12,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe LocaleField do
+RSpec.describe LocaleField do
   it "should convert between an RFC 5646 code and a Locale" do
-    t = FactoryGirl.build(:translation, rfc5646_locale: 'de-DE')
+    t = FactoryBot.build(:translation, rfc5646_locale: 'de-DE')
     expect(t.locale.rfc5646).to eql('de-DE')
     t.locale = Locale.from_rfc5646('fr-CA')
     expect(t.rfc5646_locale).to eql('fr-CA')
   end
 
   it "should use a custom reader and writer" do
-    pr = FactoryGirl.build(:project, targeted_rfc5646_locales: {'de-DE' => true, 'fr-CA' => false})
+    pr = FactoryBot.build(:project, targeted_rfc5646_locales: {'de-DE' => true, 'fr-CA' => false})
     lr = pr.locale_requirements
     expect(lr.keys.sort_by(&:rfc5646)).to eql([Locale.from_rfc5646('de-DE'), Locale.from_rfc5646('fr-CA')])
     pr.locale_requirements = {
@@ -38,7 +38,7 @@ describe LocaleField do
   end
 
   it "should use a custom from column" do
-    pr = FactoryGirl.create(:project, base_rfc5646_locale: 'en-US')
+    pr = FactoryBot.create(:project, base_rfc5646_locale: 'en-US')
     expect(pr.base_locale.rfc5646).to eql('en-US')
     pr.base_locale = Locale.from_rfc5646('zh-HK')
     expect(pr.base_rfc5646_locale).to eql('zh-HK')

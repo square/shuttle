@@ -12,15 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ProjectDescendantsRecalculator do
+RSpec.describe ProjectDescendantsRecalculator do
   describe "#perform" do
     it "recalculates ready for all Keys of the project" do
       # setup
-      project = FactoryGirl.create(:project)
-      key1 = FactoryGirl.create(:key, project: project)
-      key2 = FactoryGirl.create(:key, project: project)
+      project = FactoryBot.create(:project)
+      key1 = FactoryBot.create(:key, project: project)
+      key2 = FactoryBot.create(:key, project: project)
       project.keys.update_all ready: false
 
       test_project_descendants_recalculator(project)
@@ -31,9 +31,9 @@ describe ProjectDescendantsRecalculator do
 
     it "recalculates ready for all Commits of the project" do
       # setup
-      project = FactoryGirl.create(:project)
-      commit1 = FactoryGirl.create(:commit, project: project)
-      commit2 = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project)
+      commit1 = FactoryBot.create(:commit, project: project)
+      commit2 = FactoryBot.create(:commit, project: project)
       project.commits.update_all ready: false
 
       test_project_descendants_recalculator(project)
@@ -48,9 +48,9 @@ describe ProjectDescendantsRecalculator do
 
       # https://github.com/mperham/sidekiq/wiki/Testing
       Sidekiq::Testing.fake! do
-        project = FactoryGirl.create(:project)
-        article1 = FactoryGirl.create(:article, project: project)
-        article2 = FactoryGirl.create(:article, project: project)
+        project = FactoryBot.create(:project)
+        article1 = FactoryBot.create(:article, project: project)
+        article2 = FactoryBot.create(:article, project: project)
         project.articles.update_all ready: false
         ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article1.id})
         ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article2.id})

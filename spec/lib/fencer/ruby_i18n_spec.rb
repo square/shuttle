@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer::RubyI18n do
+RSpec.describe Fencer::RubyI18n do
   describe ".fence" do
     it "should fence a string with I18n escapes" do
       expect(Fencer::RubyI18n.fence("String with %{two} %{tokens}.")).

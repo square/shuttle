@@ -19,6 +19,6 @@
 class CommentObserver < ActiveRecord::Observer
   def after_commit_on_create(comment)
     # send a notification to subscribed email addresses about the new comment
-    CommentMailer.comment_created(comment).deliver
+    CommentMailer.comment_created(comment).deliver_now
   end
 end

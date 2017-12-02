@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ArticleRecalculator do
+RSpec.describe ArticleRecalculator do
   it "should recalculate Article readiness" do
     article = nil
 
@@ -22,7 +22,7 @@ describe ArticleRecalculator do
     # In this case, we only have ArticleImporter and we need to stub it to prevent
     # it form creating keys. If you do need some sidekiq jobs to run, you need refactor this line.
     Sidekiq::Testing.fake! do
-      article = FactoryGirl.create(:article, ready: false)
+      article = FactoryBot.create(:article, ready: false)
       ArticleImporter::Finisher.new.on_success(nil, {'article_id' => article.id})
       ArticleRecalculator.new.perform(article.id)
     end

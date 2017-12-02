@@ -14,10 +14,10 @@
 
 require "spec_helper"
 
-describe CommentsHelper do
+RSpec.describe CommentsHelper do
   describe "#issue_url" do
     before :each do
-      @comment = FactoryGirl.create(:comment)
+      @comment = FactoryBot.create(:comment)
       @translation = @comment.issue.translation
       @key = @translation.key
       @project = @key.project

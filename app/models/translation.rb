@@ -69,8 +69,8 @@ class Translation < ActiveRecord::Base
     %w(copy source_copy id translator_id rfc5646_locale created_at updated_at translated)
   end
   mapping do
-    indexes :copy, analyzer: 'snowball'
-    indexes :source_copy, analyzer: 'snowball'
+    indexes :copy, analyzer: 'snowball', type: 'string'
+    indexes :source_copy, analyzer: 'snowball', type: 'string'
     indexes :id, type: 'integer', index: :not_analyzed
     indexes :project_id, type: 'integer'
     indexes :article_id, type: 'integer'

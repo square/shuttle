@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe 'Authentication', capybara: true do
+RSpec.describe 'Authentication', capybara: true do
   include ActionView::Helpers
 
   before :each do
@@ -36,7 +36,7 @@ describe 'Authentication', capybara: true do
     end
 
     it 'lets you register a non-square account but doesn\'t send confirmation e-mail' do
-      non_square_user = FactoryGirl.build(:user)
+      non_square_user = FactoryBot.build(:user)
 
       visit new_user_session_path + '#sign-up'
       expect(page).to have_content 'Sign up for Shuttle'
@@ -57,7 +57,7 @@ describe 'Authentication', capybara: true do
     end
 
     it 'lets you register a square account and sends confirmation e-mail' do
-      square_user = FactoryGirl.build(:user, email: 'test@example.com')
+      square_user = FactoryBot.build(:user, email: 'test@example.com')
 
       visit new_user_session_path + '#sign-up'
       expect(page).to have_content 'Sign up for Shuttle'
@@ -82,7 +82,7 @@ describe 'Authentication', capybara: true do
 
   context '[reset password]' do
     before :each do
-      @user = FactoryGirl.create(:user)
+      @user = FactoryBot.create(:user)
     end
 
     it 'lets you access the Forgot Password page' do

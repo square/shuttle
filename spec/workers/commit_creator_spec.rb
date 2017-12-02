@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe CommitCreator do
+RSpec.describe CommitCreator do
   describe "#perform" do
     context "[rescue Git::CommitNotFoundError]" do
       before :each do
-        @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
-        @user = FactoryGirl.create(:user, email: "foo@example.com")
+        @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+        @user = FactoryBot.create(:user, email: "foo@example.com")
         ActionMailer::Base.deliveries.clear
       end
 
@@ -40,8 +40,8 @@ describe CommitCreator do
 
     context "[rescue Project::NotLinkedToAGitRepositoryError]" do
       before :each do
-        @project = FactoryGirl.create(:project, repository_url: nil)
-        @user = FactoryGirl.create(:user, email: "foo@example.com")
+        @project = FactoryBot.create(:project, repository_url: nil)
+        @user = FactoryBot.create(:user, email: "foo@example.com")
         ActionMailer::Base.deliveries.clear
       end
 

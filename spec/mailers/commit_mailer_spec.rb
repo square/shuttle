@@ -14,18 +14,18 @@
 
 require "spec_helper"
 
-describe CommitMailer do
+RSpec.describe CommitMailer do
   describe "#notify_submitter_of_import_errors" do
     before :each do
-      @project = FactoryGirl.create(:project)
-      @commit = FactoryGirl.create(:commit, project: @project, author_email: "foo@example.com")
+      @project = FactoryBot.create(:project)
+      @commit = FactoryBot.create(:commit, project: @project, author_email: "foo@example.com")
       ActionMailer::Base.deliveries.clear
     end
 
     context "[sends an email with import errors]" do
       def set_import_errors_and_expect_an_email_with_them_return_mail_object(commit, errors)
         commit.update import_errors: errors
-        CommitMailer.notify_submitter_of_import_errors(commit).deliver
+        CommitMailer.notify_submitter_of_import_errors(commit).deliver_now
         expect(ActionMailer::Base.deliveries.size).to eql(1)
         mail = ActionMailer::Base.deliveries.first
         expect(mail.to).to eql(["foo@example.com"])
@@ -71,27 +71,27 @@ describe CommitMailer do
 
     it "doesn't send an email if there are no import errors" do
       @commit.update import_errors: []
-      CommitMailer.notify_submitter_of_import_errors(@commit).deliver
+      CommitMailer.notify_submitter_of_import_errors(@commit).deliver_now
       expect(ActionMailer::Base.deliveries).to be_empty
     end
 
     it "doesn't send an email if there is no author email and submitter user" do
       @commit.update author_email: nil, user: nil
-      CommitMailer.notify_submitter_of_import_errors(@commit).deliver
+      CommitMailer.notify_submitter_of_import_errors(@commit).deliver_now
       expect(ActionMailer::Base.deliveries).to be_empty
     end
   end
 
   describe "#notify_import_errors_in_commit_creator" do
     before :each do
-      @project = FactoryGirl.create(:project)
+      @project = FactoryBot.create(:project)
       ActionMailer::Base.deliveries.clear
     end
 
     it "sends an email to the user if user_id is valid" do
-      user = FactoryGirl.create(:user, email: "example@example.com")
+      user = FactoryBot.create(:user, email: "example@example.com")
       ActionMailer::Base.deliveries.clear
-      CommitMailer.notify_import_errors_in_commit_creator(user.id, @project.id, "xyz123", Git::CommitNotFoundError.new("xyz123")).deliver
+      CommitMailer.notify_import_errors_in_commit_creator(user.id, @project.id, "xyz123", Git::CommitNotFoundError.new("xyz123")).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(1)
       mail = ActionMailer::Base.deliveries.first
       expect(mail.to).to eql(["example@example.com"])
@@ -101,9 +101,9 @@ describe CommitMailer do
     end
 
     it "sends an email to the user if user_id is valid, but doesn't include the extra explanation about rebasing if the error is not related to Git::NotFoundError" do
-      user = FactoryGirl.create(:user, email: "example@example.com")
+      user = FactoryBot.create(:user, email: "example@example.com")
       ActionMailer::Base.deliveries.clear
-      CommitMailer.notify_import_errors_in_commit_creator(user.id, @project.id, "xyz123", StandardError.new("random message")).deliver
+      CommitMailer.notify_import_errors_in_commit_creator(user.id, @project.id, "xyz123", StandardError.new("random message")).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(1)
       mail = ActionMailer::Base.deliveries.first
       expect(mail.to).to eql(["example@example.com"])
@@ -113,13 +113,13 @@ describe CommitMailer do
     end
 
     it "doesn't send an email if user_id is nil" do
-      CommitMailer.notify_import_errors_in_commit_creator(nil, @project.id, "xyz123", Git::CommitNotFoundError.new("xyz123")).deliver
+      CommitMailer.notify_import_errors_in_commit_creator(nil, @project.id, "xyz123", Git::CommitNotFoundError.new("xyz123")).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
 
     it "doesn't send an email if we cannot find a user with user_id" do
       expect(User).to receive(:find_by_id).once.and_call_original
-      CommitMailer.notify_import_errors_in_commit_creator(0, @project.id, "xyz123", Git::CommitNotFoundError.new("xyz123")).deliver
+      CommitMailer.notify_import_errors_in_commit_creator(0, @project.id, "xyz123", Git::CommitNotFoundError.new("xyz123")).deliver_now
       expect(ActionMailer::Base.deliveries.size).to eql(0)
     end
   end

@@ -12,12 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ArticleOrCommitStats do
+RSpec.describe ArticleOrCommitStats do
   describe "#fetch_stat" do
     before :each do
-      @commit = FactoryGirl.build(:commit)
+      @commit = FactoryBot.build(:commit)
       allow(@commit).to receive(:stats).and_return( {
                                           approved: { translations_count: 1, words_count: 2 },
                                           pending: { translations_count: 1, words_count: 1 }
@@ -39,14 +39,14 @@ describe ArticleOrCommitStats do
 
   context "[should recalculate article statistics correctly]" do
     def create_translations_for_active_keys(key1, key2)
-      FactoryGirl.create :translation, key: key1, rfc5646_locale: 'en', source_rfc5646_locale: 'en', source_copy: "hello world", approved: true,  copy: "fake" # base translation
-      FactoryGirl.create :translation, key: key2, rfc5646_locale: 'en', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: true,  copy: "fake" # base translation
-      FactoryGirl.create :translation, key: key1, rfc5646_locale: 'fr', source_rfc5646_locale: 'en', source_copy: "hello world", approved: true,  copy: "fake" # approved
-      FactoryGirl.create :translation, key: key2, rfc5646_locale: 'fr', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: true,  copy: "fake" # approved
-      FactoryGirl.create :translation, key: key1, rfc5646_locale: 'de', source_rfc5646_locale: 'en', source_copy: "hello world", approved: true,  copy: "fake" # approved
-      FactoryGirl.create :translation, key: key2, rfc5646_locale: 'de', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: false, copy: "fake" # pending (rejected)
-      FactoryGirl.create :translation, key: key1, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', source_copy: "hello world", approved: nil,   copy: "fake" # pending
-      FactoryGirl.create :translation, key: key2, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: nil,   copy: nil    # not-translated
+      FactoryBot.create :translation, key: key1, rfc5646_locale: 'en', source_rfc5646_locale: 'en', source_copy: "hello world", approved: true,  copy: "fake" # base translation
+      FactoryBot.create :translation, key: key2, rfc5646_locale: 'en', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: true,  copy: "fake" # base translation
+      FactoryBot.create :translation, key: key1, rfc5646_locale: 'fr', source_rfc5646_locale: 'en', source_copy: "hello world", approved: true,  copy: "fake" # approved
+      FactoryBot.create :translation, key: key2, rfc5646_locale: 'fr', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: true,  copy: "fake" # approved
+      FactoryBot.create :translation, key: key1, rfc5646_locale: 'de', source_rfc5646_locale: 'en', source_copy: "hello world", approved: true,  copy: "fake" # approved
+      FactoryBot.create :translation, key: key2, rfc5646_locale: 'de', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: false, copy: "fake" # pending (rejected)
+      FactoryBot.create :translation, key: key1, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', source_copy: "hello world", approved: nil,   copy: "fake" # pending
+      FactoryBot.create :translation, key: key2, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: nil,   copy: nil    # not-translated
     end
 
     def expectations_without_locales(item)
@@ -79,29 +79,29 @@ describe ArticleOrCommitStats do
 
     it "should calculate article statistics correctly" do
       allow_any_instance_of(Article).to receive(:import!)
-      @article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true, 'de' => false, 'ja' => true})
-      active_section   = FactoryGirl.create(:section, article: @article)
-      inactive_section = FactoryGirl.create(:section, article: @article, active: false)
+      @article = FactoryBot.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true, 'de' => false, 'ja' => true})
+      active_section   = FactoryBot.create(:section, article: @article)
+      inactive_section = FactoryBot.create(:section, article: @article, active: false)
 
-      key1 = FactoryGirl.create(:key, section: active_section, index_in_section: 0)
-      key2 = FactoryGirl.create(:key, section: active_section, index_in_section: 1)
-      key3 = FactoryGirl.create(:key, section: active_section, index_in_section: nil) # key is inactive
-      key4 = FactoryGirl.create(:key, section: inactive_section, index_in_section: 0) # section is inactive
+      key1 = FactoryBot.create(:key, section: active_section, index_in_section: 0)
+      key2 = FactoryBot.create(:key, section: active_section, index_in_section: 1)
+      key3 = FactoryBot.create(:key, section: active_section, index_in_section: nil) # key is inactive
+      key4 = FactoryBot.create(:key, section: inactive_section, index_in_section: 0) # section is inactive
 
       create_translations_for_active_keys(key1, key2)
-      FactoryGirl.create :translation, key: key3, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', source_copy: "hello world", approved: nil,   copy: "fake" # pending
-      FactoryGirl.create :translation, key: key4, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: nil,   copy: nil    # not-translated
+      FactoryBot.create :translation, key: key3, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', source_copy: "hello world", approved: nil,   copy: "fake" # pending
+      FactoryBot.create :translation, key: key4, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', source_copy: "whatsup",     approved: nil,   copy: nil    # not-translated
 
       expectations_without_locales(@article)
       expectations_with_locales(@article)
     end
 
     it "should recalculate Commit statistics correctly" do
-      project = FactoryGirl.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true, 'de' => false, 'ja' => true})
-      @commit = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true, 'de' => false, 'ja' => true})
+      @commit = FactoryBot.create(:commit, project: project)
 
-      key1 = FactoryGirl.create(:key, project: project)
-      key2 = FactoryGirl.create(:key, project: project)
+      key1 = FactoryBot.create(:key, project: project)
+      key2 = FactoryBot.create(:key, project: project)
 
       @commit.keys = [key1, key2]
       create_translations_for_active_keys(key1, key2)

@@ -14,4 +14,4 @@
 
 # Be sure to restart your server when you modify this file.
 
-Shuttle::Application.config.session_store :cookie_store, key: '_shuttle_session'
+Rails.application.config.session_store :cookie_store, key: '_shuttle_session'

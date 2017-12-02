@@ -1,6 +1,6 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe Incontext::TranslationsController do
+RSpec.describe Incontext::TranslationsController do
   # TODO:
   skip
 end

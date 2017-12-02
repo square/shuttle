@@ -12,22 +12,20 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe GlossaryController do
-  include Devise::TestHelpers
-
+RSpec.describe GlossaryController do
   describe '#index' do
     before :each do
       reset_elastic_search
 
       update_date = DateTime.new(2014, 1, 1)
-      @user = FactoryGirl.create(:user, :confirmed, role: 'translator')
+      @user = FactoryBot.create(:user, :confirmed, role: 'translator')
       @start_date = (update_date - 1.day).strftime('%m/%d/%Y')
       @end_date = (update_date + 1.day).strftime('%m/%d/%Y')
 
       %w(ar cn fr ja).each do |locale|
-        FactoryGirl.create :project,
+        FactoryBot.create :project,
                            repository_url: nil,
                            base_rfc5646_locale: 'en',
                            targeted_rfc5646_locales: { locale => true }
@@ -40,7 +38,7 @@ describe GlossaryController do
           other_locale_field = (field == 'copy' ? :source_rfc5646_locale : :rfc5646_locale)
           %w(en ja-JP).each do |locale|
             other_locale = (locale == 'en' ? 'ja-JP' : 'en')
-            FactoryGirl.create :translation,
+            FactoryBot.create :translation,
                                field              => "foo #{term} bar",
                                other_field        => 'something else',
                                locale_field       => locale,
@@ -86,7 +84,7 @@ describe GlossaryController do
 
     it 'should group glossary entries in alphabetical order' do
       words_in_glossary.each do |source_copy|
-        FactoryGirl.create :source_glossary_entry,
+        FactoryBot.create :source_glossary_entry,
                            source_copy: source_copy
       end
 

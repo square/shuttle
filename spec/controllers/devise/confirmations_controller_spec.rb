@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Devise::ConfirmationsController do
+RSpec.describe Devise::ConfirmationsController do
   before :each do
     @request.env["devise.mapping"] = Devise.mappings[:user]
 
@@ -23,7 +23,7 @@ describe Devise::ConfirmationsController do
   end
 
   it "gives monitor permission to user after confirmation if their email address domain is a priviliged one" do
-    user = FactoryGirl.create(:user, role: nil, email: "foo@example.com")
+    user = FactoryBot.create(:user, role: nil, email: "foo@example.com")
     expect(user.email).to eql('foo@example.com')
     user.send :generate_confirmation_token!
 
@@ -34,7 +34,7 @@ describe Devise::ConfirmationsController do
   end
 
   it "does not change the permission of user after confirmation if their email address domain is NOT a priviliged one" do
-    user = FactoryGirl.create(:user, role: nil, email: "foo@notpriviliged.com")
+    user = FactoryBot.create(:user, role: nil, email: "foo@notpriviliged.com")
     expect(user.email).to eql('foo@notpriviliged.com')
     user.send :generate_confirmation_token!
 

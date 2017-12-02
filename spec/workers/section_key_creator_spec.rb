@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe SectionKeyCreator do
+RSpec.describe SectionKeyCreator do
   describe "#perform" do
     before :each do
       allow_any_instance_of(Article).to receive(:import!) # prevent imports, we want to handle things manually
-      @article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } )
-      @section = FactoryGirl.create(:section, article: @article)
+      @article = FactoryBot.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'ja' => true, 'es' => false } )
+      @section = FactoryBot.create(:section, article: @article)
     end
 
     it "creates Key and related Translations in base & targeted locales" do

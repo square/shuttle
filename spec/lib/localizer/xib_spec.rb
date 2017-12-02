@@ -14,11 +14,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Localizer::Xib do
+RSpec.describe Localizer::Xib do
   before :each do
-    @project = FactoryGirl.create(:project,
+    @project = FactoryBot.create(:project,
                                   repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                   only_paths:     %w(apple/),
                                   skip_imports:   Importer::Base.implementations.map(&:ident) - %w(xib))

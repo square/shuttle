@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe CommitsCleaner do
+RSpec.describe CommitsCleaner do
   before :each do
     allow_any_instance_of(Project).to receive(:repo).and_return(nil)
-    StashWebhookHelper.stub_chain(:new, :ping).and_return(nil)
+    allow(StashWebhookHelper).to receive_message_chain(:new, :ping).and_return(nil)
     @commits_cleaner = CommitsCleaner.new
-    @project = FactoryGirl.create(:project, :light)
+    @project = FactoryBot.create(:project, :light)
   end
 
   describe "#destroy_dangling_commits" do
@@ -77,6 +77,6 @@ describe CommitsCleaner do
   private
 
   def create_commits(project, num=1, data={})
-    num.times.map { |i| FactoryGirl.create(:commit, project: project, **data) }
+    num.times.map { |i| FactoryBot.create(:commit, project: project, **data) }
   end
 end

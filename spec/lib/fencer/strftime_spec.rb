@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer::Strftime do
+RSpec.describe Fencer::Strftime do
   describe ".fence" do
     it "should properly fence the examples from the Ruby docs" do
       expect(Fencer::Strftime.fence('%c - date and time (%a %b %e %T %Y)')).

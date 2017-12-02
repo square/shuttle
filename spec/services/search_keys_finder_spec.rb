@@ -12,8 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe SearchKeysFinder do
+RSpec.describe SearchKeysFinder do
   # some integration tests exist in search_controller_spec.rb
 end

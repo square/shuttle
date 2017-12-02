@@ -14,19 +14,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe CommentsController do
+RSpec.describe CommentsController do
   render_views
 
-  include Devise::TestHelpers
-
   before(:each) do
-    @user = FactoryGirl.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "test@example.com")
-    @project = FactoryGirl.create(:project)
-    @key = FactoryGirl.create(:key, project: @project)
-    @translation = FactoryGirl.create(:translation, key: @key)
-    @issue = FactoryGirl.create(:issue, user: @user, translation: @translation, subscribed_emails: [])
+    @user = FactoryBot.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar", email: "test@example.com")
+    @project = FactoryBot.create(:project)
+    @key = FactoryBot.create(:key, project: @project)
+    @translation = FactoryBot.create(:translation, key: @key)
+    @issue = FactoryBot.create(:issue, user: @user, translation: @translation, subscribed_emails: [])
     @path_params = { issue_id: @issue.id }
     @request.env['devise.mapping'] = Devise.mappings[:user]
     sign_in @user

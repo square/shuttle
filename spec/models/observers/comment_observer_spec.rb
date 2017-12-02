@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Comment do
+RSpec.describe Comment do
   context "[email notifications]" do
     context "after_create" do
       it "subscribes the commenter to the issue emails; and sends an email to the subscription list when a new comment is created" do
-        issue = FactoryGirl.create(:issue, subscribed_emails: ["test@example.com"])
-        comment = FactoryGirl.build(:comment, issue: issue)
+        issue = FactoryBot.create(:issue, subscribed_emails: ["test@example.com"])
+        comment = FactoryBot.build(:comment, issue: issue)
         ActionMailer::Base.deliveries.clear
 
         comment.save!

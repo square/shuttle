@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ArticleAndCommitNotApprovedTranslationStats do
+RSpec.describe ArticleAndCommitNotApprovedTranslationStats do
   before :each do
     allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
   end
@@ -23,34 +23,34 @@ describe ArticleAndCommitNotApprovedTranslationStats do
     describe "#item_stat" do
       it "calculates stats for only required translations of each commit" do
         # setup project1 and commit1
-        project1 = FactoryGirl.create(:project, targeted_rfc5646_locales: {'fr' => true, 'de' => true, 'ja' => true, 'es' => false})
+        project1 = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr' => true, 'de' => true, 'ja' => true, 'es' => false})
 
-        key1 = FactoryGirl.create(:key, project: project1)
-        FactoryGirl.create :translation, key: key1, rfc5646_locale: 'fr', source_copy: "hello foo bar", approved: nil,   copy: nil    # new
-        FactoryGirl.create :translation, key: key1, rfc5646_locale: 'de', source_copy: "hello foo bar", approved: nil,   copy: nil    # new
-        FactoryGirl.create :translation, key: key1, rfc5646_locale: 'ja', source_copy: "hello foo bar", approved: nil,   copy: "fake" # pending
-        FactoryGirl.create :translation, key: key1, rfc5646_locale: 'es', source_copy: "hello foo bar", approved: false, copy: "fake" # pending (rejected)
-        FactoryGirl.create :translation, key: key1, rfc5646_locale: 'tr', source_copy: "hello foo bar", approved: nil,   copy: "fake" # pending
+        key1 = FactoryBot.create(:key, project: project1)
+        FactoryBot.create :translation, key: key1, rfc5646_locale: 'fr', source_copy: "hello foo bar", approved: nil,   copy: nil    # new
+        FactoryBot.create :translation, key: key1, rfc5646_locale: 'de', source_copy: "hello foo bar", approved: nil,   copy: nil    # new
+        FactoryBot.create :translation, key: key1, rfc5646_locale: 'ja', source_copy: "hello foo bar", approved: nil,   copy: "fake" # pending
+        FactoryBot.create :translation, key: key1, rfc5646_locale: 'es', source_copy: "hello foo bar", approved: false, copy: "fake" # pending (rejected)
+        FactoryBot.create :translation, key: key1, rfc5646_locale: 'tr', source_copy: "hello foo bar", approved: nil,   copy: "fake" # pending
 
-        key2 = FactoryGirl.create(:key, project: project1)
-        FactoryGirl.create :translation, key: key2, rfc5646_locale: 'fr', source_copy: "hello foo bar", approved: true, copy: "fake" # approved
-        FactoryGirl.create :translation, key: key2, rfc5646_locale: 'de', source_copy: "hello foo bar", approved: nil,  copy: nil    # new
-        FactoryGirl.create :translation, key: key2, rfc5646_locale: 'ja', source_copy: "hello foo bar", approved: nil,  copy: nil    # new
-        FactoryGirl.create :translation, key: key2, rfc5646_locale: 'es', source_copy: "hello foo bar", approved: nil,  copy: "fake" # pending
-        FactoryGirl.create :translation, key: key2, rfc5646_locale: 'tr', source_copy: "hello foo bar", approved: nil,  copy: nil    # new
+        key2 = FactoryBot.create(:key, project: project1)
+        FactoryBot.create :translation, key: key2, rfc5646_locale: 'fr', source_copy: "hello foo bar", approved: true, copy: "fake" # approved
+        FactoryBot.create :translation, key: key2, rfc5646_locale: 'de', source_copy: "hello foo bar", approved: nil,  copy: nil    # new
+        FactoryBot.create :translation, key: key2, rfc5646_locale: 'ja', source_copy: "hello foo bar", approved: nil,  copy: nil    # new
+        FactoryBot.create :translation, key: key2, rfc5646_locale: 'es', source_copy: "hello foo bar", approved: nil,  copy: "fake" # pending
+        FactoryBot.create :translation, key: key2, rfc5646_locale: 'tr', source_copy: "hello foo bar", approved: nil,  copy: nil    # new
 
-        commit1 = FactoryGirl.create(:commit, project: project1)
+        commit1 = FactoryBot.create(:commit, project: project1)
         commit1.keys = [key1, key2]
 
         # setup project2 and commit2
-        project2 = FactoryGirl.create(:project, targeted_rfc5646_locales: {'ja' => true, 'es' => false})
+        project2 = FactoryBot.create(:project, targeted_rfc5646_locales: {'ja' => true, 'es' => false})
 
-        key3 = FactoryGirl.create(:key, project: project2)
-        FactoryGirl.create :translation, key: key3, rfc5646_locale: 'ja', source_copy: "hello foo bar", approved: nil, copy: nil # new
-        FactoryGirl.create :translation, key: key3, rfc5646_locale: 'es', source_copy: "hello foo bar", approved: nil, copy: nil # new
-        FactoryGirl.create :translation, key: key3, rfc5646_locale: 'tr', source_copy: "hello foo bar", approved: nil, copy: nil # new
+        key3 = FactoryBot.create(:key, project: project2)
+        FactoryBot.create :translation, key: key3, rfc5646_locale: 'ja', source_copy: "hello foo bar", approved: nil, copy: nil # new
+        FactoryBot.create :translation, key: key3, rfc5646_locale: 'es', source_copy: "hello foo bar", approved: nil, copy: nil # new
+        FactoryBot.create :translation, key: key3, rfc5646_locale: 'tr', source_copy: "hello foo bar", approved: nil, copy: nil # new
 
-        commit2 = FactoryGirl.create(:commit, project: project2)
+        commit2 = FactoryBot.create(:commit, project: project2)
         commit2.keys = [key3]
 
         #---------------------------------------------------------------------------------------------------------------
@@ -107,11 +107,11 @@ describe ArticleAndCommitNotApprovedTranslationStats do
       end
 
       it "should memoize the stats hash on initialize so that it doesn't query the db later" do
-        project = FactoryGirl.create(:project)
-        commit = FactoryGirl.create(:commit, project: project)
-        key = FactoryGirl.create(:key, project: project)
+        project = FactoryBot.create(:project)
+        commit = FactoryBot.create(:commit, project: project)
+        key = FactoryBot.create(:key, project: project)
         commit.keys << key
-        translation = FactoryGirl.create(:translation, key: key)
+        translation = FactoryBot.create(:translation, key: key)
 
         expect_any_instance_of(ArticleAndCommitNotApprovedTranslationStats).to receive(:commit_translation_groups_with_stats).and_call_original
         stats = ArticleAndCommitNotApprovedTranslationStats.new([commit], [], [])
@@ -124,13 +124,13 @@ describe ArticleAndCommitNotApprovedTranslationStats do
   context "[Article]" do
     describe "#item_stat" do
       it "calculates translation stats for Article" do
-        article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'de' => true, 'es' => true, 'ja' => true })
-        section = FactoryGirl.create(:section, article: article)
-        key = FactoryGirl.create(:key, section: section, index_in_section: 0)
-        FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: "hello world", approved: true,  copy: "abc") # approved
-        FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'de', source_copy: "hello world", approved: nil,   copy: nil)   # new
-        FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', source_copy: "hello world", approved: nil,   copy: "abc") # pending
-        FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'ja', source_copy: "hello world", approved: false, copy: "abc") # pending
+        article = FactoryBot.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'de' => true, 'es' => true, 'ja' => true })
+        section = FactoryBot.create(:section, article: article)
+        key = FactoryBot.create(:key, section: section, index_in_section: 0)
+        FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: "hello world", approved: true,  copy: "abc") # approved
+        FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'de', source_copy: "hello world", approved: nil,   copy: nil)   # new
+        FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', source_copy: "hello world", approved: nil,   copy: "abc") # pending
+        FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'ja', source_copy: "hello world", approved: false, copy: "abc") # pending
 
         stats = ArticleAndCommitNotApprovedTranslationStats.new([], [article], [])
         expect(stats.item_stat(article, :translations, :new)).to eql(1)
@@ -140,24 +140,24 @@ describe ArticleAndCommitNotApprovedTranslationStats do
       end
 
       it "calculates stats for Article's required locales if no locales are inputted" do
-        article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'de' => true })
-        section = FactoryGirl.create(:section, article: article)
-        key = FactoryGirl.create(:key, section: section, index_in_section: 0)
-        FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', approved: nil, copy: nil)
-        FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', approved: nil, copy: nil) # not in one of required locales
+        article = FactoryBot.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'de' => true })
+        section = FactoryBot.create(:section, article: article)
+        key = FactoryBot.create(:key, section: section, index_in_section: 0)
+        FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', approved: nil, copy: nil)
+        FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', approved: nil, copy: nil) # not in one of required locales
 
         stats = ArticleAndCommitNotApprovedTranslationStats.new([], [article], [])
         expect(stats.item_stat(article, :translations, :new)).to eql(1)
       end
 
       it "doesn't calculate stats for translations of inactive articles" do
-        article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'de' => true, 'es' => true })
-        section = FactoryGirl.create(:section, article: article, active: false)
-        key = FactoryGirl.create(:key, section: section, index_in_section: 0)
+        article = FactoryBot.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'de' => true, 'es' => true })
+        section = FactoryBot.create(:section, article: article, active: false)
+        key = FactoryBot.create(:key, section: section, index_in_section: 0)
 
-        t1 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', approved: nil, copy: nil)
-        t2 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'de', approved: nil, copy: 'abc')
-        t3 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', approved: false, copy: 'abc')
+        t1 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', approved: nil, copy: nil)
+        t2 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'de', approved: nil, copy: 'abc')
+        t3 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', approved: false, copy: 'abc')
 
         stats = ArticleAndCommitNotApprovedTranslationStats.new([], [article], %w(fr de es).map { |l| Locale.from_rfc5646(l) })
         expect(stats.item_stat(article, :translations, :new)).to eql(0)
@@ -167,13 +167,13 @@ describe ArticleAndCommitNotApprovedTranslationStats do
       end
 
       it "doesn't calculate stats for translations of inactive keys" do
-        article = FactoryGirl.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'de' => true, 'es' => true })
-        section = FactoryGirl.create(:section, article: article, active: true)
-        key = FactoryGirl.create(:key, section: section, index_in_section: nil)
+        article = FactoryBot.create(:article, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'de' => true, 'es' => true })
+        section = FactoryBot.create(:section, article: article, active: true)
+        key = FactoryBot.create(:key, section: section, index_in_section: nil)
 
-        t1 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', approved: nil, copy: nil)
-        t2 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'de', approved: nil, copy: 'abc')
-        t3 = FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', approved: false, copy: 'abc')
+        t1 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', approved: nil, copy: nil)
+        t2 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'de', approved: nil, copy: 'abc')
+        t3 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', approved: false, copy: 'abc')
 
         stats = ArticleAndCommitNotApprovedTranslationStats.new([], [article], %w(fr de es).map { |l| Locale.from_rfc5646(l) })
         expect(stats.item_stat(article, :translations, :new)).to eql(0)
@@ -183,11 +183,11 @@ describe ArticleAndCommitNotApprovedTranslationStats do
       end
 
       it "should memoize the stats hash on initialize so that it doesn't query the db later" do
-        project = FactoryGirl.create(:project)
-        article = FactoryGirl.create(:article, project: project)
-        section = FactoryGirl.create(:section, article: article)
-        key = FactoryGirl.create(:key, project: project, section: section, index_in_section: 0)
-        translation = FactoryGirl.create(:translation, key: key)
+        project = FactoryBot.create(:project)
+        article = FactoryBot.create(:article, project: project)
+        section = FactoryBot.create(:section, article: article)
+        key = FactoryBot.create(:key, project: project, section: section, index_in_section: 0)
+        translation = FactoryBot.create(:translation, key: key)
 
         expect_any_instance_of(ArticleAndCommitNotApprovedTranslationStats).to receive(:article_translation_groups_with_stats).and_call_original
         stats = ArticleAndCommitNotApprovedTranslationStats.new([], [article], [])

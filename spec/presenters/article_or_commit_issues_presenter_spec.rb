@@ -12,20 +12,20 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe ArticleOrCommitIssuesPresenter do
+RSpec.describe ArticleOrCommitIssuesPresenter do
   def setup_commit_with_issues(status_counts={})
-    @commit = FactoryGirl.create(:commit)
+    @commit = FactoryBot.create(:commit)
     @project = @commit.project
-    @key = FactoryGirl.create(:key, project: @project)
+    @key = FactoryBot.create(:key, project: @project)
     @commit.keys << @key
-    @translation = FactoryGirl.create(:translation, key: @key)
+    @translation = FactoryBot.create(:translation, key: @key)
 
     @issues = []
     status_counts.each do |status, count|
       count.times do
-        issue = FactoryGirl.create(:issue, translation: @translation)
+        issue = FactoryBot.create(:issue, translation: @translation)
         issue.update_attributes(status: status)
         @issues << issue
       end
@@ -34,7 +34,7 @@ describe ArticleOrCommitIssuesPresenter do
 
   context "#issues" do
     it "should return an empty array given a commit with no issues" do
-      presenter = ArticleOrCommitIssuesPresenter.new(FactoryGirl.create(:commit))
+      presenter = ArticleOrCommitIssuesPresenter.new(FactoryBot.create(:commit))
       expect(presenter.issues).to be_blank
     end
 
@@ -47,7 +47,7 @@ describe ArticleOrCommitIssuesPresenter do
 
   context "#status_counts" do
     it "should set all counts to 0 given a commit with no issues" do
-      presenter = ArticleOrCommitIssuesPresenter.new(FactoryGirl.create(:commit))
+      presenter = ArticleOrCommitIssuesPresenter.new(FactoryBot.create(:commit))
       expect(presenter.status_counts).to eql([{ status: 1, status_desc: "Open", count: 0 }, { status: 2, status_desc: "In progress", count: 0 }, { status: 3, status_desc: "Resolved", count: 0 }, { status: 4, status_desc: "IceBox", count: 0 }])
     end
 

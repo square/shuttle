@@ -14,32 +14,32 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Exporter::Ios do
+RSpec.describe Exporter::Ios do
   before :each do
-    @project = FactoryGirl.create(:project)
+    @project = FactoryBot.create(:project)
     @en      = Locale.from_rfc5646('en-US')
     @de      = Locale.from_rfc5646('de-DE')
 
     # file 1
-    key1     = FactoryGirl.create(:key,
+    key1     = FactoryBot.create(:key,
                                   project: @project,
                                   key:     "I'm a string!",
                                   source:  '/Resources/en-US.lproj/Localizable-en-US.strings',
                                   context: "This is a normal string.")
-    key2     = FactoryGirl.create(:key,
+    key2     = FactoryBot.create(:key,
                                   project: @project,
                                   key:     "I'm also a string!",
                                   source:  '/Resources/en-US.lproj/Localizable-en-US.strings',
                                   context: "This is also a normal string.")
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           key1,
                        source_locale: @en,
                        locale:        @de,
                        source_copy:   "I'm a string!",
                        copy:          "Ich bin ein String!"
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           key2,
                        source_locale: @en,
                        locale:        @de,
@@ -47,23 +47,23 @@ describe Exporter::Ios do
                        copy:          "Ich bin auch ein String!"
 
     # file 2
-    key3 = FactoryGirl.create(:key,
+    key3 = FactoryBot.create(:key,
                               project: @project,
                               key:     "Hello, world!",
                               source:  '/Resources/en-US.lproj/More.strings',
                               context: "Saying hello.")
-    key4 = FactoryGirl.create(:key,
+    key4 = FactoryBot.create(:key,
                               project: @project,
                               key:     "Goodbye, cruel world.",
                               source:  '/Resources/en-US.lproj/More.strings',
                               context: "Saying goodbye.")
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           key3,
                        source_locale: @en,
                        locale:        @de,
                        source_copy:   "Hello, world!",
                        copy:          "Hallo, Welt!"
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           key4,
                        source_locale: @en,
                        locale:        @de,
@@ -71,18 +71,18 @@ describe Exporter::Ios do
                        copy:          "Auf Wiedersehen, grausamer Welt."
 
     # red herring; not a .strings file
-    key5 = FactoryGirl.create(:key,
+    key5 = FactoryBot.create(:key,
                               project: @project,
                               key:     "red herring",
                               source:  '/Resources/en-US.lproj/Some.xib')
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           key5,
                        source_locale: @en,
                        locale:        @de,
                        source_copy:   "red herring",
                        copy:          "rote herring"
 
-    @commit      = FactoryGirl.create(:commit, project: @project)
+    @commit      = FactoryBot.create(:commit, project: @project)
     @commit.keys = [key1, key2, key3, key4, key5]
   end
 
@@ -96,7 +96,7 @@ describe Exporter::Ios do
       while (entry = archive.next_header)
         expect(entry).to be_regular
         contents = archive.read_data
-        # contents.should start_with("\xFF\xFE") -- Some bug in Rspec prevents this from working. 
+        # contents.should start_with("\xFF\xFE") -- Some bug in Rspec prevents this from working.
         expect(contents.bytes.to_a[0]).to eq(0xFF)
         expect(contents.bytes.to_a[1]).to eq(0xFE)
         entries[entry.pathname] = contents.force_encoding('UTF-16LE')

@@ -14,12 +14,12 @@
 
 require "spec_helper"
 
-describe ScreenshotMailer do
+RSpec.describe ScreenshotMailer do
   describe 'request_screenshot' do
-    let(:translator)    { FactoryGirl.create(:user) }
-    let(:developer)     { FactoryGirl.create(:user) }
+    let(:translator)    { FactoryBot.create(:user) }
+    let(:developer)     { FactoryBot.create(:user) }
     let(:author_email)  { 'author@example.com' }
-    let(:commit)        { FactoryGirl.create(:commit, user: developer, author_email: author_email) }
+    let(:commit)        { FactoryBot.create(:commit, user: developer, author_email: author_email) }
     let(:mail)          { ScreenshotMailer.request_screenshot(commit, translator)}
 
     it 'renders the subject' do

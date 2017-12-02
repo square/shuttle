@@ -12,15 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe SortingHelper do
+RSpec.describe SortingHelper do
   describe "#order_by_elasticsearch_result_order" do
     before do
-      project = FactoryGirl.create(:project)
-      @commit1 = FactoryGirl.create(:commit, project: project)
-      @commit2 = FactoryGirl.create(:commit, project: project)
-      @commit3 = FactoryGirl.create(:commit, project: project)
+      project = FactoryBot.create(:project)
+      @commit1 = FactoryBot.create(:commit, project: project)
+      @commit2 = FactoryBot.create(:commit, project: project)
+      @commit3 = FactoryBot.create(:commit, project: project)
 
       @commits = [@commit1, @commit2, @commit3]
       @es_objects = [double('es_result', id: @commit2.id),

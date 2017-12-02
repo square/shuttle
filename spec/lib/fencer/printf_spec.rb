@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Fencer::Printf do
+RSpec.describe Fencer::Printf do
   describe ".fence" do
     it "should correctly fence all examples from the printf documentation" do
       expect(Fencer::Printf.fence(%|printf ("Characters: %c %c \n", 'a', 65);|)).

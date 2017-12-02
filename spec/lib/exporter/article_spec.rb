@@ -14,9 +14,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Exporter::Article do
+RSpec.describe Exporter::Article do
   describe "#export" do
     before :all do
       @fr_locale = Locale.from_rfc5646('fr')
@@ -25,8 +25,8 @@ describe Exporter::Article do
     end
 
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: nil)
-      @article = FactoryGirl.create(:article, project: @project, ready: false,
+      @project = FactoryBot.create(:project, repository_url: nil)
+      @article = FactoryBot.create(:article, project: @project, ready: false,
                                       sections_hash: { "title" => "a", "body" => "<p>hello</p><p>world</p>" },
                                       base_rfc5646_locale: 'en',
                                       targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
@@ -94,8 +94,8 @@ describe Exporter::Article do
     it "exports translations in one locale" do
       @fr_locale = Locale.from_rfc5646('fr')
 
-      @project = FactoryGirl.create(:project, repository_url: nil)
-      @article = FactoryGirl.create(:article, project: @project,
+      @project = FactoryBot.create(:project, repository_url: nil)
+      @article = FactoryBot.create(:article, project: @project,
                                     sections_hash: { "title" => "a", "body" => "<p>hello</p><p>world</p>" },
                                     base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'fr' => true })
@@ -111,8 +111,8 @@ describe Exporter::Article do
     end
 
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: nil)
-      @article = FactoryGirl.create(:article, project: @project,
+      @project = FactoryBot.create(:project, repository_url: nil)
+      @article = FactoryBot.create(:article, project: @project,
                                     sections_hash: { "main" => "<p>hello</p><p>world</p>" },
                                     base_rfc5646_locale: 'en',
                                     targeted_rfc5646_locales: { 'fr' => true, 'es' => true })

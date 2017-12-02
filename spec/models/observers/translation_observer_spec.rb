@@ -12,18 +12,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe TranslationObserver do
+RSpec.describe TranslationObserver do
   context "[translation changes]" do
     before :each do
-      @trans = FactoryGirl.create(:translation)
+      @trans = FactoryBot.create(:translation)
     end
 
     it "should log the change and the changer when a user changes the translation" do
       old_copy   = @trans.copy
       new_copy   = "A new translation"
-      translator = FactoryGirl.create(:user)
+      translator = FactoryBot.create(:user)
       expect {
         @trans.copy     = new_copy
         @trans.modifier = translator
@@ -35,7 +35,7 @@ describe TranslationObserver do
     end
 
     it "should log the approval and the approver when a user approves the translation" do
-      approver = FactoryGirl.create(:user)
+      approver = FactoryBot.create(:user)
       expect {
         @trans.approved = true
         @trans.modifier = approver

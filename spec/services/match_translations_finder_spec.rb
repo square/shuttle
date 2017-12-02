@@ -12,8 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe MatchTranslationsFinder do
+RSpec.describe MatchTranslationsFinder do
   # some integration tests exist in translation_controller_spec.rb
 end

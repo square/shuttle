@@ -14,17 +14,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 require 'fileutils'
 
-describe CommitsController do
-  shared_examples_for "returns error string if repository_url is blank" do |action|
+RSpec.describe CommitsController do
+  RSpec.shared_examples_for "returns error string if repository_url is blank" do |action|
+
     it "should return an error string if repository_url is blank" do
-      user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
+      user = FactoryBot.create(:user, :confirmed, role: 'monitor')
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in user
 
-      project = FactoryGirl.create(:project, repository_url: nil)
+      project = FactoryBot.create(:project, repository_url: nil)
       post action, project_id: project.to_param, id: 'HEAD', format: 'json'
       expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
     end
@@ -33,7 +34,7 @@ describe CommitsController do
 
   describe "#manifest" do
     before :each do
-      @project      = FactoryGirl.create(:project,
+      @project      = FactoryBot.create(:project,
                                          base_rfc5646_locale:      'en-US',
                                          targeted_rfc5646_locales: {'en-US' => true, 'en' => true, 'fr' => true, 'de' => false},
                                          repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
@@ -43,12 +44,12 @@ describe CommitsController do
       @commit.update_attributes(loading: false, loaded_at: Time.now)
       @newer_commit.update_attributes(loading: false, loaded_at: Time.now)
 
-      key1 = FactoryGirl.create(:key,
+      key1 = FactoryBot.create(:key,
                                 project: @project,
                                 key:     'key1',
                                 context: "Universal Greeting",
                                 source:  'foo/bar.txt')
-      key2 = FactoryGirl.create(:key,
+      key2 = FactoryBot.create(:key,
                                 project: @project,
                                 key:     'key2',
                                 context: "Shopping cart contents",
@@ -56,14 +57,14 @@ describe CommitsController do
 
       @commit.keys = [key1, key2]
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key1,
                          source_copy:           "Hi {name}! You have {count} items.",
                          copy:                  "Hi {name}! You have {count} items.",
                          source_rfc5646_locale: 'en-US',
                          rfc5646_locale:        'en',
                          approved:              true
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key1,
                          source_copy:           "Hi {name}! You have {count} items.",
                          copy:                  "Bonjour {name}! Avec anninas fromage {count} la bouches.",
@@ -71,21 +72,21 @@ describe CommitsController do
                          rfc5646_locale:        'fr',
                          approved:              true
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key2,
                          source_copy:           "Your cart has {count} items",
                          copy:                  "Your cart has {count} items",
                          source_rfc5646_locale: 'en-US',
                          rfc5646_locale:        'en',
                          approved:              true
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key2,
                          source_copy:           "Hi {name}! You have {count} items.",
                          copy:                  "Tu avec carté {count} itém has",
                          source_rfc5646_locale: 'en-US',
                          rfc5646_locale:        'fr',
                          approved:              true
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key2,
                          source_copy:           "Hi {name}! You have {count} items.",
                          copy:                  "Hallo {name}! Du hast {count} Itemen.",
@@ -338,31 +339,31 @@ de:
 
   describe '#localize' do
     before :each do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     base_rfc5646_locale:      'en',
                                     targeted_rfc5646_locales: {'en' => true, 'de' => true, 'fr' => true, 'zh' => false},
                                     repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit  = @project.commit!('HEAD', skip_import: true)
 
-      key1 = FactoryGirl.create(:key,
+      key1 = FactoryBot.create(:key,
                                 project:      @project,
                                 key:          'file-en.svg:/*/*[1]',
                                 original_key: '/*/*[1]',
                                 source:       'file-en.svg')
-      key2 = FactoryGirl.create(:key,
+      key2 = FactoryBot.create(:key,
                                 project:      @project,
                                 key:          'file-en.svg:/*/*[2]/*',
                                 original_key: '/*/*[2]/*',
                                 source:       'file-en.svg')
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key1,
                          source_rfc5646_locale: 'en',
                          rfc5646_locale:        'de',
                          source_copy:           "Hello, world!",
                          copy:                  "Hallo, Welt!",
                          approved:              true
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key2,
                          source_rfc5646_locale: 'en',
                          rfc5646_locale:        'de',
@@ -370,14 +371,14 @@ de:
                          copy:                  "Gruppierten text",
                          approved:              true
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key1,
                          source_rfc5646_locale: 'en',
                          rfc5646_locale:        'fr',
                          source_copy:           "Hello, world!",
                          copy:                  "Bonjour tut le monde!",
                          approved:              true
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key2,
                          source_rfc5646_locale: 'en',
                          rfc5646_locale:        'fr',
@@ -385,14 +386,14 @@ de:
                          copy:                  "Texte groupé",
                          approved:              true
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key1,
                          source_rfc5646_locale: 'en',
                          rfc5646_locale:        'zh',
                          source_copy:           "Hello, world!",
                          copy:                  "你好，世界！",
                          approved:              true
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:                   key2,
                          source_rfc5646_locale: 'en',
                          rfc5646_locale:        'zh',
@@ -530,19 +531,19 @@ de:
     before :each do
       reset_elastic_search
 
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     base_rfc5646_locale:      'en',
                                     targeted_rfc5646_locales: { 'en' => true, 'fr' => true, 'es' => false },
                                     repository_url:           Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
 
       @commit = @project.commit!('HEAD', skip_import: true)
-      other_commit = FactoryGirl.create(:commit, project: @project)
-      other_commit.keys = [FactoryGirl.create(:key, project: @project).tap(&:add_pending_translations)]
-      @keys = FactoryGirl.create_list(:key, 51, project: @project, ready: false).sort_by(&:key)
+      other_commit = FactoryBot.create(:commit, project: @project)
+      other_commit.keys = [FactoryBot.create(:key, project: @project).tap(&:add_pending_translations)]
+      @keys = FactoryBot.create_list(:key, 51, project: @project, ready: false).sort_by(&:key)
       @keys.each &:add_pending_translations
       @commit.keys = @keys
 
-      @user = FactoryGirl.create(:user, :activated)
+      @user = FactoryBot.create(:user, :activated)
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
@@ -564,7 +565,7 @@ de:
     end
 
     it 'should filter by the key name' do
-      new_key = FactoryGirl.create(:key, project: @project, key: 'test_key').tap(&:add_pending_translations)
+      new_key = FactoryBot.create(:key, project: @project, key: 'test_key').tap(&:add_pending_translations)
       @commit.keys = @keys << new_key
       sleep 1
 
@@ -575,7 +576,7 @@ de:
     end
 
     it 'filters by requested status' do
-      approved_key = FactoryGirl.create(:key, project: @project, key: 'approved_key', ready: true)
+      approved_key = FactoryBot.create(:key, project: @project, key: 'approved_key', ready: true)
       @commit.keys = @keys << approved_key
       sleep 1
 
@@ -595,12 +596,12 @@ de:
 
   describe '#create' do
     before :each do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     skip_imports: Importer::Base.implementations.map(&:ident) - %w(yaml))
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
+      @user = FactoryBot.create(:user, :confirmed, role: 'monitor')
       sign_in @user
 
       keys = Shuttle::Redis.keys('submitted_revision:*')
@@ -639,7 +640,7 @@ de:
     end
 
     it "should not create a commit if repository_url is blank" do
-      project = FactoryGirl.create(:project, repository_url: nil)
+      project = FactoryBot.create(:project, repository_url: nil)
       expect(Project).to_not receive(:find)
       post :create, project_id: project.to_param, commit: {revision: 'HEAD'}
       expect(response.body).to include("This project does not have a repository url. This action only applies to projects that have a repository.")
@@ -662,10 +663,10 @@ de:
 
   describe '#destroy' do
     before :each do
-      @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit                        = @project.commit!('HEAD', skip_import: true)
       @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, :confirmed, role: 'admin')
+      @user = FactoryBot.create(:user, :confirmed, role: 'admin')
       sign_in @user
     end
 
@@ -687,19 +688,19 @@ de:
     render_views
 
     before :each do
-      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar")
+      @user = FactoryBot.create(:user, :confirmed, role: 'monitor', first_name: "Foo", last_name: "Bar")
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
     end
 
     it "should return the issues" do
-      commit = FactoryGirl.create(:commit)
+      commit = FactoryBot.create(:commit)
       project = commit.project
-      key = FactoryGirl.create(:key, project: project)
+      key = FactoryBot.create(:key, project: project)
       commit.keys << key
-      translation = FactoryGirl.create(:translation, key: key)
+      translation = FactoryBot.create(:translation, key: key)
 
-      issues = 3.times.map { FactoryGirl.create(:issue).tap{|issue| translation.issues << issue } }
+      issues = 3.times.map { FactoryBot.create(:issue).tap{|issue| translation.issues << issue } }
 
       get :issues, project_id: translation.key.project.to_param, id: commit.to_param, format: 'html'
       expect(response).to be_ok

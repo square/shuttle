@@ -12,16 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe KeyTranslationAdderAndRemover do
+RSpec.describe KeyTranslationAdderAndRemover do
   describe "#perform" do
     it "adds missing translations and removes excluded untranslated translations" do
-      project = FactoryGirl.create(:project, :light, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true}, base_rfc5646_locale: 'en')
-      key = FactoryGirl.create(:key, key: "firstkey",  project: project)
-      FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en', source_copy: 'fake', copy: 'fake', approved: true)
-      FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', source_copy: 'fake', copy: 'fake', approved: true)
-      FactoryGirl.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: 'fake', copy: nil, approved: nil)
+      project = FactoryBot.create(:project, :light, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true}, base_rfc5646_locale: 'en')
+      key = FactoryBot.create(:key, key: "firstkey",  project: project)
+      FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en', source_copy: 'fake', copy: 'fake', approved: true)
+      FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'es', source_copy: 'fake', copy: 'fake', approved: true)
+      FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: 'fake', copy: nil, approved: nil)
 
       expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once).once # because we will call KeyTranslationAdderAndRemover manually
       project.update! key_locale_exclusions: { 'fr' => ["*firstkey*"] }, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true, 'ja'=>true}

@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe CommitObserver do
+RSpec.describe CommitObserver do
   context "[mail hooks]" do
     context "[on loading_finished]" do
       context "[with import errors]" do
@@ -24,16 +24,16 @@ describe CommitObserver do
           CommitImporter::Finisher.new.on_success(true, 'commit_id' => commit.id)
           commit.reload
           expect(ActionMailer::Base.deliveries.map(&:subject)).to include("[Shuttle] Error(s) occurred during the import")
-          expect(commit.import_errors.sort).to eql([["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"],
-                                                    ["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
-                                                    ["ExecJS::RuntimeError", "SyntaxError: Unexpected identifier (in /ember-broken/en-US.js)"]].sort)
+          expect(commit.import_errors).to match_array([["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
+                                                       ["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"],
+                                                       ["ExecJS::RuntimeError", "Exception: SyntaxError (in /ember-broken/en-US.js)"]])
 
           expect(Blob.where(errored: true).count).to eql(3)
         end
 
         it "should email if commit has import errors after submitting twice" do
-          user = FactoryGirl.create(:user)
-          project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
+          user = FactoryBot.create(:user)
+          project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s)
 
           commit_and_expect_import_errors(project, 'a82cf69f11618883e534189dea61f234da914462', user)
           expect(Blob.count).to eql(3)
@@ -45,8 +45,8 @@ describe CommitObserver do
 
       context "[without import errors]" do
         it "sends an email to the translators and cc's the user when loading changes to false from true if not all keys are translated yet" do
-          @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil, user: FactoryGirl.create(:user))
-          @key = FactoryGirl.create(:key, project: @commit.project, ready: false)
+          @commit = FactoryBot.create(:commit, loading: true, loaded_at: nil, user: FactoryBot.create(:user))
+          @key = FactoryBot.create(:key, project: @commit.project, ready: false)
           @commit.keys << @key
 
           ActionMailer::Base.deliveries.clear
@@ -61,8 +61,8 @@ describe CommitObserver do
         end
 
         it "sends one email to the translators when loading changes to false if the commit has no user if not all keys are translated yet" do
-          @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil)
-          @key = FactoryGirl.create(:key, project: @commit.project, ready: false)
+          @commit = FactoryBot.create(:commit, loading: true, loaded_at: nil)
+          @key = FactoryBot.create(:key, project: @commit.project, ready: false)
           @commit.keys << @key
 
           ActionMailer::Base.deliveries.clear
@@ -76,7 +76,7 @@ describe CommitObserver do
         end
 
         it "does not send an email if the commit was previously ready" do
-          @commit = FactoryGirl.create(:commit, loading: true, loaded_at: nil, user: FactoryGirl.create(:user), completed_at: 1.day.ago)
+          @commit = FactoryBot.create(:commit, loading: true, loaded_at: nil, user: FactoryBot.create(:user), completed_at: 1.day.ago)
           ActionMailer::Base.deliveries.clear
           @commit.loading = false
           @commit.save!
@@ -84,8 +84,8 @@ describe CommitObserver do
         end
 
         it "does not send an email when a new commit is loaded if all keys are already translated" do
-          commit = FactoryGirl.create(:commit, loading: true)
-          key = FactoryGirl.create(:key, project: commit.project, ready: true)
+          commit = FactoryBot.create(:commit, loading: true)
+          key = FactoryBot.create(:key, project: commit.project, ready: true)
           commit.keys << key
           ActionMailer::Base.deliveries.clear
           commit.update! loading: false
@@ -96,7 +96,7 @@ describe CommitObserver do
 
     context "[on became_ready]" do
       it "sends an email when ready changes to true from false" do
-        @commit = FactoryGirl.create(:commit, ready: false, user: FactoryGirl.create(:user, email: "author@xample.com"))
+        @commit = FactoryBot.create(:commit, ready: false, user: FactoryBot.create(:user, email: "author@xample.com"))
 
         @commit.project.key_inclusions += %w(inc_key_1 inc_key_2)
         @commit.project.key_exclusions += %w(exc_key_1 exc_key_2 exc_key_3)
@@ -148,7 +148,7 @@ describe CommitObserver do
       end
 
       it "should not send an email when ready changes to true from false if the commit has no user or the user has no email" do
-        @commit = FactoryGirl.create(:commit, ready: false)
+        @commit = FactoryBot.create(:commit, ready: false)
         ActionMailer::Base.deliveries.clear
         @commit.ready = true
         @commit.save!
@@ -165,12 +165,12 @@ describe CommitObserver do
     context "[stash]" do
       context "[with a stash_webhook_url]" do
         before(:each) do
-          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, stash_webhook_url: "http://example.com")
-          @commit = FactoryGirl.create(:commit, project: @project, ready: false, loading: false)
+          @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, stash_webhook_url: "http://example.com")
+          @commit = FactoryBot.create(:commit, project: @project, ready: false, loading: false)
         end
 
         it "enqueues a StashWebhookPinger job when a commit is created" do
-          commit = FactoryGirl.build(:commit, project: @project)
+          commit = FactoryBot.build(:commit, project: @project)
           expect(StashWebhookPinger).to receive(:perform_once)
           commit.save!
         end
@@ -210,12 +210,12 @@ describe CommitObserver do
 
       context "[without a stash_webhook_url]" do
         before(:each) do
-          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, stash_webhook_url: nil)
-          @commit = FactoryGirl.create(:commit, project: @project, ready: false, loading: false)
+          @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, stash_webhook_url: nil)
+          @commit = FactoryBot.create(:commit, project: @project, ready: false, loading: false)
         end
 
         it "does not enqueue a StashWebhookPinger job when a commit is created" do
-          commit = FactoryGirl.build(:commit, project: @project)
+          commit = FactoryBot.build(:commit, project: @project)
           expect(StashWebhookPinger).to_not receive(:perform_once)
           commit.save!
         end
@@ -230,8 +230,8 @@ describe CommitObserver do
       context "[without a repository_url]" do
         it "does not enqueue a StashWebhookPinger job when a commit is created or when it becomes ready" do
           expect(StashWebhookPinger).to_not receive(:perform_once)
-          project = FactoryGirl.create(:project, repository_url: nil, stash_webhook_url: "http://example.com")
-          commit = FactoryGirl.create(:commit, project: project, ready: false, loading: false)
+          project = FactoryBot.create(:project, repository_url: nil, stash_webhook_url: "http://example.com")
+          commit = FactoryBot.create(:commit, project: project, ready: false, loading: false)
           commit.update! ready: true
           commit.save!
         end
@@ -241,12 +241,12 @@ describe CommitObserver do
     context "[github]" do
       context "[with a github_webhook_url]" do
         before(:each) do
-          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, github_webhook_url: "http://example.com")
-          @commit = FactoryGirl.create(:commit, project: @project, ready: false, loading: false)
+          @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, github_webhook_url: "http://example.com")
+          @commit = FactoryBot.create(:commit, project: @project, ready: false, loading: false)
         end
 
         it "does not enqueue a GithubWebhookPinger job when a commit is created" do
-          @commit = FactoryGirl.build(:commit, project: @project, ready: true)
+          @commit = FactoryBot.build(:commit, project: @project, ready: true)
           expect(GithubWebhookPinger).to_not receive(:perform_once)
           @commit.save!
         end
@@ -273,8 +273,8 @@ describe CommitObserver do
 
       context "[without a github_webhook_url]" do
         before(:each) do
-          @project = FactoryGirl.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, github_webhook_url: nil)
-          @commit = FactoryGirl.create(:commit, project: @project, ready: false, loading: false)
+          @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, github_webhook_url: nil)
+          @commit = FactoryBot.create(:commit, project: @project, ready: false, loading: false)
         end
 
         it "does not enqueue a GithubWebhookPinger job when a commit's ready field changes" do
@@ -287,8 +287,8 @@ describe CommitObserver do
       context "[without a repository_url]" do
         it "does not enqueue a GithubWebhookPinger job when a commit is created or when it becomes ready" do
           expect(GithubWebhookPinger).to_not receive(:perform_once)
-          project = FactoryGirl.create(:project, repository_url: nil, github_webhook_url: "http://example.com")
-          commit = FactoryGirl.create(:commit, project: project, ready: false, loading: false)
+          project = FactoryBot.create(:project, repository_url: nil, github_webhook_url: "http://example.com")
+          commit = FactoryBot.create(:commit, project: project, ready: false, loading: false)
           commit.update! ready: true
           commit.save!
         end
@@ -302,7 +302,7 @@ describe CommitObserver do
      [false, false, false],
      [true, false, false]].each do |before, after, result|
       it "returns #{result} if ready went from #{before} false to #{after}" do
-        commit = FactoryGirl.create(:commit)
+        commit = FactoryBot.create(:commit)
         commit.update! ready: before
         commit.reload.update! ready: after
         expect(CommitObserver.instance.send(:just_became_ready?, commit)).to eql(result)
@@ -316,7 +316,7 @@ describe CommitObserver do
      [false, false, false],
      [true, false, true]].each do |before, after, result|
       it "returns #{result} if loading went from #{before} false to #{after}" do
-        commit = FactoryGirl.create(:commit)
+        commit = FactoryBot.create(:commit)
         commit.update! loading: before
         commit.reload.update! loading: after
         expect(CommitObserver.instance.send(:just_finished_loading?, commit)).to eql(result)

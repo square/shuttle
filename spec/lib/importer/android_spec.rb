@@ -14,14 +14,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Importer::Android do
+RSpec.describe Importer::Android do
   describe "#import_file?" do
     before :each do
-      @project = FactoryGirl.create(:project, base_rfc5646_locale: 'en')
-      @commit = FactoryGirl.create(:commit, project: @project)
-      @blob = FactoryGirl.create(:fake_blob, project: @project)
+      @project = FactoryBot.create(:project, base_rfc5646_locale: 'en')
+      @commit = FactoryBot.create(:commit, project: @project)
+      @blob = FactoryBot.create(:fake_blob, project: @project)
     end
 
     it "should return false if it's not an XML file" do
@@ -54,7 +54,7 @@ describe Importer::Android do
 
   describe "#import_strings" do
     before :each do
-      @project = FactoryGirl.create(:project,
+      @project = FactoryBot.create(:project,
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     only_paths:     %w(java/),
                                     skip_imports:   Importer::Base.implementations.map(&:ident) - %w(android))
@@ -90,7 +90,7 @@ describe Importer::Android do
 
     it "should properly strip non-explicit new lines" do
       expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:implied_new_lines').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("Hello Hello World!!\n\nHello World.")
-    end 
+    end
 
     it "should add comments as context" do
       k = @project.keys.for_key('/java/basic-hdpi/strings.xml:with_context').first

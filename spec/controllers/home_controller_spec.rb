@@ -12,25 +12,25 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe HomeController do
+RSpec.describe HomeController do
   before :each do
     allow_any_instance_of(Article).to receive(:import!) # prevent auto import
 
     reset_elastic_search
     @request.env['devise.mapping'] = Devise.mappings[:user]
-    @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
+    @user = FactoryBot.create(:user, :confirmed, role: 'monitor')
     sign_in @user
 
-    @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'ja'=>true, 'es'=>false}, base_rfc5646_locale: 'en')
-    @commit = FactoryGirl.create(:commit, project: @project)
-    @commit_key = FactoryGirl.create(:key, project: @project)
+    @project = FactoryBot.create(:project, targeted_rfc5646_locales: {'ja'=>true, 'es'=>false}, base_rfc5646_locale: 'en')
+    @commit = FactoryBot.create(:commit, project: @project)
+    @commit_key = FactoryBot.create(:key, project: @project)
     @commit.keys << @commit_key
 
-    @article = FactoryGirl.create(:article, project: @project)
-    @section = FactoryGirl.create(:section, article: @article)
-    @article_key = FactoryGirl.create(:key, section: @section, index_in_section: 0)
+    @article = FactoryBot.create(:article, project: @project)
+    @section = FactoryBot.create(:section, article: @article)
+    @article_key = FactoryBot.create(:key, section: @section, index_in_section: 0)
 
     regenerate_elastic_search_indexes
     sleep(2)
@@ -38,11 +38,11 @@ describe HomeController do
 
   context "[when 'uncompleted' filter is selected and locales are specified]" do
     it "returns the commit/article with pending translations in specified locales, even if that commit/article is ready and the locale is optional" do
-      FactoryGirl.create(:translation, key: @commit_key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
+      FactoryBot.create(:translation, key: @commit_key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
       @commit_key.update_columns ready: true
       @commit.update_columns ready: true
 
-      FactoryGirl.create(:translation, key: @article_key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
+      FactoryBot.create(:translation, key: @article_key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
       @article_key.update_columns ready: true
       @article.update_columns ready: true
 
@@ -52,11 +52,11 @@ describe HomeController do
     end
 
     it "doesn't return the commit/article with no pending translations in specified locales, even if that commit/article is not ready and the locale is required" do
-      FactoryGirl.create(:translation, key: @commit_key, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: true)
+      FactoryBot.create(:translation, key: @commit_key, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: true)
       @commit_key.update_columns ready: false
       @commit.update_columns ready: false
 
-      FactoryGirl.create(:translation, key: @article_key, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: true)
+      FactoryBot.create(:translation, key: @article_key, rfc5646_locale: 'ja', source_rfc5646_locale: 'en', approved: true)
       @article_key.update_columns ready: false
       @article.update_columns ready: false
 
@@ -66,7 +66,7 @@ describe HomeController do
     end
 
     it "should return all hidden articles" do
-      hidden_article = FactoryGirl.create(:article, project: @project, hidden: true)
+      hidden_article = FactoryBot.create(:article, project: @project, hidden: true)
 
       get :index, { filter__status: 'hidden' }
       expect(assigns(:articles).map(&:id)).to eq([hidden_article.id])
@@ -75,8 +75,8 @@ describe HomeController do
 
   context "[when only 'all translations' and 'all projects' filters are selected]" do
     it 'should return all translations in all projects' do
-      commit1 = FactoryGirl.create(:commit, project: @project, ready: false)
-      commit2 = FactoryGirl.create(:commit, project: @project)
+      commit1 = FactoryBot.create(:commit, project: @project, ready: false)
+      commit2 = FactoryBot.create(:commit, project: @project)
       regenerate_elastic_search_indexes
       sleep(2)
 

@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Reports::TranslationWordReport do
+RSpec.describe Reports::TranslationWordReport do
   describe '#generate_csv' do
     it 'throws an exception if start_date is nil' do
       expect { Reports::TranslationWordReport.generate_csv(nil, Date.today) }.to raise_error(ArgumentError)
@@ -38,14 +38,14 @@ describe Reports::TranslationWordReport do
         @translation_date = @start_date.next_day
         @match_percentage = 78
 
-        project = FactoryGirl.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
-        key1 = FactoryGirl.create(:key, project: project)
-        key2 = FactoryGirl.create(:key, project: project)
-        key3 = FactoryGirl.create(:key, project: project)
+        project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
+        key1 = FactoryBot.create(:key, project: project)
+        key2 = FactoryBot.create(:key, project: project)
+        key3 = FactoryBot.create(:key, project: project)
 
-        FactoryGirl.create(:translation, key: key1, rfc5646_locale: 'fr', translation_date: @translation_date, tm_match: @match_percentage)
-        FactoryGirl.create(:translation, key: key2, rfc5646_locale: 'it', translation_date: @translation_date, tm_match: @match_percentage)
-        FactoryGirl.create(:translation, key: key3, rfc5646_locale: 'it', translation_date: @translation_date, tm_match: @match_percentage)
+        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', translation_date: @translation_date, tm_match: @match_percentage)
+        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', translation_date: @translation_date, tm_match: @match_percentage)
+        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', translation_date: @translation_date, tm_match: @match_percentage)
 
         csv = Reports::TranslationWordReport.generate_csv(@start_date, @end_date)
         @result = CSV.parse(csv)

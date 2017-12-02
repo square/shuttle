@@ -44,8 +44,9 @@ module LocaleField
   #   @option options [Symbol] from The database column that will store the
   #     serialized Locale. By default it's the name of the field with "rfc5646_"
   #     prepended.
-  #   @option options [Hash] validations Additional validations or validation
-  #     options to apply to the field.
+  #   @option options [Hash] validations Additional validation options to apply
+  #     to the format validator. Do not use this to apply additional
+  #     EachValidators.
 
   def locale_field(*fields)
     options = fields.extract_options!
@@ -65,9 +66,18 @@ module LocaleField
         send :"#{field_from}=", (value ? writer.(value) : nil)
       end
 
-      validate field, (options[:validations] || {}).reverse_merge(
-          format:   {with: Locale::RFC5646_FORMAT}
-      )
+      if options[:validate_proc]
+        validate do |obj|
+          Array(options[:validate_proc].call(obj.send(field_from))).each do |rfc5646_locale|
+            if Locale::RFC5646_FORMAT !~ rfc5646_locale
+              obj.errors.add field, :invalid
+              break
+            end
+          end
+        end
+      else
+        validates field_from, format: {with: Locale::RFC5646_FORMAT}.reverse_merge(options[:validations] || {})
+      end
     end
   end
 end

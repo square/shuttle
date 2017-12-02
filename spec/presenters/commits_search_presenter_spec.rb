@@ -1,8 +1,8 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe CommitsSearchPresenter do
+RSpec.describe CommitsSearchPresenter do
   let!(:project) do
-    FactoryGirl.create(:project,
+    FactoryBot.create(:project,
                        base_rfc5646_locale:      'en',
                        targeted_rfc5646_locales: {'fr' => true, 'es' => true, 'es-US' => true,
                                                   'en-GB' => true, 'en-US' => false, 'ja' => false},
@@ -48,25 +48,25 @@ describe CommitsSearchPresenter do
 
   describe '#translation_text' do
     it 'should have expected translations text when copy is empty' do
-      translation = FactoryGirl.create(:translation, copy: "")
+      translation = FactoryBot.create(:translation, copy: "")
       presenter = CommitsSearchPresenter.new(nil, true, project)
       expect(presenter.translation_text(translation)).to eql "(empty string)"
     end
 
     it 'should have expected translations text when copy is just whitespace' do
-      translation = FactoryGirl.create(:translation, copy: "  ")
+      translation = FactoryBot.create(:translation, copy: "  ")
       presenter = CommitsSearchPresenter.new(nil, true, project)
       expect(presenter.translation_text(translation)).to eql "(2 whitespace string)"
     end
 
     it 'should have expected translations text when copy has content with length less than 31 characters' do
-      translation = FactoryGirl.create(:translation, copy: "test string")
+      translation = FactoryBot.create(:translation, copy: "test string")
       presenter = CommitsSearchPresenter.new(nil, true, project)
       expect(presenter.translation_text(translation)).to eql "test string"
     end
 
     it 'should have expected translations text when copy has content with length more than 31 characters' do
-      translation = FactoryGirl.create(:translation, copy: ("a" * 35))
+      translation = FactoryBot.create(:translation, copy: ("a" * 35))
       presenter = CommitsSearchPresenter.new(nil, true, project)
       expect(presenter.translation_text(translation)).to eql "a" * 31
     end

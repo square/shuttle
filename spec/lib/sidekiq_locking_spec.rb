@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe "SidekiqLockingSpec" do
+RSpec.describe "SidekiqLockingSpec" do
   class TestWorker
     include Sidekiq::Worker
     sidekiq_options queue: :low
@@ -23,10 +23,6 @@ describe "SidekiqLockingSpec" do
     end
 
     include SidekiqLocking
-  end
-
-  before :each do
-    Shuttle::Redis.flushall
   end
 
   describe "#perform_with_locking" do

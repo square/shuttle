@@ -15,9 +15,9 @@
 # Any model with a column that stores the batch id can be used. The specs in this file will be using
 # the Commit model, for no specific reason.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe SidekiqBatchManager do
+RSpec.describe SidekiqBatchManager do
   class BatchFinisher
     def on_success(_status, options)
     end
@@ -27,7 +27,7 @@ describe SidekiqBatchManager do
     # remove methods that will be defined later
     [:import_batch, :import_batch_status].each { |method_name| Commit.send :remove_method, method_name }
     Commit.extend SidekiqBatchManager
-    @commit = FactoryGirl.create(:commit)
+    @commit = FactoryBot.create(:commit)
   end
 
   after :each do
