@@ -1,0 +1,12 @@
+- content_for :shuttle_title do
+  = "Incoming New Words Report - Shuttle"
+- content_for :file_name do
+  = 'views/stats/incoming_new_words_report'
+
+.header
+  h1 Incoming New Words Report
+hr.dividers
+
+.translation_report
+  = form_tag stats_generate_incoming_new_words_report_path(format: :csv)
+    = render partial: 'stats/date_fields'

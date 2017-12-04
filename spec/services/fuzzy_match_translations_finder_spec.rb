@@ -22,31 +22,31 @@ RSpec.describe FuzzyMatchTranslationsFinder do
       source_copy = "yes"
 
       # create a translation that will be used for lookup for tm_match
-      FactoryGirl.create(:translation, copy: "oui", source_copy: source_copy, approved: true, translated: true, rfc5646_locale: 'fr')
+      FactoryBot.create(:translation, copy: "oui", source_copy: source_copy, approved: true, translated: true, rfc5646_locale: 'fr')
 
       # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
       regenerate_elastic_search_indexes
 
-      translation = FactoryGirl.build(:translation, source_copy: source_copy, rfc5646_locale: 'fr')
+      translation = FactoryBot.build(:translation, source_copy: source_copy, rfc5646_locale: 'fr')
       finder = FuzzyMatchTranslationsFinder.new(source_copy, translation)
       expect(finder.top_fuzzy_match_percentage).to eq 100.0
     end
 
     it "should return 0.0 if there isn't any matches" do
       # there are no translation in the database, so there shouldn't be a match
-      translation = FactoryGirl.build(:translation, source_copy: 'yes', rfc5646_locale: 'fr')
+      translation = FactoryBot.build(:translation, source_copy: 'yes', rfc5646_locale: 'fr')
       finder = FuzzyMatchTranslationsFinder.new('yes', translation)
       expect(finder.top_fuzzy_match_percentage).to eq 0.0
     end
 
     it "should return 0.0 if the top fuzzy match is < 70%" do
       # create a translation that will be used for lookup for tm_match (note: this is a 60% match)
-      FactoryGirl.create(:translation, copy: "oui monsieur ", source_copy: 'yes sir', approved: true, translated: true, rfc5646_locale: 'fr')
+      FactoryBot.create(:translation, copy: "oui monsieur ", source_copy: 'yes sir', approved: true, translated: true, rfc5646_locale: 'fr')
 
       # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
       regenerate_elastic_search_indexes
 
-      translation = FactoryGirl.build(:translation, source_copy: 'yes', rfc5646_locale: 'fr')
+      translation = FactoryBot.build(:translation, source_copy: 'yes', rfc5646_locale: 'fr')
       finder = FuzzyMatchTranslationsFinder.new('yes', translation)
       expect(finder.top_fuzzy_match_percentage).to eq 0.0
     end
