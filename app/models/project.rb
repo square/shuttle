@@ -379,22 +379,65 @@ class Project < ActiveRecord::Base
 
   def skip_tree?(path)
     path = path.sub(/^\//, '')
+    if (skip_for_importer = skip_tree_because_of_importer_path?(path)).nil?
+      return skip_tree_because_of_path?(path)
+    else
+      return skip_for_importer
+    end
+  end
 
-    if only_paths.present? || only_importer_paths.present?
-      # we can't skip this path if any of the only_paths have this path as a
-      # child or parent.
-      # otherwise we can, since the only paths we care about are unrelated to
-      # this path
-      paths = only_paths + only_importer_paths.values.flatten.compact
-      return paths.none? { |op| op.start_with?(path) || path.start_with?(op) }
+  # (assume `path` is "a/b/")
+  # If there are only_paths...
+  #   If there is an only_path "a/b/" then NO we cannot skip this path
+  #   If there is an only_path "a/" then NO we cannot skip this path
+  #   If there is an only_path "a/b/c/" then NO we cannot skip this path
+  #   Otherwise, YES we can skip this path
+  # If there is a skip_path "a/b/" then YES we can skip this path
+  # If there is a skip_path "a/" then YES we can skip this path
+  # If there is a skip_path "a/b/c/" then NO we cannot skip this path
+
+  def skip_tree_because_of_path?(path)
+    ops = normalize_paths(only_paths)
+    sps = normalize_paths(skip_paths)
+
+    if ops.present?
+      return false if ops.include?(path)
+      return false if ops.any? { |p| path.start_with?(p) }
+      return false if ops.any? { |p| p.start_with?(path) }
+      return true
     end
 
-    return false if only_importer_paths.values.flatten.compact.any? { |op| op.start_with?(path) }
-    # we can skip this path if at least one of the skip_paths are subpaths of
-    # this path
-    return skip_paths.any? { |sp| path.start_with?(sp) } ||
-        skip_importer_paths.values.flatten.compact.any? { |sp| path.start_with?(sp) }
+    return true if sps.include?(path)
+    return true if sps.any? { |p| path.start_with?(p) }
+
+    return false
   end
+
+  # same logic as above except with importer paths except
+  # true = definitely can skip becomes nil (not sure, ask someone else)
+
+  def skip_tree_because_of_importer_path?(path)
+    ops = normalize_paths(only_importer_paths.values.flatten.compact.uniq)
+    sps = normalize_paths(skip_importer_paths.values.flatten.compact.uniq)
+
+    if ops.present?
+      return false if ops.include?(path)
+      return false if ops.any? { |p| path.start_with?(p) }
+      return false if ops.any? { |p| p.start_with?(path) }
+      return nil
+    end
+
+    # return true if sps.include?(path)
+    # return true if sps.any? { |p| path.start_with?(p) }
+
+    return nil
+  end
+
+  def normalize_paths(paths)
+    paths.map { |p| p.sub(/^\//, '') }
+  end
+
+  private :skip_tree_because_of_path?, :skip_tree_because_of_importer_path?
 
   # @private
   def as_json(options=nil)

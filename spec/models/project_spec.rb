@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'rails_helper'
+require 'models/concerns/common_locale_logic_spec'
 
 RSpec.describe Project do
   it_behaves_like "CommonLocaleLogic"
@@ -476,16 +477,16 @@ RSpec.describe Project do
         expect(@project.skip_tree?('/skip/path/child')).to be_truthy
       end
 
-      it "should return true if given an importer-specific skip path" do
-        expect(@project.skip_tree?('/importerskip/path')).to be_truthy
+      it "should return false if given an importer-specific skip path (and no global skip paths)" do
+        expect(@project.skip_tree?('/importerskip/path')).to be_falsey
       end
 
       it "should return false if given the parent of an importer-specific skip path" do
         expect(@project.skip_tree?('/importerskip')).to be_falsey
       end
 
-      it "should return true if given the child of an importer-specific skip path" do
-        expect(@project.skip_tree?('/importerskip/path/child')).to be_truthy
+      it "should return false if given the child of an importer-specific skip path (and no global skip paths)" do
+        expect(@project.skip_tree?('/importerskip/path/child')).to be_falsey
       end
 
       it "should return false if there are no applicable skip paths" do
