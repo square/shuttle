@@ -24,9 +24,7 @@ RSpec.describe CommitObserver do
           CommitImporter::Finisher.new.on_success(true, 'commit_id' => commit.id)
           commit.reload
           expect(ActionMailer::Base.deliveries.map(&:subject)).to include("[Shuttle] Error(s) occurred during the import")
-          expect(commit.import_errors).to match_array([["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
-                                                       ["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"],
-                                                       ["ExecJS::RuntimeError", "Exception: SyntaxError (in /ember-broken/en-US.js)"]])
+          expect(commit.import_errors.map(&:first)).to match_array(%w[Psych::SyntaxError ExecJS::RuntimeError ExecJS::RuntimeError])
 
           expect(Blob.where(errored: true).count).to eql(3)
         end

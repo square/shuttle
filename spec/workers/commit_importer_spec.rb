@@ -39,8 +39,8 @@ RSpec.describe CommitImporter do
 
           expect(mail.to).to eql(["yunus@squareup.com"])
           expect(mail.subject).to eql("[Shuttle] Error(s) occurred during the import")
-          expected_errors.each do |err_class, err_message|
-            expect(mail.body).to include("#{err_class} - #{err_message}")
+          expected_errors.each do |err_class, _err_message|
+            expect(mail.body).to include(err_class)
           end
         end
 
@@ -58,14 +58,10 @@ RSpec.describe CommitImporter do
           blob_not_found                  = commit.blobs.with_sha("88e5b52732c23a4e33471d91cf2281e62021512a").first
           blob_for_which_commit_not_found = commit.blobs.with_sha("b80d7482dba100beb55e65e82c5edb28589fa045").first
 
-          expected_errors = [["Psych::SyntaxError", "(<unknown>): did not find expected key while parsing a block mapping at line 1 column 1 (in /config/locales/ruby/broken.yml)"],
-                             ["Git::BlobNotFoundError", "Blob not found in git repo: 88e5b52732c23a4e33471d91cf2281e62021512a (failed in BlobImporter for commit_id #{commit.id} and blob_id #{blob_not_found.id})"],
-                             ["Git::CommitNotFoundError", "Commit not found in git repo: fake_sha (failed in CommitKeyCreator for commit_id #{commit.id} and blob_id #{blob_for_which_commit_not_found.id})"],
-                             ["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"],
-                             ["ExecJS::RuntimeError", "Exception: SyntaxError (in /ember-broken/en-US.js)"]]
+          expected_errors = %w[Psych::SyntaxError Git::BlobNotFoundError Git::CommitNotFoundError ExecJS::RuntimeError ExecJS::RuntimeError]
 
           CommitImporter::Finisher.new.on_success true, 'commit_id' => commit.id
-          expect(commit.reload.import_errors).to match_array(expected_errors)
+          expect(commit.reload.import_errors.map(&:first)).to match_array(expected_errors)
           expect_to_send_import_errors_email(expected_errors)
         end
 
@@ -75,9 +71,9 @@ RSpec.describe CommitImporter do
           ActionMailer::Base.deliveries.clear
           commit = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
 
-          expected_errors = [["Git::CommitNotFoundError", "Commit not found in git repo: e5f5704af3c1f84cf42c4db46dcfebe8ab842bde (failed in CommitImporter for commit_id #{commit.id})"]]
+          expected_errors = %w[Git::CommitNotFoundError]
           CommitImporter::Finisher.new.on_success true, 'commit_id' => commit.id
-          expect(commit.reload.import_errors.sort).to eql(expected_errors.sort)
+          expect(commit.reload.import_errors.map(&:first)).to match_array(expected_errors)
           expect_to_send_import_errors_email(expected_errors)
         end
       end

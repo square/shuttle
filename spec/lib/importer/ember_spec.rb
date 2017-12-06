@@ -52,8 +52,7 @@ RSpec.describe Importer::Ember do
       end
 
       it "should add error to commit" do
-        expect(@commit.import_errors).to match_array([["ExecJS::RuntimeError", "Exception: SyntaxError (in /ember-broken/en-US.js)"],
-                                                      ["ExecJS::RuntimeError", "SyntaxError:  (in /ember-broken/en-US.coffee)"]])
+        expect(@commit.import_errors.map(&:first)).to match_array(%w[ExecJS::RuntimeError ExecJS::RuntimeError])
         expect(@commit.blobs.where(errored: true).count).to eql(2)
         expect(@commit.blobs.where(parsed: false).count).to eql(2)
         expect(@commit.blobs.where(parsed: true).count).to eql(0)

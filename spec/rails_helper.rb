@@ -99,6 +99,11 @@ RSpec.configure do |config|
 
   # Devise
   config.include Devise::Test::ControllerHelpers, type: :controller
+
+  # Clear tmp/repos
+  config.before :each do
+    Pathname.glob(Project::REPOS_DIRECTORY.join('*.git')).each(&:rmtree)
+  end
 end
 
 def reset_elastic_search
