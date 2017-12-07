@@ -33,7 +33,6 @@ RSpec.describe HomeController do
     @article_key = FactoryBot.create(:key, section: @section, index_in_section: 0)
 
     regenerate_elastic_search_indexes
-    sleep(2)
   end
 
   context "[when 'uncompleted' filter is selected and locales are specified]" do
@@ -78,7 +77,6 @@ RSpec.describe HomeController do
       commit1 = FactoryBot.create(:commit, project: @project, ready: false)
       commit2 = FactoryBot.create(:commit, project: @project)
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :index, { filter__status: 'all', commits_filter__project_id: 'all' }
       expect(assigns(:commits).map(&:id)).to eq([commit2.id, commit1.id, @commit.id])

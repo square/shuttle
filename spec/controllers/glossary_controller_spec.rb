@@ -53,7 +53,6 @@ RSpec.describe GlossaryController do
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      sleep(1)
     end
 
     let(:length_of_anchor_list) { 27 }

@@ -158,7 +158,7 @@ RSpec.describe Translation do
         trans.source_copy = trans.copy = "<<%= foo %>em>baz</<%= foo %>em>"
         expect(trans).to be_valid
 
-        # Only checks the first validation 
+        # Only checks the first validation
         trans.source_copy = trans.copy = "<<%= foo %>em>baz</<%= foo %>b>"
         expect(trans).to be_valid
 
@@ -268,14 +268,13 @@ RSpec.describe Translation do
       translation = FactoryBot.create(:translation, key: key)
 
       regenerate_elastic_search_indexes
-      sleep(2)
 
       expect(Elasticsearch::Model.search(section_active_query(true), Translation).results.first.id.to_i).to eql(translation.id)
       expect(Elasticsearch::Model.search(section_active_query(false), Translation).results.first).to be_nil
 
       section.update! active: false
       Translation.batch_refresh_elastic_search(article)
-      sleep(2)
+      regenerate_elastic_search_indexes
 
       expect(Elasticsearch::Model.search(section_active_query(true), Translation).results.first).to be_nil
       expect(Elasticsearch::Model.search(section_active_query(false), Translation).results.first.id.to_i).to eql(translation.id)

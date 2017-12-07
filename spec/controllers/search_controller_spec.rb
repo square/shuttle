@@ -46,14 +46,12 @@ RSpec.describe SearchController do
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      sleep(1)
     end
 
     it "should filter by page" do
-      (1..50).each do
-        FactoryBot.create(:translation)
-      end
-      sleep(1)
+      FactoryBot.create_list :translation, 50
+      regenerate_elastic_search_indexes
+
       get :translations, page: '2'
       results = assigns(:results)
       expect(results.size).to eql(8)
@@ -131,7 +129,6 @@ RSpec.describe SearchController do
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      sleep(2)
     end
 
     it "should search by key" do
@@ -145,7 +142,6 @@ RSpec.describe SearchController do
     it "should exlcude hidden key" do
       FactoryBot.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :keys, project_id: @project.id, format: 'json'
       expect(response.status).to eql(200)
@@ -156,7 +152,6 @@ RSpec.describe SearchController do
     it "should search for hidden key only" do
       FactoryBot.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :keys, project_id: @project.id, hidden_in_search: '', format: 'json'
       expect(response.status).to eql(200)
@@ -232,7 +227,6 @@ RSpec.describe SearchController do
     before :each do
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      sleep 2
     end
 
     it "should return all commits if no filters are given" do

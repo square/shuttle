@@ -81,7 +81,6 @@ RSpec.describe Locale::ProjectsController do
 
         @request.env["devise.mapping"] = Devise.mappings[:user]
         sign_in @user
-        sleep(2)
       end
 
       it "should filter with include_translated = true and include_new = true if noe include_ are specified" do
@@ -182,14 +181,12 @@ RSpec.describe Locale::ProjectsController do
         @translation5 = FactoryBot.create(:translation, key: @key5, copy: nil, rfc5646_locale: 'fr')
 
         regenerate_elastic_search_indexes
-        sleep(2)
       end
 
       it "returns active keys in an article in the right order" do
         @section2.update! active: false     # inactive section
         @key3.update! index_in_section: nil # inactive key
         regenerate_elastic_search_indexes
-        sleep(2)
 
         get :show, id: @project.to_param, article_id: @article.id, locale_id: 'fr', include_new: 'true'
         expect(response.status).to eql(200)

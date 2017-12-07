@@ -411,7 +411,6 @@ RSpec.describe TranslationsController do
 
     it "should 1. respond with a Translation with matching locale and source copy" do
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :match,
           project_id: @project.to_param,
@@ -439,7 +438,6 @@ RSpec.describe TranslationsController do
       translation.update! modifier: @user
 
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :match,
           project_id: @project.to_param,
@@ -455,7 +453,6 @@ RSpec.describe TranslationsController do
     it "should 3. respond with the Translation of the 1st fallback locale with matching project/key and source copy" do
       @same_locale_sc.destroy
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :match,
           project_id: @project.to_param,
@@ -469,7 +466,6 @@ RSpec.describe TranslationsController do
     it "should 4. respond with the Translation of the 1st fallback locale with source copy" do
       [@same_locale_sc, @fallback1_sc].each(&:destroy)
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :match,
           project_id: @project.to_param,
@@ -483,7 +479,6 @@ RSpec.describe TranslationsController do
     it "should 5. respond with a 204" do
       [@same_locale_sc, @fallback1_sc, @fallback2_sc].each(&:destroy)
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :match,
           project_id: @project.to_param,
@@ -617,7 +612,6 @@ RSpec.describe TranslationsController do
                          source_rfc5646_locale: 'en',
                          rfc5646_locale: 'fr'
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -638,7 +632,6 @@ RSpec.describe TranslationsController do
                                        source_rfc5646_locale: 'en',
                                        rfc5646_locale: 'fr-CA'
       regenerate_elastic_search_indexes
-      sleep(2)
 
       # fr is a fallback of fr-CA
       get :fuzzy_match,
@@ -669,7 +662,6 @@ RSpec.describe TranslationsController do
                          source_rfc5646_locale: 'en',
                          rfc5646_locale: 'fr'
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -692,7 +684,6 @@ RSpec.describe TranslationsController do
                          rfc5646_locale: 'fr'
 
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -716,7 +707,6 @@ RSpec.describe TranslationsController do
       end
 
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -740,7 +730,6 @@ RSpec.describe TranslationsController do
       end
 
       regenerate_elastic_search_indexes
-      sleep(2)
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -761,7 +750,6 @@ RSpec.describe TranslationsController do
 
       it "should truncate project name exceeds 30 chars" do
         regenerate_elastic_search_indexes
-        sleep(2)
 
         get :fuzzy_match,
             project_id: @translation.key.project.to_param,
@@ -792,7 +780,6 @@ RSpec.describe TranslationsController do
 
       it "should not show in search result" do
         regenerate_elastic_search_indexes
-        sleep(2)
 
         get :fuzzy_match,
             project_id: @translation.key.project.to_param,

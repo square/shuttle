@@ -547,7 +547,8 @@ de:
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-      sleep 2
+
+      regenerate_elastic_search_indexes
     end
 
     it 'should return the first page of keys if page not specified' do
@@ -578,7 +579,7 @@ de:
     it 'filters by requested status' do
       approved_key = FactoryBot.create(:key, project: @project, key: 'approved_key', ready: true)
       @commit.keys = @keys << approved_key
-      sleep 1
+      regenerate_elastic_search_indexes
 
       get :search, project_id: @project.to_param, id: @commit.to_param, status: 'approved'
       expect(response.status).to eql 200

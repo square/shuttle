@@ -27,19 +27,19 @@ RSpec.describe SearchTranslationsFinder do
     end
 
     it "should include new translation" do
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
       expect(@finder.find_translations.total_count).to eq(1)
 
       new_key = create_key(@project)
       create_translation(new_key)
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
       expect(@finder.find_translations.total_count).to eq(2)
     end
 
     it "should filter target locales" do
       create_translation(@key)
       new_finder = create_finder(target_locales: [Locale.new('zh-CN'), Locale.new('ja-JP')])
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
 
       expect(@finder.find_translations.total_count).to eq(2)
       expect(new_finder.find_translations.total_count).to eq(1)
@@ -50,7 +50,7 @@ RSpec.describe SearchTranslationsFinder do
       new_key = create_key(new_project)
       create_translation(new_key)
       new_finder = create_finder(project_id: new_project.id)
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
 
       expect(@finder.find_translations.total_count).to eq(2)
       expect(new_finder.find_translations.total_count).to eq(1)
@@ -58,7 +58,7 @@ RSpec.describe SearchTranslationsFinder do
 
     it "should filter translation id" do
       new_finder = create_finder(translator_id: 15875)
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
 
       expect(@finder.find_translations.total_count).to eq(1)
       expect(new_finder.find_translations.total_count).to eq(0)
@@ -67,7 +67,7 @@ RSpec.describe SearchTranslationsFinder do
     it "should filter start date" do
       create_translation(@key, updated_at: Time.current - 7.days)
       new_finder = create_finder(start_date: Time.current - 3.days)
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
 
       expect(@finder.find_translations.total_count).to eq(2)
       expect(new_finder.find_translations.total_count).to eq(1)
@@ -76,7 +76,7 @@ RSpec.describe SearchTranslationsFinder do
     it "should filter end date" do
       create_translation(@key, updated_at: Time.current + 7.days)
       new_finder = create_finder(end_date: Time.current + 3.days)
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
 
       expect(@finder.find_translations.total_count).to eq(2)
       expect(new_finder.find_translations.total_count).to eq(1)
@@ -85,7 +85,7 @@ RSpec.describe SearchTranslationsFinder do
     it "should filter hidden keys" do
       hidden_key = create_key(@project, hidden_in_search: true)
       create_translation(hidden_key)
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
 
       expect(@finder.find_translations.total_count).to eq(1)
     end
@@ -96,18 +96,13 @@ RSpec.describe SearchTranslationsFinder do
         hidden_key = create_key(@project, hidden_in_search: true)
         create_translation(hidden_key)
       end
-      regenerate_elastic_search_indexes_helper
+      regenerate_elastic_search_indexes
       expect(@finder.find_translations.total_count).to eq(1)
       expect(new_finder.find_translations.total_count).to eq(3)
     end
   end
 
   private
-
-  def regenerate_elastic_search_indexes_helper
-    regenerate_elastic_search_indexes
-    sleep(2)
-  end
 
   def create_finder(params={})
     form = {
