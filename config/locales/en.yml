@@ -277,6 +277,8 @@ en:
       name: Ember-intl (JSON or YAML)
     erb:
       name: ERb file
+    mustache:
+      name: Mustache file
     properties:
       name: Java .properties file
     ruby:
