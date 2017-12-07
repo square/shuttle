@@ -100,9 +100,12 @@ RSpec.configure do |config|
   # Devise
   config.include Devise::Test::ControllerHelpers, type: :controller
 
-  # Clear tmp/repos
+  # Clear repo directories
   config.before :each do
     Pathname.glob(Project::REPOS_DIRECTORY.join('*.git')).each(&:rmtree)
+    if Project::WORKING_REPOS_DIRECTORY.exist?
+      Project::WORKING_REPOS_DIRECTORY.children.reject { |e| e.basename.to_s.start_with?('.') }.each(&:rmtree)
+    end
   end
 end
 

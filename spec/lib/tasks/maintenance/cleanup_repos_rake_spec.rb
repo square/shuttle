@@ -36,11 +36,11 @@ RSpec.describe 'maintenance' do
     describe "#gc_and_remote_prune" do
       it "prunes remote-tracking branches from working_repo that are deleted from the remote repo" do
         project = FactoryBot.create(:project, :light)
-        project.working_repo.references.create("refs/remotes/origin/non-existant-branch", '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264')
+        project.working_repo.references.create("refs/remotes/origin/non-existent-branch", '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264')
 
-        expect(project.working_repo.branches.each_name(:remote)).to include('origin/non-existant-branch')
+        expect(project.working_repo.branches.each_name(:remote)).to include('origin/non-existent-branch')
         ReposCleaner.new.gc_and_remote_prune(project.working_repo)
-        expect(project.working_repo.branches.each_name(:remote)).to_not include('origin/non-existant-branch')
+        expect(project.working_repo.branches.each_name(:remote)).to_not include('origin/non-existent-branch')
       end
     end
   end
@@ -51,11 +51,11 @@ RSpec.describe 'maintenance' do
     describe 'cleanup_repos' do
       it "prunes remote-tracking branches from repo that are deleted from the remote repo" do
         project = FactoryBot.create(:project, :light)
-        project.working_repo.references.create("refs/remotes/origin/non-existant-branch", '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264')
+        project.working_repo.references.create("refs/remotes/origin/non-existent-branch", '67adce6e5e7e2cae5621b8e86d4ebdd20b5ce264')
 
-        expect(project.working_repo.branches.each_name(:remote)).to include('origin/non-existant-branch')
+        expect(project.working_repo.branches.each_name(:remote)).to include('origin/non-existent-branch')
         subject
-        expect(project.repo.branches.each_name(:remote)).to_not include('origin/non-existant-branch')
+        expect(project.repo.branches.each_name(:remote)).to_not include('origin/non-existent-branch')
       end
     end
   end
