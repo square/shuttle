@@ -104,20 +104,19 @@ ElasticSearch 1.7, and a modern version of libarchive. To run Shuttle for the fi
 11. Verify that all specs pass with `rspec spec`
 
 These steps can be run with `foreman start` if foreman is installed.
-  12. To run the server, use `rails server`
-  13. To run the job queue: `bundle exec sidekiq -C config/sidekiq.yml`
-  to run the Sidekiq development server.
 
-14. Visit [http://localhost:3000](http://localhost:3000) and log in with the
+12. Visit [http://localhost:3000](http://localhost:3000) and log in with the
    credentials:
 
    username: **admin@example.com**<br>
    password: **password123**
 
-15. Make sure that you initialize ElasticSearch with indexes:
+13. Make sure that you initialize ElasticSearch with indexes:
 
   bundle exec rake elasticsearch:import:model FORCE=y
 
+To run the server, use `rails server`. To run the job queue:
+`bundle exec sidekiq -C config/sidekiq.yml`.
 
 ### Starting the server (Docker)
 
