@@ -154,7 +154,7 @@ RSpec.describe ProjectTranslationsMassCopier do
       key6 = FactoryBot.create(:key, project: project)
       fr_translation_6 = FactoryBot.create(:translation, key: key6, rfc5646_locale: 'fr', copy: 'test', approved: true)
 
-      expect(ProjectTranslationsMassCopier.new.key_ids_with_copyable_translations(project, 'fr', 'fr-XX').sort).to eql([key1.id, key2.id].sort)
+      expect(ProjectTranslationsMassCopier.new.key_ids_with_copyable_translations(project, 'fr', 'fr-XX')).to match_array([key1.id, key2.id])
     end
   end
 

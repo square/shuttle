@@ -50,7 +50,7 @@ RSpec.describe ImportErrors do
     it "should clear all import errors of a commit in redis and postgres" do
       @commit.add_import_error(StandardError.new("first fake error"))
       @commit.add_import_error(StandardError.new("second fake error"), "in /path/to/some/file")
-      expect(@commit.import_errors.sort).to eql([["StandardError", "first fake error"], ["StandardError", "second fake error (in /path/to/some/file)"]].sort)
+      expect(@commit.import_errors).to match_array([["StandardError", "first fake error"], ["StandardError", "second fake error (in /path/to/some/file)"]])
 
       @commit.clear_import_errors!
       expect(@commit.import_errors).to eql([])

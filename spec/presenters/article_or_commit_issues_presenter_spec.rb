@@ -41,7 +41,7 @@ RSpec.describe ArticleOrCommitIssuesPresenter do
     it "should return the list of issues related to the commit given a commit with issues" do
       setup_commit_with_issues({Issue::Status::OPEN=>3, Issue::Status::IN_PROGRESS=>1})
       presenter = ArticleOrCommitIssuesPresenter.new(@commit)
-      expect(presenter.issues.sort).to eql(@issues.sort)
+      expect(presenter.issues).to match_array(@issues)
     end
   end
 

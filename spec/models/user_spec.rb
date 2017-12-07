@@ -34,7 +34,7 @@ RSpec.describe User do
         monitor = FactoryBot.create(:user, role: 'monitor')
         translator = FactoryBot.create(:user, role: 'translator')
         other = FactoryBot.create(:user, role: nil)
-        expect(User.has_role.to_a.sort).to eql([monitor, translator].sort)
+        expect(User.has_role.to_a).to match_array([monitor, translator])
       end
     end
 

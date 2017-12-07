@@ -36,8 +36,8 @@ RSpec.describe ArticleImporter do
         article = FactoryBot.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
         ArticleImporter.new.perform(article.id)
         sections = article.reload.sections
-        expect(sections.map { |section| [section.name, section.source_copy, section.active] }.sort).to eql(
-            [["title", "a", true], ["body", "<p>b</p><p>c</p>", true]].sort)
+        expect(sections.map { |section| [section.name, section.source_copy, section.active] }).to match_array(
+            [["title", "a", true], ["body", "<p>b</p><p>c</p>", true]])
       end
 
       it "updates the existing Section if it exists" do

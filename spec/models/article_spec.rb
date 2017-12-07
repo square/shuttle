@@ -186,7 +186,7 @@ RSpec.describe Article do
       active_section1 = FactoryBot.create(:section, article: article, active: true)
       active_section2 = FactoryBot.create(:section, article: article, active: true)
       inactive_section = FactoryBot.create(:section, article: article, active: false)
-      expect(article.reload.active_sections.to_a.sort).to eql([active_section1, active_section2].sort)
+      expect(article.reload.active_sections.to_a).to match_array([active_section1, active_section2])
     end
   end
 
@@ -198,7 +198,7 @@ RSpec.describe Article do
       active_section = FactoryBot.create(:section, article: article, active: true)
       inactive_section1 = FactoryBot.create(:section, article: article, active: false)
       inactive_section2 = FactoryBot.create(:section, article: article, active: false)
-      expect(article.reload.inactive_sections.to_a.sort).to eql([inactive_section1, inactive_section2].sort)
+      expect(article.reload.inactive_sections.to_a).to match_array([inactive_section1, inactive_section2])
     end
   end
 
@@ -218,9 +218,9 @@ RSpec.describe Article do
       inactive_section_active_key2 = FactoryBot.create(:key, section: inactive_section, project: article.project, index_in_section: 1)
       inactive_section_inactive_key = FactoryBot.create(:key, section: inactive_section, project: article.project, index_in_section: nil)
 
-      expect(article.reload.keys.to_a.sort).to eql([active_section_active_key1, active_section_active_key2, active_section_inactive_key,
-                                                    inactive_section_active_key1, inactive_section_active_key2, inactive_section_inactive_key].sort)
-      expect(article.active_keys.to_a.sort).to eql([active_section_active_key1, active_section_active_key2].sort)
+      expect(article.reload.keys.to_a).to match_array([active_section_active_key1, active_section_active_key2, active_section_inactive_key,
+                                                       inactive_section_active_key1, inactive_section_active_key2, inactive_section_inactive_key])
+      expect(article.active_keys.to_a).to match_array([active_section_active_key1, active_section_active_key2])
     end
   end
 

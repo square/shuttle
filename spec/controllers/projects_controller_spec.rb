@@ -134,13 +134,13 @@ RSpec.describe ProjectsController do
       it "runs ProjectTranslationsAdderAndRemover which adds missing translations when a new locale is added" do
         expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once).and_call_original
         patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es fr ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
-        expect(@project.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en en es es fr fr ja ja))
+        expect(@project.reload.translations.map(&:rfc5646_locale)).to match_array(%w(en en es es fr fr ja ja))
       end
 
       it "runs ProjectTranslationsAdderAndRemover which removes unnecessary translations when a locale is removed" do
         expect(ProjectTranslationsAdderAndRemover).to receive(:perform_once).and_call_original
         patch :update, { id: @project.to_param, project: { required_rfc5646_locales: %w{es ja}, use_imports: (Importer::Base.implementations.map(&:ident) - @project.skip_imports) } }
-        expect(@project.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en en es es ja ja))
+        expect(@project.reload.translations.map(&:rfc5646_locale)).to match_array(%w(en en es es ja ja))
       end
 
       it "switches keys' and commit's readiness from true to false when a new locale is added to a ready commit" do
@@ -276,7 +276,7 @@ RSpec.describe ProjectsController do
       commit.keys.each { |key| expect(key).to be_ready }
       expect(fr_ca_translations.not_translated.count).to eql(0)
       expect(fr_ca_translations.approved.count).to eql(14)
-      expect(fr_translations.map(&:copy).sort).to eql(fr_ca_translations.reload.map(&:copy).sort)
+      expect(fr_translations.map(&:copy)).to match_array(fr_ca_translations.reload.map(&:copy))
     end
 
     it "doesn't override already translated translations" do

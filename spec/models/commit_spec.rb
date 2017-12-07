@@ -284,20 +284,20 @@ RSpec.describe Commit do
 
     it "should call #import on all importer subclasses" do
       @project.commit! 'HEAD'
-      expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort)
+      expect(@project.keys.map(&:importer).uniq).to match_array(Importer::Base.implementations.map(&:ident))
     end
 
     it "should not call #import on any disabled importer subclasses" do
       @project.update_attribute(:skip_imports, (Importer::Base.implementations.map(&:ident) - %w(ruby yaml)))
       @project.commit! 'HEAD'
-      expect(@project.keys.map(&:importer).uniq.sort).to eql(%w(ruby yaml))
+      expect(@project.keys.map(&:importer).uniq).to match_array(%w(ruby yaml))
       @project.update_attribute :skip_imports, []
     end
 
     it "should skip any importers for which #skip? returns true" do
       allow_any_instance_of(Importer::Yaml).to receive(:skip?).and_return(true)
       @project.commit! 'HEAD'
-      expect(@project.keys.map(&:importer).uniq.sort).to eql(Importer::Base.implementations.map(&:ident).sort - %w(yaml))
+      expect(@project.keys.map(&:importer).uniq).to match_array(Importer::Base.implementations.map(&:ident) - %w(yaml))
     end
 
     it "clears the previous import errors" do

@@ -62,7 +62,7 @@ RSpec.describe LocaleProjectsShowPresenter do
 
     it "returns selectable Sections under the Project if an Article is NOT selected" do
       presenter = LocaleProjectsShowPresenter.new(@project, { })
-      expect(presenter.selectable_sections.sort).to eql( [["ALL SECTIONS", nil], ["section1", @section1.id], ["section2", @section2.id]].sort )
+      expect(presenter.selectable_sections).to match_array( [["ALL SECTIONS", nil], ["section1", @section1.id], ["section2", @section2.id]])
     end
 
     it "doesn't include inactive Sections in the result" do

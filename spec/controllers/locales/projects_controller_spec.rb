@@ -88,7 +88,7 @@ RSpec.describe Locale::ProjectsController do
         get :show, id: @project.to_param, locale_id: 'fr-CA'
         expect(response.status).to eql (200)
         translations = assigns(:translations)
-        expect(translations.map { |t| t.key.key }.sort).to eql([@translated.key.key, @new.key.key, @rejected.key.key].sort)
+        expect(translations.map { |t| t.key.key }).to match_array([@translated.key.key, @new.key.key, @rejected.key.key])
 
       end
 
@@ -96,7 +96,7 @@ RSpec.describe Locale::ProjectsController do
         get :show, id: @project.to_param, locale_id: 'fr-CA', include_translated: 'true'
         expect(response.status).to eql(200)
         translations = assigns(:translations)
-        expect(translations.map { |t| t.key.key }.sort).to eql([@translated.key.key].sort)
+        expect(translations.map { |t| t.key.key }).to match_array([@translated.key.key])
       end
 
       it "should filter with include_approved = true" do

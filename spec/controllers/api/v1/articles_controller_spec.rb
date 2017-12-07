@@ -143,7 +143,7 @@ RSpec.describe API::V1::ArticlesController do
       get :index, project_id: project.id, api_token: project.api_token, format: :json
 
       expect(response.status).to eql(200)
-      expect(JSON.parse(response.body)).to eql([{"name"=>article1.name, "ready"=>false}, {"name"=>article2.name, "ready"=>true}])
+      expect(JSON.parse(response.body)).to match_array([{"name"=>article1.name, "ready"=>false}, {"name"=>article2.name, "ready"=>true}])
     end
   end
 
@@ -183,14 +183,14 @@ RSpec.describe API::V1::ArticlesController do
       expect(Article.count).to eql(1)
       article = Article.last
       expect(article.name).to eql("testname")
-      expect(article.sections.map { |section| [section.name, section.source_copy, section.active] }.sort).to eql([["title", "<p>a</p><p>b</p>", true], ["body", "<p>a</p><p>c</p>", true]].sort)
+      expect(article.sections.map { |section| [section.name, section.source_copy, section.active] }).to match_array([["title", "<p>a</p><p>b</p>", true], ["body", "<p>a</p><p>c</p>", true]])
       expect(article.keys.count).to eql(12)
       expect(article.human_review).to be_truthy
       expect(article.translations.count).to eql(36)
       expect(article.base_rfc5646_locale).to eql('en')
       expect(article.targeted_rfc5646_locales).to eql({ 'fr' => true, 'es' => false })
       expect(article.base_locale).to eql(Locale.from_rfc5646('en'))
-      expect(article.targeted_locales.map(&:rfc5646).sort).to eql(%w(es fr).sort)
+      expect(article.targeted_locales.map(&:rfc5646)).to match_array(%w(es fr))
     end
 
     it "creates an Article, has its own locale settings different from those of Project's" do

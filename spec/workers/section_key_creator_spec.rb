@@ -35,7 +35,7 @@ RSpec.describe SectionKeyCreator do
       expect(key.ready).to be_falsey
 
       expect(key.translations.count).to eql(4) # the correct number of translations are created
-      expect(key.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr ja es).sort)
+      expect(key.translations.map(&:rfc5646_locale)).to match_array(%w(en fr ja es))
 
       base_translation = key.translations.where(rfc5646_locale: 'en', source_rfc5646_locale: 'en').first
       expect(base_translation.copy).to eql(base_translation.source_copy)
@@ -56,11 +56,11 @@ RSpec.describe SectionKeyCreator do
 
     it "adds new required Translations and removes old unnecessary ones while keeping the unnecessary but translated Translations" do
       SectionKeyCreator.new.perform(@section.id, "<p>test</p>", 0)
-      expect(@section.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr ja es).sort)
+      expect(@section.reload.translations.map(&:rfc5646_locale)).to match_array(%w(en fr ja es))
 
       @article.update! targeted_rfc5646_locales: { 'fr' => true, 'tr' => true, 'es' => false }
       SectionKeyCreator.new.perform(@section.id, "<p>test</p>", 0)
-      expect(@section.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr tr es).sort)
+      expect(@section.reload.translations.map(&:rfc5646_locale)).to match_array(%w(en fr tr es))
     end
   end
 

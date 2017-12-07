@@ -32,7 +32,7 @@ RSpec.describe Section do
       it "returns only active sections" do
         active_sections   = 2.times.map { FactoryBot.create(:section, active: true) }
         inactive_sections = 2.times.map { FactoryBot.create(:section, active: false) }
-        expect(Section.active.sort).to eql(active_sections.sort)
+        expect(Section.active).to match_array(active_sections)
       end
     end
   end
@@ -47,7 +47,7 @@ RSpec.describe Section do
       translation2 = FactoryBot.create(:translation, key: key2)
       translation3 = FactoryBot.create(:translation, key: key3)
 
-      expect(section.active_translations.sort).to eql([translation1, translation2].sort)
+      expect(section.active_translations).to match_array([translation1, translation2])
     end
   end
 
@@ -57,7 +57,7 @@ RSpec.describe Section do
       key1 = FactoryBot.create(:key, project: section.project, section: section, index_in_section: 0)
       key2 = FactoryBot.create(:key, project: section.project, section: section, index_in_section: 1)
       FactoryBot.create(:key, project: section.project, section: section, index_in_section: nil)
-      expect(section.active_keys.sort).to eql([key1, key2].sort)
+      expect(section.active_keys).to match_array([key1, key2])
     end
   end
 

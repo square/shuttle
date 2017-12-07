@@ -27,7 +27,7 @@ RSpec.describe KeyTranslationAdderAndRemover do
       project.update! key_locale_exclusions: { 'fr' => ["*firstkey*"] }, targeted_rfc5646_locales: {'es'=>true, 'fr'=>true, 'ja'=>true}
       KeyTranslationAdderAndRemover.new.perform(key.id)
 
-      expect(key.reload.translations.map(&:rfc5646_locale).sort).to eql(%w(en es ja))
+      expect(key.reload.translations.map(&:rfc5646_locale)).to match_array(%w(en es ja))
       expect(key.translations.order(:created_at).last.rfc5646_locale).to eql('ja')
     end
 

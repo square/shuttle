@@ -249,7 +249,7 @@ RSpec.describe Key do
 
         expect(key.translations.count).to eql(3)
         expect(excluded.translations.count).to eql(2)
-        expect(excluded.translations.pluck(:rfc5646_locale).sort).to eql(%w(de en-US))
+        expect(excluded.translations.pluck(:rfc5646_locale)).to match_array(%w(de en-US))
       end
 
       it "should skip non-matching locale-specific included keys" do
@@ -267,7 +267,7 @@ RSpec.describe Key do
 
         expect(included.translations.count).to eql(3)
         expect(excluded.translations.count).to eql(2)
-        expect(excluded.translations.pluck(:rfc5646_locale).sort).to eql(%w(de en-US))
+        expect(excluded.translations.pluck(:rfc5646_locale)).to match_array(%w(de en-US))
       end
 
       it "should not auto-translate block tags" do
@@ -293,7 +293,7 @@ RSpec.describe Key do
 
         key.add_pending_translations
 
-        expect(key.translations.map(&:rfc5646_locale).sort).to eql(%w(en de).sort)
+        expect(key.translations.map(&:rfc5646_locale)).to match_array(%w(en de))
       end
 
       it "should auto-translate block tags" do

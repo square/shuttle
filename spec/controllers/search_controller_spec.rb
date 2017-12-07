@@ -139,7 +139,7 @@ RSpec.describe SearchController do
       expect(response.status).to eql(200)
       results = JSON.parse(response.body)
       expect(results.size).to eql(5)
-      expect(results.map { |r| r['original_key'] }.sort).to eql(%w(t1_n0 t1_n1 t1_n2 t1_n3 t1_n4))
+      expect(results.map { |r| r['original_key'] }).to match_array(%w(t1_n0 t1_n1 t1_n2 t1_n3 t1_n4))
     end
 
     it "should exlcude hidden key" do

@@ -56,7 +56,7 @@ RSpec.describe SectionImporter::Core do
       expect(section.translations.length).to eql(18)
       keys.each do |key|
         expect(key.project).to eql(section.project)
-        expect(key.translations.map(&:rfc5646_locale).sort).to eql(%w(en fr es).sort)
+        expect(key.translations.map(&:rfc5646_locale)).to match_array(%w(en fr es))
 
         key.translations.not_block_tag.each do |translation|
           expect(key).to_not  be_ready
