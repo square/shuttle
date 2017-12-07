@@ -35,7 +35,7 @@ fieldset {
 }
 
 legend {
-  font-size: $legend-size; 
+  font-size: $legend-size;
   line-height: $legend-line-height;
   text-transform: uppercase;
   font-weight: 600;
@@ -99,7 +99,7 @@ legend {
       margin-top: 5px;
     }
 
-    .twitter-typeahead * {
+    .twitter-typeahead>* {
       margin: 0px;
     }
 

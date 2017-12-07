@@ -16,7 +16,7 @@ gem 'devise'
 
 # MODELS
 gem 'pg'
-gem 'stringex', '2.2.0' # 2.5.2 forces config.enforce_available_locales to true for some stupid reason
+gem 'stringex'
 gem 'slugalicious'
 gem 'validates_timeliness'
 gem 'find_or_create_on_scopes'
@@ -32,7 +32,7 @@ gem 'elasticsearch-dsl'
 # VIEWS
 gem 'jquery-rails'
 gem 'font-awesome-rails'
-gem 'twitter-typeahead-rails', '0.9.3' # 0.10.2 breaks locale key filtering
+gem 'twitter-typeahead-rails'
 gem 'dropzonejs-rails'
 gem 'kaminari'
 gem 'slim-rails'
@@ -44,7 +44,7 @@ gem 'rugged', git: 'https://github.com/brandonweeks/rugged.git', tag: 'v0.24.0-s
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
-gem 'similar_text', '~> 0.0.4'
+gem 'similar_text'
 # temporary fix uninitialized constant Paperclip::Storage::S3::AWS bug. Should consider using latest version after upgrading rails to 4.2 or higher version
 gem 'paperclip', git: 'https://github.com/thoughtbot/paperclip', ref: '523bd46c768226893f23889079a7aa9c73b57d68'
 gem 'aws-sdk'
@@ -52,7 +52,7 @@ gem 'execjs'
 gem 'safemode'
 
 # IMPORTING
-gem 'nokogiri', '>= 1.6.7.2'
+gem 'nokogiri'
 gem 'CFPropertyList', require: 'cfpropertylist'
 gem 'parslet'
 gem 'mustache'
@@ -81,35 +81,27 @@ gem 'redis-namespace'
 
 # ASSETS
 gem 'sprockets-rails'
-gem 'sass-rails', '4.0.3' # bugfix for sass 3.3 (in)compatibility
+gem 'sass-rails'
 gem 'coffee-rails'
 gem 'uglifier'
 gem 'hogan_assets', github: 'rubenrails/hogan_assets', branch: 'fix_for_sprockets' # sprockets 3 compatibility
 
 group :development do
-  gem 'capistrano', '~> 3.10'
-  gem 'capistrano-bundler', '~> 1.3'
-  gem 'capistrano-rails', '~> 1.3'
-  gem 'capistrano-rvm', '~> 0.1'
+  gem 'capistrano'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rails'
+  gem 'capistrano-rvm'
   gem 'capistrano-sidekiq', github: 'seuros/capistrano-sidekiq'
   gem 'redcarpet', require: nil
-  gem 'web-console', '~> 2.0'
   gem 'yard', require: nil, platform: :mri
+  gem 'better_errors'
 end
 
 group :test do
-  gem 'rspec-rails', '~> 3.0'
+  gem 'rspec-rails'
   gem 'factory_bot_rails'
   gem 'timecop'
   gem 'pry-nav'
   gem 'database_cleaner'
   gem 'capybara'
-end
-
-# Doesn't work in Rails 4
-group :development, :test do
-  gem 'mailcatcher', '~> 0.6.4'
-  gem 'better_errors'
-  gem 'binding_of_caller'
-  gem 'pry'
 end

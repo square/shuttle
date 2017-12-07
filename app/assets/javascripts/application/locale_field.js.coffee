@@ -210,15 +210,15 @@ Locale.matches_prefix = (prefix, key, value) ->
 Locale.locales = {}
 Locale.locale_countries = {}
 
-Locale.dataset = () -> 
+Locale.dataset = () ->
   dataset = []
   for rfc, name of Locale.locales.name
-    datum = 
+    datum =
       rfc: rfc
       name: name
       value: rfc
       flag: Locale.locale_countries[rfc]
-      tokens: [ rfc, name]
+      tokens: [rfc, name]
     dataset.push datum
   return dataset
 
@@ -243,35 +243,44 @@ class root.LocaleField
   constructor: (@element, @options = {}) ->
     template = "
     <div class=\"locale-field-suggestion\">
-      <img src=\"{{flag}}\" style=\"float: right;\">
+      <img src=\"{{flag}}\">
       <div class='locale-rfc'>
         <strong>{{rfc}}</strong>
-      </div> 
+      </div>
       <div class='locale-name'>
         {{name}}
       </span>
     </div>
     "
-    
-    @element.wrap("<span class='locale-field-wrapper'></span>")
-    @element.typeahead 
-      name: 'typeahead'
+    compiled = Hogan.compile(template)
+    source = new Bloodhound
+      datumTokenizer: (d) -> [d.rfc, d.name]
+      queryTokenizer: Bloodhound.tokenizers.whitespace
       local: Locale.dataset()
-      template: template
-      engine: Hogan
 
-    @element.blur () -> 
-      if $(this).val() == ''
-        $(this).attr("placeholder", "Locale")
-      else if Locale.from_rfc5646($(this).val()) == null
-        $(this).val('')
-        $(this).attr("placeholder", "Invalid Locale")
+    source.initialize().done =>
 
-    this.setFlag()
-    @element.on 'keyup', (e) =>
+      @element.wrap("<span class='locale-field-wrapper'></span>")
+      @element.typeahead null, {
+        name: 'locales',
+        source: source.ttAdapter()
+        display: 'rfc'
+        templates:
+          suggestion: compiled.render.bind(compiled)
+      }
+
+      @element.blur () ->
+        if $(this).val() == ''
+          $(this).attr("placeholder", "Locale")
+        else if Locale.from_rfc5646($(this).val()) == null
+          $(this).val('')
+          $(this).attr("placeholder", "Invalid Locale")
+
       this.setFlag()
-    @element.on "typeahead:closed", (e) =>
-      this.setFlag()
+      @element.on 'keyup', (e) =>
+        this.setFlag()
+      @element.on "typeahead:closed", (e) =>
+        this.setFlag()
 
 
   setFlag: ->

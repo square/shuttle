@@ -82,6 +82,8 @@ module Shuttle
   end
 end
 
+I18n.enforce_available_locales = false
+
 # no idea why this is necessary
 require 'errors'
 require Rails.root.join('lib', 'importer', 'base')
