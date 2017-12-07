@@ -21,10 +21,6 @@ RSpec.describe StashWebhookPinger do
     allow(HTTParty).to receive(:post)
   end
 
-  after(:each) do
-    Commit.destroy_all
-  end
-
   describe "#perform" do
     subject { StashWebhookPinger.new }
 
