@@ -117,9 +117,8 @@ class LocaleProjectsShowFinder
     translations_in_es = Elasticsearch::Model.search(search_query, Translation).results
     translations = Translation
                        .where(id: translations_in_es.map(&:id))
-                       .joins(key: :commits)
                        .where('commits.revision': form[:commit])
-                       .includes({key: [:project, :translations, :section, {article: :project}]}, :locale_associations)
+                       .includes({key: [:project, :commits, :translations, :section, {article: :project}]}, :locale_associations)
                        .order('commits_keys.created_at, keys.original_key')
 
     # Don't sort the keys since they are sorted in the line above
