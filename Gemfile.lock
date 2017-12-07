@@ -823,9 +823,6 @@ GEM
     redis-rack (2.0.3)
       rack (>= 1.5, < 3)
       redis-store (>= 1.2, < 2)
-    redis-rack-cache (2.0.2)
-      rack-cache (>= 1.6, < 2)
-      redis-store (>= 1.2, < 2)
     redis-rails (5.0.2)
       redis-actionpack (>= 5.0, < 6)
       redis-activesupport (>= 5.0, < 6)
@@ -999,7 +996,6 @@ DEPENDENCIES
   redcarpet
   redis-mutex
   redis-namespace
-  redis-rack-cache
   redis-rails
   rspec-rails (~> 3.0)
   rubyzip
