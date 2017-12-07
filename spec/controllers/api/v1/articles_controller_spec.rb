@@ -138,7 +138,7 @@ RSpec.describe API::V1::ArticlesController do
       article2 = FactoryBot.create(:article, project: project)
       article2.update! ready: true
 
-      2.times { FactoryBot.create(:article) }
+      FactoryBot.create_list :article, 2
 
       get :index, project_id: project.id, api_token: project.api_token, format: :json
 

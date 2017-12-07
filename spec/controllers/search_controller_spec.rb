@@ -216,10 +216,10 @@ RSpec.describe SearchController do
       @project1 = FactoryBot.create(:project)
       @project2 = FactoryBot.create(:project)
       Commit.delete_all
-      2.times { FactoryBot.create(:commit, project: @project1, revision: finish_sha("abcdef")) }
-      2.times { FactoryBot.create(:commit, project: @project1, revision: finish_sha("123456")) }
-      1.times { FactoryBot.create(:commit, project: @project1, revision: finish_sha("abc111")) }
-      1.times { FactoryBot.create(:commit, project: @project2, revision: finish_sha("abc111")) }
+      2.times { FactoryBot.create :commit, project: @project1, revision: finish_sha('abcdef') }
+      2.times { FactoryBot.create :commit, project: @project1, revision: finish_sha('123456') }
+      FactoryBot.create :commit, project: @project1, revision: finish_sha('abc111')
+      FactoryBot.create :commit, project: @project2, revision: finish_sha('abc111')
 
       regenerate_elastic_search_indexes
     end
