@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'exporter/yaml'
+
 module Exporter
 
   # Exports the translated strings of a Commit to a YAML file formatted
