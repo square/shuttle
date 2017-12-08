@@ -19,7 +19,7 @@ module Exporter
   #
   # @raise [NoLocaleProvidedError] If a single locale is not provided.
 
-class EmberIntlYAML < Yaml
+  class EmberIntlYAML < Yaml
     def export(io, *locales)
       raise NoLocaleProvidedError, "Ember-intl YAML files can only be for a single locale" unless locales.size == 1
       locale = locales.first
