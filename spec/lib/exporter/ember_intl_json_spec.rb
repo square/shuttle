@@ -14,39 +14,39 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Exporter::EmberIntlJSON do
+RSpec.describe Exporter::EmberIntlJSON do
   let(:source_locale) { Locale.from_rfc5646('en-US') }
   let(:target_locale) { Locale.from_rfc5646('de-DE') }
-  let(:project) { FactoryGirl.create(:project) }
-  let(:commit) { FactoryGirl.create(:commit, project: project) }
+  let(:project) { FactoryBot.create(:project) }
+  let(:commit) { FactoryBot.create(:commit, project: project) }
 
   before do
-    root      = FactoryGirl.create(:key,
+    root      = FactoryBot.create(:key,
                                    project: project,
                                    key:     "root")
-    nested1   = FactoryGirl.create(:key,
+    nested1   = FactoryBot.create(:key,
                                    project: project,
                                    key:     "nested.one")
-    nested2   = FactoryGirl.create(:key,
+    nested2   = FactoryBot.create(:key,
                                    project: project,
                                    key:     "nested.two")
     commit.keys = [root, nested1, nested2]
 
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           root,
                        source_locale: source_locale,
                        locale:        target_locale,
                        source_copy:   "Te Quiero.",
                        copy:          "Te Quiero."
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           nested1,
                        source_locale: source_locale,
                        locale:        target_locale,
                        source_copy:   "English, please.",
                        copy:          "Deutsch, bitte."
-    FactoryGirl.create :translation,
+    FactoryBot.create :translation,
                        key:           nested2,
                        source_locale: source_locale,
                        locale:        target_locale,
@@ -92,29 +92,29 @@ describe Exporter::EmberIntlJSON do
     it "should de-dupe en-CA translations from the base locale" do
       en_CA = Locale.from_rfc5646('en-CA')
 
-      same         = FactoryGirl.create(:key, project: project, key: 'same')
-      different    = FactoryGirl.create(:key, project: project, key: 'different')
+      same         = FactoryBot.create(:key, project: project, key: 'same')
+      different    = FactoryBot.create(:key, project: project, key: 'different')
       commit.keys = [same, different]
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           same,
                          source_locale: source_locale,
                          locale:        source_locale,
                          source_copy:   "Same",
                          copy:          "Same"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           different,
                          source_locale: source_locale,
                          locale:        source_locale,
                          source_copy:   "Different",
                          copy:          "Different"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           same,
                          source_locale: source_locale,
                          locale:        en_CA,
                          source_copy:   "Same",
                          copy:          "Same"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           different,
                          source_locale: source_locale,
                          locale:        en_CA,
@@ -133,17 +133,17 @@ describe Exporter::EmberIntlJSON do
     it "should not de-dupe ja translations from en" do
       ja = Locale.from_rfc5646('ja')
 
-      same         = FactoryGirl.create(:key, project: project, key: 'same')
-      different    = FactoryGirl.create(:key, project: project, key: 'different')
+      same         = FactoryBot.create(:key, project: project, key: 'same')
+      different    = FactoryBot.create(:key, project: project, key: 'different')
       commit.keys = [same, different]
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           same,
                          source_locale: source_locale,
                          locale:        ja,
                          source_copy:   "Same",
                          copy:          "Same"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           different,
                          source_locale: source_locale,
                          locale:        ja,
@@ -165,29 +165,29 @@ describe Exporter::EmberIntlJSON do
       ja_JP = Locale.from_rfc5646('ja-JP')
       project.update_attribute :locale_requirements, source_locale => true, ja => true, ja_JP => true
 
-      same         = FactoryGirl.create(:key, project: project, key: 'same')
-      different    = FactoryGirl.create(:key, project: project, key: 'different')
+      same         = FactoryBot.create(:key, project: project, key: 'same')
+      different    = FactoryBot.create(:key, project: project, key: 'different')
       commit.keys = [same, different]
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           same,
                          source_locale: source_locale,
                          locale:        ja,
                          source_copy:   "Same",
                          copy:          "Same (ja)"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           different,
                          source_locale: source_locale,
                          locale:        ja,
                          source_copy:   "Different",
                          copy:          "Different (ja)"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           same,
                          source_locale: source_locale,
                          locale:        ja_JP,
                          source_copy:   "Same",
                          copy:          "Same (ja)"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           different,
                          source_locale: source_locale,
                          locale:        ja_JP,
@@ -208,29 +208,29 @@ describe Exporter::EmberIntlJSON do
       ja_JP = Locale.from_rfc5646('ja-JP')
       project.update_attribute :locale_requirements, source_locale => true, ja => false, ja_JP => true
 
-      same         = FactoryGirl.create(:key, project: project, key: 'same')
-      different    = FactoryGirl.create(:key, project: project, key: 'different')
+      same         = FactoryBot.create(:key, project: project, key: 'same')
+      different    = FactoryBot.create(:key, project: project, key: 'different')
       commit.keys = [same, different]
 
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           same,
                          source_locale: source_locale,
                          locale:        ja,
                          source_copy:   "Same",
                          copy:          "Same (ja)"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           different,
                          source_locale: source_locale,
                          locale:        ja,
                          source_copy:   "Different",
                          copy:          "Different (ja)"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           same,
                          source_locale: source_locale,
                          locale:        ja_JP,
                          source_copy:   "Same",
                          copy:          "Same (ja)"
-      FactoryGirl.create :translation,
+      FactoryBot.create :translation,
                          key:           different,
                          source_locale: source_locale,
                          locale:        ja_JP,

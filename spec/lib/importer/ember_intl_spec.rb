@@ -12,13 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Importer::EmberIntl do
+RSpec.describe Importer::EmberIntl do
   context "[importing]" do
     context "[repo with valid files]" do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                       only_paths:     %w(ember-intl/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember_intl))
@@ -40,7 +40,7 @@ describe Importer::EmberIntl do
 
     context "[repo with broken files]" do
       before :each do
-        @project = FactoryGirl.create(:project,
+        @project = FactoryBot.create(:project,
                                       repository_url: Rails.root.join('spec', 'fixtures', 'repository-broken.git').to_s,
                                       only_paths:     %w(ember-intl-broken/),
                                       skip_imports:   Importer::Base.implementations.map(&:ident) - %w(ember_intl))
