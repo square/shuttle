@@ -32,7 +32,7 @@ RSpec.describe Translation do
         FactoryBot.create :translation, approved: true,  copy: "fake"
         FactoryBot.create :translation, approved: false, copy: "fake"
         FactoryBot.create :translation, approved: nil,   copy: "fake"
-        expect(Translation.not_translated.to_a).to eql([t1, t2])
+        expect(Translation.not_translated.to_a).to match_array([t1, t2])
       end
     end
   end
