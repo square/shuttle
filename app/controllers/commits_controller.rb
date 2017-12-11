@@ -177,6 +177,7 @@ class CommitsController < ApplicationController
     flash[:alert] = t('controllers.commits.create.project_not_linked_error', revision: params[:commit][:revision].strip)
     redirect_to root_url
   rescue Timeout::Error
+    Raven.capture_exception err, extra: { project_id: project_id, sha: sha }
     flash[:alert] = t('controllers.commits.create.timeout', revision: revision)
     redirect_to root_url
   end

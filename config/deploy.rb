@@ -14,10 +14,10 @@
 
 set :application, 'shuttle'
 
-set :repo_url, 'https://github.com/Square/shuttle.git'
+set :repo_url, 'https://stash.corp.squareup.com/scm/intl/shuttle.git'
 ask(:branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp })
 
-set :deploy_to, "/var/www/#{fetch :application}"
+set :deploy_to, "/app/#{fetch :application}"
 
 append :linked_files,
        'config/database.yml',
@@ -41,3 +41,31 @@ namespace :deploy do
     end
   end
 end
+
+namespace :sidekiq do
+  task :start do
+    on roles(:sidekiq) do
+      sudo 'sv start sidekiq0'
+      sudo 'sv start sidekiq1'
+      sudo 'sv start sidekiq2'
+    end
+  end
+
+  task :stop do
+    on roles(:sidekiq) do
+      sudo 'sv stop sidekiq0'
+      sudo 'sv stop sidekiq1'
+      sudo 'sv stop sidekiq2'
+    end
+  end
+
+  task :restart do
+    on roles(:sidekiq) do
+      sudo 'sv restart sidekiq0'
+      sudo 'sv restart sidekiq1'
+      sudo 'sv restart sidekiq2'
+    end
+  end
+end
+
+after 'deploy:publishing', 'deploy:restart'

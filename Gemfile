@@ -1,6 +1,5 @@
-source 'https://rubygems.org'
-source 'YOUR_SIDEKIQ_PRO_SOURCE_HERE'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
+source 'https://gems.vip.global.square'
 
 ruby '2.3.1'
 
@@ -54,6 +53,7 @@ gem 'aws-sdk', '< 3'
 gem 'execjs'
 gem 'safemode'
 gem 'pivot_table'
+gem 'sentry-raven'
 
 # IMPORTING
 gem 'nokogiri'
@@ -73,7 +73,9 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-gem 'sidekiq-pro', '= 3.4.5'
+source 'https://gems.vip.global.square/private' do
+  gem 'sidekiq-pro', '= 3.4.5'
+end
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
@@ -88,6 +90,10 @@ gem 'sass-rails'
 gem 'coffee-rails'
 gem 'uglifier'
 gem 'hogan_assets', github: 'rubenrails/hogan_assets', branch: 'fix_for_sprockets' # sprockets 3 compatibility
+
+source 'https://rails-assets.org' do
+  gem 'rails-assets-raven-js'
+end
 
 group :development do
   gem 'capistrano'

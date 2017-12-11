@@ -16,7 +16,7 @@ require 'rails_helper'
 
 RSpec.describe ArticleImporter do
   describe "#perform" do
-    before :each do
+    before do
       allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
       @article = FactoryBot.create(:article, sections_hash: { "title" => "a", "body" => "<p>b</p><p>c</p>" })
       ArticleImporter.new.perform(@article.id) # first import
@@ -117,7 +117,7 @@ end
 
 RSpec.describe ArticleImporter::Finisher do
   describe "#on_success" do
-    before :each do
+    before do
       # creation triggers the initial import
       @article = FactoryBot.create(:article, sections_hash: { "main" => "<p>hello</p><p>world</p>" }, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => true, 'ja' => false })
       expect(@article.reload.keys.count).to eql(6)

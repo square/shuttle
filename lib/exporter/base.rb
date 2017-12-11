@@ -215,6 +215,7 @@ module Exporter
           # or an array index (previous if did run)
           this_object[last] = translation.copy
         rescue => err
+          Raven.capture_exception err, extra: { translation_id: translation.id }
           raise if Rails.env.test?
         end
       end

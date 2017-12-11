@@ -1,0 +1,8 @@
+language: ruby
+ruby:
+ - ruby-2.3.1
+test_command: 'script/ci'
+targets:
+- type: specs
+  glob: spec/**/*_spec.rb
+  workers: 10

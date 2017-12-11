@@ -8,6 +8,10 @@ ENV APP_HOME /app
 RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
+COPY square_primary_certificate_authority_g2.crt /usr/local/share/ca-certificates/
+COPY square_service_authority_g2.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
 ADD Gemfile* $APP_HOME/
 RUN gem update --system
 RUN gem update
