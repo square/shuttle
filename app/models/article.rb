@@ -71,6 +71,7 @@
 # | `base_locale`               | The locale the Article is initially localized in.                                                                 |
 # | `locale_requirements`       | An hash mapping locales this Article can be localized to, to whether those locales are required.                  |
 # | `hidden`                    | Hidden in dashboard or not                                                                                        |
+# | `human_review`              | Boolean. Default to true(default to human review for machine translation)                                         |
 
 class Article < ActiveRecord::Base
   include ArticleOrCommitStats

@@ -16,7 +16,7 @@
 
 require 'spec_helper'
 
-describe Api::V1::ArticlesController do
+describe API::V1::ArticlesController do
   let(:project) { FactoryGirl.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
   let(:monitor_user) { FactoryGirl.create(:user, :confirmed, role: 'monitor') }
   let(:reviewer_user) { FactoryGirl.create(:user, :confirmed, role: 'reviewer') }
@@ -169,6 +169,14 @@ describe Api::V1::ArticlesController do
       expect(JSON.parse(response.body)).to eql({"error"=>{"errors"=>{ "name"=>["can’t be blank"], "sections_hash"=>["can’t be blank"]}}})
     end
 
+    it "creates an Article, human review should be false" do
+      post :create, project_id: project.id, api_token: project.api_token, article: { name: "testname", human_review: false, sections_hash: {"title" => "<p>a</p><p>b</p>", "body" => "<p>a</p><p>c</p>"} }, format: :json
+      expect(response.status).to eql(200)
+      expect(Article.count).to eql(1)
+      article = Article.last
+      expect(article.human_review).to be_falsey
+    end
+
     it "creates an Article, its Sections, inherits locale settings from Project" do
       post :create, project_id: project.id, api_token: project.api_token, article: { name: "testname", sections_hash: {"title" => "<p>a</p><p>b</p>", "body" => "<p>a</p><p>c</p>"}}, format: :json
       expect(response.status).to eql(200)
@@ -177,6 +185,7 @@ describe Api::V1::ArticlesController do
       expect(article.name).to eql("testname")
       expect(article.sections.map { |section| [section.name, section.source_copy, section.active] }.sort).to eql([["title", "<p>a</p><p>b</p>", true], ["body", "<p>a</p><p>c</p>", true]].sort)
       expect(article.keys.count).to eql(12)
+      expect(article.human_review).to be_truthy
       expect(article.translations.count).to eql(36)
       expect(article.base_rfc5646_locale).to eql('en')
       expect(article.targeted_rfc5646_locales).to eql({ 'fr' => true, 'es' => false })
@@ -190,6 +199,7 @@ describe Api::V1::ArticlesController do
       expect(Article.count).to eql(1)
       article = Article.last
       expect(article.keys.count).to eql(6)
+      expect(article.human_review).to be_truthy
       expect(article.translations.count).to eql(12)
       expect(article.base_rfc5646_locale).to eql('en-US')
       expect(article.targeted_rfc5646_locales).to eql({ 'ja' => true })
@@ -269,7 +279,7 @@ describe Api::V1::ArticlesController do
   end
 
   describe "#update" do
-    let(:article) { FactoryGirl.create(:article, project: project, name: "test", sections_hash: { "main" => "<p>a</p><p>b</p>", "second" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }).tap(&:reload) }
+    let(:article) { FactoryGirl.create(:article, project: project, name: "test", human_review: true, sections_hash: { "main" => "<p>a</p><p>b</p>", "second" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }).tap(&:reload) }
 
     it_behaves_like "api-or-session-authenticateable-and-filters" do
       let(:request_type) { :patch }
@@ -283,9 +293,10 @@ describe Api::V1::ArticlesController do
       end
 
       it "updates an Article's sections_hash and targeted_rfc5646_locales" do
-        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>", "sub" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }, targeted_rfc5646_locales: { 'fr' => true, 'es' => false, 'tr' => false } }, format: :json
+        patch :update, project_id: project.id, api_token: project.api_token, name: article.name, article: { human_review: false, sections_hash: { "main" => "<p>a</p><p>x</p><p>b</p>", "sub" => "<p>y</p><p>z</p>", "third" => "<p>t</p>" }, targeted_rfc5646_locales: { 'fr' => true, 'es' => false, 'tr' => false } }, format: :json
         expect(response.status).to eql(200)
         article = Article.first
+        expect(article.human_review).to be_falsey
         expect(article.sections.count).to eql(4)
         expect(article.active_sections.count).to eql(3)
 

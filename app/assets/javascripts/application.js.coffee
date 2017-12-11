@@ -66,8 +66,6 @@
 #= require selectize_with_defaults
 #= require select2
 #=
-#= require raven-js
-#
 #= require_tree ../templates
 #= require_tree ./application
 

@@ -22,16 +22,16 @@ describe CommitsCleaner do
     @project = FactoryGirl.create(:project, :light)
   end
 
-  describe "#destroy_commits_on_no_branch" do
+  describe "#destroy_dangling_commits" do
     before :each do
-      allow_any_instance_of(Commit).to receive(:on_any_branch?).and_return(false)
+      allow_any_instance_of(Commit).to receive(:commit).and_raise(Rugged::OdbError)
     end
 
     it "should destory all commits" do
       create_commits(@project, 3)
 
       expect(@project.commits.count).to eq(3)
-      @commits_cleaner.destroy_commits_on_no_branch
+      @commits_cleaner.destroy_dangling_commits
       expect(@project.commits.count).to eq(0)
     end
 
@@ -39,7 +39,7 @@ describe CommitsCleaner do
       create_commits(@project, 3, ready: true)
 
       expect(@project.commits.count).to eq(3)
-      @commits_cleaner.destroy_commits_on_no_branch
+      @commits_cleaner.destroy_dangling_commits
       expect(@project.commits.count).to eq(3)
     end
   end

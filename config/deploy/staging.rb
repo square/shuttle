@@ -8,3 +8,6 @@ role :web,          [single_server]
 role :db,           [single_server]
 role :sidekiq,      [single_server]
 role :primary_cron, [single_server]
+
+set :linked_files, fetch(:linked_files, []).push('config/environments/staging/app.yml',
+                                                 'config/environments/staging/paperclip.yml')

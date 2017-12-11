@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+ROOT_DIR=$(pwd $(dirname $0)/../..)
+cd $ROOT_DIR
+mkdir -p vendor
+cd vendor
+
+git clone --quiet --shared /mnt/nfs/git/sq/shuttle-es.git

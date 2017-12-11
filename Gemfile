@@ -9,6 +9,8 @@ gem 'redis-rails'
 gem 'redis-rack-cache'
 gem 'rack-cache', require: 'rack/cache'
 gem 'boolean'
+gem 'faraday'
+gem 'rubyzip'
 
 # AUTHENTICATION
 gem 'devise'
@@ -43,11 +45,11 @@ gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
 gem 'similar_text', '~> 0.0.4'
-gem 'paperclip', '>= 4.2.2'
+# temporary fix uninitialized constant Paperclip::Storage::S3::AWS bug. Should consider using latest version after upgrading rails to 4.2 or higher version
+gem 'paperclip', :git=> 'https://github.com/thoughtbot/paperclip', :ref => '523bd46c768226893f23889079a7aa9c73b57d68'
 gem 'aws-sdk'
 gem 'execjs'
 gem 'safemode'
-gem 'sentry-raven'
 
 # IMPORTING
 gem 'nokogiri', '>= 1.6.7.2'
@@ -83,10 +85,6 @@ gem 'sass-rails', '4.0.3' # bugfix for sass 3.3 (in)compatibility
 gem 'coffee-rails'
 gem 'uglifier'
 gem 'hogan_assets'
-
-source 'https://rails-assets.org' do
-  gem 'rails-assets-raven-js'
-end
 
 group :development do
   gem 'capistrano', '~> 3.10'

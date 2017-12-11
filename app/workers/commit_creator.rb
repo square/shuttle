@@ -34,7 +34,6 @@ class CommitCreator
   rescue Git::CommitNotFoundError, Project::NotLinkedToAGitRepositoryError => err
     CommitMailer.notify_import_errors_in_commit_creator(options[:other_fields].try!(:symbolize_keys).try!(:[], :user_id), project_id, sha, err).deliver
   rescue Timeout::Error => err
-    Raven.capture_exception err, extra: { project_id: project_id, sha: sha }
     self.class.perform_in 2.minutes, project_id, sha
   end
 

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+pushd "$(dirname $0)/.."
+
+PIDFILE="tmp/elasticsearch.pid"
+
+# kill things using our elasticsearch port before we attempt to start
+./script/elasticsearch-cleanup
+
+export HOSTNAME=localhost
+./vendor/shuttle-es/elasticsearch-1.2.1/bin/elasticsearch -p $PIDFILE

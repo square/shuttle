@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'abstract_class'
+
 # Container module for {Exporter::Base} and its subclasses.
 
 module Exporter
@@ -26,15 +28,7 @@ module Exporter
   # Subclasses should implement at a minimum {#export}.
 
   class Base
-    # @return [Array<Class>] All known implementations of the base class.
-    #   Automatically updated.
-    class_attribute :implementations
-    self.implementations = []
-
-    # @private
-    def self.inherited(subclass)
-      self.implementations << subclass
-    end
+    extend AbstractClass
 
     # Prepares an exporter for use with a Commit.
     #
@@ -218,7 +212,6 @@ module Exporter
           # or an array index (previous if did run)
           this_object[last] = translation.copy
         rescue => err
-          Raven.capture_exception err, extra: { translation_id: translation.id }
           raise if Rails.env.test?
         end
       end

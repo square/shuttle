@@ -273,6 +273,8 @@ en:
       name: Ember.js (with dependency injection)
     ember_es6_module:
       name: Ember.js i18n ES6 (dependency-injected)
+    ember_intl:
+      name: Ember-intl (JSON or YAML)
     erb:
       name: ERb file
     properties:
@@ -308,6 +310,10 @@ en:
       name: Ember.js i18n file (dependency injection)
     ember_es6_module:
       name: Ember.js i18n ES6 (dependency-injected)
+    ember_intl_yaml:
+      name: Ember-intl (YAML)
+    ember_intl_json:
+      name: Ember-intl (JSON)
     erb:
       name: ERb file
     ios:

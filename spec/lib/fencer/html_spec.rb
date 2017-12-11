@@ -45,7 +45,7 @@ describe Fencer::Html do
       expect(Fencer::Html.valid?("An <unknown>tag.")).to be_falsey
       expect(Fencer::Html.valid?("An <b>unclosed tag.")).to be_falsey
       expect(Fencer::Html.valid?("A <b>mismatched tag</i>.")).to be_falsey
-      expect(Fencer::Html.valid?("An <<b>/>invalid</b>tag.")).to be_falsey
+      expect(Fencer::Html.valid?("An <b>invalid tag.<b>")).to be_falsey
     end
   end
 end

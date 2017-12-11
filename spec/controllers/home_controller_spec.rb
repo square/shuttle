@@ -15,28 +15,28 @@
 require 'spec_helper'
 
 describe HomeController do
+  before :each do
+    allow_any_instance_of(Article).to receive(:import!) # prevent auto import
+
+    reset_elastic_search
+    @request.env['devise.mapping'] = Devise.mappings[:user]
+    @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
+    sign_in @user
+
+    @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'ja'=>true, 'es'=>false}, base_rfc5646_locale: 'en')
+    @commit = FactoryGirl.create(:commit, project: @project)
+    @commit_key = FactoryGirl.create(:key, project: @project)
+    @commit.keys << @commit_key
+
+    @article = FactoryGirl.create(:article, project: @project)
+    @section = FactoryGirl.create(:section, article: @article)
+    @article_key = FactoryGirl.create(:key, section: @section, index_in_section: 0)
+
+    regenerate_elastic_search_indexes
+    sleep(2)
+  end
+
   context "[when 'uncompleted' filter is selected and locales are specified]" do
-    before :each do
-      allow_any_instance_of(Article).to receive(:import!) # prevent auto import
-
-      reset_elastic_search
-      @request.env['devise.mapping'] = Devise.mappings[:user]
-      @user = FactoryGirl.create(:user, :confirmed, role: 'monitor')
-      sign_in @user
-
-      @project = FactoryGirl.create(:project, targeted_rfc5646_locales: {'ja'=>true, 'es'=>false}, base_rfc5646_locale: 'en')
-      @commit = FactoryGirl.create(:commit, project: @project)
-      @commit_key = FactoryGirl.create(:key, project: @project)
-      @commit.keys << @commit_key
-
-      @article = FactoryGirl.create(:article, project: @project)
-      @section = FactoryGirl.create(:section, article: @article)
-      @article_key = FactoryGirl.create(:key, section: @section, index_in_section: 0)
-
-      regenerate_elastic_search_indexes
-      sleep(2)
-    end
-
     it "returns the commit/article with pending translations in specified locales, even if that commit/article is ready and the locale is optional" do
       FactoryGirl.create(:translation, key: @commit_key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
       @commit_key.update_columns ready: true
@@ -70,6 +70,18 @@ describe HomeController do
 
       get :index, { filter__status: 'hidden' }
       expect(assigns(:articles).map(&:id)).to eq([hidden_article.id])
+    end
+  end
+
+  context "[when only 'all translations' and 'all projects' filters are selected]" do
+    it 'should return all translations in all projects' do
+      commit1 = FactoryGirl.create(:commit, project: @project, ready: false)
+      commit2 = FactoryGirl.create(:commit, project: @project)
+      regenerate_elastic_search_indexes
+      sleep(2)
+
+      get :index, { filter__status: 'all', commits_filter__project_id: 'all' }
+      expect(assigns(:commits).map(&:id)).to eq([commit2.id, commit1.id, @commit.id])
     end
   end
 end

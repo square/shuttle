@@ -15,10 +15,10 @@ devise:
 # Used in setting `config.cache_store` in production.rb
 cache_store:
   type: :redis_store
-  endpoint: redis://shuttle-redis.example.com:PORT/0/shuttle_rails
+  endpoint: redis://shuttle-redis.example.com:PORT/0/shuttle_cache
 
 # Used in setting `config.action_dispatch.rack_cache` in production.rb
 action_dispatch:
   rack_cache:
-    metastore: redis://shuttle-redis.example.com:PORT/0/shuttle_rails
-    entitystore: redis://shuttle-redis.example.com:PORT/0/shuttle_rails
+    metastore: redis://shuttle-redis.example.com:PORT/0/shuttle_meta
+    entitystore: redis://shuttle-redis.example.com:PORT/0/shuttle_entity

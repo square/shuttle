@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class IncreaseApiTokenSize < ActiveRecord::Migration
+class IncreaseAPITokenSize < ActiveRecord::Migration
   def change
     remove_column :projects, :api_token
     add_column    :projects, :api_token, "character(240)"

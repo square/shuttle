@@ -20,17 +20,21 @@ class CommitsCleaner
     log("Cleaning old commits for #{Date.today}")
     destroy_old_commits_which_errored_during_import
     destroy_old_excess_commits_per_project
-    destroy_commits_on_no_branch
+    destroy_dangling_commits
   end
 
   include SidekiqLocking
 
-  def destroy_commits_on_no_branch
-    log("[destroy_commits_on_no_branch")
+  def destroy_dangling_commits
+    log("[destroy_dangling_commits")
     Project.find_each do |project|
       project.repo { |r| r.fetch('origin') }
       project.commits.not_ready.each do |commit|
-        destroy_and_notify_stash(commit) unless commit.on_any_branch?
+        begin
+          commit.commit
+        rescue Rugged::OdbError
+          destroy_and_notify_stash(commit)
+        end
       end
     end
   end

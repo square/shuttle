@@ -9,3 +9,7 @@ role :web,          web_boxes
 role :db,           db_boxes
 role :sidekiq,      worker_boxes
 role :primary_cron, worker_boxes.first
+
+set :linked_files, fetch(:linked_files, []).push('config/environments/production/app.yml',
+                                                 'config/environments/production/paperclip.yml',
+                                                 'config/environments/production/stash.yml')

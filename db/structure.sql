@@ -2,11 +2,12 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.3
--- Dumped by pg_dump version 9.5.3
+-- Dumped from database version 10.1
+-- Dumped by pg_dump version 10.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -64,7 +65,8 @@ CREATE TABLE articles (
     updater_id integer,
     created_via_api boolean DEFAULT true NOT NULL,
     name_sha character varying(64) NOT NULL,
-    hidden boolean DEFAULT false NOT NULL
+    hidden boolean DEFAULT false NOT NULL,
+    human_review boolean DEFAULT true NOT NULL
 );
 
 
@@ -73,6 +75,7 @@ CREATE TABLE articles (
 --
 
 CREATE SEQUENCE articles_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -122,6 +125,7 @@ CREATE TABLE blobs_commits (
 --
 
 CREATE SEQUENCE blobs_commits_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -141,6 +145,7 @@ ALTER SEQUENCE blobs_commits_id_seq OWNED BY blobs_commits.id;
 --
 
 CREATE SEQUENCE blobs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -173,6 +178,7 @@ CREATE TABLE blobs_keys (
 --
 
 CREATE SEQUENCE blobs_keys_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -206,6 +212,7 @@ CREATE TABLE comments (
 --
 
 CREATE SEQUENCE comments_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -255,6 +262,7 @@ CREATE TABLE commits (
 --
 
 CREATE SEQUENCE commits_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -307,6 +315,7 @@ CREATE TABLE daily_metrics (
 --
 
 CREATE SEQUENCE daily_metrics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -346,6 +355,7 @@ CREATE TABLE issues (
 --
 
 CREATE SEQUENCE issues_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -391,6 +401,7 @@ CREATE TABLE keys (
 --
 
 CREATE SEQUENCE keys_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -425,6 +436,7 @@ CREATE TABLE locale_associations (
 --
 
 CREATE SEQUENCE locale_associations_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -463,6 +475,7 @@ CREATE TABLE locale_glossary_entries (
 --
 
 CREATE SEQUENCE locale_glossary_entries_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -516,6 +529,7 @@ CREATE TABLE projects (
 --
 
 CREATE SEQUENCE projects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -560,6 +574,7 @@ CREATE TABLE screenshots (
 --
 
 CREATE SEQUENCE screenshots_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -596,6 +611,7 @@ CREATE TABLE sections (
 --
 
 CREATE SEQUENCE sections_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -631,6 +647,7 @@ CREATE TABLE slugs (
 --
 
 CREATE SEQUENCE slugs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -667,6 +684,7 @@ CREATE TABLE source_glossary_entries (
 --
 
 CREATE SEQUENCE source_glossary_entries_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -699,6 +717,7 @@ CREATE TABLE translation_changes (
 --
 
 CREATE SEQUENCE translation_changes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -742,6 +761,7 @@ CREATE TABLE translations (
 --
 
 CREATE SEQUENCE translations_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -796,6 +816,7 @@ CREATE TABLE users (
 --
 
 CREATE SEQUENCE users_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -811,140 +832,140 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: articles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY articles ALTER COLUMN id SET DEFAULT nextval('articles_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: blobs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs ALTER COLUMN id SET DEFAULT nextval('blobs_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: blobs_commits id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs_commits ALTER COLUMN id SET DEFAULT nextval('blobs_commits_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: blobs_keys id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs_keys ALTER COLUMN id SET DEFAULT nextval('blobs_keys_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: comments id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY comments ALTER COLUMN id SET DEFAULT nextval('comments_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: commits id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY commits ALTER COLUMN id SET DEFAULT nextval('commits_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: daily_metrics id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY daily_metrics ALTER COLUMN id SET DEFAULT nextval('daily_metrics_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: issues id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: keys id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY keys ALTER COLUMN id SET DEFAULT nextval('keys_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: locale_associations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY locale_associations ALTER COLUMN id SET DEFAULT nextval('locale_associations_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: locale_glossary_entries id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY locale_glossary_entries ALTER COLUMN id SET DEFAULT nextval('locale_glossary_entries_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: projects id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY projects ALTER COLUMN id SET DEFAULT nextval('projects_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: screenshots id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY screenshots ALTER COLUMN id SET DEFAULT nextval('screenshots_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: sections id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY sections ALTER COLUMN id SET DEFAULT nextval('sections_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: slugs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY slugs ALTER COLUMN id SET DEFAULT nextval('slugs_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: source_glossary_entries id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY source_glossary_entries ALTER COLUMN id SET DEFAULT nextval('source_glossary_entries_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: translation_changes id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translation_changes ALTER COLUMN id SET DEFAULT nextval('translation_changes_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: translations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translations ALTER COLUMN id SET DEFAULT nextval('translations_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
 
 
 --
--- Name: articles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: articles articles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY articles
@@ -952,7 +973,7 @@ ALTER TABLE ONLY articles
 
 
 --
--- Name: blobs_commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs_commits blobs_commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs_commits
@@ -960,7 +981,7 @@ ALTER TABLE ONLY blobs_commits
 
 
 --
--- Name: blobs_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs_keys blobs_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs_keys
@@ -968,7 +989,7 @@ ALTER TABLE ONLY blobs_keys
 
 
 --
--- Name: blobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs blobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs
@@ -976,7 +997,7 @@ ALTER TABLE ONLY blobs
 
 
 --
--- Name: comments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: comments comments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY comments
@@ -984,7 +1005,7 @@ ALTER TABLE ONLY comments
 
 
 --
--- Name: commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: commits commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY commits
@@ -992,7 +1013,7 @@ ALTER TABLE ONLY commits
 
 
 --
--- Name: daily_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: daily_metrics daily_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY daily_metrics
@@ -1000,7 +1021,7 @@ ALTER TABLE ONLY daily_metrics
 
 
 --
--- Name: issues_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: issues issues_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY issues
@@ -1008,7 +1029,7 @@ ALTER TABLE ONLY issues
 
 
 --
--- Name: keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: keys keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY keys
@@ -1016,7 +1037,7 @@ ALTER TABLE ONLY keys
 
 
 --
--- Name: locale_associations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: locale_associations locale_associations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY locale_associations
@@ -1024,7 +1045,7 @@ ALTER TABLE ONLY locale_associations
 
 
 --
--- Name: locale_glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: locale_glossary_entries locale_glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY locale_glossary_entries
@@ -1032,7 +1053,7 @@ ALTER TABLE ONLY locale_glossary_entries
 
 
 --
--- Name: projects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY projects
@@ -1040,7 +1061,7 @@ ALTER TABLE ONLY projects
 
 
 --
--- Name: screenshots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: screenshots screenshots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY screenshots
@@ -1048,7 +1069,7 @@ ALTER TABLE ONLY screenshots
 
 
 --
--- Name: sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: sections sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY sections
@@ -1056,7 +1077,7 @@ ALTER TABLE ONLY sections
 
 
 --
--- Name: slugs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: slugs slugs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY slugs
@@ -1064,7 +1085,7 @@ ALTER TABLE ONLY slugs
 
 
 --
--- Name: source_glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: source_glossary_entries source_glossary_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY source_glossary_entries
@@ -1072,7 +1093,7 @@ ALTER TABLE ONLY source_glossary_entries
 
 
 --
--- Name: translation_changes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: translation_changes translation_changes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translation_changes
@@ -1080,7 +1101,7 @@ ALTER TABLE ONLY translation_changes
 
 
 --
--- Name: translations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: translations translations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translations
@@ -1088,7 +1109,7 @@ ALTER TABLE ONLY translations
 
 
 --
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY users
@@ -1411,7 +1432,7 @@ CREATE UNIQUE INDEX users_unlock_token ON users USING btree (unlock_token);
 
 
 --
--- Name: articles_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: articles articles_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY articles
@@ -1419,7 +1440,7 @@ ALTER TABLE ONLY articles
 
 
 --
--- Name: blobs_commits_blob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs_commits blobs_commits_blob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs_commits
@@ -1427,7 +1448,7 @@ ALTER TABLE ONLY blobs_commits
 
 
 --
--- Name: blobs_commits_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs_commits blobs_commits_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs_commits
@@ -1435,7 +1456,7 @@ ALTER TABLE ONLY blobs_commits
 
 
 --
--- Name: blobs_keys_blob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs_keys blobs_keys_blob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs_keys
@@ -1443,7 +1464,7 @@ ALTER TABLE ONLY blobs_keys
 
 
 --
--- Name: blobs_keys_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs_keys blobs_keys_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs_keys
@@ -1451,7 +1472,7 @@ ALTER TABLE ONLY blobs_keys
 
 
 --
--- Name: blobs_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: blobs blobs_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY blobs
@@ -1459,7 +1480,7 @@ ALTER TABLE ONLY blobs
 
 
 --
--- Name: comments_issue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: comments comments_issue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY comments
@@ -1467,7 +1488,7 @@ ALTER TABLE ONLY comments
 
 
 --
--- Name: comments_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: comments comments_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY comments
@@ -1475,7 +1496,7 @@ ALTER TABLE ONLY comments
 
 
 --
--- Name: commits_keys_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: commits_keys commits_keys_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY commits_keys
@@ -1483,7 +1504,7 @@ ALTER TABLE ONLY commits_keys
 
 
 --
--- Name: commits_keys_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: commits_keys commits_keys_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY commits_keys
@@ -1491,7 +1512,7 @@ ALTER TABLE ONLY commits_keys
 
 
 --
--- Name: commits_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: commits commits_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY commits
@@ -1499,7 +1520,7 @@ ALTER TABLE ONLY commits
 
 
 --
--- Name: commits_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: commits commits_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY commits
@@ -1507,7 +1528,7 @@ ALTER TABLE ONLY commits
 
 
 --
--- Name: issues_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: issues issues_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY issues
@@ -1515,7 +1536,7 @@ ALTER TABLE ONLY issues
 
 
 --
--- Name: issues_updater_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: issues issues_updater_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY issues
@@ -1523,7 +1544,7 @@ ALTER TABLE ONLY issues
 
 
 --
--- Name: issues_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: issues issues_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY issues
@@ -1531,7 +1552,7 @@ ALTER TABLE ONLY issues
 
 
 --
--- Name: keys_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: keys keys_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY keys
@@ -1539,7 +1560,7 @@ ALTER TABLE ONLY keys
 
 
 --
--- Name: keys_section_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: keys keys_section_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY keys
@@ -1547,7 +1568,7 @@ ALTER TABLE ONLY keys
 
 
 --
--- Name: locale_glossary_entries_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: locale_glossary_entries locale_glossary_entries_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY locale_glossary_entries
@@ -1555,7 +1576,7 @@ ALTER TABLE ONLY locale_glossary_entries
 
 
 --
--- Name: locale_glossary_entries_source_glossary_entry_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: locale_glossary_entries locale_glossary_entries_source_glossary_entry_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY locale_glossary_entries
@@ -1563,7 +1584,7 @@ ALTER TABLE ONLY locale_glossary_entries
 
 
 --
--- Name: locale_glossary_entries_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: locale_glossary_entries locale_glossary_entries_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY locale_glossary_entries
@@ -1571,7 +1592,7 @@ ALTER TABLE ONLY locale_glossary_entries
 
 
 --
--- Name: screenshots_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: screenshots screenshots_commit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY screenshots
@@ -1579,7 +1600,7 @@ ALTER TABLE ONLY screenshots
 
 
 --
--- Name: sections_article_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sections sections_article_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY sections
@@ -1587,7 +1608,7 @@ ALTER TABLE ONLY sections
 
 
 --
--- Name: translation_changes_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: translation_changes translation_changes_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translation_changes
@@ -1595,7 +1616,7 @@ ALTER TABLE ONLY translation_changes
 
 
 --
--- Name: translation_changes_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: translation_changes translation_changes_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translation_changes
@@ -1603,7 +1624,7 @@ ALTER TABLE ONLY translation_changes
 
 
 --
--- Name: translations_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: translations translations_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translations
@@ -1611,7 +1632,7 @@ ALTER TABLE ONLY translations
 
 
 --
--- Name: translations_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: translations translations_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translations
@@ -1619,7 +1640,7 @@ ALTER TABLE ONLY translations
 
 
 --
--- Name: translations_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: translations translations_translator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY translations
@@ -1803,6 +1824,8 @@ INSERT INTO schema_migrations (version) VALUES ('20160303235403');
 INSERT INTO schema_migrations (version) VALUES ('20160404235737');
 
 INSERT INTO schema_migrations (version) VALUES ('20160516051607');
+
+INSERT INTO schema_migrations (version) VALUES ('20170508202319');
 
 INSERT INTO schema_migrations (version) VALUES ('20171024225818');
 

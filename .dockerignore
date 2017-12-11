@@ -1,5 +1,10 @@
 .bundle
 .git
 log/*
-tmp/*
+tmp/cache/*
+tmp/pids/*
+tmp/repos/*
+tmp/sessions/*
+tmp/sockets/*
+tmp/working_repos/*
 .validation

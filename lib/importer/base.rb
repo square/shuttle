@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'set'
+require 'abstract_class'
 
 # Container module for {Importer::Base} and its subclasses.
 
@@ -36,6 +37,8 @@ module Importer
   # approved automatically.
 
   class Base
+    extend AbstractClass
+
     # Byte-order marks for different encodings.
     BOMS = {
         'UTF-8'    => [[0xEF, 0xBB, 0xBF]],
@@ -47,16 +50,6 @@ module Importer
         'GB18030'  => [[0x84, 0x31, 0x95, 0x33]]
     }
     BOMS.default = []
-
-    # @return [Array<Class>] All known implementations of the base class.
-    #   Automatically updated.
-    class_attribute :implementations
-    self.implementations = []
-
-    # @private
-    def self.inherited(subclass)
-      self.implementations << subclass
-    end
 
     # @return [String] The human-readable description of this importer's file
     #   format.
@@ -72,7 +65,9 @@ module Importer
     # @return [Class, nil] an importer subclass.
 
     def self.find_by_ident(ident)
-      "Importer::#{ident.camelize}".constantize
+      klass = "Importer::#{ident.camelize}".constantize
+      return nil if klass.abstract?
+      return klass
     rescue NameError
       nil
     end

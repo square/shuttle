@@ -56,7 +56,7 @@ class Compiler
     end
 
     exporter = Exporter::Base.find_by_format(format)
-    raise UnknownExporterError unless exporter
+    raise UnknownExporterError, "Unknown exporter for format #{format}" unless exporter
 
     io = StringIO.new
     exporter = exporter.new(@commit)

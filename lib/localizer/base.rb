@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'multifile'
+require 'abstract_class'
 
 # Container module for {Localizer::Base} and its subclasses.
 
@@ -28,17 +29,8 @@ module Localizer
   # Subclasses should at a minimum implement {#localize}.
 
   class Base
+    extend AbstractClass
     extend ::Multifile
-
-    # @return [Array<Class>] All known implementations of the base class.
-    #   Automatically updated.
-    class_attribute :implementations
-    self.implementations = []
-
-    # @private
-    def self.inherited(subclass)
-      self.implementations << subclass
-    end
 
     # @overload localize(commit, locale, ...)
     #   Localizes the localizable files in a Commit. Returns a String containing
@@ -138,7 +130,9 @@ module Localizer
     # @return [Class, nil] an exporter subclass.
 
     def self.find_by_ident(ident)
-      "Localizer::#{ident.camelize}".constantize
+      klass = "Localizer::#{ident.camelize}".constantize
+      return nil if klass.abstract?
+      return klass
     rescue NameError
       nil
     end

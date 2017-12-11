@@ -13,7 +13,7 @@ copy when appropriate (e.g., ﻿iOS xib files).
 How to appropriately use Shuttle, or, "What Shuttle is not"
 -----------------------------------------------------------
 
-**Shuttle is not a localization or internationalization tool﻿, only 
+**Shuttle is not a localization or internationalization tool﻿, only
 translation.** You should keep _locale_-specific data, such as date and time
 formats, out of Shuttle. (Month names would be appropriate, however.) Use
 another library, such as JavaScript's locale settings, for this. Shuttle is only

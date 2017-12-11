@@ -9,7 +9,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gstreamer1.0-tools \
     gstreamer1.0-x  \
     libarchive-dev \
+    libhttp-parser-dev \
     libqt5webkit5-dev \
+    libssh2-1-dev \
+    libssl-dev \
     nodejs \
     postgresql-client \
     qt5-default \

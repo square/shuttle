@@ -19,7 +19,7 @@
 # otherwise, it will be authenticated via session using the `authenticate_user!`
 # method that's used everywhere else in the application.
 
-module Api
+module API
   module V1
     class ArticlesController < ApplicationController
       respond_to :json, only: [:create, :show, :update, :manifest, :issues, :index]
@@ -109,7 +109,7 @@ module Api
       # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article. Ex: { 'fr' => true, 'es-US' => false }                              |
       # | `priority`                 | Priority for translation. Potential values: 0 (higher priority) to 3, nil.                                    |
       # | `due_date`                 | Due date for translation. Format: '%m/%d/%Y', Ex: '01/17/2015'                                                |
-
+      # | `human_review`             | Boolean. Default to true(default to human review for machine translation)                                     |
 
       def create
         @article = @project.articles.create(params_for_create)
@@ -207,6 +207,7 @@ module Api
       # | `targeted_rfc5646_locales` | Targeted rfc5646 locales for the Article. Ex: { 'fr' => true, 'es-US' => false }                              |
       # | `priority`                 | Priority for translation. Potential values: 0 (higher priority) to 3, nil.                                    |
       # | `due_date`                 | Due date for translation. Format: '%m/%d/%Y', Ex: '01/17/2015'                                                |
+      # | `human_review`             | Boolean. Default to true(default to human review for machine translation)                                     |
 
       def update
         _params_for_update = params_for_update # cache
@@ -412,7 +413,8 @@ module Api
       end
 
       def params_for_update
-        hsh = params.require(:article).permit(:name, :description, :email, :priority)
+        hsh = params.require(:article).permit(:name, :description, :email, :human_review)
+        hsh[:priority] = params[:article][:priority] # default to nil
         hsh[:due_date] = DateTime::strptime(params[:article][:due_date], "%m/%d/%Y") rescue '' if params[:article].try(:key?, :due_date)
         hsh[:targeted_rfc5646_locales] = params[:article][:targeted_rfc5646_locales] if params[:article].try(:key?, :targeted_rfc5646_locales)
         hsh[:sections_hash] = params[:article][:sections_hash] if params[:article].try(:key?, :sections_hash)

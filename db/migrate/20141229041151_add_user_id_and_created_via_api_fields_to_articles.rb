@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-class AddUserIdAndCreatedViaApiFieldsToArticles < ActiveRecord::Migration
+class AddUserIdAndCreatedViaAPIFieldsToArticles < ActiveRecord::Migration
   def change
     add_column :articles, :creator_id, :integer
     add_column :articles, :updater_id, :integer

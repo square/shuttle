@@ -124,7 +124,6 @@ class ApplicationController < ActionController::Base
   self.responder = JsonDetailResponder
 
   before_filter :authenticate_user!
-  before_filter :set_raven_context
 
   rescue_from(ActiveRecord::RecordNotFound) do
     respond_to do |format|
@@ -253,12 +252,4 @@ class ApplicationController < ActionController::Base
       end
     end
   end
-
-  private
-
-  def set_raven_context
-    return unless user_signed_in?
-    Raven.user_context user_id: current_user.id, email: current_user.email
-  end
-
 end

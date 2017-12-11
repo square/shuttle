@@ -22,15 +22,15 @@ html lang="en"
     = csrf_meta_tags
     / link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Raleway"
     = stylesheet_link_tag "application", :media => "all"
-    
+
     title = content_for?(:shuttle_title) ? yield(:shuttle_title) : 'Shuttle: Magic Localization Dust'
     /[if lt IE 9] = javascript_include_tag "http://html5shim.googlecode.com/svn/trunk/html5.js"
 
   body id="#{body_id}" class="#{body_class}"
-    .wrapper 
-      = render partial: 'layouts/navbar' 
-      .content-container 
-        .container.modal-container 
+    .wrapper
+      = render partial: 'layouts/navbar'
+      .content-container
+        .container.modal-container
           = yield
         .push
 
@@ -48,8 +48,5 @@ html lang="en"
       = raw(CoffeeScript.compile(File.read(js_coffee_file))) if File.exist?(js_coffee_file)
       = raw(ERB.new(File.read(js_erb_file)).result(binding)) if File.exist?(js_erb_file)
       = raw(CoffeeScript.compile(ERB.new(File.read(js_coffee_erb_file)).result(binding))) if File.exist?(js_coffee_erb_file)
-
-    - if ENV['SENTRY_PUBLIC_DSN']
-      script type='text/javascript' Raven.config("#{ENV['SENTRY_PUBLIC_DSN']}").install()
 
     = render partial: 'layouts/flashes'
