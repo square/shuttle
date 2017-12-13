@@ -11,13 +11,13 @@
 
 hr.divider
 
-.row 
+.row
   .six.columns
     .image-wrapper
       = image_tag @user.gravatar
   .eight.columns
     = form_for(@user) do |f|
-      fieldset 
+      fieldset
         legend Profile
         .control-group
           label.control-label Email
@@ -46,57 +46,58 @@ hr.divider
           .controls
             p = "#{l @user.created_at, format: :short_full}"
 
-        .control-group
-          label.control-label Confirmed On
-          .controls
-            p = "#{l @user.confirmed_at, format: :short_full}"
+        - if @user.confirmed_at?
+          .control-group
+            label.control-label Confirmed On
+            .controls
+              p = "#{l @user.confirmed_at, format: :short_full}"
 
         .control-group
           label.control-label Last Updated
           .controls
             p = "#{l @user.updated_at, format: :short_full}"
 
-      fieldset 
+      fieldset
         legend Languages
         .control-group
           = f.label :approved_rfc5646_locales, "Privileged Locales", class: 'control-label'
           .controls
             = f.content_tag_field 'div', :approved_rfc5646_locales, class: 'array-field', 'data-value' => @user.approved_rfc5646_locales.to_json
 
-      fieldset 
+      fieldset
         legend.activity Activity
-        dl 
-          .item            
+        dl
+          .item
             dt Number of logins
             dd = number_with_delimiter(@user.sign_in_count)
-          .item  
+          .item
             dt Number of failed logins
             dd = number_with_delimiter(@user.failed_attempts)
-          .item  
+          .item
             dt Locked because of too many failed logins?
-            dd 
+            dd
               - if @user.locked_at
                 = "Yes, since #{time_ago_in_words @user.locked_at} ago"
               - else
                 | No
-          .item              
+          .item
             dt Reset password token sent?
-            dd 
+            dd
               - if @user.reset_password_sent_at
                 = "Yes, #{time_ago_in_words @user.reset_password_sent_at} ago"
               - else
                 | No
-          .item              
+          .item
             dt Currently signed in since
-            dd 
+            dd
               - if @user.current_sign_in_at
                 = "#{l @user.current_sign_in_at, format: :short_full}"
                 / from #{@user.current_sign_in_ip}
               - else
                 | Never
-          .item              
+          .item
             dt Last signed in at
-            dd 
+            dd
               - if @user.last_sign_in_at
                 = "#{l @user.last_sign_in_at, format: :short_full}"
                 / from #{@user.last_sign_in_ip}
