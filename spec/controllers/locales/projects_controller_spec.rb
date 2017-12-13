@@ -102,48 +102,48 @@ RSpec.describe Locale::ProjectsController do
         get :show, id: @project.to_param, locale_id: 'fr-CA', include_approved: 'true'
         expect(response.status).to eql(200)
         translations = assigns(:translations)
-        expect(translations.map { |t| t.key.key }.sort).
-            to eql([@approved.key.key].sort)
+        expect(translations.map { |t| t.key.key }).
+            to match_array([@approved.key.key])
       end
 
       it "should filter with include_new = true" do
         get :show, id: @project.to_param, locale_id: 'fr-CA', include_new: 'true'
         expect(response.status).to eql(200)
         translations = assigns(:translations)
-        expect(translations.map { |t| t.key.key }.sort).
-            to eql([@new.key.key, @rejected.key.key].sort)
+        expect(translations.map { |t| t.key.key }).
+            to match_array([@new.key.key, @rejected.key.key])
       end
 
       it "should filter with include_translated = true, include_new = true" do
         get :show, id: @project.to_param, locale_id: 'fr-CA', include_translated: 'true', include_new: 'true'
         expect(response.status).to eql(200)
         translations = assigns(:translations)
-        expect(translations.map { |t| t.key.key }.sort).
-            to eql([@translated.key.key, @new.key.key, @rejected.key.key].sort)
+        expect(translations.map { |t| t.key.key }).
+            to match_array([@translated.key.key, @new.key.key, @rejected.key.key])
       end
 
       it "should filter with include_approved = true, include_new = true" do
         get :show, id: @project.to_param, locale_id: 'fr-CA', include_approved: 'true', include_new: 'true'
         expect(response.status).to eql(200)
         translations = assigns(:translations)
-        expect(translations.map { |t| t.key.key }.sort).
-            to eql([@approved.key.key, @new.key.key].sort)
+        expect(translations.map { |t| t.key.key }).
+            to match_array([@approved.key.key, @new.key.key])
       end
 
       it "should filter with include_translated = true, include_approved = true" do
         get :show, id: @project.to_param, locale_id: 'fr-CA', include_translated: 'true', include_approved: 'true'
         expect(response.status).to eql(200)
         translations = assigns(:translations)
-        expect(translations.map { |t| t.key.key }.sort).
-            to eql([@translated.key.key, @approved.key.key, @rejected.key.key].sort)
+        expect(translations.map { |t| t.key.key }).
+            to match_array([@translated.key.key, @approved.key.key, @rejected.key.key])
       end
 
       it "should filter with include_translated = true, include_approved = true, include_new = true" do
         get :show, id: @project.to_param, locale_id: 'fr-CA', include_translated: 'true', include_approved: 'true', include_new: 'true'
         expect(response.status).to eql(200)
         translations = assigns(:translations)
-        expect(translations.map { |t| t.key.key }.sort).
-            to eql([@translated.key.key, @approved.key.key, @rejected.key.key, @new.key.key].sort)
+        expect(translations.map { |t| t.key.key }).
+            to match_array([@translated.key.key, @approved.key.key, @rejected.key.key, @new.key.key])
       end
 
       it "should filter with commit" do
@@ -190,22 +190,19 @@ RSpec.describe Locale::ProjectsController do
 
         get :show, id: @project.to_param, article_id: @article.id, locale_id: 'fr', include_new: 'true'
         expect(response.status).to eql(200)
-        translations = assigns(:translations)
-        expect(translations.map { |t| t.id }).to eql([@translation1.id, @translation2.id])
+        expect(assigns(:translations).map(&:id)).to eql([@translation1.id, @translation2.id])
       end
 
       it "filters with section_id" do
         get :show, id: @project.to_param, article_id: @article.id, section_id: @section2.id, locale_id: 'fr', include_new: 'true'
         expect(response.status).to eql(200)
-        translations = assigns(:translations)
-        expect(translations.map { |t| t.id }).to eql([@translation4.id])
+        expect(assigns(:translations).map(&:id)).to eql([@translation4.id])
       end
 
       it "filters with include_block_tags" do
         get :show, id: @project.to_param, article_id: @article.id, section_id: @section2.id, locale_id: 'fr', include_new: 'true', include_block_tags: 'true'
         expect(response.status).to eql(200)
-        translations = assigns(:translations)
-        expect(translations.map { |t| t.id }).to eql([@translation4.id, @translation5.id])
+        expect(assigns(:translations).map(&:id)).to eql([@translation4.id, @translation5.id])
       end
     end
   end

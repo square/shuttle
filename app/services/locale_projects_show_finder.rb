@@ -119,7 +119,11 @@ class LocaleProjectsShowFinder
                        .where(id: translations_in_es.map(&:id))
                        .where('commits.revision': form[:commit])
                        .includes({key: [:project, :commits, :translations, :section, {article: :project}]}, :locale_associations)
-                       .order('commits_keys.created_at, keys.original_key')
+    if form[:article_id]
+      translations = translations.order('keys.section_id, keys.index_in_section')
+    else
+      translations = translations.order('commits_keys.created_at, keys.original_key')
+    end
 
     # Don't sort the keys since they are sorted in the line above
     PaginatableObjects.new(translations, translations_in_es, page, PER_PAGE, false)
