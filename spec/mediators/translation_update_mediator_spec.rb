@@ -49,6 +49,16 @@ RSpec.describe TranslationUpdateMediator do
       expect(@key.reload).to be_ready
     end
 
+    it "updates a single translation; review_date is set if the translator is a reviewer" do
+      TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
+      expect(@fr_translation.review_date).to_not be_nil
+    end
+
+    it "updates a single translation; review_date is not set if the translator is not a reviewer" do
+      TranslationUpdateMediator.new(@fr_translation, translator, @params).update!
+      expect(@fr_translation.review_date).to be_nil
+    end
+
     context "[update new record]" do
       it "sets the translation_date" do
         TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!

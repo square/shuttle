@@ -752,7 +752,8 @@ CREATE TABLE translations (
     copy text,
     notes text,
     tm_match numeric,
-    translation_date timestamp without time zone
+    translation_date timestamp without time zone,
+    review_date timestamp without time zone
 );
 
 
@@ -1830,4 +1831,6 @@ INSERT INTO schema_migrations (version) VALUES ('20170508202319');
 INSERT INTO schema_migrations (version) VALUES ('20171024225818');
 
 INSERT INTO schema_migrations (version) VALUES ('20171103183318');
+
+INSERT INTO schema_migrations (version) VALUES ('20171206152825');
 

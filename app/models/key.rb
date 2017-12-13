@@ -243,6 +243,12 @@ class Key < ActiveRecord::Base
           preserve_reviewed_status: true,
         )
       end
+
+      finder = FuzzyMatchTranslationsFinder.new(source_copy, t)
+      t.update!(
+        tm_match: finder.top_fuzzy_match_percentage
+      )
+
     end
   end
 

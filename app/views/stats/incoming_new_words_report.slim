@@ -1,14 +1,14 @@
 - content_for :shuttle_title do
-  = "Project Translation Report - Shuttle"
+  = "Incoming New Words Report - Shuttle"
 - content_for :file_name do
-  = 'views/stats/project_translation_report'
+  = 'views/stats/incoming_new_words_report'
 
 .header
-  h1 Project Translation Report
+  h1 Incoming New Words Report
 hr.dividers
 
 .translation_report
-  = form_tag stats_generate_project_translation_report_path(format: :csv)
+  = form_tag stats_generate_incoming_new_words_report_path(format: :csv)
     = render partial: 'stats/date_fields'
     .form-actions
       = submit_tag 'Get Report', class: 'btn btn-primary'

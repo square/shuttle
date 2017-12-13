@@ -81,6 +81,39 @@ class StatsController < ApplicationController
       render text: t('controllers.stats.reports.failure'), status: 400
     end
   end
+
+  def incoming_new_words_report
+  end
+
+  def generate_incoming_new_words_report
+    begin
+      start_date =  Date.strptime(params[:start_date], '%m/%d/%Y')
+      end_date =  Date.strptime(params[:end_date], '%m/%d/%Y')
+      filename = "incoming-new-words-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
+      send_data Reports::IncomingNewWordsReport.generate_csv(start_date, end_date), filename: filename
+    rescue
+      render text: t('controllers.stats.reports.failure'), status: 400
+    end
+  end
+
+  def translator_report
+    @languages = Project.pluck(:targeted_rfc5646_locales, :base_rfc5646_locale).map { |hash, base| hash.keys - [base]}.flatten.uniq.sort
+  end
+
+  def generate_translator_report
+    begin
+      start_date =  Date.strptime(params[:start_date], '%m/%d/%Y')
+      end_date =  Date.strptime(params[:end_date], '%m/%d/%Y')
+      languages = params[:languages]
+      exclude_internal = (params[:exclude_internal] || false)
+
+      filename = "translator-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
+      send_data Reports::TranslatorReport.generate_csv(start_date, end_date, languages, exclude_internal), filename: filename
+    rescue
+      render text: t('controllers.stats.reports.failure'), status: 400
+    end
+  end
+
   private
 
   def generate_commit_csv

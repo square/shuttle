@@ -31,3 +31,8 @@ git:
   author:
     name: Shuttle
     email: shuttle-noreply@example.com
+
+# Report Settings
+reports:
+  translator_report:
+    internal_domains: ['@squareup.com']
