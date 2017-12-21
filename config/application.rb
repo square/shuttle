@@ -34,8 +34,6 @@ module Shuttle
     # Custom directories with classes and modules you want to be autoloadable.
     config.autoload_paths << config.root.join('lib')
     config.autoload_paths << config.root.join('lib', 'api')
-    config.autoload_paths << config.root.join('app', 'models', 'concerns') #RAILS4 remove
-    config.autoload_paths << config.root.join('app', 'controllers', 'concerns') #RAILS4 remove
     config.autoload_paths << config.root.join('app', 'models', 'observers')
     config.autoload_paths << config.root.join('app', 'presenters')
     config.autoload_paths << config.root.join('app', 'mediators')

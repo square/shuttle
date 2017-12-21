@@ -27,111 +27,28 @@
 #     $ bundle exec rake -D elasticsearch
 #
 
-STDOUT.sync = true
-STDERR.sync = true
+require 'elasticsearch/rails/tasks/import'
 
-begin
-  ; require 'ansi/progressbar';
-rescue LoadError;
-end
-
+Rake::Task['elasticsearch:import:all'].clear
 namespace :elasticsearch do
-
-  task :import => 'import:model'
-
   namespace :import do
-    import_model_desc = <<-DESC.gsub(/    /, '')
-      Import data from all models with elasticsearch indexed
-
-        $ rake environment elasticsearch:import:model FORCE=y
-
-      Import data from your model (pass name as CLASS environment variable).
-
-        $ rake environment elasticsearch:import:model CLASS='MyModel'
-
-      Force rebuilding the index (delete and create):
-        $ rake environment elasticsearch:import:model CLASS='Article' FORCE=y
-
-      Customize the batch size:
-        $ rake environment elasticsearch:import:model CLASS='Article' BATCH=100
-
-      Set target index name:
-        $ rake environment elasticsearch:import:model CLASS='Article' INDEX='articles-new'
-
-      Pass an ActiveRecord scope to limit the imported records:
-        $ rake environment elasticsearch:import:model CLASS='Article' SCOPE='published'
-    DESC
-    desc import_model_desc
-    task model: :environment do
-      klasses = if ENV['CLASS']
-                  [eval(ENV['CLASS'].to_s)]
-                else
-                  [Commit, Translation, Key]
-                end
-      klasses.each do |klass|
-        total = klass.count rescue nil
-        pbar = ANSI::Progressbar.new(klass.to_s, total) rescue nil
-        pbar.__send__ :show if pbar
-
-        unless ENV['DEBUG']
-          begin
-            klass.__elasticsearch__.client.transport.logger.level = Logger::WARN
-          rescue NoMethodError;
-          end
-          begin
-            klass.__elasticsearch__.client.transport.tracer.level = Logger::WARN
-          rescue NoMethodError;
-          end
-        end
-
-        total_errors = klass.__elasticsearch__.import force: ENV.fetch('FORCE', false),
-                                                      batch_size: ENV.fetch('BATCH', 1000).to_i,
-                                                      index: ENV.fetch('INDEX', nil),
-                                                      type: ENV.fetch('TYPE', nil),
-                                                      scope: ENV.fetch('SCOPE', nil) do |response|
-          pbar.inc response['items'].size if pbar
-          STDERR.flush
-          STDOUT.flush
-        end
-        pbar.finish if pbar
-
-        puts "[IMPORT] #{total_errors} errors occurred" unless total_errors.zero?
-        puts '[IMPORT] Done'
-      end
-    end
-
-    desc <<-DESC.gsub(/    /, '')
-      Import all indices from `app/models` (or use DIR environment variable).
-
-        $ rake environment elasticsearch:import:all DIR=app/models
-    DESC
     task :all do
-      dir = ENV['DIR'].to_s != '' ? ENV['DIR'] : Rails.root.join("app/models")
-
+      dir = ENV['DIR'].presence || Rails.root.join('app', 'models')
       puts "[IMPORT] Loading models from: #{dir}"
-      Dir.glob(File.join("#{dir}/**/*.rb")).each do |path|
-        model_filename = path[/#{Regexp.escape(dir.to_s)}\/([^\.]+).rb/, 1]
+      Pathname.glob(dir.join('**', '*.rb')).each do |path|
+        next if path.each_filename.include?('concerns')
+        next if path.each_filename.include?('observers')
+        require path.relative_path_from(dir)
+      end
 
-        next if model_filename.match(/^concerns\//i) # Skip concerns/ folder
-
-        begin
-          klass = model_filename.camelize.constantize
-        rescue NameError
-          require(path) ? retry : raise(RuntimeError, "Cannot load class '#{klass}'")
-        end
-
-        # Skip if the class doesn't have Elasticsearch integration
+      ActiveRecord::Base.subclasses.each do |klass|
         next unless klass.respond_to?(:__elasticsearch__)
-
         puts "[IMPORT] Processing model: #{klass}..."
 
         ENV['CLASS'] = klass.to_s
-        Rake::Task["elasticsearch:import:model"].invoke
-        Rake::Task["elasticsearch:import:model"].reenable
-        puts
+        Rake::Task['elasticsearch:import:model'].invoke
+        Rake::Task['elasticsearch:import:model'].reenable
       end
     end
-
   end
-
 end
