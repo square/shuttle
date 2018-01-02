@@ -189,6 +189,9 @@ en:
       mass_copy_translations:
         success: "Success. Shuttle is now mass copying translations from %{from} to %{to}."
         failure: "Failure. Not copying translations."
+    stats:
+      reports:
+        failure: Be sure start_date and end_date are included and in the format of MM/DD/YYYY.
     translations:
       update:
         success: Translation updated.

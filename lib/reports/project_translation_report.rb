@@ -35,7 +35,7 @@ module Reports
         csv << ['', ''] + empty_cols
         csv << ['Project', 'source'] + languages
 
-        projects = translations.keys.map{|k| k[0]}.uniq.sort
+        projects = translations.keys.map(&:first).uniq.sort
 
         projects.each do |project|
           row = [project]
