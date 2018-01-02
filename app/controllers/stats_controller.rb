@@ -64,7 +64,7 @@ class StatsController < ApplicationController
       filename = "translation-word-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
       send_data Reports::TranslationWordReport.generate_csv(start_date, end_date), filename: filename
     rescue
-      render text: t('stats.reports.failure'), status: 400
+      render text: t('controllers.stats.reports.failure'), status: 400
     end
   end
 
@@ -78,7 +78,7 @@ class StatsController < ApplicationController
       filename = "project-translation-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
       send_data Reports::ProjectTranslationReport.generate_csv(start_date, end_date), filename: filename
     rescue
-      render text: t('stats.reports.failure'), status: 400
+      render text: t('controllers.stats.reports.failure'), status: 400
     end
   end
   private
