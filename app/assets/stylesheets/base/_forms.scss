@@ -78,6 +78,10 @@ legend {
     width: 160px;
     padding-top: 9px;
     text-align: left;
+
+    @include iphone-portrait {
+      float: none;
+    }
   }
   .control-label {
     text-transform: capitalize;
@@ -108,6 +112,9 @@ legend {
       padding-top: 9px;
     }
 
+    @include iphone-portrait {
+      margin-left: 0;
+    }
 
   }
 
@@ -118,4 +125,3 @@ legend {
     }
   }
 }
-

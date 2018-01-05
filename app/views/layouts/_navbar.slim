@@ -1,4 +1,4 @@
-/ Copyright 2014 Square Inc.
+/ Copyright 2014-2017 Square Inc.
 /
 /    Licensed under the Apache License, Version 2.0 (the "License");
 /    you may not use this file except in compliance with the License.
@@ -12,54 +12,47 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-div id="navbar-container"
-  nav class="container full-size-only"
-    ul
-      li id="logo"
-        a href="/#"
-          = content_for?(:shuttle_logo) ? yield(:shuttle_logo) : image_tag("shuttle.png")
-      - if current_user
+nav.navbar.navbar-dark
+  a.navbar-brand href="/"
+    = content_for?(:shuttle_logo) ? yield(:shuttle_logo) : image_tag("shuttle.png")
+
+  - if current_user
+    button.navbar-toggler data-target="navbarContent"
+      = fa_icon "bars"
+
+    #navbarContent.navbar-collapse
+      ul.navbar-nav
         - if current_user.monitor? or current_user.reviewer?
-          li class=("active" if controller_name == "projects")
-            a href=projects_url Projects
+          = nav_link "Projects", "projects", projects_url
+
         - if current_user.translator?
-          li class=("active" if controller_name == "locale_associations")
-            a href=locale_associations_url Locale Associations
-          li class=("active" if controller_name == "glossary")
-            a href=glossary_url Glossary
-        li class=("active" if controller_name == "stats")
-          a href=stats_url Stats
+          = nav_link "Locale Associations", "locale_associations", locale_associations_url
+          = nav_link "Glossary", "glossary", glossary_url
+
+        li.nav-link.dropdown
+          a.dropdown-toggle href="#" data-toggle="dropdown"
+            | Stats&nbsp;
+            = fa_icon "caret-down"
+          ul.dropdown-menu
+            = nav_dropdown_link "Translation Statistics", "stats", "index", stats_url
+            = nav_dropdown_link "Translation Word Report", "stats", "translation_report", stats_translation_report_url
+
         - if current_user.admin?
-          li class=("active" if controller_name == "users")
-            a href=users_url Users
-        li class=("active" if controller_name == "search")
-          a href=search_url Search
-          - if controller_name == "search"
-            .uparrow
-      li id="quicknav-container" &nbsp;
-      - if current_user
+          = nav_link "Users", "users", users_path
+
+        li.nav-link.dropdown
+          a.dropdown-toggle href="#" data-toggle="dropdown"
+            | Search&nbsp;
+            = fa_icon "caret-down"
+          ul.dropdown-menu
+            = nav_dropdown_link "Translations", "search", "translations", search_translations_url
+            = nav_dropdown_link "Keys", "search", "keys", search_keys_url
+            = nav_dropdown_link "Commits", "search", "commits", search_commits_url
+            = nav_dropdown_link "Issues", "search", "issues", search_issues_url
+
+        li.nav-link: a href=destroy_user_session_url data-method='delete' Log Out
+
         - if current_user.monitor?
-          li.worker-status class=('clickable' if current_user.admin?)
-            i.fa.fa-circle
-            | &nbsp; Workers
-        li: a href=destroy_user_session_url data-method='delete' Log Out
-- if controller_name == "search"
-  div id="search-container"
-    nav class="container full-size-only"
-      ul
-        li class=("active" if action_name == "translations")
-          a href=search_translations_url Translations
-        li class=("active" if action_name == "keys")
-          a href=search_keys_url Keys
-        li class=("active" if action_name == "commits")
-          a href=search_commits_url Commits
-        li class=("active" if action_name == "issues")
-          a href=search_issues_url Issues
-- if controller_name == "stats"
-  div id="search-container"
-    nav class="container full-size-only"
-      ul
-        li class=("active" if action_name == "index")
-          a href=stats_url Translation Statistics
-        li class=("active" if action_name == "translation_report")
-          a href=stats_translation_report_url Translation Word Report
+          li.nav-link.worker-status class=("clickable" if current_user.admin?)
+            = fa_icon "circle"
+            | &nbsp;Workers

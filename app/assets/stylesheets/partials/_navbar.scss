@@ -1,203 +1,110 @@
 @import "base/vars";
 @import "css3-mixins";
 
-#navbar-container {
-  background-color: $navbar-background;
-}
+$navbar-min-width: 910px;
 
-#search-container {
-  background-color: $subnav-background;
-  li {
-    line-height: $subnav-height;
+.navbar {
+  @include clearfix;
+
+  padding: 1.3em 1em;
+  color: rgba(255,255,255,.5);
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 12px;
+
+  &.navbar-dark {
+    background-color: $navbar-background;
   }
-}
 
-.uparrow {
-  width:0;
-  height:0;
+  .navbar-brand {
+    float: left;
+    text-transform: uppercase;
+    margin-right: 1.5em;
 
-  position: absolute; 
-  bottom: 0px;
-  left: 25%;
+    img {
+      height: 27px;
+      margin-top: .25em;
+    }
+  }
 
-  border-color: transparent transparent $subnav-background transparent;
-  border-style: solid;
-  border-width: 10px;
-  z-index: 1000;
-}
+  button.navbar-toggler {
+    color: rgba(255,255,255,.5);
+    border: solid 1px rgba(255,255,255,.1);
+    padding: .25rem .75rem;
+    background: 0 0;
+    border-radius: .25rem;
+    float: right;
+    margin-top: .25em;
 
-nav {
-  z-index: 99;
-  letter-spacing: 1px;
+    @media (min-width: $navbar-min-width) {
+      display: none;
+    }
+  }
 
-  &#expanded-nav {
+  .navbar-collapse {
     display: none;
 
-    &.shown { display: block; }
-    &>ul { display: block; }
+    @media (min-width: $navbar-min-width) {
+      display: block;
+    }
   }
 
+  .navbar-nav {
+    clear: both;
 
-  &>ul {
-    width: 100%;
-
-    @include box;
-    @include box-orient(horizontal);
-
-    $nav-horiz-margin: 10px;
-    &>li {
-      font-size: $nav-font-size;
-      font-weight: 500;
-      text-transform: uppercase;
-
-      margin: 0 $nav-horiz-margin;
-      line-height: $nav-height;
-
-      position: relative;
-
-      a:hover { 
-        text-decoration: none !important;
-        color: $navbar-highlight-text !important;
-      }
+    .nav-link {
+      display: block;
+      padding: .5em 1em;
 
       &.active {
         a {
-          color: $navbar-highlight-text !important;
+          color: $navbar-highlight-text;
         }
       }
 
-      &#logo {
-        margin-right: 40px;
-        text-transform: uppercase;
-        line-height: 60px;
-        
-        a {
-          vertical-align: middle;
-          img {
-            height: 27px;
-            vertical-align: middle;
-          }
+      a {
+        color: $navbar-gray-text;
+
+        &:hover {
+          text-decoration: none;
+          color: $navbar-highlight-text;
         }
       }
+    }
 
-      a, i { color: $navbar-gray-text; }
 
+    @media (min-width: $navbar-min-width) {
+      clear: none;
 
-      &#quicknav-container {
-        position: relative;
-        @include flex;
+      > .nav-link {
+        float: left;
 
-        #quicknav {
-          padding-left: 0;
-          padding-right: 0;
-          background-color: $gray2;
-          color: black;
-          font-weight: normal;
-
-          &:focus {
-            width: 100%;
-            -webkit-transition: width 0.5s;
-            -moz-transition: width 0.5s;
-            transition: width 0.5s;
-            outline: none;
-            background-color: $gray3;
-          }
-
-          &:not(:focus) {
-            width: 50%;
-            @include iphone-landscape-and-smaller { width: 100%; }
-
-            -webkit-transition: width 0.5s;
-            -moz-transition: width 0.5s;
-            transition: width 0.5s;
-          }
+        &:last-child {
+          float: right;
         }
 
-        ul#search-suggestions {
-          position: absolute;
-          top: $nav-height;
-          left: 0;
-          border: 1px solid rgba(black, 0.5);
-          @include box-shadow(0 2px 2px rgba(black, 0.5));
-          background-color: white;
-          color: black;
-          margin: 0;
-          padding: 0;
-          line-height: 12px;
-
-          @include iphone-landscape-and-smaller { display: none; }
-
-          &>li {
-            color: $gray3;
-            background-color: white;
-            margin: 0;
-            padding: 10px;
-
-            &.hint {
-              color: $gray4;
-              font-weight: bold;
-
-              em { font-weight: normal; }
-            }
-
-            a { color: $gray3; }
-
-            span.newline {
-              color: $gray4;
-              font-weight: bold;
-              float: right;
-              padding-left: 10px;
-            }
-          }
+        &:nth-last-child(2) {
+          float: right;
         }
-      }
 
-      // large-screen dropdown nav menu
-      @include ipad-and-larger {
-        &.with-dropdown {
-          position: relative;
-
-          &>ul {
-            display: none;
-            position: absolute;
-            top: $nav-height + 1px; // shift down one so the border doesn't overlap the navbar
-            left: -$nav-horiz-margin; // line it up with the nav item
-            border-bottom: 3px solid white;
-            border-left: 3px solid white;
-            border-right: 3px solid white;
-            z-index: 99;
-
-            &.shown {
-              display: block;
-              width: 300px;
-            }
-
-            li {
-              background-color: #212121;
-              padding: 10px;
-              border-bottom: 1px solid $gray2;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              line-height: normal;
-              margin: 0;
-
-              &.divider {
-                height: 2px;
-                padding: 0;
-                margin: 0;
-              }
-            }
-          }
+        &.worker-status {
+          margin: -1.3em 0;
+          line-height: 55px;
         }
       }
     }
   }
 
-  // small-screen dropdown nav menu
-  ul.subnav {
+  .dropdown-menu {
     display: none;
 
-    &.shown { display: block; }
-    &>li { list-style-type: none; }
+    @media (min-width: $navbar-min-width) {
+      position: absolute;
+      background-color: $navbar-background;
+    }
+
+    &.open {
+      display: block;
+    }
   }
 }

@@ -7,7 +7,7 @@ body.search {
     select { text-transform: capitalize; }
 
     .main {
-      input[type="text"] { width: 865px; }
+      input[type="text"] { width: 565px; }
       select {width: 150px; }
     }
 
@@ -18,7 +18,7 @@ body.search {
   }
 
   &#search-translations {
-    .main > input[type="text"] { width: 535px; }
+    .main > input[type="text"] { width: 250px; }
     .translation-entry { word-break: break-word; }
     .key {
       word-break: break-word;
@@ -27,7 +27,7 @@ body.search {
   }
 
   &#search-keys {
-    .main > input[type="text"] { width: 700px; }
+    .main > input[type="text"] { width: 400px; }
   }
 
   &#search-keys {
