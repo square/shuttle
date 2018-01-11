@@ -17,4 +17,15 @@ namespace :maintenance do
   task cleanup_commits: :environment do
     CommitsCleaner.perform_async
   end
+
+  desc "Cleans up commits that have been deleted from the repository"
+  task reap_deleted_commits: :environment do
+    Commit.find_each do |c|
+      begin
+        c.commit!
+      rescue Git::CommitNotFoundError
+        c.destroy
+      end
+    end
+  end
 end
