@@ -25,8 +25,8 @@ class CommitImporter
   def perform(commit_id)
     commit = Commit.find(commit_id)
     commit.import_strings
-  rescue Git::CommitNotFoundError => err
-    commit.add_import_error(err, "failed in CommitImporter for commit_id #{commit_id}")
+  rescue Git::CommitNotFoundError
+    commit.destroy
   end
 
   include SidekiqLocking
