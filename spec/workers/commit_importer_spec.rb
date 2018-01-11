@@ -18,13 +18,13 @@ RSpec.describe CommitImporter do
   context "[unit-tests]" do
     describe "#perform" do
       context "[rescue Git::CommitNotFoundError]" do
-        it "adds import errors to commit when commit importer fails due to a Git::CommitNotFoundError" do
+        it "deletes the commit when commit importer fails due to a Git::CommitNotFoundError" do
           allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_return(nil)
           project = FactoryBot.create(:project)
           commit  = FactoryBot.create(:commit, revision: "abc123", project: project)
 
-          expect { CommitImporter.new.perform(commit.id) }.to_not raise_error
-          expect(commit.reload.import_errors).to eql([["Git::CommitNotFoundError", "Commit not found in git repo: abc123 (failed in CommitImporter for commit_id #{commit.id})"]])
+          CommitImporter.new.perform commit.id
+          expect { commit.reload }.to raise_error(ActiveRecord::RecordNotFound)
         end
       end
     end
@@ -60,18 +60,6 @@ RSpec.describe CommitImporter do
 
           expected_errors = %w[Psych::SyntaxError Git::BlobNotFoundError Git::CommitNotFoundError ExecJS::RuntimeError ExecJS::RuntimeError]
 
-          CommitImporter::Finisher.new.on_success true, 'commit_id' => commit.id
-          expect(commit.reload.import_errors.map(&:first)).to match_array(expected_errors)
-          expect_to_send_import_errors_email(expected_errors)
-        end
-
-        it "records the import error in CommitImporter due to a Git:CommitNotFoundError and sends an email after the import" do
-          allow_any_instance_of(Commit).to receive(:commit!).and_raise(Git::CommitNotFoundError, "e5f5704af3c1f84cf42c4db46dcfebe8ab842bde") # fake a Git::CommitNotFoundError in CommitImporter
-
-          ActionMailer::Base.deliveries.clear
-          commit = @project.commit!('e5f5704af3c1f84cf42c4db46dcfebe8ab842bde')
-
-          expected_errors = %w[Git::CommitNotFoundError]
           CommitImporter::Finisher.new.on_success true, 'commit_id' => commit.id
           expect(commit.reload.import_errors.map(&:first)).to match_array(expected_errors)
           expect_to_send_import_errors_email(expected_errors)
