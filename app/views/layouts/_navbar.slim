@@ -36,6 +36,7 @@ nav.navbar.navbar-dark
           ul.dropdown-menu
             = nav_dropdown_link "Translation Statistics", "stats", "index", stats_url
             = nav_dropdown_link "Translation Word Report", "stats", "translation_report", stats_translation_report_url
+            = nav_dropdown_link "Project Translation Report", "stats", "project_translation_report", stats_project_translation_report_url
 
         - if current_user.admin?
           = nav_link "Users", "users", users_path
