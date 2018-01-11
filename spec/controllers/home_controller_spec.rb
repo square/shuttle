@@ -32,6 +32,9 @@ RSpec.describe HomeController do
     @section = FactoryBot.create(:section, article: @article)
     @article_key = FactoryBot.create(:key, section: @section, index_in_section: 0)
 
+    # red herring: loading commit
+    FactoryBot.create(:commit, project: @project, loading: true)
+
     regenerate_elastic_search_indexes
   end
 

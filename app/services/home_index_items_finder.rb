@@ -52,7 +52,8 @@ class HomeIndexItemsFinder
               must { term project_id: project_id } unless project_id == 'all'
               must { term exported: false } if hide_exported
               must { exists field: :user_id } if hide_autoimported
-              must { term  user_id: 1 } if show_only_mine
+              must { term user_id: 1 } if show_only_mine
+              must { term loading: false }
 
               case status
               when 'uncompleted'
