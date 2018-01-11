@@ -15,7 +15,7 @@ gem 'rubyzip'
 gem 'devise'
 
 # MODELS
-gem 'pg'
+gem 'pg', '< 1.0'
 gem 'stringex'
 gem 'slugalicious'
 gem 'validates_timeliness'
@@ -47,7 +47,7 @@ gem 'httparty'
 gem 'similar_text'
 # temporary fix uninitialized constant Paperclip::Storage::S3::AWS bug. Should consider using latest version after upgrading rails to 4.2 or higher version
 gem 'paperclip', git: 'https://github.com/thoughtbot/paperclip', ref: '523bd46c768226893f23889079a7aa9c73b57d68'
-gem 'aws-sdk'
+gem 'aws-sdk', '< 3'
 gem 'execjs'
 gem 'safemode'
 
