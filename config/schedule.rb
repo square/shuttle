@@ -33,3 +33,7 @@ end
 every :saturday, at: '1am', roles: [:app] do
   rake 'maintenance:cleanup_repos'
 end
+
+every :day, roles: [:primary_cron] do
+  rake 'maintenance:reap_deleted_commits'
+end
