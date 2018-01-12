@@ -20,11 +20,13 @@ namespace :maintenance do
 
   desc "Cleans up commits that have been deleted from the repository"
   task reap_deleted_commits: :environment do
-    Commit.find_each do |c|
+    Commit.includes(:project).find_each do |c|
       begin
         c.commit!
       rescue Git::CommitNotFoundError
         c.destroy
+      rescue Elasticsearch::Transport::Transport::Errors::NotFound
+        next
       end
     end
   end
