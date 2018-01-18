@@ -198,6 +198,27 @@ RSpec.describe Key do
       expect(base_translations.all? { |trans| trans && (trans.copy == trans.source_copy) && trans.approved? }).to be_truthy
     end
 
+    it "should add the tm_match for the new translation" do
+      project = FactoryBot.create(:project,
+                                   base_rfc5646_locale: 'en',
+                                   targeted_rfc5646_locales: {'en' => true, 'fr' => true})
+
+      # this key/translation represents an approved translation already in the databbabse
+      key1    = FactoryBot.create(:key, project: project)
+      FactoryBot.create :translation, key: key1, rfc5646_locale: 'fr', approved: true, source_copy: 'yes', copy: 'oui'
+
+      # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
+      regenerate_elastic_search_indexes
+
+      # this is a new key
+      key2    = FactoryBot.create(:key, project: project, source_copy: 'yes')
+
+      key2.add_pending_translations
+
+      translation = key2.translations.select {|t| t.rfc5646_locale == 'fr' }.first
+      expect(translation.tm_match).to eql 100.0
+    end
+
     context "[for commit-related keys]" do
       it "should only import included keys" do
         project = FactoryBot.create(:project,
