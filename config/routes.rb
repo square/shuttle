@@ -126,6 +126,10 @@ Shuttle::Application.routes.draw do
   post 'stats/generate-translation-report' => 'stats#generate_translation_report', as: :stats_generate_translation_report, format: :csv
   get 'stats/project-translation-report' => 'stats#project_translation_report', as: :stats_project_translation_report
   post 'stats/generate-project-translation-report' => 'stats#generate_project_translation_report', as: :stats_generate_project_translation_report, format: :csv
+  get 'stats/incoming-new-words-report' => 'stats#incoming_new_words_report', as: :stats_incoming_new_words_report
+  post 'stats/generate-incoming-new-words-report' => 'stats#generate_incoming_new_words_report', as: :stats_generate_incoming_new_words_report, format: :csv
+  get 'stats/translator-report' => 'stats#translator_report', as: :stats_translator_report
+  post 'stats/generate-translator-report' => 'stats#generate_translator_report', as: :stats_generate_translator_report, format: :csv
 
   # GLOSSARY PAGES
   get 'glossary' => 'glossary#index', as: :glossary

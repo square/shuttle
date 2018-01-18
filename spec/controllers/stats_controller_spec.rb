@@ -165,4 +165,65 @@ RSpec.describe StatsController do
       expect(response).to be_success
     end
   end
+
+  describe "#generate_incoming_new_words_report" do
+    before do
+      @start_date = Date.today
+      @end_date = @start_date.next_month
+    end
+
+    it 'has a response of 400 if start_date is nil' do
+      post :generate_incoming_new_words_report, format: :csv, start_date: nil, end_date: @end_date.strftime('%m/%d/%Y')
+      expect(response.status).to eq 400
+    end
+
+    it 'has a response of 400 if if end_date is nil' do
+      post :generate_incoming_new_words_report, format: :csv, start_date: @start_date.strftime('%m/%d/%Y'), end_date: nil
+      expect(response.status).to eq 400
+    end
+
+    it 'throws an exception if end_date is before start_date' do
+      post :generate_incoming_new_words_report, format: :csv, start_date: @end_date.strftime('%m/%d/%Y'), end_date: @start_date.strftime('%m/%d/%Y')
+      expect(response.status).to eq 400
+    end
+
+    it 'sends a csv file to the client' do
+      post :generate_incoming_new_words_report, format: :csv, start_date: @start_date.strftime('%m/%d/%Y'), end_date: @end_date.strftime('%m/%d/%Y')
+      expect(response).to be_success
+    end
+  end
+
+  describe "#generate_translator_report" do
+    before do
+      @start_date = Date.today
+      @end_date = @start_date.next_month
+      @languages = ['fr', 'it']
+      @exclude_internal = true
+    end
+
+    it 'has a response of 400 if start_date is nil' do
+      post :generate_translator_report, format: :csv, start_date: nil, end_date: @end_date.strftime('%m/%d/%Y'), languages: @languages
+      expect(response.status).to eq 400
+    end
+
+    it 'has a response of 400 if if end_date is nil' do
+      post :generate_translator_report, format: :csv, start_date: @start_date.strftime('%m/%d/%Y'), end_date: nil, languages: @languages
+      expect(response.status).to eq 400
+    end
+
+    it 'throws an exception if end_date is before start_date' do
+      post :generate_translator_report, format: :csv, start_date: @end_date.strftime('%m/%d/%Y'), end_date: @start_date.strftime('%m/%d/%Y'), languages: @languages
+      expect(response.status).to eq 400
+    end
+
+    it 'throws an exception if languages is not an array' do
+      post :generate_translator_report, format: :csv, start_date: @start_date.strftime('%m/%d/%Y'), end_date: @end_date.strftime('%m/%d/%Y'), languages: 'fr'
+      expect(response.status).to eq 400
+    end
+
+    it 'sends a csv file to the client' do
+      post :generate_translator_report, format: :csv, start_date: @start_date.strftime('%m/%d/%Y'), end_date: @end_date.strftime('%m/%d/%Y'), languages: @languages
+      expect(response).to be_success
+    end
+  end
 end

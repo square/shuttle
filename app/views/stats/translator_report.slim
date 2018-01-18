@@ -1,0 +1,31 @@
+- content_for :shuttle_title do
+  = "Translator Report - Shuttle"
+- content_for :file_name do
+  = 'views/stats/translator_report'
+
+.header
+  h1 Translator Word Report
+hr.dividers
+
+.translation_report
+  = form_tag stats_generate_translator_report_path(format: :csv)
+    = render partial: 'stats/date_fields'
+    .control-group
+      = label_tag :languages
+      .controls
+        - @languages.each do |language|
+          label
+            = check_box_tag 'languages[]', language, true
+            = language.upcase
+    .control-group
+      = label_tag :exclude_internal
+      .controls
+          label
+            = radio_button_tag :exclude_internal, true, true
+            | Yes
+          label
+            = radio_button_tag :exclude_internal, false, false
+            | No
+
+    .form-actions
+      = submit_tag 'Get Report', class: 'btn btn-primary'

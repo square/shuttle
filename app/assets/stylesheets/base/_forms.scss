@@ -1,6 +1,6 @@
 @import "css3-mixins";
 @import "base/vars";
-@import "css3-mixins";
+@import "mixins";
 
 form#new_project {
   p { margin: 0 0 10px 0; }
@@ -72,6 +72,7 @@ legend {
 }
 
 .control-group {
+  @include clearfix;
   margin-bottom: 15px;
   label {
     float: left;

@@ -6,6 +6,3 @@
   = label_tag :end_date
   .controls
     = text_field_tag :end_date, Time.now.strftime('%m/%d/%Y'), class: 'datepicker form-control', required: true
-
-.form-actions
-  = submit_tag 'Get Report', class: 'btn btn-primary'

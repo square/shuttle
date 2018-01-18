@@ -10,3 +10,5 @@ hr.dividers
 .translation_report
   = form_tag stats_generate_incoming_new_words_report_path(format: :csv)
     = render partial: 'stats/date_fields'
+    .form-actions
+      = submit_tag 'Get Report', class: 'btn btn-primary'

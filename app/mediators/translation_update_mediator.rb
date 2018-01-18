@@ -132,6 +132,7 @@ class TranslationUpdateMediator < BasicMediator
       translation.translator = @user if translation.copy != translation.copy_was
       if @user.reviewer?
         translation.reviewer = @user
+        translation.review_date = Time.now
         translation.approved = true
         translation.preserve_reviewed_status = true
       end
