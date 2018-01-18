@@ -248,7 +248,6 @@ class Key < ActiveRecord::Base
       t.update!(
         tm_match: finder.top_fuzzy_match_percentage
       )
-
     end
   end
 

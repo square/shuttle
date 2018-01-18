@@ -28,7 +28,7 @@ module Reports
                                    .where('tm_match IS NOT null')
                                    .select('DATE(created_at) as created_at', :rfc5646_locale, :tm_match, :words_count)
 
-        languages = translations.map {|t| t.rfc5646_locale}.uniq.sort
+        languages = translations.map(&:rfc5646_locale).uniq.sort
         empty_cols = Array.new(languages.count, '')
 
         csv << ['Start Date', start_date] + empty_cols
@@ -37,7 +37,7 @@ module Reports
         csv << ['', ''] + empty_cols
         csv << ['Date', 'source (total words)'] + languages.map {|l| "#{l} (new words)"}
 
-        dates = translations.map{|t| t.created_at}.uniq.sort
+        dates = translations.map(&:created_at).uniq.sort
 
         dates.each do |date|
           row = [date.utc.strftime('%Y-%m-%d')]
