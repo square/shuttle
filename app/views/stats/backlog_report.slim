@@ -1,0 +1,14 @@
+- content_for :shuttle_title do
+  = "Backlog Report - Shuttle"
+- content_for :file_name do
+  = 'views/stats/backlog_report'
+
+.header
+  h1 Backlog Report
+hr.dividers
+
+.translation_report
+  = form_tag stats_generate_backlog_report_path(format: :csv)
+    = render partial: 'stats/date_fields'
+    .form-actions
+      = submit_tag 'Get Report', class: 'btn btn-primary'

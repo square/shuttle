@@ -114,6 +114,20 @@ class StatsController < ApplicationController
     end
   end
 
+  def backlog_report
+  end
+
+  def generate_backlog_report
+    begin
+      start_date =  Date.strptime(params[:start_date], '%m/%d/%Y')
+      end_date =  Date.strptime(params[:end_date], '%m/%d/%Y')
+      filename = "backlog-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
+      send_data Reports::BacklogReport.generate_csv(start_date, end_date), filename: filename
+    rescue
+      render text: t('stats.reports.failure'), status: 400
+    end
+  end
+
   private
 
   def generate_commit_csv
