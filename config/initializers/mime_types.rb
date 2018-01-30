@@ -57,3 +57,6 @@ Mime::Type.register 'application/javascript', :js, %w(text/javascript applicatio
 #TODO this should really be an option passed to the .js URL
 Mime::Type.register_alias 'application/javascript', :jsm
 Mime::Type.register_alias 'application/javascript', :jsm2
+
+Mime::Type.register_alias 'text/x-yaml', :ember_intl_yaml
+Mime::Type.register_alias 'application/json', :ember_intl_json
