@@ -45,6 +45,12 @@ class CommitImporter
       # mark related blobs as parsed so that we don't parse them again
       mark_not_errored_blobs_as_parsed(commit)
 
+      # to eliminate duplicate commits (from things like `git -amend`),
+      # we calculate a "fingerprint" for the commit based on it's commits_keys
+      # once the fingerprint is set, it will check for other duplicates
+      # based on the fingerprint and mark them as such.
+      set_fingerprint_find_dupes(commit)
+
       # the readiness hooks were all disabled, so now we need to go through and calculate keys' readiness.
       # This needs to happen before updating loading to false because there are hooks in CommitObserver
       # which gets fired when loading ends, and it expects keys to reflect correct readiness states.
@@ -65,6 +71,13 @@ class CommitImporter
       # This would potentially be a performance optimization, too, since we would start using the parsed strings earlier
       # instead of waiting till all blob importers are finished.
       commit.blobs.where(errored: false).update_all parsed: true
+    end
+
+    def set_fingerprint_find_dupes(commit)
+      commit.fingerprint = Digest::SHA1.hexdigest(commit.commits_keys.order(:key_id).pluck(:key_id).join(','))
+
+      # now that we have a fingerprint, look up others to mark them as duplicates
+      Commit.where(fingerprint: commit.fingerprint).update_all(duplicate: true)
     end
   end
 

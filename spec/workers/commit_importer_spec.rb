@@ -112,5 +112,22 @@ RSpec.describe CommitImporter::Finisher do
       CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
       expect(@key.reload).to be_ready
     end
+
+    it "sets the commit's fingerprint" do
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
+
+      expect(@commit.reload.fingerprint).to_not be_nil
+      expected_fingerprint = Digest::SHA1.hexdigest(@key.id.to_s)
+      expect(@commit.fingerprint).to eq expected_fingerprint
+    end
+
+    it "sets a duplicate commit as such" do
+      expected_fingerprint = Digest::SHA1.hexdigest(@key.id.to_s)
+      commit2 = FactoryBot.create(:commit, fingerprint: expected_fingerprint)
+
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
+
+      expect(commit2.reload.duplicate).to be true
+    end
   end
 end

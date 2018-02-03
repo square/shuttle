@@ -38,6 +38,28 @@ RSpec.describe HomeController do
     regenerate_elastic_search_indexes
   end
 
+  context "[when 'remove duplicates' filter is selected]" do
+    it "should hide the duplicate commits" do
+      key1 = FactoryBot.create(:key)
+      key2 = FactoryBot.create(:key)
+      expected_fingerprint = Digest::SHA1.hexdigest([key1.id, key2.id].join(','))
+      commit1 = FactoryBot.create(:commit, project: @project, fingerprint: expected_fingerprint, duplicate: true)
+      commit2 = FactoryBot.create(:commit, project: @project, fingerprint: expected_fingerprint)
+      commit3 = FactoryBot.create(:commit, project: @project, fingerprint: '1234567890')
+
+      commit1.keys << key1
+      commit2.keys << key1
+
+      commit1.keys << key2
+      commit2.keys << key2
+
+      regenerate_elastic_search_indexes
+
+      get :index, { commits_filter__hide_duplicates: 'true' }
+      expect(assigns(:commits).map(&:id)).to eq [commit3.id, commit2.id, @commit.id]
+    end
+  end
+
   context "[when 'uncompleted' filter is selected and locales are specified]" do
     it "returns the commit/article with pending translations in specified locales, even if that commit/article is ready and the locale is optional" do
       FactoryBot.create(:translation, key: @commit_key, rfc5646_locale: 'es', source_rfc5646_locale: 'en')
