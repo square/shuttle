@@ -47,8 +47,8 @@ class CommitImporter
 
       # to eliminate duplicate commits (from things like `git -amend`),
       # we calculate a "fingerprint" for the commit based on it's commits_keys
-      # once the fingerprint is set, it will check for other duplicates
-      # based on the fingerprint and mark them as such.
+      # once the fingerprint is set, it will check for duplicates
+      # and that will decide if this commit is a duplicate.
       set_fingerprint_find_dupes(commit)
 
       # the readiness hooks were all disabled, so now we need to go through and calculate keys' readiness.
@@ -76,8 +76,8 @@ class CommitImporter
     def set_fingerprint_find_dupes(commit)
       commit.fingerprint = Digest::SHA1.hexdigest(commit.commits_keys.order(:key_id).pluck(:key_id).join(','))
 
-      # now that we have a fingerprint, look up others to mark them as duplicates
-      Commit.where(fingerprint: commit.fingerprint).update_all(duplicate: true)
+      # now that we have a fingerprint, look up others to mark this as a duplicate if the exist
+      commit.duplicate = Commit.where(fingerprint: commit.fingerprint).exists?
     end
   end
 

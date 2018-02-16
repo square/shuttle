@@ -36,12 +36,12 @@ RSpec.describe 'commit_fingerprint:update' do
     expect(commit.duplicate).to be false
   end
 
-  it 'should mark duplicate commits as such' do
+  it 'should mark duplicate commits as such, keeping the oldest commit as active' do
     key1 = FactoryBot.create(:key)
     key2 = FactoryBot.create(:key)
     expected_fingerprint = Digest::SHA1.hexdigest([key1.id, key2.id].join(','))
 
-    commit1 = FactoryBot.create(:commit)
+    commit1 = FactoryBot.create(:commit) # oldest commit
     commit2 = FactoryBot.create(:commit)
 
     commit1.keys << key1
@@ -57,7 +57,7 @@ RSpec.describe 'commit_fingerprint:update' do
 
     expect(commit1.fingerprint).to eq(expected_fingerprint)
     expect(commit2.fingerprint).to eq(expected_fingerprint)
-    expect(commit1.duplicate).to be true
-    expect(commit2.duplicate).to be false
+    expect(commit1.duplicate).to be false
+    expect(commit2.duplicate).to be true
   end
 end
