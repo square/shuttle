@@ -3,7 +3,7 @@ namespace :commit_fingerprint do
   task update: :environment do
     puts "[commit_fingerprint:update] Updating fingerprints on commits."
 
-    Commit.includes(:commits_keys).all.each do |commit|
+    Commit.includes(:commits_keys).find_each do |commit|
       # calculate the new fingerprint
       fingerprint = Digest::SHA1.hexdigest(commit.commits_keys.order(:key_id).pluck(:key_id).join(','))
 
