@@ -28,6 +28,8 @@
     .collapse
       .control-group
         span.advanced-filters-label Advanced Filters:
+        = check_box_tag 'commits_filter__hide_duplicates', 'true', @form[:commits_filter__hide_duplicates]
+        | Hide duplicate commits
         = check_box_tag 'commits_filter__show_only_mine', 'true', @form[:commits_filter__show_only_mine]
         | Show only my commits
         = check_box_tag 'commits_filter__hide_exported', 'true', @form[:commits_filter__hide_exported]

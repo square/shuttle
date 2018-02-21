@@ -107,10 +107,12 @@ class Commit < ActiveRecord::Base
     indexes :loading, type: 'boolean'
     indexes :ready, type: 'boolean'
     indexes :exported, type: 'boolean'
+    indexes :fingerprint, type: 'string'
+    indexes :duplicate, type: 'boolean'
   end
 
   def regular_index_fields
-    %w(project_id user_id priority due_date created_at revision ready exported loading)
+    %w(project_id user_id priority due_date created_at revision ready exported loading fingerprint duplicate)
   end
 
   def special_index_fields

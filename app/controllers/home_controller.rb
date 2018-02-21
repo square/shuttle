@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2014-2018 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ class HomeController < ApplicationController
   # | `commits_filter__hide_exported`     | A string flag indicating whether exported Commits should be hidden or not: 'true', 'false'.                           |
   # | `commits_filter__hide_autoimported` | A string flag indicating whether auto imported Commits should be hidden or not: 'true', 'false'.                      |
   # | `commits_filter__show_only_mine`    | A string flag indicating whether only Commits from the current user should be shown: 'true', 'false'.                 |
+  # | `commits_filter__hide_duplicates`   | A string flag indicating whether only unique Commits should be shown (by fingerprint): 'true', 'false'.                 |
   # | `articles_filter__project_id`       | A Project ID to filter Articles by (default all Projects).                                                            |
   # | `articles_filter__name`             | A name to filter Articles by.                                                                                         |
 

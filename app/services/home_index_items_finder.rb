@@ -33,6 +33,7 @@ class HomeIndexItemsFinder
     hide_exported     = form[:commits_filter__hide_exported]
     hide_autoimported = form[:commits_filter__hide_autoimported]
     show_only_mine    = form[:commits_filter__show_only_mine]
+    hide_duplicates   = form[:commits_filter__hide_duplicates]
 
     # PAGINATION
     offset = form[:offset]
@@ -54,6 +55,7 @@ class HomeIndexItemsFinder
               must { exists field: :user_id } if hide_autoimported
               must { term user_id: 1 } if show_only_mine
               must { term loading: false }
+              must { term duplicate: false } if hide_duplicates
 
               case status
               when 'uncompleted'

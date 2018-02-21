@@ -41,6 +41,7 @@ class HomeIndexForm
     set_commits_filter__hide_exported
     set_commits_filter__hide_autoimported
     set_commits_filter__show_only_mine
+    set_commits_filter__hide_duplicates
 
     # article specific
     set_articles_filter__name
@@ -128,6 +129,17 @@ class HomeIndexForm
           params[:commits_filter__show_only_mine] == 'true'
         elsif cookies[:home_index__commits_filter__show_only_mine]
           cookies[:home_index__commits_filter__show_only_mine] == 'true'
+        else
+          false
+        end
+  end
+
+  def set_commits_filter__hide_duplicates
+    vars[:commits_filter__hide_duplicates] = cookies[:home_index__commits_filter__hide_duplicates] =
+        if params[:commits_filter__hide_duplicates].present?
+          params[:commits_filter__hide_duplicates] == 'true'
+        elsif cookies[:home_index__commits_filter__hide_duplicates]
+          cookies[:home_index__commits_filter__hide_duplicates] == 'true'
         else
           false
         end

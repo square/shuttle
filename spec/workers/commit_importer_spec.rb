@@ -112,5 +112,28 @@ RSpec.describe CommitImporter::Finisher do
       CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
       expect(@key.reload).to be_ready
     end
+
+    it "sets the commit's fingerprint" do
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
+
+      expect(@commit.reload.fingerprint).to_not be_nil
+      expected_fingerprint = Digest::SHA1.hexdigest(@key.id.to_s)
+      expect(@commit.fingerprint).to eq expected_fingerprint
+      expect(@commit.duplicate).to be false
+    end
+
+    it "sets all but the oldest duplicate commit as such" do
+      expected_fingerprint = Digest::SHA1.hexdigest(@key.id.to_s)
+      @commit.fingerprint = expected_fingerprint
+      @commit.save!
+
+      commit2 = FactoryBot.create(:commit, fingerprint: expected_fingerprint, duplicate: false)
+      commit2.keys << @key
+
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => commit2.id
+
+      expect(@commit.reload.duplicate).to be false
+      expect(commit2.reload.duplicate).to be true
+    end
   end
 end

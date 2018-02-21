@@ -22,6 +22,7 @@ FactoryBot.define do
     loading false
     ready false
     skip_import true
+    duplicate false
 
     after(:build) do |commit|
       class << commit; def set_author() end; end

@@ -252,6 +252,8 @@ CREATE TABLE commits (
     import_batch_id character varying,
     import_errors text,
     revision character varying(40) NOT NULL,
+    fingerprint character varying,
+    duplicate boolean DEFAULT false,
     CONSTRAINT commits_message_check CHECK ((char_length((message)::text) > 0)),
     CONSTRAINT commits_priority_check CHECK (((priority >= 0) AND (priority <= 3)))
 );
@@ -1230,6 +1232,13 @@ CREATE INDEX index_commits_keys_on_created_at ON commits_keys USING btree (creat
 
 
 --
+-- Name: index_commits_on_fingerprint; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_commits_on_fingerprint ON commits USING btree (fingerprint);
+
+
+--
 -- Name: index_commits_on_project_id_and_revision; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1833,4 +1842,6 @@ INSERT INTO schema_migrations (version) VALUES ('20171024225818');
 INSERT INTO schema_migrations (version) VALUES ('20171103183318');
 
 INSERT INTO schema_migrations (version) VALUES ('20171206152825');
+
+INSERT INTO schema_migrations (version) VALUES ('20180129223845');
 
