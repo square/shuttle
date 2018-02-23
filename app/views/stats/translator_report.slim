@@ -11,14 +11,14 @@ hr.dividers
   = form_tag stats_generate_translator_report_path(format: :csv)
     = render partial: 'stats/date_fields'
     .control-group
-      = label_tag :languages
+      = label_tag :languages, nil, class: 'control-label'
       .controls
         - @languages.each do |language|
           label
             = check_box_tag 'languages[]', language, true
             = language.upcase
     .control-group
-      = label_tag :exclude_internal
+      = label_tag :exclude_internal, nil, class: 'control-label'
       .controls
           label
             = radio_button_tag :exclude_internal, true, true
