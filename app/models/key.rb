@@ -245,7 +245,7 @@ class Key < ActiveRecord::Base
       end
 
       finder = FuzzyMatchTranslationsFinder.new(source_copy, t)
-      t.update!(
+      t.update(
         tm_match: finder.top_fuzzy_match_percentage
       )
     end
