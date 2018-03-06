@@ -23,7 +23,7 @@ configure_sidekiq = -> do
   redis_config  = YAML.load_file(Rails.root.join('config', 'sidekiq.yml')).
       merge(url: Shuttle::Redis.client.id)
   size          = Sidekiq.server? ? Shuttle::Configuration.sidekiq.server_pool_size : Shuttle::Configuration.sidekiq.client_pool_size
-  Redis.current = ConnectionPool.new(size: size) { Redis.new(redis_config) }
+  Redis.current = ConnectionPool.new(size: size) { Redis::Namespace.new Shuttle::Configuration.sidekiq.namespace, redis: Redis.new(redis_config) }
 
   Sidekiq.configure_client do |config|
     config.redis = Redis.current

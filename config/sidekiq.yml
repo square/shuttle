@@ -5,4 +5,3 @@
 :queues:
   - [high, 10]
   - [low, 1]
-:namespace: shuttle_sidekiq
