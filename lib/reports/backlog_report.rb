@@ -14,7 +14,7 @@
 
 module Reports
   module BacklogReport
-    def self.generate_csv(start_date, end_date)
+    def self.generate_csv(start_date, end_date, exclude_duplicates = true)
       # verify that the params are dates
       raise ArgumentError, 'start_date is not a date' unless start_date.instance_of?(Date)
       raise ArgumentError, 'end_date is not a date' unless end_date.instance_of?(Date)
@@ -23,8 +23,7 @@ module Reports
       raise ArgumentError, 'end_date cannot be earlier than the start date' if end_date < start_date
 
       CSV.generate do |csv|
-        translations  = Translation.where('rfc5646_locale != source_rfc5646_locale')
-                                   .select('DATE(created_at) as created_at', 'DATE(translation_date) as translation_date', :rfc5646_locale, :words_count)
+        translations  = retrieve_translations(start_date, end_date, exclude_duplicates)
 
         languages = translations.map(&:rfc5646_locale).uniq.sort
         lang_count = languages.count
@@ -47,7 +46,7 @@ module Reports
               (t.translation_date == nil || t.translation_date > date)
             end
 
-            lang_total = words.sum(&:words_count) || 0
+            lang_total = words.sum(&:words) || 0
             row += [lang_total]
           end
 
@@ -56,5 +55,22 @@ module Reports
         end
       end
     end
+
+    def self.retrieve_translations(start_date, end_date, exclude_duplicates = true)
+      translations = Translation.where('rfc5646_locale != source_rfc5646_locale')
+                                .where('translations.created_at <= ?', end_date)
+                                .where('(translation_date >= ? OR translation_date is null)', start_date)
+                                .where('(tm_match < 70.0 OR tm_match is null)')
+                                .group('DATE(translations.created_at), DATE(translations.translation_date), rfc5646_locale')
+
+      if exclude_duplicates
+        duplicates = Translation.joins(commits_keys: :commit).where('commits.duplicate = true')
+        translations = translations.where.not(id: duplicates)
+      end
+
+      translations.select('DATE(translations.created_at) as created_at', 'DATE(translation_date) as translation_date', :rfc5646_locale, 'SUM(words_count) as words')
+    end
+
+    private_class_method :retrieve_translations
   end
 end

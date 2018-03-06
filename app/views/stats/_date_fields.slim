@@ -1,8 +1,8 @@
 .control-group
-  = label_tag :start_date
+  = label_tag :start_date, nil, class: 'control-label'
   .controls
     = text_field_tag :start_date, 1.month.ago.strftime('%m/%d/%Y') , class: 'datepicker form-control', required: true
 .control-group
-  = label_tag :end_date
+  = label_tag :end_date, nil, class: 'control-label'
   .controls
     = text_field_tag :end_date, Time.now.strftime('%m/%d/%Y'), class: 'datepicker form-control', required: true

@@ -31,7 +31,7 @@ RSpec.describe Reports::BacklogReport do
       expect { Reports::BacklogReport.generate_csv(start_date, end_date) }.to raise_error(ArgumentError)
     end
 
-    describe 'CSV Data' do
+    describe 'Basic CSV Data' do
       before :context do
         @start_date = Date.today
         @end_date = @start_date.next_month
@@ -39,9 +39,10 @@ RSpec.describe Reports::BacklogReport do
         @translation_date = @created_at + 2
 
         project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
-        key1 = FactoryBot.create(:key, project: project)
-        key2 = FactoryBot.create(:key, project: project)
-        key3 = FactoryBot.create(:key, project: project)
+        commit = FactoryBot.create(:commit, project: project)
+        key1 = FactoryBot.create(:key, commits: [commit])
+        key2 = FactoryBot.create(:key, commits: [commit])
+        key3 = FactoryBot.create(:key, commits: [commit])
 
         FactoryBot.create(:translation, key: key1, translation_date: @translation_date, source_copy: 'This is a test', rfc5646_locale: 'fr', created_at: @created_at)
         FactoryBot.create(:translation, key: key2, translation_date: @translation_date, source_copy: 'Another test', rfc5646_locale: 'it', created_at: @created_at)
@@ -89,6 +90,64 @@ RSpec.describe Reports::BacklogReport do
 
         expect(@result[8]).to eql expected_results
         # these results are the same for every day after day 4 (day 4 - end_date)
+      end
+    end
+
+    describe '#retrieve_translations' do
+      it 'should filter out records created after the end_date' do
+        start_date = Date.today
+        end_date = start_date.next_month
+        created_at = end_date.next_day
+
+        FactoryBot.create(:translation, created_at: created_at)
+        results = Reports::BacklogReport.send :retrieve_translations, start_date, end_date
+        expect(results.all.length).to eq 0
+      end
+
+      it 'should filter out records with a translation_date before the start_date' do
+        start_date = Date.today
+        end_date = start_date.next_month
+        translation_date = start_date - 1
+
+        FactoryBot.create(:translation, translation_date: translation_date)
+        results = Reports::BacklogReport.send :retrieve_translations, start_date, end_date
+        expect(results.all.length).to eq 0
+      end
+
+      it 'should filter out records with a greater than 70% tm_match' do
+        start_date = Date.today
+        end_date = start_date.next_month
+        created_at = start_date.next_day
+
+        FactoryBot.create(:translation, created_at: created_at, translation_date: nil, tm_match: 78)
+        results = Reports::BacklogReport.send :retrieve_translations, start_date, end_date
+        expect(results.all.length).to eq 0
+      end
+
+      it 'should filter out translations that are associated with a duplicate commit' do
+        start_date = Date.today
+        end_date = start_date.next_month
+        created_at = start_date.next_day
+
+        key = FactoryBot.create(:key)
+        FactoryBot.create(:commit, duplicate: true, keys: [key])
+        FactoryBot.create(:translation, key: key, created_at: created_at, translation_date: nil)
+
+        results = Reports::BacklogReport.send :retrieve_translations, start_date, end_date
+        expect(results.all.length).to eq 0
+      end
+
+      it 'should not filter out translations that are associated with a duplicate commit if exclude_duplicates is false' do
+        start_date = Date.today
+        end_date = start_date.next_month
+        created_at = start_date.next_day
+
+        key = FactoryBot.create(:key)
+        FactoryBot.create(:commit, duplicate: true, keys: [key])
+        FactoryBot.create(:translation, key: key, created_at: created_at, translation_date: nil)
+
+        results = Reports::BacklogReport.send :retrieve_translations, start_date, end_date, false
+        expect(results.all.length).to eq 1
       end
     end
   end
