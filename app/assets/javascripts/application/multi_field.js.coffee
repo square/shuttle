@@ -170,14 +170,17 @@ class root.HashField
     @options.renderer div, key, value
     key_field = div.find('[rel=key]')
     value_field = div.find('[rel=value]')
-    refreshName = =>
-      new_key = key_field.val()
+    refreshName = (locale) =>
+      new_key = key_field.val() || locale
       if new_key?.length > 0
         value_field.attr 'name', "#{this.name()}[#{new_key}]"
       else
         value_field.removeAttr 'name'
     key_field.keyup refreshName
     key_field.change refreshName
+    key_field.on 'typeahead:change', (evt, locale) =>
+      refreshName(locale)
+      
     refreshName()
 
     remove = $('<a/>').addClass('fa fa-minus-circle').attr('href', '#').appendTo(div)
