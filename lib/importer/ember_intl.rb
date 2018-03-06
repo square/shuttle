@@ -20,7 +20,7 @@ module Importer
   # addon.
 
   class EmberIntl < Base
-    def self.fencers() %w(MessageFormat Html) end
+    def self.fencers() %w(IntlMessageFormat Html) end
 
     protected
 
