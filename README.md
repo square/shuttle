@@ -56,91 +56,106 @@ does not return 404.
 Getting Started
 ---------------
 
-### Starting the server
+### Setting up your development environment
 
-Developing for Shuttle requires Ruby 2.0.0, PostgreSQL, Redis, Tidy, Sidekiq Pro
-ElasticSearch 1.7, and a modern version of libarchive. To run Shuttle for the first time:
-
-1. Clone this project. You can run `brew bundle` to install all dependencies available
-   via Homebrew, which are specified in the `Brewfile`, or install them sequentially
-   specified below.
-
-2. Buy SidekiqPro, place your private repo url in Gemfile.
-
-3. Install a modern version of libarchive, one that supports the GNU tar format.
-   (The version that comes with Mac OS X does not.) On OS X, you can run
-
-        brew install libarchive
-
-   If you have an out-of-date libarchive version, you will see missing constant
-   errors in the multifile exporters.
-4. Create a PostgreSQL user called `shuttle`, and make it the owner of two
-   PostgreSQL databases, `shuttle_development` and `shuttle_test`:
-
-        brew install postgresql
-        createuser shuttle
-        createdb -O shuttle shuttle_development
-        createdb -O shuttle shuttle_test
-
-5. Install the libarchive gem using a modern version of libarchive.
-   For Homebrew, run
-
-        gem install libarchive -- --with-opt-dir=/usr/local/Cellar/libarchive/3.1.2
-
-6. Install Redis and ElasticSearch 1.7. For Homebrew, run
-
-        brew install redis
-        brew install elasticsearch17
-
-   and start them, following the post-install instructions for each of them.
-7. Install Qt, the cross-platform application framework, which is used for capybara-webkit.
-   For Homebrew, run
-
-        brew install qt
-
-8. You’ll need to run Bundler: `bundle install`
-9. Run `rake db:migrate db:seed` to seed the database.
-10. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
-11. Verify that all specs pass with `rspec spec`
-
-These steps can be run with `foreman start` if foreman is installed.
-
-12. Visit [http://localhost:3000](http://localhost:3000) and log in with the
-   credentials:
-
-   username: **admin@example.com**<br>
-   password: **password123**
-
-13. Make sure that you initialize ElasticSearch with indexes:
-
-  bundle exec rake elasticsearch:import:model FORCE=y
-
-To run the server, use `rails server`. To run the job queue:
-`bundle exec sidekiq -C config/sidekiq.yml`.
-
-### Starting the server (Docker)
-
-To run Shuttle for the first time using `docker-compose`:
+Developing for Shuttle requires Ruby 2.3.1, PostgreSQL, Redis, Tidy, Sidekiq Pro
+ElasticSearch 1.7, and a modern version of libarchive. To run Shuttle for the
+first time:
 
 1. Clone this project.
-2. Buy SidekiqPro, place your private repo url in Gemfile.
-3. (Mac) Install [Docker for Mac](https://docs.docker.com/engine/installation/mac/).
-4. Build the Docker containers by running `docker-compose build`.
-5. Run `docker-compose run web rake db:create db:migrate db:seed` to seed the database.
-6. Run `docker-compose run -e "RAILS_ENV=test" web rake db:migrate` to setup the test database.
-7. Verify that all specs pass with `docker-compose run web rspec spec`.
-8. To run the server, use `docker-compose up`.
-9. Run `docker-machine ip` to get the IP of the server.
-10. Visit http://[that IP]:3000 and log in with the credentials:
 
-  username: **admin@example.com**<br>
-  password: **password123**
+2. Install Ruby 2.3.1. If you are using RVM, you can do so using the
+   `.ruby-version` file.
+
+3. Run `brew bundle` to install all dependencies available via Homebrew, which
+   are specified in the `Brewfile`, or install them manually referencing the
+   Brewfile.
+
+4. Since ElasticSearch 1.7 is required, you will have to download and install it
+   manually at https://www.elastic.co/downloads/past-releases/elasticsearch-1-7-6.
+
+   If you are already running a more modern version of ElasticSearch, you can
+   run this older version simultaneously on a different port (e.g. 9201) by
+   altering the `config/elasticsearch./yml` file in the ElasticSearch install
+   directory. If you do this, make sure you override the default ElasticSearch
+   URL when running Shuttle by either creating a
+   `config/environments/development/elasticsearch.yml` file (to override the
+   file under `config/environments/common`), or setting the `ELASTICSEARCH_URL`
+   instance variable.
+
+5. Buy Sidekiq Pro and place your private source URL in Gemfile as specified by
+   the Sidekiq Pro documentation.
+
+6. Create a PostgreSQL user called `shuttle`, and make it the owner of two
+   PostgreSQL databases, `shuttle_development` and `shuttle_test`:
+
+   ``` sh
+   createuser shuttle
+   createdb -O shuttle shuttle_development
+   createdb -O shuttle shuttle_test
+   ```
+
+7. You will need to tell Bundler where the libarchive install directory is. If
+   you installed libarchive using Homebrew, you can do this by running
+
+   ``` sh
+   bundle config build.libarchive --with-opt-dir=$(brew --prefix libarchive)
+   ```
+
+8. Make sure that PostgreSQL, Redis, and ElasticSearch are running. If you
+   installed them via Homebrew, running `brew info postgresql` and
+   `brew info redis` will tell you how to run them. For ElasticSearch, read the
+   README in your install directory.
+
+9. Install the `mailcatcher` gem, which is used to receive emails sent in
+   development. (This gem is not a part of the Gemfile because it's typically
+   installed as part of a global or system-wide gemset to be used with
+   all projects.)
+10. Optionally, install the `foreman` gem, which runs all the processes
+    necessary for development.
+11. Install all required gems by running `bundle install`.
+12. Run `rake db:migrate db:seed` to migrate and seed the database.
+13. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
+14. Initialize the ElasticSearch index for development by running
+
+    ``` sh
+    rake elasticsearch:import:model FORCE=y CLASS=Commit
+    rake elasticsearch:import:model FORCE=y CLASS=Key
+    rake elasticsearch:import:model FORCE=y CLASS=Translation
+    ```
+
+15. Do the same for the test indexes:
+
+    ``` sh
+    RAILS_ENV=test rake elasticsearch:import:model FORCE=y CLASS=Commit
+    RAILS_ENV=test rake elasticsearch:import:model FORCE=y CLASS=Key
+    RAILS_ENV=test rake elasticsearch:import:model FORCE=y CLASS=Translation
+    ```
+
+16. Verify that all specs pass with `rspec spec`.
+
+### Starting the server
+
+To run the development environment, you will need to start the Web server, the
+mail client, and Sidekiq.
+
+* **Running the Web server:** `rails server`
+* **Running the mail client:** `mailcatcher`
+* **Running Sidekiq:** `sidekiq -C config/sidekiq.yml`
+
+These processes can be launched together by running `foreman start`.
+
+Visit [http://localhost:3000](http://localhost:3000) and log in with the
+username `admin@example.com` and the password `password123`. This user is
+created by the seed script.
+
+Create and import your first project!
 
 ### Adding your first project
 
 You are now an admin user on Shuttle. You can click the "Add Project" button to
 configure your first project. You will need at least read-only access to this
-project's Git repository. Set up the locale and importing settings as neessary.
+project's Git repository. Set up the locale and importing settings as necessary.
 
 Once the project has been added, you can add a commit for it to import strings
 from. For starters, try entering "HEAD". Once you click "Add", you should see
@@ -182,8 +197,8 @@ Shuttle does not come with a deploy script; you should use whatever deploy
 system you are comfortable. Your deploy script should, in addition to copying
 the code and starting the Rails server,
 
-1. stop and restart the Sidekiq workers (the Sidekiq gem has many scripts for
-   this), and
+1. stop and restart the Sidekiq workers (the Sidekiq gem has scripts for this),
+   and
 2. install the cron entries (the Whenever gem has scripts for this).
 
 

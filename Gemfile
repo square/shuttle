@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
+source 'YOUR_SIDEKIQ_PRO_SOURCE_HERE'
+git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.3.1'
 
@@ -40,13 +42,13 @@ gem 'autoprefixer-rails'
 
 # UTILITIES
 gem 'json'
-gem 'rugged', git: 'https://github.com/brandonweeks/rugged.git', tag: 'v0.24.0-square0', submodules: true
+gem 'rugged', github: 'brandonweeks/rugged', tag: 'v0.24.0-square0', submodules: true
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
 gem 'similar_text'
 # temporary fix uninitialized constant Paperclip::Storage::S3::AWS bug. Should consider using latest version after upgrading rails to 4.2 or higher version
-gem 'paperclip', git: 'https://github.com/thoughtbot/paperclip', ref: '523bd46c768226893f23889079a7aa9c73b57d68'
+gem 'paperclip', github: 'thoughtbot/paperclip', ref: '523bd46c768226893f23889079a7aa9c73b57d68'
 gem 'aws-sdk', '< 3'
 gem 'execjs'
 gem 'safemode'
@@ -69,8 +71,7 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-gem 'sidekiq', '4.2.10'
-gem 'sidekiq-pro'
+gem 'sidekiq-pro', '= 3.4.5'
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
