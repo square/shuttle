@@ -77,6 +77,8 @@ module Shuttle
       incontext.js
       incontext.css
     )
+
+    config.action_mailer.default_url_options = Shuttle::Configuration.default_url_options.symbolize_keys
   end
 end
 

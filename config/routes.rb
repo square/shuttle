@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-Shuttle::Application.routes.draw do
+Rails.application.routes.draw do
   # Redirect request with not matching hosts or protocol to a default url.
   # For example, `http://shuttle.server1.example.com` would redirect to `https://shuttle.example.com`
   # if the default url provided in the configs were `https://shuttle.example.com`.
