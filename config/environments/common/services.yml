@@ -1,0 +1,8 @@
+# Will be used to determine the url of a commit
+github_enterprise_domain: "git.example.com"
+
+# Will be used to determine the url of a commit
+stash_domain: "stash.example.com"
+
+# Will be linked to in the footer to give users a way to provide feedback to the engineers running Shuttle
+feedback_link: "https://jira.example.com"

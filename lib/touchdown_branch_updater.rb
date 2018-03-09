@@ -9,8 +9,8 @@ class TouchdownBranchUpdater
   def initialize(project)
     @project = project
     @source_branch = watched_branches.first
-    @git_author_name = Shuttle::Configuration.app.git.author.name
-    @git_author_email = Shuttle::Configuration.app.git.author.email
+    @git_author_name = Shuttle::Configuration.git.author.name
+    @git_author_email = Shuttle::Configuration.git.author.email
   end
 
   # Updates the `touchdown_branch` head to be the latest translated commit in

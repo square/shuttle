@@ -13,5 +13,5 @@
 #    limitations under the License.
 
 Rails.application.config.action_mailer.default_url_options =
-    Shuttle::Configuration.app.default_url_options.symbolize_keys
+    Shuttle::Configuration.default_url_options.symbolize_keys
 

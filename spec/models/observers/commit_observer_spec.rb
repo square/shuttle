@@ -52,7 +52,7 @@ RSpec.describe CommitObserver do
 
           expect(ActionMailer::Base.deliveries.size).to eql(1)
           email = ActionMailer::Base.deliveries.first
-          expect(email.to).to eql([Shuttle::Configuration.app.mailer.translators_list])
+          expect(email.to).to eql([Shuttle::Configuration.mailer.translators_list])
           expect(email.cc).to eql([@commit.user.email])
           expect(email.subject).to eql('[Shuttle] New commit ready for translation')
           expect(email.body.to_s).to include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
@@ -68,7 +68,7 @@ RSpec.describe CommitObserver do
 
           expect(ActionMailer::Base.deliveries.size).to eql(1)
           email = ActionMailer::Base.deliveries.first
-          expect(email.to).to eql([Shuttle::Configuration.app.mailer.translators_list])
+          expect(email.to).to eql([Shuttle::Configuration.mailer.translators_list])
           expect(email.subject).to eql('[Shuttle] New commit ready for translation')
           expect(email.body.to_s).to include("http://test.host/?project_id=#{@commit.project_id}&status=uncompleted")
         end

@@ -89,7 +89,7 @@ Shuttle::Application.configure do
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.log_formatter                     = ::Logger::Formatter.new
 
-  config.action_mailer.default_url_options = Shuttle::Configuration.app.default_url_options
+  config.action_mailer.default_url_options = Shuttle::Configuration.default_url_options
 
   config.use_ssl = true
 end

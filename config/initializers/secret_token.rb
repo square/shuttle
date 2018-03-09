@@ -23,4 +23,4 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-Shuttle::Application.config.secret_key_base = Shuttle::Configuration.app.cookies.secret_key_base
+Shuttle::Application.config.secret_key_base = Rails.application.secrets.secret_key_base

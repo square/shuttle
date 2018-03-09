@@ -16,9 +16,10 @@ require 'rails_helper'
 
 RSpec.describe User do
   before :each do
-    app_config = Shuttle::Configuration.app
-    allow(Shuttle::Configuration).to receive(:app).and_return(app_config.merge(domains_to_get_monitor_role_after_email_confirmation: ['example.com'],
-                                                                  domains_who_can_search_users: ['example.com']))
+    app_config = Shuttle::Configuration.automatic_user_privileges
+    allow(Shuttle::Configuration).to receive(:automatic_user_privileges).
+        and_return(app_config.merge(domains_to_get_monitor_role_after_email_confirmation: ['example.com'],
+                                    domains_who_can_search_users:                         ['example.com']))
   end
 
   let(:role) { nil }

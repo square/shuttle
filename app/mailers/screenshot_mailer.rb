@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 class ScreenshotMailer < ActionMailer::Base
-  default from: Shuttle::Configuration.app.mailer.from
+  default from: Shuttle::Configuration.mailer.from
 
   # Notifies all of the translators on the translators' mailing list that there is a new commit
   # that has finished loading. CC's the creator of the commit.

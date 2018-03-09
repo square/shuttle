@@ -92,7 +92,7 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  config.action_mailer.default_url_options = Shuttle::Configuration.app.default_url_options
+  config.action_mailer.default_url_options = Shuttle::Configuration.default_url_options
 
   # Force cookies to be sent over https only
   config.force_ssl = true
