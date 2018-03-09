@@ -144,22 +144,22 @@ first time:
 14. Initialize the ElasticSearch index for development by running
 
     ``` sh
-    rake elasticsearch:import:model FORCE=y CLASS=Commit
-    rake elasticsearch:import:model FORCE=y CLASS=Key
-    rake elasticsearch:import:model FORCE=y CLASS=Translation
+    rake environment elasticsearch:import:model FORCE=y CLASS=Commit
+    rake environment elasticsearch:import:model FORCE=y CLASS=Key
+    rake environment elasticsearch:import:model FORCE=y CLASS=Translation
     ```
 
 15. Do the same for the test indexes:
 
     ``` sh
-    RAILS_ENV=test rake elasticsearch:import:model FORCE=y CLASS=Commit
-    RAILS_ENV=test rake elasticsearch:import:model FORCE=y CLASS=Key
-    RAILS_ENV=test rake elasticsearch:import:model FORCE=y CLASS=Translation
+    RAILS_ENV=test rake environment elasticsearch:import:model FORCE=y CLASS=Commit
+    RAILS_ENV=test rake environment elasticsearch:import:model FORCE=y CLASS=Key
+    RAILS_ENV=test rake environment elasticsearch:import:model FORCE=y CLASS=Translation
     ```
 
 16. Verify that all specs pass with `rspec spec`.
 
-### Starting the server
+#### Starting the server
 
 To run the development environment, you will need to start the Web server, the
 mail client, and Sidekiq.
