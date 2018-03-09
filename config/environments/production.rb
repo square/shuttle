@@ -69,8 +69,7 @@ Rails.application.configure do
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
 
   # Use a different cache store in production.
-  # config.cache_store                       = Shuttle::Configuration.app.cache_store.type, Shuttle::Configuration.app.cache_store.endpoint, {expires_in: 90.minutes}
-  # config.action_dispatch.rack_cache        = Shuttle::Configuration.app.action_dispatch.rack_cache.symbolize_keys
+  # config.cache_store = :mem_cache_store
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.action_controller.asset_host = 'http://assets.example.com'
@@ -91,8 +90,6 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
-
-  config.action_mailer.default_url_options = Shuttle::Configuration.default_url_options
 
   # Force cookies to be sent over https only
   config.force_ssl = true

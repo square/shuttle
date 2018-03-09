@@ -53,7 +53,7 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
-  #
-  # # for PseudoTranslator specs
+
+  # for PseudoTranslator specs
   config.i18n.available_locales = %w(en en-pseudo)
 end
