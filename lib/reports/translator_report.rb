@@ -60,7 +60,7 @@ module Reports
               users = project_translations.flat_map{|t| [t.reviewer, t.translator]}.uniq.compact.sort
 
               if exclude_internal
-                internal_domains = Shuttle::Configuration.app[:reports][:translator_report][:internal_domains]
+                internal_domains = Shuttle::Configuration.reports.internal_domains
                 users.reject!{|u| u.email.end_with?(*internal_domains)}
               end
               users.each do |user|

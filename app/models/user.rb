@@ -98,7 +98,7 @@ class User < ActiveRecord::Base
   # activate their accounts.
   # For all other email addresses, admin approval is required for them to use the application.
   def after_confirmation
-    privileged_domains = Shuttle::Configuration.app[:domains_to_get_monitor_role_after_email_confirmation]
+    privileged_domains = Shuttle::Configuration.automatic_user_privileges[:domains_to_get_monitor_role_after_email_confirmation]
     if privileged_domains && privileged_domains.include?(email_domain)
       update(role: 'monitor') unless has_role?
     end
@@ -146,7 +146,7 @@ class User < ActiveRecord::Base
 
   # @return [true, false] whether or not the user has permissions to search other users
   def can_search_users?
-    allowed_domains = Shuttle::Configuration.app[:domains_who_can_search_users]
+    allowed_domains = Shuttle::Configuration.automatic_user_privileges[:domains_who_can_search_users]
     allowed_domains && allowed_domains.include?(email_domain)
   end
 

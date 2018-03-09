@@ -18,7 +18,7 @@ class CommentMailer < ActionMailer::Base
   include ActionView::Helpers::TextHelper
   helper CommentsHelper
 
-  default from: Shuttle::Configuration.app.mailer.from
+  default from: Shuttle::Configuration.mailer.from
 
   # Notifies everybody who is associated with this comment that a new comment is created.
   #

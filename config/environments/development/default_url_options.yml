@@ -1,0 +1,3 @@
+# Used for creating urls in mailers and other places
+host: localhost
+port: 3000

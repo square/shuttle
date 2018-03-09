@@ -51,17 +51,17 @@ class StashWebhookHelper
       name: "SHUTTLE-#{commit.project.slug}-#{commit.revision_prefix}",
       url: project_commit_url(commit.project,
                               commit,
-                              host: Shuttle::Configuration.app.default_url_options.host,
-                              port: Shuttle::Configuration.app.default_url_options['port'],
-                              protocol: Shuttle::Configuration.app.default_url_options['protocol'] || 'http'),
+                              host: Shuttle::Configuration.default_url_options.host,
+                              port: Shuttle::Configuration.default_url_options['port'],
+                              protocol: Shuttle::Configuration.default_url_options['protocol'] || 'http'),
     }.merge(current_commit_state(commit))
 
     if opts[:purged]
       post_parameters[:description] = 'Commit has been purged from Shuttle.  Please resubmit.'
       post_parameters[:url] = root_url(
-        host: Shuttle::Configuration.app.default_url_options.host,
-        port: Shuttle::Configuration.app.default_url_options['port'],
-        protocol: Shuttle::Configuration.app.default_url_options['protocol'] || 'http'
+        host: Shuttle::Configuration.default_url_options.host,
+        port: Shuttle::Configuration.default_url_options['port'],
+        protocol: Shuttle::Configuration.default_url_options['protocol'] || 'http'
       )
     end
     post_parameters.to_json

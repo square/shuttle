@@ -1,0 +1,4 @@
+# The author info that will be used when Shuttle is updating the touchdown branch, i.e. when pushing manifest file
+author:
+  name: Shuttle
+  email: shuttle-noreply@example.com

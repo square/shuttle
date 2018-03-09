@@ -263,8 +263,8 @@ class Commit < ActiveRecord::Base
   #   or `nil` if the URL could not be determined.
 
   def git_url
-    github_enterprise_domain = Shuttle::Configuration.app[:github_enterprise_domain]
-    stash_domain = Shuttle::Configuration.app[:stash_domain]
+    github_enterprise_domain = Shuttle::Configuration.services[:github_enterprise_domain]
+    stash_domain = Shuttle::Configuration.services[:stash_domain]
     escaped_github_enterprise_domain = Regexp.escape(github_enterprise_domain)
     escaped_stash_domain = Regexp.escape(stash_domain)
     path_regex = "([^\/]+)\/(.+)\.git$"
