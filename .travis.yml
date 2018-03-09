@@ -1,24 +1,10 @@
-before_install:
-- sudo apt-get install -qq libarchive-dev tidy
-- psql -c 'create database travis_ci_test;' -U postgres
-- cp config/database.travis.yml config/database.yml
-- git --git-dir=spec/fixtures/repository.git init --bare
-addons:
-  postgresql: '9.3'
-services:
-- redis
-- elasticsearch
 language: ruby
-rvm:
-- 2.0
-- 2.1
-- 2.2
-env:
-  - TESTFOLDER=spec/models
-  - TESTFOLDER=spec/controllers
-  - TESTFOLDER=spec/lib
-  - TESTFOLDER=spec/workers
-  - TESTFOLDER=spec/mailers
+
+services:
+- docker
+
+before_install:
+- docker-compose -f docker-compose.test.yml build
+
 script:
-  - bundle exec rake db:test:prepare
-  - bundle exec rspec $TESTFOLDER
+- docker-compose -f docker-compose.test.yml run tests bin/docker-tests

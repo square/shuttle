@@ -3,26 +3,19 @@ version: '2'
 services:
   postgresql:
     image: postgres:9.4
-    volumes:
-    - postgres_data:/var/lib/postgresql/data
     environment:
     - POSTGRES_USER=shuttle
     - POSTGRES_PASSWORD=
-    - POSTGRES_DB=shuttle_development
+    - POSTGRES_DB=shuttle_test
 
   redis:
     image: redis
 
   elasticsearch:
     image: quay.io/trackmaven/elasticsearch:1.7
-    volumes:
-    - es_data:/usr/share/elasticsearch/data
 
-  web:
+  tests:
     build: .
-    command: bundle exec rails server -e _env:RAILS_ENV -p 3000 -b 0.0.0.0
-    ports:
-    - '3000:3000'
     links: &links
     - postgresql
     - postgresql:postgresql.shuttle.local
@@ -30,27 +23,22 @@ services:
     - redis:redis.shuttle.local
     - elasticsearch
     - elasticsearch:elasticsearch.shuttle.local
-    - mailcatcher:mail.shuttle.local
     environment: &environment
-    - RAILS_ENV=development
-    - RACK_ENV=development
+    - RAILS_ENV=test
+    - RACK_ENV=test
     - SHUTTLE_DB_HOST=postgresql.shuttle.local
     - SHUTTLE_REDIS_HOST=redis.shuttle.local
     - 'SHUTTLE_ES_URL=elasticsearch.shuttle.local:9200'
     - SHUTTLE_MAIL_HOST=mail.shuttle.local
 
-  worker:
-    build: .
-    command: bundle exec sidekiq -C config/sidekiq.yml
-    links: *links
-    environment: *environment
-
-  mailcatcher:
-    image: schickling/mailcatcher
-    ports:
-    - '1025:1025'
-    - '1080:1080'
-
-volumes:
-  postgres_data:
-  es_data:
+#  worker:
+#    build: .
+#    command: bundle exec sidekiq -C config/sidekiq.yml
+#    links: *links
+#    environment: *environment
+#
+#  mailcatcher:
+#    image: schickling/mailcatcher
+#    ports:
+#    - '1025:1025'
+#    - '1080:1080'

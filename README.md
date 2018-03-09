@@ -56,7 +56,32 @@ does not return 404.
 Getting Started
 ---------------
 
-### Setting up your development environment
+The easiest way to use Shuttle is with Docker. You will need to download and
+install a Docker environment. If you do not wish to use Docker, you can also
+install and configure all the necessary dependencies on your development
+environment.
+
+### Using Shuttle with Docker
+
+To get set up, run `docker-compose build` to generate all the necessary images.
+You only have to do this once, and each time you make a change to the source
+code.
+
+To run the generated images, run `docker-compose up`. Use `docker-compose down`
+to stop the running images. To initialize your database and ElasticSearch
+indexes for the first time, run  `docker-compose run web bin/docker-setup`.
+
+The Shuttle development database is stored as a Docker volume called
+`shuttle_postgres_data`. ElasticSearch data is stored as a Docker volume called
+`shuttle_es_data`.
+
+Visit [http://localhost:3000](http://localhost:3000) and log in with the
+username `admin@example.com` and the password `password123`. This user is
+created by the seed script.
+
+Create and import your first project!
+
+### Setting up your development environment without Docker
 
 Developing for Shuttle requires Ruby 2.3.1, PostgreSQL, Redis, Tidy, Sidekiq Pro
 ElasticSearch 1.7, and a modern version of libarchive. To run Shuttle for the
@@ -421,41 +446,16 @@ Specs
 -----
 
 All models, controllers, and library files are unit or integration-tested with
-RSpec specs under the `spec` directory. Run unit tests with the `rspec spec`
-command. Views and JavaScript files are not specced. Almost all unit tests use
-factories rather than mocks, putting them somewhat closer to integration tests.
+RSpec specs under the `spec` directory. Views and JavaScript files are not
+specced. Almost all unit tests use factories rather than mocks, putting them
+somewhat closer to integration tests.
 
+If you are using Docker, first run `docker-compose -f docker-compose.test.yml`
+to build the images. This only has to be done once, and each time you make a
+change to the source code. Run `docker-compose -f docker-compose.test.yml up` to
+start the environment, and
+`docker-compose -f docker-compose.test.yml run tests bin/docker-tests` to
+actuall run tests. Run `docker-compose -f docker-compose.test.yml down` when you
+are done testing to stop the running images.
 
-To-Do Items
------------
-
-### Translation view
-
-* Display meta-indication of special characters, esp. nonprinting ones
-
-### Explosions
-
-* Token object
-* Token explosions (UI)
-* Language metadata
-
-### Large-format translation view
-
-* Git context display
-
-### Finish account administration
-
-* Design and verify Devise account pages
-
-### Importing
-
-* Segmentation for large files
-* `<STYLE>`/`<SCRIPT>` tag content should not be localizable
-
-### Performance optimizations
-
-* Use PSQL trigger-based cached counters
-
-### Misc.
-
-* Second reviewer role: integration review (by commit) (?)
+If you are not using Docker, run unit tests with the `rspec spec` command.

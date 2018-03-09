@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+#
+# Helper commands for running Docker tasks.
+
+def help
+  puts <<~EOS.chomp
+    bin/docker server
+      Runs the Rails server in the development environment
+
+    bin/docker specs
+      Runs specs
+
+    bin/docker reset
+      Deletes Docker volumes (persisted PostgreSQL and ElasticSearch data) from
+      development
+
+    bin/docker rebuild
+      Deletes Docker images (compiled VMs) and volumes (persisted PostgreSQL and
+      ElasticSearch data) from development and test
+  EOS
+end
+
+def specs
+  system 'docker-compose', '-f', 'docker-compose.test.yml', 'down', '-v'
+  system 'docker-compose', '-f', 'docker-compose.test.yml', 'build'
+  system 'docker-compose', '-f', 'docker-compose.test.yml', 'run', 'tests', 'bin/docker-tests'
+end
+
+def server
+  system 'docker-compose', 'down'
+  system 'docker-compose', 'build'
+  system 'docker-compose', 'up'
+end
+
+def reset
+  system 'docker-compose', 'down', '-v'
+  system 'docker-compose', 'run', 'server', 'bin/docker-setup'
+end
+
+def rebuild
+  system 'docker-compose', 'down', '-v', '--rmi', 'local'
+  system 'docker-compose', '-f', 'docker-compose.test.yml', 'down', '-v', '--rmi', 'local'
+end
+
+case ARGV.first
+  when 'specs' then specs
+  when 'server' then server
+  when 'reset' then reset
+  when 'rebuild' then rebuild
+  else help
+end
