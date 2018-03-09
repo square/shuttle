@@ -1,31 +1,17 @@
 FROM ruby:2.3.1
 
-RUN mkdir /app
-WORKDIR /app
+RUN apt-get update -qq
+RUN apt-get install -y build-essential nodejs libarchive-dev libpq-dev \
+    postgresql-client cmake tidy git
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    cmake \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-tools \
-    gstreamer1.0-x  \
-    libarchive-dev \
-    libhttp-parser-dev \
-    libqt5webkit5-dev \
-    libssh2-1-dev \
-    libssl-dev \
-    nodejs \
-    postgresql-client \
-    qt5-default \
-    tidy \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+ENV APP_HOME /app
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
 
-RUN wget https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz
-RUN tar -C /usr/local/bin -xzvf dockerize-linux-amd64-v0.2.0.tar.gz
+ADD Gemfile* $APP_HOME/
+RUN gem update --system
+RUN gem update
+RUN gem clean
+RUN bundle install
 
-COPY Gemfile Gemfile.lock ./
-RUN bundle install --jobs 4 --retry 5
-
-COPY . ./
-
-CMD bundle exec rails server
+ADD . $APP_HOME

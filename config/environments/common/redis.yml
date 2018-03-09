@@ -1,2 +1,4 @@
 ---
+host: <%= ENV['SHUTTLE_REDIS_HOST'] || 'localhost' %>
+port: 6379
 db: 0
