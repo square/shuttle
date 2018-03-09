@@ -60,9 +60,13 @@ RSpec.configure do |config|
 
   # Clear Redis before each test
   config.before :each do
-    keys = Shuttle::Redis.keys('*')
+    # Shuttle keys
+    keys = Shuttle::Redis.keys('shuttle_*')
     Shuttle::Redis.del(*keys) unless keys.empty?
-    RedisMutex.sweep
+
+    # RedisMutex keys
+    keys = Shuttle::Redis.keys('RedisMutex:*')
+    Shuttle::Redis.del(*keys) unless keys.empty?
   end
 
   # Capybara

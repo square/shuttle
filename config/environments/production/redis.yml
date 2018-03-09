@@ -1,2 +1,2 @@
 ---
-url: "redis://shuttle-redis.example.com:PORT"
+host: shuttle-redis.example.com
