@@ -29,12 +29,12 @@ RSpec.describe "SidekiqLockingSpec" do
     it "unlocks the mutex and calls perform_without_locking" do
       args = [{ 1 => 2 }]
       TestWorker.send(:mutex, *args).lock
-      expect(Shuttle::Redis.keys('*')).to eql(["RedisMutex:testworker:[{\"1\":2}]"])
+      expect(Shuttle::Redis.keys('RedisMutex:*')).to eql(["RedisMutex:testworker:[{\"1\":2}]"])
 
       test_worker = TestWorker.new
       expect(test_worker).to receive(:perform_without_locking)
       test_worker.perform_with_locking *args
-      expect(Shuttle::Redis.keys('*')).to eql([])
+      expect(Shuttle::Redis.keys('RedisMutex:*')).to eql([])
     end
   end
 
@@ -57,17 +57,17 @@ RSpec.describe "SidekiqLockingSpec" do
     it "unlocks a previously locked mutex (with simple hash as args)" do
       args = [{ 1 => 2 }]
       expect(TestWorker.send(:mutex, *args).lock).to be_truthy
-      expect(Shuttle::Redis.keys('*')).to eql(["RedisMutex:testworker:[{\"1\":2}]"])
+      expect(Shuttle::Redis.keys('RedisMutex:*')).to eql(["RedisMutex:testworker:[{\"1\":2}]"])
       expect(TestWorker.unlock(*args)).to be_truthy
-      expect(Shuttle::Redis.keys('*')).to eql([])
+      expect(Shuttle::Redis.keys('RedisMutex:*')).to eql([])
     end
 
     it "unlocks a previously locked mutex (with complex args)" do
       args = [1, 'a', { b: 'c', 2 => :d }]
       expect(TestWorker.send(:mutex, *args).lock).to be_truthy
-      expect(Shuttle::Redis.keys('*')).to eql(["RedisMutex:testworker:[1,\"a\",{\"b\":\"c\",\"2\":\"d\"}]"])
+      expect(Shuttle::Redis.keys('RedisMutex:*')).to eql(["RedisMutex:testworker:[1,\"a\",{\"b\":\"c\",\"2\":\"d\"}]"])
       expect(TestWorker.unlock(*args)).to be_truthy
-      expect(Shuttle::Redis.keys('*')).to eql([])
+      expect(Shuttle::Redis.keys('RedisMutex:*')).to eql([])
     end
   end
 
@@ -112,7 +112,7 @@ RSpec.describe "SidekiqLockingSpec" do
         it "will clean up the mutex right before a job starts running for a worker with #{desc}" do
           allow_any_instance_of(TestWorker).to receive(:perform_without_locking) # to prevent the job from running so that we know the mutex is cleared before the contents of the perform action is run
           TestWorker.perform_once(*args)
-          expect(Shuttle::Redis.keys('*')).to eql([])
+          expect(Shuttle::Redis.keys('RedisMutex:*')).to eql([])
         end
       end
     end

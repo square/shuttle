@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-TOUCHDOWN_BRANCH_KEY = 'touchdown_running'
+TOUCHDOWN_BRANCH_KEY = 'shuttle_settings:touchdown_running'
 
 namespace :touchdown do
   desc "Updates touchdown branches"

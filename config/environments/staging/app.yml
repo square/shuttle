@@ -11,14 +11,3 @@ cookies:
 # Devise uses this key to generate random tokens such as confirmation, reset password and unlock tokens
 devise:
   secret_key: THIS.WILL.BE.USED.TO.GENERATE.RANDOM.DEVISE.TOKENS
-
-# Used in setting `config.cache_store` in staging.rb
-cache_store:
-  type: :redis_store
-  endpoint: redis://localhost:6379/0/shuttle_cache
-
-# Used in setting `config.action_dispatch.rack_cache` in staging.rb
-action_dispatch:
-  rack_cache:
-    metastore: redis://localhost:6379/0/shuttle_meta
-    entitystore: redis://localhost:6379/0/shuttle_entity

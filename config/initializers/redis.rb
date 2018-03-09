@@ -12,5 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-Shuttle::Redis   = Redis::Namespace.new(:shuttle_cache, redis: Redis.new(Shuttle::Configuration.redis.symbolize_keys))
+redis_options = Shuttle::Configuration.redis.symbolize_keys
+
+Shuttle::Redis    = Redis.new(redis_options)
 RedisClassy.redis = Shuttle::Redis
+
+Rails.application.config.cache_store = :redis_store, redis_options.merge(namespace: :shuttle_cache)
+Rails.application.config.action_dispatch.rack_cache = {
+    metastore:   URI::Generic.build(redis_options.merge(scheme: 'redis', path: '/shuttle_metastore')).to_s,
+    entitystore: URI::Generic.build(redis_options.merge(scheme: 'redis', path: '/shuttle_entitystore')).to_s
+}

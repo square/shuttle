@@ -604,9 +604,6 @@ de:
       @request.env['devise.mapping'] = Devise.mappings[:user]
       @user = FactoryBot.create(:user, :confirmed, role: 'monitor')
       sign_in @user
-
-      keys = Shuttle::Redis.keys('submitted_revision:*')
-      Shuttle::Redis.del(*keys) unless keys.empty?
     end
 
     it "should strip the commit revision of whitespace" do
