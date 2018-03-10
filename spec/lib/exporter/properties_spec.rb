@@ -81,6 +81,20 @@ dialogue.marta[1]=Te Quiero.
     EOS
   end
 
+  it "should not include untranslated translations when partial=true" do
+    project     = FactoryBot.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
+    key1         = FactoryBot.create(:key, project: project, key: 'test1')
+    key2         = FactoryBot.create(:key, project: project, key: 'test2')
+    commit      = FactoryBot.create(:commit, project: project)
+    commit.keys = [key]
+    FactoryBot.create :translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: key1.source_copy, copy: "translated1"
+
+    Exporter::Properties.new(commit).export(io, Locale.from_rfc5646('fr'))
+    expect(io.string).to eql(<<~EOS)
+      test1=translated1
+    EOS
+  end
+
   describe ".valid?" do
     it "should return true for a syntactically valid properties file" do
       expect(Exporter::Properties.valid?(<<-EOS)).to be_truthy
