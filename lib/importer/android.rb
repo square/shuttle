@@ -103,7 +103,7 @@ module Importer
     private
 
     def strip(string)
-      string.gsub(/\s*\n+\s*/, ' ')
+      string.gsub(/\s*\n+\s*/, ' ').strip
     end
 
     def unescape(string)

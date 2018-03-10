@@ -58,7 +58,7 @@ RSpec.describe Importer::Android do
                                     repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s,
                                     only_paths:     %w(java/),
                                     skip_imports:   Importer::Base.implementations.map(&:ident) - %w(android))
-      @commit  = @project.commit!('5873b2624b3da6ba9f6a0975c898b11ca66ae982')
+      @commit  = @project.commit!('4fe357edecbb3cc556b53e713e56975c4bbc11a7')
     end
 
     it "should import strings from XML files" do
@@ -95,6 +95,10 @@ RSpec.describe Importer::Android do
     it "should add comments as context" do
       k = @project.keys.for_key('/java/basic-hdpi/strings.xml:with_context').first
       expect(k.context).to eql("This is not a date format string. Rather, it is hint text in a field, presented to the merchant.")
+    end
+
+    it "should strip leading and trailing spaces or newlines" do
+      expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:leading_newline').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Hello')
     end
   end
 end
