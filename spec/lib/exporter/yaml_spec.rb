@@ -219,6 +219,23 @@ fr:
   test: Translated
       YAML
     end
+
+  end
+
+  it "should not include untranslated translations when partial=true" do
+    project     = FactoryBot.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
+    key1         = FactoryBot.create(:key, project: project, key: 'test1')
+    key2         = FactoryBot.create(:key, project: project, key: 'test2')
+    commit      = FactoryBot.create(:commit, project: project)
+    commit.keys = [key]
+    FactoryBot.create :translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: key1.source_copy, copy: "translated1"
+
+    Exporter::Yaml.new(commit).export(io, Locale.from_rfc5646('fr'))
+    expect(io.string).to eql(<<~YAML)
+        ---
+        fr:
+          test1: translated1
+    YAML
   end
 
   describe ".valid?" do
