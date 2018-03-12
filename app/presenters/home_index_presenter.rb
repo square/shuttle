@@ -35,7 +35,12 @@ class HomeIndexPresenter
   # @return [String] item's short description.
 
   def short_description(item)
-    truncate(full_description(item), length: 50)
+    full_desc = full_description(item)
+    if full_desc.start_with?("Automatically imported from ")
+      full_desc
+    else
+      truncate(full_desc, length: 50)
+    end
   end
 
   # For a Commit, this will be the author info, for an Article, it will be blank for now.
