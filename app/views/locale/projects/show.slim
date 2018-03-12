@@ -80,7 +80,7 @@ div
           = check_box_tag 'include_new', '1', @presenter.include_new?
           label for="include_new" New
   .pagination-links
-    = paginate @translations
+    = paginate @translations, params: {commit: params[:commit]}
   .translation-workbench.border
 
 .row
