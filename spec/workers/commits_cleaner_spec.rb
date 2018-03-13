@@ -29,6 +29,7 @@ RSpec.describe CommitsCleaner do
 
     it "should destory all commits" do
       create_commits(@project, 3)
+      regenerate_elastic_search_indexes
 
       expect(@project.commits.count).to eq(3)
       @commits_cleaner.destroy_dangling_commits
@@ -47,6 +48,7 @@ RSpec.describe CommitsCleaner do
   describe "#destroy_old_commits_which_errored_during_import" do
     it "should destroy all errored commits older than 2 days during import" do
       create_commits(@project, 3, created_at: Time.current - 3.days).each { |commit| commit.add_import_error(StandardError.new("This is a fake error"))}
+      regenerate_elastic_search_indexes
 
       expect(@project.commits.count).to eq(3)
       @commits_cleaner.destroy_old_commits_which_errored_during_import
@@ -66,6 +68,7 @@ RSpec.describe CommitsCleaner do
     it "should destory old commits exceeding 100" do
       create_commits(@project, 100, ready: true)
       create_commits(@project, 100, ready: true, created_at: Time.current - 3.days)
+      regenerate_elastic_search_indexes
 
       expect(@project.commits.count).to eq(200)
       @commits_cleaner.destroy_old_excess_commits_per_project

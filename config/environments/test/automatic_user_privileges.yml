@@ -1,0 +1,3 @@
+---
+domains_to_get_monitor_role_after_email_confirmation: ['example.com']
+domains_who_can_search_users: ['example.com']

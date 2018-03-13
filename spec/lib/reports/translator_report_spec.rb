@@ -127,7 +127,7 @@ RSpec.describe Reports::TranslatorReport do
           exclude_internal = true
 
           project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
-          reviewer = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(it fr), first_name: 'Chase', email: 'chase@example.com')
+          reviewer = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(it fr), first_name: 'Chase', email: 'chase@test.host')
           translator = FactoryBot.create(:user, :translator, approved_rfc5646_locales: %w(it fr), first_name: 'Rebecca')
 
           key1 = FactoryBot.create(:key, project: project)

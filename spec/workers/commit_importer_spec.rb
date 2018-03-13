@@ -22,6 +22,7 @@ RSpec.describe CommitImporter do
           allow_any_instance_of(Project).to receive(:find_or_fetch_git_object).and_return(nil)
           project = FactoryBot.create(:project)
           commit  = FactoryBot.create(:commit, revision: "abc123", project: project)
+          regenerate_elastic_search_indexes
 
           CommitImporter.new.perform commit.id
           expect { commit.reload }.to raise_error(ActiveRecord::RecordNotFound)
