@@ -29,7 +29,7 @@ class CommitsController < ApplicationController
   before_filter :set_commit_issues_presenter, only: [:show, :issues, :tools, :gallery, :search]
 
   respond_to :html, :json, only: [:show, :tools, :gallery, :search, :create, :update, :destroy, :issues,
-                                  :sync, :match, :clear, :recalculate, :ping_stash]
+                                  :sync, :match, :clear, :recalculate, :ping_stash, :reindex]
 
   # Renders JSON information about a Commit and its translation progress.
   #
@@ -296,6 +296,12 @@ class CommitsController < ApplicationController
   def ping_stash
     StashWebhookPinger.new.perform(@commit.id)
     flash[:success] = t('controllers.commits.stash.success', sha: @commit.revision_prefix)
+    respond_with @commit, location: project_commit_url(@project, @commit)
+  end
+
+  def reindex
+    Translation.batch_refresh_elastic_search @commit
+    flash[:success] = t('controllers.commits.reindex.success')
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
 
