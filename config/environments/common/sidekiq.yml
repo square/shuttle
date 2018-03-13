@@ -1,3 +1,4 @@
 ---
 server_pool_size: 25
 client_pool_size: 5
+namespace: shuttle_sidekiq
