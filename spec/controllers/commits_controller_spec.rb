@@ -717,4 +717,8 @@ de:
   describe "#ping_stash" do
     it_behaves_like "returns error string if repository_url is blank", :ping_stash
   end
+
+  describe "#reindex" do
+    it_behaves_like "returns error string if repository_url is blank", :reindex
+  end
 end

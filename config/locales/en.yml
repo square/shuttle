@@ -171,6 +171,8 @@ en:
         deleted: Commit %{sha} has been removed.
       stash:
         success: Stash has been successfully pinged for commit %{sha}.
+      reindex:
+        success: The ElasticSearch indexes have been regenerated.
     locale:
       projects:
         locale_access_required: You don't have permission to access that locale.

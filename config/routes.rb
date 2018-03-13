@@ -52,7 +52,7 @@ Rails.application.routes.draw do
   resources :projects do
     resources :commits, only: [:show, :create, :update, :destroy] do
       member do
-        post :sync, :recalculate, :ping_stash
+        post :sync, :recalculate, :ping_stash, :reindex
         get :manifest, :localize, :search, :tools, :gallery, :issues
       end
 

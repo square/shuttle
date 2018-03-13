@@ -30,6 +30,12 @@
 
       .control-group.wide-label
         label
+          | Re-generate ElasticSearch entries
+        .controls
+          button.primary href=reindex_project_commit_path(@project, @commit) data-method='POST' Re-Index ElasticSearch
+
+      .control-group.wide-label
+        label
           | Ping stash to update build status
         .controls
           button.primary href=ping_stash_project_commit_path(@project, @commit) data-method='POST' Ping Stash
