@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 require 'rails_helper'
+require 'open3'
 
 RSpec.describe TouchdownBranchUpdater do
   def commit_and_translate(project, revision)
@@ -24,11 +25,11 @@ RSpec.describe TouchdownBranchUpdater do
     expect(c).to be_ready
   end
 
-  let(:project) do
-    project = FactoryBot.create(:project, :light)
-    system 'git', 'push', project.repository_url, ':refs/heads/translated'
-    project.update! touchdown_branch: 'translated'
-    project
+  let(:project) { FactoryBot.create(:project, :light, touchdown_branch: 'translated') }
+
+  after :each do
+    system({'GIT_DIR' => project.repository_url},
+           'git', 'push', project.repository_url, ':refs/heads/translated')
   end
 
   let(:head_revision) { 'fb355bb396eb3cf66e833605c835009d77054b71' }
@@ -53,9 +54,11 @@ RSpec.describe TouchdownBranchUpdater do
     context "invalid touchdown branch" do
       it "returns immediately if missing watched_branches and touchdown_branch" do
         project.update! watched_branches: [], touchdown_branch: nil
-        TouchdownBranchUpdater.new(project).update
-        expect(`git --git-dir=#{Shellwords.escape project.repository_url} rev-parse translated`.chomp).
-          to eql('translated')
+        parsed = nil
+        Open3.popen2({'GIT_DIR' => project.repository_url}, 'git', '--bare', 'rev-parse', 'translated') do |_stdin, stdout, _thread|
+          parsed = stdout.gets.chomp
+        end
+        expect(parsed).to eql('translated')
       end
     end
 
@@ -73,8 +76,11 @@ RSpec.describe TouchdownBranchUpdater do
         commit_and_translate(project, head_revision)
 
         TouchdownBranchUpdater.new(project).update
-        expect(`git --git-dir=#{Shellwords.escape project.repository_url} rev-parse translated`.chomp).
-          to eql(head_revision)
+        parsed = nil
+        Open3.popen2({'GIT_DIR' => project.repository_url}, 'git', '--bare', 'rev-parse', 'translated') do |_stdin, stdout, _thread|
+          parsed = stdout.gets.chomp
+        end
+        expect(parsed).to eql(head_revision)
       end
 
       it "does nothing if the head of the watched branch is not translated" do
@@ -85,8 +91,11 @@ RSpec.describe TouchdownBranchUpdater do
         expect(head_commit.reload).to_not be_ready
 
         TouchdownBranchUpdater.new(project).update
-        expect(`git --git-dir=#{Shellwords.escape project.repository_url} rev-parse translated`.chomp).
-          to eql('translated')
+        parsed = nil
+        Open3.popen2({'GIT_DIR' => project.repository_url}, 'git', '--bare', 'rev-parse', 'translated') do |_stdin, stdout, _thread|
+          parsed = stdout.gets.chomp
+        end
+        expect(parsed).to eql('translated')
       end
 
       it "does nothing if the head of the watched branch has not changed" do
@@ -134,8 +143,11 @@ RSpec.describe TouchdownBranchUpdater do
 
         it "pushes a new commit with the manifest to the specified manifest directory" do
           TouchdownBranchUpdater.new(project).update
-          expect(`git --git-dir=#{Shellwords.escape project.repository_url} rev-parse translated`.chomp).
-            to_not eql(head_revision)
+          parsed = nil
+          Open3.popen2({'GIT_DIR' => project.repository_url}, 'git', '--bare', 'rev-parse', 'translated') do |_stdin, stdout, _thread|
+            parsed = stdout.gets.chomp
+          end
+          expect(parsed).to_not eql(head_revision)
         end
 
         it "pushes a new commit with the correct author" do

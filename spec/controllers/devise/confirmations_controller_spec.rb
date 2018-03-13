@@ -17,10 +17,6 @@ require 'rails_helper'
 RSpec.describe Devise::ConfirmationsController do
   before :each do
     @request.env["devise.mapping"] = Devise.mappings[:user]
-
-    app_config = Shuttle::Configuration.automatic_user_privileges
-    allow(Shuttle::Configuration).to receive(:automatic_user_privileges).
-        and_return(app_config.merge(domains_to_get_monitor_role_after_email_confirmation: ['example.com']))
   end
 
   it "gives monitor permission to user after confirmation if their email address domain is a priviliged one" do

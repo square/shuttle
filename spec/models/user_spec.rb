@@ -15,13 +15,6 @@
 require 'rails_helper'
 
 RSpec.describe User do
-  before :each do
-    app_config = Shuttle::Configuration.automatic_user_privileges
-    allow(Shuttle::Configuration).to receive(:automatic_user_privileges).
-        and_return(app_config.merge(domains_to_get_monitor_role_after_email_confirmation: ['example.com'],
-                                    domains_who_can_search_users:                         ['example.com']))
-  end
-
   let(:role) { nil }
   let :user do
     FactoryBot.create(:user, role: role).tap do |user|
@@ -106,12 +99,16 @@ RSpec.describe User do
       expect(user.role).to be_nil
     end
 
-    it "doesn't change user's role if priviliged domains are blank" do
-      allow(Shuttle::Configuration).to receive(:app).and_return({ })
+    it "doesn't change user's role if privileged domains are blank" do
+      old_domains = Shuttle::Configuration.automatic_user_privileges.domains_to_get_monitor_role_after_email_confirmation
+      Shuttle::Configuration.automatic_user_privileges[:domains_to_get_monitor_role_after_email_confirmation] = []
+
       user = FactoryBot.create(:user, role: nil, email: "test@example.com")
       expect(user.role).to be_nil
       user.after_confirmation
       expect(user.role).to be_nil
+
+      Shuttle::Configuration.automatic_user_privileges[:domains_to_get_monitor_role_after_email_confirmation] = old_domains
     end
   end
 

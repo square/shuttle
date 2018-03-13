@@ -86,9 +86,10 @@ dialogue.marta[1]=Te Quiero.
     key1         = FactoryBot.create(:key, project: project, key: 'test1')
     key2         = FactoryBot.create(:key, project: project, key: 'test2')
     commit      = FactoryBot.create(:commit, project: project)
-    commit.keys = [key]
+    commit.keys = [key1, key2]
     FactoryBot.create :translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: key1.source_copy, copy: "translated1"
 
+    io = StringIO.new
     Exporter::Properties.new(commit).export(io, Locale.from_rfc5646('fr'))
     expect(io.string).to eql(<<~EOS)
       test1=translated1

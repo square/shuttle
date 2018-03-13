@@ -118,12 +118,14 @@ def reset_elastic_search
     next unless model.respond_to?(:__elasticsearch__)
     model.__elasticsearch__.create_index! force: true
     model.import(force: true)
+    model.__elasticsearch__.client.indices.flush(index: model.__elasticsearch__.index_name, force: true)
   end
 end
 
 def regenerate_elastic_search_indexes
   ActiveRecord::Base.subclasses.each do |model|
     next unless model.respond_to?(:__elasticsearch__)
-    model.import(force: true, refresh: true)
+    model.import(refresh: true)
+    model.__elasticsearch__.client.indices.flush(index: model.__elasticsearch__.index_name, force: true)
   end
 end

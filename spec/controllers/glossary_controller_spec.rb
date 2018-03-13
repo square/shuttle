@@ -70,7 +70,7 @@ RSpec.describe GlossaryController do
 
     it 'should switch to multiple non-default locales' do
       get :index, target_locales: 'cn,fr'
-      expect(assigns(:target_locales).map(&:rfc5646)).to eq(['cn', 'fr'])
+      expect(assigns(:target_locales).map(&:rfc5646)).to match_array(%w[cn fr])
     end
 
     it 'it should generate an anchor list of length 27' do
