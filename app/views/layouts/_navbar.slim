@@ -39,7 +39,7 @@ nav.navbar.navbar-dark
             = nav_dropdown_link "Project Translation Report", "stats", "project_translation_report", stats_project_translation_report_url
             = nav_dropdown_link "Incoming New Words Report", "stats", "incoming_new_words_report", stats_incoming_new_words_report_url
             = nav_dropdown_link "Translator Report", "stats", "translator_report", stats_translator_report_url
-            = nav_dropdown_link "Backlog Report", "stats", "backlog_report", stats_backlog_report_url
+            /= nav_dropdown_link "Backlog Report", "stats", "backlog_report", stats_backlog_report_url
 
         - if current_user.admin?
           = nav_link "Users", "users", users_path
