@@ -14,7 +14,7 @@
 
 class CommitsCleaner
   include Sidekiq::Worker
-  sidekiq_options queue: :high, retry: 5
+  sidekiq_options queue: :low, retry: 5
 
   def perform
     log("Cleaning old commits for #{Date.today}")
