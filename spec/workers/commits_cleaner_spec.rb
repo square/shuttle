@@ -28,7 +28,7 @@ RSpec.describe CommitsCleaner do
     end
 
     it "should destory all commits" do
-      create_commits(@project, 3)
+      FactoryBot.create_list :commit, 3, project: @project
       regenerate_elastic_search_indexes
 
       expect(@project.commits.count).to eq(3)
@@ -37,7 +37,7 @@ RSpec.describe CommitsCleaner do
     end
 
     it "should not destory any ready commits" do
-      create_commits(@project, 3, ready: true)
+      FactoryBot.create_list :commit, 3, project: @project, ready: true
 
       expect(@project.commits.count).to eq(3)
       @commits_cleaner.destroy_dangling_commits
@@ -47,7 +47,8 @@ RSpec.describe CommitsCleaner do
 
   describe "#destroy_old_commits_which_errored_during_import" do
     it "should destroy all errored commits older than 2 days during import" do
-      create_commits(@project, 3, created_at: Time.current - 3.days).each { |commit| commit.add_import_error(StandardError.new("This is a fake error"))}
+      FactoryBot.create_list(:commit, 3, project: @project, created_at: 3.days.ago).
+          each { |c| c.add_import_error StandardError.new("This is a fake error") }
       regenerate_elastic_search_indexes
 
       expect(@project.commits.count).to eq(3)
@@ -56,7 +57,8 @@ RSpec.describe CommitsCleaner do
     end
 
     it "should not destroy errored commits imported in last 2 days" do
-      create_commits(@project, 3).each { |commit| commit.add_import_error(StandardError.new("This is a fake error"))}
+      FactoryBot.create_list(:commit, 3, project: @project).
+          each { |c| c.add_import_error StandardError.new("This is a fake error") }
 
       expect(@project.commits.count).to eq(3)
       @commits_cleaner.destroy_old_commits_which_errored_during_import
@@ -66,8 +68,8 @@ RSpec.describe CommitsCleaner do
 
   describe "destroy_old_excess_commits_per_project" do
     it "should destory old commits exceeding 100" do
-      create_commits(@project, 100, ready: true)
-      create_commits(@project, 100, ready: true, created_at: Time.current - 3.days)
+      FactoryBot.create_list :commit, 100, project: @project, ready: true
+      FactoryBot.create_list :commit, 100, project: @project, ready: true, created_at: 3.days.ago
       regenerate_elastic_search_indexes
 
       expect(@project.commits.count).to eq(200)
@@ -75,11 +77,5 @@ RSpec.describe CommitsCleaner do
       expect(@project.commits.count).to eq(100)
       expect(@project.commits.first.created_at).to be > Time.current - 2.days
     end
-  end
-
-  private
-
-  def create_commits(project, num=1, data={})
-    num.times.map { |i| FactoryBot.create(:commit, project: project, **data) }
   end
 end

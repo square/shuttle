@@ -666,6 +666,7 @@ de:
       @request.env['devise.mapping'] = Devise.mappings[:user]
       @user = FactoryBot.create(:user, :confirmed, role: 'admin')
       sign_in @user
+      regenerate_elastic_search_indexes
     end
 
     it "should require a monitor" do
