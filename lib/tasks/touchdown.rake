@@ -26,7 +26,7 @@ namespace :touchdown do
       exit
     end
 
-    Shuttle::Redis.setex TOUCHDOWN_BRANCH_KEY, 10.minutes, '1'
+    Shuttle::Redis.setex TOUCHDOWN_BRANCH_KEY, 1.hour, '1'
     Rails.logger.info "[touchdown:update] Successfully obtained lock.  Updating touchdown branch."
 
     Project.git.each do |project|
