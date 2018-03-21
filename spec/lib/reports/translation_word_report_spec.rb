@@ -36,16 +36,15 @@ RSpec.describe Reports::TranslationWordReport do
         @start_date = Date.today
         @end_date = @start_date.next_month
         @translation_date = @start_date.next_day
-        @match_percentage = 78
 
         project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
         key1 = FactoryBot.create(:key, project: project)
         key2 = FactoryBot.create(:key, project: project)
         key3 = FactoryBot.create(:key, project: project)
 
-        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', translation_date: @translation_date, tm_match: @match_percentage)
-        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', translation_date: @translation_date, tm_match: @match_percentage)
-        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', translation_date: @translation_date, tm_match: @match_percentage)
+        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', source_copy: 'foo bar', translation_date: @translation_date, tm_match: 70)
+        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', source_copy: 'foo bar', translation_date: @translation_date, tm_match: 60)
+        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', source_copy: 'foo bar', translation_date: @translation_date, tm_match: 80)
 
         csv = Reports::TranslationWordReport.generate_csv(@start_date, @end_date)
         @result = CSV.parse(csv)
@@ -66,10 +65,15 @@ RSpec.describe Reports::TranslationWordReport do
 
       it 'has the expected data for the timeframe' do
         expected_results = [
-          [@translation_date.strftime("%Y-%m-%d"), '1', 'FR', '0', '0', '1', '0', '0', '0'],
-          [@translation_date.strftime("%Y-%m-%d"), '2', 'IT', '0', '0', '2', '0', '0', '0']
+          [@translation_date.strftime("%Y-%m-%d"), '2', 'FR', '0', '0', '2', '0', '0', '0'],
+          [@translation_date.strftime("%Y-%m-%d"), '4', 'IT', '0', '2', '0', '2', '0', '0']
         ]
         expect(@result[6..7]).to eql expected_results
+      end
+
+      it 'does not duplicate rows' do
+        expected_results = nil
+        expect(@result[8]).to eql expected_results
       end
     end
 
