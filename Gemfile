@@ -103,7 +103,7 @@ group :test do
   gem 'rspec-rails'
   gem 'factory_bot_rails'
   gem 'timecop'
-  gem 'pry-nav'
+  gem 'pry-byebug'
   gem 'database_cleaner'
   gem 'capybara'
 end
