@@ -239,6 +239,36 @@ fr:
     YAML
   end
 
+  it "should not de-dupe in an array" do
+    project = FactoryBot.create(:project, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' => true })
+    key1 = FactoryBot.create(:key, project: project, key: "test.hint[0]")
+    key2 = FactoryBot.create(:key, project: project, key: "test.hint[1]")
+    commit = FactoryBot.create(:commit, project: project)
+    commit.keys = [key1, key2]
+    FactoryBot.create :translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: key1.source_copy, copy: "fr Translated", approved: true
+    FactoryBot.create :translation, key: key1, source_rfc5646_locale: 'en', rfc5646_locale: 'fr-CA', source_copy: key1.source_copy, copy: "fr Translated", approved: true
+    FactoryBot.create :translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'fr', source_copy: key2.source_copy, copy: "fr Translated", approved: true
+    FactoryBot.create :translation, key: key2, source_rfc5646_locale: 'en', rfc5646_locale: 'fr-CA', source_copy: key2.source_copy, copy: "fr-CA Translated", approved: true
+
+    fr = Locale.from_rfc5646('fr')
+    frCA = Locale.from_rfc5646('fr-CA')
+    io = StringIO.new
+    Exporter::Yaml.new(commit).export(io, fr, frCA)
+    expect(io.string).to eql(<<-YAML)
+---
+fr:
+  test:
+    hint:
+    - fr Translated
+    - fr Translated
+fr-CA:
+  test:
+    hint:
+    - fr Translated
+    - fr-CA Translated
+   YAML
+  end
+
   describe ".valid?" do
     it "should return true for a syntactically valid YAML hash" do
       expect(Exporter::Yaml.valid?(<<-YAML)).to be_truthy
