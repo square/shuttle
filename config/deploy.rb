@@ -13,22 +13,25 @@
 #    limitations under the License.
 
 set :application, 'shuttle'
-set :repo_url, YAML.load(ERB.new(IO.read(File.join(File.dirname(__FILE__), 'environments', 'common', 'app.yml'))).result)["repo_url"]
 
-set :branch, 'deployable'
+set :repo_url, 'https://github.com/Square/shuttle.git'
+ask(:branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp })
 
-set :deploy_to, "/app/#{fetch :application}"
+set :deploy_to, "/var/www/#{fetch :application}"
 
-set :linked_files, fetch(:linked_files, []).push('config/database.yml',
-                                                 'config/environments/common/credentials.yml')
-
-set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle tmp/repos tmp/working_repos}
+append :linked_files,
+       'config/database.yml',
+       'config/secrets.yml'
+append :linked_dirs,
+       'log',
+       'tmp/pids', 'tmp/cache', 'tmp/sockets',
+       'tmp/repos', 'tmp/working_repos',
+       'vendor/bundle'
 
 set :rvm_type, :system
 set :rvm_ruby_version, "2.3.1@#{fetch :application}"
 
 set :whenever_roles, [:app, :primary_cron]
-set :sidekiq_role, [] # make the default cap sidekiq:* commands no-ops, instead, rely on 'sv' commands as below
 
 namespace :deploy do
   desc 'Restart application'
@@ -37,16 +40,4 @@ namespace :deploy do
       execute :touch, release_path.join('tmp/restart.txt')
     end
   end
-
-  namespace :sidekiq do
-    task :restart do
-      on roles(:sidekiq) do
-        sudo "sv term sidekiq"
-      end
-    end
-  end
-
-  after :finishing, 'deploy:cleanup'
-  after :finishing, 'deploy:restart'
-  after :finishing, 'deploy:sidekiq:restart'
 end
