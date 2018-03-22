@@ -20,8 +20,7 @@ module Sidekiq::Util
 end
 
 configure_sidekiq = -> do
-  size  = Sidekiq.server? ? Shuttle::Configuration.sidekiq.server_pool_size : Shuttle::Configuration.sidekiq.client_pool_size
-  redis = ConnectionPool.new(size: size) { Redis::Namespace.new(:shuttle_sidekiq, redis: Shuttle::Redis) }
+  redis = Shuttle::Configuration.redis.symbolize_keys.merge(namespace: :shuttle_sidekiq)
 
   Sidekiq.configure_client do |config|
     config.redis = redis
