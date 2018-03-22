@@ -32,23 +32,23 @@ RSpec.describe Reports::ProjectTranslationReport do
     end
 
     describe 'CSV Data' do
-      before :context do
+      before do
         @start_date = Date.today
         @end_date = @start_date.next_month
-        translation_date = @start_date.next_day
+        @translation_date = @start_date.next_day
+        @expected_results = ['Foo', '3', '1', '2']
 
         project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
         key1 = FactoryBot.create(:key, project: project)
         key2 = FactoryBot.create(:key, project: project)
         key3 = FactoryBot.create(:key, project: project)
 
-        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', translation_date: translation_date)
-        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', translation_date: translation_date)
-        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', translation_date: translation_date)
-
-        csv = Reports::ProjectTranslationReport.generate_csv(@start_date, @end_date)
-        @result = CSV.parse(csv)
+        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', translation_date: @translation_date)
+        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', translation_date: @translation_date)
+        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', translation_date: @translation_date)
       end
+
+      let(:report) { CSV.parse(Reports::ProjectTranslationReport.generate_csv(@start_date, @end_date)) }
 
       it 'has the expected start and end date' do
         expected_results = [
@@ -56,21 +56,25 @@ RSpec.describe Reports::ProjectTranslationReport do
           ["End Date", @end_date.strftime("%Y-%m-%d"), "", ""]
         ]
 
-        expect(@result[0..1]).to eql expected_results
+        expect(report[0..1]).to eql expected_results
       end
 
       it 'has the row headers' do
         expected_results = ["Project", "source", "fr", "it"]
 
-        expect(@result[3]).to eql expected_results
+        expect(report[3]).to eql expected_results
       end
 
       it 'has the expected data for the timeframe' do
-        expected_results = ['Foo', '3', '1', '2']
+        expect(report[4]).to eql @expected_results
+      end
 
-        expect(@result[4]).to eql expected_results
+      it 'retrieves a day worth of data if you specify the same date for start and end' do
+        csv = Reports::ProjectTranslationReport.generate_csv(@translation_date, @translation_date)
+        result = CSV.parse(csv)
+
+        expect(result[4]).to eql @expected_results
       end
     end
-
   end
 end

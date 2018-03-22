@@ -23,7 +23,7 @@ module Reports
       raise ArgumentError, 'end_date cannot be earlier than the start date' if end_date < start_date
 
       CSV.generate do |csv|
-        translations  = Translation.where(translation_date: start_date..end_date)
+        translations  = Translation.where(translation_date: start_date.beginning_of_day..end_date.end_of_day)
                                    .joins(key: :project)
                                    .group(['projects.name','translations.rfc5646_locale'])
                                    .count
