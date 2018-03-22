@@ -26,7 +26,7 @@ module Reports
         translations  = Translation.where(translation_date: start_date.beginning_of_day..end_date.end_of_day)
                                    .joins(key: :project)
                                    .group(['projects.name','translations.rfc5646_locale'])
-                                   .count
+                                   .sum(:words_count)
         languages = translations.keys.map {|k| k[1]}.uniq.sort
         empty_cols = Array.new(languages.count, '')
 

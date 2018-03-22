@@ -36,16 +36,16 @@ RSpec.describe Reports::ProjectTranslationReport do
         @start_date = Date.today
         @end_date = @start_date.next_month
         @translation_date = @start_date.next_day
-        @expected_results = ['Foo', '3', '1', '2']
+        @expected_results = ['Foo', '6', '2', '4']
 
         project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
         key1 = FactoryBot.create(:key, project: project)
         key2 = FactoryBot.create(:key, project: project)
         key3 = FactoryBot.create(:key, project: project)
 
-        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', translation_date: @translation_date)
-        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', translation_date: @translation_date)
-        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', translation_date: @translation_date)
+        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', source_copy: 'foo bar', translation_date: @translation_date, tm_match: @match_percentage)
+        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', source_copy: 'foo bar', translation_date: @translation_date, tm_match: @match_percentage)
+        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', source_copy: 'foo bar', translation_date: @translation_date, tm_match: @match_percentage)
       end
 
       let(:report) { CSV.parse(Reports::ProjectTranslationReport.generate_csv(@start_date, @end_date)) }
