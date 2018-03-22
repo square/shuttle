@@ -111,6 +111,9 @@ RSpec.configure do |config|
       Project::WORKING_REPOS_DIRECTORY.children.reject { |e| e.basename.to_s.start_with?('.') }.each(&:rmtree)
     end
   end
+
+  # ElasticSearch
+  config.before(:suite) { reset_elastic_search }
 end
 
 def reset_elastic_search
