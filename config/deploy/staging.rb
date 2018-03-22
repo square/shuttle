@@ -1,15 +1,14 @@
 set :stage, :staging
 set :rails_env, :staging
 
-single_server = "user@shuttle-staging.example.com"
+STAGING_BOXES = %w[user@shuttle-staging.example.com]
 
-role :app,          [single_server]
-role :web,          [single_server]
-role :db,           [single_server]
-role :sidekiq,      [single_server]
-role :primary_cron, [single_server]
+role :app, STAGING_BOXES
+role :web, STAGING_BOXES
+role :db, STAGING_BOXES.first
+role :sidekiq, STAGING_BOXES
+role :primary_cron, STAGING_BOXES.first
 
-ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }
-
-set :linked_files, fetch(:linked_files, []).push('config/environments/staging/app.yml',
-                                                 'config/environments/staging/paperclip.yml')
+append :linked_files,
+       'config/environments/staging/credentials.yml',
+       'config/environments/staging/paperclip.yml'
