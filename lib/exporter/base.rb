@@ -155,7 +155,7 @@ module Exporter
           # SHUTTLE-694
           # Don't de-dupe arrays, they require the same number of results even if there are duplicates.
           # This does not enable fallback.
-          possible_duplicates[dup.key.key] << dup.copy unless dup.key.key =~ /\]$/
+          possible_duplicates[dup.key.key] << dup.copy unless dup.key.key =~ /\[\d+\]$/
         end
       end
 
