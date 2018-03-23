@@ -103,6 +103,8 @@ $(window).ready () ->
   commits_filter_form.find('input#commits_filter__show_only_mine').change ->
     $.cookie 'home_index__commits_filter__show_only_mine', $(this).is(':checked')
 
+  commits_filter_form.find('input#commits_filter__hide_duplicates').change ->
+    $.cookie 'home_index__commits_filter__hide_duplicates', $(this).is(':checked')
 
   # ARTICLE SPECIFIC
 
