@@ -23,7 +23,7 @@ module Reports
       raise ArgumentError, 'end_date cannot be earlier than the start date' if end_date < start_date
 
       CSV.generate do |csv|
-        locales = locales = Project.pluck(:targeted_rfc5646_locales, :base_rfc5646_locale).map { |hash, base| hash.keys - [base]}.flatten.map!(&:downcase).uniq.sort
+        locales = Project.pluck(:targeted_rfc5646_locales, :base_rfc5646_locale).map { |hash, base| hash.keys - [base]}.flatten.map(&:downcase).uniq.sort
         translation_query = Translation
                               .where(translation_date: start_date.beginning_of_day..end_date.end_of_day)
                               .where('tm_match IS NOT NULL')
