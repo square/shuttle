@@ -58,17 +58,22 @@ module Reports
 
     def self.retrieve_translations(start_date, end_date, exclude_duplicates = true)
       translations = Translation.where('rfc5646_locale != source_rfc5646_locale')
-                                .where('translations.created_at <= ?', end_date)
+                                .where('created_at <= ?', end_date)
                                 .where('(translation_date >= ? OR translation_date is null)', start_date)
                                 .where('(tm_match < 70.0 OR tm_match is null)')
-                                .group('DATE(translations.created_at), DATE(translations.translation_date), rfc5646_locale')
+                                .group('DATE(created_at), DATE(translation_date), rfc5646_locale')
 
       if exclude_duplicates
-        duplicates = Translation.joins(commits_keys: :commit).where('commits.duplicate = true')
-        translations = translations.where.not(id: duplicates)
+        translations = translations.where('NOT EXISTS(
+            SELECT 1
+            FROM translations AS t
+            INNER JOIN commits_keys AS ck ON ck.key_id = t.key_id
+            INNER JOIN commits AS c ON c.id = ck.commit_id
+            WHERE (c.duplicate = TRUE AND t.id = translations.id)
+          )')
       end
 
-      translations.select('DATE(translations.created_at) as created_at', 'DATE(translation_date) as translation_date', :rfc5646_locale, 'SUM(words_count) as words')
+      translations.select('DATE(created_at) as created_at', 'DATE(translation_date) as translation_date', :rfc5646_locale, 'SUM(words_count) as words')
     end
 
     private_class_method :retrieve_translations
