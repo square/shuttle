@@ -35,54 +35,79 @@ module Reports
                       review_date:      start_date.beginning_of_day..end_date.end_of_day)
 
         translator_query = Translation.where(date_query.where_values.inject(:or))
-                                      .includes(:reviewer, :translator, key: :project)
-
+                                      .where('tm_match IS NOT NULL')
+                                      .where(rfc5646_locale: languages)
+                                      .joins(key: :project)
+                                      .joins('LEFT OUTER JOIN "users" as u ON u.id = translator_id')
+                                      .joins('LEFT OUTER JOIN "users" as u2 ON u2.id = reviewer_id')
+                                      .select('RANK() OVER (
+                                         ORDER BY DATE(translation_date), rfc5646_locale, name, u.first_name
+                                      ) AS group_id,
+                                      DATE(translation_date) as translation_date,
+                                      DATE(review_date) as review_date,
+                                      rfc5646_locale,
+                                      projects.name,
+                                      u.first_name as translator_name,
+                                      u2.first_name as reviewer_name,
+                                      u.email as translator_email,
+                                      u2.email as reviewer_email,
+                                      CASE
+                                        WHEN tm_match < 60 THEN 59
+                                        WHEN tm_match >= 60 AND tm_match < 70 THEN 60
+                                        WHEN tm_match >= 70 AND tm_match < 80 THEN 70
+                                        WHEN tm_match >= 80 AND tm_match < 90 THEN 80
+                                        WHEN tm_match >= 90 AND tm_match < 100 THEN 90
+                                        WHEN tm_match = 100 THEN 100
+                                      END AS classification,
+                                      SUM(words_count) as words_count')
+                                      .group('DATE(translation_date), rfc5646_locale, DATE(review_date), name, u.first_name, u2.first_name, u.email, u2.email, classification')
+                                      .order('group_id', :rfc5646_locale, 'projects.name', 'u.first_name')
         csv << ['Start Date', start_date] + empty_cols
         csv << ['End Date', end_date] + empty_cols
         csv << ['Language(s)', "#{languages.sort.join(", ").upcase}"] + empty_cols
         csv << ['', ''] + empty_cols
         csv << ['Translator Report', ''] + empty_cols
-        csv << ['Date', 'Translator', 'Language', 'Project Name', 'Reviewed', 'Words Translated', 'New Words (0-69%)', '70-79', '80-89', '90-99', '100%']
+        csv << ['Date', 'Translator', 'Language', 'Project Name', 'Reviewed', 'Words Translated', 'New Words (0-59%)', '60-69', '70-79', '80-89', '90-99', '100%']
 
-        dates = translator_query.map {|t| (t.translation_date || t.review_date).to_date }.uniq.sort
+        grid = PivotTable::Grid.new do |g|
+          g.source_data  = translator_query
+          g.column_name  = 'classification'
+          g.row_name     = 'group_id'
+          g.value_name   = 'words_count'
+        end
 
-        dates.each do |date|
-          # retrieve the translations/reviews for the given date
-          date_translations = translator_query.select{|t| t.translation_date&.to_date == date || t.review_date&.to_date == date }
+        grid.build
 
-          projects = date_translations.map{|t| t.key.project}.uniq.sort
-          projects.each do |project|
-            project_translations = date_translations.select{|t| t.key.project == project}
+        grid.rows.each do |row|
+          tran = row.data.find{|x| !x.nil?}
+          users = ([{name: tran.translator_name, email: tran.translator_email}] + [{name: tran.reviewer_name, email: tran.reviewer_email}]).reject { |h| h[:email].nil? }.uniq.sort_by{ |h| h[:name] }
 
-            languages = project_translations.map(&:rfc5646_locale).uniq.sort
-            languages.each do |language|
-              # for each date, get the users who have made modifications to the translations, note the user may be nil here, thus the use of compact
-              users = project_translations.flat_map{|t| [t.reviewer, t.translator]}.uniq.compact.sort
+          if exclude_internal
+            internal_domains = Shuttle::Configuration.reports.internal_domains
+            users.reject!{|u| u[:email].end_with?(*internal_domains)}
+          end
 
-              if exclude_internal
-                internal_domains = Shuttle::Configuration.reports.internal_domains
-                users.reject!{|u| u.email.end_with?(*internal_domains)}
-              end
-              users.each do |user|
-                language_translations = project_translations.select{|t| t.rfc5646_locale == language}
+          users.each do |user|
+            date = (tran.translation_date || tran.review_date)
 
-                reviewed_words = language_translations.select{|t| t.reviewer == user}.sum(&:words_count)
-                translated_words = language_translations.select{|t| t.translator == user}.sum(&:words_count)
+            date_translations = translator_query.select{|t| t.translation_date == date || t.review_date == date }
+            language_translations = date_translations.select{|t| t.rfc5646_locale == tran.rfc5646_locale }
+            reviewed_words = language_translations.select{|t| t.reviewer_email == user[:email] && t.name == tran[:name] }.sum(&:words_count)
+            translated_words = language_translations.select{|t| t.translator_email == user[:email] && t.name == tran[:name] }.sum(&:words_count)
 
-                # Now pair down the list where the user is either the translator or reviewer
-                user_translations = language_translations.select{|t| t.reviewer == user || t.translator == user }
+            next if reviewed_words == 0 && translated_words == 0
 
-                total_lt_70 = user_translations.select {|t| t.tm_match >= 0  && t.tm_match <= 69.99 }.sum(&:words_count)
-                total_70    = user_translations.select {|t| t.tm_match >= 70 && t.tm_match <= 79.99 }.sum(&:words_count)
-                total_80    = user_translations.select {|t| t.tm_match >= 80 && t.tm_match <= 89.99 }.sum(&:words_count)
-                total_90    = user_translations.select {|t| t.tm_match >= 90 && t.tm_match <= 99.99 }.sum(&:words_count)
-                total_100   = user_translations.select {|t| t.tm_match == 100.0 }.sum(&:words_count)
-
-                csv << [date, user.first_name, language.upcase, project.name,
-                        reviewed_words, translated_words, total_lt_70,
-                        total_70, total_80, total_90, total_100]
+            data = [date.utc.strftime('%Y-%m-%d'), user[:name], tran.rfc5646_locale.upcase, tran[:name], reviewed_words, translated_words]
+            %w{59 60 70 80 90 100}.each do |classification|
+              value = row.column_data(classification) || 0
+              if value.instance_of? Translation
+                data << value.words_count
+              else
+                data << value
               end
             end
+
+            csv << data
           end
         end
       end

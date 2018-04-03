@@ -63,7 +63,7 @@ RSpec.describe Reports::TranslatorReport do
 
         FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', tm_match: 71, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
         FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', tm_match: 85, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
-        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', tm_match: 60, source_copy: 'One two three', translation_date: @nil, review_date: @end_date, reviewer: reviewer, translator: nil)
+        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', tm_match: 60, source_copy: 'One two three', translation_date: @end_date, review_date: nil, reviewer: nil, translator: reviewer)
         FactoryBot.create(:translation, key: key4, rfc5646_locale: 'it', tm_match: 90, source_copy: 'One two three', translation_date: @end_date, review_date: @end_date, reviewer: translator, translator: translator)
 
         csv = Reports::TranslatorReport.generate_csv(@start_date, @end_date, @languages)
@@ -85,32 +85,32 @@ RSpec.describe Reports::TranslatorReport do
 
       context 'data for timeframe' do
         it 'has the expected row 6' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Mark',    'FR', 'Foo', '3', '0', '0', '3', '0', '0', '0']
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Mark',    'FR', 'Foo', '3', '0', '0', '0', '3', '0', '0', '0']
           expect(@result[6]).to eql expected_results
         end
 
         it 'has the expected row 7' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'FR', 'Foo', '0', '3', '0', '3', '0', '0', '0']
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'FR', 'Foo', '0', '3', '0', '0', '3', '0', '0', '0']
           expect(@result[7]).to eql expected_results
         end
 
         it 'has the expected row 8' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Mark',    'IT', 'Foo', '3', '0', '0', '0', '3', '0', '0']
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Mark',    'IT', 'Foo', '3', '0', '0', '0', '0', '3', '0', '0']
           expect(@result[8]).to eql expected_results
         end
 
         it 'has the expected row 9' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'IT', 'Foo', '0', '3', '0', '0', '3', '0', '0']
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'IT', 'Foo', '0', '3', '0', '0', '0', '3', '0', '0']
           expect(@result[9]).to eql expected_results
         end
 
         it 'has the expected row 10' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"),  'Mark',  'IT', 'Foo', '3', '0', '3', '0', '0', '0', '0']
+          expected_results = [@end_date.strftime("%Y-%m-%d"),  'Mark',  'IT', 'Foo', '0', '3', '0', '3', '0', '0', '0', '0']
           expect(@result[10]).to eql expected_results
         end
 
         it 'has the expected row 11' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"),  'Rebecca',  'IT', 'Foo', '3', '3', '0', '0', '0', '3', '0']
+          expected_results = [@end_date.strftime("%Y-%m-%d"),  'Rebecca',  'IT', 'Foo', '3', '3', '0', '0', '0', '0', '3', '0']
           expect(@result[11]).to eql expected_results
         end
 
@@ -118,49 +118,148 @@ RSpec.describe Reports::TranslatorReport do
           expect(@result[12]).to eql nil
         end
       end
+    end
+    describe 'Internal Users' do
+      before :context do
+        @start_date = Date.today
+        @end_date = @start_date.next_day
+        @languages = ['it', 'fr']
+        exclude_internal = true
+
+        project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
+        reviewer = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(it fr), first_name: 'Chase', email: 'chase@test.host')
+        translator = FactoryBot.create(:user, :translator, approved_rfc5646_locales: %w(it fr), first_name: 'Rebecca')
+
+        key1 = FactoryBot.create(:key, project: project)
+        key2 = FactoryBot.create(:key, project: project)
+        key3 = FactoryBot.create(:key, project: project)
+        key4 = FactoryBot.create(:key, project: project)
+
+        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', tm_match: 71, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
+        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', tm_match: 85, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
+        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', tm_match: 60, source_copy: 'One two three', translation_date: @end_date, review_date: nil, reviewer: nil, translator: @reviewer)
+        FactoryBot.create(:translation, key: key4, rfc5646_locale: 'it', tm_match: 90, source_copy: 'One two three', translation_date: @end_date, review_date: @end_date, reviewer: translator, translator: translator)
+
+        csv = Reports::TranslatorReport.generate_csv(@start_date, @end_date, @languages, exclude_internal)
+        @result = CSV.parse(csv)
+      end
 
       context 'excludes internal users with an internal email address' do
-        before :context do
-          @start_date = Date.today
-          @end_date = @start_date.next_day
-          @languages = ['it', 'fr']
-          exclude_internal = true
-
-          project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
-          reviewer = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(it fr), first_name: 'Chase', email: 'chase@test.host')
-          translator = FactoryBot.create(:user, :translator, approved_rfc5646_locales: %w(it fr), first_name: 'Rebecca')
-
-          key1 = FactoryBot.create(:key, project: project)
-          key2 = FactoryBot.create(:key, project: project)
-          key3 = FactoryBot.create(:key, project: project)
-          key4 = FactoryBot.create(:key, project: project)
-
-          FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', tm_match: 71, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
-          FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', tm_match: 85, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
-          FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', tm_match: 60, source_copy: 'One two three', translation_date: @nil, review_date: @end_date, reviewer: reviewer, translator: nil)
-          FactoryBot.create(:translation, key: key4, rfc5646_locale: 'it', tm_match: 90, source_copy: 'One two three', translation_date: @end_date, review_date: @end_date, reviewer: translator, translator: translator)
-
-          csv = Reports::TranslatorReport.generate_csv(@start_date, @end_date, @languages, exclude_internal)
-          @result = CSV.parse(csv)
-        end
-
         it 'has the expected row 6' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'FR', 'Foo', '0', '3', '0', '3', '0', '0', '0']
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'FR', 'Foo', '0', '3', '0', '0', '3', '0', '0', '0']
           expect(@result[6]).to eql expected_results
         end
 
         it 'has the expected row 7' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'IT', 'Foo', '0', '3', '0', '0', '3', '0', '0']
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'IT', 'Foo', '0', '3', '0', '0', '0', '3', '0', '0']
           expect(@result[7]).to eql expected_results
         end
 
         it 'has the expected row 8' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"),  'Rebecca',  'IT', 'Foo', '3', '3', '0', '0', '0', '3', '0']
+          expected_results = [@end_date.strftime("%Y-%m-%d"),  'Rebecca',  'IT', 'Foo', '3', '3', '0', '0', '0', '0', '3', '0']
           expect(@result[8]).to eql expected_results
         end
 
         it 'has the expected row 9' do
           expect(@result[9]).to eql nil
+        end
+      end
+    end
+    describe 'Multiple Projects' do
+      before :context do
+        @start_date = Date.today
+        @end_date = @start_date.next_day
+        @languages = ['it', 'fr']
+        exclude_internal = true
+
+        project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
+        project2 = FactoryBot.create(:project, name: 'Bar', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
+        reviewer = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(it fr), first_name: 'Mark')
+        translator = FactoryBot.create(:user, :translator, approved_rfc5646_locales: %w(it fr), first_name: 'Rebecca')
+
+        key1 = FactoryBot.create(:key, project: project)
+        key2 = FactoryBot.create(:key, project: project)
+        key3 = FactoryBot.create(:key, project: project2)
+        key4 = FactoryBot.create(:key, project: project2)
+
+        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', tm_match: 71, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
+        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', tm_match: 85, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
+        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', tm_match: 60, source_copy: 'One two three', translation_date: @end_date, review_date: nil, reviewer: nil, translator: @reviewer)
+        FactoryBot.create(:translation, key: key4, rfc5646_locale: 'it', tm_match: 90, source_copy: 'One two three', translation_date: @end_date, review_date: @end_date, reviewer: translator, translator: translator)
+
+        csv = Reports::TranslatorReport.generate_csv(@start_date, @end_date, @languages, exclude_internal)
+        @result = CSV.parse(csv)
+      end
+
+      context 'has the expected project breakdown' do
+        it 'has the expected row 6' do
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Mark',    'FR', 'Foo', '3', '0', '0', '0', '3', '0', '0', '0']
+          expect(@result[6]).to eql expected_results
+        end
+
+        it 'has the expected row 7' do
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'FR', 'Foo', '0', '3', '0', '0', '3', '0', '0', '0']
+          expect(@result[7]).to eql expected_results
+        end
+
+        it 'has the expected row 8' do
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Mark',    'IT', 'Foo', '3', '0', '0', '0', '0', '3', '0', '0']
+          expect(@result[8]).to eql expected_results
+        end
+
+        it 'has the expected row 9' do
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'IT', 'Foo', '0', '3', '0', '0', '0', '3', '0', '0']
+          expect(@result[9]).to eql expected_results
+        end
+
+        it 'has the expected row 10' do
+          expected_results = [@end_date.strftime("%Y-%m-%d"),  'Rebecca',  'IT', 'Bar', '3', '3', '0', '0', '0', '0', '3', '0']
+          expect(@result[10]).to eql expected_results
+        end
+
+        it 'has the expected row 11' do
+          expect(@result[11]).to eql nil
+        end
+      end
+    end
+    describe 'Language Filter' do
+      before :context do
+        @start_date = Date.today
+        @end_date = @start_date.next_day
+        @languages = ['fr']
+        exclude_internal = true
+
+        project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
+        reviewer = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(it fr), first_name: 'Mark')
+        translator = FactoryBot.create(:user, :translator, approved_rfc5646_locales: %w(it fr), first_name: 'Rebecca')
+
+        key1 = FactoryBot.create(:key, project: project)
+        key2 = FactoryBot.create(:key, project: project)
+        key3 = FactoryBot.create(:key, project: project)
+        key4 = FactoryBot.create(:key, project: project)
+
+        FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', tm_match: 71, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
+        FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', tm_match: 85, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: reviewer, translator: translator)
+        FactoryBot.create(:translation, key: key3, rfc5646_locale: 'it', tm_match: 60, source_copy: 'One two three', translation_date: @end_date, review_date: nil, reviewer: nil, translator: @reviewer)
+        FactoryBot.create(:translation, key: key4, rfc5646_locale: 'it', tm_match: 90, source_copy: 'One two three', translation_date: @end_date, review_date: @end_date, reviewer: translator, translator: translator)
+
+        csv = Reports::TranslatorReport.generate_csv(@start_date, @end_date, @languages, exclude_internal)
+        @result = CSV.parse(csv)
+      end
+
+      context 'has the expected project breakdown' do
+        it 'has the expected row 6' do
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Mark',    'FR', 'Foo', '3', '0', '0', '0', '3', '0', '0', '0']
+          expect(@result[6]).to eql expected_results
+        end
+
+        it 'has the expected row 7' do
+          expected_results = [@start_date.strftime("%Y-%m-%d"), 'Rebecca', 'FR', 'Foo', '0', '3', '0', '0', '3', '0', '0', '0']
+          expect(@result[7]).to eql expected_results
+        end
+
+        it 'has the expected row 8' do
+          expect(@result[8]).to eql nil
         end
       end
     end
