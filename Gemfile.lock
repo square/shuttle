@@ -237,6 +237,7 @@ GEM
     orm_adapter (0.5.0)
     parslet (1.8.1)
     pg (0.21.0)
+    pivot_table (1.0.0)
     pry (0.11.3)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -454,6 +455,7 @@ DEPENDENCIES
   paperclip!
   parslet
   pg (< 1.0)
+  pivot_table
   pry-byebug
   rack-cache
   rails (= 4.2.10)

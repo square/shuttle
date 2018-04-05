@@ -53,6 +53,7 @@ gem 'paperclip', github: 'thoughtbot/paperclip', ref: '523bd46c768226893f2388907
 gem 'aws-sdk', '< 3'
 gem 'execjs'
 gem 'safemode'
+gem 'pivot_table'
 
 # IMPORTING
 gem 'nokogiri'
