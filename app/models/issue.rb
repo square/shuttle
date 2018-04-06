@@ -143,7 +143,7 @@ class Issue < ActiveRecord::Base
   # ===== END subscribed_emails =====
 
   def user_name
-    user.try!(:name) || t('models.issue.unknown_user')
+    user.try!(:name) || I18n.t('models.issue.unknown_user')
   end
 
   def self.order_default
