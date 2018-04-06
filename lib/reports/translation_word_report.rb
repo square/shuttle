@@ -23,37 +23,54 @@ module Reports
       raise ArgumentError, 'end_date cannot be earlier than the start date' if end_date < start_date
 
       CSV.generate do |csv|
-        locales = Project.pluck(:targeted_rfc5646_locales, :base_rfc5646_locale).map { |hash, base| hash.keys - [base]}.flatten.uniq
-        translation_query = Translation
-                              .where(translation_date: start_date.beginning_of_day..end_date.end_of_day)
-                              .where(rfc5646_locale: locales)
+        locales = Project.pluck(:targeted_rfc5646_locales, :base_rfc5646_locale).map { |hash, base| hash.keys - [base]}.flatten.map(&:downcase).uniq.sort
+        translation_query = Translation.where(translation_date: start_date.beginning_of_day..end_date.end_of_day)
+                                       .select(
+                                         'RANK() OVER (
+                                           ORDER BY DATE(translation_date), rfc5646_locale
+                                          ) AS group_id',
+                                          'DATE(translation_date) as translation_date',
+                                          :rfc5646_locale,
+                                          'CASE
+                                            WHEN tm_match < 60 THEN 59
+                                            WHEN tm_match >= 60 AND tm_match < 70 THEN 60
+                                            WHEN tm_match >= 70 AND tm_match < 80 THEN 70
+                                            WHEN tm_match >= 80 AND tm_match < 90 THEN 80
+                                            WHEN tm_match >= 90 AND tm_match < 100 THEN 90
+                                            WHEN tm_match = 100 THEN 100
+                                          END AS classification',
+                                          'SUM(words_count) as words_count'
+                                       )
+                                       .group(['DATE(translation_date)', :rfc5646_locale, 'classification'])
 
         csv << ['Start Date', start_date, '', '', '', '', '', '', '']
         csv << ['End Date', end_date, '', '', '', '', '', '', '']
         csv << ['Language(s)', "#{locales.join(", ").upcase}", '', '', '', '', '', '', '']
         csv << ['', '', '', '', '', '', '', '', '']
         csv << ['Translated Word Report', '', '', '', '', '', '', '', '']
-        csv << ['Date', 'en', 'Target Language', 'New Words (0-59%)', '60-69', '70-79', '80-89', '90-99', '100%']
+        csv << ['Date', 'source', 'Target Language', 'New Words (0-59%)', '60-69', '70-79', '80-89', '90-99', '100%']
 
-        start_date.upto(end_date).each do |date|
-          translation_for_date = translation_query.select do |t|
-            t[:translation_date] >= date.beginning_of_day && t[:translation_date] <= date.end_of_day
-          end
+        grid = PivotTable::Grid.new do |g|
+          g.source_data  = translation_query
+          g.column_name  = 'classification'
+          g.row_name     = 'group_id'
+          g.value_name   = 'words_count'
+        end
 
-          locales.each do |locale|
-            translations_for_locale = translation_for_date.select {|t| t[:rfc5646_locale] == locale.downcase }
-            total_en = translations_for_locale.count
-            next if total_en.zero?
+        grid.build
+        grid.rows.each do |row|
+            tran = row.data.find{|x| !x.nil?}
 
-            total_lt_59 = translations_for_locale.select {|t| t[:tm_match] >= 0 && t[:tm_match] <= 59.99 }.count
-            total_60 = translations_for_locale.select {|t| t[:tm_match] >= 60 && t[:tm_match] <= 69.99 }.count
-            total_70 = translations_for_locale.select {|t| t[:tm_match] >= 70 && t[:tm_match] <= 79.99 }.count
-            total_80 = translations_for_locale.select {|t| t[:tm_match] >= 80 && t[:tm_match] <= 89.99 }.count
-            total_90 = translations_for_locale.select {|t| t[:tm_match] >= 90 && t[:tm_match] <= 99.99 }.count
-            total_100 = translations_for_locale.select {|t| t[:tm_match] == 100.0 }.count
-
-            csv << [date, total_en, locale.upcase, total_lt_59, total_60, total_70, total_80, total_90, total_100]
-          end
+            data = [tran.translation_date.utc.strftime('%Y-%m-%d'), row.total, tran.rfc5646_locale.upcase]
+            %w{59 60 70 80 90 100}.each do |classification|
+              value = row.column_data(classification) || 0
+              if value.instance_of? Translation
+                data << value.words_count
+              else
+                data << value
+              end
+            end
+            csv << data
         end
       end
     end

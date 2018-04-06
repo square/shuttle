@@ -14,3 +14,4 @@ set :branch, 'deployable'
 append :linked_files,
        'config/environments/production/credentials.yml',
        'config/environments/production/paperclip.yml'
+

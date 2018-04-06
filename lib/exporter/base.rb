@@ -152,7 +152,10 @@ module Exporter
       possible_duplicates = Hash.new { |h,k| h[k] = Array.new }
       translations.in_groups_of(100, false) do |group|
         Translation.where(key_id: group.map(&:key_id), rfc5646_locale: deduplicate.map(&:rfc5646)).includes(:key).each do |dup|
-          possible_duplicates[dup.key.key] << dup.copy
+          # SHUTTLE-694
+          # Don't de-dupe arrays, they require the same number of results even if there are duplicates.
+          # This does not enable fallback.
+          possible_duplicates[dup.key.key] << dup.copy unless dup.key.key =~ /\[\d+\]$/
         end
       end
 

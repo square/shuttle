@@ -53,6 +53,7 @@ gem 'paperclip', github: 'thoughtbot/paperclip', ref: '523bd46c768226893f2388907
 gem 'aws-sdk', '< 3'
 gem 'execjs'
 gem 'safemode'
+gem 'pivot_table'
 
 # IMPORTING
 gem 'nokogiri'
@@ -103,7 +104,7 @@ group :test do
   gem 'rspec-rails'
   gem 'factory_bot_rails'
   gem 'timecop'
-  gem 'pry-nav'
+  gem 'pry-byebug'
   gem 'database_cleaner'
   gem 'capybara'
 end
