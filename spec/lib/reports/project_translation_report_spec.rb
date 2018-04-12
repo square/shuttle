@@ -36,7 +36,7 @@ RSpec.describe Reports::ProjectTranslationReport do
         @start_date = Date.today
         @end_date = @start_date.next_month
         @translation_date = @start_date.next_day
-        @expected_results = ['Foo', '6', '2', '4']
+        @expected_results = ['Foo', '2', '4']
 
         project = FactoryBot.create(:project, name: 'Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true })
         key1 = FactoryBot.create(:key, project: project)
@@ -52,15 +52,15 @@ RSpec.describe Reports::ProjectTranslationReport do
 
       it 'has the expected start and end date' do
         expected_results = [
-          ["Start Date", @start_date.strftime("%Y-%m-%d"), "", ""],
-          ["End Date", @end_date.strftime("%Y-%m-%d"), "", ""]
+          ["Start Date", @start_date.strftime("%Y-%m-%d"), ""],
+          ["End Date", @end_date.strftime("%Y-%m-%d"), ""]
         ]
 
         expect(report[0..1]).to eql expected_results
       end
 
       it 'has the row headers' do
-        expected_results = ["Project", "source", "fr", "it"]
+        expected_results = ["Project", "fr", "it"]
 
         expect(report[3]).to eql expected_results
       end
