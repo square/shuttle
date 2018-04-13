@@ -32,7 +32,7 @@ module Reports
 
         csv << ['Start Date', start_date] + empty_cols
         csv << ['End Date', end_date] + empty_cols
-        csv << [''] + empty_cols
+        csv << ['', ''] + empty_cols
         csv << ['Project'] + languages
 
         projects = translations.keys.map(&:first).uniq.sort
