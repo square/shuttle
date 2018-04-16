@@ -1,5 +1,4 @@
 source 'https://rubygems.org'
-source 'YOUR_SIDEKIQ_PRO_SOURCE_HERE'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.3.1'
@@ -73,7 +72,9 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-gem 'sidekiq-pro', '= 3.4.5'
+source "https://gems.contribsys.com/" do
+  gem 'sidekiq-pro', '= 3.4.5'
+end
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
