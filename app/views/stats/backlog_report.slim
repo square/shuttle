@@ -10,10 +10,5 @@ hr.dividers
 .translation_report
   = form_tag stats_generate_backlog_report_path(format: :csv)
     = render partial: 'stats/date_fields'
-    .control-group
-      .controls
-        label.control-label
-          = check_box_tag 'exclude_duplicates', 'true', true
-          | Hide Duplicate Commits
     .form-actions
       = submit_tag 'Get Report', class: 'btn btn-primary'

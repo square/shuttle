@@ -114,40 +114,14 @@ RSpec.describe Reports::BacklogReport do
         expect(results.all.length).to eq 0
       end
 
-      it 'should filter out records with a greater than 70% tm_match' do
+      it 'should filter out records with a less than 60% tm_match' do
         start_date = Date.today
         end_date = start_date.next_month
         created_at = start_date.next_day
 
-        FactoryBot.create(:translation, created_at: created_at, translation_date: nil, tm_match: 78)
+        FactoryBot.create(:translation, created_at: created_at, translation_date: nil, tm_match: 68)
         results = Reports::BacklogReport.send :retrieve_translations, start_date, end_date
         expect(results.all.length).to eq 0
-      end
-
-      it 'should filter out translations that are associated with a duplicate commit' do
-        start_date = Date.today
-        end_date = start_date.next_month
-        created_at = start_date.next_day
-
-        key = FactoryBot.create(:key)
-        FactoryBot.create(:commit, duplicate: true, keys: [key])
-        FactoryBot.create(:translation, key: key, created_at: created_at, translation_date: nil)
-
-        results = Reports::BacklogReport.send :retrieve_translations, start_date, end_date
-        expect(results.all.length).to eq 0
-      end
-
-      it 'should not filter out translations that are associated with a duplicate commit if exclude_duplicates is false' do
-        start_date = Date.today
-        end_date = start_date.next_month
-        created_at = start_date.next_day
-
-        key = FactoryBot.create(:key)
-        FactoryBot.create(:commit, duplicate: true, keys: [key])
-        FactoryBot.create(:translation, key: key, created_at: created_at, translation_date: nil)
-
-        results = Reports::BacklogReport.send :retrieve_translations, start_date, end_date, false
-        expect(results.all.length).to eq 1
       end
     end
   end

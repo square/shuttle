@@ -121,9 +121,8 @@ class StatsController < ApplicationController
     begin
       start_date =  Date.strptime(params[:start_date], '%m/%d/%Y')
       end_date =  Date.strptime(params[:end_date], '%m/%d/%Y')
-      exclude_duplicates = params[:exclude_duplicates]
       filename = "backlog-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
-      send_data Reports::BacklogReport.generate_csv(start_date, end_date, exclude_duplicates), filename: filename
+      send_data Reports::BacklogReport.generate_csv(start_date, end_date), filename: filename
     rescue
       render text: t('stats.reports.failure'), status: 400
     end
