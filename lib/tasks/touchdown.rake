@@ -27,21 +27,13 @@ namespace :touchdown do
     end
 
     Shuttle::Redis.setex TOUCHDOWN_BRANCH_KEY, 1.hour, '1'
-    Rails.logger.info "[touchdown:update] Successfully obtained lock.  Updating touchdown branch."
+    Rails.logger.info "[touchdown:update] Successfully obtained lock.  Queuing touchdown workers."
 
     Project.git.each do |project|
-      begin
-        project_start_time = Time.now
-        Rails.logger.info "[touchdown:update] Starting update for project #{project.name}."
-        TouchdownBranchUpdater.new(project).update
-        Rails.logger.info "[touchdown:update] Successfully updated touchdown branch for project #{project.name}.  Took #{(Time.now - project_start_time).round} seconds."
-      rescue StandardError => e
-        Rails.logger.error "[touchdown:update] Failed to update touchdown branch for project #{project.name}."
-        Rails.logger.error(e)
-      end
+      BranchTouchdowner.perform_once(project.id)
     end
 
     Shuttle::Redis.del TOUCHDOWN_BRANCH_KEY
-    Rails.logger.info "[touchdown:update] Releasing lock.  Successfully updated touchdown branch. Took #{(Time.now - start_time).round} seconds."
+    Rails.logger.info "[touchdown:update] Releasing lock.  Successfully queued touchdown branch workers. Took #{(Time.now - start_time).round} seconds."
   end
 end
