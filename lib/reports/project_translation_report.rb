@@ -28,19 +28,17 @@ module Reports
                                    .group(['projects.name','translations.rfc5646_locale'])
                                    .sum(:words_count)
         languages = translations.keys.map {|k| k[1]}.uniq.sort
-        empty_cols = Array.new(languages.count, '')
+        empty_cols = Array.new(languages.count - 1, '')
 
         csv << ['Start Date', start_date] + empty_cols
         csv << ['End Date', end_date] + empty_cols
         csv << ['', ''] + empty_cols
-        csv << ['Project', 'source'] + languages
+        csv << ['Project'] + languages
 
         projects = translations.keys.map(&:first).uniq.sort
 
         projects.each do |project|
           row = [project]
-
-          row += [translations.select {|k,v| k[0] == project}.values.inject(:+) || 0]
 
           languages.each do |language|
             lang_total = translations[[project, language]] || 0
