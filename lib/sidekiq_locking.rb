@@ -24,8 +24,9 @@ module SidekiqLocking
 
   # @private
   def perform_with_locking(*args)
-    self.class.unlock *args
     perform_without_locking *args
+  ensure
+    self.class.unlock *args
   end
 
   module ClassMethods
