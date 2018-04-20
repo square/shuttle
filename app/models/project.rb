@@ -132,19 +132,6 @@ class Project < ActiveRecord::Base
   scope :git, -> { where("projects.repository_url IS NOT NULL") }
   scope :not_git, -> { where("projects.repository_url IS NULL") }
 
-  def credentials
-    lambda do |url, _, _|
-      host = URI.parse(url).host
-
-      if Shuttle::Configuration.credentials.key?(host)
-        return Rugged::Credentials::UserPassword.new(
-          username:  Shuttle::Configuration.credentials[host].username,
-          password: Shuttle::Configuration.credentials[host].password
-        )
-      end
-    end
-  end
-
   # Returns a `Rugged::Repository` proxy object that allows you to work with the
   # local checkout of this Project's repository. The repository will be checked
   # out if it hasn't been already.
