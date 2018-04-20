@@ -10,5 +10,5 @@ role :sidekiq, STAGING_BOXES
 role :primary_cron, STAGING_BOXES.first
 
 append :linked_files,
-       'config/environments/staging/paperclip.yml',
-       'config/environments/staging/stash.yml'
+       'config/environments/staging/credentials.yml',
+       'config/environments/staging/paperclip.yml'
