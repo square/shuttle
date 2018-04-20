@@ -443,6 +443,21 @@ class Project < ActiveRecord::Base
     super options
   end
 
+  # @return [Proc] A proc that returns the credentials to be used when working
+  #   with this Project's repository using Rugged. The proc will return either a
+  #   Rugged::Credentials object or `nil`.
+
+  def rugged_credentials
+    lambda do |url|
+      host = URI.parse(url).host
+      if Shuttle::Configuration.credentials.key?(host)
+        Rugged::Credentials::UserPassword.new(Shuttle::Configuration.credentials[host].to_h)
+      else
+        nil
+      end
+    end
+  end
+
   private
 
   def repo_path
@@ -467,7 +482,7 @@ class Project < ActiveRecord::Base
 
   def clone_repo
     raise NotLinkedToAGitRepositoryError unless git?
-    repo = Rugged::Repository.clone_at(repository_url, repo_path.to_s, bare: true, credentials: Shuttle::Configuration.stash.to_h)
+    repo = Rugged::Repository.clone_at(repository_url, repo_path.to_s, bare: true, credentials: rugged_credentials)
     repo.config['remote.origin.fetch'] = '+refs/*:refs/*'
     repo.config['remote.origin.mirror'] = true
     repo.fetch('origin')
