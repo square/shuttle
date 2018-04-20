@@ -68,7 +68,7 @@ class StashWebhookHelper
   end
 
   def webhook_auth_parameters
-    {username: Shuttle::Configuration.stash.username, password: Shuttle::Configuration.stash.password}
+    Shuttle::Configuration.stash.to_h
   end
 
   def webhook_header_parameters

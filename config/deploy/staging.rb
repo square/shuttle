@@ -11,4 +11,5 @@ role :primary_cron, STAGING_BOXES.first
 
 append :linked_files,
        'config/environments/staging/credentials.yml',
-       'config/environments/staging/paperclip.yml'
+       'config/environments/staging/paperclip.yml',
+       'config/environments/staging/stash.yml'

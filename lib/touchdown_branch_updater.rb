@@ -148,7 +148,7 @@ class TouchdownBranchUpdater
     Rails.logger.info "[TouchdownBranchUpdater] Updating #{project.inspect} branch #{touchdown_branch} to #{working_repo.rev_parse('HEAD').oid}"
     begin
       Timeout.timeout(1.minute) do
-        working_repo.remotes['origin'].push(["+refs/heads/#{touchdown_branch}"], credentials: project.credentials)
+        working_repo.remotes['origin'].push(["+refs/heads/#{touchdown_branch}"], credentials: Shuttle::Configuration.stash.to_h)
       end
     rescue Timeout::Error
       Rails.logger.error "[TouchdownBranchUpdater] Timed out on updating touchdown branch for #{project.inspect}"
