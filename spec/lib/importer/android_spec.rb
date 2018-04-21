@@ -101,4 +101,17 @@ RSpec.describe Importer::Android do
       expect(@project.keys.for_key('/java/basic-hdpi/strings.xml:leading_newline').first.translations.find_by_rfc5646_locale('en-US').copy).to eql('Hello')
     end
   end
+
+  describe "#unescape" do
+    before :each do
+      @project = FactoryBot.create(:project, base_rfc5646_locale: 'en')
+      @commit = FactoryBot.create(:commit, project: @project)
+      @blob = FactoryBot.create(:fake_blob, project: @project)
+    end
+
+    it "should unescape strings properly" do
+      expect(Importer::Android.new(@blob, @commit).send(:unescape, '\\u003A 1 min left on break')).to eql(': 1 min left on break');
+      expect(Importer::Android.new(@blob, @commit).send(:unescape, '\\u003a 1 min left on break')).to eql(': 1 min left on break');
+    end
+  end
 end
