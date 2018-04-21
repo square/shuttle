@@ -132,7 +132,7 @@ module Importer
             result << "\t"
           elsif scanner.scan(/@/)
             result << '@'
-          elsif (match = scanner.scan(/u[0-9a-f]{4}/))
+          elsif (match = scanner.scan(/u[0-9a-fA-F]{4}/))
             result << Integer("0x#{match[1..-1]}").chr('utf-8')
           else
             raise "Invalid escape sequence at position #{scanner.pos} in #{string.inspect}"
