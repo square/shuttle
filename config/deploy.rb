@@ -31,39 +31,45 @@ append :linked_dirs,
 set :rvm_type, :system
 set :rvm_ruby_version, "2.3.1@#{fetch :application}"
 
+set :runit_timeout, 60
 set :whenever_roles, [:app, :primary_cron]
 
 namespace :deploy do
   desc 'Restart application'
   task :restart do
-    on roles(:app), in: :sequence, wait: 5 do
+    on roles(:web), in: :sequence, wait: 5 do
       execute :touch, release_path.join('tmp/restart.txt')
     end
   end
 end
 
 namespace :sidekiq do
-  task :start do
-    on roles(:sidekiq) do
-      sudo 'sv start sidekiq0'
-      sudo 'sv start sidekiq1'
-      sudo 'sv start sidekiq2'
+  Rake::Task["sidekiq:quiet"].clear_actions
+  task :quiet do
+    on roles fetch(:sidekiq_roles) do
+      within release_path do
+        execute :sidekiqctl, 'quiet', release_path.join('tmp/pids/sidekiq-0.pid')
+        execute :sidekiqctl, 'quiet', release_path.join('tmp/pids/sidekiq-1.pid')
+        execute :sidekiqctl, 'quiet', release_path.join('tmp/pids/sidekiq-2.pid')
+      end
     end
   end
 
+  Rake::Task["sidekiq:stop"].clear_actions
   task :stop do
-    on roles(:sidekiq) do
-      sudo 'sv stop sidekiq0'
-      sudo 'sv stop sidekiq1'
-      sudo 'sv stop sidekiq2'
+    on roles fetch(:sidekiq_roles) do
+      sudo "sv -w #{fetch(:runit_timeout)} stop sidekiq0"
+      sudo "sv -w #{fetch(:runit_timeout)} stop sidekiq1"
+      sudo "sv -w #{fetch(:runit_timeout)} stop sidekiq2"
     end
   end
 
-  task :restart do
-    on roles(:sidekiq) do
-      sudo 'sv restart sidekiq0'
-      sudo 'sv restart sidekiq1'
-      sudo 'sv restart sidekiq2'
+  Rake::Task["sidekiq:start"].clear_actions
+  task :start do
+    on roles fetch(:sidekiq_roles) do
+      sudo "sv start sidekiq0"
+      sudo "sv start sidekiq1"
+      sudo "sv start sidekiq2"
     end
   end
 end
