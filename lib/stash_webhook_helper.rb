@@ -68,7 +68,7 @@ class StashWebhookHelper
   end
 
   def webhook_auth_parameters
-    Shuttle::Configuration.credentials[Shuttle::Configuration.webhook_pinger.host].to_h
+    Shuttle::Configuration.credentials[Shuttle::Configuration.webhook_pinger.host].to_h.symbolize_keys
   end
 
   def webhook_header_parameters

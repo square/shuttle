@@ -448,10 +448,10 @@ class Project < ActiveRecord::Base
   #   Rugged::Credentials object or `nil`.
 
   def rugged_credentials
-    lambda do |url|
+    lambda do |url, _username, _credential_types|
       host = URI.parse(url).host
       if Shuttle::Configuration.credentials.key?(host)
-        Rugged::Credentials::UserPassword.new(Shuttle::Configuration.credentials[host].to_h)
+        Rugged::Credentials::UserPassword.new(Shuttle::Configuration.credentials[host].to_h.symbolize_keys)
       else
         nil
       end
