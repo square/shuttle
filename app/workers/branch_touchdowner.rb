@@ -14,7 +14,7 @@
 
 class BranchTouchdowner
   include Sidekiq::Worker
-  sidekiq_options queue: :low
+  sidekiq_options queue: :low, retry: false
 
   # Executes this worker.
   #
