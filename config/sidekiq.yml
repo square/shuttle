@@ -1,6 +1,11 @@
 ---
 :verbose: true
 :concurrency: 8
+
+# Sidekiq's default timeout is just 8 seconds. Set higher value to give
+# Shuttle's long running jobs more time.
+:timeout: 50
+
 :queues:
   - [high, 10]
   - [low, 1]
