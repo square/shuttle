@@ -246,14 +246,20 @@ class ProjectsController < ApplicationController
   # | `type`    | Whether it was a pull request or push that triggered it  |
 
   def stash_webhook
-    if @project.git?
-      revision = params[:sha]
-      other_fields = { description: 'Requested due to a Pull Request on Stash.' }
-      CommitCreator.perform_once @project.id, revision, other_fields: other_fields
-      render status: :ok, text: 'Success'
-    else
+    unless @project.git?
       render status: :bad_request, text: 'Repository url is blank'
+      return
     end
+
+    revision = params[:sha]
+    if revision.blank?
+      render status: :bad_request, text: 'SHA is blank'
+      return
+    end
+
+    other_fields = { description: 'Requested due to a Pull Request on Stash.' }
+    CommitCreator.perform_once @project.id, revision, other_fields: other_fields
+    render status: :ok, text: 'Success'
   end
 
   # Shows a page were admins can configure settings to mass copy translations from one locale to another.

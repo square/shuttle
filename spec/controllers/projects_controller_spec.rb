@@ -200,6 +200,12 @@ RSpec.describe ProjectsController do
       post :stash_webhook, { id: project.to_param, sha: "HEAD" }
       expect(response.status).to eql(400)
     end
+
+    it "returns 400 if SHA is missing" do
+      project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
+      post :stash_webhook, { id: project.to_param, sha: "" }
+      expect(response.status).to eql(400)
+    end
   end
 
   describe "#setup_mass_copy_translations" do
