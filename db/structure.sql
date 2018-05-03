@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.1
--- Dumped by pg_dump version 10.1
+-- Dumped from database version 9.6.5
+-- Dumped by pg_dump version 9.6.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -75,7 +75,6 @@ CREATE TABLE articles (
 --
 
 CREATE SEQUENCE articles_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -125,7 +124,6 @@ CREATE TABLE blobs_commits (
 --
 
 CREATE SEQUENCE blobs_commits_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -145,7 +143,6 @@ ALTER SEQUENCE blobs_commits_id_seq OWNED BY blobs_commits.id;
 --
 
 CREATE SEQUENCE blobs_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -178,7 +175,6 @@ CREATE TABLE blobs_keys (
 --
 
 CREATE SEQUENCE blobs_keys_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -212,7 +208,6 @@ CREATE TABLE comments (
 --
 
 CREATE SEQUENCE comments_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -264,7 +259,6 @@ CREATE TABLE commits (
 --
 
 CREATE SEQUENCE commits_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -317,7 +311,6 @@ CREATE TABLE daily_metrics (
 --
 
 CREATE SEQUENCE daily_metrics_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -357,7 +350,6 @@ CREATE TABLE issues (
 --
 
 CREATE SEQUENCE issues_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -403,7 +395,6 @@ CREATE TABLE keys (
 --
 
 CREATE SEQUENCE keys_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -438,7 +429,6 @@ CREATE TABLE locale_associations (
 --
 
 CREATE SEQUENCE locale_associations_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -477,7 +467,6 @@ CREATE TABLE locale_glossary_entries (
 --
 
 CREATE SEQUENCE locale_glossary_entries_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -531,7 +520,6 @@ CREATE TABLE projects (
 --
 
 CREATE SEQUENCE projects_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -576,7 +564,6 @@ CREATE TABLE screenshots (
 --
 
 CREATE SEQUENCE screenshots_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -613,7 +600,6 @@ CREATE TABLE sections (
 --
 
 CREATE SEQUENCE sections_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -649,7 +635,6 @@ CREATE TABLE slugs (
 --
 
 CREATE SEQUENCE slugs_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -686,7 +671,6 @@ CREATE TABLE source_glossary_entries (
 --
 
 CREATE SEQUENCE source_glossary_entries_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -719,7 +703,6 @@ CREATE TABLE translation_changes (
 --
 
 CREATE SEQUENCE translation_changes_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -764,7 +747,6 @@ CREATE TABLE translations (
 --
 
 CREATE SEQUENCE translations_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -819,7 +801,6 @@ CREATE TABLE users (
 --
 
 CREATE SEQUENCE users_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE

@@ -37,6 +37,7 @@ GIT
 
 GEM
   remote: https://rubygems.org/
+  remote: https://gems.contribsys.com/
   specs:
     CFPropertyList (2.3.6)
     actionmailer (4.2.10)
@@ -466,7 +467,7 @@ DEPENDENCIES
   safemode
   sass-rails
   sidekiq-failures!
-  sidekiq-pro (= 3.4.5)
+  sidekiq-pro (= 3.4.5)!
   similar_text
   sinatra
   slim-rails
