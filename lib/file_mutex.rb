@@ -24,6 +24,9 @@ class FileMutex
   # `Timeout::Error`.
   DEFAULT_TIMEOUT = 60.minutes
 
+  # The interval between retries.
+  RETRY_INTERVAL = 1.second
+
   # Creates a new file-based mutex.
   #
   # @param [String] path The path to the lockfile (can be any file; will be
@@ -41,27 +44,35 @@ class FileMutex
   # @return The result of the block.
 
   def lock!(timeout_duration = DEFAULT_TIMEOUT)
-    result = nil
+    # Beware: this is a block call until the specified block is executed.
+    loop do
+      # Tries to open a file. Creates the file if the file does not exist.
+      File.open(@path, File::CREAT|File::WRONLY, 0644) do |f|
+        # Tries to acquire exclusive access to the file without waiting.
+        if f.flock(File::LOCK_EX | File::LOCK_NB)
+          # We have acquired exclusive access to the file.
+          # Executes the block and releases the exclusive access (unlocking the file).
+          begin
+            f.puts contents
+            f.flush
 
-    File.open(@path, File::CREAT|File::EXCL|File::WRONLY, 0644) do |f|
-      f.puts contents
-      f.flush
-      Timeout.timeout(timeout_duration) do
-        begin
-          result = yield
-        ensure
-          unlock!
+            Timeout.timeout(timeout_duration) do
+              return yield
+            end
+          ensure
+            unlock!
+          end
         end
       end
+
+      # Failed to acquire exclusive access to the file. It means someone
+      # else is using the file. Waits a little and tries again.
+      sleep RETRY_INTERVAL
     end
-    return result
-  rescue Errno::EEXIST
-    sleep 1
-    retry
-  ensure
-    unlock!
   end
   alias synchronize lock!
+
+  private
 
   # Forces this lock to be unlocked. Does nothing if the lock is already
   # unlocked.
@@ -69,8 +80,6 @@ class FileMutex
   def unlock!
     FileUtils.rm_f @path
   end
-
-  private
 
   def contents
     "created=#{Time.now.to_s}, pid=#{Process.pid}, thread=#{Thread.current.object_id}\n\n" + caller.join("\n")
