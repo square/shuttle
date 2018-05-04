@@ -44,6 +44,7 @@ class FileMutex
     result = nil
 
     File.open(@path, File::CREAT|File::EXCL|File::WRONLY, 0644) do |f|
+      f.flock(File::LOCK_EX|File::LOCK_NB)
       f.puts contents
       f.flush
       Timeout.timeout(timeout_duration) do
@@ -56,6 +57,10 @@ class FileMutex
     end
     return result
   rescue Errno::EEXIST
+    File.open(@path) do |f|
+      # If we can lock the file the original process must have died - unlock now
+      unlock! if f.flock(File::LOCK_EX|File::LOCK_NB)
+    end
     sleep 1
     retry
   ensure
