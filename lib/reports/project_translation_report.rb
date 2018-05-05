@@ -28,6 +28,7 @@ module Reports
                                    .group(['projects.name','translations.rfc5646_locale'])
                                    .sum(:words_count)
         languages = translations.keys.map {|k| k[1]}.uniq.sort
+        return if languages.count == 0
         empty_cols = Array.new(languages.count - 1, '')
 
         csv << ['Start Date', start_date] + empty_cols
