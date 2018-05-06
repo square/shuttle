@@ -70,9 +70,12 @@ class TranslationItem
     # find checked locales to which this translation copy should be copied to
     copyToLocales = @element.find('.multi-updateable-translations input[type=checkbox]:checked').map(() -> this.value).get()
 
+    params = (new URL(document.location)).searchParams
+    sha = params.get('commit')
+
     $.ajax @translation.url + '.json',
       type: 'PUT'
-      data: $.param('translation[copy]': @element.find('.translation-area').val(), copyToLocales: copyToLocales)
+      data: $.param('translation[copy]': @element.find('.translation-area').val(), copyToLocales: copyToLocales, commit: sha)
       complete: => @element.find('.translation-area, textarea').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
       error: (xhr, textStatus, errorThrown) => new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
@@ -188,7 +191,9 @@ class TranslationItem
 
     # Set up @expand_link_button
     @expand_link_button.click (e) =>
-      window.open @translation.edit_url, '_blank'
+      params = (new URL(document.location)).searchParams
+      sha = params.get('commit')
+      window.open "#{@translation.edit_url}?commit=#{sha}", '_blank'
       @expand_link_button.find("i").removeClass('fa-pencil-square-o').addClass 'fa-spinner'
       @expand_link_button.unbind('click').click =>
         $.ajax (@translation.url + '.json'),

@@ -8,6 +8,7 @@ require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'sidekiq/testing'
 require 'paperclip/matchers'
+Dir[Rails.root.join('spec/spec_support/**/*.rb')].each { |f| require f }
 
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -103,6 +104,7 @@ RSpec.configure do |config|
 
   # Devise
   config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include RequestSpecHelper, type: :request
 
   # Clear repo directories
   config.before :each do

@@ -694,7 +694,13 @@ CREATE TABLE translation_changes (
     translation_id integer NOT NULL,
     created_at timestamp without time zone,
     user_id integer,
-    diff text
+    diff text,
+    tm_match numeric,
+    sha character varying,
+    sha character varying(40),
+    role character varying,
+    project_id integer,
+    is_edit boolean DEFAULT false
 );
 
 
@@ -1825,4 +1831,6 @@ INSERT INTO schema_migrations (version) VALUES ('20171103183318');
 INSERT INTO schema_migrations (version) VALUES ('20171206152825');
 
 INSERT INTO schema_migrations (version) VALUES ('20180129223845');
+
+INSERT INTO schema_migrations (version) VALUES ('20180506023840');
 
