@@ -135,7 +135,7 @@ class CommitsController < ApplicationController
       hsh
     end
     @keys = CommitsSearchKeysFinder.new(params, @commit).find_keys
-    @keys_presenter = CommitsSearchPresenter.new(params[:locales], current_user.translator?, @project)
+    @keys_presenter = CommitsSearchPresenter.new(params[:locales], current_user.translator?, @project, @commit)
   end
 
   # Marks a commit as needing localization. Creates a CommitCreator job to do the

@@ -24,8 +24,8 @@ RSpec.describe TranslationUpdateMediator do
     before :each do
       @params = ActionController::Parameters.new(translation: { copy: "test copy", notes: "test note" })
 
-      project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
-      @key = FactoryBot.create(:key, ready: false, project: project)
+      @project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
+      @key = FactoryBot.create(:key, ready: false, project: @project)
       @fr_translation    = FactoryBot.create(:translation, key: @key, copy: nil, source_copy: 'test', translator: nil, rfc5646_locale: 'fr')
       expect(@key.reload).to_not be_ready
     end
@@ -52,6 +52,20 @@ RSpec.describe TranslationUpdateMediator do
     it "updates a single translation; review_date is set if the translator is a reviewer" do
       TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
       expect(@fr_translation.review_date).to_not be_nil
+    end
+
+    it "creates a just one translation change record for the translation" do
+      expect { TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update! }.to change{ TranslationChange.count }.by(1)
+    end
+
+    it "creates the correct translation change record for the translation" do
+      TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
+      tc = TranslationChange.first
+      expect(tc.role).to eq 'reviewer'
+      expect(tc.user).to eq reviewer
+      expect(tc.translation).to eq @fr_translation
+      expect(tc.is_edit).to be_falsey # this is false because the existing translation doesn't have a copy assigned to it
+      # Note: the project won't be set, neither will the sha because of the params passed in
     end
 
     it "updates a single translation; review_date is not set if the translator is not a reviewer" do

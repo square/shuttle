@@ -3,10 +3,11 @@ class CommitsSearchPresenter
 
   attr_reader :is_translator, :project, :locales
 
-  def initialize(locales, is_translator, project)
+  def initialize(locales, is_translator, project, commit)
     @is_translator = is_translator
     @project = project
     @locales = locales
+    @commit = commit
   end
 
   def original_key(key)
@@ -67,10 +68,11 @@ class CommitsSearchPresenter
   end
 
   def translation_url(translation)
+    params = (@commit ? { commit: @commit.revision } : {})
     if is_translator
-      edit_project_key_translation_path(project, translation.key, translation)
+      edit_project_key_translation_path(project, translation.key, translation, params)
     else
-      project_key_translation_path(@project, translation.key, translation)
+      project_key_translation_path(@project, translation.key, translation, params)
     end
   end
 end

@@ -39,11 +39,13 @@ class TranslationUpdateMediator < BasicMediator
     copy_to_translations = translations_that_should_be_multi_updated
     return if failure?
 
-    Translation.transaction do
-      copy_to_translations.each do |translation|
-        update_single_translation!(translation)
+    ActiveRecord::Base.observers.disable :translation_observer do
+      Translation.transaction do
+        copy_to_translations.each do |translation|
+          update_single_translation!(translation)
+        end
+        update_single_translation!(@primary_translation)
       end
-      update_single_translation!(@primary_translation)
     end
 
     KeyRecalculator.perform_once(@primary_translation.key_id) # Readiness hooks were skipped in the transaction above, now we gotta run them.
@@ -111,6 +113,8 @@ class TranslationUpdateMediator < BasicMediator
   # @raise [ActiveRecord::RecordInvalid] if translation is invalid
 
   def update_single_translation!(translation)
+    is_edit = true
+
     # determine if this is the initial translation or an update based on if the
     # translation has an existing value.
     if (translation.copy || "").empty?
@@ -120,6 +124,7 @@ class TranslationUpdateMediator < BasicMediator
       # retrieve the top fuzzy match percentage for the translation
       finder = FuzzyMatchTranslationsFinder.new(translation.source_copy, translation)
       translation.tm_match = finder.top_fuzzy_match_percentage
+      is_edit = false
     end
 
     translation.modifier = @user
@@ -137,7 +142,9 @@ class TranslationUpdateMediator < BasicMediator
         translation.preserve_reviewed_status = true
       end
     end
+
     translation.save!
+    TranslationChange.create_from_params!(translation, @params, is_edit)
   end
 
   # Untranslates a translation, but doesn't call `save`.

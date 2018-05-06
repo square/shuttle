@@ -32,7 +32,7 @@
 hr.divider
 
 / Filter Bar
-= form_for @translation, url: project_key_translation_url(@project, @key, @translation), html: {id: 'large-translation'} do |f|
+= form_for @translation, url: project_key_translation_url(@project, @key, @translation, commit: @params[:commit]), html: {id: 'large-translation'} do |f|
   .entry.row
     / Edit Side
     .eight.columns.edit-side
@@ -61,7 +61,7 @@ hr.divider
     / Information Side
     .eight.columns.info-side
       button.small.default.copy-source Copy to #{@translation.locale.name}
-      fieldset 
+      fieldset
         legend = @translation.source_locale.name
 
         .control-group

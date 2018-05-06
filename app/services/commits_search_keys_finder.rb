@@ -56,7 +56,7 @@ class CommitsSearchKeysFinder
           end
         end
       end
-      sort { by :original_key_exact, order: 'asc' } unless query_filter
+      sort { by :original_key_exact, order: 'asc', ignore_unmapped: true } unless query_filter
       from (current_page - 1) * PER_PAGE
       size PER_PAGE
     }.to_hash
