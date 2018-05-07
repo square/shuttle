@@ -16,10 +16,11 @@ require 'rails_helper'
 
 RSpec.describe CommitsCleaner do
   before :each do
-    allow_any_instance_of(Project).to receive(:repo).and_return(nil)
     allow(StashWebhookHelper).to receive_message_chain(:new, :ping).and_return(nil)
     @commits_cleaner = CommitsCleaner.new
+
     @project = FactoryBot.create(:project, :light)
+    allow(@project).to receive(:repo).and_return(nil)
   end
 
   describe "#destroy_dangling_commits" do
@@ -42,6 +43,13 @@ RSpec.describe CommitsCleaner do
       expect(@project.commits.count).to eq(3)
       @commits_cleaner.destroy_dangling_commits
       expect(@project.commits.count).to eq(3)
+    end
+
+    it "should not destory any commits in not git project" do
+      not_git_project = FactoryBot.create(:project, repository_url: nil)
+      expect(not_git_project).not_to receive(:repo)
+
+      @commits_cleaner.destroy_dangling_commits
     end
   end
 

@@ -27,7 +27,7 @@ class CommitsCleaner
 
   def destroy_dangling_commits
     log("[destroy_dangling_commits")
-    Project.find_each do |project|
+    Project.git.find_each do |project|
       project.repo { |r| r.fetch('origin') }
       project.commits.not_ready.each do |commit|
         begin

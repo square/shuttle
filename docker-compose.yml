@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '3'
 services:
   postgresql:
     image: postgres:9.4
