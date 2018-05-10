@@ -62,6 +62,9 @@ module Importer
           result << '\\'
         elsif scanner.scan(/"/)
           result << '"'
+        elsif scanner.scan(/'/)
+          # replace [\'] with single [']
+          result << '\''
         elsif scanner.scan(/n/)
           result << "\n"
         elsif scanner.scan(/r/)

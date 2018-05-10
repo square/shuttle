@@ -35,6 +35,7 @@ RSpec.describe Importer::Strings do
       expect(@project.keys.for_key("/apple/en-US.lproj/example.strings:Something\nwith\tescapes\\").first.translations.base.first.copy).to eql("Something\nwith\tescapes\\")
     end
 
+
     it "should still import strings that end with <DNL>" do
       expect(@project.keys.for_key('/apple/en-US.lproj/example.strings:quote.charlie.1').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("I'm a patriot. You've gotta give me that.<DNL>")
     end
@@ -44,6 +45,18 @@ RSpec.describe Importer::Strings do
       expect(@project.keys.for_key('/apple/en-US.lproj/no-translations.strings:dialogue.dennis.1').first).to be_nil
       expect(@project.keys.for_key('/apple/en-US.lproj/no-translations.strings:dialogue.charlie.2').first).to be_nil
       expect(@project.keys.for_key('/apple/en-US.lproj/no-translations.strings:dialogue.dennis.2').first).to be_nil
+    end
+  end
+
+  describe "#unescape" do
+    before :each do
+      @project = FactoryBot.create(:project, base_rfc5646_locale: 'en')
+      @commit = FactoryBot.create(:commit, project: @project)
+      @blob = FactoryBot.create(:fake_blob, project: @project)
+    end
+
+    it "should unescape strings properly" do
+      expect(Importer::Strings.new(@blob, @commit).send(:unescape, 'We\\\'ve done it.')).to eql('We\'ve done it.');
     end
   end
 end
