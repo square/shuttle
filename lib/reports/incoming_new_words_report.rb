@@ -45,7 +45,7 @@ module Reports
           row += [translations.select {|t| t.created_at == date}.sum(&:words_count) || 0]
 
           languages.each do |language|
-            new_words = translations.select{|t| t.tm_match < 70 && t.rfc5646_locale == language && t.created_at == date }
+            new_words = translations.select{|t| t.tm_match < 60 && t.rfc5646_locale == language && t.created_at == date }
 
             lang_total = new_words.sum(&:words_count) || 0
             row += [lang_total]

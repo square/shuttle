@@ -68,6 +68,7 @@ class TranslationsController < ApplicationController
   # | `id`         | The ID of a Translation.           |
 
   def edit
+    @params = params
     respond_with @translation, location: project_key_translation_url(@project, @key, @translation)
   end
 
@@ -118,11 +119,16 @@ class TranslationsController < ApplicationController
           render json: mediator.errors, status: :unprocessable_entity
         end
       end
+      sha = (params[:commit] == 'Save' ? nil : params[:commit])
+      edit_url = (sha.present? ?
+        edit_project_key_translation_url(@project, @key, @translation, commit: params[:commit]) :
+        edit_project_key_translation_url(@project, @key, @translation)
+      )
       format.html do
         if mediator.success?
-          redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { success: t('controllers.translations.update.success') }
+          redirect_to edit_url, flash: { success: t('controllers.translations.update.success') }
         else
-          redirect_to edit_project_key_translation_url(@project, @key, @translation), flash: { alert: mediator.errors.unshift(t('controllers.translations.update.failure')) }
+          redirect_to edit_url, flash: { alert: mediator.errors.unshift(t('controllers.translations.update.failure')) }
         end
       end
     end

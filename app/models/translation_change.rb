@@ -30,6 +30,7 @@ class TranslationChange < ActiveRecord::Base
 
   belongs_to :translation, inverse_of: :translation_changes
   belongs_to :user
+  belongs_to :project
 
   serialize :diff, Hash
 
@@ -38,6 +39,24 @@ class TranslationChange < ActiveRecord::Base
   def self.create_from_translation!(translation)
     diff = translation.previous_changes.slice(*TRACKED_ATTRIBUTES)
     TranslationChange.create(translation: translation, user: translation.modifier, diff: diff) if diff.present?
+  end
+
+  def self.create_from_params!(translation, params, is_edit)
+    diff = translation.previous_changes.slice(*TRACKED_ATTRIBUTES)
+    if diff.present?
+      project_id = Project.joins(:slugs).where('slugs.slug = ?', params[:project_id]).pluck('projects.id').first
+      commit = (params[:commit] == 'Save') ? nil : params[:commit]
+      TranslationChange.create(
+        translation: translation,
+        user: translation.modifier,
+        diff: diff,
+        role: translation.modifier.role,
+        is_edit: is_edit,
+        tm_match: translation.tm_match,
+        sha: commit,
+        project_id: project_id
+      )
+    end
   end
 
   def differ
@@ -66,13 +85,13 @@ class TranslationChange < ActiveRecord::Base
 
   def transition_from
     self.class.status(diff["approved"][0])
-  end 
+  end
 
   def transition_to
     self.class.status(diff["approved"][1])
-  end 
+  end
 
-  def self.style(approval_status) 
+  def self.style(approval_status)
     if approval_status.nil?
       "text-info"
     elsif approval_status
@@ -80,7 +99,7 @@ class TranslationChange < ActiveRecord::Base
     else
       "text-error"
     end
-  end 
+  end
 
   def self.status(approval_status)
     if approval_status.nil?

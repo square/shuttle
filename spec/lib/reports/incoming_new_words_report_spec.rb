@@ -69,7 +69,7 @@ RSpec.describe Reports::IncomingNewWordsReport do
       end
 
       it 'has the expected data for the timeframe' do
-        expected_results = [@created_at.strftime('%Y-%m-%d'), '8', '4', '2']
+        expected_results = [@created_at.strftime('%Y-%m-%d'), '8', '4', '0']
 
         expect(@result[5]).to eql expected_results
       end
