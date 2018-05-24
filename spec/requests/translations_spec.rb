@@ -22,6 +22,32 @@ RSpec.describe "Translations", type: :request do
       expect(TranslationChange.first.sha).to eq commit
     end
 
+    it 'handles an article from search' do
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
+      article = FactoryBot.create(:article, project: project)
+      section = FactoryBot.create(:section, article: article, active: true)
+      key1 = FactoryBot.create(:key, key: "firstkey", project: project, section: section)
+      translation = FactoryBot.create(:translation, source_rfc5646_locale: 'en', source_copy: 'fake', copy: nil, approved: nil, key: key1)
+      url = project_key_translation_path(project, key1, translation.to_param)
+      patch_via_redirect url, translation: { copy: 'fake' }
+
+      expect(response).to render_template(:edit)
+      expect(TranslationChange.first.article).to eq article
+    end
+
+    it 'handles an article in the params' do
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
+      key1 = FactoryBot.create(:key, key: "firstkey",  project: project)
+      article = FactoryBot.create(:article)
+      translation = FactoryBot.create(:translation, source_rfc5646_locale: 'en', source_copy: 'fake', copy: nil, approved: nil, key: key1)
+
+      url = project_key_translation_path(project, key1, translation.to_param, article_id: article.id)
+      patch_via_redirect url, translation: { copy: 'fake' }
+
+      expect(response).to render_template(:edit)
+      expect(TranslationChange.first.article).to eq article
+    end
+
     it 'handles a project in the params' do
       project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
       key1 = FactoryBot.create(:key, key: "firstkey",  project: project)
@@ -37,7 +63,7 @@ RSpec.describe "Translations", type: :request do
       key1 = FactoryBot.create(:key, key: "firstkey",  project: project)
       translation = FactoryBot.create(:translation, source_rfc5646_locale: 'en', source_copy: 'fake', copy: nil, approved: nil, key: key1)
       url = project_key_translation_path(project, key1, translation.to_param)
-      expect{ patch_via_redirect url, translation: { copy: 'fake' } }.to change{ TranslationChange.count }.by(1) 
+      expect{ patch_via_redirect url, translation: { copy: 'fake' } }.to change{ TranslationChange.count }.by(1)
     end
   end
 end

@@ -701,6 +701,8 @@ CREATE TABLE translation_changes (
     role character varying,
     project_id integer,
     is_edit boolean DEFAULT false
+    is_edit boolean DEFAULT false,
+    article_id integer
 );
 
 
@@ -1833,4 +1835,6 @@ INSERT INTO schema_migrations (version) VALUES ('20171206152825');
 INSERT INTO schema_migrations (version) VALUES ('20180129223845');
 
 INSERT INTO schema_migrations (version) VALUES ('20180506023840');
+
+INSERT INTO schema_migrations (version) VALUES ('20180525005743');
 
