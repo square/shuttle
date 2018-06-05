@@ -97,6 +97,10 @@ GEM
       erubi (>= 1.0.0)
       rack (>= 0.9.0)
     boolean (1.0.1)
+    bootstrap (4.1.1)
+      autoprefixer-rails (>= 6.0.3)
+      popper_js (>= 1.12.9, < 2)
+      sass (>= 3.5.2)
     builder (3.2.3)
     byebug (10.0.1)
     capistrano (3.10.1)
@@ -234,6 +238,7 @@ GEM
     parslet (1.8.1)
     pg (0.21.0)
     pivot_table (1.0.0)
+    popper_js (1.12.9)
     pry (0.11.3)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -416,6 +421,7 @@ DEPENDENCIES
   aws-sdk (< 3)
   better_errors
   boolean
+  bootstrap
   capistrano
   capistrano-bundler
   capistrano-rails

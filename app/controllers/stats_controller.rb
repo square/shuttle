@@ -105,7 +105,7 @@ class StatsController < ApplicationController
       start_date =  Date.strptime(params[:start_date], '%m/%d/%Y')
       end_date =  Date.strptime(params[:end_date], '%m/%d/%Y')
       languages = params[:languages]
-      exclude_internal = (params[:exclude_internal] || false)
+      exclude_internal = (ActiveRecord::Type::Boolean.new.type_cast_from_user(params[:exclude_internal]) || false)
 
       filename = "translator-report-#{start_date.strftime('%Y-%m-%d')}-to-#{end_date.strftime('%Y-%m-%d')}.csv"
       send_data Reports::TranslatorReport.generate_csv(start_date, end_date, languages, exclude_internal), filename: filename

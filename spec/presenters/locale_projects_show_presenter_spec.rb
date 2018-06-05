@@ -17,15 +17,17 @@ require 'rails_helper'
 RSpec.describe LocaleProjectsShowPresenter do
   before :each do
     allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
+    @user = FactoryBot.create(:user)
   end
 
   describe "#selectable_commits" do
     it "returns selectable Commits" do
       project = FactoryBot.create(:project)
+
       commit1 = FactoryBot.create(:commit, revision: 'abcd', message: "hello", project: project)
       commit2 = FactoryBot.create(:commit, revision: '1234', message: "world", project: project)
 
-      presenter = LocaleProjectsShowPresenter.new(project, {})
+      presenter = LocaleProjectsShowPresenter.new(project, @user, {})
       expect(presenter.selectable_commits).to eql( [["ALL COMMITS", nil], ["1234: world", "1234"], ["abcd: hello", "abcd"]] )
     end
   end
@@ -33,7 +35,7 @@ RSpec.describe LocaleProjectsShowPresenter do
   describe "#selected_commit" do
     it "returns the selected Commit if there is one" do
       commit = FactoryBot.create(:commit, revision: 'abcd')
-      presenter = LocaleProjectsShowPresenter.new(commit.project, {commit: 'abcd'})
+      presenter = LocaleProjectsShowPresenter.new(commit.project, @user, {commit: 'abcd'})
       expect(presenter.selected_commit).to eql(commit)
     end
   end
@@ -41,7 +43,7 @@ RSpec.describe LocaleProjectsShowPresenter do
   describe "#selected_article" do
     it "returns the selected Article if there is one" do
       article = FactoryBot.create(:article, name: 'abcd')
-      presenter = LocaleProjectsShowPresenter.new(article.project, { article_id: article.id })
+      presenter = LocaleProjectsShowPresenter.new(article.project, @user, { article_id: article.id })
       expect(presenter.selected_article).to eql(article)
     end
   end
@@ -56,18 +58,18 @@ RSpec.describe LocaleProjectsShowPresenter do
     end
 
     it "returns selectable Sections under the Article if an Article is selected" do
-      presenter = LocaleProjectsShowPresenter.new(@project, { article_id: @article1.id })
+      presenter = LocaleProjectsShowPresenter.new(@project, @user, { article_id: @article1.id })
       expect(presenter.selectable_sections).to eql( [["ALL SECTIONS", nil], ["section1", @section1.id]] )
     end
 
     it "returns selectable Sections under the Project if an Article is NOT selected" do
-      presenter = LocaleProjectsShowPresenter.new(@project, { })
+      presenter = LocaleProjectsShowPresenter.new(@project, @user, { })
       expect(presenter.selectable_sections).to match_array( [["ALL SECTIONS", nil], ["section1", @section1.id], ["section2", @section2.id]])
     end
 
     it "doesn't include inactive Sections in the result" do
       @section1.update_columns active: false
-      presenter = LocaleProjectsShowPresenter.new(@project, { })
+      presenter = LocaleProjectsShowPresenter.new(@project, @user, { })
       expect(presenter.selectable_sections).to eql( [["ALL SECTIONS", nil], ["section2", @section2.id]] )
     end
   end
@@ -82,12 +84,12 @@ RSpec.describe LocaleProjectsShowPresenter do
     end
 
     it "returns selected Section" do
-      presenter = LocaleProjectsShowPresenter.new(@project, { section_id: @section1.id })
+      presenter = LocaleProjectsShowPresenter.new(@project, @user, { section_id: @section1.id })
       expect(presenter.selected_section).to eql( @section1 )
     end
 
     it "doesn't return inactive Section even if user attempted to select it" do
-      presenter = LocaleProjectsShowPresenter.new(@project, { section_id: @section2.id })
+      presenter = LocaleProjectsShowPresenter.new(@project, @user, { section_id: @section2.id })
       expect(presenter.selected_section).to be_nil
     end
   end

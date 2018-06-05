@@ -65,6 +65,8 @@
 #= require selectize
 #= require selectize_with_defaults
 #= require select2
+#= require popper
+#= require bootstrap
 #=
 #= require_tree ../templates
 #= require_tree ./application
