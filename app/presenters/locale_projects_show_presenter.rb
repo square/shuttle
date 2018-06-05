@@ -18,9 +18,14 @@ class LocaleProjectsShowPresenter
   include Rails.application.routes.url_helpers
 
   attr_reader :form
-  def initialize(project, form)
+  def initialize(project, user, form)
     @project = project
+    @user = user
     @form = form
+  end
+
+  def role
+    @user.role
   end
 
   # @return [Array<Pair<String, String>>] an array of selectable options for Commits

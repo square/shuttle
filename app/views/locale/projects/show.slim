@@ -90,4 +90,5 @@ div
   .pagination-info
     = page_entries_info(@translations, entry_name: 'translations')
 
-
+button type='button' id='reason_trigger' href='#add-translation-reasons' style='display:none' rel='modal' Trigger
+= render partial: "locale/projects/reason_modal", locals: { reasons: @reasons } 

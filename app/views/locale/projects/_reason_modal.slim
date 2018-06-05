@@ -1,0 +1,29 @@
+.row
+  .modal.twelve.columns#add-translation-reasons
+    a.close ×
+    h2 Translation Edit Reasons
+    .modal-body
+      p Looks like you edited the translation. Please select one or more reasons to explain why.
+      hr
+      .btn-group
+        button.btn.dropdown-toggle.pull-left.reason-btn aria-expanded='false' aria-haspopup='true' data-toggle='dropdown' type='button'
+          <span class="badge badge-light badge-left">0</span>
+          | Select Reasons
+
+        ul.dropdown-menu
+          li.no-padding = text_field_tag 'search', '', placeholder: 'Search', id: 'dropdown-search'
+          - reasons.each do |reason|
+            li
+              label
+                = check_box_tag 'translation[reason_ids][]', reason.id, false, id: "modal_reason_#{reason.id}"
+                = "#{reason.category}: #{reason.name} "
+              = fa_icon 'info-circle', 'data-toggle': 'tooltip', title: "#{reason.description}" if reason.description
+
+      button.btn-secondary.pull-right.save-btn type='button' data-popover-content='#reason-review-popover' data-trigger='hover' data-container='body' data-toggle='popover' data-placement='left' disabled='disabled' Save
+      button.btn-secondary.pull-right.undo-btn type='button' Undo Edit
+
+      #reason-review-popover.hide
+        .popover-heading
+          | Review Reasons
+        .popover-body
+          ul

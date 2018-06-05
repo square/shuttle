@@ -119,7 +119,7 @@ class LocaleProjectsShowFinder
     translations = Translation
                        .where(id: translations_in_es.map(&:id))
                        .where('commits.revision': form[:commit])
-                       .includes({key: [:project, :commits, :translations, :section, {article: :project}]}, :locale_associations)
+                       .includes({key: [:project, :commits, :translations, :section, {article: :project}]}, :locale_associations, :translation_changes)
     if form[:article_id]
       translations = translations.order('keys.section_id, keys.index_in_section')
     else
