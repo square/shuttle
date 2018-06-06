@@ -105,7 +105,7 @@ RSpec.describe Exporter::Strings do
                        source_locale: @en,
                        locale:        @de,
                        source_copy:   "Lots of special characters.",
-                       copy:          "Lots\n of \"special\" \t characters.\r"
+                       copy:          "There\'re lots\n of \"special\" \t characters.\r"
     @commit.keys = [key]
 
     io = StringIO.new
@@ -113,7 +113,7 @@ RSpec.describe Exporter::Strings do
 
     output = io.string.force_encoding('UTF-16').encode('UTF-8')
     expect(output).to include(<<-C)
-"Lots of special characters." = "Lots\\n of \\"special\\" \\t characters.\\r";
+"Lots of special characters." = "There\\'re lots\\n of \\"special\\" \\t characters.\\r";
     C
   end
 

@@ -71,7 +71,7 @@ module Exporter
       scanner = UnicodeScanner.new(str)
 
       until scanner.eos?
-        match = scanner.scan_until /[\\\t\r\n"]/
+        match = scanner.scan_until /[\\\t\r\n"']/
         unless match
           result << scanner.scan(/.*/m)
           next
@@ -88,6 +88,9 @@ module Exporter
             result << '\n'
           when '"'
             result << '\"'
+          when '\''
+            # Replace single quote ['] with [\']
+            result << '\\\''
           else
             raise "Invalid escape sequence at position #{scanner.pos} in #{str.inspect}"
         end
