@@ -34,7 +34,7 @@ end
 
 def reset
   system 'docker-compose', 'down', '-v'
-  system 'docker-compose', 'run', 'server', 'bin/docker-setup'
+  system 'docker-compose', 'run', 'web', 'bin/docker-setup'
 end
 
 def rebuild
