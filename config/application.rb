@@ -79,6 +79,9 @@ module Shuttle
     )
 
     config.action_mailer.default_url_options = Shuttle::Configuration.default_url_options.symbolize_keys
+
+    require Rails.root.join('app', 'middleware', 'health_check')
+    config.middleware.insert_before (config.force_ssl ? ActionDispatch::SSL : Rack::Runtime), HealthCheck
   end
 end
 
