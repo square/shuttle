@@ -1,4 +1,6 @@
+brew 'cmake'
 brew 'libarchive'
+brew 'libgit2'
 brew 'postgresql'
-brew 'redis'
 brew 'qt'
+brew 'redis'

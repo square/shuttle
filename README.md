@@ -101,7 +101,7 @@ first time:
 
    If you are already running a more modern version of ElasticSearch, you can
    run this older version simultaneously on a different port (e.g. 9201) by
-   altering the `config/elasticsearch./yml` file in the ElasticSearch install
+   altering the `config/elasticsearch.yml` file in the ElasticSearch install
    directory. If you do this, make sure you override the default ElasticSearch
    URL when running Shuttle by either creating a
    `config/environments/development/elasticsearch.yml` file (to override the
@@ -127,21 +127,28 @@ first time:
    bundle config build.libarchive --with-opt-dir=$(brew --prefix libarchive)
    ```
 
-8. Make sure that PostgreSQL, Redis, and ElasticSearch are running. If you
+8. Likewise, for Rugged, you will need to tell Bundler where the libgit2 install
+   directory is. If you installed libgit2 using Homebrew:
+
+   ``` sh
+   bundle config build.rugged --with-opt-dir=$(brew --prefix libgit2)
+   ```
+
+9. Make sure that PostgreSQL, Redis, and ElasticSearch are running. If you
    installed them via Homebrew, running `brew info postgresql` and
    `brew info redis` will tell you how to run them. For ElasticSearch, read the
    README in your install directory.
 
-9. Install the `mailcatcher` gem, which is used to receive emails sent in
-   development. (This gem is not a part of the Gemfile because it's typically
-   installed as part of a global or system-wide gemset to be used with
-   all projects.)
-10. Optionally, install the `foreman` gem, which runs all the processes
+10. Install the `mailcatcher` gem, which is used to receive emails sent in
+    development. (This gem is not a part of the Gemfile because it's typically
+    installed as part of a global or system-wide gemset to be used with
+    all projects.)
+11. Optionally, install the `foreman` gem, which runs all the processes
     necessary for development.
-11. Install all required gems by running `bundle install`.
-12. Run `rake db:migrate db:seed` to migrate and seed the database.
-13. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
-14. Initialize the ElasticSearch index for development by running
+12. Install all required gems by running `bundle install`.
+13. Run `rake db:migrate db:seed` to migrate and seed the database.
+14. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
+15. Initialize the ElasticSearch index for development by running
 
     ``` sh
     rake environment elasticsearch:import:model FORCE=y CLASS=Commit
@@ -149,7 +156,7 @@ first time:
     rake environment elasticsearch:import:model FORCE=y CLASS=Translation
     ```
 
-15. Do the same for the test indexes:
+16. Do the same for the test indexes:
 
     ``` sh
     RAILS_ENV=test rake environment elasticsearch:import:model FORCE=y CLASS=Commit
@@ -157,7 +164,7 @@ first time:
     RAILS_ENV=test rake environment elasticsearch:import:model FORCE=y CLASS=Translation
     ```
 
-16. Verify that all specs pass with `rspec spec`.
+17. Verify that all specs pass with `rspec spec`.
 
 #### Starting the server
 
