@@ -229,6 +229,7 @@ GEM
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (4.2.0)
+    newrelic_rpm (5.2.0.345)
     nokogiri (1.8.1)
       mini_portile2 (~> 2.3.0)
     orm_adapter (0.5.0)
@@ -451,6 +452,7 @@ DEPENDENCIES
   kaminari
   libarchive
   mustache
+  newrelic_rpm
   nokogiri
   paperclip!
   parslet
@@ -493,4 +495,4 @@ RUBY VERSION
    ruby 2.3.1p112
 
 BUNDLED WITH
-   1.16.1
+   1.16.2
