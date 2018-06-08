@@ -40,4 +40,51 @@ RSpec.describe Article do
       article.update!(description: "new description", email: "new@example.com")
     end
   end
+
+  context "[article webhook]" do
+    context "[with an article_webhook_url]" do
+      before(:each) do
+        @project = FactoryBot.create(:project, article_webhook_url: "http://example.com")
+        @article = FactoryBot.create(:article, project: @project, ready: false)
+      end
+
+      it "does not enqueue an ArticleWebhookPinger job when an article is created" do
+        @article = FactoryBot.create(:article, project: @project, ready: true)
+        expect(ArticleWebhookPinger).to_not receive(:perform_once)
+        @article.save!
+      end
+
+      it "enqueues a ArticleWebhookPinger job when a article becomes ready" do
+        @article.ready = true
+        expect(ArticleWebhookPinger).to receive(:perform_once)
+        @article.save!
+      end
+
+      it "doesn't enqueue a ArticleWebhookPinger job when a article becomes not-ready" do
+        @article.update!(ready: true)
+        @article.ready = false
+        expect(ArticleWebhookPinger).to_not receive(:perform_once)
+        @article.save!
+      end
+
+      it "doesn't enqueue a ArticleWebhookPinger when a article is updated without changing its ready field" do
+        @article.update(name: 'test_article')
+        expect(ArticleWebhookPinger).to_not receive(:perform_once)
+        @article.save!
+      end
+    end
+
+    context "[without an article_webhook_url]" do
+      before(:each) do
+        @project = FactoryBot.create(:project, article_webhook_url: nil)
+        @article = FactoryBot.create(:article, project: @project, ready: false)
+      end
+
+      it "does not enqueue a ArticleWebhookPinger job when a article's ready field changes" do
+        @article.ready = true
+        expect(ArticleWebhookPinger).to_not receive(:perform_once)
+        @article.save!
+      end
+    end
+  end
 end

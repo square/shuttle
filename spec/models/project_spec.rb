@@ -698,6 +698,23 @@ RSpec.describe Project do
     end
   end
 
+  describe "#article_webhook?" do
+    it "returns true if article_webhook_url exists" do
+      project = FactoryBot.create(:project, article_webhook_url: "https://example.com")
+      expect(project.article_webhook?).to be_truthy
+    end
+
+    it "returns false if article_webhook_url is empty" do
+      project = FactoryBot.create(:project, article_webhook_url: "")
+      expect(project.article_webhook?).to be_falsey
+    end
+
+    it "returns false if article_webhook_url is nil" do
+      project = FactoryBot.create(:project, article_webhook_url: nil)
+      expect(project.article_webhook?).to be_falsey
+    end
+  end
+
   describe "#git?" do
     it "returns true if repository_url exists" do
       project = FactoryBot.create(:project, repository_url: "https://example.com")

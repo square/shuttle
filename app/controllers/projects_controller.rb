@@ -391,7 +391,7 @@ class ProjectsController < ApplicationController
     end
 
     project_params = params[:project].to_hash.slice(*%w(
-        name repository_url base_rfc5646_locale due_date
+        name repository_url base_rfc5646_locale due_date article_webhook_url
         github_webhook_url stash_webhook_url skip_imports default_manifest_format key_exclusions
         key_inclusions skip_paths only_paths
         watched_branches touchdown_branch
