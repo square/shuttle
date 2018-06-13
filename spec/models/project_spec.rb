@@ -53,6 +53,24 @@ RSpec.describe Project do
       expect(project).to_not be_persisted
       expect(project.errors.full_messages).to eql(["targeted localizations can’t be blank"])
     end
+
+    it "creates a valid project even if article_webhook_url is empty" do
+      project = Project.create(name: "Project with an empty article_webhook_url", article_webhook_url: "", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
+      expect(project).to be_valid
+      expect(project).to be_persisted
+    end
+
+    it "doesn't create a project if article_webhook_url has not a valid format" do
+      project = Project.create(name: "Project with an invalid article_webhook_url", article_webhook_url: "localhost", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
+      expect(project).to_not be_persisted
+      expect(project.errors.full_messages).to eql(["Article webhook url invalid"])
+    end
+
+    it "creates a valid project when a valid article_webhook_url is given" do
+      project = Project.create(name: "Project with an empty article_webhook_url", article_webhook_url: "https://example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
+      expect(project).to be_valid
+      expect(project).to be_persisted
+    end
   end
 
   describe "#repo" do
@@ -701,17 +719,17 @@ RSpec.describe Project do
   describe "#article_webhook?" do
     it "returns true if article_webhook_url exists" do
       project = FactoryBot.create(:project, article_webhook_url: "https://example.com")
-      expect(project.article_webhook?).to be_truthy
+      expect(project.article_webhook?).to eql(true)
     end
 
     it "returns false if article_webhook_url is empty" do
       project = FactoryBot.create(:project, article_webhook_url: "")
-      expect(project.article_webhook?).to be_falsey
+      expect(project.article_webhook?).to eql(false)
     end
 
     it "returns false if article_webhook_url is nil" do
       project = FactoryBot.create(:project, article_webhook_url: nil)
-      expect(project.article_webhook?).to be_falsey
+      expect(project.article_webhook?).to eql(false)
     end
   end
 

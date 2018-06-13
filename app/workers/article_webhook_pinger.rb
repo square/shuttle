@@ -34,7 +34,7 @@ class ArticleWebhookPinger
         project_name: article.project.name,
         ready: article.ready?,
       }
-      HTTParty.post(article.project.article_webhook_url, {timeout: 5, body: post_parameters })
+      HTTParty.post(article.project.article_webhook_url, timeout: 5, body: post_parameters)
     end
   end
 

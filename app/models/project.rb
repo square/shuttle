@@ -65,7 +65,7 @@ require 'file_mutex'
 # | `watched_branches`        | A list of branches to automatically import new Commits from.                                                                                                |
 # | `touchdown_branch`        | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch. |
 # | `manifest_directory`      | If this is set, Shuttle will automatically push a new commit containing the translated manifest in the specified directory to the touchdown branch.         |
-# | `article_webhook_url`     | The URL that should be used to notify the client system about articles translations being completed                                                         |
+# | `article_webhook_url`     | The URL that should be used to notify the client system about articles translations being completed.                                                        |
 
 class Project < ActiveRecord::Base
   # The directory where repositories are mirrored.
@@ -125,6 +125,8 @@ class Project < ActiveRecord::Base
             strict:     true
 
   validate :can_clone_repo, if: :validate_repo_connectivity
+
+  validates :article_webhook_url, :allow_blank => true, :format => URI::regexp(%w(http https))
 
   before_validation :create_api_token, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
