@@ -15,7 +15,7 @@
 require 'rails_helper'
 RSpec.describe ArticleWebhookPinger do
   before(:each) do
-    @article = FactoryBot.create(:article)
+    @article = FactoryBot.create(:article, name: 'test_webhook-article')
   end
 
   describe "#perform" do
@@ -25,12 +25,17 @@ RSpec.describe ArticleWebhookPinger do
       url = "http://www.example.com"
       @article.project.update(article_webhook_url: url)
       @article.update(ready: true)
+      expected_params = {
+        article_name: 'test_webhook-article',
+        project_name: @article.project,
+        ready: true,
+      }
       expect(HTTParty).to receive(:post).with(url, anything())
       subject.perform(@article.id)
     end
 
     it "doesnt send anything if no article_webhook_url is defined on the project" do
-      expect(@article.project.article_webhook_url).to be_blank
+      @article.project.update(article_webhook_url: nil)
       expect(HTTParty).not_to receive(:post)
       subject.perform(@article.id)
     end
