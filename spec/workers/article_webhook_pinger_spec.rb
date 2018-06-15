@@ -30,7 +30,7 @@ RSpec.describe ArticleWebhookPinger do
         project_name: @article.project,
         ready: true,
       }
-      expect(HTTParty).to receive(:post).with(url, anything())
+      expect(HTTParty).to receive(:post).with(url, anything)
       subject.perform(@article.id)
     end
 

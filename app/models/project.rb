@@ -108,6 +108,7 @@ class Project < ActiveRecord::Base
   set_nil_if_blank :stash_webhook_url
   set_nil_if_blank :manifest_directory
   set_nil_if_blank :default_manifest_format
+  set_nil_if_blank :article_webhook_url
 
   include Slugalicious
   slugged :name
@@ -126,7 +127,7 @@ class Project < ActiveRecord::Base
 
   validate :can_clone_repo, if: :validate_repo_connectivity
 
-  validates :article_webhook_url, :allow_blank => true, :format => URI::regexp(%w(http https))
+  validates :article_webhook_url, format: URI::regexp(%w(http https)), allow_nil: true
 
   before_validation :create_api_token, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
