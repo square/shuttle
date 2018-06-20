@@ -33,7 +33,12 @@ tr.row_class
       = link_to truncate(item.name), api_v1_project_article_url(item.project.id, item.name)
 
   / Create Date
-  td.centered = item.created_at.strftime('%m/%d/%Y')
+  td.centered
+    - if item.is_a?(Commit)
+      = item.created_at.strftime('%m/%d/%Y')
+    - else
+      = item.last_import_requested_at.strftime('%m/%d/%Y')
+
 
   / Due Date
   td.due-date.centered
