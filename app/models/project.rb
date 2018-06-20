@@ -65,6 +65,7 @@ require 'file_mutex'
 # | `watched_branches`        | A list of branches to automatically import new Commits from.                                                                                                |
 # | `touchdown_branch`        | If this is set, Shuttle will reset the head of this branch to the most recently translated commit if that commit is accessible by the first watched branch. |
 # | `manifest_directory`      | If this is set, Shuttle will automatically push a new commit containing the translated manifest in the specified directory to the touchdown branch.         |
+# | `article_webhook_url`     | The URL that should be used to notify the client system about articles translations being completed.                                                        |
 
 class Project < ActiveRecord::Base
   # The directory where repositories are mirrored.
@@ -107,6 +108,7 @@ class Project < ActiveRecord::Base
   set_nil_if_blank :stash_webhook_url
   set_nil_if_blank :manifest_directory
   set_nil_if_blank :default_manifest_format
+  set_nil_if_blank :article_webhook_url
 
   include Slugalicious
   slugged :name
@@ -124,6 +126,8 @@ class Project < ActiveRecord::Base
             strict:     true
 
   validate :can_clone_repo, if: :validate_repo_connectivity
+
+  validates :article_webhook_url, format: URI::regexp(%w(http https)), allow_nil: true
 
   before_validation :create_api_token, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }
@@ -221,6 +225,14 @@ class Project < ActiveRecord::Base
     else
       return @working_repo
     end
+  end
+
+  # Tells us if this {Project} opted-in to receive webhook calls when its
+  # articles translations gets ready/available for download.
+  #
+  # @return [Boolean] true if there is a article_webhook_url present, false otherwise
+  def article_webhook?
+    article_webhook_url.present?
   end
 
   # Tells us if this {Project} is meant to be linked to a repository (ie. repo-backed vs article-backed).

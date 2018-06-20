@@ -61,6 +61,19 @@
               |  and,
               tt description
               |  .
+        .control-group
+          = f.label :article_webhook_url, class: 'control-label'
+          .controls
+            = f.text_field :article_webhook_url, class: 'tooltip-parent', :'data-tooltip' => '#article_webhook_url_tooltip'
+            .tooltip#article_webhook_url_tooltip
+              ' This URL will be posted to when an article's translation gets ready.
+                It is used to notify client systems about translations getting available to be consumed.  HTTP Post body will contain
+              tt article_name
+              |,
+              tt'  project_name
+              ' and
+              tt' ready
+              '  status.
       fieldset
         legend Locale Settings
         .control-group
