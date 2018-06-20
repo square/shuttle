@@ -28,8 +28,7 @@ $(document).ready () ->
 
   setupKeyFields = () ->
     $('#project_key_locale_exclusions, #project_key_locale_inclusions').hashField(
-      renderer: (container, key, value) ->
-
+      renderer: (container, key, value, hash_field) ->
         key_field = $('<div/>').addClass('hashfield-key').appendTo(container)
         value_field = $('<div/>').addClass('hashfield-multi-value').appendTo(container)
 
@@ -43,7 +42,11 @@ $(document).ready () ->
             .addClass('locale-field').appendTo(key_field)
         )
 
-        valueField = $('<div/>').attr({rel: 'value', 'data-value': JSON.stringify(value)}).addClass('array-field').appendTo(value_field);
+        valueField = $('<div/>').attr(
+          rel:          'value',
+          'data-value': JSON.stringify(value),
+          'data-name':  "#{hash_field.name()}[#{key}]"
+        ).addClass('array-field').appendTo(value_field)
         valueField.arrayField(
           renderer: (container, name, value) ->
             $('<input/>').attr(
@@ -99,7 +102,7 @@ $(document).ready () ->
     setupLocaleField()
     setupKeyFields()
     setupPathFields()
-  else 
+  else
     $(document).bind('locales_loaded', setupLocaleField)
     $(document).bind('locales_loaded', setupKeyFields)
     $(document).bind('locales_loaded', setupPathFields)
