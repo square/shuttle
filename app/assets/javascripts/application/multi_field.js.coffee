@@ -45,7 +45,7 @@ class root.ArrayField
     observer = new MutationObserver (changes) =>
       for change in changes
         do (change) =>
-          if change.attributeName == 'name'
+          if change.attributeName == 'data-name'
             @element.find('[name]').attr('name', "#{this.name()}[]")
     observer.observe @element[0], {attributes: true}
 
@@ -56,7 +56,7 @@ class root.ArrayField
     this.drawButton()
     for string in @value
       do (string) => this.addElement string
-      
+
     if @value.length == 0
       this.addElement()
 
@@ -69,16 +69,16 @@ class root.ArrayField
     div = $('<div/>').addClass('arrayfield-element').insertBefore(@new_element_button)
 
     @options.renderer div, "#{this.name()}[]", value
-    
+
     $.each @element.find(".arrayfield-element"), (index, element) =>
       text_field = $(element).find("input[type='text']").unbind("keypress")
       if $(element).is(":last-of-type")
         text_field.keypress (e) =>
           if e.which == 13 || e.which == 9
-            this.addElement @options.defaultValue  
+            this.addElement @options.defaultValue
             $(element).next().find("input[type='text']").focus()
             return false
-      else 
+      else
         text_field.keypress (e) =>
           if e.which == 13 || e.which == 9
             $(element).next().find("input[type='text']").focus()
@@ -105,7 +105,7 @@ class root.ArrayField
     @new_element_button.appendTo(button_div)
 
   # @private
-  name: -> @element.attr 'name'
+  name: -> @element.attr 'data-name'
 
 # A dynamic field that builds a list of field item pairs (with plus and minus
 # buttons) that will be serialized as a hash in Rails. This allows the field
@@ -154,7 +154,7 @@ class root.HashField
     this.drawButtons()
     for own name, value of @value
       do (name, value) => this.addElement name, value
-    
+
     if Object.keys(@value).length == 0
       this.addElement @options.defaultKey, @options.defaultValue
 
@@ -167,7 +167,7 @@ class root.HashField
   addElement: (key, value) ->
     div = $('<div/>').addClass('hashfield-element').insertBefore(@element.find('>.multifield-last-element'))
 
-    @options.renderer div, key, value
+    @options.renderer div, key, value, this
     key_field = div.find('[rel=key]')
     value_field = div.find('[rel=value]')
     refreshName = (locale) =>
@@ -180,7 +180,7 @@ class root.HashField
     key_field.change refreshName
     key_field.on 'typeahead:change', (evt, locale) =>
       refreshName(locale)
-      
+
     refreshName()
 
     remove = $('<a/>').addClass('fa fa-minus-circle').attr('href', '#').appendTo(div)
