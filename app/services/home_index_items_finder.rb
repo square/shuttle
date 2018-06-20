@@ -136,7 +136,7 @@ class HomeIndexItemsFinder
       when 'due'
         "due_date #{direction || 'asc'}"
       when 'create'
-        "created_at #{direction || 'desc'}"
+        "last_import_requested_at #{direction || 'desc'}"
       when 'priority'
         "priority #{direction || 'asc'}"
     end
