@@ -70,12 +70,20 @@ class TranslationItem
     # find checked locales to which this translation copy should be copied to
     copyToLocales = @element.find('.multi-updateable-translations input[type=checkbox]:checked').map(() -> this.value).get()
 
-    params = (new URL(document.location)).searchParams
-    sha = params.get('commit')
+    searchParams = (new URL(document.location)).searchParams
+    sha = searchParams.get('commit')
+    articleId = searchParams.get('article_id')
+
+    params = {
+      'translation[copy]': @element.find('.translation-area').val(),
+      copyToLocales: copyToLocales,
+    }
+    params['commit'] = sha if sha
+    params['article_id'] = articleId if articleId
 
     $.ajax @translation.url + '.json',
       type: 'PUT'
-      data: $.param('translation[copy]': @element.find('.translation-area').val(), copyToLocales: copyToLocales, commit: sha)
+      data: $.param(params)
       complete: => @element.find('.translation-area, textarea').removeAttr 'disabled', 'disabled'
       success: (new_translation) => this.refresh new_translation
       error: (xhr, textStatus, errorThrown) => new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
@@ -191,9 +199,14 @@ class TranslationItem
 
     # Set up @expand_link_button
     @expand_link_button.click (e) =>
-      params = (new URL(document.location)).searchParams
-      sha = params.get('commit')
-      window.open "#{@translation.edit_url}?commit=#{sha}", '_blank'
+      searchParams = (new URL(document.location)).searchParams
+      sha = searchParams.get('commit')
+      articleId = searchParams.get('article_id')
+
+      url = @translation.edit_url
+      url += if sha then "?commit=#{sha}" else "?article_id=#{articleId}"
+
+      window.open url, '_blank'
       @expand_link_button.find("i").removeClass('fa-pencil-square-o').addClass 'fa-spinner'
       @expand_link_button.unbind('click').click =>
         $.ajax (@translation.url + '.json'),

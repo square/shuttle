@@ -31,6 +31,7 @@ class TranslationChange < ActiveRecord::Base
   belongs_to :translation, inverse_of: :translation_changes
   belongs_to :user
   belongs_to :project
+  belongs_to :article
 
   serialize :diff, Hash
 
@@ -46,6 +47,8 @@ class TranslationChange < ActiveRecord::Base
     if diff.present?
       project_id = Project.joins(:slugs).where('slugs.slug = ?', params[:project_id]).pluck('projects.id').first
       commit = (params[:commit] == 'Save') ? nil : params[:commit]
+      article_id = params[:article_id] || translation.article&.id
+
       TranslationChange.create(
         translation: translation,
         user: translation.modifier,
@@ -54,6 +57,7 @@ class TranslationChange < ActiveRecord::Base
         is_edit: is_edit,
         tm_match: translation.tm_match,
         sha: commit,
+        article_id: article_id,
         project_id: project_id
       )
     end

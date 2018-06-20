@@ -29,4 +29,16 @@ class ArticleObserver < ActiveRecord::Observer
       article.import!(article.previous_changes.include?(:targeted_rfc5646_locales))
     end
   end
+
+
+  def after_commit_on_update(article)
+    if just_became_ready?(article) && article.project.article_webhook?
+      ArticleWebhookPinger.perform_once article.id
+    end
+  end
+
+  # This should be called in after_commit hooks only because it checks previous_changes hash instead of changes hash.
+  def just_became_ready?(article)
+    article.previous_changes.include?(:ready) && article.ready?
+  end
 end
