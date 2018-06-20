@@ -175,6 +175,11 @@ class ProjectsController < ApplicationController
   # | `project` | Parameterized hash of Project information. |
 
   def update
+    # TODO(dliu): Need to enable the project update after ticket: SHUTTLE-784
+    flash[:alert] = 'Project update is disabled. Please contact #shuttle for your update.'
+    respond_with @project, location: edit_project_url(@project)
+    return;
+
     @project.update_attributes project_params
     if @project.errors.blank?
       flash[:success] = t('controllers.projects.update.success', project: @project.name)
