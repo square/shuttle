@@ -16,6 +16,8 @@ class FuzzyMatchTranslationsFinder
   attr_reader :translation
   include Elasticsearch::DSL
 
+  MINIMUM_FUZZY_MATCH = 60
+
   def initialize(query_filter, translation)
     @query_filter = query_filter
     @translation = translation
@@ -60,7 +62,7 @@ class FuzzyMatchTranslationsFinder
       {
           match_percentage: @translation.source_copy.similar(tran.source_copy),
       }
-    end.reject { |t| t[:match_percentage] < 70 }
+    end.reject { |t| t[:match_percentage] < MINIMUM_FUZZY_MATCH }
     translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
     translations.any? ? translations.first[:match_percentage] : 0.0
   end
