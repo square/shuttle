@@ -54,6 +54,7 @@ class ActionView::Helpers::Tags::ContentField < ActionView::Helpers::Tags::Base
     options['value'] = options.fetch('value'){ value_before_type_cast(object) }
     options['value'] &&= ERB::Util.html_escape(options['value'])
     add_default_name_and_id(options)
+    options['data-name'] = options['name']
     tag(options['tag_name'].to_s, options, true) + "</#{options['tag_name']}>".html_safe
   end
 end
