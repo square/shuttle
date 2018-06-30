@@ -27,7 +27,7 @@ module Reports
       # and that languages is an array
       raise ArgumentError, 'languages must be an array' unless languages.kind_of?(Array)
 
-      empty_cols = Array.new(11, '')
+      empty_cols = Array.new(13, '')
       internal_domains = Shuttle::Configuration.reports.internal_domains.join('|')
 
       CSV.generate do |csv|
@@ -36,13 +36,15 @@ module Reports
                                       .where('translations.rfc5646_locale': languages)
                                       .joins(:project, :user, :translation)
                                       .joins('LEFT OUTER JOIN articles ON articles.id = article_id')
-                                      .group('DATE(translation_changes.created_at), rfc5646_locale, translation_changes.role, projects.name, articles.name, first_name, sha, classification, DATE(articles.created_at)')
+                                      .joins('LEFT OUTER JOIN commits ON commits.revision = sha')
+                                      .group('DATE(translation_changes.created_at), rfc5646_locale, translation_changes.role, projects.name, articles.name, first_name, users.id, sha, classification, DATE(articles.created_at)')
                                       .order('group_id', 'rfc5646_locale', 'projects.name', 'first_name', 'classification')
                                       .select('RANK() OVER (
                                                  ORDER BY DATE(translation_changes.created_at), rfc5646_locale, projects.name, sha, articles.name, first_name
                                               ) AS group_id,
                                               DATE(translation_changes.created_at) as "date",
                                               users.first_name,
+                                              users.id as user_id,
                                               translation_changes.role,
                                               rfc5646_locale,
                                               projects.name as project_name,
@@ -57,6 +59,7 @@ module Reports
                                                 WHEN translation_changes.tm_match >= 90 AND translation_changes.tm_match < 100 THEN 4
                                                 WHEN translation_changes.tm_match = 100 THEN 5
                                               END AS classification,
+                                              MAX(commits.created_at) as job_start,
                                               SUM(words_count) as words_count')
 
 
@@ -67,7 +70,7 @@ module Reports
         csv << ['Language(s)', "#{languages.sort.join(", ").upcase}"] + empty_cols
         csv << ['', ''] + empty_cols
         csv << ['Translator Report', ''] + empty_cols
-        csv << ['Date', 'User', 'Role', 'Language (Locale)', 'Project Name', 'Job Name (SHA)', 'Article Name', 'Article Date', 'New Words', '60-69%', '70-79%%', '80-89%', '90-99%', '100%']
+        csv << ['Date', 'User', 'User Id', 'Role', 'Language (Locale)', 'Project Name', 'Job Name (SHA)', 'Job Start', 'Article Name', 'Article Date', 'New Words', '60-69%', '70-79%%', '80-89%', '90-99%', '100%']
 
         translator_query.group_by(&:group_id).each do |group, records|
           tc = records.first
@@ -80,7 +83,8 @@ module Reports
           article = (tc.article_name || '')
           article_date = (tc.article_date ? tc.article_date.strftime('%Y-%m-%d') : '')
           sha = (tc.sha || '')
-          csv << [tc.date.strftime('%Y-%m-%d'), tc.first_name, tc.role, tc.rfc5646_locale.upcase, tc.project_name, sha, article, article_date, counts].flatten
+          job_start = (tc.job_start ? tc.job_start.in_time_zone.strftime('%Y-%m-%d %H:%M %:z') : '')
+          csv << [tc.date.strftime('%Y-%m-%d'), tc.first_name, tc.user_id, tc.role, tc.rfc5646_locale.upcase, tc.project_name, sha, job_start, article, article_date, counts].flatten
         end
       end
     end
