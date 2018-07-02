@@ -72,7 +72,8 @@ class Locale::ProjectsController < ApplicationController
             approved:                true)
         .map(&:as_translation_json)
         .compact
-    @presenter = LocaleProjectsShowPresenter.new(@project, translations_form)
+    @reasons = Reason.order(:category)
+    @presenter = LocaleProjectsShowPresenter.new(@project, current_user, translations_form)
     respond_with @project
   end
 

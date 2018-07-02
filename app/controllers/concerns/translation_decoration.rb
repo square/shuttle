@@ -33,6 +33,7 @@ module TranslationDecoration
           status:           translation_status(translation),
           translator:       translation.translator.as_json,
           reviewer:         translation.reviewer.as_json, # not sure why it's necessary to explicitly include these, but it is
+          changes:          translation.translation_changes.as_json,
           multi_updateable_translations_and_locale_associations: multi_updateable_translations_and_locale_associations(translation),
       )
     end

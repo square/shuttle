@@ -65,28 +65,12 @@ class TranslationItem
     if !@copy_field.val().length && !@translation.copy?.length
       return true
 
-    @element.find('.translation-area, input').attr 'disabled', 'disabled'
+    # if this is a reviewer edit, fill in the data and show reason modal
+    if @parent.enable_reasons && @parent.role == 'reviewer' && @copy_field.val() != @translation.copy
+      $('#reason_trigger').click()
+      return false
 
-    # find checked locales to which this translation copy should be copied to
-    copyToLocales = @element.find('.multi-updateable-translations input[type=checkbox]:checked').map(() -> this.value).get()
-
-    searchParams = (new URL(document.location)).searchParams
-    sha = searchParams.get('commit')
-    articleId = searchParams.get('article_id')
-
-    params = {
-      'translation[copy]': @element.find('.translation-area').val(),
-      copyToLocales: copyToLocales,
-    }
-    params['commit'] = sha if sha
-    params['article_id'] = articleId if articleId
-
-    $.ajax @translation.url + '.json',
-      type: 'PUT'
-      data: $.param(params)
-      complete: => @element.find('.translation-area, textarea').removeAttr 'disabled', 'disabled'
-      success: (new_translation) => this.refresh new_translation
-      error: (xhr, textStatus, errorThrown) => new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
+    @saveTranslation(@translation, @element)
     return true
 
   # Re-renders the cell using a new translation object (loaded from JSON).
@@ -116,6 +100,31 @@ class TranslationItem
 
   findFuzzyMatches: ->
     loadFuzzyMatches(@fuzzy_matches, @copy_field, @translation.fuzzy_match_url, @translation.source_copy)
+
+
+  saveTranslation: (translation, element, reason_ids = []) ->
+    # find checked locales to which this translation copy should be copied to
+    copyToLocales = element.find('.multi-updateable-translations input[type=checkbox]:checked').map(() -> this.value).get()
+    element.find('.translation-area, input').attr 'disabled', 'disabled'
+
+    copy = @element.find('.translation-area').val()
+    params = (new URL(document.location)).searchParams
+    sha = params.get('commit')
+    articleId = params.get('article_id')
+
+    ajaxParams = {}
+    ajaxParams['translation[copy]'] = copy
+    ajaxParams['copyToLocales'] = copyToLocales
+    ajaxParams['commit'] = sha
+    ajaxParams['reason_ids'] = reason_ids if reason_ids.length
+    ajaxParams['article_id'] = articleId if articleId
+
+    $.ajax translation.url + '.json',
+      type: 'PUT'
+      data: $.param(ajaxParams)
+      complete: => element.find('.translation-area, textarea').removeAttr 'disabled', 'disabled'
+      success: (new_translation) => this.refresh new_translation
+      error: (xhr, textStatus, errorThrown) => new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
 
   # @private
   build: ->
@@ -152,6 +161,23 @@ class TranslationItem
       context.approved = @translation.approved
       context.reviewer = @translation.reviewer.name
 
+    if @translation.changes
+      # extract the reasons
+      reasons = @translation.changes.map (change) ->
+        change.reasons.map (reason) ->
+          id: reason.id,
+          text: "#{reason.category}: #{reason.name}"
+      # flatten array of reasons
+      reasons = reasons.reduce(((a, b) ->
+        a.concat b
+      ), [])
+
+      reasons.sort (a,b) ->
+        new Date(b.date) - new Date(a.date)
+
+      context.reasons = reasons
+
+
     @element = $(HoganTemplates['translationworkbench/translation_item'].render(context))
 
     @copy_field = @element.find('.translation-area').first()
@@ -183,6 +209,11 @@ class TranslationItem
     @copy_field.keydown (e) =>
       # hitting enter saves the field
       if e.keyCode == 13
+        # clear all active textareas
+        $('textarea.active').removeClass('active');
+        # and set this one active
+        $(e.currentTarget).addClass('active');
+
         e.preventDefault()
         this.submit() && this.advanceSelection()
         return false
@@ -372,8 +403,10 @@ class root.TranslationWorkbench
   # @param [Array] glossary A JSON-decoded list of glossary entries.
   # @param [String] url of the translations search page
   # @param [Object] JSON of translation information
+  # @param [String] role of the current user
+  # @param [Boolean] whether or not to show reviewers the reason modal on save
   #
-  constructor: (@list, @search_url, @glossary, @translations) ->
+  constructor: (@list, @search_url, @glossary, @translations, @role, @enable_reasons) ->
     @highlighter = $(HoganTemplates['translationworkbench/translation_tooltip'].render())
     @highlighter.find('.tool-item.hide').click =>
       @highlighter.hide()
@@ -385,6 +418,7 @@ class root.TranslationWorkbench
     @items = []
     @highlighter.appendTo @list
     @addItems @translations
+    @setupReasonsModal()
 
   # @private
   addItems: (translations) ->
@@ -397,3 +431,113 @@ class root.TranslationWorkbench
         @items.push item
         previousItem = item
     @list.find(".translation-area").autosize()
+
+  setupReasonsModal: ->
+    $modal = $('#add-translation-reasons')
+
+    $('[data-toggle="tooltip"]', $modal).tooltip()
+    $('[data-toggle="popover"]', $modal).popover
+      html: true
+      content: ->
+        content = $(this).attr('data-popover-content')
+        $(content).children('.popover-body').html()
+      title: ->
+        title = $(this).attr('data-popover-content')
+        $(title).children('.popover-heading').html()
+
+    $modal.on 'shown.bs.dropdown', ->
+      $('#dropdown-search').focus()
+
+    # modal drop-drop down checkboxes
+    # handle clicking on a li and checking/unchecking the checkbox
+    # and update the UI (badges, review, and button badge (count))
+    $('.dropdown-menu li:not(.no-padding)', $modal).on 'click', (event) ->
+      $target = $(event.currentTarget)
+      $inp = $target.find('input[type=checkbox]')
+      return unless $inp.length
+      text = $inp.parent().text()
+      $area = $('.translation-area.active').parent()
+      $btn_badge = $('.reason-btn .badge')
+      $review = $('#reason-review-popover .popover-body ul')
+      $save_btn = $('.save-btn', $modal)
+
+      setTimeout ->
+        $inp.prop 'checked', !$inp.prop('checked')
+        checked = $inp.prop('checked')
+        if checked
+          $save_btn.removeAttr('disabled')
+          $area.append(
+            "<span class=\"badge badge-secondary\"
+            data-checkbox=\"#{$inp.val()}\">#{text}</span>"
+          )
+          $review.append("<li data-checkbox=\"#{$inp.val()}\">#{text}</li>")
+          $btn_badge.text(parseInt($btn_badge.text()) + 1)
+        else
+          item_count = parseInt(parseInt($btn_badge.text()) - 1)
+          $save_btn.attr('disabled', 'disabled') unless item_count
+          $area.find(".badge[data-checkbox='#{$inp.val()}']:not(.saved)").remove()
+          $review.find("[data-checkbox='#{$inp.val()}']").remove()
+          $btn_badge.text(item_count)
+      , 0
+
+      $(event.target).blur()
+      false
+
+    $('#dropdown-search').on 'keyup', ->
+      search_regex = new RegExp(this.value, 'i')
+      $('.dropdown-menu li:not(.no-padding)', $modal).each ->
+        $this = $(this)
+        string_value = "#{$this.text()} #{$('i', $this).data('original-title')}"
+        if search_regex.test string_value
+          $(this).fadeIn('fast')
+        else
+          $(this).fadeOut('fast')
+
+    $('.undo-btn', $modal).on 'click', =>
+      $trans = $('.translation-area.active')
+      $trans.parent().find('.badge:not(.saved)').remove()
+      item = @items.find (item) ->
+        item.copy_field.hasClass 'active'
+      $trans.val(item.translation.copy)
+      $('#add-translation-reasons .close').click()
+      $trans.keyup()
+      $trans.focus()
+
+    $('.save-btn', $modal).on 'click', =>
+      $modal = $('#add-translation-reasons')
+      $trans = $('.translation-area.active')
+
+      item = @items.find (item) ->
+        item.copy_field.hasClass 'active'
+
+      reason_ids = $('input:checked', $modal).map ->
+        this.value
+
+      if reason_ids.length
+        item.saveTranslation(item.translation, item.element, reason_ids.toArray())
+        $('.close', $modal).click()
+        $trans.keyup()
+        $trans.focus()
+
+    $(document).on 'leanModal.shown', ->
+      $modal = $('#add-translation-reasons')
+      $badges = $('.translation-area.active').parent().find('.badge')
+      $btn_badge = $('.reason-btn .badge')
+      $review = $('#reason-review-popover .popover-body ul')
+      $('.save-btn', $modal).removeAttr('disabled') if $badges.length
+
+      for badge in $badges
+        $modal.find("[value=#{$(badge).data('checkbox')}]").prop 'checked', true
+        $btn_badge.text(parseInt($btn_badge.text()) + 1)
+        $review.append("<li data-checkbox=\"#{$(badge).data('checkbox')}\">
+          #{$(badge).text()}</li>"
+        )
+
+    $(document).on 'leanModal.hidden', ->
+      $btn_badge = $('.reason-btn .badge')
+      $btn_badge.text('0')
+
+      $('#reason-review-popover .popover-body ul li').remove()
+      $('#dropdown-search').val('')
+      $('.dropdown-menu li:not(.no-padding)', $modal).fadeIn('fast')
+      $('input[type=checkbox]', $modal).prop 'checked', false

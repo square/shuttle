@@ -174,8 +174,10 @@ class root.HashField
       new_key = key_field.val() || locale
       if new_key?.length > 0
         value_field.attr 'name', "#{this.name()}[#{new_key}]"
+        value_field.attr 'data-name', "#{this.name()}[#{new_key}]"
       else
         value_field.removeAttr 'name'
+        value_field.removeAttr 'data-name'
     key_field.keyup refreshName
     key_field.change refreshName
     key_field.on 'typeahead:change', (evt, locale) =>

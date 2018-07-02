@@ -323,7 +323,36 @@ ALTER SEQUENCE public.daily_metrics_id_seq OWNED BY public.daily_metrics.id;
 
 
 --
--- Name: issues; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: edit_reasons; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE edit_reasons (
+    id integer NOT NULL,
+    reason_id integer,
+    translation_change_id integer
+);
+
+
+--
+-- Name: edit_reasons_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE edit_reasons_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: edit_reasons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE edit_reasons_id_seq OWNED BY edit_reasons.id;
+--
+-- Name: issues; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.issues (
@@ -533,7 +562,41 @@ ALTER SEQUENCE public.projects_id_seq OWNED BY public.projects.id;
 
 
 --
--- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: reasons; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE reasons (
+    id integer NOT NULL,
+    name character varying NOT NULL,
+    category character varying NOT NULL,
+    description character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: reasons_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE reasons_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: reasons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE reasons_id_seq OWNED BY reasons.id;
+
+
+--
+-- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.schema_migrations (

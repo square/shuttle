@@ -50,8 +50,47 @@ body.projects {
 
   .translation-workbench {
     border-top: 1px solid #dfdfdf;
+
+    .badge {
+      margin-left: 3px;
+    }
   }
-  
+
+  .modal {
+    ul.dropdown-menu {
+      height: 400px;
+      overflow: scroll;
+      padding: 0 15px;
+      min-width: 275px;
+
+      li {
+        padding: 10px;
+
+        &.no-padding {
+          padding: 0;
+          margin: 0 -15px 10px;
+        }
+        #dropdown-search {
+          border: none;
+          outline: none;
+          background: #ededed;
+          font-size: 1.1rem;
+          height: 50px;
+        }
+      }
+    }
+
+    button {
+      &.pull-right {
+        margin-left: 20px;
+      }
+
+      .badge-left {
+        margin: 0 10px 0 0;
+      }
+    }
+  }
+
   &#projects-show {
     .locale-select {
       select[name='commit'] { width: 300px; }
@@ -87,15 +126,15 @@ body.projects {
             }
           }
         }
-        
+
         .controls {
           &.checkboxes_and_radios {
             &:first-of-type {
               margin-top: 10px;
-              border-top: 1px solid $gray5;              
+              border-top: 1px solid $gray5;
             }
 
-            &:last-of-type { 
+            &:last-of-type {
               margin-bottom: 30px;
             }
 
@@ -106,7 +145,7 @@ body.projects {
               padding-right: 40px;
             }
           }
-          
+
 
           label {
             font-weight: 400;
@@ -122,7 +161,7 @@ body.projects {
           }
 
           input[type="checkbox"], input[type="radio"] {
-            margin-right: 10px; 
+            margin-right: 10px;
             margin-top: 3px;
             float: right;
             width: auto;
@@ -149,6 +188,23 @@ body.projects {
     ul {
       list-style-type: disc;
       margin-left: 20px;
+    }
+  }
+
+  .tooltip.show {
+    display: block;
+    z-index: 99999;
+  }
+  .popover {
+    z-index: 99999;
+
+    .popover-header {
+      margin: 0;
+    }
+
+    ul {
+      list-style-type: square;
+      padding: 0 20px;
     }
   }
 }

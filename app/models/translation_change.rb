@@ -32,6 +32,8 @@ class TranslationChange < ActiveRecord::Base
   belongs_to :user
   belongs_to :project
   belongs_to :article
+  has_many :edit_reasons
+  has_many :reasons, through: :edit_reasons
 
   serialize :diff, Hash
 
@@ -49,7 +51,7 @@ class TranslationChange < ActiveRecord::Base
       commit = (params[:commit] == 'Save') ? nil : params[:commit]
       article_id = params[:article_id] || translation.article&.id
 
-      TranslationChange.create(
+      tran = TranslationChange.create(
         translation: translation,
         user: translation.modifier,
         diff: diff,
@@ -60,7 +62,22 @@ class TranslationChange < ActiveRecord::Base
         article_id: article_id,
         project_id: project_id
       )
+      tran.reason_ids = params[:reason_ids] if params[:reason_ids]
     end
+  end
+
+  def as_json(options=nil)
+    options ||= {}
+
+    options[:methods] = Array.wrap(options[:methods])
+    options[:methods] << :reasons
+
+    options[:except] = Array.wrap(options[:only])
+    options[:except] << :tm_match
+    options[:except] << :translation_id
+    options[:except] << :project_id
+
+    super options
   end
 
   def differ

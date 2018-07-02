@@ -52,5 +52,7 @@ $(document).ready ->
     $(".translation-workbench"),
     "<%= search_translations_url(:target_locales => @locale.rfc5646) %>",
     JSON.parse("<%= escape_javascript @glossary_entries.to_json %>"),
-    JSON.parse('<%= escape_javascript @presenter.decorate_translations(@translations) %>')
+    JSON.parse('<%= escape_javascript @presenter.decorate_translations(@translations) %>'),
+    "<%= @presenter.role %>",
+    "<%= Shuttle::Configuration.workbench.enable_reasons %>"
   )
