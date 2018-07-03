@@ -33,6 +33,7 @@ gem 'elasticsearch-dsl'
 
 # VIEWS
 gem 'jquery-rails'
+gem 'bootstrap'
 gem 'font-awesome-rails'
 gem 'twitter-typeahead-rails'
 gem 'dropzonejs-rails'

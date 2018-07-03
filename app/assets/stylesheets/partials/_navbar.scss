@@ -55,6 +55,7 @@ $navbar-min-width: 910px;
     .nav-link {
       display: block;
       padding: .5em 1em;
+      font-size: 12px;
 
       &.active {
         a {
@@ -83,13 +84,10 @@ $navbar-min-width: 910px;
           float: right;
         }
 
-        &:nth-last-child(2) {
-          float: right;
-        }
-
         &.worker-status {
           margin: -1.3em 0;
           line-height: 55px;
+          float: right;
         }
       }
     }

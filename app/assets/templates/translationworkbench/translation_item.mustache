@@ -2,7 +2,7 @@
   <!-- TRANSLATION SIDE -->
   <div class="row">
     <div class="eight columns left">
-      <div class="translation-side"> 
+      <div class="translation-side">
         <textarea class="translation-area {{status}}">{{translation_copy}}</textarea>
 
         {{#multi_updateable_translations_and_locale_associations.0}}
@@ -41,12 +41,16 @@
           <div class="half tips"></div>
           <div class="half alerts"></div>
         </div>
+
+        {{#reasons}}
+          <span class="badge badge-secondary saved" data-checkbox="{{id}}">{{text}}</span>
+        {{/reasons}}
       </div>
     </div>
 
     <!-- INFO SIDE -->
     <div class="eight columns right">
-      <div class="info-side"> 
+      <div class="info-side">
         <p class="source-copy">{{{source_copy}}}</p>
 
         <dl class="additional-info">
@@ -102,6 +106,6 @@
 
       </div>
     </div>
-  </div> 
-  <div class="entry-spacer"></div>   
+  </div>
+  <div class="entry-spacer"></div>
 </div>
