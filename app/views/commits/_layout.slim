@@ -39,7 +39,7 @@
     strong
       - if @commit.loading?
         - if @commit.import_batch_status
-          - current_status = "Loading With #{pluralize_with_delimiter @commit.import_batch_status.pending, 'Job'} Remaining" 
+          - current_status = "Loading With #{pluralize_with_delimiter @commit.import_batch_status.pending, 'Job'} Remaining"
         - else
           - current_status = "Hung (Loading, No Import Batch)"
       - elsif @commit.ready?
@@ -52,8 +52,8 @@
       span.separator &nbsp;/&nbsp;
       = "Found #{@commit.keys.count} Keys"
       span.separator &nbsp;/&nbsp;
-      - if @commit.completed_at
-        = "First Completed #{time_ago_in_words(@commit.completed_at)} ago"
+      - if @commit.approved_at
+        = "First Completed #{time_ago_in_words(@commit.approved_at)} ago"
       - elsif @commit.loaded_at
         = "First Loaded #{time_ago_in_words(@commit.loaded_at)} ago"
       - else

@@ -139,8 +139,8 @@ RSpec.describe Commit do
       expect(@commit.loaded_at.to_time).to eql(@created_at + 3.hours)
     end
 
-    it "should persist the completed_at time" do
-      expect(@commit.completed_at.to_time).to eql(@created_at + 6.hours)
+    it "should persist the approved_at time" do
+      expect(@commit.approved_at.to_time).to eql(@created_at + 6.hours)
     end
   end
 
@@ -173,7 +173,7 @@ RSpec.describe Commit do
       @project = FactoryBot.create(:project, repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s)
       @commit  = @project.commit!('HEAD', skip_import: true)
       @commit.keys.each(&:destroy)
-      @commit.update_attribute(:completed_at, nil)
+      @commit.update_attribute(:approved_at, nil)
     end
 
     context "has never loaded" do
@@ -207,7 +207,7 @@ RSpec.describe Commit do
         expect(@commit).not_to be_ready
       end
 
-      it "completed_at should remain nil if not ready" do
+      it "approved_at should remain nil if not ready" do
         @commit.keys << FactoryBot.create(:key)
         @commit.keys << FactoryBot.create(:key)
         FactoryBot.create(:translation, copy: nil, key: @commit.keys.last)
@@ -215,7 +215,7 @@ RSpec.describe Commit do
 
         @commit.recalculate_ready!
         expect(@commit).not_to be_ready
-        expect(@commit.completed_at).to be_nil
+        expect(@commit.approved_at).to be_nil
       end
 
       it "should set ready to true for commits with all ready keys" do
@@ -229,7 +229,7 @@ RSpec.describe Commit do
         expect(@commit).to be_ready
       end
 
-      it "should set completed_at to current time when ready" do
+      it "should set approved_at to current time when ready" do
         Timecop.freeze(Time.now)
         start_time = Time.now
 
@@ -239,22 +239,22 @@ RSpec.describe Commit do
         @commit.recalculate_ready!
         expect(@commit).to be_ready
 
-        expect(@commit.completed_at).to eql(start_time + 1.day)
+        expect(@commit.approved_at).to eql(start_time + 1.day)
         Timecop.return
       end
 
-      it "should not change completed_at if commit goes from ready to unready." do
+      it "should not change approved_at if commit goes from ready to unready." do
         @commit.keys << FactoryBot.create(:key)
         @commit.recalculate_ready!
         expect(@commit).to be_ready
-        completed_time = @commit.completed_at
+        completed_time = @commit.approved_at
 
         FactoryBot.create(:translation, copy: nil, key: @commit.keys.last)
         @commit.keys.last.recalculate_ready!
         @commit.recalculate_ready!
 
         expect(@commit).not_to be_ready
-        expect(@commit.completed_at).to eql(completed_time)
+        expect(@commit.approved_at).to eql(completed_time)
       end
 
       it "should not set ready if there are import errors in postgres" do
