@@ -236,7 +236,7 @@ CREATE TABLE public.commits (
     due_date date,
     priority integer,
     user_id integer,
-    completed_at timestamp without time zone,
+    approved_at timestamp without time zone,
     exported boolean DEFAULT false NOT NULL,
     loaded_at timestamp without time zone,
     description text,
@@ -1923,3 +1923,4 @@ INSERT INTO schema_migrations (version) VALUES ('20180525005743');
 
 INSERT INTO schema_migrations (version) VALUES ('20180608004859');
 
+INSERT INTO schema_migrations (version) VALUES ('20180722180453');

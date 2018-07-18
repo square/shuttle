@@ -25,6 +25,10 @@ gem 'find_or_create_on_scopes'
 gem 'rails-observers'
 gem 'after-commit-on-action'
 
+# REPORTING
+gem 'postgres_ext'
+gem 'active_record_union'
+
 # ElASTICSEARCH
 gem 'elasticsearch', '< 6.0'
 gem 'elasticsearch-rails'
