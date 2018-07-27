@@ -18,6 +18,10 @@ every 30.minutes, roles: [:primary_cron] do
   runner 'AutoImporter.perform_once'
 end
 
+every 5.minutes, roles: [:primary_cron] do
+  runner 'SidekiqWorkerRestarter.perform_once'
+end
+
 every :day, at: '12:00 am', roles: [:primary_cron] do
   rake 'metrics:update'
 end
