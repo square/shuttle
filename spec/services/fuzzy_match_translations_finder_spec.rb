@@ -39,14 +39,15 @@ RSpec.describe FuzzyMatchTranslationsFinder do
       expect(finder.top_fuzzy_match_percentage).to eq 0.0
     end
 
-    it "should return 0.0 if the top fuzzy match is < 70%" do
-      # create a translation that will be used for lookup for tm_match (note: this is a 60% match)
+    it "should return 0.0 if the top fuzzy match is < 60%" do
+      # create a translation that will be used for lookup for tm_match
       FactoryBot.create(:translation, copy: "oui monsieur ", source_copy: 'yes sir', approved: true, translated: true, rfc5646_locale: 'fr')
 
       # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
       regenerate_elastic_search_indexes
 
-      translation = FactoryBot.build(:translation, source_copy: 'yes', rfc5646_locale: 'fr')
+      # create a translation that will matches the above one with 57%
+      translation = FactoryBot.build(:translation, source_copy: 'yes madam', rfc5646_locale: 'fr')
       finder = FuzzyMatchTranslationsFinder.new('yes', translation)
       expect(finder.top_fuzzy_match_percentage).to eq 0.0
     end
