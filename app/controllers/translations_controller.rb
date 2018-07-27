@@ -299,7 +299,7 @@ class TranslationsController < ApplicationController
           rfc5646_locale: translation.rfc5646_locale,
           project_name: translation.key.project.name.truncate(30)
       }
-    end.reject { |t| t[:match_percentage] < 70 }
+    end.reject { |t| t[:match_percentage] < FuzzyMatchTranslationsFinder::MINIMUM_FUZZY_MATCH }
     translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
   end
 end
