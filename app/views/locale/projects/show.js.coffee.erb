@@ -15,6 +15,7 @@
 $(document).ready ->
   locale_field = $('#locale-field')
   commit_select = $("select[name='commit']")
+  asset_id = $("input[name='asset_id']").val()
   article_id = $("input[name='article_id']").val()
   section_select = $("select[name='section_id']")
   group = $("input[name='group']").val()
@@ -33,6 +34,7 @@ $(document).ready ->
     url += "article_id=#{article_id}" if article_id
     url += "&section_id=#{section_id}" if section_id
     url += "group=#{group}" if group
+    url += "asset_id=#{asset_id}" if asset_id
     window.location = url
 
   gallery_link.click () ->

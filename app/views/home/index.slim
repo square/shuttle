@@ -20,5 +20,8 @@
 = render partial: 'home/items', locals: { item_type: 'commit', items: @commits }
 = render partial: 'home/items', locals: { item_type: 'article', items: @articles }
 
+- if Shuttle::Configuration.features.enable_assets
+  = render partial: 'home/items', locals: { item_type: 'asset', items: @assets }
+
 - if Shuttle::Configuration.workbench.show_article_groups
   = render partial: 'home/items', locals: { item_type: 'group', items: @groups}

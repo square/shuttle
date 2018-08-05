@@ -23,6 +23,10 @@ en:
           attributes:
             base:
               not_finished: latest requested import is not yet finished
+        asset:
+          attributes:
+            base:
+              not_finished: latest requested import is not yet finished
         locale_association:
           attributes:
             target_rfc5646_locale:
@@ -32,6 +36,9 @@ en:
               cannot_disable_uncheck_if_its_not_checked: cannot disable unchecking if it's not checked by default
     attributes:
       article:
+        base_rfc5646_locale: source locale
+        targeted_rfc5646_locales: targeted localizations
+      asset:
         base_rfc5646_locale: source locale
         targeted_rfc5646_locales: targeted localizations
       project:
@@ -161,6 +168,9 @@ en:
         header: Articles
       groups:
         header: Article Groups
+    assets:
+      project_not_found: Invalid project
+      asset_not_found: Asset doesn't exist
     commits:
       blank_repository_url: This project does not have a repository url. This action only applies to projects that have a repository.
       create:
@@ -246,6 +256,12 @@ en:
         2: P2
         3: P3
     group:
+      priority:
+        0: P0
+        1: P1
+        2: P2
+        3: P3  
+    asset:
       priority:
         0: P0
         1: P1

@@ -12,6 +12,13 @@ body.home {
     }
   }
 
+  #assets {
+    #new_project_asset_id {
+      width: 60%;
+      margin: 20px;
+    }
+  }
+
   .filter-bar {
     input[type="submit"] { width: 125px; margin-left: 15px; }
     select[name="filter__rfc5646_locales"] { width: 200px; }
@@ -32,7 +39,7 @@ body.home {
 
   table.items-table {
     th:first-child {
-      padding: 0px; 
+      padding: 0px;
     }
 
     tbody {
@@ -53,7 +60,7 @@ body.home {
 
           &.due-date { width: 110px;}
           &.centered { text-align: center; }
-          
+
           select { width: 100%; }
           input[type="text"] { width: 110px; }
           a { text-decoration: underline; }
