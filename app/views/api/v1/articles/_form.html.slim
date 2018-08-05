@@ -57,13 +57,13 @@
           = f.label :email, class: 'control-label'
           .controls
             = f.text_field :email, value: (@article.email || current_user.email), class: 'tooltip-parent' , 'data-tooltip' => '#article-email'
-            .tooltip#article-email So that translators can contact you if something comes up!
+            .qtip-tooltip#article-email So that translators can contact you if something comes up!
 
         .control-group
           = f.label :description, class: 'control-label'
           .controls
             = f.text_area :description, rows: 6, class: 'tooltip-parent' , 'data-tooltip' => '#article-description'
-            .tooltip#article-description So that translators understand the context!
+            .qtip-tooltip#article-description So that translators understand the context!
 
       fieldset
         legend Sections

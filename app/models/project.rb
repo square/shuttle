@@ -78,6 +78,8 @@ class Project < ActiveRecord::Base
   #   and add an error to the `repository_url` attribute if it cannot.
   attr_accessor :validate_repo_connectivity
 
+  enum job_type: [:commit, :article, :asset]
+
   has_many :commits, inverse_of: :project, dependent: :destroy
   has_many :keys, inverse_of: :project, dependent: :destroy
   has_many :blobs, inverse_of: :project, dependent: :delete_all
@@ -85,6 +87,7 @@ class Project < ActiveRecord::Base
   has_many :articles, inverse_of: :project
   has_many :groups, inverse_of: :project, dependent: :destroy
   has_many :sections, through: :articles
+  has_many :assets, inverse_of: :project
 
   serialize :skip_imports,             Array
   serialize :key_exclusions,           Array
@@ -130,6 +133,7 @@ class Project < ActiveRecord::Base
   validate :can_clone_repo, if: :validate_repo_connectivity
 
   validates :article_webhook_url, format: URI::regexp(%w(http https)), allow_nil: true
+  validates :job_type, presence: true
 
   before_validation :create_api_token, on: :create
   before_validation { |obj| obj.skip_imports.reject!(&:blank?) }

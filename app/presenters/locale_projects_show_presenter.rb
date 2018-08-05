@@ -47,6 +47,12 @@ class LocaleProjectsShowPresenter
     @_selected_article ||= @project.articles.find_by_id(form[:article_id])
   end
 
+  # @return [Asset, nil] selected Asset if there is one
+
+  def selected_asset
+    @_selected_asset ||= @project.assets.find_by_id(form[:asset_id])
+  end
+
   # @return [Array<Pair<String, String>>] an array of selectable options for Sections
 
   def selectable_sections

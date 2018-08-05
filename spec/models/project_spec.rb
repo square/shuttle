@@ -51,7 +51,7 @@ RSpec.describe Project do
     it "doesn't create a project if targeted_rfc5646_locales is empty hash" do
       project = Project.create(name: "test", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {})
       expect(project).to_not be_persisted
-      expect(project.errors.full_messages).to eql(["targeted localizations can’t be blank"])
+      expect(project.errors.full_messages).to include("targeted localizations can’t be blank")
     end
 
     it "creates a valid project even if article_webhook_url is empty" do
@@ -63,13 +63,19 @@ RSpec.describe Project do
     it "doesn't create a project if article_webhook_url has not a valid format" do
       project = Project.create(name: "Project with an invalid article_webhook_url", article_webhook_url: "localhost", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
       expect(project).to_not be_persisted
-      expect(project.errors.full_messages).to eql(["Article webhook url invalid"])
+      expect(project.errors.full_messages).to include("Article webhook url invalid")
     end
 
     it "creates a valid project when a valid article_webhook_url is given" do
       project = Project.create(name: "Project with an empty article_webhook_url", article_webhook_url: "https://example.com", base_rfc5646_locale: 'en', targeted_rfc5646_locales: {'fr' => true})
       expect(project).to be_valid
       expect(project).to be_persisted
+    end
+
+    it "doesn't create a project if job_type is empty" do
+      project = Project.create(name: "Foo", job_type: nil)
+      expect(project).to_not be_persisted
+      expect(project.errors.full_messages).to include("Job type can’t be blank")
     end
   end
 

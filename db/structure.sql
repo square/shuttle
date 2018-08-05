@@ -122,6 +122,89 @@ ALTER SEQUENCE public.articles_id_seq OWNED BY public.articles.id;
 
 
 --
+-- Name: assets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE assets (
+    id integer NOT NULL,
+    name character varying NOT NULL,
+    project_id integer NOT NULL,
+    user_id integer NOT NULL,
+    base_rfc5646_locale character varying NOT NULL,
+    targeted_rfc5646_locales text NOT NULL,
+    description text,
+    email character varying,
+    priority integer,
+    due_date timestamp without time zone,
+    ready boolean DEFAULT false NOT NULL,
+    loading boolean DEFAULT false NOT NULL,
+    approved_at timestamp without time zone,
+    hidden boolean DEFAULT false NOT NULL,
+    file_name character varying NOT NULL,
+    import_batch_id character varying,
+    file_file_name character varying,
+    file_content_type character varying,
+    file_file_size integer,
+    file_updated_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: assets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE assets_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: assets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE assets_id_seq OWNED BY assets.id;
+
+
+--
+-- Name: assets_keys; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE assets_keys (
+    id integer NOT NULL,
+    asset_id integer,
+    key_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: assets_keys_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE assets_keys_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: assets_keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE assets_keys_id_seq OWNED BY assets_keys.id;
+
+
+--
 -- Name: blobs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -619,6 +702,7 @@ CREATE TABLE public.projects (
     stash_webhook_url text,
     api_token character(240) NOT NULL,
     article_webhook_url character varying,
+    job_type smallint DEFAULT 0 NOT NULL,
     CONSTRAINT projects_name_check CHECK ((char_length((name)::text) > 0))
 );
 
@@ -974,6 +1058,11 @@ ALTER TABLE ONLY public.article_groups ALTER COLUMN id SET DEFAULT nextval('publ
 --
 
 ALTER TABLE ONLY public.articles ALTER COLUMN id SET DEFAULT nextval('public.articles_id_seq'::regclass);
+--
+-- Name: assets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY assets ALTER COLUMN id SET DEFAULT nextval('assets_id_seq'::regclass);
 
 
 --
@@ -1396,6 +1485,20 @@ CREATE UNIQUE INDEX index_articles_on_project_id_and_name_sha ON public.articles
 --
 
 CREATE INDEX index_articles_on_ready ON public.articles USING btree (ready);
+
+
+--
+-- Name: index_assets_on_project_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_assets_on_project_id ON public.assets USING btree (project_id);
+
+
+--
+-- Name: index_assets_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_assets_on_user_id ON public.assets USING btree (user_id);
 
 
 --
@@ -2149,7 +2252,10 @@ INSERT INTO schema_migrations (version) VALUES ('20180608004859');
 
 INSERT INTO schema_migrations (version) VALUES ('20180722180453');
 
+INSERT INTO schema_migrations (version) VALUES ('20180803153222');
+
 INSERT INTO schema_migrations (version) VALUES ('20180814210040');
 
 INSERT INTO schema_migrations (version) VALUES ('20180814210112');
 
+INSERT INTO schema_migrations (version) VALUES ('20180825234430');

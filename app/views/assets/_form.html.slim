@@ -1,0 +1,77 @@
+/ Copyright 2018 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+= form_for @asset, url: (@asset.persisted? ? project_asset_path(@project, @asset) : project_assets_path(@project)), \
+                  method: (@asset.persisted? ? :patch : :post ), html: { multipart: true } do |f|
+
+  .row
+    .thirteen.columns
+      fieldset
+        .control-group
+          = f.label :project, class: 'control-label'
+          .controls
+            = @project.name
+
+        .control-group
+          = f.label :name, class: 'control-label'
+          .controls
+            = f.text_field :name, class: 'tooltip-parent', 'data-tooltip' => '#asset-name'
+            .qtip-tooltip#asset-name This is a "friendly" name for the asset.
+
+        .control-group
+          = f.label :file, class: 'control-label'
+          .controls
+            = f.file_field :file, class: 'tooltip-parent', 'data-tooltip' => '#asset-file'
+            .qtip-tooltip#asset-file The asset requires a file.
+
+        .control-group
+          = f.label :priority, class: 'control-label'
+          .controls
+            = @asset.priority || '-'
+
+        .control-group
+          = f.label :due_date, class: 'control-label'
+          .controls
+            = @asset.due_date || '-'
+
+        .control-group
+          = f.label :base_rfc5646_locale, class: 'control-label'
+          .controls
+            = (@asset.persisted? ? @asset : @project).base_rfc5646_locale
+
+        .control-group
+          = f.label :required_rfc5646_locales, 'Required Localizations', class: 'control-label'
+          .controls
+            = (@asset.persisted? ? @asset : @project).required_rfc5646_locales.join(', ').presence || '-'
+
+        .control-group
+          = f.label :other_rfc5646_locales, 'Other Localizations', class: 'control-label'
+          .controls
+            = (@asset.persisted? ? @asset : @project).other_rfc5646_locales.join(', ').presence || '-'
+
+        .control-group
+          = f.label :email, class: 'control-label'
+          .controls
+            = f.text_field :email, value: (@asset.email || current_user.email), class: 'tooltip-parent' , 'data-tooltip' => '#asset-email'
+            .qtip-tooltip#asset-email So that translators can contact you if something comes up!
+
+        .control-group
+          = f.label :description, class: 'control-label'
+          .controls
+            = f.text_area :description, rows: 6, class: 'tooltip-parent' , 'data-tooltip' => '#asset-description'
+            .qtip-tooltip#asset-description So that translators understand the context!
+
+  .form-actions
+    = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
+    button.default href=(@asset.persisted? ? project_asset_path(@project, @asset) : root_path) Cancel

@@ -66,6 +66,7 @@ gem 'parslet'
 gem 'mustache'
 gem 'html_validation'
 gem 'diff-lcs'
+gem 'rubyXL', github: 'weshatheleopard/rubyXL'
 
 # EXPORTING
 gem 'libarchive'
@@ -104,6 +105,9 @@ group :development do
   gem 'redcarpet', require: nil
   gem 'yard', require: nil, platform: :mri
   gem 'better_errors'
+  gem 'guard-rspec', require: false
+  gem 'spring'
+  gem 'spring-commands-rspec'
 end
 
 group :test do

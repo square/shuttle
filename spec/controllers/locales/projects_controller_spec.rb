@@ -165,7 +165,7 @@ RSpec.describe Locale::ProjectsController do
         allow_any_instance_of(Article).to receive(:import!) # prevent auto import
         reset_elastic_search
 
-        @project = FactoryBot.create(:project, repository_url: nil)
+        @project = FactoryBot.create(:project, repository_url: nil, job_type: :article)
         @article = FactoryBot.create(:article, project: @project)
         @section1 = FactoryBot.create(:section, article: @article)
         @section2 = FactoryBot.create(:section, article: @article)
