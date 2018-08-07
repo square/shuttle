@@ -74,7 +74,7 @@ RSpec.describe CommitObserver do
         end
 
         it "does not send an email if the commit was previously ready" do
-          @commit = FactoryBot.create(:commit, loading: true, loaded_at: nil, user: FactoryBot.create(:user), completed_at: 1.day.ago)
+          @commit = FactoryBot.create(:commit, loading: true, loaded_at: nil, user: FactoryBot.create(:user), approved_at: 1.day.ago)
           ActionMailer::Base.deliveries.clear
           @commit.loading = false
           @commit.save!

@@ -21,7 +21,7 @@ namespace :metrics do
     date_range = date...(date + 1.day)
 
     commits_loaded = Commit.includes(:project).where(loaded_at: date_range)
-    commits_completed = Commit.includes(:project).where(completed_at: date_range)
+    commits_completed = Commit.includes(:project).where(approved_at: date_range)
 
     translations_created = Translation.not_base.where(created_at: date_range)
     # Proxy for now.  Will require a "completed at" field for Translation in future
