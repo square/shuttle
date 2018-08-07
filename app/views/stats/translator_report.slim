@@ -18,6 +18,16 @@ hr.dividers
             = check_box_tag 'languages[]', language, true
             = language.upcase
     .control-group
+      = label_tag :report_type, nil, class: 'control-label'
+      .controls
+          label
+            = radio_button_tag :report_type, 'standard', true
+            | Translations or reviews completed in the date range
+          label
+            = radio_button_tag :report_type, 'completed', false
+            | Projects completed in the date range
+
+    .control-group
       = label_tag :exclude_internal, nil, class: 'control-label'
       .controls
           label

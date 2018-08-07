@@ -1,4 +1,4 @@
-# Copyright 2014 Square Inc.
+# Copyright 2014-2018 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ require 'fileutils'
 # | `loading`          | If `true`, there is at least one {BlobImporter} processing this Commit.                                  |
 # | `priority`         | An administrator-set priority arbitrarily defined as a number between 0 (highest) and 3 (lowest).        |
 # | `due_date`         | A date displayed to translators and reviewers informing them of when the Commit must be fully localized. |
-# | `completed_at`     | The date this Commit completed translation.                                                              |
+# | `approved _at`     | The date this Commit completed translation and has been approved.                                                              |
 # | `description`      | A user-submitted description of why we are localizing this commit.                                       |
 # | `pull_request_url` | A user-submitted URL to the pull request that is being localized.                                        |
 # | `import_batch_id`  | The ID of the Sidekiq batch of import jobs.                                                              |
@@ -138,7 +138,7 @@ class Commit < ActiveRecord::Base
   validates :due_date,
             timeliness: {type: :date},
             allow_nil:  true
-  validates :completed_at,
+  validates :approved_at,
             timeliness: {type: :date},
             allow_nil:  true
 
@@ -197,11 +197,11 @@ class Commit < ActiveRecord::Base
 
   # Calculates the value of the `ready` field and saves the record.
   # If this is the first time a commit has been marked as ready, sets
-  # completed_at to be the current time.
+  # approved_at to be the current time.
 
   def recalculate_ready!
     self.ready = successfully_loaded? && keys_are_ready? && !errored_during_import?
-    self.completed_at = Time.current if self.ready && self.completed_at.nil?
+    self.approved_at = Time.current if self.ready && self.approved_at.nil?
     index_elasticsearch_document
     save!
   end
