@@ -54,5 +54,5 @@ $(document).ready ->
     JSON.parse("<%= escape_javascript @glossary_entries.to_json %>"),
     JSON.parse('<%= escape_javascript @presenter.decorate_translations(@translations) %>'),
     "<%= @presenter.role %>",
-    "<%= Shuttle::Configuration.workbench.enable_reasons %>"
+    JSON.parse("<%= Shuttle::Configuration.workbench.enable_reasons %>")
   )
