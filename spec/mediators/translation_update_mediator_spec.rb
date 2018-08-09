@@ -73,6 +73,13 @@ RSpec.describe TranslationUpdateMediator do
       expect(@fr_translation.review_date).to be_nil
     end
 
+    it 'calls check_and_invoke_article_pinger' do
+      mediator = TranslationUpdateMediator.new(@fr_translation, translator, @params)
+      expect(mediator).to receive(:check_and_invoke_article_pinger).once
+
+      mediator.update!
+    end
+
     context "[update new record]" do
       it "sets the translation_date" do
         TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
@@ -329,6 +336,57 @@ RSpec.describe TranslationUpdateMediator do
       expect(translation.approved).to be_nil
       expect(translation.translator).to be_nil
       expect(translation.reviewer).to be_nil
+    end
+  end
+
+  describe '#check_and_invoke_article_pinger' do
+    let(:article_webhook_url) { 'https://webhooks.com/translation_ready' }
+    let(:project) { FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true }, article_webhook_url: article_webhook_url) }
+    let(:article) { FactoryBot.create(:article, project: project, targeted_rfc5646_locales: {'fr-CA' => true}, ready: false ) }
+    let(:section) { FactoryBot.create(:section, article: article) }
+    let(:key) { FactoryBot.create(:key, project: project, section: section) }
+    let(:translation) { FactoryBot.create(:translation, key: key, copy: nil, source_copy: 'test', translator: nil, rfc5646_locale: 'fr-CA') }
+    let(:params) { ActionController::Parameters.new(translation: { copy: 'test copy', notes: 'test note' }) }
+    let(:mediator) { TranslationUpdateMediator.new(translation, reviewer, params) }
+
+    before do
+      article.update(ready: true)
+    end
+
+    it 'enqueues ArticleWebhookPinger' do
+      expect(ArticleWebhookPinger).to receive(:perform_once).with(article.id).once
+
+      mediator.send(:check_and_invoke_article_pinger)
+    end
+
+    context 'with article not ready' do
+      it 'does not enqueue ArticleWebhookPinger' do
+        article.update(ready: false)
+        expect(ArticleWebhookPinger).to_not receive(:perform_once)
+
+        mediator.send(:check_and_invoke_article_pinger)
+      end
+    end
+
+    context 'with project without article_webhook_url' do
+      let(:article_webhook_url) { nil }
+
+      it 'does not enqueue ArticleWebhookPinger' do
+        expect(ArticleWebhookPinger).to_not receive(:perform_once)
+
+        mediator.send(:check_and_invoke_article_pinger)
+      end
+    end
+
+    context 'with translation for commit' do
+      let(:commit) { FactoryBot.create(:commit, project: project, ready: false) }
+      let(:key) { FactoryBot.create(:key, commits: [commit], ready: false) }
+
+      it 'does not enqueue ArticleWebhookPinger' do
+        expect(ArticleWebhookPinger).to_not receive(:perform_once)
+
+        mediator.send(:check_and_invoke_article_pinger)
+      end
     end
   end
 end
