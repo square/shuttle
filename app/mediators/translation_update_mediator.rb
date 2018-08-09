@@ -48,6 +48,7 @@ class TranslationUpdateMediator < BasicMediator
       end
     end
 
+    check_and_invoke_article_pinger
     KeyRecalculator.perform_once(@primary_translation.key_id) # Readiness hooks were skipped in the transaction above, now we gotta run them.
   rescue ActiveRecord::RecordInvalid => err
     add_errors(err.record.errors.full_messages.map { |msg| "(#{err.record.rfc5646_locale}): #{msg}" })
@@ -158,5 +159,12 @@ class TranslationUpdateMediator < BasicMediator
     translation.reviewer = nil
     translation.translation_date = nil
     translation.tm_match = nil
+  end
+
+  def check_and_invoke_article_pinger
+    article = @primary_translation.article
+    if article && article.project.article_webhook? && article.ready?
+      ArticleWebhookPinger.perform_once article.id
+    end
   end
 end
