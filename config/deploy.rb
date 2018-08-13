@@ -14,7 +14,7 @@
 
 set :application, 'shuttle'
 
-set :repo_url, 'https://stash.corp.squareup.com/scm/intl/shuttle.git'
+set :repo_url, 'https://git.sqcorp.co/scm/intl/shuttle.git'
 ask(:branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp })
 
 set :deploy_to, "/app/#{fetch :application}"
