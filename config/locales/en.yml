@@ -141,6 +141,12 @@ en:
           project_not_found: Invalid project
           invalid_api_token: Invalid project API TOKEN
           article_not_found: Article doesn't exist
+        groups:
+          project_not_found: Invalid project
+          invalid_api_token: Invalid project API TOKEN
+          group_not_found: Group does not exist
+          group_found: Group already exists
+          article_not_found: Article %{article_name} does not exist
     application:
       mass_assignment_security: You tried to modify something you weren’t allowed to!
       monitor_required: You must be a monitor to do that.

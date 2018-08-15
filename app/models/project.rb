@@ -41,6 +41,7 @@ require 'file_mutex'
 # | `translations` | The {Translation Translations} under this Project.   |
 # | `blobs`        | The Git {Blob Blobs} imported into this Project.     |
 # | `articles`     | The {Article Articles} imported into this Project.   |
+# | `groups`       | The {Group Groups} imported into this Project.       |
 #
 # Properties
 # ==========
@@ -82,6 +83,7 @@ class Project < ActiveRecord::Base
   has_many :blobs, inverse_of: :project, dependent: :delete_all
   has_many :translations, through: :keys
   has_many :articles, inverse_of: :project
+  has_many :groups, inverse_of: :project, dependent: :destroy
   has_many :sections, through: :articles
 
   serialize :skip_imports,             Array
