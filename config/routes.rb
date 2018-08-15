@@ -38,6 +38,7 @@ Rails.application.routes.draw do
             get :manifest, :issues
           end
         end
+        resources :groups, param: :name, only: [:index, :create, :update, :destroy, :show]
       end
     end
   end

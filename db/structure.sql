@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.9
--- Dumped by pg_dump version 9.6.9
+-- Dumped from database version 9.6.10
+-- Dumped by pg_dump version 9.6.10
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -32,6 +32,39 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 SET default_tablespace = '';
 
 SET default_with_oids = false;
+
+--
+-- Name: article_groups; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.article_groups (
+    id integer NOT NULL,
+    group_id integer NOT NULL,
+    article_id integer NOT NULL,
+    index_in_group integer NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: article_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.article_groups_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: article_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.article_groups_id_seq OWNED BY public.article_groups.id;
+
 
 --
 -- Name: articles; Type: TABLE; Schema: public; Owner: -
@@ -328,7 +361,7 @@ ALTER SEQUENCE public.daily_metrics_id_seq OWNED BY public.daily_metrics.id;
 -- Name: edit_reasons; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE edit_reasons (
+CREATE TABLE public.edit_reasons (
     id integer NOT NULL,
     reason_id integer,
     translation_change_id integer
@@ -339,8 +372,7 @@ CREATE TABLE edit_reasons (
 -- Name: edit_reasons_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE edit_reasons_id_seq
-    AS integer
+CREATE SEQUENCE public.edit_reasons_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -352,7 +384,54 @@ CREATE SEQUENCE edit_reasons_id_seq
 -- Name: edit_reasons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE edit_reasons_id_seq OWNED BY edit_reasons.id;
+ALTER SEQUENCE public.edit_reasons_id_seq OWNED BY public.edit_reasons.id;
+
+
+--
+-- Name: groups; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.groups (
+    id integer NOT NULL,
+    project_id integer NOT NULL,
+    name text NOT NULL,
+    description text,
+    ready boolean DEFAULT false NOT NULL,
+    loading boolean DEFAULT false NOT NULL,
+    hidden boolean DEFAULT false,
+    due_date date,
+    priority integer,
+    creator_id integer,
+    updater_id integer,
+    email character varying(255),
+    created_via_api boolean DEFAULT true NOT NULL,
+    loaded_at timestamp without time zone,
+    translated_at timestamp without time zone,
+    approved_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: groups_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.groups_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.groups_id_seq OWNED BY public.groups.id;
+
+
 --
 -- Name: issues; Type: TABLE; Schema: public; Owner: -
 --
@@ -567,7 +646,7 @@ ALTER SEQUENCE public.projects_id_seq OWNED BY public.projects.id;
 -- Name: reasons; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE reasons (
+CREATE TABLE public.reasons (
     id integer NOT NULL,
     name character varying NOT NULL,
     category character varying NOT NULL,
@@ -581,8 +660,7 @@ CREATE TABLE reasons (
 -- Name: reasons_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE reasons_id_seq
-    AS integer
+CREATE SEQUENCE public.reasons_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -594,7 +672,7 @@ CREATE SEQUENCE reasons_id_seq
 -- Name: reasons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE reasons_id_seq OWNED BY reasons.id;
+ALTER SEQUENCE public.reasons_id_seq OWNED BY public.reasons.id;
 
 
 --
@@ -885,6 +963,13 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: article_groups id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.article_groups ALTER COLUMN id SET DEFAULT nextval('public.article_groups_id_seq'::regclass);
+
+
+--
 -- Name: articles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -934,6 +1019,20 @@ ALTER TABLE ONLY public.daily_metrics ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
+-- Name: edit_reasons id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.edit_reasons ALTER COLUMN id SET DEFAULT nextval('public.edit_reasons_id_seq'::regclass);
+
+
+--
+-- Name: groups id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.groups ALTER COLUMN id SET DEFAULT nextval('public.groups_id_seq'::regclass);
+
+
+--
 -- Name: issues id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -966,6 +1065,13 @@ ALTER TABLE ONLY public.locale_glossary_entries ALTER COLUMN id SET DEFAULT next
 --
 
 ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.projects_id_seq'::regclass);
+
+
+--
+-- Name: reasons id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.reasons ALTER COLUMN id SET DEFAULT nextval('public.reasons_id_seq'::regclass);
 
 
 --
@@ -1015,6 +1121,14 @@ ALTER TABLE ONLY public.translations ALTER COLUMN id SET DEFAULT nextval('public
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: article_groups article_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.article_groups
+    ADD CONSTRAINT article_groups_pkey PRIMARY KEY (id);
 
 
 --
@@ -1074,6 +1188,22 @@ ALTER TABLE ONLY public.daily_metrics
 
 
 --
+-- Name: edit_reasons edit_reasons_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.edit_reasons
+    ADD CONSTRAINT edit_reasons_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: groups groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.groups
+    ADD CONSTRAINT groups_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: issues issues_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1111,6 +1241,14 @@ ALTER TABLE ONLY public.locale_glossary_entries
 
 ALTER TABLE ONLY public.projects
     ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: reasons reasons_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.reasons
+    ADD CONSTRAINT reasons_pkey PRIMARY KEY (id);
 
 
 --
@@ -1219,6 +1357,20 @@ CREATE UNIQUE INDEX daily_metrics_date ON public.daily_metrics USING btree (date
 
 
 --
+-- Name: index_article_groups_on_article_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_article_groups_on_article_id ON public.article_groups USING btree (article_id);
+
+
+--
+-- Name: index_article_groups_on_group_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_article_groups_on_group_id ON public.article_groups USING btree (group_id);
+
+
+--
 -- Name: index_articles_on_name_sha; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1293,6 +1445,34 @@ CREATE INDEX index_commits_on_fingerprint ON public.commits USING btree (fingerp
 --
 
 CREATE UNIQUE INDEX index_commits_on_project_id_and_revision ON public.commits USING btree (project_id, revision);
+
+
+--
+-- Name: index_edit_reasons_on_reason_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_edit_reasons_on_reason_id ON public.edit_reasons USING btree (reason_id);
+
+
+--
+-- Name: index_edit_reasons_on_translation_change_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_edit_reasons_on_translation_change_id ON public.edit_reasons USING btree (translation_change_id);
+
+
+--
+-- Name: index_groups_on_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_groups_on_name ON public.groups USING btree (name);
+
+
+--
+-- Name: index_groups_on_project_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_groups_on_project_id ON public.groups USING btree (project_id);
 
 
 --
@@ -1506,6 +1686,22 @@ CREATE UNIQUE INDEX users_unlock_token ON public.users USING btree (unlock_token
 
 
 --
+-- Name: article_groups article_groups_article_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.article_groups
+    ADD CONSTRAINT article_groups_article_id_fkey FOREIGN KEY (article_id) REFERENCES public.articles(id) ON DELETE CASCADE;
+
+
+--
+-- Name: article_groups article_groups_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.article_groups
+    ADD CONSTRAINT article_groups_group_id_fkey FOREIGN KEY (group_id) REFERENCES public.groups(id) ON DELETE CASCADE;
+
+
+--
 -- Name: articles articles_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1602,11 +1798,35 @@ ALTER TABLE ONLY public.commits
 
 
 --
+-- Name: edit_reasons fk_rails_bac020938b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.edit_reasons
+    ADD CONSTRAINT fk_rails_bac020938b FOREIGN KEY (reason_id) REFERENCES public.reasons(id);
+
+
+--
 -- Name: translation_changes fk_rails_c5bea0b054; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.translation_changes
     ADD CONSTRAINT fk_rails_c5bea0b054 FOREIGN KEY (article_id) REFERENCES public.articles(id);
+
+
+--
+-- Name: edit_reasons fk_rails_d4c92da42d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.edit_reasons
+    ADD CONSTRAINT fk_rails_d4c92da42d FOREIGN KEY (translation_change_id) REFERENCES public.translation_changes(id);
+
+
+--
+-- Name: groups groups_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.groups
+    ADD CONSTRAINT groups_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
 
 --
@@ -1921,6 +2141,15 @@ INSERT INTO schema_migrations (version) VALUES ('20180506023840');
 
 INSERT INTO schema_migrations (version) VALUES ('20180525005743');
 
+INSERT INTO schema_migrations (version) VALUES ('20180604202337');
+
+INSERT INTO schema_migrations (version) VALUES ('20180604202547');
+
 INSERT INTO schema_migrations (version) VALUES ('20180608004859');
 
 INSERT INTO schema_migrations (version) VALUES ('20180722180453');
+
+INSERT INTO schema_migrations (version) VALUES ('20180814210040');
+
+INSERT INTO schema_migrations (version) VALUES ('20180814210112');
+

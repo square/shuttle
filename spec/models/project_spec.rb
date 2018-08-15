@@ -761,4 +761,20 @@ RSpec.describe Project do
       expect(project.not_git?).to be_truthy
     end
   end
+
+  describe '#groups' do
+    let(:project) { FactoryBot.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
+    let!(:group1) { FactoryBot.create(:group, project: project) }
+    let!(:group2) { FactoryBot.create(:group, project: project) }
+
+    it 'includes proper groups' do
+      expect(project.groups).to match_array([group1, group2])
+    end
+
+    it 'destroys its group after project are destroyed' do
+      project.destroy
+
+      expect(Group.where(id: [group1.id, group2.id])).to eq([])
+    end
+  end
 end
