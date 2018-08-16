@@ -89,6 +89,9 @@ class Article < ActiveRecord::Base
   has_many :translations, through:    :keys
   has_many :issues,       through:    :translations
 
+  has_many :article_groups, inverse_of: :article, dependent: :destroy
+  has_many :groups, through: :article_groups
+
   # Scopes
   scope :hidden, -> { where(hidden: true) }
   scope :showing, -> { where(hidden: false) }

@@ -533,6 +533,35 @@ RSpec.describe Article do
     end
   end
 
+  describe '#groups' do
+    let(:project) { FactoryBot.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
+    let(:article1) { FactoryBot.create(:article, project: project) }
+    let(:article2) { FactoryBot.create(:article, project: project) }
+    let(:article3) { FactoryBot.create(:article, project: project) }
+    let(:group1) { FactoryBot.create(:group, project: project) }
+    let(:group2) { FactoryBot.create(:group, project: project) }
+
+    let!(:article_group11) { FactoryBot.create(:article_group, group: group1, article: article1, index_in_group: 1) }
+    let!(:article_group12) { FactoryBot.create(:article_group, group: group1, article: article2, index_in_group: 2) }
+    let!(:article_group21) { FactoryBot.create(:article_group, group: group2, article: article2, index_in_group: 1) }
+    let!(:article_group22) { FactoryBot.create(:article_group, group: group2, article: article3, index_in_group: 2) }
+
+    it 'includes proper groups' do
+      expect(Article.find(article1.id).groups).to match_array([group1])
+      expect(Article.find(article2.id).groups).to match_array([group1, group2])
+      expect(Article.find(article3.id).groups).to match_array([group2])
+
+      expect(group1.articles).to match_array([article1, article2])
+      expect(group2.articles).to match_array([article2, article3])
+    end
+
+    it 'destroys its groups after articles are destroyed' do
+      article2.destroy
+
+      expect(group1.articles).to match_array([article1])
+    end
+  end
+
   # ======== END IMPORT RELATED CODE ===================================================================================
 
   # ======== START ERRORS RELATED CODE =================================================================================
