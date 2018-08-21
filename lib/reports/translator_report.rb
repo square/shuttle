@@ -95,7 +95,7 @@ module Reports
                  sha,
                  articles.name as article_name,
                  COALESCE(MIN(commits.created_at), MIN(articles.created_at)) as job_start,
-                 COALESCE(MAX(commits.approved_at), MAX(articles.first_completed_at)) as approved_at')
+                 COALESCE(MAX(commits.approved_at), MAX(articles.last_completed_at)) as approved_at')
       add_shared(query, languages, exclude_internal)
     end
 
@@ -110,14 +110,14 @@ module Reports
                 MAX(commits.approved_at) as approved_at')
       commit_query = add_shared(commit_query, languages, exclude_internal)
 
-      article_query = TranslationChange.where('articles.first_completed_at': start_date.beginning_of_day..end_date.end_of_day)
+      article_query = TranslationChange.where('articles.last_completed_at': start_date.beginning_of_day..end_date.end_of_day)
         .joins('JOIN articles ON articles.id = article_id')
-        .group('DATE(articles.first_completed_at), articles.name')
-        .select('DATE(articles.first_completed_at) as "date",
+        .group('DATE(articles.last_completed_at), articles.name')
+        .select('DATE(articles.last_completed_at) as "date",
                  NULL,
                  articles.name as article_name,
                  MIN(articles.created_at) as job_start,
-                 MAX(articles.first_completed_at) as approved_at')
+                 MAX(articles.last_completed_at) as approved_at')
       article_query = add_shared(article_query, languages, exclude_internal)
 
       TranslationChange.from_cte('foo', commit_query.union(article_query))
