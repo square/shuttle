@@ -57,7 +57,7 @@ RSpec.describe Reports::TranslatorReport do
         @commit = FactoryBot.create(:commit, project: @project, approved_at: @end_date)
         @reviewer = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(it fr), first_name: 'Mark', email: 'mark@test.host')
         @translator = FactoryBot.create(:user, :translator, approved_rfc5646_locales: %w(it fr), first_name: 'Rebecca')
-        @article = FactoryBot.create(:article, project: @article_project, created_at: @start_date, first_completed_at: @end_date)
+        @article = FactoryBot.create(:article, project: @article_project, created_at: @start_date, last_completed_at: @end_date)
 
         key1 = FactoryBot.create(:key, project: @project)
         key2 = FactoryBot.create(:key, project: @project)
