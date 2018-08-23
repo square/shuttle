@@ -82,13 +82,15 @@ module API
       # a map from article names to their readiness
 
       def create
-        if group_exists?(params[:name])
+        create_params = params_for_create
+
+        if group_exists?(create_params[:name])
           render_error_with_message(t('controllers.api.v1.groups.group_found'), :bad_request)
           return
         end
 
-        group = @project.groups.new(name: params[:name])
-        errors = update_article_groups(group, params[:article_names])
+        group = @project.groups.new(name: create_params[:name])
+        errors = update_article_groups(group, create_params)
         if errors
           render_errors(errors)
           return
@@ -154,7 +156,9 @@ module API
       # a map from article names to their readiness
 
       def update
-        errors = update_article_groups(@group, params['article_names'])
+        update_params = params_for_update
+
+        errors = update_article_groups(@group, update_params)
         if errors
           render_errors(errors)
           return
@@ -219,6 +223,20 @@ module API
       end
       # ===== END DECORATORS ===========================================================================================
 
+      # ===== START PARAMS RELATED CODE ================================================================================
+      def params_for_create
+        hash = params.require(:group).permit(:name, :description, :article_names => [])
+        hash.merge(created_via_api: api_request?, creator_id: current_user.try(:id))
+      end
+
+      def params_for_update
+        hash = params.require(:group).permit(:description, :article_names => [])
+        hash[:priority] = params[:group][:priority] # default to nil
+        hash[:due_date] = DateTime::strptime(params[:group][:due_date], "%m/%d/%Y") rescue '' if params[:group].try(:key?, :due_date)
+        hash.merge(updater_id: current_user.try(:id))
+      end
+      # ===== END PARAMS RELATED CODE ==================================================================================
+
       def group_exists?(name)
         @project.groups.where(name: name).count > 0
       end
@@ -233,21 +251,36 @@ module API
         end
       end
 
-      def update_article_groups(group, article_names)
+      def update_article_groups(group, update_params)
         errors = []
-        article_groups = params['article_names'].each_with_index.map do |article_name, index|
-          article = @project.articles.where(name: article_name).first
-          if article
-            ArticleGroup.new(group: group, article: article, index_in_group: index)
-          else
-            errors << t('controllers.api.v1.groups.article_not_found', article_name: article_name)
+
+        if update_params[:article_names]
+          article_groups = update_params[:article_names].each_with_index.map do |article_name, index|
+            article = @project.articles.where(name: article_name).first
+            if article
+              ArticleGroup.new(group: group, article: article, index_in_group: index)
+            else
+              errors << t('controllers.api.v1.groups.article_not_found', article_name: article_name)
+            end
           end
-        end
-        if errors.present?
-          return errors
+          if errors.present?
+            return errors
+          end
+          group.article_groups = article_groups
         end
 
-        group.article_groups = article_groups
+        if update_params[:priority]
+          group.priority = update_params[:priority]
+        end
+
+        if update_params[:due_date]
+          group.due_date = update_params[:due_date]
+        end
+
+        if update_params[:description]
+          group.description = update_params[:description]
+        end
+
         group.save!
         nil
       end

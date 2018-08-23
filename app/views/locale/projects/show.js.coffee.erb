@@ -17,6 +17,7 @@ $(document).ready ->
   commit_select = $("select[name='commit']")
   article_id = $("input[name='article_id']").val()
   section_select = $("select[name='section_id']")
+  group = $("input[name='group']").val()
   translate_link = $("#translate-link")
   gallery_link = $('#gallery-link')
   issues_link = $('#issues-link')
@@ -31,6 +32,7 @@ $(document).ready ->
     url += "commit=#{commit_sha}" if commit_sha
     url += "article_id=#{article_id}" if article_id
     url += "&section_id=#{section_id}" if section_id
+    url += "group=#{group}" if group
     window.location = url
 
   gallery_link.click () ->
@@ -54,5 +56,7 @@ $(document).ready ->
     JSON.parse("<%= escape_javascript @glossary_entries.to_json %>"),
     JSON.parse('<%= escape_javascript @presenter.decorate_translations(@translations) %>'),
     "<%= @presenter.role %>",
-    JSON.parse("<%= Shuttle::Configuration.workbench.enable_reasons %>")
+    JSON.parse("<%= Shuttle::Configuration.workbench.enable_reasons %>"),
+    JSON.parse('<%= @presenter.edit_approved? %>'),
+    JSON.parse('<%= @presenter.is_group? %>')
   )

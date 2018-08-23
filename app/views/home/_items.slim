@@ -13,15 +13,29 @@
 /    limitations under the License.
 
 / Requires the following local variables:
-/   - `item_type`. Can be 'commit' or 'article'.
-/   - `items`. Can be an array of Commits or Articles.
+/   - `item_type`. Can be 'commit', 'article' or 'group'.
+/   - `items`. Can be an array of Commits, Articles or ArticleBatches.
 
-/ will be #commits or #articles
+/ will be #commits, #articles or #groups
+
+ruby:
+  (showRequestTranslationButton, itemsHeader) = case item_type
+  when 'commit'
+    [true, t('controllers.home.commits.header')]
+  when 'article'
+    [true, t('controllers.home.articles.header')]
+  when 'group'
+    [false, t('controllers.home.groups.header')]
+  else
+    [false, "Unknown item type #{item_type}"]
+  end
+
 div id="#{item_type}s"
   .header
-    .pull-right
-      button.primary href="#add-#{item_type}-translation" rel='modal' disabled=(item_type == 'commit' ? Project.git : Project.not_git).count.zero? Request Translation
-    h1 = item_type.humanize.pluralize
+    - if showRequestTranslationButton
+      .pull-right
+        button.primary href="#add-#{item_type}-translation" rel='modal' disabled=(item_type == 'commit' ? Project.git : Project.not_git).count.zero? Request Translation
+    h1 = itemsHeader
 
   hr.divider
 
@@ -42,4 +56,5 @@ div id="#{item_type}s"
     .pagination-info
       = page_entries_info(items, entry_name: item_type)
 
-  = render partial: "home/#{item_type}s/add_translation_modal"
+  - if item_type != 'group'
+    = render partial: "home/#{item_type}s/add_translation_modal"

@@ -17,7 +17,7 @@ require 'rails_helper'
 RSpec.describe HomeIndexPresenter do
   before :each do
     allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
-    @presenter = HomeIndexPresenter.new([], [], [])
+    @presenter = HomeIndexPresenter.new([], [], [], [])
   end
 
   describe "#full_description" do
@@ -54,6 +54,18 @@ RSpec.describe HomeIndexPresenter do
         expect(@presenter.full_description(article)).to eql('with all the force of a great typhoon')
       end
     end
+
+    context "[Group]" do
+      it "returns full description" do
+        group = FactoryBot.create(:group, name: 'full-description-group', description: 'abc'*50)
+        expect(@presenter.full_description(group)).to eql('abc'*50)
+      end
+
+      it "returns a dash sign if description is missing" do
+        group = FactoryBot.create(:group, name: 'dash-description-group', description: nil)
+        expect(@presenter.full_description(group)).to eql('-')
+      end
+    end
   end
 
   describe "#short_description" do
@@ -80,6 +92,13 @@ RSpec.describe HomeIndexPresenter do
         expect(@presenter.short_description(article)).to eql('mysterious as the dark side of the moon! Be a m...')
       end
     end
+
+    context "[Group]" do
+      it "returns a truncated description" do
+        group = FactoryBot.create(:group, name: 'full-description-group', description: 'abc'*50)
+        expect(@presenter.short_description(group)).to eql('abc'*15 + 'ab...')
+      end
+    end
   end
 
   describe "#sub_description" do
@@ -96,6 +115,13 @@ RSpec.describe HomeIndexPresenter do
         expect(@presenter.sub_description(article)).to eql('')
       end
     end
+
+    context "[Group]" do
+      it "returns empty string" do
+        group = FactoryBot.create(:group, name: 'full-description-group')
+        expect(@presenter.sub_description(group)).to eql('')
+      end
+    end
   end
 
   describe "#update_item_path" do
@@ -110,6 +136,13 @@ RSpec.describe HomeIndexPresenter do
       it "returns the article update path" do
         article = FactoryBot.create(:article)
         expect(@presenter.update_item_path(article)).to eql(Rails.application.routes.url_helpers.api_v1_project_article_path(project_id: article.project_id, name: article.name, format: 'json'))
+      end
+    end
+
+    context "[Group]" do
+      it "returns the group update path" do
+        group = FactoryBot.create(:group, name: 'full-description-group')
+        expect(@presenter.update_item_path(group)).to eql(Rails.application.routes.url_helpers.api_v1_project_group_path(project_id: group.project_id, name: group.name, format: 'json'))
       end
     end
   end
@@ -139,6 +172,16 @@ RSpec.describe HomeIndexPresenter do
             to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: article.project, article_id: article.id))
         expect(@presenter.translate_link_path(@reviewer_user, article)).
             to eql(@url_helpers.locale_project_path(locale_id: 'fr', id: article.project, article_id: article.id))
+      end
+    end
+
+    context "[Group]" do
+      it "returns the group translate link path" do
+        group = FactoryBot.create(:group, name: 'full-description-group', project: @project)
+        expect(@presenter.translate_link_path(@admin_user, group)).
+            to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: group.project, group: group.name))
+        expect(@presenter.translate_link_path(@reviewer_user, group)).
+            to eql(@url_helpers.locale_project_path(locale_id: 'fr', id: group.project, group: group.name))
       end
     end
   end

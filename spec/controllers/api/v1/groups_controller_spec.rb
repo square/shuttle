@@ -95,12 +95,12 @@ RSpec.describe API::V1::GroupsController do
     it_behaves_like 'api-or-session-authenticateable-and-filters', runs_find_group_filter: false do
       let(:request_type) { :post }
       let(:action) { :create }
-      let(:params) { { name: 'dummy-group', article_names: [] } }
+      let(:params) { { group: { name: 'dummy-group', article_names: [] } } }
     end
 
     it 'creates a Group' do
       article_names = [article2.name, article1.name, article3.name]
-      post :create, project_id: project.id, api_token: project.api_token, name: 'test-group', article_names: article_names, format: :json
+      post :create, project_id: project.id, api_token: project.api_token, group: { name: 'test-group', article_names: article_names, description: 'hello' }, format: :json
 
       expect(response.status).to eql(200)
       expect(JSON.parse(response.body)).to eq([
@@ -112,10 +112,11 @@ RSpec.describe API::V1::GroupsController do
       groups = project.groups.where(name: 'test-group')
       expect(groups.count).to eq(1)
       expect(groups.first.articles).to match_array([article2, article1, article3])
+      expect(groups.first.description).to eq('hello')
     end
 
     it 'fails when project has same group name' do
-      post :create, project_id: project.id, api_token: project.api_token,  name: group1.name, article_names: [article1.name], format: :json
+      post :create, project_id: project.id, api_token: project.api_token,  group: { name: group1.name, article_names: [article1.name] }, format: :json
 
       expect(response.status).to eql(400)
       expect(JSON.parse(response.body)).to match_array({'error'=>{'errors'=>[{'message'=>'Group already exists'}]}})
@@ -126,14 +127,14 @@ RSpec.describe API::V1::GroupsController do
       FactoryBot.create(:group, name: 'test-group', project: other_project)
 
       article_names = [article2.name, article1.name, article3.name]
-      post :create, project_id: project.id, api_token: project.api_token, name: 'test-group', article_names: article_names, format: :json
+      post :create, project_id: project.id, api_token: project.api_token, group: { name: 'test-group', article_names: article_names }, format: :json
 
       expect(response.status).to eql(200)
     end
 
     it 'fails when articles do not exist' do
       article_names = [article1.name, 'dummy-article-1', 'dummy-article-2']
-      post :create, project_id: project.id, api_token: project.api_token,  name:'test-group', article_names: article_names, format: :json
+      post :create, project_id: project.id, api_token: project.api_token,  group: { name:'test-group', article_names: article_names }, format: :json
 
       expect(response.status).to eql(400)
       expect(JSON.parse(response.body)).to match_array({'error'=>{'errors'=>['Article dummy-article-1 does not exist', 'Article dummy-article-2 does not exist']}})
@@ -144,7 +145,7 @@ RSpec.describe API::V1::GroupsController do
       other_article = FactoryBot.create(:article, name: 'other-article', project: other_project)
 
       article_names = [other_article.name]
-      post :create, project_id: project.id, api_token: project.api_token,  name:'test-group', article_names: article_names, format: :json
+      post :create, project_id: project.id, api_token: project.api_token,  group: { name:'test-group', article_names: article_names }, format: :json
 
       expect(response.status).to eql(400)
       expect(JSON.parse(response.body)).to match_array({'error'=>{'errors'=>['Article other-article does not exist']}})
@@ -190,14 +191,14 @@ RSpec.describe API::V1::GroupsController do
     it_behaves_like 'api-or-session-authenticateable-and-filters' do
       let(:request_type) { :patch }
       let(:action) { :update }
-      let(:params) { { name: group1.name, article_names: [] } }
+      let(:params) { { name: group1.name, group: { article_names: [] } } }
     end
 
     it 'updates articles in the group' do
       expect(project.groups.find_by_name(group1.name).articles).to match_array([article1, article3])
 
       article_names = [article2.name, article3.name]
-      patch :update, project_id: project.id, api_token: project.api_token, name: group1.name, article_names: article_names, format: :json
+      patch :update, project_id: project.id, api_token: project.api_token, name: group1.name, group: { article_names: article_names, description: 'hello' }, format: :json
 
       expect(response.status).to eql(200)
       expect(JSON.parse(response.body)).to eq([
@@ -205,11 +206,13 @@ RSpec.describe API::V1::GroupsController do
                                                   { 'name' => article3.name, 'ready' => false }
                                               ])
 
-      expect(project.groups.find_by_name(group1.name).articles).to match_array([article2, article3])
+      group = project.groups.find_by_name(group1.name)
+      expect(group.articles).to match_array([article2, article3])
+      expect(group.description).to eq('hello')
     end
 
     it 'fails when group does not exist' do
-      patch :update, project_id: project.id, api_token: project.api_token, name: 'dummy-article-group', article_names: [], format: :json
+      patch :update, project_id: project.id, api_token: project.api_token, name: 'dummy-article-group', group: { article_names: [] }, format: :json
 
       expect(response.status).to eql(404)
       expect(JSON.parse(response.body)).to match_array({'error'=>{'errors'=>[{'message'=>'Group does not exist'}]}})
@@ -217,7 +220,7 @@ RSpec.describe API::V1::GroupsController do
 
     it 'fails when articles do not exist' do
       article_names = [article1.name, 'dummy-article-1', 'dummy-article-2']
-      patch :update, project_id: project.id, api_token: project.api_token, name: group1.name, article_names: article_names, format: :json
+      patch :update, project_id: project.id, api_token: project.api_token, name: group1.name, group: { article_names: article_names }, format: :json
 
       expect(response.status).to eql(400)
       expect(JSON.parse(response.body)).to match_array({'error'=>{'errors'=>['Article dummy-article-1 does not exist', 'Article dummy-article-2 does not exist']}})

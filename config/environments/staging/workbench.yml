@@ -1,1 +1,2 @@
-enable_reasons: true
+enable_reasons: false
+show_article_groups: true
