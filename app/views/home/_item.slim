@@ -29,11 +29,19 @@ tr.row_class
   td
     - if item.is_a?(Commit)
       = link_to item.revision_prefix, project_commit_url(item.project, item)
-    - else
+    - elsif item.is_a?(Article)
       = link_to truncate(item.name), api_v1_project_article_url(item.project.id, item.name)
+    - elsif item.is_a?(Group)
+      = truncate(item.name)
 
   / Create Date
-  td.centered = item.created_at.strftime('%m/%d/%Y')
+  td.centered
+    - if item.is_a?(Commit)
+      = item.created_at.strftime('%m/%d/%Y')
+    - elsif item.is_a?(Article)
+      = item.last_import_requested_at.strftime('%m/%d/%Y')
+    - elsif item.is_a?(Group)
+      = item.created_at.strftime('%m/%d/%Y')
 
   / Due Date
   td.due-date.centered

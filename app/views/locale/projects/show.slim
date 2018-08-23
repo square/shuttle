@@ -29,9 +29,12 @@
     = button_tag 'Translate', id: 'translate-link', class: 'submit', type: 'button'
   h1
     => @project.name
-    - unless @project.git?
+    - if @presenter.form[:article_id]
       small
         = link_to @presenter.selected_article.name, api_v1_project_article_path(@project.id, @presenter.selected_article.name)
+    - elsif @presenter.form[:group]
+      small
+        = @presenter.form[:group]
 
   h6
     strong
@@ -56,11 +59,13 @@ div
 
         = text_field_tag 'filter', @presenter.filter_string, placeholder:'Substring'
 
-        - if @project.git?
+        - if @presenter.form[:commit]
           = select_tag 'commit', options_for_select(@presenter.selectable_commits, @presenter.selected_commit.try!(:revision))
-        - else
+        - elsif @presenter.form[:article_id]
           = hidden_field_tag 'article_id', @presenter.selected_article.id
           = select_tag 'section_id', options_for_select(@presenter.selectable_sections, @presenter.selected_section.try!(:id))
+        - elsif @presenter.form[:group]
+          = hidden_field_tag 'group', @presenter.form[:group]
 
         = select_tag 'filter_source', options_for_select( [['Source', 'source'], ['Translation', 'translated']], @presenter.selected_filter_source)
         = submit_tag 'Filter', {name: 'submit', class: 'primary'}
@@ -79,8 +84,12 @@ div
         .checkbox
           = check_box_tag 'include_new', '1', @presenter.include_new?
           label for="include_new" New
+        - if @presenter.is_group?
+          .checkbox.pull-right
+            = check_box_tag 'edit_approved', '1', @presenter.edit_approved?
+            label for="edit_approved" Edit Approved
   .pagination-links
-    = paginate @translations, params: {commit: params[:commit]}
+    = paginate @translations, params: {commit: params[:commit], group: params[:group]}
   .translation-workbench.border
 
 .row

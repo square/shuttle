@@ -22,9 +22,9 @@
 #   - Not Specific, Applies to both: `offset`, `limit`, `filter__locales`, `filter__rfc5646_locales`, `sort__field`, `sort__direction`
 
 class HomeIndexForm
-  
+
   attr_reader :params, :cookies, :vars
-  
+
   def initialize(params, cookies)
     @params, @cookies, @vars = params, cookies, {}
 
@@ -46,6 +46,10 @@ class HomeIndexForm
     # article specific
     set_articles_filter__name
     set_articles_filter__project_id
+
+    # group specific
+    set_groups_filter__name
+    set_groups_filter__project_id
   end
 
   # @param [String] key name of the form variable
@@ -154,5 +158,16 @@ class HomeIndexForm
   def set_articles_filter__project_id
     vars[:articles_filter__project_id] = cookies[:home_index__articles_filter__project_id] =
         params[:articles_filter__project_id].to_s.presence || cookies[:home_index__articles_filter__project_id].to_s.presence || 'all'
+  end
+
+  # GROUP SPECIFIC
+
+  def set_groups_filter__name
+    vars[:groups_filter__name] = params[:groups_filter__name].presence
+  end
+
+  def set_groups_filter__project_id
+    vars[:groups_filter__project_id] = cookies[:home_index__groups_filter__project_id] =
+        params[:groups_filter__project_id].to_s.presence || cookies[:home_index__groups_filter__project_id].to_s.presence || 'all'
   end
 end

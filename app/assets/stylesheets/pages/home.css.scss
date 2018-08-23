@@ -16,8 +16,8 @@ body.home {
     input[type="submit"] { width: 125px; margin-left: 15px; }
     select[name="filter__rfc5646_locales"] { width: 200px; }
     select[name="filter__status"] { width: 200px; }
-    input[name="commits_filter__sha"], input[name="articles_filter__name"] { width: 350px; }
-    select[name="commits_filter__project_id"], select[name="articles_filter__project_id"] { width: 160px; }
+    input[name="commits_filter__sha"], input[name="articles_filter__name"], input[name="groups_filter__name"] { width: 350px; }
+    select[name="commits_filter__project_id"], select[name="articles_filter__project_id"], select[name="groups_filter__project_id"] { width: 160px; }
 
     .twitter-typeahead {
       margin-left: 15px;

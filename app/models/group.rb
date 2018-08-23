@@ -68,5 +68,7 @@ class Group < ActiveRecord::Base
   validates :priority, numericality: {only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 3}, allow_nil: true
   validates :due_date, timeliness: {type: :date}, allow_nil: true
 
+  delegate :required_locales, :required_rfc5646_locales, :targeted_rfc5646_locales, :locale_requirements, to: :project
+
   def to_param() name end
 end

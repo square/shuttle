@@ -182,6 +182,11 @@ class Translation < ActiveRecord::Base
     @_potential_commit ||= key.commits.order(:id).first
   end
 
+  # returns if the translations is shared with multiple groups (article translations only)
+  def is_shared
+    belongs_to_article? && article.groups.count > 1
+  end
+
   # @private
   def as_json(options=nil)
     options ||= {}
@@ -194,6 +199,7 @@ class Translation < ActiveRecord::Base
     options[:methods] = Array.wrap(options[:methods])
     options[:methods] << :source_locale << :locale
     options[:methods] << :source_fences
+    options[:methods] << :is_shared
 
     super options
   end

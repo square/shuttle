@@ -49,6 +49,7 @@ class HomeController < ApplicationController
     items_finder = HomeIndexItemsFinder.new(current_user, @form)
     @commits = items_finder.find_commits
     @articles = items_finder.find_articles
-    @presenter = HomeIndexPresenter.new(@commits, @articles, @form[:filter__locales])
+    @groups = items_finder.find_groups
+    @presenter = HomeIndexPresenter.new(@commits, @articles, @groups, @form[:filter__locales])
   end
 end
