@@ -140,7 +140,7 @@ class TranslationItem
     context.multi_updateable_translations_and_locale_associations = @translation.multi_updateable_translations_and_locale_associations
 
     if @parent.is_group
-      context.is_shared = @translation.is_shared
+      context.is_shared = @translation['shared?']
       if @translation.approved && !@parent.edit_approved
         context.read_only_mode = 'read-only-mode'
         context.translation_editing_status = 'disabled'

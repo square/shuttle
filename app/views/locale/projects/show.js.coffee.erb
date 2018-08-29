@@ -58,5 +58,5 @@ $(document).ready ->
     "<%= @presenter.role %>",
     JSON.parse("<%= Shuttle::Configuration.workbench.enable_reasons %>"),
     JSON.parse('<%= @presenter.edit_approved? %>'),
-    JSON.parse('<%= @presenter.is_group? %>')
+    JSON.parse('<%= @presenter.group? %>')
   )

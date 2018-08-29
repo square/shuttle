@@ -86,7 +86,7 @@ class LocaleProjectsShowPresenter
     form[:edit_approved].present?
   end
 
-  def is_group?
+  def group?
     form[:group].present?
   end
 
