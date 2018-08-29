@@ -84,7 +84,7 @@ div
         .checkbox
           = check_box_tag 'include_new', '1', @presenter.include_new?
           label for="include_new" New
-        - if @presenter.is_group?
+        - if @presenter.group?
           .checkbox.pull-right
             = check_box_tag 'edit_approved', '1', @presenter.edit_approved?
             label for="edit_approved" Edit Approved

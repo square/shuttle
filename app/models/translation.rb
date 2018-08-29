@@ -183,7 +183,7 @@ class Translation < ActiveRecord::Base
   end
 
   # returns if the translations is shared with multiple groups (article translations only)
-  def is_shared
+  def shared?
     belongs_to_article? && article.groups.count > 1
   end
 
@@ -199,7 +199,7 @@ class Translation < ActiveRecord::Base
     options[:methods] = Array.wrap(options[:methods])
     options[:methods] << :source_locale << :locale
     options[:methods] << :source_fences
-    options[:methods] << :is_shared
+    options[:methods] << :shared?
 
     super options
   end
