@@ -14,7 +14,9 @@ class LocaleProjectsShowForm
     processed[:include_block_tags] = form[:include_block_tags].parse_bool
     unless processed[:include_translated] || processed[:include_approved] || processed[:include_new]
       processed[:include_translated] = processed[:include_new] = true
+      processed[:include_approved] = true if form[:group]
     end
+    processed[:edit_approved] = form[:edit_approved]
 
     processed[:page]       = form.fetch(:page, 1).to_i
     processed[:query_filter] = form[:filter]
@@ -36,6 +38,12 @@ class LocaleProjectsShowForm
     processed[:project]      = project
 
     processed[:filter_source] = form[:filter_source]
+
+    if form[:group]
+      processed[:group] = form[:group]
+      processed[:translation_ids_in_commit] = Group.where(name: form[:group]).includes({articles: :translations}).map(&:articles).flatten.map(&:translations).flatten.map(&:id)
+    end
+
     processed
   end
 

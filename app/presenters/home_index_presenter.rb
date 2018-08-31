@@ -19,9 +19,9 @@ class HomeIndexPresenter
   attr_reader :locales, :stats
   delegate :item_stat, to: :stats
 
-  def initialize(commits, articles, locales)
+  def initialize(commits, articles, groups, locales)
     @locales = locales
-    @stats = ArticleAndCommitNotApprovedTranslationStats.new(commits, articles, locales)
+    @stats = ArticleAndCommitNotApprovedTranslationStats.new(commits, articles, groups, locales)
   end
 
   # @param [Commit, Article] item The {Commit} or {Article} for which full description will be returned.
@@ -60,18 +60,26 @@ class HomeIndexPresenter
     selected_locales = locales.presence || item.required_locales
     rfc5646_locale = ((approved_locales & selected_locales).presence || approved_locales).first.rfc5646
 
-    item_specific_path_params = item.is_a?(Commit) ? { commit: item.revision } : { article_id: item.id }
+    item_specific_path_params = if item.is_a?(Commit)
+                                  { commit: item.revision }
+                                elsif item.is_a?(Article)
+                                  { article_id: item.id }
+                                elsif item.is_a?(Group)
+                                  { group: item.to_param }
+                                end
     locale_project_path({ locale_id: rfc5646_locale, id: item.project.to_param }.merge(item_specific_path_params) )
   end
 
-  # @param [Commit, Article] item The {Commit} or {Article} that will be updated.
-  # @return [String] the path to post to to update a Commit/Article
+  # @param [Commit, Article, Group] item The {Commit}, {Article} or {Group} that will be updated.
+  # @return [String] the path to post to to update a Commit/Article/Group
 
   def update_item_path(item)
     if item.is_a?(Commit)
       project_commit_path(item.project, item, format: 'json')
-    else
+    elsif item.is_a?(Article)
       api_v1_project_article_path(project_id: item.project.id, name: item.name, format: 'json')
+    elsif item.is_a?(Group)
+      api_v1_project_group_path(project_id: item.project.id, name: item.name, format: 'json')
     end
   end
 end

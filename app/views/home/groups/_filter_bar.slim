@@ -12,15 +12,11 @@
 /    See the License for the specific language governing permissions and
 /    limitations under the License.
 
-/ Requires the following local variables:
-/   - `item_type`. Can be 'commit', 'article' or 'group'.
+.filter-bar
+  = form_tag({}, id: 'groups-filter-form', method: 'get')
+    = text_field_tag 'groups_filter__name', @form[:groups_filter__name], placeholder: 'group name, ex: helloworld (exact matches only)'
+    = render partial: 'home/filters/project', locals: { item_type: 'group' }
+    = render partial: 'home/filters/status'
+    = render partial: 'home/filters/locales'
 
-ruby:
-  # ex: :commits_filter__project_id, :articles_filter__project_id, :groups_filter__project_id
-  filter_name = :"#{item_type}s_filter__project_id"
-
-  project_list = (item_type == 'commit') ? Project.git : Project.not_git
-  project_list = project_list.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
-  project_list.unshift ['all projects', 'all']
-
-= select_tag filter_name, options_for_select(project_list, @form[filter_name])
+    = submit_tag 'Filter', class: 'primary'

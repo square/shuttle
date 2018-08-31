@@ -89,6 +89,22 @@ RSpec.describe LocaleProjectsShowForm do
       expect(form[:section_id]).to eql section.id
     end
 
+    it 'should get the group name if group name is specified' do
+      allow_any_instance_of(Article).to receive(:import!)
+      article = FactoryBot.create(:article, project: project)
+      section = FactoryBot.create(:section, article: article, active: true)
+      key = FactoryBot.create(:key, section: section, index_in_section: 0, project: article.project)
+      translation = FactoryBot.create(:translation, key: key)
+
+      group = FactoryBot.create(:group, name: 'test-group', project: project)
+      FactoryBot.create(:article_group, group: group, article: article, index_in_group: 1)
+
+      params = { id: project.to_param, group: group.to_param }
+      form = LocaleProjectsShowForm.new(params)
+      expect(form[:group]).to eq(group.name)
+      expect(form[:translation_ids_in_commit]).to match_array([translation.id])
+    end
+
     it 'builds a locale from the specified locale' do
       params = { id: project.to_param, locale_id: 'en' }
       form = LocaleProjectsShowForm.new(params)

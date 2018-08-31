@@ -122,8 +122,11 @@ class LocaleProjectsShowFinder
                        .includes({key: [:project, :commits, :translations, :section, {article: :project}]}, :locale_associations, :translation_changes)
     if form[:article_id]
       translations = translations.order('keys.section_id, keys.index_in_section')
-    else
+    elsif form[:commit]
       translations = translations.order('commits_keys.created_at, keys.original_key')
+    elsif form[:group]
+      translations = translations.joins({article: {article_groups: :group}}).where("groups.name = ?", form[:group])
+      translations = translations.order('article_groups.index_in_group, keys.section_id, keys.index_in_section')
     end
 
     # Don't sort the keys since they are sorted in the line above

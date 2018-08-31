@@ -22,9 +22,17 @@
         padding: 10px;
         min-height: 240px;
 
+        &.read-only-mode {
+          min-height: 0px;
+        }
+
         textarea.translation-area {
           width: 100%;
           min-height: 150px;
+
+          &.read-only-mode {
+            min-height: 0px;
+          }
         }
 
         textarea.translation-area, .multi-updateable-translations a {
@@ -97,6 +105,13 @@
 
         span.controls {
           float: right;
+
+          .share-icon {
+            background: image-url('icon-share.png');
+            height: 24px;
+            width: 24px;
+            margin: 4px;
+          }
         }
         .notes {
           display: -moz-box; /* Firefox */
@@ -138,6 +153,10 @@
         padding: 10px;
         min-height: 240px;
         position: relative;
+
+        &.read-only-mode {
+          min-height: 0px;
+        }
 
         background-color: $gray6;
         p.source-copy {

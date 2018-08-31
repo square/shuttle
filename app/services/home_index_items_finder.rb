@@ -147,6 +147,46 @@ class HomeIndexItemsFinder
     articles.uniq
   end
 
+  def find_groups
+    groups = Group.includes(:project).showing.joins(:articles)
+
+    # filter by name
+    groups = groups.where("groups.name like '%#{form[:groups_filter__name]}%'") if form[:groups_filter__name]
+
+    # filter by project
+    groups = groups.where(project_id: form[:groups_filter__project_id]) unless form[:groups_filter__project_id] == 'all'
+
+    # filter by status
+    case form[:filter__status]
+    when 'uncompleted'
+      if form[:filter__locales].present?
+        groups = groups.joins(articles: :keys).where(keys: { id: uncompleted_key_ids_in_locales }).merge(Section.active).merge(Key.active_in_section)
+      else
+        groups = groups.not_ready
+      end
+    when 'completed'
+      groups = groups.ready
+    when 'hidden'
+      groups = Group.includes(:project).hidden
+    end
+
+    # sorting
+    direction = %w(asc desc).include?(form[:sort__direction]) ? form[:sort__direction] : nil
+    order_by = case form[:sort__field]
+               when 'due'
+                 "due_date #{direction || 'asc'}"
+               when 'create'
+                 "created_at #{direction || 'desc'}"
+               when 'priority'
+                 "priority #{direction || 'asc'}"
+               end
+    groups = groups.order(order_by) if order_by
+
+    groups = groups.page(form[:page]).per(form[:limit]) # limit and offset
+
+    groups.uniq
+  end
+
   private
 
   def uncompleted_key_ids_in_locales

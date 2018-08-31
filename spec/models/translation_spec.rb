@@ -281,6 +281,38 @@ RSpec.describe Translation do
     end
   end
 
+  describe "#shared?" do
+    let(:article) { FactoryBot.create(:article) }
+    let(:section) { FactoryBot.create(:section, article: article, active: true) }
+    let(:key) { FactoryBot.create(:key, section: section, index_in_section: 0, project: article.project) }
+    let(:translation) { FactoryBot.create(:translation, key: key) }
+
+    it 'is not shared when article not in group' do
+      expect(translation.shared?).to be_falsey
+    end
+
+    it 'is not shared when article not shared in group' do
+      group = FactoryBot.create(:group, name: 'test-group', project: article.project)
+      FactoryBot.create(:article_group, group: group, article: article, index_in_group: 1)
+
+      expect(translation.shared?).to be_falsey
+    end
+
+    it 'is shared when article shared in other group' do
+      group = FactoryBot.create(:group, name: 'test-group', project: article.project)
+      FactoryBot.create(:article_group, group: group, article: article, index_in_group: 1)
+
+      shared_group = FactoryBot.create(:group, name: 'shared-group', project: article.project)
+      FactoryBot.create(:article_group, group: shared_group, article: article, index_in_group: 2)
+
+      expect(translation.shared?).to be_truthy
+    end
+
+    it 'included in to_json' do
+      expect(JSON.parse(translation.to_json).include?('shared?')).to be_truthy
+    end
+  end
+
   def section_active_query(active)
     {
       filter: {
