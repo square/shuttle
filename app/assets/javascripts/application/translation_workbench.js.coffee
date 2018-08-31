@@ -139,6 +139,12 @@ class TranslationItem
 
     context.multi_updateable_translations_and_locale_associations = @translation.multi_updateable_translations_and_locale_associations
 
+    if @parent.is_group
+      context.is_shared = @translation['shared?']
+      if @translation.approved && !@parent.edit_approved
+        context.read_only_mode = 'read-only-mode'
+        context.translation_editing_status = 'disabled'
+
     if @translation.article_name
       context.article_name = @translation.article_name
     if @translation.article_url
@@ -406,7 +412,7 @@ class root.TranslationWorkbench
   # @param [String] role of the current user
   # @param [Boolean] whether or not to show reviewers the reason modal on save
   #
-  constructor: (@list, @search_url, @glossary, @translations, @role, @enable_reasons) ->
+  constructor: (@list, @search_url, @glossary, @translations, @role, @enable_reasons, @edit_approved, @is_group) ->
     @highlighter = $(HoganTemplates['translationworkbench/translation_tooltip'].render())
     @highlighter.find('.tool-item.hide').click =>
       @highlighter.hide()

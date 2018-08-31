@@ -82,6 +82,14 @@ class LocaleProjectsShowPresenter
     form[:include_approved]
   end
 
+  def edit_approved?
+    form[:edit_approved].present?
+  end
+
+  def group?
+    form[:group].present?
+  end
+
   def decorate_translations(translations)
     @_decorate_translations ||= decorate(translations).to_json
   end

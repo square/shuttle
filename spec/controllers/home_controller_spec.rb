@@ -32,6 +32,9 @@ RSpec.describe HomeController do
     @section = FactoryBot.create(:section, article: @article)
     @article_key = FactoryBot.create(:key, section: @section, index_in_section: 0)
 
+    @group = FactoryBot.create(:group, name: 'test-group', project: @project)
+    FactoryBot.create(:article_group, group: @group, article: @article, index_in_group: 0)
+
     # red herring: loading commit
     FactoryBot.create(:commit, project: @project, loading: true)
 
@@ -73,6 +76,7 @@ RSpec.describe HomeController do
       get :index, { filter__rfc5646_locales: 'es', filter__status: 'uncompleted' }
       expect(assigns(:commits).map(&:id)).to eq([@commit.id])
       expect(assigns(:articles).map(&:id)).to eq([@article.id])
+      expect(assigns(:groups).map(&:id)).to eq([@group.id])
     end
 
     it "doesn't return the commit/article with no pending translations in specified locales, even if that commit/article is not ready and the locale is required" do
@@ -87,13 +91,16 @@ RSpec.describe HomeController do
       get :index, { filter__rfc5646_locales: 'ja', filter__status: 'uncompleted' }
       expect(assigns(:commits).map(&:id)).to eq([])
       expect(assigns(:articles).map(&:id)).to eq([])
+      expect(assigns[:groups].map(&:id)).to eq([])
     end
 
     it "should return all hidden articles" do
       hidden_article = FactoryBot.create(:article, project: @project, hidden: true)
+      hidden_group = FactoryBot.create(:group, name: 'hidden-group', project: @project, hidden: true)
 
       get :index, { filter__status: 'hidden' }
       expect(assigns(:articles).map(&:id)).to eq([hidden_article.id])
+      expect(assigns(:groups).map(&:id)).to eq([hidden_group.id])
     end
   end
 
