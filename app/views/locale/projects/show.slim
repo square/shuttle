@@ -29,7 +29,7 @@
     = button_tag 'Translate', id: 'translate-link', class: 'submit', type: 'button'
   h1
     => @project.name
-    - if @presenter.form[:article_id]
+    - if @project.article?
       small
         = link_to @presenter.selected_article.name, api_v1_project_article_path(@project.id, @presenter.selected_article.name)
     - elsif @presenter.form[:group]
@@ -59,9 +59,9 @@ div
 
         = text_field_tag 'filter', @presenter.filter_string, placeholder:'Substring'
 
-        - if @presenter.form[:commit]
+        - if @project.commit?
           = select_tag 'commit', options_for_select(@presenter.selectable_commits, @presenter.selected_commit.try!(:revision))
-        - elsif @presenter.form[:article_id]
+        - elsif @project.article?
           = hidden_field_tag 'article_id', @presenter.selected_article.id
           = select_tag 'section_id', options_for_select(@presenter.selectable_sections, @presenter.selected_section.try!(:id))
         - elsif @presenter.form[:group]
@@ -100,4 +100,4 @@ div
     = page_entries_info(@translations, entry_name: 'translations')
 
 button type='button' id='reason_trigger' href='#add-translation-reasons' style='display:none' rel='modal' Trigger
-= render partial: "locale/projects/reason_modal", locals: { reasons: @reasons } 
+= render partial: "locale/projects/reason_modal", locals: { reasons: @reasons }

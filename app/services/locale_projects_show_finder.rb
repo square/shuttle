@@ -34,6 +34,7 @@ class LocaleProjectsShowFinder
     translation_ids_in_commit = form[:translation_ids_in_commit]
     article_id = form[:article_id]
     section_id = form[:section_id]
+    translation_ids_in_assest = form[:translation_ids_in_assest]
     locale = form[:locale]
     project_id = form[:project_id]
     project = form[:project]
@@ -66,10 +67,11 @@ class LocaleProjectsShowFinder
               must { term rfc5646_locale: locale.rfc5646 } if locale
               must { ids values: translation_ids_in_commit } if translation_ids_in_commit
               must { term article_id: article_id } if article_id.present?
+              must { ids values: translation_ids_in_assest } if translation_ids_in_assest
               must { term section_id: section_id } if section_id.present?
-              must { term section_active: true } if project.not_git? # active sections
-              must { exists field: :index_in_section } if project.not_git? # active keys in sections
-              must_not { term is_block_tag: true } if project.not_git? && !include_block_tags
+              must { term section_active: true } if project.article? # active sections
+              must { exists field: :index_in_section } if project.article? # active keys in sections
+              must_not { term is_block_tag: true } if project.article? && !include_block_tags
 
               if include_translated && include_approved && include_new
                 #include everything
@@ -98,7 +100,7 @@ class LocaleProjectsShowFinder
         end
       end
 
-      if project.not_git?
+      if project.article?
         sort do
           by :section_id, order: 'asc'
           by :index_in_section, order: 'asc'
@@ -116,10 +118,11 @@ class LocaleProjectsShowFinder
 
   def find_translations
     translations_in_es = Elasticsearch::Model.search(search_query, Translation).results
+
     translations = Translation
                        .where(id: translations_in_es.map(&:id))
                        .where('commits.revision': form[:commit])
-                       .includes({key: [:project, :commits, :translations, :section, {article: :project}]}, :locale_associations, :translation_changes)
+                       .includes({key: [:project, :commits, :assets, :translations, :section, {article: :project}]}, :locale_associations, :translation_changes)
     if form[:article_id]
       translations = translations.order('keys.section_id, keys.index_in_section')
     elsif form[:commit]

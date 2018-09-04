@@ -147,6 +147,46 @@ class HomeIndexItemsFinder
     articles.uniq
   end
 
+  def find_assets
+    assets = Asset.includes(:project).showing
+
+    # filter by name
+    assets = assets.for_name(form[:assets_filter__name]) if form[:assets_filter__name]
+
+    # filter by project
+    assets = assets.where(project_id: form[:assets_filter__project_id]) unless form[:assets_filter__project_id] == 'all'
+
+    # filter by status
+    case form[:filter__status]
+      when 'uncompleted'
+        if form[:filter__locales].present?
+          assets = assets.joins(:keys).where(keys: { id: uncompleted_key_ids_in_locales })
+        else
+          assets = assets.not_ready
+        end
+      when 'completed'
+        assets = assets.ready
+      when 'hidden'
+        assets = Asset.includes(:project).hidden
+    end
+
+    # sorting
+    direction = %w(asc desc).include?(form[:sort__direction]) ? form[:sort__direction] : nil
+    order_by = case form[:sort__field]
+      when 'due'
+        "due_date #{direction || 'asc'}"
+      when 'create'
+        "created_at #{direction || 'desc'}"
+      when 'priority'
+        "priority #{direction || 'asc'}"
+    end
+    assets = assets.order(order_by) if order_by
+
+    assets = assets.page(form[:page]).per(form[:limit]) # limit and offset
+
+    assets.uniq
+  end
+
   def find_groups
     groups = Group.includes(:project).showing.joins(:articles)
 

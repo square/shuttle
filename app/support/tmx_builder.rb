@@ -52,9 +52,9 @@ class TmxBuilder
   private
 
   def translation_units
-    if @project.git?
+    if @project.commit? || @project.asset?
       @project.commits.last.try(:keys) || []
-    else
+    elsif @project.article?
       @project.articles.select { |a| !a.hidden }.map(&:sections).flatten
     end
   end

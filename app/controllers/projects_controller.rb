@@ -108,6 +108,7 @@ class ProjectsController < ApplicationController
     @project ||= Project.new
     # Default targeted_rfc5646_locales to display to user.
     @project.targeted_rfc5646_locales = {@project.base_rfc5646_locale => true}
+    @project.job_type = :commit
     respond_with @project
   end
 
@@ -404,6 +405,7 @@ class ProjectsController < ApplicationController
         key_locale_exclusions key_locale_inclusions
         only_importer_paths skip_importer_paths
         disable_locale_association_checkbox_settings
+        job_type
     ))
     project_params["targeted_rfc5646_locales"] = targeted_rfc5646_locales
     project_params
