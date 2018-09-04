@@ -50,6 +50,10 @@ class HomeIndexForm
     # group specific
     set_groups_filter__name
     set_groups_filter__project_id
+
+    # asset specific
+    set_assets_filter__name
+    set_assets_filter__project_id
   end
 
   # @param [String] key name of the form variable
@@ -165,9 +169,20 @@ class HomeIndexForm
   def set_groups_filter__name
     vars[:groups_filter__name] = params[:groups_filter__name].presence
   end
-
+  
   def set_groups_filter__project_id
     vars[:groups_filter__project_id] = cookies[:home_index__groups_filter__project_id] =
-        params[:groups_filter__project_id].to_s.presence || cookies[:home_index__groups_filter__project_id].to_s.presence || 'all'
+    params[:groups_filter__project_id].to_s.presence || cookies[:home_index__groups_filter__project_id].to_s.presence || 'all'
+  end
+  
+  # ASSET SPECIFIC
+
+  def set_assets_filter__name
+    vars[:assets_filter__name] = params[:assets_filter__name].presence
+  end
+
+  def set_assets_filter__project_id
+    vars[:assets_filter__project_id] = cookies[:home_index__assets_filter__project_id] =
+        params[:assets_filter__project_id].to_s.presence || cookies[:home_index__assets_filter__project_id].to_s.presence || 'all'
   end
 end

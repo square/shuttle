@@ -41,7 +41,7 @@ module Shuttle
     config.autoload_paths << config.root.join('app', 'support')
 
     # Activate observers that should always be running.
-    config.active_record.observers     = :comment_observer, :commit_observer, :article_observer, :issue_observer, :translation_observer
+    config.active_record.observers     = :comment_observer, :commit_observer, :article_observer, :asset_observer, :issue_observer, :translation_observer
 
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
@@ -67,7 +67,7 @@ module Shuttle
       g.template_engine :slim
       g.test_framework :rspec, fixture: true, views: false
       g.integration_tool :rspec
-      g.fixture_replacement :factory_girl, dir: 'spec/factories'
+      g.fixture_replacement :factory_bot, dir: 'spec/factories'
     end
 
     # Precompile additional assets.

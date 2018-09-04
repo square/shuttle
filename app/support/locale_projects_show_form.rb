@@ -21,6 +21,8 @@ class LocaleProjectsShowForm
     processed[:page]       = form.fetch(:page, 1).to_i
     processed[:query_filter] = form[:filter]
     processed[:commit] = form[:commit]
+    processed[:asset_id] = form[:asset_id]
+    processed[:translation_ids_in_assest] = project.assets.where(id: form[:asset_id]).first.try(:translations).try(:pluck, :id)
     processed[:translation_ids_in_commit] = project.commits.for_revision(form[:commit]).first.try(:translations).try(:pluck, :id)
     processed[:article_id]  =
       if form[:article_id].present?

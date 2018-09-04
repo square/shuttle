@@ -20,7 +20,7 @@
       .modal-body
         strong Project
 
-        - projects = Project.not_git.order('LOWER(name) ASC')
+        - projects = Project.article.order('LOWER(name) ASC')
         = select_tag 'new_project_article_id', options_for_select(projects.map { |p| [p.name, new_api_v1_project_article_path(p.id)] })
 
         = link_to 'REQUEST', 'javascript: void(0);', class: 'button primary', id: 'request_new_project_article_button'

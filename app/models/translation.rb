@@ -52,6 +52,7 @@ class Translation < ActiveRecord::Base
   has_many :translation_changes, inverse_of: :translation, dependent: :delete_all
   has_many :issues, inverse_of: :translation, dependent: :destroy
   has_many :commits_keys, primary_key: :key_id, foreign_key: :key_id
+  has_many :assets_keys, primary_key: :key_id, foreign_key: :key_id
   has_many :locale_associations, primary_key: :rfc5646_locale, foreign_key: :source_rfc5646_locale
 
   before_validation { |obj| obj.source_copy = '' if obj.source_copy.nil? }
@@ -276,7 +277,7 @@ class Translation < ActiveRecord::Base
   # Expects `obj` to have a `keys` association.
   # This is currently only run in ArticleImporter::Finisher.
   #
-  # @param [Commit, Project, Article] obj The object whose translations should be batch refreshed in ElasticSearch
+  # @param [Commit, Project, Article, Asset] obj The object whose translations should be batch refreshed in ElasticSearch
 
   def self.batch_refresh_elastic_search(obj)
     obj.keys.includes(:translations, :section).find_in_batches do |keys|

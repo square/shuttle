@@ -105,7 +105,9 @@ class Key < ActiveRecord::Base
   belongs_to :project, inverse_of: :keys
   has_many :translations, inverse_of: :key, dependent: :destroy
   has_many :commits_keys, inverse_of: :key, dependent: :destroy
+  has_many :assets_keys, inverse_of: :key, dependent: :destroy
   has_many :commits, through: :commits_keys
+  has_many :assets, through: :assets_keys
   has_many :blobs_keys, dependent: :delete_all, inverse_of: :key
   has_many :blobs, through: :blobs_keys
   belongs_to :section, inverse_of: :keys

@@ -45,7 +45,7 @@ RSpec.describe TmxBuilder do
   end
 
   context 'api project' do
-    let!(:project) { FactoryBot.create(:project, repository_url: nil, name: 'this-is-a-project') }
+    let!(:project) { FactoryBot.create(:project, repository_url: nil, name: 'this-is-a-project', job_type: :article) }
     let!(:article) { FactoryBot.create(:article, project: project, name: 'this-is-a-tu') }
     let!(:section) { FactoryBot.create(:section, article: article) }
     let!(:key) { FactoryBot.create(:key, section: section, original_key: 'this-is-a-tu') }

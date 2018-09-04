@@ -111,5 +111,9 @@ $(window).ready () ->
   $('#request_new_project_article_button').click ->
     window.location = $('#new_project_article_id').val()
 
+  # ASSET specific
+  $('#request_new_project_asset_button').click ->
+    window.location = $('#new_project_asset_id').val()
+
   # refresh current page every 15 min
   setTimeout("location.reload(true);", 15 * 60 * 1000)

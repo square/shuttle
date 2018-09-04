@@ -19,9 +19,9 @@ class HomeIndexPresenter
   attr_reader :locales, :stats
   delegate :item_stat, to: :stats
 
-  def initialize(commits, articles, groups, locales)
+  def initialize(commits, articles, groups, assets, locales)
     @locales = locales
-    @stats = ArticleAndCommitNotApprovedTranslationStats.new(commits, articles, groups, locales)
+    @stats = ArticleAndCommitNotApprovedTranslationStats.new(commits, articles, groups, assets, locales)
   end
 
   # @param [Commit, Article] item The {Commit} or {Article} for which full description will be returned.
@@ -45,33 +45,35 @@ class HomeIndexPresenter
 
   # For a Commit, this will be the author info, for an Article, it will be blank for now.
   #
-  # @param [Commit, Article] item The {Commit} or {Article} for which sub description will be returned.
+  # @param [Commit, Article, Asset] item The {Commit}, {Article}, or {Asset} for which sub description will be returned.
   # @return [String] item's short description.
 
   def sub_description(item)
     item.is_a?(Commit) ? "Authored By: #{item.author}" : ""
   end
 
-  # @param [Commit, Article] item The {Commit} or {Article} for which translate link path will be returned.
+  # @param [Commit, Article] item The {Commit}, {Article}, or {Asset} for which translate link path will be returned.
   # @return [String] the path for the translate link
 
   def translate_link_path(user, item)
     approved_locales = user.admin? ? item.required_locales : user.approved_locales
     selected_locales = locales.presence || item.required_locales
     rfc5646_locale = ((approved_locales & selected_locales).presence || approved_locales).first.rfc5646
-
-    item_specific_path_params = if item.is_a?(Commit)
-                                  { commit: item.revision }
-                                elsif item.is_a?(Article)
-                                  { article_id: item.id }
-                                elsif item.is_a?(Group)
-                                  { group: item.to_param }
-                                end
+    item_specific_path_params = nil
+    if item.is_a?(Commit)
+      item_specific_path_params = { commit: item.revision }
+    elsif item.is_a?(Article)
+      item_specific_path_params = { article_id: item.id }
+    elsif item.is_a?(Asset)
+      item_specific_path_params = { asset_id: item.id }
+    elsif item.is_a?(Group)
+      item_specific_path_params = { group: item.to_param }
+    end
     locale_project_path({ locale_id: rfc5646_locale, id: item.project.to_param }.merge(item_specific_path_params) )
   end
 
-  # @param [Commit, Article, Group] item The {Commit}, {Article} or {Group} that will be updated.
-  # @return [String] the path to post to to update a Commit/Article/Group
+  # @param [Commit, Article] item The {Commit}, {Article}, {Group} or {Asset} that will be updated.
+  # @return [String] the path to post to to update a Commit/Article
 
   def update_item_path(item)
     if item.is_a?(Commit)
@@ -80,6 +82,8 @@ class HomeIndexPresenter
       api_v1_project_article_path(project_id: item.project.id, name: item.name, format: 'json')
     elsif item.is_a?(Group)
       api_v1_project_group_path(project_id: item.project.id, name: item.name, format: 'json')
+    elsif item.is_a?(Asset)
+      project_asset_path(item.project, item, format: 'json')
     end
   end
 end

@@ -26,7 +26,7 @@
           = f.label :repository_url, class: 'control-label'
           .controls
             = f.text_field :repository_url, class: 'tooltip-parent', :'data-tooltip' => '#repository_url_tooltip'
-            .tooltip#repository_url_tooltip
+            .qtip-tooltip#repository_url_tooltip
               | This is the URL you use to check out the project in Git,
               strong not
               |  the GitHub website URL.
@@ -35,7 +35,7 @@
           = f.label :github_webhook_url, class: 'control-label'
           .controls
             = f.text_field :github_webhook_url, class: 'tooltip-parent', :'data-tooltip' => '#github_webhook_url_tooltip'
-            .tooltip#github_webhook_url_tooltip
+            .qtip-tooltip#github_webhook_url_tooltip
               | This URL will be posted to when a commit is marked as 'ready'. HTTP Post body will contain
               tt commit_revision
               | ,
@@ -47,7 +47,7 @@
           = f.label :stash_webhook_url, class: 'control-label'
           .controls
             = f.text_field :stash_webhook_url, class: 'tooltip-parent', :'data-tooltip' => '#stash_webhook_url_tooltip'
-            .tooltip#stash_webhook_url_tooltip
+            .qtip-tooltip#stash_webhook_url_tooltip
               | This URL will be posted to when a commit's status is changed.
                 It is used to update the build status of a commit and is primarily meant
                 to integrate with Stash.  HTTP Post body will contain
@@ -65,7 +65,7 @@
           = f.label :article_webhook_url, class: 'control-label'
           .controls
             = f.text_field :article_webhook_url, class: 'tooltip-parent', :'data-tooltip' => '#article_webhook_url_tooltip'
-            .tooltip#article_webhook_url_tooltip
+            .qtip-tooltip#article_webhook_url_tooltip
               ' This URL will be posted to when an article's translation gets ready.
                 It is used to notify client systems about translations getting available to be consumed.  HTTP Post body will contain
               tt article_name
@@ -74,6 +74,15 @@
               ' and
               tt' ready
               '  status.
+        .control-group
+          = f.label :job_type, class: 'control-label'
+          - Project.job_types.each do |k,v|
+            - next if !Shuttle::Configuration.features.enable_assets && k == 'asset'
+            .controls.checkboxes_and_radios
+              = f.label "job_type_#{v}", class: 'radio'
+                = k.titlecase
+              = f.radio_button :job_type, k
+
       fieldset
         legend Locale Settings
         .control-group
@@ -82,7 +91,7 @@
             = f.text_field :base_rfc5646_locale, class: 'locale-field tooltip-parent',\
                                                  :'data-tooltip' => '#base_rfc5646_tooltip',\
                                                  disabled: !current_user.try!(:admin?)
-            .tooltip#base_rfc5646_tooltip
+            .qtip-tooltip#base_rfc5646_tooltip
               | The locale that the original copy is written in.
 
         .control-group
@@ -274,7 +283,7 @@
           .space-group
             = link_to "Export Project Translations as TMX", tmx_project_url
 
-    - unless @project.git?
+    - if @project.article?
       .row
         .eight.columns
           fieldset

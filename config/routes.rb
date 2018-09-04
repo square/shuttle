@@ -65,6 +65,13 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :assets, only: [:index, :new, :create, :show, :edit, :update] do
+      member do
+        patch :hide_in_dashboard, :show_in_dashboard
+        get :issues
+      end
+    end
+
     resources :keys, only: [] do
       resources :translations, only: [:show, :new, :create, :edit, :update] do
         member do

@@ -20,22 +20,24 @@ class ArticleAndCommitNotApprovedTranslationStats
   # @param [Array<Commit>]  commits  The {Commit Commits}   for which stats will be calculated.
   # @param [Array<Article>] articles The {Article Articles} for which stats will be calculated.
   # @param [Array<Group>] groups The {Group Groups} for which stats will be calculated.
+  # @param [Array<Asset>]   assets The {Asset Assets} for which stats will be calculated.
   # @param [Array<Locale>]  locales  The list of locales in which stats will be calculated.
   #             If blank, targeted locales will be used instead.
 
-  def initialize(commits, articles, groups, locales)
-    @commits, @articles, @locales, @groups = commits, articles, locales, groups
+  def initialize(commits, articles, groups, assets, locales)
+    @commits, @articles, @groups, @assets, @locales = commits, articles, groups, assets, locales
 
     # memoize
     @_commit_stats ||= parse_stats(@commits, commit_translation_groups_with_stats)
     @_article_stats ||= parse_stats(@articles, article_translation_groups_with_stats(@articles))
     @_group_stats ||= build_group_stats(@groups)
+    @_asset_stats ||= parse_stats(@assets, asset_translation_groups_with_stats)
   end
 
   # Returns the count of pending/new translations/words for a Commit or Article.
   # Ex: `item_stat(commit, :translations, :new)`, `item_stat(commit, :words, :pending)`
   #
-  # @param [Commit, Article] item The {Commit} or {Article} for which stat will be returned.
+  # @param [Commit, Article, Group, Asset] item The {Commit}, {Article}, {Group}, or {Asset} for which stat will be returned.
   # @param [String] type The type for which stat will be returned. Can be :translations or :words
   # @param [String] state The state for which stat will be returned. Can be :new or :pending
   #
@@ -43,12 +45,14 @@ class ArticleAndCommitNotApprovedTranslationStats
 
   def item_stat(item, type, state)
     stats = if item.is_a?(Commit)
-              @_commit_stats
-            elsif item.is_a?(Article)
-              @_article_stats
-            elsif item.is_a?(Group)
-              @_group_stats
-            end
+      @_commit_stats
+    elsif item.is_a?(Article)
+      @_article_stats
+    elsif item.is_a?(Group)
+      @_group_stats
+    elsif item.is_a?(Asset)
+      @_asset_stats
+    end
     stats[item.id][type][state]
   end
 
@@ -75,6 +79,17 @@ class ArticleAndCommitNotApprovedTranslationStats
     query = query.where(translations: { rfc5646_locale: @locales.map(&:rfc5646) }) if @locales.present?
     query = query.group("article_id, translated, rfc5646_locale")
     query.select("article_id as item_id, translated, rfc5646_locale, COUNT(*) AS translations_count, SUM(words_count) AS words_count")
+  end
+
+  # Prepares a query which will group Asset translations in a way that we can extract stats from them easily afterwards.
+  # Queries for not_approved translations.
+
+  def asset_translation_groups_with_stats
+    query = Translation.not_base.not_approved.joins(:assets_keys)
+    query = query.where(assets_keys: { asset_id: @assets.map(&:id) } )
+    query = query.where(translations: { rfc5646_locale: @locales.map(&:rfc5646) }) if @locales.present?
+    query = query.group("asset_id, translated, rfc5646_locale")
+    query.select("asset_id as item_id, translated, rfc5646_locale, COUNT(*) AS translations_count, SUM(words_count) AS words_count")
   end
 
   # Parses stats for Commits and Articles.

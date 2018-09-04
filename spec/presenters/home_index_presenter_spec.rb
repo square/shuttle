@@ -17,7 +17,7 @@ require 'rails_helper'
 RSpec.describe HomeIndexPresenter do
   before :each do
     allow_any_instance_of(Article).to receive(:import!) # prevent auto imports
-    @presenter = HomeIndexPresenter.new([], [], [], [])
+    @presenter = HomeIndexPresenter.new([], [], [], [], [])
   end
 
   describe "#full_description" do
@@ -66,6 +66,23 @@ RSpec.describe HomeIndexPresenter do
         expect(@presenter.full_description(group)).to eql('-')
       end
     end
+
+    context "[Asset]" do
+      it "returns full description" do
+        asset = FactoryBot.create(:asset, description: 'abc'*50)
+        expect(@presenter.full_description(asset)).to eql('abc'*50)
+      end
+
+      it "returns a dash sign if description is missing" do
+        asset = FactoryBot.create(:asset, description: nil)
+        expect(@presenter.full_description(asset)).to eql('-')
+      end
+
+      it "strips html from descriptions with html in them" do
+        asset = FactoryBot.create(:asset, description: '<a href="/cool/site">with all the <strong>force of a</strong></a><br/> great typhoon')
+        expect(@presenter.full_description(asset)).to eql('with all the force of a great typhoon')
+      end
+    end
   end
 
   describe "#short_description" do
@@ -82,25 +99,51 @@ RSpec.describe HomeIndexPresenter do
     end
 
     context "[Article]" do
-      it "returns a truncated description" do
+      it "returns full description" do
         article = FactoryBot.create(:article, description: 'abc'*50)
-        expect(@presenter.short_description(article)).to eql('abc'*15 + 'ab...')
+        expect(@presenter.full_description(article)).to eql('abc'*50)
       end
 
-      it "strips html from descriptions with html in them and only shortens the non-html content" do
-        article = FactoryBot.create(:article, description: '<a href="/cool/site">mysterious as the <strong>dark side<strong> of the moon!</a> Be a man! Im <em>never</em> gonna catch my breadth<br/>')
-        expect(@presenter.short_description(article)).to eql('mysterious as the dark side of the moon! Be a m...')
+      it "returns a dash sign if description is missing" do
+        article = FactoryBot.create(:article, description: nil)
+        expect(@presenter.full_description(article)).to eql('-')
+      end
+
+      it "strips html from descriptions with html in them" do
+        article = FactoryBot.create(:article, description: '<a href="/cool/site">with all the <strong>force of a</strong></a><br/> great typhoon')
+        expect(@presenter.full_description(article)).to eql('with all the force of a great typhoon')
       end
     end
 
     context "[Group]" do
-      it "returns a truncated description" do
+      it "returns full description" do
         group = FactoryBot.create(:group, name: 'full-description-group', description: 'abc'*50)
-        expect(@presenter.short_description(group)).to eql('abc'*15 + 'ab...')
+        expect(@presenter.full_description(group)).to eql('abc'*50)
+      end
+
+      it "returns a dash sign if description is missing" do
+        group = FactoryBot.create(:group, name: 'dash-description-group', description: nil)
+        expect(@presenter.full_description(group)).to eql('-')
+      end
+    end
+    
+    context "[Asset]" do
+      it "returns full description" do
+        asset = FactoryBot.create(:asset, description: 'abc'*50)
+        expect(@presenter.full_description(asset)).to eql('abc'*50)
+      end
+
+      it "returns a dash sign if description is missing" do
+        asset = FactoryBot.create(:asset, description: nil)
+        expect(@presenter.full_description(asset)).to eql('-')
+      end
+
+      it "strips html from descriptions with html in them" do
+        asset = FactoryBot.create(:asset, description: '<a href="/cool/site">with all the <strong>force of a</strong></a><br/> great typhoon')
+        expect(@presenter.full_description(asset)).to eql('with all the force of a great typhoon')
       end
     end
   end
-
   describe "#sub_description" do
     context "[Commit]" do
       it "returns a description to display under the main description" do
@@ -120,6 +163,13 @@ RSpec.describe HomeIndexPresenter do
       it "returns empty string" do
         group = FactoryBot.create(:group, name: 'full-description-group')
         expect(@presenter.sub_description(group)).to eql('')
+      end
+    end
+
+    context "[Asset]" do
+      it "returns empty string" do
+        asset = FactoryBot.create(:asset)
+        expect(@presenter.sub_description(asset)).to eql('')
       end
     end
   end
@@ -143,6 +193,13 @@ RSpec.describe HomeIndexPresenter do
       it "returns the group update path" do
         group = FactoryBot.create(:group, name: 'full-description-group')
         expect(@presenter.update_item_path(group)).to eql(Rails.application.routes.url_helpers.api_v1_project_group_path(project_id: group.project_id, name: group.name, format: 'json'))
+      end
+    end
+
+    context "[Asset]" do
+      it "returns the article update path" do
+        asset = FactoryBot.create(:asset)
+        expect(@presenter.update_item_path(asset)).to eql(Rails.application.routes.url_helpers.project_asset_path(asset.project,asset, format: 'json'))
       end
     end
   end
@@ -182,6 +239,16 @@ RSpec.describe HomeIndexPresenter do
             to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: group.project, group: group.name))
         expect(@presenter.translate_link_path(@reviewer_user, group)).
             to eql(@url_helpers.locale_project_path(locale_id: 'fr', id: group.project, group: group.name))
+      end
+    end
+
+    context "[Asset]" do
+      it "returns the asset translate link path" do
+        asset = FactoryBot.create(:asset, project: @project)
+        expect(@presenter.translate_link_path(@admin_user, asset)).
+            to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: asset.project, asset_id: asset.id))
+        expect(@presenter.translate_link_path(@reviewer_user, asset)).
+            to eql(@url_helpers.locale_project_path(locale_id: 'fr', id: asset.project, asset_id: asset.id))
       end
     end
   end
