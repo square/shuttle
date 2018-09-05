@@ -66,6 +66,8 @@ div
           = select_tag 'section_id', options_for_select(@presenter.selectable_sections, @presenter.selected_section.try!(:id))
         - elsif @presenter.form[:group]
           = hidden_field_tag 'group', @presenter.form[:group]
+        - elsif @project.asset?
+          = hidden_field_tag 'asset_id', @presenter.selected_asset.id
 
         = select_tag 'filter_source', options_for_select( [['Source', 'source'], ['Translation', 'translated']], @presenter.selected_filter_source)
         = submit_tag 'Filter', {name: 'submit', class: 'primary'}

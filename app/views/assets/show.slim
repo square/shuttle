@@ -37,6 +37,11 @@
             = @asset.due_date || '-'
 
         .control-group
+          = label_tag :file, nil, class: 'control-label'
+          .controls
+            = @asset.file_name
+
+        .control-group
           = label_tag :base_rfc5646_locale, nil, class: 'control-label'
           .controls
             = @asset.base_rfc5646_locale

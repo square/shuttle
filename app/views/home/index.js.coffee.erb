@@ -65,7 +65,7 @@ $(window).ready () ->
     startDate: new Date()
   )
 
-  $('.edit_commit select, .edit_commit input[type="text"], .edit_article select, .edit_article input[type="text"], .edit_group select, .edit_group input[type="text"').change () ->
+  $('.edit_commit select, .edit_commit input[type="text"], .edit_article select, .edit_article input[type="text"], .edit_group select, .edit_group input[type="text"], .edit_asset select, .edit_asset input[type="text"]').change () ->
     select = $(this)
     form = select.closest('form')
     authParam = $('meta[name=csrf-param]').attr('content')

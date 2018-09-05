@@ -33,15 +33,21 @@ RSpec.describe AssetsController, type: :controller do
       expect(asset.targeted_locales.map(&:rfc5646)).to match_array(%w(es fr))
     end
 
-    it "creates an Asset that has its own locale settings different from those of Project's" do
-      post :create, project_id: @project, asset: FactoryBot.attributes_for(:asset, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: { 'ja' => true }), format: :json
+    it "creates an Asset specifying targeted_rfc5646_locales, but the project's are used" do
+      post :create, project_id: @project, asset: FactoryBot.attributes_for(:asset, targeted_rfc5646_locales: { 'ja' => true }), format: :json
       expect(response.status).to eql(200)
       expect(Asset.count).to eql(1)
       asset = Asset.last
-      expect(asset.base_rfc5646_locale).to eql('en-US')
-      expect(asset.targeted_rfc5646_locales).to eql({ 'ja' => true })
-      expect(asset.base_locale).to eql(Locale.from_rfc5646('en-US'))
-      expect(asset.targeted_locales.map(&:rfc5646)).to eql(%w(ja))
+      expect(asset.targeted_rfc5646_locales).to eql(@project.targeted_rfc5646_locales)
+    end
+
+    it "creates an Asset specifying base_locale, but the project's are used" do
+      post :create, project_id: @project, asset: FactoryBot.attributes_for(:asset, base_rfc5646_locale: 'ja'), format: :json
+      expect(response.status).to eql(200)
+      expect(Asset.count).to eql(1)
+      asset = Asset.last
+      expect(asset.base_rfc5646_locale).to eql('en')
+      expect(asset.base_locale).to eql(Locale.from_rfc5646('en'))
     end
 
     it "doesn't create a Asset in a Project with a duplicate key name" do
@@ -113,6 +119,41 @@ RSpec.describe AssetsController, type: :controller do
         @asset.reload
         expect(@asset.hidden).to be false
       end
+    end
+  end
+
+  describe "#manifest" do
+    before :each do
+      @project = FactoryBot.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } )
+
+      @request.env['devise.mapping'] = Devise.mappings[:user]
+      @user = FactoryBot.create(:user, :confirmed, role: 'monitor')
+      sign_in @user
+    end
+
+    let(:asset) { FactoryBot.create(:asset, project: @project) }
+
+    before do
+      AssetImporter::Finisher.new.on_success(nil, {'asset_id' => asset.id})
+    end
+
+    it "errors if not all required locales are ready (i.e. translated)" do
+      get :manifest, project_id: @project, id: asset.id
+      expect(response.status).to eql(302)
+      expect(response).to redirect_to(project_asset_url(project_id: @project, id: asset.id))
+    end
+
+    it "returns a status of 200 when calling with translations" do
+      AssetImporter.new.perform(asset.id)
+      AssetImporter::Finisher.new.on_success(nil, {'asset_id' => asset.id})
+
+      asset.translations.in_locale(*asset.required_locales).reload.each do |translation|
+        translation.update! copy: translation.source_copy.upcase, approved: true
+      end
+      asset.keys.reload.each(&:recalculate_ready!)
+
+      get :manifest, project_id: @project, id: asset.id
+      expect(response.status).to eql(200)
     end
   end
 end

@@ -27,11 +27,15 @@ RSpec.describe Asset, type: :model do
       asset = FactoryBot.create(:asset, targeted_rfc5646_locales: {}, project: project)
       expect(asset.targeted_rfc5646_locales).to eql({'fr' => true})
     end
+
+    it 'should not use targeted_rfc5646_locales specified, but revert to projects (due to key associations)' do
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr' => true})
+      asset = FactoryBot.create(:asset, targeted_rfc5646_locales: {'it' => true}, project: project)
+      expect(asset.targeted_rfc5646_locales).to eql({'fr' => true})
+    end
   end
 
   describe '[validations]' do
-    it_behaves_like 'CommonLocaleLogic'
-
     it { is_expected.to have_attached_file(:file) }
     it { is_expected.to validate_attachment_presence(:file) }
     it { is_expected.to validate_attachment_content_type(:file).allowing(Asset::CONTENT_TYPES) }
@@ -63,7 +67,8 @@ RSpec.describe Asset, type: :model do
     end
 
     it 'doesn\'t allow updating base_rfc5646_locale to be blank' do
-      asset = FactoryBot.create(:asset, base_rfc5646_locale: 'es')
+      project = FactoryBot.create(:project, base_rfc5646_locale: 'es')
+      asset = FactoryBot.create(:asset, project: project)
       asset.update base_rfc5646_locale: nil
       expect(asset.errors.full_messages).to include("source locale can’t be blank")
       expect(asset.reload.base_rfc5646_locale).to eql('es')
@@ -73,7 +78,8 @@ RSpec.describe Asset, type: :model do
     end
 
     it "doesn't allow updating targeted_rfc5646_locales to be blank" do
-      asset = FactoryBot.create(:asset, targeted_rfc5646_locales: {'fr' => true})
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr' => true})
+      asset = FactoryBot.create(:asset, project: project)
       asset.update targeted_rfc5646_locales: nil
       expect(asset.errors.full_messages).to include("targeted localizations can’t be blank")
       expect(asset.reload.targeted_rfc5646_locales).to eql({'fr' => true})
@@ -95,6 +101,24 @@ RSpec.describe Asset, type: :model do
 
       expect(asset.ready).to be false
       expect(asset.loading).to be true
+    end
+  end
+
+  describe "#full_reset_ready!" do
+    before(:each) { allow_any_instance_of(Asset).to receive(:import!) } # prevent auto imports
+
+    it "resets the ready field of the Article and all of its Keys" do
+      asset = FactoryBot.create(:asset, name: "test", ready: true)
+
+      k1 = FactoryBot.create(:key, ready: true)
+      k2 = FactoryBot.create(:key, ready: true)
+      k3 = FactoryBot.create(:key, ready: true)
+
+      asset.keys = [k1, k2, k3]
+
+      asset.full_reset_ready!
+      expect(asset).to_not be_ready
+      expect(asset.keys.ready.exists?).to be_falsey
     end
   end
 

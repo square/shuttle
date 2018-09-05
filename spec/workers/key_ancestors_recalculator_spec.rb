@@ -50,5 +50,21 @@ RSpec.describe KeyAncestorsRecalculator do
         expect(commit2.reload).to be_ready
       end
     end
+
+    context "Assets" do
+      it "recalculates the readiness of the related Assets" do
+        project = FactoryBot.create(:project)
+        asset1 = FactoryBot.create(:asset, project: project, ready: false)
+        asset2 = FactoryBot.create(:asset, project: project, ready: false)
+        key = FactoryBot.create(:key, project: project, ready: false)
+        asset1.keys = asset2.keys = [key]
+
+        expect(KeyAncestorsRecalculator).to receive(:perform_once).once.and_call_original
+        key.recalculate_ready!
+
+        expect(asset1.reload).to be_ready
+        expect(asset2.reload).to be_ready
+      end
+    end
   end
 end
