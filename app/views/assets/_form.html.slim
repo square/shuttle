@@ -29,12 +29,17 @@
             = f.text_field :name, class: 'tooltip-parent', 'data-tooltip' => '#asset-name'
             .qtip-tooltip#asset-name This is a "friendly" name for the asset.
 
-        .control-group
-          = f.label :file, class: 'control-label'
-          .controls
-            = f.file_field :file, class: 'tooltip-parent', 'data-tooltip' => '#asset-file'
-            .qtip-tooltip#asset-file The asset requires a file.
-
+        - if @asset.persisted?
+          .control-group
+            = f.label :file, class: 'control-label'
+            .controls
+              = @asset.file_name
+        - else
+          .control-group
+            = f.label :file, class: 'control-label'
+            .controls
+              = f.file_field :file, class: 'tooltip-parent', 'data-tooltip' => '#asset-file'
+              .qtip-tooltip#asset-file The asset requires a file.
         .control-group
           = f.label :priority, class: 'control-label'
           .controls

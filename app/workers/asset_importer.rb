@@ -30,7 +30,9 @@ class AssetImporter
     # determine the correct importer to use based on file type
     if asset.file_content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       asset.update_import_starting_fields!
-      AssetXlsxImporter.perform_once(asset_id)
+
+      importer = AssetXlsxImporter.new
+      importer.import(asset_id)
     end
   end
 
@@ -48,7 +50,7 @@ class AssetImporter
       asset = Asset.find(options['asset_id'])
 
       # finish loading
-      asset.update!(loading: false)
+      asset.update_import_finishing_fields!
 
       Key.batch_recalculate_ready!(asset)
       AssetRecalculator.new.perform(asset.id)

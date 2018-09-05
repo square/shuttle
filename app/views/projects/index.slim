@@ -28,6 +28,7 @@ hr.divider
     thead
       tr
         th Project
+        th Job Type
         th Repository URL
         th Required Locales
         th Optional Locales
@@ -35,6 +36,7 @@ hr.divider
       - @projects.each do |project|
         tr onclick="document.location = '#{edit_project_url(project)}'"
           td = project.name
+          td = project.job_type.titlecase
           td = project.repository_url
           td = project.required_rfc5646_locales.join(" / ").upcase
           td = project.other_rfc5646_locales.join(" / ").upcase

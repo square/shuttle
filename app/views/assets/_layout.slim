@@ -15,7 +15,7 @@
 .header
   .pull-right
     = link_to (@asset.ready? ? 'Download' : 'Translating'), \
-                  project_asset_path(@project, @asset), \
+                  manifest_project_asset_path(@project, @asset), \
                   class: 'button primary download-button', disabled: !@asset.ready?
     = link_to 'Edit', \
                   edit_project_asset_path(@project, @asset), \

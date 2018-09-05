@@ -31,6 +31,10 @@ class KeyAncestorsRecalculator
     CommitsKey.where(key_id: key_id).pluck(:commit_id).each do |commit_id|
       CommitRecalculator.perform_once commit_id.to_i
     end
+
+    AssetsKey.where(key_id: key_id).pluck(:asset_id).each do |asset_id|
+      AssetRecalculator.perform_once asset_id.to_i
+    end
   end
 
   include SidekiqLocking

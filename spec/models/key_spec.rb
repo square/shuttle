@@ -575,5 +575,14 @@ RSpec.describe Key do
       expect(@key1.reload).to be_ready
       expect(@key2.reload).to_not be_ready
     end
+
+    it "properly recalculates ready for keys of a given asset in batch" do
+      asset = FactoryBot.create(:asset, project: @project)
+      asset.keys = [@key1, @key2]
+
+      Key.batch_recalculate_ready!(asset)
+      expect(@key1.reload).to be_ready
+      expect(@key2.reload).to_not be_ready
+    end
   end
 end
