@@ -74,10 +74,20 @@ class CommitImporter
     end
 
     def set_fingerprint_find_dupes(commit)
-      commit.fingerprint = Digest::SHA1.hexdigest(commit.commits_keys.order(:key_id).pluck(:key_id).join(','))
+      # When the commit has an existing fingerprint, do not change its fingerprint and the duplicate status.
+      # This is important for re-importing duplicated commits or commits with duplicates.
+      # • Very first commit --> sets fingerprint and duplicate = false
+      # • The following commits with same keys --> sets fingerprint and duplicate = true
+      # • Re-import the very first commit --> skips fingerprint (the new fingerprint must be same as old one)
+      #   and keeps duplicate = false
+      # • Re-import following commits with same keys --> skips fingerprint (the new fingerprint must be same as old one)
+      #   and keeps duplicate = true
+      if commit.fingerprint.nil?
+        commit.fingerprint = Digest::SHA1.hexdigest(commit.commits_keys.order(:key_id).pluck(:key_id).join(','))
 
-      # now that we have a fingerprint, look up others to mark this as a duplicate if the exist
-      commit.duplicate = Commit.where(fingerprint: commit.fingerprint).exists?
+        # now that we have a fingerprint, look up others to mark this as a duplicate if the exist
+        commit.duplicate = Commit.where(fingerprint: commit.fingerprint).exists?
+      end
     end
   end
 
