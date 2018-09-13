@@ -114,7 +114,7 @@ RSpec.describe CommitImporter::Finisher do
       expect(@key.reload).to be_ready
     end
 
-    it "sets the commit's fingerprint" do
+    it "sets the commit's fingerprint when fingerprint is not present" do
       CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
 
       expect(@commit.reload.fingerprint).to_not be_nil
@@ -123,18 +123,55 @@ RSpec.describe CommitImporter::Finisher do
       expect(@commit.duplicate).to be false
     end
 
-    it "sets all but the oldest duplicate commit as such" do
+    it "does not change commit's fingerprint when fingerprint is present (duplicate is false)" do
+      expected_fingerprint = Digest::SHA1.hexdigest(@key.id.to_s)
+      @commit.fingerprint = expected_fingerprint
+      @commit.duplicate = false
+      @commit.save!
+
+      # when duplicate is false
+      expect(@commit.fingerprint).to eq expected_fingerprint
+      expect(@commit.duplicate).to be false
+    end
+
+    it "does not change commit's fingerprint when fingerprint is present (duplicate is true)" do
+      expected_fingerprint = Digest::SHA1.hexdigest(@key.id.to_s)
+      @commit.fingerprint = expected_fingerprint
+      @commit.duplicate = true
+      @commit.save!
+
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => @commit.id
+      expect(@commit.fingerprint).to eq expected_fingerprint
+      expect(@commit.duplicate).to be true
+    end
+
+    it "sets following commits with same keys as duplicates" do
       expected_fingerprint = Digest::SHA1.hexdigest(@key.id.to_s)
       @commit.fingerprint = expected_fingerprint
       @commit.save!
 
-      commit2 = FactoryBot.create(:commit, fingerprint: expected_fingerprint, duplicate: false)
+      commit2 = FactoryBot.create(:commit, duplicate: false)
       commit2.keys << @key
 
       CommitImporter::Finisher.new.on_success true, 'commit_id' => commit2.id
 
       expect(@commit.reload.duplicate).to be false
       expect(commit2.reload.duplicate).to be true
+    end
+
+    it "sets following commits with different keys as not duplicates" do
+      expected_fingerprint = Digest::SHA1.hexdigest(@key.id.to_s)
+      @commit.fingerprint = expected_fingerprint
+      @commit.save!
+
+      commit2 = FactoryBot.create(:commit, duplicate: false)
+      key2     = FactoryBot.create(:key, project: @project)
+      commit2.keys << key2
+
+      CommitImporter::Finisher.new.on_success true, 'commit_id' => commit2.id
+
+      expect(@commit.reload.duplicate).to be false
+      expect(commit2.reload.duplicate).to be false
     end
   end
 end
