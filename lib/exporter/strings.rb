@@ -56,11 +56,11 @@ module Exporter
       part << %("#{escape translation.key.original_key}" = "#{escape translation.copy}";\n)
       part << "\n"
 
-      io.write part.encode('UTF-16LE').force_encoding('BINARY')
+      io.write part.encode('UTF-8').force_encoding('BINARY')
     end
 
     def self.file_extension() 'strings' end
-    def self.character_encoding() 'UTF-16LE' end
+    def self.character_encoding() 'UTF-8' end
     def self.request_format() :strings end
     def self.multilingual?() false end
 
