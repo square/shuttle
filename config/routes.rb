@@ -68,7 +68,7 @@ Rails.application.routes.draw do
     resources :assets, only: [:index, :new, :create, :show, :edit, :update] do
       member do
         patch :hide_in_dashboard, :show_in_dashboard
-        get :issues
+        get :manifest, :issues
       end
     end
 

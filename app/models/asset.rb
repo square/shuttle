@@ -44,8 +44,8 @@ class Asset < ActiveRecord::Base
   include CommonLocaleLogic
   before_validation(on: :create) do |asset|
     if asset.project # this is needed to test validate_attachment_presence, project is null in this case for some reason
-      asset.base_rfc5646_locale      = asset.project.base_rfc5646_locale      if asset.base_rfc5646_locale.blank?
-      asset.targeted_rfc5646_locales = asset.project.targeted_rfc5646_locales if asset.targeted_rfc5646_locales.blank?
+      asset.base_rfc5646_locale      = asset.project.base_rfc5646_locale
+      asset.targeted_rfc5646_locales = asset.project.targeted_rfc5646_locales
     end
   end
   # ======== END LOCALE RELATED CODE ===================================================================================
@@ -64,15 +64,16 @@ class Asset < ActiveRecord::Base
     update!(ready: false, loading: true)
   end
 
+  def update_import_finishing_fields!
+    new_attrs = { import_batch_id: nil, loading: false }
+    update!(new_attrs)
+  end
+
   # Calculates the value of the `ready` field and saves the record.
   def recalculate_ready!
-    keys_are_ready = !keys.merge(Key.not_ready).exists?
-    ready_new = keys_are_ready && !loading?
-    if !ready? && ready_new # if it just became ready
-      self.approved_at = Time.current
-    end
-    self.ready = ready_new
-    self.save!
+    self.ready = !loading && keys_are_ready?
+    self.approved_at = Time.current if self.ready && self.approved_at.nil?
+    save!
   end
 
   # Resets ready fields for this Asset and its Keys.
@@ -80,6 +81,14 @@ class Asset < ActiveRecord::Base
   def full_reset_ready!
     update!(ready: false) if ready?
     keys.update_all(ready: false)
+  end
+
+  # Returns `true` if all Keys associated with this commit are ready.
+  #
+  # @return [true, false] Whether all keys are ready for this commit.
+
+  def keys_are_ready?
+    !keys.where(ready: false).exists?
   end
 
   def import!(force_import_sections=false)

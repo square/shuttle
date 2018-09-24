@@ -168,7 +168,7 @@ class root.HashField
     div = $('<div/>').addClass('hashfield-element').insertBefore(@element.find('>.multifield-last-element'))
 
     @options.renderer div, key, value, this
-    key_field = div.find('[rel=key]')
+    key_field = div.find('.tt-input[rel=key]')
     value_field = div.find('[rel=value]')
     refreshName = (locale) =>
       new_key = key_field.val() || locale

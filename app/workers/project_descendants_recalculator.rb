@@ -44,6 +44,10 @@ class ProjectDescendantsRecalculator
     project.articles.find_each do |article|
       ArticleRecalculator.perform_once(article.id)
     end
+
+    project.assets.find_each do |asset|
+      AssetRecalculator.perform_once(asset.id)
+    end
   end
 
   include SidekiqLocking
