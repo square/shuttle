@@ -3,9 +3,9 @@ class AssetsController < ApplicationController
   respond_to :html, only: [:create, :show, :update, :new, :edit]
 
   before_filter :find_project
-  before_filter :find_asset, only: [:show, :edit, :update, :issues, :show_in_dashboard, :hide_in_dashboard]
+  before_filter :find_asset, only: [:show, :edit, :update, :issues, :show_in_dashboard, :hide_in_dashboard, :manifest]
   before_filter :reviewer_required, only: [:show_in_dashboard, :hide_in_dashboard]
-  
+
   def show
     respond_with @asset do |format|
       format.json { render json: decorate(@asset).to_json }
@@ -73,6 +73,21 @@ class AssetsController < ApplicationController
     end
   end
 
+  def manifest
+    begin
+      @manifest = Exporter::Asset.new(@asset).export
+    rescue Exporter::Asset::Error => @error
+    end
+
+    if @error
+      flash[:alert] = 'An error has occured creating the manifest, please try again later.'
+      redirect_to project_asset_path(@project, @asset)
+    else
+      # generate file
+      send_data @manifest.read, filename: "#{@asset.file_name}.zip"
+    end
+  end
+
   def show_in_dashboard
     unless @asset.hidden
       redirect_to edit_project_asset_path(@project, @asset), flash: { alert: 'This asset state has been modified, please refresh and try again'}
@@ -134,8 +149,7 @@ private
     hsh = params.require(:asset).permit(:name, :description, :email, :file, :file_name)
     hsh[:priority] = params[:asset][:priority] # default to nil
     hsh[:due_date] = DateTime::strptime(params[:asset][:due_date], "%m/%d/%Y") rescue '' if params[:asset].try(:key?, :due_date)
-    hsh[:targeted_rfc5646_locales] = params[:asset][:targeted_rfc5646_locales] if params[:asset].try(:key?, :targeted_rfc5646_locales)
-    hsh[:file_name] = params[:asset][:file].original_filename if params[:asset][:file].try(:original_filename)
+    hsh[:file_name] = File.basename(params[:asset][:file].original_filename, File.extname(params[:asset][:file].original_filename)) if params[:asset][:file].try(:original_filename)
     hsh.merge(user_id: current_user.try(:id))
   end
 end

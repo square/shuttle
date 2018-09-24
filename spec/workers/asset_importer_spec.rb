@@ -40,6 +40,10 @@ RSpec.describe AssetImporter do
       it 'imports data from a file' do
         expect(@asset.keys.count).to eq 1
       end
+
+      it 'sets the proper key name' do
+        expect(@asset.keys.first.original_key).to eq "#{@asset.id}-#{@asset.file_name}-sheet0-row1-col1"
+      end
     end
   end
 end

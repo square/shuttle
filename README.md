@@ -246,7 +246,7 @@ does not as yet recognize them as documentable files. A `.codoopts` file is
 included in case you wish to use [Codo](https://github.com/netzpirat/codo) to
 generate the CoffeeScript docs, but as of now Codo does not recognize the ERb
 files, and does not use the full set of Markdown syntax features used in the
-documenttion.
+documentation.
 
 
 Architecture
@@ -462,7 +462,7 @@ to build the images. This only has to be done once, and each time you make a
 change to the source code. Run `docker-compose -f docker-compose.test.yml up` to
 start the environment, and
 `docker-compose -f docker-compose.test.yml run tests bin/docker-tests` to
-actuall run tests. Run `docker-compose -f docker-compose.test.yml down` when you
+actual run tests. Run `docker-compose -f docker-compose.test.yml down` when you
 are done testing to stop the running images.
 
 If you are not using Docker, run unit tests with the `rspec spec` command.

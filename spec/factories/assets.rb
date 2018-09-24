@@ -4,6 +4,6 @@ FactoryBot.define do
     association :user
     sequence(:name) { |i| "asset-#{i}" }
     sequence(:file_name) { |i| "asset-file#{i}.xlsx" }
-    file { File.new("#{Rails.root}/spec/fixtures/excel-simple.xlsx") }
+    file { File.new("#{Rails.root}/spec/fixtures/asset_files/excel-simple.xlsx") }
   end
 end
