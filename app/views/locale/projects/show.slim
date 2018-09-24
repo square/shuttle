@@ -29,7 +29,7 @@
     = button_tag 'Translate', id: 'translate-link', class: 'submit', type: 'button'
   h1
     => @project.name
-    - if @project.article?
+    - if @presenter.form[:article_id]
       small
         = link_to @presenter.selected_article.name, api_v1_project_article_path(@project.id, @presenter.selected_article.name)
     - elsif @presenter.form[:group]
@@ -61,7 +61,7 @@ div
 
         - if @project.commit?
           = select_tag 'commit', options_for_select(@presenter.selectable_commits, @presenter.selected_commit.try!(:revision))
-        - elsif @project.article?
+        - elsif @presenter.form[:article_id]
           = hidden_field_tag 'article_id', @presenter.selected_article.id
           = select_tag 'section_id', options_for_select(@presenter.selectable_sections, @presenter.selected_section.try!(:id))
         - elsif @presenter.form[:group]
