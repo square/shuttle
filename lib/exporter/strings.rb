@@ -36,10 +36,6 @@ module Exporter
       raise NoLocaleProvidedError, ".strings files can only be for a single locale" unless locales.size == 1
       locale = locales.first
 
-      # write the BOM
-      io.putc 0xFF
-      io.putc 0xFE
-
       translations = Translation.in_commit(@commit).where(rfc5646_locale: locale.rfc5646).
           sort_by { |t| t.key.key }
       translations.each { |translation| export_translation io, translation }
