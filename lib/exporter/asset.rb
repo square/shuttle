@@ -64,6 +64,12 @@ module Exporter
 
 private
     def generate_xlsx(asset, locale)
+      if File.file?(asset.file.path)
+        RubyXL::Parser.parse(asset.file.path)
+      else
+        content = open(asset.file.url).read
+        RubyXL::Parser.parse_buffer(content)
+      end
       workbook = RubyXL::Parser.parse(asset.file.path)
 
       asset.translations.in_locale(locale).each do |translation|
