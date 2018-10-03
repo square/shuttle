@@ -51,12 +51,14 @@ module Reports
           records.each do |rec|
             counts[rec.classification] = rec.words_count
           end
-          article = tc.article_name
-          sha = tc.sha
-          asset = tc.asset_id
+          article = (tc.article_name.blank?) ? nil : tc.article_name
+          sha = (tc.sha.blank?) ? nil : tc.sha
+          asset = (tc.asset_id.blank?) ? nil : tc.asset_id
           job_start = (tc.job_start ? tc.job_start.in_time_zone.strftime('%Y-%m-%d %H:%M') : '')
           approved_at = (tc.approved_at ? tc.approved_at.in_time_zone.strftime('%Y-%m-%d %H:%M') : '')
-          csv << [tc.date.strftime('%Y-%m-%d'), tc.first_name, tc.user_id, tc.role, tc.source_rfc5646_locale.upcase, tc.rfc5646_locale.upcase, tc.project_name, Project.job_types.key(tc.job_type).titlecase, (sha || article || asset), job_start, approved_at, counts].flatten
+
+          p (sha || article || asset).to_s
+          csv << [tc.date.strftime('%Y-%m-%d'), tc.first_name, tc.user_id, tc.role, tc.source_rfc5646_locale.upcase, tc.rfc5646_locale.upcase, tc.project_name, Project.job_types.key(tc.job_type).titlecase, (sha || article || asset).to_s, job_start, approved_at, counts].flatten
         end
       end
     end
