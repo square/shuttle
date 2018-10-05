@@ -36,6 +36,10 @@ module Exporter
       raise NoLocaleProvidedError, ".strings files can only be for a single locale" unless locales.size == 1
       locale = locales.first
 
+      # write the BOM
+      io.putc 0xFF
+      io.putc 0xFE
+
       translations = Translation.in_commit(@commit).where(rfc5646_locale: locale.rfc5646).
           sort_by { |t| t.key.key }
       translations.each { |translation| export_translation io, translation }
@@ -52,11 +56,11 @@ module Exporter
       part << %("#{escape translation.key.original_key}" = "#{escape translation.copy}";\n)
       part << "\n"
 
-      io.write part.encode('UTF-8').force_encoding('BINARY')
+      io.write part.encode('UTF-16LE').force_encoding('BINARY')
     end
 
     def self.file_extension() 'strings' end
-    def self.character_encoding() 'UTF-8' end
+    def self.character_encoding() 'UTF-16LE' end
     def self.request_format() :strings end
     def self.multilingual?() false end
 
