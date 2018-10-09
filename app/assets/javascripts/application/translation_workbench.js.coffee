@@ -111,6 +111,7 @@ class TranslationItem
     params = (new URL(document.location)).searchParams
     sha = params.get('commit')
     articleId = params.get('article_id')
+    assetId = params.get('asset_id')
 
     ajaxParams = {}
     ajaxParams['translation[copy]'] = copy
@@ -118,6 +119,7 @@ class TranslationItem
     ajaxParams['commit'] = sha
     ajaxParams['reason_ids'] = reason_ids if reason_ids.length
     ajaxParams['article_id'] = articleId if articleId
+    ajaxParams['asset_id'] = assetId if assetId
 
     $.ajax translation.url + '.json',
       type: 'PUT'

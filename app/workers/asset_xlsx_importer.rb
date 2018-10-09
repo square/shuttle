@@ -23,11 +23,11 @@ class AssetXlsxImporter
   end
 
   def get_workbook(file)
-    if file.class == Paperclip::Attachment
+    if File.file?(file.path)
+      RubyXL::Parser.parse(file.path)
+    else
       content = open(file.url).read
       RubyXL::Parser.parse_buffer(content)
-    else
-      RubyXL::Parser.parse(file.path)
     end
   end
 

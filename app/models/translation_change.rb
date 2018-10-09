@@ -32,6 +32,7 @@ class TranslationChange < ActiveRecord::Base
   belongs_to :user
   belongs_to :project
   belongs_to :article
+  belongs_to :asset
   has_many :edit_reasons
   has_many :reasons, through: :edit_reasons
 
@@ -50,6 +51,7 @@ class TranslationChange < ActiveRecord::Base
       project_id = Project.joins(:slugs).where('slugs.slug = ?', params[:project_id]).pluck('projects.id').first
       commit = (params[:commit] == 'Save') ? nil : params[:commit]
       article_id = params[:article_id] || translation.article&.id
+      asset_id = params[:asset_id]
 
       tran = TranslationChange.create(
         translation: translation,
@@ -60,7 +62,8 @@ class TranslationChange < ActiveRecord::Base
         tm_match: translation.tm_match,
         sha: commit,
         article_id: article_id,
-        project_id: project_id
+        project_id: project_id,
+        asset_id: asset_id
       )
       tran.reason_ids = params[:reason_ids] if params[:reason_ids]
     end

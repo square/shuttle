@@ -925,7 +925,8 @@ CREATE TABLE public.translation_changes (
     role character varying,
     project_id integer,
     is_edit boolean DEFAULT false,
-    article_id integer
+    article_id integer,
+    asset_id integer
 );
 
 
@@ -2259,3 +2260,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180814210040');
 INSERT INTO schema_migrations (version) VALUES ('20180814210112');
 
 INSERT INTO schema_migrations (version) VALUES ('20180825234430');
+
+INSERT INTO schema_migrations (version) VALUES ('20180924195012');
+

@@ -48,6 +48,19 @@ RSpec.describe "Translations", type: :request do
       expect(TranslationChange.first.article).to eq article
     end
 
+    it 'handles an asset in the params' do
+      project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
+      key1 = FactoryBot.create(:key, key: "firstkey",  project: project)
+      asset = FactoryBot.create(:asset)
+      translation = FactoryBot.create(:translation, source_rfc5646_locale: 'en', source_copy: 'fake', copy: nil, approved: nil, key: key1)
+
+      url = project_key_translation_path(project, key1, translation.to_param, asset_id: asset.id)
+      patch_via_redirect url, translation: { copy: 'fake' }
+
+      expect(response).to render_template(:edit)
+      expect(TranslationChange.first.asset).to eq asset
+    end
+
     it 'handles a project in the params' do
       project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr'=>true, 'es'=>true}, base_rfc5646_locale: 'en')
       key1 = FactoryBot.create(:key, key: "firstkey",  project: project)
