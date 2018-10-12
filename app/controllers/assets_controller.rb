@@ -1,3 +1,4 @@
+# Language: Ruby, Level: Level 3
 class AssetsController < ApplicationController
   respond_to :json, only: [:create, :show, :update]
   respond_to :html, only: [:create, :show, :update, :new, :edit]
@@ -147,6 +148,19 @@ private
 
   def params_for_update
     hsh = params.require(:asset).permit(:name, :description, :email, :file, :file_name)
+
+    if params[:asset].try(:key?, :targeted_rfc5646_locales)
+      locales = {}
+      params[:asset][:targeted_rfc5646_locales].each do |k,v|
+        if k.class == String && !v
+          locales.merge! JSON.parse(k.gsub('=>', ':'))
+        else
+          locales.merge! k => v
+        end
+      end
+      hsh[:targeted_rfc5646_locales] = locales
+    end
+
     hsh[:priority] = params[:asset][:priority] # default to nil
     hsh[:due_date] = DateTime::strptime(params[:asset][:due_date], "%m/%d/%Y") rescue '' if params[:asset].try(:key?, :due_date)
     hsh[:file_name] = File.basename(params[:asset][:file].original_filename, File.extname(params[:asset][:file].original_filename)) if params[:asset][:file].try(:original_filename)
