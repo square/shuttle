@@ -2,9 +2,42 @@
 @import "css3-mixins";
 
 body.assets {
+  .select_all_link {
+    margin: 0 10px 15px 0;
+  }
+  .deselect_all_link {
+    margin: 0 0 15px 10px;
+  }
   .control-group label {
     padding-top: 0;
     width: 170px;
+
+    &.form_checkbox {
+      display: block;
+      height: 30px;
+      float: none;
+      margin: 10px 0;
+      position: relative;
+      border: solid 1px #d2d9dd;
+      width: 97%;
+      padding: 1% 1% 1% 2%;
+
+      .locale-flag {
+        position: relative;
+        left: -1%;
+      }
+
+      span {
+        display: inline-block;
+        top: -3px;
+        position: relative;
+      }
+
+      input {
+        float: right;
+        margin-top: 7px;
+      }
+    }
   }
 
   &#assets-show, &#assets-issues {

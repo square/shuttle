@@ -44,8 +44,8 @@ class Asset < ActiveRecord::Base
   include CommonLocaleLogic
   before_validation(on: :create) do |asset|
     if asset.project # this is needed to test validate_attachment_presence, project is null in this case for some reason
-      asset.base_rfc5646_locale      = asset.project.base_rfc5646_locale
-      asset.targeted_rfc5646_locales = asset.project.targeted_rfc5646_locales
+      asset.base_rfc5646_locale      = asset.project.base_rfc5646_locale if asset.base_rfc5646_locale.blank?
+      asset.targeted_rfc5646_locales = asset.project.targeted_rfc5646_locales if asset.targeted_rfc5646_locales.blank?
     end
   end
   # ======== END LOCALE RELATED CODE ===================================================================================

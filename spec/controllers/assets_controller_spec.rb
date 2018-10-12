@@ -33,21 +33,21 @@ RSpec.describe AssetsController, type: :controller do
       expect(asset.targeted_locales.map(&:rfc5646)).to match_array(%w(es fr))
     end
 
-    it "creates an Asset specifying targeted_rfc5646_locales, but the project's are used" do
+    it "creates an Asset specifying targeted_rfc5646_locales" do
       post :create, project_id: @project, asset: FactoryBot.attributes_for(:asset, targeted_rfc5646_locales: { 'ja' => true }), format: :json
       expect(response.status).to eql(200)
       expect(Asset.count).to eql(1)
       asset = Asset.last
-      expect(asset.targeted_rfc5646_locales).to eql(@project.targeted_rfc5646_locales)
+      expect(asset.targeted_rfc5646_locales).to eql({ 'ja' => true })
     end
 
-    it "creates an Asset specifying base_locale, but the project's are used" do
+    it "creates an Asset specifying base_locale" do
       post :create, project_id: @project, asset: FactoryBot.attributes_for(:asset, base_rfc5646_locale: 'ja'), format: :json
       expect(response.status).to eql(200)
       expect(Asset.count).to eql(1)
       asset = Asset.last
-      expect(asset.base_rfc5646_locale).to eql('en')
-      expect(asset.base_locale).to eql(Locale.from_rfc5646('en'))
+      expect(asset.base_rfc5646_locale).to eql('ja')
+      expect(asset.base_locale).to eql(Locale.from_rfc5646('ja'))
     end
 
     it "doesn't create a Asset in a Project with a duplicate key name" do

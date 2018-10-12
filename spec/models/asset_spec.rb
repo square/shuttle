@@ -28,10 +28,10 @@ RSpec.describe Asset, type: :model do
       expect(asset.targeted_rfc5646_locales).to eql({'fr' => true})
     end
 
-    it 'should not use targeted_rfc5646_locales specified, but revert to projects (due to key associations)' do
+    it 'should use targeted_rfc5646_locales specified' do
       project = FactoryBot.create(:project, targeted_rfc5646_locales: {'fr' => true})
       asset = FactoryBot.create(:asset, targeted_rfc5646_locales: {'it' => true}, project: project)
-      expect(asset.targeted_rfc5646_locales).to eql({'fr' => true})
+      expect(asset.targeted_rfc5646_locales).to eql({'it' => true})
     end
   end
 
