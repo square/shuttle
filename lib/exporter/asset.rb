@@ -65,12 +65,11 @@ module Exporter
 private
     def generate_xlsx(asset, locale)
       if File.file?(asset.file.path)
-        RubyXL::Parser.parse(asset.file.path)
+        workbook = RubyXL::Parser.parse(asset.file.path)
       else
         content = open(asset.file.url).read
-        RubyXL::Parser.parse_buffer(content)
+        workbook = RubyXL::Parser.parse_buffer(content)
       end
-      workbook = RubyXL::Parser.parse(asset.file.path)
 
       asset.translations.in_locale(locale).each do |translation|
         cell_info = translation.key.original_key.scan(/sheet(\d+)-row(\d+)-col(\d+)/).flatten

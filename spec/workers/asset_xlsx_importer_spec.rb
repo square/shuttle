@@ -19,7 +19,7 @@ RSpec.describe AssetXlsxImporter do
     before :each do
       allow_any_instance_of(AssetImporter::Finisher).to receive(:on_success) # prevent import from finishing
       @asset = FactoryBot.create(:asset)
-      AssetXlsxImporter.new.perform(@asset.id)
+      AssetXlsxImporter.new.import(@asset.id)
       @asset.reload
     end
 
@@ -37,7 +37,7 @@ RSpec.describe AssetXlsxImporter do
     end
 
     it 'sets the key to the correct name' do
-      expect(@asset.keys.first.key).to eq "#{@asset.file_name.downcase}-sheet1-row1-col1"
+      expect(@asset.keys.first.key).to eq "#{@asset.id}-#{@asset.file_name.downcase}-sheet0-row1-col1"
     end
   end
 end
