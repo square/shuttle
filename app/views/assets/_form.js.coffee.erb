@@ -1,0 +1,33 @@
+$ ->
+  setFlag = (element) ->
+    $element = $(element)
+    $element.find('img.locale-flag').remove()
+    image = Locale.from_rfc5646($element.text())?.image()
+    if image
+      img = $('<img/>').attr('src', image).addClass('locale-flag')
+      $element.prepend(img)
+      img.css('top', ($element.height() - 24) / 2)
+
+
+  setFlags = ->
+    $('.form_checkbox').each ->
+      setFlag(@)
+
+  $('.select_all_link').click (e) ->
+    e.preventDefault()
+
+    $parent = $(@).parent()
+    $('.form_checkbox', $parent).each ->
+      $('input[type=checkbox]', $parent).prop('checked', true)
+
+  $('.deselect_all_link').click (e) ->
+    e.preventDefault()
+
+    $parent = $(@).parent()
+    $('.form_checkbox', $parent).each ->
+      $('input[type=checkbox]', $parent).prop('checked', false)
+
+  if (window.localesLoaded)
+    setFlags()
+  else
+    $(document).bind('locales_loaded', setFlags)

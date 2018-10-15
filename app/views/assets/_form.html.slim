@@ -40,6 +40,7 @@
             .controls
               = f.file_field :file, class: 'tooltip-parent', 'data-tooltip' => '#asset-file'
               .qtip-tooltip#asset-file The asset requires a file.
+
         .control-group
           = f.label :priority, class: 'control-label'
           .controls
@@ -56,14 +57,29 @@
             = (@asset.persisted? ? @asset : @project).base_rfc5646_locale
 
         .control-group
-          = f.label :required_rfc5646_locales, 'Required Localizations', class: 'control-label'
+          = f.label :targeted_rfc5646_locales, 'Required Localizations', class: 'control-label'
           .controls
-            = (@asset.persisted? ? @asset : @project).required_rfc5646_locales.join(', ').presence || '-'
+            a.select_all_link href="#" Select All
+            | |
+            a.deselect_all_link href="#" Deselect All
+            - @project.targeted_rfc5646_locales.select { |k,v| v == true}.each do |key, value|
+              label.form_checkbox
+                = check_box_tag 'asset[targeted_rfc5646_locales][]', { key => value }, @asset.targeted_rfc5646_locales.include?(key)
+                span = key.upcase
 
         .control-group
-          = f.label :other_rfc5646_locales, 'Other Localizations', class: 'control-label'
+          = f.label :targeted_rfc5646_locales, 'Other Localizations', class: 'control-label'
           .controls
-            = (@asset.persisted? ? @asset : @project).other_rfc5646_locales.join(', ').presence || '-'
+            - if @project.targeted_rfc5646_locales.select { |k,v| v == false}.presence
+              a.select_all_link href="#" Select All
+              | |
+              a.deselect_all_link href="#" Deselect All
+              - @project.targeted_rfc5646_locales.select { |k,v| v == false}.each do |key, value|
+                label.form_checkbox
+                  = check_box_tag 'asset[targeted_rfc5646_locales][]', { key => value }, @asset.targeted_rfc5646_locales.include?(key)
+                  span = key.upcase
+            - else
+              | -
 
         .control-group
           = f.label :email, class: 'control-label'
@@ -80,3 +96,10 @@
   .form-actions
     = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
     button.default href=(@asset.persisted? ? project_asset_path(@project, @asset) : root_path) Cancel
+
+
+- content_for :javascript do
+  script type='text/javascript'
+    - file_name = 'views/assets/_form'
+    - js_coffee_erb_file  = Rails.root.join('app', file_name + '.js.coffee.erb')
+    = raw(CoffeeScript.compile(ERB.new(File.read(js_coffee_erb_file)).result(binding))) if File.exist?(js_coffee_erb_file)
