@@ -219,17 +219,20 @@ class Key < ActiveRecord::Base
   # This is used, for example, when a Project adds a new required localization,
   # to create pending Translation requests for each string in the new locale.
 
-  def add_pending_translations
-    translations.in_locale(base_locale).find_or_create!(
+  def add_pending_translations(model = nil)
+    locales = model && model.targeted_locales ? model.targeted_locales : targeted_locales
+    base = model && model.base_locale ? model.base_locale : base_locale
+
+    translations.in_locale(base).find_or_create!(
         source_copy:              source_copy,
         copy:                     source_copy,
-        source_locale:            base_locale,
-        locale:                   base_locale,
+        source_locale:            base,
+        locale:                   base,
         approved:                 true,
         preserve_reviewed_status: true,
     )
 
-    targeted_locales.each do |locale|
+    locales.each do |locale|
       next if skip_key?(locale)
       t = translations.in_locale(locale).find_or_create!(
         source_copy:          source_copy,

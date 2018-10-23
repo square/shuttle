@@ -39,16 +39,19 @@ class AssetXlsxImporter
         next unless cell
 
         unless cell.fill_color =~ /ff0000$/i
-          key_name = generate_key_name(worksheet_index, cell)
           if cell.value
-            key = @asset.keys.for_key(key_name).create_or_update!(
+            key_name = generate_key_name(worksheet_index, cell)
+            key = Key.for_key(key_name).create_or_update!(
                 project:              @asset.project,
                 key:                  key_name,
                 source_copy:          cell.value,
                 skip_readiness_hooks: true,
                 ready: false
             )
-            key.add_pending_translations
+
+            @asset.keys << key unless @asset.keys.include?(key)
+
+            key.add_pending_translations(@asset)
           end
         end
       end
@@ -57,6 +60,7 @@ class AssetXlsxImporter
 
   def generate_key_name(worksheet_index, cell)
     file_name = @asset.file_name.gsub(' ', '_').downcase
-    "#{@asset.id}-#{file_name}-sheet#{worksheet_index}-row#{cell.row}-col#{cell.column}"
+    hashed_value = Digest::SHA1.hexdigest(cell.value)
+    "#{file_name}-sheet#{worksheet_index}-row#{cell.row}-col#{cell.column}-#{hashed_value}"
   end
 end
