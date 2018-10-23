@@ -17,8 +17,8 @@ require 'rails_helper'
 RSpec.describe AssetXlsxImporter do
   describe "#perform" do
     before :each do
-      allow_any_instance_of(AssetImporter::Finisher).to receive(:on_success) # prevent import from finishing
-      @asset = FactoryBot.create(:asset)
+      @project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'es' => true })
+      @asset = FactoryBot.create(:asset, targeted_rfc5646_locales: { 'fr' => true }, project: @project)
       AssetXlsxImporter.new.import(@asset.id)
       @asset.reload
     end
@@ -37,7 +37,9 @@ RSpec.describe AssetXlsxImporter do
     end
 
     it 'sets the key to the correct name' do
-      expect(@asset.keys.first.key).to eq "#{@asset.id}-#{@asset.file_name.downcase}-sheet0-row1-col1"
+      expect(@asset.keys.count).to eq 1
+      hashed_value = Digest::SHA1.hexdigest(@asset.keys.first.source_copy)
+      expect(@asset.keys.first.key).to eq "#{@asset.file_name.downcase}-sheet0-row1-col1-#{hashed_value}"
     end
   end
 end
