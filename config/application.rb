@@ -82,6 +82,7 @@ module Shuttle
 
     require Rails.root.join('app', 'middleware', 'health_check')
     config.middleware.insert_before (config.force_ssl ? ActionDispatch::SSL : Rack::Runtime), HealthCheck
+    config.middleware.use Rack::Attack
   end
 end
 
