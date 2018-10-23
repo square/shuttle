@@ -52,6 +52,7 @@ gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
 gem 'similar_text'
+gem 'rack-attack'
 # temporary fix uninitialized constant Paperclip::Storage::S3::AWS bug. Should consider using latest version after upgrading rails to 4.2 or higher version
 gem 'paperclip', github: 'thoughtbot/paperclip', ref: '523bd46c768226893f23889079a7aa9c73b57d68'
 gem 'aws-sdk', '< 3'

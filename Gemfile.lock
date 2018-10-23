@@ -286,6 +286,8 @@ GEM
       pry (~> 0.10)
     public_suffix (3.0.1)
     rack (1.6.8)
+    rack-attack (5.4.1)
+      rack (>= 1.0, < 3)
     rack-cache (1.7.1)
       rack (>= 0.4)
     rack-protection (1.5.3)
@@ -511,6 +513,7 @@ DEPENDENCIES
   pivot_table
   postgres_ext
   pry-byebug
+  rack-attack
   rack-cache
   rails (= 4.2.10)
   rails-observers
