@@ -13,13 +13,13 @@
 /    limitations under the License.
 
 / Requires the following local variables:
-/   - `item_type`. Can be 'commit', 'article' or 'group'.
+/   - `item_type`. Can be 'commit', 'article', 'asset', or 'group'.
 
 ruby:
   # ex: :commits_filter__project_id, :articles_filter__project_id, :groups_filter__project_id
   filter_name = :"#{item_type}s_filter__project_id"
 
-  project_list = (item_type == 'commit') ? Project.git : Project.not_git
+  project_list = Project.where(job_type: Project.job_types[item_type])
   project_list = project_list.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
   project_list.unshift ['all projects', 'all']
 
