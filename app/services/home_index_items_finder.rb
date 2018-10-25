@@ -151,7 +151,7 @@ class HomeIndexItemsFinder
     assets = Asset.includes(:project).showing
 
     # filter by name
-    assets = assets.for_name(form[:assets_filter__name]) if form[:assets_filter__name]
+    assets = assets.where(name: form[:assets_filter__name]) if form[:assets_filter__name]
 
     # filter by project
     assets = assets.where(project_id: form[:assets_filter__project_id]) unless form[:assets_filter__project_id] == 'all'
