@@ -51,9 +51,14 @@
             <div class="half alerts"></div>
           </div>
 
-          {{#reasons}}
-            <span class="badge badge-secondary saved" data-checkbox="{{id}}">{{text}}</span>
-          {{/reasons}}
+          <div class="reason-badges">
+            {{#reason_severity}}
+              <span class="badge {{class_name}} severity-badge saved" data-severity="{{severity}}">{{severity_text}}</span>
+            {{/reason_severity}}
+            {{#reasons}}
+              <span class="badge badge-secondary saved" data-checkbox="{{id}}">{{text}}</span>
+            {{/reasons}}
+          </div>
         {{/read_only_mode}}
       </div>
     </div>
