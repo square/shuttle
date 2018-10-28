@@ -102,7 +102,7 @@ class TranslationItem
     loadFuzzyMatches(@fuzzy_matches, @copy_field, @translation.fuzzy_match_url, @translation.source_copy)
 
 
-  saveTranslation: (translation, element, reason_ids = []) ->
+  saveTranslation: (translation, element, reason_ids = [], reason_severity = null) ->
     # find checked locales to which this translation copy should be copied to
     copyToLocales = element.find('.multi-updateable-translations input[type=checkbox]:checked').map(() -> this.value).get()
     element.find('.translation-area, input').attr 'disabled', 'disabled'
@@ -118,6 +118,7 @@ class TranslationItem
     ajaxParams['copyToLocales'] = copyToLocales
     ajaxParams['commit'] = sha
     ajaxParams['reason_ids'] = reason_ids if reason_ids.length
+    ajaxParams['reason_severity'] = reason_severity if reason_severity != null
     ajaxParams['article_id'] = articleId if articleId
     ajaxParams['asset_id'] = assetId if assetId
 
@@ -130,6 +131,8 @@ class TranslationItem
 
   # @private
   build: ->
+    severity_texts = ['Minor', 'Neutral', 'Major', 'Critical']
+    severity_classes = ['badge-success', 'badge-info', 'badge-warning', 'badge-danger']
     context = {}
 
     context.status = @translation.status
@@ -169,7 +172,7 @@ class TranslationItem
       context.approved = @translation.approved
       context.reviewer = @translation.reviewer.name
 
-    if @translation.changes
+    if @translation.changes.length
       # extract the reasons
       reasons = @translation.changes.map (change) ->
         change.reasons.map (reason) ->
@@ -184,6 +187,17 @@ class TranslationItem
         new Date(b.date) - new Date(a.date)
 
       context.reasons = reasons
+
+      [first, ..., last] = @translation.changes
+
+      if first
+        severity = first.reason_severity
+        if severity
+          context.reason_severity = {
+            class_name: severity_classes[severity],
+            severity: severity
+            severity_text: "Severity: #{severity_texts[severity]}"
+          }
 
 
     @element = $(HoganTemplates['translationworkbench/translation_item'].render(context))
@@ -424,6 +438,8 @@ class root.TranslationWorkbench
           "_blank", 'toolbar=0,location=0,menubar=0,height=800,width=1280,left=0'
 
     @items = []
+    @reasonSeverity = null
+    @reasonSeverityClasses = ['badge-success', 'badge-info', 'badge-warning', 'badge-danger']
     @highlighter.appendTo @list
     @addItems @translations
     @setupReasonsModal()
@@ -442,6 +458,7 @@ class root.TranslationWorkbench
 
   setupReasonsModal: ->
     $modal = $('#add-translation-reasons')
+    workbench = this
 
     $('[data-toggle="tooltip"]', $modal).tooltip()
     $('[data-toggle="popover"]', $modal).popover
@@ -452,6 +469,41 @@ class root.TranslationWorkbench
       title: ->
         title = $(this).attr('data-popover-content')
         $(title).children('.popover-heading').html()
+
+    $('[data-severity]', $modal).on 'click', (event) ->
+      event.preventDefault()
+      $this = $(this)
+      $prev = $this.parent().prev()
+      $save_btn = $('.save-btn', $modal)
+      $severityLabel = $('#reason-review-popover .popover-body .severity-label')
+      $area = $('.translation-area.active').parent().find('.reason-badges')
+      severityText = "Severity: #{$this.text()}"
+
+      # set the text and data attr of the button
+      $prev.text(severityText)
+      $prev.data('severity', $this.data('severity'))
+
+      # update review
+      $severityLabel.text(severityText)
+
+      # update the reasonSeverity variable
+      workbench.reasonSeverity = $this.data('severity')
+
+      # see if we should update the save button
+      $save_btn.removeAttr('disabled') if $('input:checked', $modal).length
+
+      # add the severity badge
+      $severityBadge = $('.severity-badge', $area)
+      if $severityBadge.length
+        $severityBadge.text(severityText)
+          .data('severity', workbench.reasonSeverity)
+          .removeClass(workbench.reasonSeverityClasses.join(' '))
+          .addClass(workbench.reasonSeverityClasses[workbench.reasonSeverity])
+      else
+        $area.prepend(
+          "<span class=\"badge #{workbench.reasonSeverityClasses[workbench.reasonSeverity]} severity-badge\"
+          data-severity=\"#{workbench.reasonSeverity}\">#{severityText}</span>"
+        )
 
     $modal.on 'shown.bs.dropdown', ->
       $('#dropdown-search').focus()
@@ -464,7 +516,7 @@ class root.TranslationWorkbench
       $inp = $target.find('input[type=checkbox]')
       return unless $inp.length
       text = $inp.parent().text()
-      $area = $('.translation-area.active').parent()
+      $area = $('.translation-area.active').parent().find('.reason-badges')
       $btn_badge = $('.reason-btn .badge')
       $review = $('#reason-review-popover .popover-body ul')
       $save_btn = $('.save-btn', $modal)
@@ -473,7 +525,7 @@ class root.TranslationWorkbench
         $inp.prop 'checked', !$inp.prop('checked')
         checked = $inp.prop('checked')
         if checked
-          $save_btn.removeAttr('disabled')
+          $save_btn.removeAttr('disabled') if workbench.reasonSeverity != null
           $area.append(
             "<span class=\"badge badge-secondary\"
             data-checkbox=\"#{$inp.val()}\">#{text}</span>"
@@ -482,7 +534,7 @@ class root.TranslationWorkbench
           $btn_badge.text(parseInt($btn_badge.text()) + 1)
         else
           item_count = parseInt(parseInt($btn_badge.text()) - 1)
-          $save_btn.attr('disabled', 'disabled') unless item_count
+          $save_btn.attr('disabled', 'disabled') unless item_count && workbench.reasonSeverity != null
           $area.find(".badge[data-checkbox='#{$inp.val()}']:not(.saved)").remove()
           $review.find("[data-checkbox='#{$inp.val()}']").remove()
           $btn_badge.text(item_count)
@@ -503,11 +555,25 @@ class root.TranslationWorkbench
 
     $('.undo-btn', $modal).on 'click', =>
       $trans = $('.translation-area.active')
+      $reasonBadgeArea = $trans.parent().find('.reason-badges')
+      $severityBadge = $reasonBadgeArea.find('.severity-badge')
+
+      # handle reason severity
+      workbench.reasonSeverity = $('#original_severity').val()
+      $severityBadge.text($('#original_severity_text').val())
+        .data('severity', workbench.reasonSeverity)
+        .removeClass(workbench.reasonSeverityClasses.join(' '))
+        .addClass(workbench.reasonSeverityClasses[workbench.reasonSeverity])
+
       $trans.parent().find('.badge:not(.saved)').remove()
       item = @items.find (item) ->
         item.copy_field.hasClass 'active'
       $trans.val(item.translation.copy)
+
+      # close the modal window
       $('#add-translation-reasons .close').click()
+
+      # update the UI
       $trans.keyup()
       $trans.focus()
 
@@ -522,17 +588,29 @@ class root.TranslationWorkbench
         this.value
 
       if reason_ids.length
-        item.saveTranslation(item.translation, item.element, reason_ids.toArray())
+        item.saveTranslation(item.translation, item.element, reason_ids.toArray(), workbench.reasonSeverity)
         $('.close', $modal).click()
         $trans.keyup()
         $trans.focus()
 
     $(document).on 'leanModal.shown', ->
       $modal = $('#add-translation-reasons')
-      $badges = $('.translation-area.active').parent().find('.badge')
+      $reasonBadgeArea = $('.translation-area.active').parent().find('.reason-badges')
+      $severityBadge = $reasonBadgeArea.find('.severity-badge')
+      $badges = $reasonBadgeArea.find('.badge:not(.severity-badge):not(.saved)')
       $btn_badge = $('.reason-btn .badge')
       $review = $('#reason-review-popover .popover-body ul')
-      $('.save-btn', $modal).removeAttr('disabled') if $badges.length
+      $severityLabel = $('.severity-label', $review)
+
+      if $severityBadge.length
+        workbench.reasonSeverity = $severityBadge.data('severity')
+        $('.severity-btn', $modal).text($severityBadge.text())
+          .data('severity', workbench.reasonSeverity)
+        $severityLabel.text($severityBadge.text())
+        $('#original_severity').val(workbench.reasonSeverity)
+        $('#original_severity_text').val($severityBadge.text())
+
+      $('.save-btn', $modal).removeAttr('disabled') if $badges.length && workbench.reasonSeverity != null
 
       for badge in $badges
         $modal.find("[value=#{$(badge).data('checkbox')}]").prop 'checked', true
@@ -544,8 +622,12 @@ class root.TranslationWorkbench
     $(document).on 'leanModal.hidden', ->
       $btn_badge = $('.reason-btn .badge')
       $btn_badge.text('0')
-
-      $('#reason-review-popover .popover-body ul li').remove()
+      workbench.reasonSeverity = null
+      $severityLabel = $('#reason-review-popover .popover-body .severity-label')
+      $severityLabel.text('Severity Not Selected')
+      $('.severity-btn', $modal).text('Select Severity')
+      $('.save-btn', $modal).attr('disabled', 'disabled')
+      $('#reason-review-popover .popover-body ul li:not(.severity-label)').remove()
       $('#dropdown-search').val('')
       $('.dropdown-menu li:not(.no-padding)', $modal).fadeIn('fast')
       $('input[type=checkbox]', $modal).prop 'checked', false

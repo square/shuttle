@@ -926,7 +926,8 @@ CREATE TABLE public.translation_changes (
     project_id integer,
     is_edit boolean DEFAULT false,
     article_id integer,
-    asset_id integer
+    asset_id integer,
+    reason_severity smallint
 );
 
 
@@ -2262,4 +2263,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180814210112');
 INSERT INTO schema_migrations (version) VALUES ('20180825234430');
 
 INSERT INTO schema_migrations (version) VALUES ('20180924195012');
+
+INSERT INTO schema_migrations (version) VALUES ('20181028020548');
 
