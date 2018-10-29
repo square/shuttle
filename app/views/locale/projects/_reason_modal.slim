@@ -9,12 +9,12 @@
         button.btn.dropdown-toggle.severity-btn aria-expanded='false' aria-haspopup='true' data-toggle='dropdown' type='button'
           | Select Severity
         .dropdown-menu
-          - Translation.reason_severities.each do |severity|
+          - TranslationChange.reason_severities.each do |severity|
             a.dropdown-item data-severity=severity[1] href="#"
               = severity[0].titlecase
 
         = hidden_field_tag 'original_severity'
-        = hidden_field_tag 'original_severity_text'        
+        = hidden_field_tag 'original_severity_text'
 
       .btn-group.pull-left
         button.btn.dropdown-toggle.reason-btn aria-expanded='false' aria-haspopup='true' data-toggle='dropdown' type='button'

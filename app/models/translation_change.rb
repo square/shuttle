@@ -40,6 +40,8 @@ class TranslationChange < ActiveRecord::Base
 
   validates :translation, presence: true
 
+  enum reason_severities: [:minor, :neutral, :major, :critical]
+
   def self.create_from_translation!(translation)
     diff = translation.previous_changes.slice(*TRACKED_ATTRIBUTES)
     TranslationChange.create(translation: translation, user: translation.modifier, diff: diff) if diff.present?
