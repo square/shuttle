@@ -131,7 +131,7 @@ class TranslationItem
 
   # @private
   build: ->
-    severity_texts = ['Minor', 'Neutral', 'Major', 'Critical']
+    severity_texts = <%= TranslationChange.reason_severities.map {|s| s[0].titlecase} %>
     severity_classes = ['badge-success', 'badge-info', 'badge-warning', 'badge-danger']
     context = {}
 
@@ -188,7 +188,7 @@ class TranslationItem
 
       context.reasons = reasons
 
-      [first, ..., last] = @translation.changes
+      [first, ...] = @translation.changes
 
       if first
         severity = first.reason_severity

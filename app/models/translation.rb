@@ -66,8 +66,6 @@ class Translation < ActiveRecord::Base
   include IndexHelper
   Translation.index_name "shuttle_#{Rails.env}_translations"
 
-  enum reason_severities: [:minor, :neutral, :major, :critical]
-
   def regular_index_fields
     %w(copy source_copy id translator_id rfc5646_locale created_at updated_at translated)
   end
