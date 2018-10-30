@@ -490,7 +490,8 @@ CREATE TABLE public.groups (
     translated_at timestamp without time zone,
     approved_at timestamp without time zone,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    display_name character varying(256)
 );
 
 
@@ -2335,4 +2336,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180825234430');
 INSERT INTO schema_migrations (version) VALUES ('20180924195012');
 
 INSERT INTO schema_migrations (version) VALUES ('20181028020548');
+
+INSERT INTO schema_migrations (version) VALUES ('20181029221959');
 

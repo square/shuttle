@@ -214,23 +214,28 @@ module API
       end
 
       def decorate_group(group)
-        group.article_groups.includes(:article).order(:index_in_group).map do |article_group|
-          {
+        {
+          name: group.name,
+          display_name: group.display_name,
+          description: group.description,
+          articles: group.article_groups.includes(:article).order(:index_in_group).map do |article_group|
+            {
               name: article_group.article.name,
               ready: article_group.article.ready?
-          }
-        end
+            }
+          end
+        }
       end
       # ===== END DECORATORS ===========================================================================================
 
       # ===== START PARAMS RELATED CODE ================================================================================
       def params_for_create
-        hash = params.require(:group).permit(:name, :description, :article_names => [])
+        hash = params.require(:group).permit(:name, :display_name, :description, :article_names => [])
         hash.merge(created_via_api: api_request?, creator_id: current_user.try(:id))
       end
 
       def params_for_update
-        hash = params.require(:group).permit(:description, :article_names => [])
+        hash = params.require(:group).permit(:description, :display_name, :article_names => [])
         hash[:priority] = params[:group][:priority] # default to nil
         hash[:due_date] = DateTime::strptime(params[:group][:due_date], "%m/%d/%Y") rescue '' if params[:group].try(:key?, :due_date)
         hash.merge(updater_id: current_user.try(:id))
@@ -279,6 +284,10 @@ module API
 
         if update_params[:description]
           group.description = update_params[:description]
+        end
+
+        if update_params[:display_name]
+          group.display_name = update_params[:display_name]
         end
 
         group.save!
