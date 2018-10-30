@@ -23,8 +23,8 @@ RSpec.describe API::V1::GroupsController do
   let!(:article1) { FactoryBot.create(:article, project: project) }
   let!(:article2) { FactoryBot.create(:article, project: project) }
   let!(:article3) { FactoryBot.create(:article, project: project) }
-  let!(:group1) { FactoryBot.create(:group, name: 'group-1', project: project) }
-  let!(:group2) { FactoryBot.create(:group, name: 'group-2', project: project) }
+  let!(:group1) { FactoryBot.create(:group, name: 'group-1', display_name: 'this is group one', project: project) }
+  let!(:group2) { FactoryBot.create(:group, name: 'group-2', display_name: 'this is gropu two', project: project) }
 
   before do
     article2.update(ready: true)
@@ -95,22 +95,28 @@ RSpec.describe API::V1::GroupsController do
     it_behaves_like 'api-or-session-authenticateable-and-filters', runs_find_group_filter: false do
       let(:request_type) { :post }
       let(:action) { :create }
-      let(:params) { { group: { name: 'dummy-group', article_names: [] } } }
+      let(:params) { { group: { name: 'dummy-group', display_name: 'this is a dummy group', article_names: [] } } }
     end
 
     it 'creates a Group' do
       article_names = [article2.name, article1.name, article3.name]
-      post :create, project_id: project.id, api_token: project.api_token, group: { name: 'test-group', article_names: article_names, description: 'hello' }, format: :json
+      post :create, project_id: project.id, api_token: project.api_token, group: { name: 'test-group', display_name: 'this is a test group', article_names: article_names, description: 'hello' }, format: :json
 
       expect(response.status).to eql(200)
-      expect(JSON.parse(response.body)).to eq([
-                                                { 'name' => article2.name, 'ready' => true },
-                                                { 'name' => article1.name, 'ready' => false },
-                                                { 'name' => article3.name, 'ready' => false }
-                                              ])
+      expect(JSON.parse(response.body)).to eq({
+        'name' => 'test-group',
+        'description' => 'hello',
+        'display_name' => 'this is a test group',
+        'articles' => [
+          { 'name' => article2.name, 'ready' => true },
+          { 'name' => article1.name, 'ready' => false },
+          { 'name' => article3.name, 'ready' => false }
+        ]
+      })
 
       groups = project.groups.where(name: 'test-group')
       expect(groups.count).to eq(1)
+      expect(groups.first.display_name).to eq('this is a test group')
       expect(groups.first.articles).to match_array([article2, article1, article3])
       expect(groups.first.description).to eq('hello')
     end
@@ -168,10 +174,15 @@ RSpec.describe API::V1::GroupsController do
       get :show, project_id: project.id, api_token: project.api_token, name: group1.name, format: :json
 
       expect(response.status).to eql(200)
-      expect(JSON.parse(response.body)).to eq([
-                                                  { 'name' => article3.name, 'ready' => false },
-                                                  { 'name' => article1.name, 'ready' => false }
-                                              ])
+      expect(JSON.parse(response.body)).to eq({
+        'name' => group1.name,
+        'description' => group1.description,
+        'display_name' => group1.display_name,
+        'articles' => [
+          { 'name' => article3.name, 'ready' => false },
+          { 'name' => article1.name, 'ready' => false }
+        ]
+      })
     end
 
     it 'fails when group does not exist' do
@@ -198,17 +209,23 @@ RSpec.describe API::V1::GroupsController do
       expect(project.groups.find_by_name(group1.name).articles).to match_array([article1, article3])
 
       article_names = [article2.name, article3.name]
-      patch :update, project_id: project.id, api_token: project.api_token, name: group1.name, group: { article_names: article_names, description: 'hello' }, format: :json
+      patch :update, project_id: project.id, api_token: project.api_token, name: group1.name, group: { article_names: article_names, description: 'hello', display_name: 'this is updated group' }, format: :json
 
       expect(response.status).to eql(200)
-      expect(JSON.parse(response.body)).to eq([
-                                                  { 'name' => article2.name, 'ready' => true },
-                                                  { 'name' => article3.name, 'ready' => false }
-                                              ])
+      expect(JSON.parse(response.body)).to eq({
+        'name' => group1.name,
+        'description' => 'hello',
+        'display_name' => 'this is updated group',
+        'articles' => [
+          { 'name' => article2.name, 'ready' => true },
+          { 'name' => article3.name, 'ready' => false }
+        ]
+      })
 
       group = project.groups.find_by_name(group1.name)
       expect(group.articles).to match_array([article2, article3])
       expect(group.description).to eq('hello')
+      expect(group.display_name).to eq('this is updated group')
     end
 
     it 'fails when group does not exist' do
