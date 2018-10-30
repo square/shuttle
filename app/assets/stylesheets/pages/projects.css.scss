@@ -4,20 +4,29 @@
 
 body.projects {
   .header .pull-right {
-    button, input, select {vertical-align: top;}
-    input, select { width: 200px; }
+    button,
+    input,
+    select {
+      vertical-align: top;
+    }
+    input,
+    select {
+      width: 200px;
+    }
   }
 
   .flipswitch-inner:before {
     content: "BLACKLIST";
     padding-left: 8px;
-    background-color: #666666; color: #FFFFFF;
+    background-color: #666666;
+    color: #ffffff;
   }
 
   .flipswitch-inner:after {
     content: "WHITELIST";
     padding-right: 8px;
-    background-color: #F0F0F0; color: #666666;
+    background-color: #f0f0f0;
+    color: #666666;
     text-align: right;
   }
 
@@ -57,6 +66,10 @@ body.projects {
   }
 
   .modal {
+    * {
+      box-sizing: border-box;
+    }
+
     ul.dropdown-menu {
       height: 400px;
       overflow: scroll;
@@ -80,6 +93,10 @@ body.projects {
       }
     }
 
+    .pull-left {
+      margin-right: 20px;
+    }
+
     button {
       &.pull-right {
         margin-left: 20px;
@@ -93,18 +110,29 @@ body.projects {
 
   &#projects-show {
     .locale-select {
-      select[name='commit'] { width: 300px; }
+      select[name="commit"] {
+        width: 300px;
+      }
     }
 
     .filter-bar {
-      input[type="text"] { width: 400px; }
-      select[name="filter_source"] { width: 150px; }
+      input[type="text"] {
+        width: 400px;
+      }
+      select[name="filter_source"] {
+        width: 150px;
+      }
 
-      select[name="article_id"], select[name="section_id"] { width: 180px; }
+      select[name="article_id"],
+      select[name="section_id"] {
+        width: 180px;
+      }
     }
   }
 
-  &#projects-edit, &#projects-new, &#projects-update {
+  &#projects-edit,
+  &#projects-new,
+  &#projects-update {
     .eight.columns {
       margin-top: -30px;
       padding: 30px;
@@ -117,11 +145,14 @@ body.projects {
 
     form {
       fieldset {
-        &:last-of-type { padding-bottom: 0px; }
+        &:last-of-type {
+          padding-bottom: 0px;
+        }
 
         .space-group {
           .controls {
-            input[type="checkbox"], input[type="radio"] {
+            input[type="checkbox"],
+            input[type="radio"] {
               margin-top: -17px;
             }
           }
@@ -139,13 +170,12 @@ body.projects {
             }
 
             border-bottom: 1px solid $gray5;
-            padding: 5px 0px;;
+            padding: 5px 0px;
             span {
               display: block;
               padding-right: 40px;
             }
           }
-
 
           label {
             font-weight: 400;
@@ -156,11 +186,14 @@ body.projects {
             float: none;
           }
 
-          input[type="text"], .twitter-typeahead, .list-field {
+          input[type="text"],
+          .twitter-typeahead,
+          .list-field {
             width: 100%;
           }
 
-          input[type="checkbox"], input[type="radio"] {
+          input[type="checkbox"],
+          input[type="radio"] {
             margin-right: 10px;
             margin-top: 3px;
             float: right;
@@ -172,7 +205,6 @@ body.projects {
       .list-field {
         margin-top: 7px;
       }
-
     }
 
     .header.advanced_actions_header {
@@ -180,8 +212,9 @@ body.projects {
     }
   }
 
-  &#projects-setup_mass_copy_translations, &#projects-mass_copy_translations {
-    input[type=submit] {
+  &#projects-setup_mass_copy_translations,
+  &#projects-mass_copy_translations {
+    input[type="submit"] {
       width: auto;
     }
 

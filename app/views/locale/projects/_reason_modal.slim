@@ -5,8 +5,19 @@
     .modal-body
       p Looks like you edited the translation. Please select one or more reasons to explain why.
       hr
-      .btn-group
-        button.btn.dropdown-toggle.pull-left.reason-btn aria-expanded='false' aria-haspopup='true' data-toggle='dropdown' type='button'
+      .btn-group.pull-left
+        button.btn.dropdown-toggle.severity-btn aria-expanded='false' aria-haspopup='true' data-toggle='dropdown' type='button'
+          | Select Severity
+        .dropdown-menu
+          - TranslationChange.reason_severities.each do |severity|
+            a.dropdown-item data-severity=severity[1] href="#"
+              = severity[0].titlecase
+
+        = hidden_field_tag 'original_severity'
+        = hidden_field_tag 'original_severity_text'
+
+      .btn-group.pull-left
+        button.btn.dropdown-toggle.reason-btn aria-expanded='false' aria-haspopup='true' data-toggle='dropdown' type='button'
           <span class="badge badge-light badge-left">0</span>
           | Select Reasons
 
@@ -27,3 +38,4 @@
           | Review Reasons
         .popover-body
           ul
+            li.severity-label Severity Not Selected
