@@ -40,6 +40,8 @@ class TranslationChange < ActiveRecord::Base
 
   validates :translation, presence: true
 
+  enum reason_severities: [:minor, :neutral, :major, :critical]
+
   def self.create_from_translation!(translation)
     diff = translation.previous_changes.slice(*TRACKED_ATTRIBUTES)
     TranslationChange.create(translation: translation, user: translation.modifier, diff: diff) if diff.present?
@@ -63,7 +65,8 @@ class TranslationChange < ActiveRecord::Base
         sha: commit,
         article_id: article_id,
         project_id: project_id,
-        asset_id: asset_id
+        asset_id: asset_id,
+        reason_severity: params[:reason_severity]
       )
       tran.reason_ids = params[:reason_ids] if params[:reason_ids]
     end
