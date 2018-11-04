@@ -27,6 +27,8 @@
 
 class TranslationChange < ActiveRecord::Base
   TRACKED_ATTRIBUTES = [:copy, :approved]
+  # Reason severity classes, note these must be in order, 0 - 3
+  SEVERITY_CLASSES = ['badge-success', 'badge-info', 'badge-warning', 'badge-danger']
 
   belongs_to :translation, inverse_of: :translation_changes
   belongs_to :user

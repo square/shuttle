@@ -69,6 +69,35 @@ class TranslationsController < ApplicationController
 
   def edit
     @params = params
+
+    # reasons logic
+    @reasons = Reason.order(:category)
+    @reason_badges = []
+    @severity_badge = nil
+    severity_texts = TranslationChange.reason_severities.map {|s| s[0].titlecase}
+
+    changes = @translation.translation_changes.to_a
+    changes.sort! { |x,y| y <=> x }
+
+    @reason_badges = changes.map do |change|
+      change.reasons.map do |reason|
+        { id: reason.id, text: "#{reason.category}: #{reason.name}"}
+      end
+    end
+
+    @reason_badges.flatten!
+
+    latest_severity = changes.find {|c| c.reason_severity }
+    severity = latest_severity&.reason_severity
+
+    if severity
+      @severity_badge = {
+        class_name: TranslationChange::SEVERITY_CLASSES[severity],
+        severity: severity,
+        severity_text: "Severity: #{severity_texts[severity]}"
+      }
+    end
+
     respond_with @translation, location: project_key_translation_url(@project, @key, @translation)
   end
 

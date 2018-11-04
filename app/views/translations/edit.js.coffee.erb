@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 $(document).ready ->
+  copy_changed = false
   find_fuzzy_matches = (source_copy, locale) ->
     loadFuzzyMatches($('.fuzzy-matches').first(),
                      copy_field,
@@ -21,7 +22,7 @@ $(document).ready ->
 
   source_copy = "<%= escape_javascript @translation.source_copy %>"
   target_locale = "<%= escape_javascript @translation.rfc5646_locale %>"
-
+  current_translation = "<%= escape_javascript @translation.copy %>"
   current_selection = source_copy
 
   blankString = $("input[name=blank_string]")
@@ -34,6 +35,7 @@ $(document).ready ->
 
   copy_field.keyup ->
     blankString[0].checked = copy_field.val().match(/^\s*$/)
+    copy_changed = @value != current_translation
     true
   $(".copy-source").click ->
     copy_field.val "<%= escape_javascript @translation.source_copy %>"
@@ -66,3 +68,25 @@ $(document).ready ->
 
   find_fuzzy_matches(source_copy, target_locale)
 
+
+  # Reasons logic
+  reasons_modal = new ReasonsModal('#translation_copy')
+  # handle the submit button
+  $('.edit-side input[type=submit].primary').click ->
+    # check server variables
+    enable_reasons = JSON.parse("<%= Shuttle::Configuration.workbench.enable_reasons %>")
+    role = '<%= current_user.role %>'
+    # only perform this logic if the user is a reviewer, the copy changed, and "reasons" is enabled
+    if enable_reasons && role == 'reviewer' && copy_changed
+      $('#reason_trigger').click()
+      false
+
+
+  # handle undo
+  $(document).on 'reasonsModal.undo', =>
+    copy_field.val(current_translation)
+  # handle save
+  $(document).on 'reasonsModal.save', (e, reason_ids, reason_severity) =>
+    $('#reason_ids').val(reason_ids)
+    $('#reason_severity').val(reason_severity)
+    $('#large-translation').submit()

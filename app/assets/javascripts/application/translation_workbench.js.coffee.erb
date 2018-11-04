@@ -132,7 +132,7 @@ class TranslationItem
   # @private
   build: ->
     severity_texts = <%= TranslationChange.reason_severities.map {|s| s[0].titlecase} %>
-    severity_classes = ['badge-success', 'badge-info', 'badge-warning', 'badge-danger']
+    severity_classes = <%= TranslationChange::SEVERITY_CLASSES %>
     context = {}
 
     context.status = @translation.status
@@ -177,6 +177,7 @@ class TranslationItem
       reasons = @translation.changes.map (change) ->
         change.reasons.map (reason) ->
           id: reason.id,
+          date: change.created_at,
           text: "#{reason.category}: #{reason.name}"
       # flatten array of reasons
       reasons = reasons.reduce(((a, b) ->
@@ -188,16 +189,18 @@ class TranslationItem
 
       context.reasons = reasons
 
-      [first, ...] = @translation.changes
+      @translation.changes.sort (a,b) ->
+        new Date(b.created_at) - new Date(a.created_at)
 
-      if first
-        severity = first.reason_severity
-        if severity != null
-          context.reason_severity = {
-            class_name: severity_classes[severity],
-            severity: severity
-            severity_text: "Severity: #{severity_texts[severity]}"
-          }
+      last_severity_change = @translation.changes.filter (t) -> t.reason_severity != null
+
+      if last_severity_change.length
+        severity = last_severity_change[0].reason_severity
+        context.reason_severity = {
+          class_name: severity_classes[severity],
+          severity: severity
+          severity_text: "Severity: #{severity_texts[severity]}"
+        }
 
 
     @element = $(HoganTemplates['translationworkbench/translation_item'].render(context))
@@ -456,188 +459,27 @@ class root.TranslationWorkbench
         previousItem = item
     @list.find(".translation-area").autosize()
 
+  # @private
   setupReasonsModal: ->
-    $modal = $('#add-translation-reasons')
-    workbench = this
-
-    $('[data-toggle="tooltip"]', $modal).tooltip()
-    $('[data-toggle="popover"]', $modal).popover
-      html: true
-      content: ->
-        content = $(this).attr('data-popover-content')
-        $(content).children('.popover-body').html()
-      title: ->
-        title = $(this).attr('data-popover-content')
-        $(title).children('.popover-heading').html()
-
-    $('[data-severity]', $modal).on 'click', (event) ->
-      event.preventDefault()
-      $this = $(this)
-      $prev = $this.parent().prev()
-      $save_btn = $('.save-btn', $modal)
-      $severityLabel = $('#reason-review-popover .popover-body .severity-label')
-      $area = $('.translation-area.active').parent().find('.reason-badges')
-      severityText = "Severity: #{$this.text()}"
-
-      # set the text and data attr of the button
-      $prev.text(severityText)
-      $prev.data('severity', $this.data('severity'))
-
-      # update review
-      $severityLabel.text(severityText)
-
-      # update the reasonSeverity variable
-      workbench.reasonSeverity = $this.data('severity')
-
-      # see if we should update the save button
-      $save_btn.removeAttr('disabled') if $('input:checked', $modal).length
-
-      # add the severity badge
-      $severityBadge = $('.severity-badge', $area)
-      if $severityBadge.length
-        $severityBadge.text(severityText)
-          .data('severity', workbench.reasonSeverity)
-          .removeClass(workbench.reasonSeverityClasses.join(' '))
-          .addClass(workbench.reasonSeverityClasses[workbench.reasonSeverity])
-      else
-        $area.prepend(
-          "<span class=\"badge #{workbench.reasonSeverityClasses[workbench.reasonSeverity]} severity-badge\"
-          data-severity=\"#{workbench.reasonSeverity}\">#{severityText}</span>"
-        )
-
-    $modal.on 'shown.bs.dropdown', ->
-      $('#dropdown-search').focus()
-
-    # modal drop-drop down checkboxes
-    # handle clicking on a li and checking/unchecking the checkbox
-    # and update the UI (badges, review, and button badge (count))
-    $('.dropdown-menu li:not(.no-padding)', $modal).on 'click', (event) ->
-      $target = $(event.currentTarget)
-      $inp = $target.find('input[type=checkbox]')
-      return unless $inp.length
-      text = $inp.parent().text()
-      $area = $('.translation-area.active').parent().find('.reason-badges')
-      $btn_badge = $('.reason-btn .badge')
-      $review = $('#reason-review-popover .popover-body ul')
-      $save_btn = $('.save-btn', $modal)
-
-      setTimeout ->
-        $inp.prop 'checked', !$inp.prop('checked')
-        checked = $inp.prop('checked')
-        if checked
-          $save_btn.removeAttr('disabled') if workbench.reasonSeverity != null
-          $area.append(
-            "<span class=\"badge badge-secondary\"
-            data-checkbox=\"#{$inp.val()}\">#{text}</span>"
-          )
-          $review.append("<li data-checkbox=\"#{$inp.val()}\">#{text}</li>")
-          $btn_badge.text(parseInt($btn_badge.text()) + 1)
-        else
-          item_count = parseInt(parseInt($btn_badge.text()) - 1)
-          $save_btn.attr('disabled', 'disabled') unless item_count && workbench.reasonSeverity != null
-          $area.find(".badge[data-checkbox='#{$inp.val()}']:not(.saved)").remove()
-          $review.find("[data-checkbox='#{$inp.val()}']").remove()
-          $btn_badge.text(item_count)
-      , 0
-
-      $(event.target).blur()
-      false
-
-    $('#dropdown-search').on 'keyup', ->
-      search_regex = new RegExp(this.value, 'i')
-      $('.dropdown-menu li:not(.no-padding)', $modal).each ->
-        $this = $(this)
-        string_value = "#{$this.text()} #{$('i', $this).data('original-title')}"
-        if search_regex.test string_value
-          $(this).fadeIn('fast')
-        else
-          $(this).fadeOut('fast')
-
-    $('.undo-btn', $modal).on 'click', =>
+    # handle undo
+    $(document).on 'reasonsModal.undo', =>
       $trans = $('.translation-area.active')
-      $reasonBadgeArea = $trans.parent().find('.reason-badges')
-      $severityBadge = $reasonBadgeArea.find('.severity-badge')
-
-      # handle reason severity
-      workbench.reasonSeverity = $('#original_severity').val()
-      $severityBadge.text($('#original_severity_text').val())
-        .data('severity', workbench.reasonSeverity)
-        .removeClass(workbench.reasonSeverityClasses.join(' '))
-        .addClass(workbench.reasonSeverityClasses[workbench.reasonSeverity])
-
-      $trans.parent().find('.badge:not(.saved)').remove()
+      # revert the translation
       item = @items.find (item) ->
         item.copy_field.hasClass 'active'
       $trans.val(item.translation.copy)
-
-      # close the modal window
-      $('#add-translation-reasons .close').click()
-
       # update the UI
       $trans.keyup()
       $trans.focus()
 
-    $('.save-btn', $modal).on 'click', =>
-      $modal = $('#add-translation-reasons')
+    $(document).on 'reasonsModal.save', (e, reason_ids, reason_severity) =>
       $trans = $('.translation-area.active')
-
+      # find the item and save it
       item = @items.find (item) ->
         item.copy_field.hasClass 'active'
 
-      reason_ids = $('input:checked', $modal).map ->
-        this.value
+      item.saveTranslation(item.translation, item.element, reason_ids, reason_severity)
 
-      if reason_ids.length
-        item.saveTranslation(item.translation, item.element, reason_ids.toArray(), workbench.reasonSeverity)
-        $('.close', $modal).click()
-        $trans.keyup()
-        $trans.focus()
-
-    $(document).on 'leanModal.shown', ->
-      # prevent users from scrolling the background
-      $('body').css({'overflow-y':'hidden'})
-
-      $modal = $('#add-translation-reasons')
-      $reasonBadgeArea = $('.translation-area.active').parent().find('.reason-badges')
-      $severityBadge = $reasonBadgeArea.find('.severity-badge')
-      $badges = $reasonBadgeArea.find('.badge:not(.severity-badge):not(.saved)')
-      $btn_badge = $('.reason-btn .badge')
-      $review = $('#reason-review-popover .popover-body ul')
-      $severityLabel = $('.severity-label', $review)
-
-      if $severityBadge.length
-        workbench.reasonSeverity = $severityBadge.data('severity')
-        $('.severity-btn', $modal).text($severityBadge.text())
-          .data('severity', workbench.reasonSeverity)
-        $severityLabel.text($severityBadge.text())
-        $('#original_severity').val(workbench.reasonSeverity)
-        $('#original_severity_text').val($severityBadge.text())
-
-      $('.save-btn', $modal).removeAttr('disabled') if $badges.length && workbench.reasonSeverity != null
-
-      for badge in $badges
-        $modal.find("[value=#{$(badge).data('checkbox')}]").prop 'checked', true
-        $btn_badge.text(parseInt($btn_badge.text()) + 1)
-        $review.append("<li data-checkbox=\"#{$(badge).data('checkbox')}\">
-          #{$(badge).text()}</li>"
-        )
-
-    $(document).on 'leanModal.hidden', ->
-      # remove the fix to prevent users from scrolling the background
-      $('body').css({'overflow-y':''})
-
-      $btn_badge = $('.reason-btn .badge')
-      $btn_badge.text('0')
-      workbench.reasonSeverity = null
-      $severityLabel = $('#reason-review-popover .popover-body .severity-label')
-      $severityLabel.text('Severity Not Selected')
-      $('.severity-btn', $modal).text('Select Severity')
-      $('.save-btn', $modal).attr('disabled', 'disabled')
-      $('#reason-review-popover .popover-body ul li:not(.severity-label)').remove()
-      $('#dropdown-search').val('')
-      $('.dropdown-menu li:not(.no-padding)', $modal).fadeIn('fast')
-      $('input[type=checkbox]', $modal).prop 'checked', false
-
-    $(document).keyup (ev) ->
-      if (ev.keyCode == 27)
-        $("#lean_overlay").trigger("click");
+      # update the UI
+      $trans.keyup()
+      $trans.focus()

@@ -1,0 +1,191 @@
+root = exports ? this
+
+class root.ReasonsModal
+  constructor: (@translation_selector) ->
+    @reasonSeverity = null
+    @reasonSeverityClasses = ['badge-success', 'badge-info', 'badge-warning', 'badge-danger']
+    @setupReasonsModal()
+
+  closeModal: =>
+    $modal = $('#add-translation-reasons')
+    $('[data-toggle="popover"]', $modal).popover('hide')
+    $('.close', $modal).click()
+
+  setupReasonsModal: ->
+    $modal = $('#add-translation-reasons')
+    modal = this
+
+    $('[data-toggle="tooltip"]', $modal).tooltip()
+    $('[data-toggle="popover"]', $modal).popover
+      html: true
+      content: ->
+        content = $(this).attr('data-popover-content')
+        $(content).children('.popover-body').html()
+      title: ->
+        title = $(this).attr('data-popover-content')
+        $(title).children('.popover-heading').html()
+
+    $('[data-severity]', $modal).on 'click', (event) ->
+      event.preventDefault()
+      $this = $(this)
+      $prev = $this.parent().prev()
+      $save_btn = $('.save-btn', $modal)
+      $severityLabel = $('#reason-review-popover .popover-body .severity-label')
+      $area = $(modal.translation_selector).parent().find('.reason-badges')
+      severityText = "Severity: #{$this.text()}"
+
+      # set the text and data attr of the button
+      $prev.text(severityText)
+      $prev.data('severity', $this.data('severity'))
+
+      # update review
+      $severityLabel.text(severityText)
+
+      # update the reasonSeverity variable
+      modal.reasonSeverity = $this.data('severity')
+
+      # see if we should update the save button
+      $save_btn.removeAttr('disabled') if $('input:checked', $modal).length
+
+      # add the severity badge
+      $severityBadge = $('.severity-badge', $area)
+      if $severityBadge.length
+        $severityBadge.text(severityText)
+          .data('severity', modal.reasonSeverity)
+          .removeClass(modal.reasonSeverityClasses.join(' '))
+          .addClass(modal.reasonSeverityClasses[modal.reasonSeverity])
+      else
+        $area.prepend(
+          "<span class=\"badge #{modal.reasonSeverityClasses[modal.reasonSeverity]} severity-badge\"
+          data-severity=\"#{modal.reasonSeverity}\">#{severityText}</span>"
+        )
+
+    $modal.on 'shown.bs.dropdown', ->
+      $('#dropdown-search').focus()
+
+    # modal drop-drop down checkboxes
+    # handle clicking on a li and checking/unchecking the checkbox
+    # and update the UI (badges, review, and button badge (count))
+    $('.dropdown-menu li:not(.no-padding)', $modal).on 'click', (event) ->
+      $target = $(event.currentTarget)
+      $inp = $target.find('input[type=checkbox]')
+      return unless $inp.length
+      text = $inp.parent().text()
+      $area = $(modal.translation_selector).parent().find('.reason-badges')
+      $btn_badge = $('.reason-btn .badge')
+      $review = $('#reason-review-popover .popover-body ul')
+      $save_btn = $('.save-btn', $modal)
+
+      setTimeout ->
+        $inp.prop 'checked', !$inp.prop('checked')
+        checked = $inp.prop('checked')
+        if checked
+          $save_btn.removeAttr('disabled') if modal.reasonSeverity != null
+          $area.append(
+            "<span class=\"badge badge-secondary\"
+            data-checkbox=\"#{$inp.val()}\">#{text}</span>"
+          )
+          $review.append("<li data-checkbox=\"#{$inp.val()}\">#{text}</li>")
+          $btn_badge.text(parseInt($btn_badge.text()) + 1)
+        else
+          item_count = parseInt(parseInt($btn_badge.text()) - 1)
+          $save_btn.attr('disabled', 'disabled') unless item_count && modal.reasonSeverity != null
+          $area.find(".badge[data-checkbox='#{$inp.val()}']:not(.saved)").remove()
+          $review.find("[data-checkbox='#{$inp.val()}']").remove()
+          $btn_badge.text(item_count)
+      , 0
+
+      $(event.target).blur()
+      false
+
+    $('#dropdown-search', $modal).on 'keyup', ->
+      search_regex = new RegExp(this.value, 'i')
+      $('.dropdown-menu li:not(.no-padding)', $modal).each ->
+        $this = $(this)
+        string_value = "#{$this.text()} #{$('i', $this).data('original-title')}"
+        if search_regex.test string_value
+          $(this).fadeIn('fast')
+        else
+          $(this).fadeOut('fast')
+
+    $('.undo-btn', $modal).on 'click', ->
+      $trans = $(modal.translation_selector)
+      $reasonBadgeArea = $trans.parent().find('.reason-badges')
+      # only go after a saved severity badge, non-saved ones will be removed
+      $severityBadge = $reasonBadgeArea.find('.severity-badge.saved')
+
+      # remove the badges from the active item
+      $('.badge:not(.saved)', $reasonBadgeArea).remove()
+
+      # handle reason severity
+      modal.reasonSeverity = $('#original_severity').val()
+
+      $severityBadge.text($('#original_severity_text').val())
+        .data('severity', modal.reasonSeverity)
+        .removeClass(modal.reasonSeverityClasses.join(' '))
+        .addClass(modal.reasonSeverityClasses[modal.reasonSeverity])
+
+      # raise an custom undo event
+      $.event.trigger 'reasonsModal.undo'
+      modal.closeModal()
+
+    $('.save-btn', $modal).on 'click', =>
+      $trans = $(modal.translation_selector)
+
+      reason_ids = $('input:checked', $modal).map ->
+        this.value
+
+      if reason_ids.length && modal.reasonSeverity != null
+        # raise an custom save event
+        $.event.trigger 'reasonsModal.save', [reason_ids.toArray(), modal.reasonSeverity]
+        modal.closeModal()
+
+    $(document).on 'leanModal.shown', ->
+      # prevent users from scrolling the background
+      $('body').css({'overflow-y':'hidden'})
+
+      $modal = $('#add-translation-reasons')
+      $reasonBadgeArea = $(modal.translation_selector).parent().find('.reason-badges')
+      $severityBadge = $reasonBadgeArea.find('.severity-badge')
+      $badges = $reasonBadgeArea.find('.badge:not(.severity-badge):not(.saved)')
+      $btn_badge = $('.reason-btn .badge')
+      $review = $('#reason-review-popover .popover-body ul')
+      $severityLabel = $('.severity-label', $review)
+
+      if $severityBadge.length
+        modal.reasonSeverity = $severityBadge.data('severity')
+        $('.severity-btn', $modal).text($severityBadge.text())
+          .data('severity', modal.reasonSeverity)
+        $severityLabel.text($severityBadge.text())
+        $('#original_severity').val(modal.reasonSeverity)
+        $('#original_severity_text').val($severityBadge.text())
+
+      $('.save-btn', $modal).removeAttr('disabled') if $badges.length && modal.reasonSeverity != null
+
+      for badge in $badges
+        $modal.find("[value=#{$(badge).data('checkbox')}]").prop 'checked', true
+        $btn_badge.text(parseInt($btn_badge.text()) + 1)
+        $review.append("<li data-checkbox=\"#{$(badge).data('checkbox')}\">
+          #{$(badge).text()}</li>"
+        )
+
+    $(document).on 'leanModal.hidden', ->
+      # remove the fix to prevent users from scrolling the background
+      $('body').css({'overflow-y':''})
+
+      $btn_badge = $('.reason-btn .badge')
+      $btn_badge.text('0')
+      modal.reasonSeverity = null
+      $severityLabel = $('#reason-review-popover .popover-body .severity-label')
+      $severityLabel.text('Severity Not Selected')
+      $('.severity-btn', $modal).text('Select Severity')
+      $('.save-btn', $modal).attr('disabled', 'disabled')
+      $('#reason-review-popover .popover-body ul li:not(.severity-label)').remove()
+      $('#dropdown-search').val('')
+      $('.dropdown-menu li:not(.no-padding)', $modal).fadeIn('fast')
+      $('input[type=checkbox]', $modal).prop 'checked', false
+
+    # close modal on ESC key press
+    $(document).keyup (ev) ->
+      if (ev.keyCode == 27)
+        $("#lean_overlay").trigger("click");
