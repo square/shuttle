@@ -51,7 +51,8 @@ $(document).ready ->
     else
       new Flash('alert').text('Need to select a commit to view issues')
 
-  # TRANSLATION WORKBENCH
+  # TRANSLATION WORKBENCH and REASONS MODAL
+  new ReasonsModal('.translation-area.active')
   new TranslationWorkbench(
     $(".translation-workbench"),
     "<%= search_translations_url(:target_locales => @locale.rfc5646) %>",

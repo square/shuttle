@@ -40,7 +40,7 @@
     strong
       - last_commit = @project.commits.order('committed_at DESC').first
       - if last_commit
-        | Last imported
+        | Last imported&nbsp;
         = "#{time_ago_in_words(last_commit.committed_at)} ago"
         |  /
         = "#{last_commit.revision_prefix}"

@@ -41,6 +41,16 @@ hr.divider
 
         .control-group
           = f.text_area :copy, autocomplete: 'off', rows: 15, class: 'resize'
+          = hidden_field_tag :reason_ids
+          = hidden_field_tag :reason_severity
+          .reason-badges
+            - if @severity_badge
+              span.badge.severity-badge.saved class="#{@severity_badge[:class_name]}" data-severity="#{@severity_badge[:severity]}"
+                = @severity_badge[:severity_text]
+
+            - @reason_badges.each do |badge|
+              span.badge.badge-secondary.saved data-checkbox="#{badge[:id]}"
+                = badge[:text]
 
         .control-group
           = check_box_tag 'blank_string', '1', (@translation.translated? && @translation.copy.blank? ? 'checked' : nil)
@@ -74,3 +84,5 @@ hr.divider
       = render partial: (@translation.belongs_to_article? ? 'article_details' : 'commit_history'), locals: { translation: @translation }
 
 = render partial: 'issues/index', locals: {project: @project, key: @key, translation: @translation, issues: @issues, issue: @issue}
+button type='button' id='reason_trigger' href='#add-translation-reasons' style='display:none' rel='modal' Trigger
+= render partial: 'locale/projects/reason_modal', locals: { reasons: @reasons }
