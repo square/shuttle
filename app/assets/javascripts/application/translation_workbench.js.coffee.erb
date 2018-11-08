@@ -631,3 +631,7 @@ class root.TranslationWorkbench
       $('#dropdown-search').val('')
       $('.dropdown-menu li:not(.no-padding)', $modal).fadeIn('fast')
       $('input[type=checkbox]', $modal).prop 'checked', false
+
+    $(document).keyup (ev) ->
+      if (ev.keyCode == 27)
+        $("#lean_overlay").trigger("click");
