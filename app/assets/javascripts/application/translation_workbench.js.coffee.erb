@@ -594,6 +594,9 @@ class root.TranslationWorkbench
         $trans.focus()
 
     $(document).on 'leanModal.shown', ->
+      # prevent users from scrolling the background
+      $('body').css({'overflow-y':'hidden'})
+
       $modal = $('#add-translation-reasons')
       $reasonBadgeArea = $('.translation-area.active').parent().find('.reason-badges')
       $severityBadge = $reasonBadgeArea.find('.severity-badge')
@@ -620,6 +623,9 @@ class root.TranslationWorkbench
         )
 
     $(document).on 'leanModal.hidden', ->
+      # remove the fix to prevent users from scrolling the background
+      $('body').css({'overflow-y':''})
+      
       $btn_badge = $('.reason-btn .badge')
       $btn_badge.text('0')
       workbench.reasonSeverity = null
