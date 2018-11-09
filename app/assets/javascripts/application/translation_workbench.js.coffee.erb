@@ -192,7 +192,7 @@ class TranslationItem
 
       if first
         severity = first.reason_severity
-        if severity
+        if severity != null
           context.reason_severity = {
             class_name: severity_classes[severity],
             severity: severity
@@ -625,7 +625,7 @@ class root.TranslationWorkbench
     $(document).on 'leanModal.hidden', ->
       # remove the fix to prevent users from scrolling the background
       $('body').css({'overflow-y':''})
-      
+
       $btn_badge = $('.reason-btn .badge')
       $btn_badge.text('0')
       workbench.reasonSeverity = null
