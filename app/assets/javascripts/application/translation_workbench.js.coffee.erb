@@ -192,7 +192,7 @@ class TranslationItem
 
       if first
         severity = first.reason_severity
-        if severity
+        if severity != null
           context.reason_severity = {
             class_name: severity_classes[severity],
             severity: severity
@@ -594,6 +594,9 @@ class root.TranslationWorkbench
         $trans.focus()
 
     $(document).on 'leanModal.shown', ->
+      # prevent users from scrolling the background
+      $('body').css({'overflow-y':'hidden'})
+
       $modal = $('#add-translation-reasons')
       $reasonBadgeArea = $('.translation-area.active').parent().find('.reason-badges')
       $severityBadge = $reasonBadgeArea.find('.severity-badge')
@@ -620,6 +623,9 @@ class root.TranslationWorkbench
         )
 
     $(document).on 'leanModal.hidden', ->
+      # remove the fix to prevent users from scrolling the background
+      $('body').css({'overflow-y':''})
+
       $btn_badge = $('.reason-btn .badge')
       $btn_badge.text('0')
       workbench.reasonSeverity = null
@@ -631,3 +637,7 @@ class root.TranslationWorkbench
       $('#dropdown-search').val('')
       $('.dropdown-menu li:not(.no-padding)', $modal).fadeIn('fast')
       $('input[type=checkbox]', $modal).prop 'checked', false
+
+    $(document).keyup (ev) ->
+      if (ev.keyCode == 27)
+        $("#lean_overlay").trigger("click");
