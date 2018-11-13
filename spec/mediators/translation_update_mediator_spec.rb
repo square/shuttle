@@ -87,6 +87,8 @@ RSpec.describe TranslationUpdateMediator do
       end
 
       it "sets the tm_match" do
+        reset_elastic_search
+
         # create a translation that will be used for lookup for tm_match
         FactoryBot.create(:translation, copy: "test", source_copy: 'test', approved: true, translated: true, rfc5646_locale: 'fr')
 

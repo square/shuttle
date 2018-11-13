@@ -56,6 +56,8 @@ RSpec.describe KeyAncestorsRecalculator do
         project = FactoryBot.create(:project)
         asset1 = FactoryBot.create(:asset, project: project, ready: false)
         asset2 = FactoryBot.create(:asset, project: project, ready: false)
+        Asset.where(id: [asset1.id, asset2.id]).update_all(loading: false)
+
         key = FactoryBot.create(:key, project: project, ready: false)
         asset1.keys = asset2.keys = [key]
 
