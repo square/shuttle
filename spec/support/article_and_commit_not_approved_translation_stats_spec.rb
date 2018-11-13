@@ -189,7 +189,8 @@ RSpec.describe ArticleAndCommitNotApprovedTranslationStats do
         key = FactoryBot.create(:key, project: project, section: section, index_in_section: 0)
         translation = FactoryBot.create(:translation, key: key)
 
-        expect_any_instance_of(ArticleAndCommitNotApprovedTranslationStats).to receive(:article_translation_groups_with_stats).and_call_original
+        # article_translation_groups_with_stats: one for articles and one for article groups.
+        expect_any_instance_of(ArticleAndCommitNotApprovedTranslationStats).to receive(:article_translation_groups_with_stats).twice.and_call_original
         stats = ArticleAndCommitNotApprovedTranslationStats.new([], [article], [],[], [])
         expect(stats).to_not receive(:article_translation_groups_with_stats)
         stats.item_stat(article, :translations, :new)

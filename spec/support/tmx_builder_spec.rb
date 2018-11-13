@@ -27,9 +27,11 @@ RSpec.describe TmxBuilder do
     let!(:project) { FactoryBot.create(:project, repository_url: 'i-am-a-git-project.com', name: 'this-is-a-project') }
     let!(:commit) { FactoryBot.create(:commit, project: project) }
     let!(:key) { FactoryBot.create(:key, project: project, original_key: 'this-is-a-tu') }
-    let!(:translationa) { FactoryBot.create(:translation, key: key, copy: 'sentence 1 en. sentence 2 en.', rfc5646_locale: 'en-US') }
-    let!(:translationb) { FactoryBot.create(:translation, key: key, copy: 'sentence 1 es. sentence 2 es.', rfc5646_locale: 'es-US') }
-    let!(:translationc) { FactoryBot.create(:translation, key: key, copy: 'sentence 1 fr. sentence 2 fr. sentence 3 fr.', rfc5646_locale: 'fr-CA') }
+    let!(:translations) do
+      FactoryBot.create(:translation, key: key, copy: 'sentence 1 en. sentence 2 en.', rfc5646_locale: 'en-US')
+      FactoryBot.create(:translation, key: key, copy: 'sentence 1 es. sentence 2 es.', rfc5646_locale: 'es-US')
+      FactoryBot.create(:translation, key: key, copy: 'sentence 1 fr. sentence 2 fr. sentence 3 fr.', rfc5646_locale: 'fr-CA')
+    end
     let!(:builder) { TmxBuilder.new(project) }
 
     before do
@@ -49,9 +51,11 @@ RSpec.describe TmxBuilder do
     let!(:article) { FactoryBot.create(:article, project: project, name: 'this-is-a-tu') }
     let!(:section) { FactoryBot.create(:section, article: article) }
     let!(:key) { FactoryBot.create(:key, section: section, original_key: 'this-is-a-tu') }
-    let!(:translationa) { FactoryBot.create(:translation, key: key, copy: 'sentence 1 en. sentence 2 en.', rfc5646_locale: 'en-US') }
-    let!(:translationb) { FactoryBot.create(:translation, key: key, copy: 'sentence 1 es. sentence 2 es.', rfc5646_locale: 'es-US') }
-    let!(:translationc) { FactoryBot.create(:translation, key: key, copy: 'sentence 1 fr. sentence 2 fr. sentence 3 fr.', rfc5646_locale: 'fr-CA') }
+    let!(:translations) do
+      FactoryBot.create(:translation, key: key, copy: 'sentence 1 en. sentence 2 en.', rfc5646_locale: 'en-US')
+      FactoryBot.create(:translation, key: key, copy: 'sentence 1 es. sentence 2 es.', rfc5646_locale: 'es-US')
+      FactoryBot.create(:translation, key: key, copy: 'sentence 1 fr. sentence 2 fr. sentence 3 fr.', rfc5646_locale: 'fr-CA')
+    end
     let!(:builder) { TmxBuilder.new(project) }
 
     before do

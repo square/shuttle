@@ -125,7 +125,7 @@ ALTER SEQUENCE public.articles_id_seq OWNED BY public.articles.id;
 -- Name: assets; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE assets (
+CREATE TABLE public.assets (
     id integer NOT NULL,
     name character varying NOT NULL,
     project_id integer NOT NULL,
@@ -155,8 +155,7 @@ CREATE TABLE assets (
 -- Name: assets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE assets_id_seq
-    AS integer
+CREATE SEQUENCE public.assets_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -168,14 +167,14 @@ CREATE SEQUENCE assets_id_seq
 -- Name: assets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE assets_id_seq OWNED BY assets.id;
+ALTER SEQUENCE public.assets_id_seq OWNED BY public.assets.id;
 
 
 --
 -- Name: assets_keys; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE assets_keys (
+CREATE TABLE public.assets_keys (
     id integer NOT NULL,
     asset_id integer,
     key_id integer,
@@ -188,8 +187,7 @@ CREATE TABLE assets_keys (
 -- Name: assets_keys_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE assets_keys_id_seq
-    AS integer
+CREATE SEQUENCE public.assets_keys_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -201,7 +199,7 @@ CREATE SEQUENCE assets_keys_id_seq
 -- Name: assets_keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE assets_keys_id_seq OWNED BY assets_keys.id;
+ALTER SEQUENCE public.assets_keys_id_seq OWNED BY public.assets_keys.id;
 
 
 --
@@ -1060,11 +1058,20 @@ ALTER TABLE ONLY public.article_groups ALTER COLUMN id SET DEFAULT nextval('publ
 --
 
 ALTER TABLE ONLY public.articles ALTER COLUMN id SET DEFAULT nextval('public.articles_id_seq'::regclass);
+
+
 --
 -- Name: assets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY assets ALTER COLUMN id SET DEFAULT nextval('assets_id_seq'::regclass);
+ALTER TABLE ONLY public.assets ALTER COLUMN id SET DEFAULT nextval('public.assets_id_seq'::regclass);
+
+
+--
+-- Name: assets_keys id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assets_keys ALTER COLUMN id SET DEFAULT nextval('public.assets_keys_id_seq'::regclass);
 
 
 --
@@ -1228,6 +1235,22 @@ ALTER TABLE ONLY public.article_groups
 
 ALTER TABLE ONLY public.articles
     ADD CONSTRAINT articles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: assets_keys assets_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assets_keys
+    ADD CONSTRAINT assets_keys_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: assets assets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assets
+    ADD CONSTRAINT assets_pkey PRIMARY KEY (id);
 
 
 --
@@ -1490,6 +1513,20 @@ CREATE INDEX index_articles_on_ready ON public.articles USING btree (ready);
 
 
 --
+-- Name: index_assets_keys_on_asset_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_assets_keys_on_asset_id ON public.assets_keys USING btree (asset_id);
+
+
+--
+-- Name: index_assets_keys_on_key_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_assets_keys_on_key_id ON public.assets_keys USING btree (key_id);
+
+
+--
 -- Name: index_assets_on_project_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1655,6 +1692,13 @@ CREATE INDEX index_sections_on_name_sha ON public.sections USING btree (name_sha
 --
 
 CREATE INDEX index_translation_changes_on_article_id ON public.translation_changes USING btree (article_id);
+
+
+--
+-- Name: index_translation_changes_on_asset_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_translation_changes_on_asset_id ON public.translation_changes USING btree (asset_id);
 
 
 --
@@ -1900,6 +1944,30 @@ ALTER TABLE ONLY public.commits
 
 ALTER TABLE ONLY public.commits
     ADD CONSTRAINT commits_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: assets_keys fk_rails_2caeca904e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assets_keys
+    ADD CONSTRAINT fk_rails_2caeca904e FOREIGN KEY (asset_id) REFERENCES public.assets(id);
+
+
+--
+-- Name: assets_keys fk_rails_7912b868b8; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assets_keys
+    ADD CONSTRAINT fk_rails_7912b868b8 FOREIGN KEY (key_id) REFERENCES public.keys(id);
+
+
+--
+-- Name: translation_changes fk_rails_7d85ba02c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.translation_changes
+    ADD CONSTRAINT fk_rails_7d85ba02c1 FOREIGN KEY (asset_id) REFERENCES public.assets(id);
 
 
 --
@@ -2255,6 +2323,8 @@ INSERT INTO schema_migrations (version) VALUES ('20180608004859');
 INSERT INTO schema_migrations (version) VALUES ('20180722180453');
 
 INSERT INTO schema_migrations (version) VALUES ('20180803153222');
+
+INSERT INTO schema_migrations (version) VALUES ('20180806002252');
 
 INSERT INTO schema_migrations (version) VALUES ('20180814210040');
 
