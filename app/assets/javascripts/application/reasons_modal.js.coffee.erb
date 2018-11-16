@@ -6,10 +6,27 @@ class root.ReasonsModal
     @reasonSeverityClasses = ['badge-success', 'badge-info', 'badge-warning', 'badge-danger']
     @setupReasonsModal()
 
-  closeModal: =>
+  closeModal: ->
     $modal = $('#add-translation-reasons')
     $('[data-toggle="popover"]', $modal).popover('hide')
     $('.close', $modal).click()
+
+  removeTempBadges: =>
+    $trans = $(@translation_selector)
+    $reasonBadgeArea = $trans.parent().find('.reason-badges')
+    # only go after a saved severity badge, non-saved ones will be removed
+    $severityBadge = $reasonBadgeArea.find('.severity-badge.saved')
+
+    # remove the badges from the active item
+    $('.badge:not(.saved)', $reasonBadgeArea).remove()
+
+    # handle reason severity
+    @reasonSeverity = $('#original_severity').val()
+
+    $severityBadge.text($('#original_severity_text').val())
+      .data('severity', @reasonSeverity)
+      .removeClass(@reasonSeverityClasses.join(' '))
+      .addClass(@reasonSeverityClasses[@reasonSeverity])
 
   setupReasonsModal: ->
     $modal = $('#add-translation-reasons')
@@ -109,21 +126,7 @@ class root.ReasonsModal
           $(this).fadeOut('fast')
 
     $('.undo-btn', $modal).on 'click', ->
-      $trans = $(modal.translation_selector)
-      $reasonBadgeArea = $trans.parent().find('.reason-badges')
-      # only go after a saved severity badge, non-saved ones will be removed
-      $severityBadge = $reasonBadgeArea.find('.severity-badge.saved')
-
-      # remove the badges from the active item
-      $('.badge:not(.saved)', $reasonBadgeArea).remove()
-
-      # handle reason severity
-      modal.reasonSeverity = $('#original_severity').val()
-
-      $severityBadge.text($('#original_severity_text').val())
-        .data('severity', modal.reasonSeverity)
-        .removeClass(modal.reasonSeverityClasses.join(' '))
-        .addClass(modal.reasonSeverityClasses[modal.reasonSeverity])
+      modal.removeTempBadges()
 
       # raise an custom undo event
       $.event.trigger 'reasonsModal.undo'
@@ -172,6 +175,9 @@ class root.ReasonsModal
     $(document).on 'leanModal.hidden', ->
       # remove the fix to prevent users from scrolling the background
       $('body').css({'overflow-y':''})
+
+      # remove temporary button badges
+      modal.removeTempBadges()
 
       $btn_badge = $('.reason-btn .badge')
       $btn_badge.text('0')
