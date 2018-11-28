@@ -21,8 +21,9 @@ RSpec.describe TranslationUpdateMediator do
   let(:reviewer) { FactoryBot.create(:user, :reviewer) }
 
   describe "#update!" do
+    let(:copy) { 'test copy' }
     before :each do
-      @params = ActionController::Parameters.new(translation: { copy: "test copy", notes: "test note" })
+      @params = ActionController::Parameters.new(translation: { copy: copy, notes: "test note" })
 
       @project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
       @key = FactoryBot.create(:key, ready: false, project: @project)
@@ -78,6 +79,30 @@ RSpec.describe TranslationUpdateMediator do
       expect(mediator).to receive(:check_and_invoke_article_pinger).once
 
       mediator.update!
+    end
+
+    context 'with straight single quote' do
+      let(:copy) { "There's a straight single quote here." }
+
+      it "returns an error" do
+        mediator = TranslationUpdateMediator.new(@fr_translation, translator, @params)
+        mediator.update!
+
+        expect(mediator.errors).to eql(["Straight single quote is not allowed. Please use curly apostrophe instead, such as There’s a curly apostrophe here."])
+        expect(@fr_translation.reload.copy).to be_nil
+      end
+    end
+
+    context 'with curly apostrophe' do
+      let(:copy) { "There’s a curly apostrophe here." }
+
+      it "translation updated" do
+        mediator = TranslationUpdateMediator.new(@fr_translation, translator, @params)
+        mediator.update!
+
+        expect(mediator.errors).to eql([])
+        expect(@fr_translation.reload.copy).to eql(copy)
+      end
     end
 
     context "[update new record]" do
