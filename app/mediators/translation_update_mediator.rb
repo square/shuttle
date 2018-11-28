@@ -36,6 +36,12 @@ class TranslationUpdateMediator < BasicMediator
 
   # Updates this translation and its associated translations
   def update!
+    copy = @params.try(:[], :translation).try(:[], :copy)
+    if copy and copy.include?("'")
+      add_errors(I18n.t('controllers.translations.update.disable_single_quote'))
+      return
+    end
+
     copy_to_translations = translations_that_should_be_multi_updated
     return if failure?
 

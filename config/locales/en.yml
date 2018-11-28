@@ -223,6 +223,7 @@ en:
       update:
         success: Translation updated.
         failure: Translation could not be updated !
+        disable_single_quote: "Straight single quote is not allowed. Please use curly apostrophe instead, such as There’s a curly apostrophe here."
     users:
       destroy:
         success: "%{user}’s account was deleted."
