@@ -22,5 +22,6 @@ FactoryBot.define do
     is_edit     false
     sha         'cbf1b9bf524cf643467060e475e40e88593b434d'
     role        'translator'
+    diff        { { copy: ['hello!', 'bye!'] } }
   end
 end
