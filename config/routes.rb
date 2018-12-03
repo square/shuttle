@@ -140,6 +140,8 @@ Rails.application.routes.draw do
   post 'stats/generate-translator-report' => 'stats#generate_translator_report', as: :stats_generate_translator_report, format: :csv
   get 'stats/backlog-report' => 'stats#backlog_report', as: :stats_backlog_report
   post 'stats/generate-backlog-report' => 'stats#generate_backlog_report', as: :stats_generate_backlog_report, format: :csv
+  get 'stats/quality-report' => 'stats#quality_report', as: :stats_quality_report
+  post 'stats/generate-quality-report' => 'stats#generate_quality_report', as: :stats_generate_quality_report, format: :csv
 
   # GLOSSARY PAGES
   get 'glossary' => 'glossary#index', as: :glossary

@@ -1,0 +1,42 @@
+- content_for :shuttle_title do
+  = "Quality Report - Shuttle"
+- content_for :file_name do
+  = 'views/stats/quality_report'
+
+.header
+  h1 Quality Report
+hr.dividers
+
+.translation_report
+  = form_tag stats_generate_quality_report_path(format: :csv)
+    = render partial: 'stats/date_fields'
+    .control-group
+      = label_tag :languages, nil, class: 'control-label'
+      .controls
+        - @languages.each do |language|
+          label
+            = check_box_tag 'languages[]', language, true
+            = language.upcase
+
+    .control-group
+      = label_tag :exclude_internal_translators, nil, class: 'control-label'
+      .controls
+          label
+            = radio_button_tag :exclude_internal_translators, true, true
+            | Yes
+          label
+            = radio_button_tag :exclude_internal_translators, false, false
+            | No
+
+    .control-group
+      = label_tag :exclude_internal_reviewers, nil, class: 'control-label'
+      .controls
+          label
+            = radio_button_tag :exclude_internal_reviewers, true, true
+            | Yes
+          label
+            = radio_button_tag :exclude_internal_reviewers, false, false
+            | No
+
+    .form-actions
+      = submit_tag 'Get Report', class: 'btn btn-primary'

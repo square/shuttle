@@ -10,7 +10,7 @@ common: &common
 
 development:
   <<: *common
-  database: shuttle_development
+  database: shuttle_square
 
 test:
   <<: *common
