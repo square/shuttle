@@ -66,7 +66,9 @@ hr.divider
           = f.text_area :notes, autocomplete: 'off', rows: 7, class: 'resize'
 
       .form-actions
-        = f.submit class: 'primary', value: 'Save'
+        = button_tag 'Save', class: 'translation-save-button primary', type: 'button'
+        - if current_user.admin?
+          = button_tag 'Override Save', class: 'translation-override-save-button primary', type: 'button'
 
     / Information Side
     .eight.columns.info-side

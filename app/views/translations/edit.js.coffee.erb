@@ -20,6 +20,21 @@ $(document).ready ->
                      "<%= fuzzy_match_project_key_translation_url(@translation.key.project, @translation.key, @translation, format: 'json') %>",
                      source_copy)
 
+  save_translation = (options) ->
+    params = {}
+    params['translation[copy]'] = $("#translation_copy").val()
+    params['translation[notes]'] = $("#translation_notes").val()
+    params['commit'] = 'Save'
+    ajaxParams = $.extend({}, params, options)
+    $.ajax "<%= project_key_translation_url(@translation.key.project, @translation.key, @translation) %>" + ".json",
+      type: 'PUT'
+      data: $.param(ajaxParams)
+      success: (new_translation) =>
+        edit_url = "<%= edit_project_key_translation_url(@translation.key.project, @translation.key, @translation) %>"
+        window.location.href = edit_url + '?with_update_success_message=true'
+      error: (xhr, textStatus, errorThrown) =>
+        new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
+
   source_copy = "<%= escape_javascript @translation.source_copy %>"
   target_locale = "<%= escape_javascript @translation.rfc5646_locale %>"
   current_translation = "<%= escape_javascript @translation.copy %>"
@@ -40,6 +55,12 @@ $(document).ready ->
   $(".copy-source").click ->
     copy_field.val "<%= escape_javascript @translation.source_copy %>"
     false
+
+  $('.translation-save-button').click ->
+    save_translation()
+
+  $('.translation-override-save-button').click ->
+    save_translation(override: true)
 
   source_copy_field.click ->
     selection_string = window.getSelection().toString()

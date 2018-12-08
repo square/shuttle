@@ -56,7 +56,7 @@ class TranslationsController < ApplicationController
   # Routes
   # ------
   #
-  # * `PATCH /projects/:project_id/keys/:key_id/translations/:id/edit`
+  # * `GET /projects/:project_id/keys/:key_id/translations/:id/edit`
   #
   # Path Parameters
   # ---------------
@@ -98,7 +98,16 @@ class TranslationsController < ApplicationController
       }
     end
 
-    respond_with @translation, location: project_key_translation_url(@project, @key, @translation)
+    respond_with(@translation, location: project_key_translation_url(@project, @key, @translation)) do |format|
+      format.html do
+        if params[:with_update_success_message]
+          # removes the parameter 'with_update_success_message' with a redirect
+          # and returns with a flash success message within the redirect.
+          edit_url = edit_project_key_translation_url(@project, @key, @translation)
+          redirect_to edit_url, flash: { success: t('controllers.translations.update.success') }
+        end
+      end
+    end
   end
 
   # Updates a Translation with new translated copy. If the translated copy is
