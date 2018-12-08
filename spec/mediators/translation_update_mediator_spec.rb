@@ -22,8 +22,9 @@ RSpec.describe TranslationUpdateMediator do
 
   describe "#update!" do
     let(:copy) { 'test copy' }
+    let(:override) { false }
     before :each do
-      @params = ActionController::Parameters.new(translation: { copy: copy, notes: "test note" })
+      @params = ActionController::Parameters.new(translation: { copy: copy, notes: "test note" }, override: override)
 
       @project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
       @key = FactoryBot.create(:key, ready: false, project: @project)
@@ -83,25 +84,55 @@ RSpec.describe TranslationUpdateMediator do
 
     context 'with straight single quote' do
       let(:copy) { "There's a straight single quote here." }
+      let(:user) { translator }
+      let(:mediator) do
+        TranslationUpdateMediator.new(@fr_translation, user, @params)
+      end
+
+      before do
+        mediator.update!
+      end
 
       it "returns an error" do
-        mediator = TranslationUpdateMediator.new(@fr_translation, translator, @params)
-        mediator.update!
-
         expect(mediator.errors).to eql(["Straight single quote is not allowed. Please use curly apostrophe instead, such as There’s a curly apostrophe here."])
         expect(@fr_translation.reload.copy).to be_nil
       end
-    end
 
-    context 'with curly apostrophe' do
-      let(:copy) { "There’s a curly apostrophe here." }
+      context 'with admin account and override' do
+        let(:user) { FactoryBot.create(:user, :admin) }
+        let(:override) { true }
 
-      it "translation updated" do
-        mediator = TranslationUpdateMediator.new(@fr_translation, translator, @params)
-        mediator.update!
+        it "translation updated" do
+          expect(mediator.errors).to eql([])
+          expect(@fr_translation.reload.copy).to eql(copy)
+        end
+      end
 
-        expect(mediator.errors).to eql([])
-        expect(@fr_translation.reload.copy).to eql(copy)
+      context 'with curly apostrophe' do
+        let(:copy) { "There’s a curly apostrophe here." }
+
+        it "translation updated" do
+          expect(mediator.errors).to eql([])
+          expect(@fr_translation.reload.copy).to eql(copy)
+        end
+      end
+
+      context 'with admin but override' do
+        let(:user) { FactoryBot.create(:user, :admin) }
+
+        it "returns an error" do
+          expect(mediator.errors).to eql(["Straight single quote is not allowed. Please use curly apostrophe instead, such as There’s a curly apostrophe here."])
+          expect(@fr_translation.reload.copy).to be_nil
+        end
+      end
+
+      context 'with override but admin' do
+        let(:override) { true }
+
+        it "returns an error" do
+          expect(mediator.errors).to eql(["Straight single quote is not allowed. Please use curly apostrophe instead, such as There’s a curly apostrophe here."])
+          expect(@fr_translation.reload.copy).to be_nil
+        end
       end
     end
 
