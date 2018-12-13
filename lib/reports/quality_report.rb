@@ -50,7 +50,7 @@ module Reports
               	translations.review_date,
               	reviewers.first_name as reviewer,
               	translations.reviewer_id,
-              	ARRAY_TO_STRING(ARRAY_AGG(reasons.name),';') AS reason_string,
+              	ARRAY_TO_STRING(ARRAY_AGG(CAST(reasons.id as varchar) || ': ' || reasons.name),';') AS reason_string,
               	translation_changes.reason_severity")
         .order('date', 'translations.rfc5646_locale', 'job_id', 'translators.first_name', 'reviewers.first_name')
 
@@ -68,10 +68,10 @@ module Reports
         csv << ['Language(s)', "#{languages.sort.join(", ").upcase}"] + empty_cols
         csv << ['', ''] + empty_cols
         csv << ['Quality Report', ''] + empty_cols
-        csv << ['Date Translated  / Reviewed', 'Project',	'Job Name', 'Stringkey', 'Original Source String (EN)',	'Langauge',	'Translator', 'Previous Translated String', 'Date Reviewed', 'Reviewer', 'Updated Translated String', 'Reason(s)',	'Severity (0-3)']
+        csv << ['Date Translated  / Reviewed', 'Project',	'Job Name', 'Stringkey', 'Original Source String (EN)',	'Langauge',	'Translator', 'Previous Translated String', 'Updated Translated String', 'Date Reviewed', 'Reviewer', 'Reason(s)',	'Severity (0-3)']
 
         query.each do |tc|
-          csv << [tc.date.strftime('%Y-%m-%d'), tc.name, tc.job_id, tc.stringkey, tc.source_string, tc.language, "#{tc.translator} (#{tc.translator_id})", tc.diff[:copy][0], tc.review_date, "#{tc.reviewer} (#{tc.reviewer_id})", tc.diff[:copy][1], tc.reason_string, tc.reason_severity]
+          csv << [tc.date.strftime('%Y-%m-%d'), tc.name, tc.job_id, tc.stringkey, tc.source_string, tc.language, "#{tc.translator} (#{tc.translator_id})", tc.diff[:copy][0], tc.diff[:copy][1], tc.review_date, "#{tc.reviewer} (#{tc.reviewer_id})", tc.reason_string, tc.reason_severity]
         end
       end
     end
