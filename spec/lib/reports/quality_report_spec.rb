@@ -57,7 +57,7 @@ RSpec.describe Reports::QualityReport do
         @asset_project = FactoryBot.create(:project, name: 'Asset Foo', targeted_rfc5646_locales: { 'en-US' => true, 'fr' => true, 'it' => true }, job_type: 2)
         @commit = FactoryBot.create(:commit, project: @project, approved_at: @end_date)
         @reviewer = FactoryBot.create(:user, :reviewer, approved_rfc5646_locales: %w(it fr), first_name: 'Mark', email: 'mark@test.host')
-        @translator = FactoryBot.create(:user, :translator, approved_rfc5646_locales: %w(it fr), first_name: 'Rebecca')
+        @translator = FactoryBot.create(:user, :translator, approved_rfc5646_locales: %w(it fr), first_name: 'Rebecca', email: 'rebecca@test.host')
         @article = FactoryBot.create(:article, project: @article_project, created_at: @start_date, last_completed_at: @end_date)
         @asset = FactoryBot.create(:asset, project: @asset_project, created_at: @start_date, approved_at: @end_date)
 
@@ -111,7 +111,7 @@ RSpec.describe Reports::QualityReport do
         end
 
         it 'has the expected column headers' do
-          expected_results = 'Date Translated  / Reviewed', 'Project', 'Job Name', 'Stringkey', 'Original Source String (EN)', 'Langauge', 'Translator', 'Previous Translated String', 'Date Reviewed', 'Reviewer', 'Updated Translated String', 'Reason(s)', 'Severity (0-3)'
+          expected_results = 'Date Translated  / Reviewed', 'Project', 'Job Name', 'Stringkey', 'Original Source String (EN)', 'Langauge', 'Translator', 'Previous Translated String', 'Updated Translated String', 'Date Reviewed', 'Reviewer', 'Reason(s)', 'Severity (0-3)'
           expect(result[5]).to eql expected_results
         end
       end
@@ -124,27 +124,27 @@ RSpec.describe Reports::QualityReport do
         let!(:result) { CSV.parse(Reports::QualityReport.generate_csv(@start_date, @end_date, @languages)) }
 
         it 'has the expected row 6' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), project, sha, @key1.key, "Hello, world", "FR", "Rebecca (#{@translator.id})", "hello!", @start_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
+          expected_results = [@start_date.strftime("%Y-%m-%d"), project, sha, @key1.key, "Hello, world", "FR", "Rebecca (#{@translator.id})", "hello!", "bye!", @start_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "", nil]
           expect(result[6]).to eql expected_results
         end
 
         it 'has the expected row 7' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), project, sha, @key2.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @start_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
+          expected_results = [@start_date.strftime("%Y-%m-%d"), project, sha, @key2.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", "bye!", @start_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "", nil]
           expect(result[7]).to eql expected_results
         end
 
         it 'has the expected row 8' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), project, sha, @key4.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
+          expected_results = [@end_date.strftime("%Y-%m-%d"), project, sha, @key4.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", "bye!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "", nil]
           expect(result[8]).to eql expected_results
         end
 
         it 'has the expected row 9' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), @asset_project.name, asset, @key6.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
+          expected_results = [@end_date.strftime("%Y-%m-%d"), @asset_project.name, asset, @key6.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", "bye!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "", nil]
           expect(result[9]).to eql expected_results
         end
 
         it 'has the expected row 10' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), @article_project.name, article, @key5.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
+          expected_results = [@end_date.strftime("%Y-%m-%d"), @article_project.name, article, @key5.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", "bye!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "", nil]
           expect(result[10]).to eql expected_results
         end
 
@@ -155,76 +155,18 @@ RSpec.describe Reports::QualityReport do
       end
 
       context 'exclude internal translator users' do
-        let!(:article) { @article.name }
-        let!(:project) { @project.name }
-        let!(:sha) { @commit.revision }
-        let!(:asset) { @asset.id.to_s }
         let!(:result) { CSV.parse(Reports::QualityReport.generate_csv(@start_date, @end_date, @languages, true, false)) }
 
         it 'has the expected row 6' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), project, sha, @key1.key, "Hello, world", "FR", "Rebecca (#{@translator.id})", "hello!", @start_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[6]).to eql expected_results
-        end
-
-        it 'has the expected row 7' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), project, sha, @key2.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @start_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[7]).to eql expected_results
-        end
-
-        it 'has the expected row 8' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), project, sha, @key4.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[8]).to eql expected_results
-        end
-
-        it 'has the expected row 9' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), @asset_project.name, asset, @key6.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[9]).to eql expected_results
-        end
-
-        it 'has the expected row 10' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), @article_project.name, article, @key5.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[10]).to eql expected_results
-        end
-
-        it 'has the expected row 11' do
-          expect(result[11]).to eql nil
+          expect(result[6]).to eql nil
         end
       end
 
       context 'exclude internal reviewer users' do
-        let!(:article) { @article.name }
-        let!(:project) { @project.name }
-        let!(:sha) { @commit.revision }
-        let!(:asset) { @asset.id.to_s }
         let!(:result) { CSV.parse(Reports::QualityReport.generate_csv(@start_date, @end_date, @languages, false, true)) }
 
         it 'has the expected row 6' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), project, sha, @key1.key, "Hello, world", "FR", "Rebecca (#{@translator.id})", "hello!", @start_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[6]).to eql expected_results
-        end
-
-        it 'has the expected row 7' do
-          expected_results = [@start_date.strftime("%Y-%m-%d"), project, sha, @key2.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @start_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[7]).to eql expected_results
-        end
-
-        it 'has the expected row 8' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), project, sha, @key4.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[8]).to eql expected_results
-        end
-
-        it 'has the expected row 9' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), @asset_project.name, asset, @key6.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[9]).to eql expected_results
-        end
-
-        it 'has the expected row 10' do
-          expected_results = [@end_date.strftime("%Y-%m-%d"), @article_project.name, article, @key5.key, "Hello, world", "IT", "Rebecca (#{@translator.id})", "hello!", @end_date.strftime("%Y-%m-%d 08:00:00 UTC"), "Mark (#{@reviewer.id})", "bye!", "", nil]
-          expect(result[10]).to eql expected_results
-        end
-
-        it 'has the expected row 11' do
-          expect(result[11]).to eql nil
+          expect(result[6]).to eql nil
         end
       end
 
