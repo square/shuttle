@@ -34,6 +34,7 @@ module Reports
         .group('translations.translator_id')
         .group('translation_changes.diff')
         .group('translations.reviewer_id')
+        .group('translations.translation_date')
         .group('translations.review_date')
         .group('translators.first_name')
         .group('reviewers.first_name')
@@ -45,7 +46,8 @@ module Reports
               	keys.source_copy as source_string,
               	UPPER(translations.rfc5646_locale) as language,
               	translators.first_name as translator,
-              	translations.translator_id,
+                translations.translation_date,
+                translations.translator_id,
               	translation_changes.diff,
               	translations.review_date,
               	reviewers.first_name as reviewer,
@@ -68,10 +70,10 @@ module Reports
         csv << ['Language(s)', "#{languages.sort.join(", ").upcase}"] + empty_cols
         csv << ['', ''] + empty_cols
         csv << ['Quality Report', ''] + empty_cols
-        csv << ['Date Translated  / Reviewed', 'Project',	'Job Name', 'Stringkey', 'Original Source String (EN)',	'Langauge',	'Translator', 'Previous Translated String', 'Updated Translated String', 'Date Reviewed', 'Reviewer', 'Reason(s)',	'Severity (0-3)']
+        csv << ['Date Translated  / Reviewed', 'Project',	'Job Name', 'Stringkey', 'Original Source String (EN)',	'Langauge',	'Date Translated', 'Translator', 'Previous Translated String', 'Updated Translated String', 'Date Reviewed', 'Reviewer', 'Reason(s)',	'Severity (0-3)']
 
         query.each do |tc|
-          csv << [tc.date.strftime('%Y-%m-%d'), tc.name, tc.job_id, tc.stringkey, tc.source_string, tc.language, "#{tc.translator} (#{tc.translator_id})", tc.diff[:copy][0], tc.diff[:copy][1], tc.review_date, "#{tc.reviewer} (#{tc.reviewer_id})", tc.reason_string, tc.reason_severity]
+          csv << [tc.date.strftime('%Y-%m-%d'), tc.name, tc.job_id, tc.stringkey, tc.source_string, tc.language, tc.translation_date, "#{tc.translator} (#{tc.translator_id})", tc.diff[:copy][0], tc.diff[:copy][1], tc.review_date, "#{tc.reviewer} (#{tc.reviewer_id})", tc.reason_string, tc.reason_severity]
         end
       end
     end

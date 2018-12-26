@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.5
--- Dumped by pg_dump version 10.5
+-- Dumped from database version 9.6.10
+-- Dumped by pg_dump version 9.6.10
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -52,7 +52,6 @@ CREATE TABLE public.article_groups (
 --
 
 CREATE SEQUENCE public.article_groups_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -157,7 +156,6 @@ CREATE TABLE public.assets (
 --
 
 CREATE SEQUENCE public.assets_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -190,7 +188,6 @@ CREATE TABLE public.assets_keys (
 --
 
 CREATE SEQUENCE public.assets_keys_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -357,10 +354,10 @@ CREATE TABLE public.commits (
     exported boolean DEFAULT false NOT NULL,
     loaded_at timestamp without time zone,
     description text,
-    author character varying(255),
-    author_email character varying(255),
+    author character varying,
+    author_email character varying,
     pull_request_url text,
-    import_batch_id character varying(255),
+    import_batch_id character varying,
     import_errors text,
     revision character varying(40) NOT NULL,
     fingerprint character varying,
@@ -472,39 +469,6 @@ ALTER SEQUENCE public.edit_reasons_id_seq OWNED BY public.edit_reasons.id;
 
 
 --
--- Name: globalsight_api_records; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.globalsight_api_records (
-    id integer NOT NULL,
-    job_id integer NOT NULL,
-    status character varying(255) NOT NULL,
-    article_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
-);
-
-
---
--- Name: globalsight_api_records_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.globalsight_api_records_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: globalsight_api_records_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.globalsight_api_records_id_seq OWNED BY public.globalsight_api_records.id;
-
-
---
 -- Name: groups; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -536,7 +500,6 @@ CREATE TABLE public.groups (
 --
 
 CREATE SEQUENCE public.groups_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -602,7 +565,7 @@ CREATE TABLE public.keys (
     original_key text NOT NULL,
     source_copy text,
     context text,
-    importer character varying(255),
+    importer character varying,
     source text,
     fencers text,
     other_data text,
@@ -641,8 +604,8 @@ ALTER SEQUENCE public.keys_id_seq OWNED BY public.keys.id;
 
 CREATE TABLE public.locale_associations (
     id integer NOT NULL,
-    source_rfc5646_locale character varying(255) NOT NULL,
-    target_rfc5646_locale character varying(255) NOT NULL,
+    source_rfc5646_locale character varying NOT NULL,
+    target_rfc5646_locale character varying NOT NULL,
     checked boolean DEFAULT false NOT NULL,
     uncheck_disabled boolean DEFAULT false NOT NULL,
     created_at timestamp without time zone,
@@ -716,9 +679,9 @@ CREATE TABLE public.projects (
     name character varying(256) NOT NULL,
     repository_url character varying(256),
     created_at timestamp without time zone,
-    translations_adder_and_remover_batch_id character varying(255),
+    translations_adder_and_remover_batch_id character varying,
     disable_locale_association_checkbox_settings boolean DEFAULT false NOT NULL,
-    base_rfc5646_locale character varying(255) DEFAULT 'en'::character varying NOT NULL,
+    base_rfc5646_locale character varying DEFAULT 'en'::character varying NOT NULL,
     targeted_rfc5646_locales text,
     skip_imports text,
     key_exclusions text,
@@ -729,11 +692,11 @@ CREATE TABLE public.projects (
     only_paths text,
     skip_importer_paths text,
     only_importer_paths text,
-    default_manifest_format character varying(255),
+    default_manifest_format character varying,
     watched_branches text,
-    touchdown_branch character varying(255),
+    touchdown_branch character varying,
     manifest_directory text,
-    manifest_filename character varying(255),
+    manifest_filename character varying,
     github_webhook_url text,
     stash_webhook_url text,
     api_token character(240) NOT NULL,
@@ -800,7 +763,7 @@ ALTER SEQUENCE public.reasons_id_seq OWNED BY public.reasons.id;
 --
 
 CREATE TABLE public.schema_migrations (
-    version character varying(255) NOT NULL
+    version character varying NOT NULL
 );
 
 
@@ -812,8 +775,8 @@ CREATE TABLE public.screenshots (
     commit_id integer NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    image_file_name character varying(255),
-    image_content_type character varying(255),
+    image_file_name character varying,
+    image_content_type character varying,
     image_file_size integer,
     image_updated_at timestamp without time zone,
     id integer NOT NULL
@@ -1044,15 +1007,15 @@ CREATE TABLE public.users (
     role character varying(50) DEFAULT NULL::character varying,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    confirmation_token character varying(255),
-    first_name character varying(255) NOT NULL,
-    last_name character varying(255) NOT NULL,
-    encrypted_password character varying(255) NOT NULL,
+    confirmation_token character varying,
+    first_name character varying NOT NULL,
+    last_name character varying NOT NULL,
+    encrypted_password character varying NOT NULL,
     remember_created_at timestamp without time zone,
     current_sign_in_at timestamp without time zone,
     last_sign_in_at timestamp without time zone,
-    current_sign_in_ip character varying(255),
-    last_sign_in_ip character varying(255),
+    current_sign_in_ip character varying,
+    last_sign_in_ip character varying,
     confirmed_at timestamp without time zone,
     confirmation_sent_at timestamp without time zone,
     locked_at timestamp without time zone,
@@ -1159,13 +1122,6 @@ ALTER TABLE ONLY public.daily_metrics ALTER COLUMN id SET DEFAULT nextval('publi
 --
 
 ALTER TABLE ONLY public.edit_reasons ALTER COLUMN id SET DEFAULT nextval('public.edit_reasons_id_seq'::regclass);
-
-
---
--- Name: globalsight_api_records id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.globalsight_api_records ALTER COLUMN id SET DEFAULT nextval('public.globalsight_api_records_id_seq'::regclass);
 
 
 --
@@ -1331,11 +1287,11 @@ ALTER TABLE ONLY public.comments
 
 
 --
--- Name: commits commits_new_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: commits commits_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.commits
-    ADD CONSTRAINT commits_new_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT commits_pkey PRIMARY KEY (id);
 
 
 --
@@ -1352,14 +1308,6 @@ ALTER TABLE ONLY public.daily_metrics
 
 ALTER TABLE ONLY public.edit_reasons
     ADD CONSTRAINT edit_reasons_pkey PRIMARY KEY (id);
-
-
---
--- Name: globalsight_api_records globalsight_api_records_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.globalsight_api_records
-    ADD CONSTRAINT globalsight_api_records_pkey PRIMARY KEY (id);
 
 
 --
@@ -1489,10 +1437,10 @@ CREATE INDEX comments_user ON public.comments USING btree (user_id);
 
 
 --
--- Name: commits_date_new; Type: INDEX; Schema: public; Owner: -
+-- Name: commits_date; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX commits_date_new ON public.commits USING btree (project_id, committed_at);
+CREATE INDEX commits_date ON public.commits USING btree (project_id, committed_at);
 
 
 --
@@ -1510,10 +1458,10 @@ CREATE INDEX commits_priority ON public.commits USING btree (priority, due_date)
 
 
 --
--- Name: commits_ready_date_new; Type: INDEX; Schema: public; Owner: -
+-- Name: commits_ready_date; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX commits_ready_date_new ON public.commits USING btree (project_id, ready, committed_at);
+CREATE INDEX commits_ready_date ON public.commits USING btree (project_id, ready, committed_at);
 
 
 --
@@ -1976,14 +1924,6 @@ ALTER TABLE ONLY public.commits_keys
 
 
 --
--- Name: commits_keys commits_keys_commit_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.commits_keys
-    ADD CONSTRAINT commits_keys_commit_id_fkey1 FOREIGN KEY (commit_id) REFERENCES public.commits(id) ON DELETE CASCADE;
-
-
---
 -- Name: commits_keys commits_keys_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1992,11 +1932,11 @@ ALTER TABLE ONLY public.commits_keys
 
 
 --
--- Name: commits commits_new_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: commits commits_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.commits
-    ADD CONSTRAINT commits_new_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+    ADD CONSTRAINT commits_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
 
 --
@@ -2221,8 +2161,6 @@ INSERT INTO schema_migrations (version) VALUES ('20130821011614');
 
 INSERT INTO schema_migrations (version) VALUES ('20131008220117');
 
-INSERT INTO schema_migrations (version) VALUES ('20131031034100');
-
 INSERT INTO schema_migrations (version) VALUES ('20131111213136');
 
 INSERT INTO schema_migrations (version) VALUES ('20131116042827');
@@ -2362,8 +2300,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160303235403');
 INSERT INTO schema_migrations (version) VALUES ('20160404235737');
 
 INSERT INTO schema_migrations (version) VALUES ('20160516051607');
-
-INSERT INTO schema_migrations (version) VALUES ('20170126001545');
 
 INSERT INTO schema_migrations (version) VALUES ('20170508202319');
 
