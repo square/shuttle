@@ -75,18 +75,4 @@ RSpec.describe CommitsCleaner do
       expect(@project.commits.count).to eq(3)
     end
   end
-
-  describe "destroy_old_excess_commits_per_project" do
-    it "should destory old commits exceeding 100" do
-      skip 'ElasticSearch flaky - deletion throws NotFound exception'
-      FactoryBot.create_list :commit, 100, project: @project, ready: true
-      FactoryBot.create_list :commit, 100, project: @project, ready: true, created_at: 3.days.ago
-      regenerate_elastic_search_indexes
-
-      expect(@project.commits.count).to eq(200)
-      @commits_cleaner.destroy_old_excess_commits_per_project
-      expect(@project.commits.count).to eq(100)
-      expect(@project.commits.first.created_at).to be > Time.current - 2.days
-    end
-  end
 end
