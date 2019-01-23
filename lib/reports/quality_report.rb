@@ -73,7 +73,16 @@ module Reports
         csv << ['Date Translated  / Reviewed', 'Project',	'Job Name', 'Stringkey', 'Original Source String (EN)',	'Langauge',	'Date Translated', 'Translator', 'Previous Translated String', 'Updated Translated String', 'Date Reviewed', 'Reviewer', 'Reason(s)',	'Severity (0-3)']
 
         query.each do |tc|
-          csv << [tc.date.strftime('%Y-%m-%d'), tc.name, tc.job_id, tc.stringkey, tc.source_string, tc.language, tc.translation_date, "#{tc.translator} (#{tc.translator_id})", tc.diff[:copy][0], tc.diff[:copy][1], tc.review_date, "#{tc.reviewer} (#{tc.reviewer_id})", tc.reason_string, tc.reason_severity]
+          old_copy = ''
+          new_copy = ''
+
+          if tc.diff[:copy]
+            old_copy = tc.diff[:copy][0]
+            new_copy = tc.diff[:copy][1]
+          end
+
+
+          csv << [tc.date.strftime('%Y-%m-%d'), tc.name, tc.job_id, tc.stringkey, tc.source_string, tc.language, tc.translation_date, "#{tc.translator} (#{tc.translator_id})", old_copy, new_copy, tc.review_date, "#{tc.reviewer} (#{tc.reviewer_id})", tc.reason_string, tc.reason_severity]
         end
       end
     end
