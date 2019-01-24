@@ -34,7 +34,7 @@ tr.row_class
     - elsif item.is_a?(Asset)
       = link_to truncate(item.name), project_asset_url(item.project, item)
     - elsif item.is_a?(Group)
-      = truncate(item.name)
+      = truncate(item.display_name)
   / Create Date
   td.centered
     - if item.is_a?(Commit)
