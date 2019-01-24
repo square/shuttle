@@ -37,7 +37,7 @@ class TranslationUpdateMediator < BasicMediator
   # Updates this translation and its associated translations
   def update!
     copy = @params.try(:[], :translation).try(:[], :copy)
-    if copy and copy.include?("'") and !(@user.admin? and @params[:override])
+    if copy and copy.include?("'") and !allow_single_quote_update
       add_errors(I18n.t('controllers.translations.update.disable_single_quote'))
       return
     end
@@ -172,5 +172,19 @@ class TranslationUpdateMediator < BasicMediator
     if article && article.project.article_webhook? && article.ready?
       ArticleWebhookPinger.perform_once article.id
     end
+  end
+
+  def allow_single_quote_update
+    # always allowed in override mode (while Override Save button is clicked)
+    if @params[:override]
+      return true
+    end
+
+    # allowed when the source copy has single quote already.
+    if @primary_translation.source_copy.include?("'")
+      return true
+    end
+
+    return false
   end
 end
