@@ -191,7 +191,7 @@ class HomeIndexItemsFinder
     groups = Group.includes(:project).showing.joins(:articles)
 
     # filter by name
-    groups = groups.where("groups.name like '%#{form[:groups_filter__name]}%'") if form[:groups_filter__name]
+    groups = groups.where("groups.display_name like '%#{form[:groups_filter__name]}%'") if form[:groups_filter__name]
 
     # filter by project
     groups = groups.where(project_id: form[:groups_filter__project_id]) unless form[:groups_filter__project_id] == 'all'
