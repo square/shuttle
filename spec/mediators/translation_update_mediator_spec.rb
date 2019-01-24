@@ -21,6 +21,7 @@ RSpec.describe TranslationUpdateMediator do
   let(:reviewer) { FactoryBot.create(:user, :reviewer) }
 
   describe "#update!" do
+    let(:source_copy) { 'test' }
     let(:copy) { 'test copy' }
     let(:override) { false }
     before :each do
@@ -28,7 +29,7 @@ RSpec.describe TranslationUpdateMediator do
 
       @project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'fr' => true, 'fr-CA' =>true, 'fr-FR' => true } )
       @key = FactoryBot.create(:key, ready: false, project: @project)
-      @fr_translation    = FactoryBot.create(:translation, key: @key, copy: nil, source_copy: 'test', translator: nil, rfc5646_locale: 'fr')
+      @fr_translation    = FactoryBot.create(:translation, key: @key, copy: nil, source_copy: source_copy, translator: nil, rfc5646_locale: 'fr')
       expect(@key.reload).to_not be_ready
     end
 
@@ -98,8 +99,7 @@ RSpec.describe TranslationUpdateMediator do
         expect(@fr_translation.reload.copy).to be_nil
       end
 
-      context 'with admin account and override' do
-        let(:user) { FactoryBot.create(:user, :admin) }
+      context 'with override' do
         let(:override) { true }
 
         it "translation updated" do
@@ -117,18 +117,16 @@ RSpec.describe TranslationUpdateMediator do
         end
       end
 
-      context 'with admin but override' do
-        let(:user) { FactoryBot.create(:user, :admin) }
+      context 'without override and with single quote in source copy' do
+        let(:source_copy) { 'test with single quote (\') ' }
 
-        it "returns an error" do
-          expect(mediator.errors).to eql(["Straight single quote is not allowed. Please use curly apostrophe instead, such as There’s a curly apostrophe here."])
-          expect(@fr_translation.reload.copy).to be_nil
+        it "translation updated" do
+          expect(mediator.errors).to eql([])
+          expect(@fr_translation.reload.copy).to eql(copy)
         end
       end
 
-      context 'with override but admin' do
-        let(:override) { true }
-
+      context 'without override and without single quote in source copy' do
         it "returns an error" do
           expect(mediator.errors).to eql(["Straight single quote is not allowed. Please use curly apostrophe instead, such as There’s a curly apostrophe here."])
           expect(@fr_translation.reload.copy).to be_nil
