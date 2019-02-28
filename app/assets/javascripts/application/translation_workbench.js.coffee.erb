@@ -24,21 +24,6 @@ htmlEscape = (str) -> str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/
 #
 class TranslationItem
 
-  # Characters to warn translators about. A list of four items:
-  #
-  # 1. an identifier for the character (used in CSS class names),
-  # 2. the bad character,
-  # 3. the human name of the bad character,
-  # 4. the suggested replacement character, and
-  # 5. the human name for the replacement character.
-  #
-  DUMB_CHARACTERS: [
-    ['dash', '--', 'a double dash', '—', 'an em-dash'],
-    ['double', '"', 'dumb quotes', '“”', 'smart quotes'],
-    ['single', "'", 'dumb quotes', '‘’', 'smart quotes'],
-    ['smiley', ':)', 'ASCII smiley', '☺', 'super cool Unicode smiley']
-  ]
-
   # Creates a new translation item manager.
   #
   # @param [TranslationWorkbench] parent The translation workbench this item belongs to.
@@ -249,7 +234,7 @@ class TranslationItem
       # mark field unsaved when modified
       this.setUnsaved()
       # show warnings
-      this.checkForDumbCharacters(@copy_field.val())
+      checkTranslationWarning(@alerts, @copy_field.val())
       this.warnForTokenParity(@copy_field.val())
       return true
 
@@ -281,10 +266,7 @@ class TranslationItem
     $('<p/>').addClass('alert token-parity-warning')
       .appendTo(@alerts).hide()
 
-    for chars in TranslationItem::DUMB_CHARACTERS
-      $('<p/>').addClass("warning dumb-#{chars[0]}")
-        .text("Consider using #{chars[4]} #{chars[3]} instead of #{chars[2]} #{chars[1]}.")
-        .appendTo(@alerts).hide()
+    prepareTranslationWarning(@alerts)
 
     # Set up @glossary_tips
     $('<p/>').addClass('glossary-tips')
@@ -310,19 +292,6 @@ class TranslationItem
         @copy_field.addClass('unsaved') if !@copy_field.hasClass('unsaved')
       else
         @copy_field.removeClass 'unsaved'
-
-  # @private
-  checkForDumbCharacters: (copy) ->
-    if copy.length == 0
-      for chars in TranslationItem::DUMB_CHARACTERS
-        @element.find(".dumb-#{chars[0]}").hide()
-      return
-
-    for chars in TranslationItem::DUMB_CHARACTERS
-      if copy.indexOf(chars[1]) > -1
-        @element.find(".dumb-#{chars[0]}").show()
-      else
-        @element.find(".dumb-#{chars[0]}").hide()
 
   # @private
   hasMissingTokens: (copy) ->

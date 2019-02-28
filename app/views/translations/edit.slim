@@ -43,6 +43,7 @@ hr.divider
           = f.text_area :copy, autocomplete: 'off', rows: 15, class: 'resize'
           = hidden_field_tag :reason_ids
           = hidden_field_tag :reason_severity
+          = hidden_field_tag :override
           .reason-badges
             - if @severity_badge
               span.badge.severity-badge.saved class="#{@severity_badge[:class_name]}" data-severity="#{@severity_badge[:severity]}"
@@ -55,6 +56,9 @@ hr.divider
         .control-group
           = check_box_tag 'blank_string', '1', (@translation.translated? && @translation.copy.blank? ? 'checked' : nil)
           | The translation is a blank string
+
+        .control-group
+          div class="alerts"
 
         .control-group
           .fuzzy-matches
@@ -76,7 +80,7 @@ hr.divider
         legend = @translation.source_locale.name
 
         .control-group
-          #source_copy.well.seven.columns
+          #source_copy.well
             span.highlight
               = @translation.source_copy
 

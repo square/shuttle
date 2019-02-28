@@ -38,6 +38,13 @@ body.translations {
     }
   }
 
+  div.alerts {
+    p.warning {
+      color: $input-orange;
+      float: right;
+    }
+  }
+
   .fuzzy-matches {
     min-height: 30px;
     padding-top: 9px;

@@ -20,21 +20,6 @@ $(document).ready ->
                      "<%= fuzzy_match_project_key_translation_url(@translation.key.project, @translation.key, @translation, format: 'json') %>",
                      source_copy)
 
-  save_translation = (options) ->
-    params = {}
-    params['translation[copy]'] = $("#translation_copy").val()
-    params['translation[notes]'] = $("#translation_notes").val()
-    params['commit'] = 'Save'
-    ajaxParams = $.extend({}, params, options)
-    $.ajax "<%= project_key_translation_url(@translation.key.project, @translation.key, @translation) %>" + ".json",
-      type: 'PUT'
-      data: $.param(ajaxParams)
-      success: (new_translation) =>
-        edit_url = "<%= edit_project_key_translation_url(@translation.key.project, @translation.key, @translation) %>"
-        window.location.href = edit_url + '?with_update_success_message=true'
-      error: (xhr, textStatus, errorThrown) =>
-        new Flash('alert').text("Couldn't update that translation. Error: " + $.parseJSON(xhr.responseText));
-
   source_copy = "<%= escape_javascript @translation.source_copy %>"
   target_locale = "<%= escape_javascript @translation.rfc5646_locale %>"
   current_translation = "<%= escape_javascript @translation.copy %>"
@@ -43,6 +28,7 @@ $(document).ready ->
   blankString = $("input[name=blank_string]")
   copy_field = $("#translation_copy")
   source_copy_field = $("#source_copy")
+  alert_field = $('div.alerts').first()
 
   blankString.checked = true  if copy_field.val().match(/^\s*$/)
   blankString.change ->
@@ -51,16 +37,22 @@ $(document).ready ->
   copy_field.keyup ->
     blankString[0].checked = copy_field.val().match(/^\s*$/)
     copy_changed = @value != current_translation
+    checkTranslationWarning(alert_field, copy_field.val())
     true
   $(".copy-source").click ->
     copy_field.val "<%= escape_javascript @translation.source_copy %>"
     false
 
   $('.translation-save-button').click ->
+    $('#override').val(false)
     save_translation()
 
   $('.translation-override-save-button').click ->
-    save_translation(override: true)
+    $('#override').val(true)
+    save_translation()
+
+  save_translation = () ->
+    $('#large-translation').submit()
 
   source_copy_field.click ->
     selection_string = window.getSelection().toString()
@@ -87,8 +79,8 @@ $(document).ready ->
         )
     )
 
+  prepareTranslationWarning(alert_field)
   find_fuzzy_matches(source_copy, target_locale)
-
 
   # Reasons logic
   reasons_modal = new ReasonsModal('#translation_copy')
