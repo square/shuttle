@@ -291,6 +291,7 @@ module API
         end
 
         group.save!
+        group.recalculate_ready!
         nil
       end
     end

@@ -119,6 +119,15 @@ RSpec.describe API::V1::GroupsController do
       expect(groups.first.display_name).to eq('this is a test group')
       expect(groups.first.articles).to match_array([article2, article1, article3])
       expect(groups.first.description).to eq('hello')
+      expect(groups.first.ready).to be_falsey
+    end
+
+    it 'creates a ready group' do
+      article_names = [article2.name]
+      post :create, project_id: project.id, api_token: project.api_token, group: { name: 'test-group', display_name: 'this is a test group', article_names: article_names, description: 'hello' }, format: :json
+
+      groups = project.groups.where(name: 'test-group')
+      expect(groups.first.ready).to be_truthy
     end
 
     it 'fails when project has same group name' do
@@ -226,6 +235,15 @@ RSpec.describe API::V1::GroupsController do
       expect(group.articles).to match_array([article2, article3])
       expect(group.description).to eq('hello')
       expect(group.display_name).to eq('this is updated group')
+      expect(group.ready).to be_falsey
+    end
+
+    it 'updates to a ready group' do
+      article_names = [article2.name]
+      patch :update, project_id: project.id, api_token: project.api_token, name: group1.name, group: { article_names: article_names, description: 'hello', display_name: 'this is updated group' }, format: :json
+
+      group = project.groups.find_by_name(group1.name)
+      expect(group.ready).to be_truthy
     end
 
     it 'fails when group does not exist' do
