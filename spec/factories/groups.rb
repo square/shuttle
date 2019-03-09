@@ -16,5 +16,6 @@ FactoryBot.define do
   factory :group do
     association :project, repository_url: nil
     sequence(:name) { |i| "group-#{i}" }
+    sequence(:display_name) { |i| "group-display-#{i}" }
   end
 end

@@ -128,7 +128,7 @@ class LocaleProjectsShowFinder
     elsif form[:commit]
       translations = translations.order('commits_keys.created_at, keys.original_key')
     elsif form[:group]
-      translations = translations.joins({article: {article_groups: :group}}).where("groups.name = ?", form[:group])
+      translations = translations.joins({article: {article_groups: :group}}).where("groups.display_name = ?", form[:group])
       translations = translations.order('article_groups.index_in_group, keys.section_id, keys.index_in_section')
     end
 
