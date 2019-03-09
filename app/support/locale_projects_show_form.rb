@@ -43,7 +43,7 @@ class LocaleProjectsShowForm
 
     if form[:group]
       processed[:group] = form[:group]
-      processed[:translation_ids_in_commit] = Group.where(name: form[:group]).includes({articles: :translations}).map(&:articles).flatten.map(&:translations).flatten.map(&:id)
+      processed[:translation_ids_in_commit] = Group.where(display_name: form[:group]).includes({articles: :translations}).map(&:articles).flatten.map(&:translations).flatten.map(&:id)
     end
 
     processed

@@ -116,7 +116,7 @@ RSpec.describe Group do
     let(:group) { FactoryBot.create(:group, loading: true) }
 
     it 'returns name of group' do
-      expect(group.to_param).to eq(group.name)
+      expect(group.to_param).to eq(group.display_name)
     end
   end
 

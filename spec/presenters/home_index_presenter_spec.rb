@@ -126,7 +126,7 @@ RSpec.describe HomeIndexPresenter do
         expect(@presenter.full_description(group)).to eql('-')
       end
     end
-    
+
     context "[Asset]" do
       it "returns full description" do
         asset = FactoryBot.create(:asset, description: 'abc'*50)
@@ -236,9 +236,9 @@ RSpec.describe HomeIndexPresenter do
       it "returns the group translate link path" do
         group = FactoryBot.create(:group, name: 'full-description-group', project: @project)
         expect(@presenter.translate_link_path(@admin_user, group)).
-            to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: group.project, group: group.name))
+            to eql(@url_helpers.locale_project_path(locale_id: 'en-CA', id: group.project, group: group.display_name))
         expect(@presenter.translate_link_path(@reviewer_user, group)).
-            to eql(@url_helpers.locale_project_path(locale_id: 'fr', id: group.project, group: group.name))
+            to eql(@url_helpers.locale_project_path(locale_id: 'fr', id: group.project, group: group.display_name))
       end
     end
 
