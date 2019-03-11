@@ -25,7 +25,10 @@ class Asset < ActiveRecord::Base
   scope :not_ready, -> { where(ready: false) }
 
   FIELDS_THAT_REQUIRE_IMPORT_WHEN_CHANGED = %w(file targeted_rfc5646_locales)
-  CONTENT_TYPES = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+  CONTENT_TYPES = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ]
 
   has_attached_file :file
 

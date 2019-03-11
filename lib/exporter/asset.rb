@@ -44,10 +44,16 @@ module Exporter
 
       compressed_filestream = Zip::OutputStream.write_buffer do |zos|
         locales.each do |locale|
-          # for each locale, generate an excel file from the source copy (Paperclip)
-          xlsx_file = generate_xlsx(@asset, locale)
-          zos.put_next_entry "#{@asset.file_name}-#{locale.rfc5646.upcase}.xlsx"
-          zos.print(xlsx_file.string)
+          # for each locale, generate an a file
+          if @asset.file.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            xlsx_file = generate_xlsx(@asset, locale)
+            zos.put_next_entry "#{@asset.file_name}-#{locale.rfc5646.upcase}.xlsx"
+            zos.print(xlsx_file.string)
+          elsif @asset.file.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            docx_file = generate_docx(@asset, locale)
+            zos.put_next_entry "#{@asset.file_name}-#{locale.rfc5646.upcase}.docx"
+            zos.print(docx_file)
+          end
         end
       end
       compressed_filestream.rewind
@@ -63,6 +69,32 @@ module Exporter
     # ======== END ERRORS ================================================================================================
 
 private
+    def generate_docx(asset, locale)
+      if File.file?(asset.file.path)
+        doc = Docx::Document.open(asset.file.path)
+      else
+        content = open(asset.file.url).read
+        doc = Docx::Document.open(content)
+      end
+      asset.translations.in_locale(locale).each do |translation|
+        para_info = translation.key.original_key.scan(/paragraph(\d+)-sentence(\d+)/).flatten
+        paragraph_index = para_info[0].to_i
+        sentence_index = para_info[1].to_i
+
+        paragraph = doc.paragraphs[paragraph_index]
+        if sentence_index > 0
+          paragraph.text = paragraph.text + ' ' + translation.copy
+        else
+          paragraph.text = translation.copy
+        end
+      end
+      filename = Rails.root.join('tmp', "#{asset.file_name}.docx")
+      doc.save(filename.to_s)
+      data = IO.binread(filename.to_s)
+      File.delete(filename.to_s)
+      data
+    end
+
     def generate_xlsx(asset, locale)
       if File.file?(asset.file.path)
         workbook = RubyXL::Parser.parse(asset.file.path)
