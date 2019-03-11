@@ -68,6 +68,7 @@ gem 'mustache'
 gem 'html_validation'
 gem 'diff-lcs'
 gem 'rubyXL', github: 'weshatheleopard/rubyXL'
+gem 'docx'
 
 # EXPORTING
 gem 'libarchive'
@@ -109,6 +110,7 @@ group :development do
   gem 'guard-rspec', require: false
   gem 'spring'
   gem 'spring-commands-rspec'
+  gem 'binding_of_caller'
 end
 
 group :test do

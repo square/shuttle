@@ -33,6 +33,11 @@ class AssetImporter
 
       importer = AssetXlsxImporter.new
       importer.import(asset_id)
+    elsif asset.file_content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      asset.update_import_starting_fields!
+
+      importer = AssetDocxImporter.new
+      importer.import(asset_id)
     end
   end
 
