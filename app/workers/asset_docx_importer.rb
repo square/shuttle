@@ -66,23 +66,22 @@ class AssetDocxImporter
       hyperlink = $1
     end
 
-    puts hyperlink if hyperlink
-
     # for the paragraph, we must split into sentences
     sentences = paragraph[:text].split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)((?=[A-Z])|\s+)/)
 
     sentences.each_with_index do |sentence, sentence_index|
       next if sentence.blank?
 
-      puts "#{index}: #{sentence_index} - #{sentence}"
       key_name = generate_key_name(index, sentence_index, sentence)
-      puts key_name
       key = Key.for_key(key_name).create_or_update!(
         project: @asset.project,
         key: key_name,
         source_copy: sentence,
         skip_readiness_hooks: true,
-        ready: false
+        ready: false,
+        other_data: {
+          url: hyperlink
+        }
       )
 
       @asset.keys << key unless @asset.keys.include?(key)

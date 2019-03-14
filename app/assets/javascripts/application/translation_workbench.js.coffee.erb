@@ -134,7 +134,7 @@ class TranslationItem
     severity_texts = <%= TranslationChange.reason_severities.map {|s| s[0].titlecase} %>
     severity_classes = <%= TranslationChange::SEVERITY_CLASSES %>
     context = {}
-
+    context.url = @translation.key.other_data.url
     context.status = @translation.status
     context.translation_copy = @translation.copy
     context.source_copy = this.renderCopyWithFencing(
