@@ -47,6 +47,10 @@ RSpec.describe Reports::QualityReport do
     end
 
     describe 'CSV Data' do
+      around do |example|
+        Timecop.freeze(Time.local(2018, 12, 25), &example)
+      end
+
       before do
         @start_date = Date.today
         @end_date = @start_date.next_month
