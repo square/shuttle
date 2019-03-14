@@ -37,6 +37,13 @@
               <i class="fa fa-pencil-square-o"></i>
             </button>
           </span>
+
+          {{#url}}
+            <div>
+              <label for="url">Link URL</label>
+              <input type="text" name="url" value="{{url}}" />
+            </div>
+          {{/url}}
         {{/read_only_mode}}
 
         {{#is_shared}}
