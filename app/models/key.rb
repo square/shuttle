@@ -240,7 +240,7 @@ class Key < ActiveRecord::Base
         locale:               locale,
       )
 
-      if article.present? && is_block_tag
+      if is_auto_approved_string?(source_copy) || (article.present? && is_block_tag)
         t.update!(
           copy: source_copy,
           approved: true,
@@ -299,5 +299,12 @@ class Key < ActiveRecord::Base
 
   def formatted_hidden_in_search
     !!hidden_in_search
+  end
+
+  # checks if a string should be auto approved.
+  def is_auto_approved_string?(source_copy)
+    return false unless Shuttle::Configuration.features.enable_blank_string_auto_approval?
+
+    return source_copy&.chomp.blank?
   end
 end

@@ -300,6 +300,29 @@ RSpec.describe Key do
         translation = Translation.find_by(key: key, rfc5646_locale: 'de')
         expect(translation.translated).to be_falsey
       end
+
+      describe 'for blank strings' do
+        let(:project) { FactoryBot.create(:project, targeted_rfc5646_locales: { 'en-US' => true, 'de' => true }) }
+        let(:key) { FactoryBot.create(:key, source_copy: ' \t\r\n', project: project) }
+
+        it "should not auto-translate blank strings when enable_blank_string_auto_approval is off" do
+          Shuttle::Configuration.features[:enable_blank_string_auto_approval] = false
+
+          key.add_pending_translations
+
+          translation = Translation.find_by(key: key, rfc5646_locale: 'de')
+          expect(translation.translated).to be_falsey
+        end
+
+        it "should auto-translate blank strings when enable_blank_string_auto_approval is on" do
+          Shuttle::Configuration.features[:enable_blank_string_auto_approval] = true
+
+          key.add_pending_translations
+
+          translation = Translation.find_by(key: key, rfc5646_locale: 'de')
+          expect(translation.translated).to be_falsey
+        end
+      end
     end
 
     context "[for article-bound keys]" do
