@@ -352,11 +352,10 @@ class Commit < ActiveRecord::Base
 
   def import_blob(path, git_blob)
     return if project.skip_tree?(path)
-    imps = Importer::Base.implementations.reject { |imp| project.skip_imports.include?(imp.ident) }
 
     blob = project.blobs.with_sha(git_blob[:oid]).with_path(path).find_or_create!(sha: git_blob[:oid], path: path)
 
-    imps.each do |importer|
+    project.required_importers.each do |importer|
       importer = importer.new(blob, self)
       next if importer.skip?
       BlobImporter.perform_once importer.class.ident, blob.id, id

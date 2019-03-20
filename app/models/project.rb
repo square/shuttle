@@ -364,8 +364,8 @@ class Project < ActiveRecord::Base
     path = path.sub(/^\//, '')
     return false if path.empty?
 
-    return true if skip_paths.any? { |sp| path.start_with?(sp) }
-    return true if only_paths.present? && only_paths.none? { |op| path.start_with?(op) }
+    return true if skip_paths.any? { |sp| path.start_with?(sp) || File.fnmatch(sp, path) }
+    return true if only_paths.present? && only_paths.none? { |op| path.start_with?(op) || File.fnmatch(op, path) }
     return true if (skip_importer_paths[importer.ident] || []).any? { |sp| path.start_with?(sp) }
     if only_importer_paths[importer.ident].present?
       return true if only_importer_paths[importer.ident].none? { |op| path.start_with?(op) }
@@ -408,12 +408,12 @@ class Project < ActiveRecord::Base
     if ops.present?
       return false if ops.include?(path)
       return false if ops.any? { |p| path.start_with?(p) }
-      return false if ops.any? { |p| p.start_with?(path) }
+      return false if ops.any? { |p| p.start_with?(path) || File.fnmatch(p, path) }
       return true
     end
 
     return true if sps.include?(path)
-    return true if sps.any? { |p| path.start_with?(p) }
+    return true if sps.any? { |p| path.start_with?(p) || File.fnmatch(p, path) }
 
     return false
   end
@@ -474,6 +474,10 @@ class Project < ActiveRecord::Base
         nil
       end
     end
+  end
+
+  def required_importers
+    @required_importers ||= Importer::Base.implementations.reject { |imp| skip_imports.include?(imp.ident) }
   end
 
   private
