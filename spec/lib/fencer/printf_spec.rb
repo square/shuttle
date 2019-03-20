@@ -47,6 +47,8 @@ RSpec.describe Fencer::Printf do
           to eql("%1$-8.8s"=>[9..14])
       expect(Fencer::Printf.fence(%|printf("%9jd", (intmax_t) statbuf.st_size);|)).
           to eql("%1$9jd"=>[8..11])
+
+      expect(Fencer::Printf.fence('% o')).to eql({})
     end
 
     it "should handle %% tokens interspersed with positional tokens and adjacent to printf format strings" do
