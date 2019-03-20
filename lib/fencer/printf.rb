@@ -21,7 +21,7 @@ module Fencer
     extend self
 
     POSITION            = /\d+\$/                                              # "%2$i"
-    FORMAT              = /[\-+ #0]/                                           # "%-i"
+    FORMAT              = /[\-+#0]/                                           # "%-i"
     PRECISION_SPECIFIER = /(\d+|\*(\d+\$)?)/                                   # "2" or "*" or "*2$"
     PRECISION           = /#{PRECISION_SPECIFIER}?(\.#{PRECISION_SPECIFIER})?/ # "%*.3f"
     WIDTH               = /([Lhjlqtz]|hh|ll)/                                  # "%ld"
