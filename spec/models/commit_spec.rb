@@ -314,7 +314,9 @@ RSpec.describe Commit do
       @project = FactoryBot.create(:project, :light)
       commit = @project.commit!('HEAD')
       CommitImporter::Finisher.new.on_success(true, 'commit_id' => commit.id)
-      expect(Blob.where(parsed: false).count).to be_zero
+      expect(@project.blobs.count).to eql(2)
+      expect(commit.blobs.count).to eql(1)
+      expect(commit.blobs.where(parsed: false).count).to be_zero
     end
 
     it "should remove appropriate keys when reimporting after changed settings" do
@@ -354,14 +356,18 @@ RSpec.describe Commit do
       @commit.send(:import_blob, '/config/locales/en.yml', @file1)
       @commit.send(:import_blob, '/config/locales/en-US.yml', @file2)
 
-      expect(@commit.reload.blobs.count).to eql(2)
+      expect(@project.blobs.count).to eql(2)
+      expect(@commit.blobs.count).to be_zero
     end
 
     it "doesn't create a new blob if the file has already been imported before" do
       @commit.send(:import_blob, '/config/locales/en.yml', @file1)
-      expect(@commit.reload.blobs.count).to eql(1)
+      expect(@project.blobs.count).to eql(1)
+      expect(@commit.blobs.count).to be_zero
+
       @commit.send(:import_blob, '/config/locales/en.yml', @file2)
-      expect(@commit.reload.blobs.count).to eql(1)
+      expect(@project.blobs.count).to eql(1)
+      expect(@commit.blobs.count).to be_zero
     end
   end
 

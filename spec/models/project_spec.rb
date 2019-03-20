@@ -383,21 +383,24 @@ RSpec.describe Project do
 
     it "should return true if there is no matching path inclusion" do
       @project.update_attributes(skip_paths:          [],
-                                 only_paths:          %w(foo/),
+                                 only_paths:          %w(foo/ */only_path_pattern),
                                  only_importer_paths: {},
                                  skip_importer_paths: {})
 
       expect(@project.skip_path?('bar/foo.txt', Importer::Ruby)).to be_truthy
       expect(@project.skip_path?('foo/bar.txt', Importer::Ruby)).to be_falsey
+
+      expect(@project.skip_path?('foo/only_path_pattern', Importer::Ruby)).to be_falsey
     end
 
     it "should return true if there is a path exclusion" do
-      @project.update_attributes(skip_paths:          %w(foo/),
+      @project.update_attributes(skip_paths:          %w(foo/ */skip_path_pattern),
                                  only_paths:          [],
                                  only_importer_paths: {},
                                  skip_importer_paths: {})
 
       expect(@project.skip_path?('foo/bar.txt', Importer::Ruby)).to be_truthy
+      expect(@project.skip_path?('foo/skip_path_pattern', Importer::Ruby)).to be_truthy
     end
 
     it "should return true if there is an importer path exclusion for the given importer" do
@@ -450,7 +453,7 @@ RSpec.describe Project do
     context '[only paths]' do
       before :each do
         @project = FactoryBot.create(:project,
-                                      only_paths:          %w(only/path),
+                                      only_paths:          %w(only/path */only_path_pattern),
                                       only_importer_paths: {'foo' => %w(importeronly/path)})
       end
 
@@ -481,12 +484,20 @@ RSpec.describe Project do
       it "should return true if true if a path that's not related to the only paths" do
         expect(@project.skip_tree?('/foo/bar')).to be_truthy
       end
+
+      it "should return true if given path does not match the pattern" do
+        expect(@project.skip_tree?('only_path_pattern')).to be_truthy
+      end
+
+      it "should return false if given path matches the pattern" do
+        expect(@project.skip_tree?('/foobar/only_path_pattern')).to be_falsey
+      end
     end
 
     context '[skip paths]' do
       before :each do
         @project = FactoryBot.create(:project,
-                                      skip_paths:          %w(skip/path),
+                                      skip_paths:          %w(skip/path */skip_path_pattern),
                                       skip_importer_paths: {'foo' => %w(importerskip/path)})
       end
       it "should return true if given a skip path" do
@@ -515,6 +526,14 @@ RSpec.describe Project do
 
       it "should return false if there are no applicable skip paths" do
         expect(@project.skip_tree?('/foo/bar')).to be_falsey
+      end
+
+      it "should return false if given path does not match the pattern" do
+        expect(@project.skip_tree?('skip_path_pattern')).to be_falsey
+      end
+
+      it "should return true if given path matches the pattern" do
+        expect(@project.skip_tree?('/foobar/skip_path_pattern')).to be_truthy
       end
     end
   end

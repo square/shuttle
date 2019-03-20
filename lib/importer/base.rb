@@ -85,14 +85,14 @@ module Importer
       @blob   = blob
       @commit = commit
       @file   = File.new(blob.path, nil)
-
-      blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
     end
 
     # Scans the Blob for localizable strings, and creates or updates
     # corresponding Translation records.
 
     def import
+      @blob.blobs_commits.where(commit_id: @commit.id).find_or_create!
+
       if @blob.parsed?
         import_by_using_cached_keys
       else
