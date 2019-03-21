@@ -71,4 +71,11 @@ class Group < ActiveRecord::Base
   delegate :required_locales, :required_rfc5646_locales, :targeted_rfc5646_locales, :locale_requirements, to: :project
 
   def to_param() name end
+
+  # Calculates the value of the `ready` field and saves the record.
+  def recalculate_ready!
+    self.ready = articles.not_ready.empty?
+    self.save!
+  end
+
 end

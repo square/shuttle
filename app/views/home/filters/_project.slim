@@ -19,7 +19,8 @@ ruby:
   # ex: :commits_filter__project_id, :articles_filter__project_id, :groups_filter__project_id
   filter_name = :"#{item_type}s_filter__project_id"
 
-  project_list = Project.where(job_type: Project.job_types[item_type])
+  project_item_type = item_type == 'group' ? 'article' : item_type
+  project_list = Project.where(job_type: Project.job_types[project_item_type])
   project_list = project_list.order('LOWER(name) ASC').map { |pr| [pr.name, pr.id] }
   project_list.unshift ['all projects', 'all']
 
