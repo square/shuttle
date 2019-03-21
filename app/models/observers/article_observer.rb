@@ -35,6 +35,10 @@ class ArticleObserver < ActiveRecord::Observer
     if just_became_ready?(article) && article.project.article_webhook?
       ArticleWebhookPinger.perform_once article.id
     end
+
+    if article.previous_changes.include?(:ready)
+      article.groups.reload.map(&:recalculate_ready!)
+    end
   end
 
   # This should be called in after_commit hooks only because it checks previous_changes hash instead of changes hash.

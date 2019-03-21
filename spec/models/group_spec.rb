@@ -119,4 +119,28 @@ RSpec.describe Group do
       expect(group.to_param).to eq(group.name)
     end
   end
+
+  describe '#recalculate_ready!' do
+    let(:project) { FactoryBot.create(:project, repository_url: nil, base_rfc5646_locale: 'en', targeted_rfc5646_locales: { 'fr' => true, 'es' => false } ) }
+    let(:group) { FactoryBot.create(:group, project: project) }
+
+    let(:article1) { FactoryBot.create(:article, targeted_rfc5646_locales: {'fr' => true}) }
+    let(:article2) { FactoryBot.create(:article, targeted_rfc5646_locales: {'fr' => true}) }
+
+    let!(:article_group1) { FactoryBot.create(:article_group, article: article1, group: group, index_in_group: 2) }
+    let!(:article_group2) { FactoryBot.create(:article_group, article: article2, group: group, index_in_group: 1) }
+
+    it 'article observer callback is triggered' do
+      expect(group.ready).to be_falsey
+
+      article1.update(ready: true)
+      expect(group.reload.ready).to be_falsey
+
+      article2.update(ready: true)
+      expect(group.reload.ready).to be_truthy
+
+      article1.update(ready: false)
+      expect(group.reload.ready).to be_falsey
+    end
+  end
 end
