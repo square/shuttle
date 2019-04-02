@@ -22,8 +22,8 @@ RSpec.describe AssetXlsxImporter do
         :asset,
         targeted_rfc5646_locales: { 'fr' => true },
         project: @project,
-        file_name: 'word-sample.docx',
-        file: File.new("#{Rails.root}/spec/fixtures/asset_files/word-sample.docx")
+        file_name: 'word-sample2.docx',
+        file: File.new("#{Rails.root}/spec/fixtures/asset_files/word-sample2.docx")
       )
       AssetDocxImporter.new.import(@asset.id)
       @asset.reload
@@ -35,7 +35,8 @@ RSpec.describe AssetXlsxImporter do
     end
 
     it 'creates the correct number of keys' do
-      expect(@asset.keys.count).to eq 7
+      expect(@asset.keys.count).to eq 24
+      expect(@asset.translations.count).to eq 48
     end
 
   end
