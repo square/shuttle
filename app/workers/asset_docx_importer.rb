@@ -11,6 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+require 'awesome_print'
 
 class AssetDocxImporter
   # @param [Fixnum] asset_id The ID of a Asset
@@ -20,6 +21,7 @@ class AssetDocxImporter
     paragraphs = []
     @document.paragraphs.each_with_index do |paragraph, index|
       paragraphs << {
+        node: paragraph.node,
         text: paragraph.text,
         background_color: paragraph.xpath('.//w:shd/@w:fill').first&.value,
         index: index
@@ -47,7 +49,7 @@ class AssetDocxImporter
       paragraph[:node] = cell[:node]
     end
 
-    paragraphs.select! { |p| p[:background_color] == 'fefb00'}
+    paragraphs.select! { |p| %w[fefb00 ffff00 fdfc00].include?(p[:background_color]) }
     paragraphs.each do |p|
       process_paragraph(p, p[:index])
     end
