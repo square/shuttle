@@ -79,14 +79,26 @@ private
       asset.translations.in_locale(locale).each do |translation|
         para_info = translation.key.original_key.scan(/paragraph(\d+)-sentence(\d+)/).flatten
         paragraph_index = para_info[0].to_i
-        sentence_index = para_info[1].to_i
+        # sentence_index = para_info[1].to_i + 1
 
         paragraph = doc.paragraphs[paragraph_index]
-        if sentence_index > 0
-          paragraph.text = paragraph.text + ' ' + translation.copy
-        else
-          paragraph.text = translation.copy
+        text_runs = paragraph.xpath('.//w:t')
+        hyperlink_run = paragraph.xpath('.//w:r[w:rPr[w:rStyle[@w:val="Hyperlink.0"]] and ./w:t]/.//w:t').first
+
+        text_runs.each_with_index do |t, i|
+          if hyperlink_run
+            if hyperlink_run == t
+              t.content = translation.copy
+            else
+              t.remove
+            end
+          elsif i.zero?
+            t.content = translation.copy
+          else
+            t.remove
+          end
         end
+
       end
       filename = Rails.root.join('tmp', "#{asset.file_name}.docx")
       doc.save(filename.to_s)
