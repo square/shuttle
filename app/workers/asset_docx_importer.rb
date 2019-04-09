@@ -32,7 +32,7 @@ class AssetDocxImporter
           cells << {
             node: cell.node,
             text: cell.text,
-            background_color: cell.xpath('.//w:shd/@w:fill').first&.value
+            background_color: cell.xpath('.//w:shd/@w:fill').first&.value || cell.xpath('.//w:highlight/@w:val').first&.value
           }
         end
       end
