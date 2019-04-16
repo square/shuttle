@@ -14,7 +14,7 @@
 
 require 'rails_helper'
 
-RSpec.describe AssetXlsxImporter do
+RSpec.describe AssetDocxImporter do
   describe "#perform" do
     before :each do
       @project = FactoryBot.create(:project, targeted_rfc5646_locales: { 'es' => true })
