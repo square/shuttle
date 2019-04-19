@@ -56,7 +56,7 @@ module Reports
           asset = (tc.asset_id.blank?) ? nil : tc.asset_id
           job_start = (tc.job_start ? tc.job_start.in_time_zone.strftime('%Y-%m-%d %H:%M') : '')
           approved_at = (tc.approved_at ? tc.approved_at.in_time_zone.strftime('%Y-%m-%d %H:%M') : '')
-          
+
           csv << [tc.date.strftime('%Y-%m-%d'), tc.first_name, tc.user_id, tc.role, tc.source_rfc5646_locale.upcase, tc.rfc5646_locale.upcase, tc.project_name, Project.job_types.key(tc.job_type).titlecase, (sha || article || asset).to_s, job_start, approved_at, counts].flatten
         end
       end
@@ -85,7 +85,12 @@ module Reports
     end
 
     def self.get_standard_query(start_date, end_date, languages, exclude_internal)
-      query = TranslationChange.where('translation_changes.created_at': start_date.beginning_of_day..end_date.end_of_day)
+      query = TranslationChange.where(
+            'translations.translation_date BETWEEN ? AND ? OR translations.review_date BETWEEN ? AND ?',
+            start_date.beginning_of_day, end_date.end_of_day,
+            start_date.beginning_of_day, end_date.end_of_day
+
+        )
         .joins('LEFT OUTER JOIN articles ON articles.id = article_id')
         .joins('LEFT OUTER JOIN commits ON commits.revision = sha')
         .joins('LEFT OUTER JOIN assets ON assets.id = asset_id')
