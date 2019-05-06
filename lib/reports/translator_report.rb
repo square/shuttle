@@ -94,13 +94,13 @@ module Reports
         .joins('LEFT OUTER JOIN articles ON articles.id = article_id')
         .joins('LEFT OUTER JOIN commits ON commits.revision = sha')
         .joins('LEFT OUTER JOIN assets ON assets.id = asset_id')
-        .group('DATE(translation_changes.created_at)')
+        .group('DATE(COALESCE(translations.review_date , translations.translation_date))')
         .group('articles.name, sha, assets.id')
         .order('group_id', 'rfc5646_locale', 'source_rfc5646_locale', 'projects.name', 'first_name', 'classification')
         .select('RANK() OVER (
-                   ORDER BY DATE(translation_changes.created_at), rfc5646_locale, projects.name, sha, articles.name, assets.id, first_name
+                   ORDER BY DATE(COALESCE(translations.review_date , translations.translation_date)), rfc5646_locale, projects.name, sha, articles.name, assets.id, first_name
                  ) AS group_id,
-                 DATE(translation_changes.created_at) as "date",
+                 DATE(COALESCE(translations.review_date , translations.translation_date)) as "date",
                  sha,
                  articles.name as article_name,
                  assets.id as asset_id,
