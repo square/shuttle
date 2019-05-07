@@ -68,7 +68,7 @@ module Reports
         query = query.where("users.email ~ '^(?!.*(#{internal_domains})$).*$'")
       end
 
-      query.where('translation_changes.tm_match IS NOT NULL')
+      query = query.where('translation_changes.tm_match IS NOT NULL')
            .where('translations.rfc5646_locale': languages)
            .joins(:project, :user, :translation)
            .group('source_rfc5646_locale, rfc5646_locale, translation_changes.role, projects.name, projects.job_type, first_name, users.id, classification')
@@ -82,6 +82,7 @@ module Reports
                    -- the following take the tm_match and converts it to a number 0-5
                    CASE WHEN translation_changes.tm_match < 60 THEN 0 ELSE FLOOR((translation_changes.tm_match - 50)/10) END as classification,
                    SUM(words_count) as words_count')
+      query.latest_changes
     end
 
     def self.get_standard_query(start_date, end_date, languages, exclude_internal)

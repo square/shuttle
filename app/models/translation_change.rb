@@ -44,6 +44,18 @@ class TranslationChange < ActiveRecord::Base
 
   enum reason_severities: [:minor, :neutral, :major, :critical]
 
+  scope :latest_changes, -> {
+    where("translation_changes.id in (
+      SELECT MAX(id) as id
+      	FROM translation_changes as tc
+      	WHERE tc.role = 'reviewer' AND tc.translation_id = translation_changes.translation_id
+      	UNION
+      	SELECT MAX(id) as id
+      	FROM translation_changes as tc
+      	WHERE tc.role = 'translator' AND tc.translation_id = translation_changes.translation_id
+      )")
+  }
+
   def self.create_from_translation!(translation)
     diff = translation.previous_changes.slice(*TRACKED_ATTRIBUTES)
     TranslationChange.create(translation: translation, user: translation.modifier, diff: diff) if diff.present?
