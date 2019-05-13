@@ -39,5 +39,9 @@ RSpec.describe AssetDocxImporter do
       expect(@asset.translations.count).to eq 48
     end
 
+    it 'sets the proper key name' do
+      hashed_value = Digest::SHA1.hexdigest(@asset.keys.first.source_copy)
+      expect(@asset.keys.first.original_key).to eq "#{@asset.file_name}-paragraph15-sentence0-p#{@project.id}-#{hashed_value}"
+    end
   end
 end

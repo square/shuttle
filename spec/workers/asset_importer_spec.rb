@@ -43,7 +43,7 @@ RSpec.describe AssetImporter do
 
       it 'sets the proper key name' do
         hashed_value = Digest::SHA1.hexdigest(@asset.keys.first.source_copy)
-        expect(@asset.keys.first.original_key).to eq "#{@asset.file_name}-sheet0-row1-col1-#{hashed_value}"
+        expect(@asset.keys.first.original_key).to eq "#{@asset.file_name}-sheet0-row1-col1-p#{@asset.project.id}-#{hashed_value}"
       end
     end
   end

@@ -61,6 +61,6 @@ class AssetXlsxImporter
   def generate_key_name(worksheet_index, cell)
     file_name = @asset.file_name.gsub(' ', '_').downcase
     hashed_value = Digest::SHA1.hexdigest(cell.value)
-    "#{file_name}-sheet#{worksheet_index}-row#{cell.row}-col#{cell.column}-#{hashed_value}"
+    "#{file_name}-sheet#{worksheet_index}-row#{cell.row}-col#{cell.column}-p#{@asset.project.id}-#{hashed_value}"
   end
 end
