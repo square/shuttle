@@ -54,7 +54,12 @@ class AssetDocxImporter
   end
 
   def get_document(file)
-    Docx::Document.open(file.path)
+    if File.file?(file.path)
+      Docx::Document.open(file.path)
+    else
+      content = open(file.url).read
+      Docx::Document.open_buffer(content)
+    end
   end
 
   def process_paragraph(paragraph, index)
@@ -93,6 +98,6 @@ class AssetDocxImporter
   def generate_key_name(index, sentence_index, sentence)
     file_name = @asset.file_name.gsub(' ', '_').downcase
     hashed_value = Digest::SHA1.hexdigest(sentence)
-    "#{file_name}-paragraph#{index}-sentence#{sentence_index}-#{hashed_value}"
+    "#{file_name}-paragraph#{index}-sentence#{sentence_index}-p#{@asset.project.id}-#{hashed_value}"
   end
 end

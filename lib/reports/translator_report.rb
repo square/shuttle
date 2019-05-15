@@ -56,7 +56,7 @@ module Reports
           asset = (tc.asset_id.blank?) ? nil : tc.asset_id
           job_start = (tc.job_start ? tc.job_start.in_time_zone.strftime('%Y-%m-%d %H:%M') : '')
           approved_at = (tc.approved_at ? tc.approved_at.in_time_zone.strftime('%Y-%m-%d %H:%M') : '')
-          
+
           csv << [tc.date.strftime('%Y-%m-%d'), tc.first_name, tc.user_id, tc.role, tc.source_rfc5646_locale.upcase, tc.rfc5646_locale.upcase, tc.project_name, Project.job_types.key(tc.job_type).titlecase, (sha || article || asset).to_s, job_start, approved_at, counts].flatten
         end
       end
@@ -68,7 +68,7 @@ module Reports
         query = query.where("users.email ~ '^(?!.*(#{internal_domains})$).*$'")
       end
 
-      query.where('translation_changes.tm_match IS NOT NULL')
+      query = query.where('translation_changes.tm_match IS NOT NULL')
            .where('translations.rfc5646_locale': languages)
            .joins(:project, :user, :translation)
            .group('source_rfc5646_locale, rfc5646_locale, translation_changes.role, projects.name, projects.job_type, first_name, users.id, classification')
@@ -82,20 +82,26 @@ module Reports
                    -- the following take the tm_match and converts it to a number 0-5
                    CASE WHEN translation_changes.tm_match < 60 THEN 0 ELSE FLOOR((translation_changes.tm_match - 50)/10) END as classification,
                    SUM(words_count) as words_count')
+      query.latest_changes
     end
 
     def self.get_standard_query(start_date, end_date, languages, exclude_internal)
-      query = TranslationChange.where('translation_changes.created_at': start_date.beginning_of_day..end_date.end_of_day)
+      query = TranslationChange.where(
+            'translations.translation_date BETWEEN ? AND ? OR translations.review_date BETWEEN ? AND ?',
+            start_date.beginning_of_day, end_date.end_of_day,
+            start_date.beginning_of_day, end_date.end_of_day
+
+        )
         .joins('LEFT OUTER JOIN articles ON articles.id = article_id')
         .joins('LEFT OUTER JOIN commits ON commits.revision = sha')
         .joins('LEFT OUTER JOIN assets ON assets.id = asset_id')
-        .group('DATE(translation_changes.created_at)')
+        .group('DATE(COALESCE(translations.review_date , translations.translation_date))')
         .group('articles.name, sha, assets.id')
         .order('group_id', 'rfc5646_locale', 'source_rfc5646_locale', 'projects.name', 'first_name', 'classification')
         .select('RANK() OVER (
-                   ORDER BY DATE(translation_changes.created_at), rfc5646_locale, projects.name, sha, articles.name, assets.id, first_name
+                   ORDER BY DATE(COALESCE(translations.review_date , translations.translation_date)), rfc5646_locale, projects.name, sha, articles.name, assets.id, first_name
                  ) AS group_id,
-                 DATE(translation_changes.created_at) as "date",
+                 DATE(COALESCE(translations.review_date , translations.translation_date)) as "date",
                  sha,
                  articles.name as article_name,
                  assets.id as asset_id,

@@ -73,6 +73,7 @@ RSpec.describe Reports::TranslatorReport do
         t1 = FactoryBot.create(:translation, key: key1, rfc5646_locale: 'fr', tm_match: 71, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: @reviewer, translator: @translator)
         FactoryBot.create(:translation_change, translation: t1, project: @project, sha: @commit.revision, is_edit: false, user: @translator, role: 'translator', created_at: @start_date, tm_match: t1.tm_match)
         FactoryBot.create(:translation_change, translation: t1, project: @project, sha: @commit.revision, is_edit: true, user: @reviewer, role: 'reviewer', created_at: @start_date, tm_match: t1.tm_match)
+        FactoryBot.create(:translation_change, translation: t1, project: @project, sha: @commit.revision, is_edit: true, user: @reviewer, role: 'reviewer', created_at: @start_date + 1.day, tm_match: t1.tm_match)
 
         t2 = FactoryBot.create(:translation, key: key2, rfc5646_locale: 'it', tm_match: 85, source_copy: 'One two three', translation_date: @start_date, review_date: @start_date, reviewer: @reviewer, translator: @translator)
         FactoryBot.create(:translation_change, translation: t2, project: @project, sha: @commit.revision, is_edit: false, user: @translator, role: 'translator', created_at: @start_date, tm_match: t2.tm_match)

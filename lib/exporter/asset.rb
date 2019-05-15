@@ -74,12 +74,11 @@ private
         doc = Docx::Document.open(asset.file.path)
       else
         content = open(asset.file.url).read
-        doc = Docx::Document.open(content)
+        doc = Docx::Document.open_buffer(content)
       end
       asset.translations.in_locale(locale).each do |translation|
         para_info = translation.key.original_key.scan(/paragraph(\d+)-sentence(\d+)/).flatten
         paragraph_index = para_info[0].to_i
-        # sentence_index = para_info[1].to_i + 1
 
         paragraph = doc.paragraphs[paragraph_index]
         text_runs = paragraph.xpath('.//w:t')
