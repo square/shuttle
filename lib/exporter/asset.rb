@@ -52,7 +52,7 @@ module Exporter
           elsif @asset.file.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             docx_file = generate_docx(@asset, locale)
             zos.put_next_entry "#{@asset.file_name}-#{locale.rfc5646.upcase}.docx"
-            zos.print(docx_file)
+            zos.print(docx_file.string)
           end
         end
       end
@@ -99,11 +99,7 @@ private
         end
 
       end
-      filename = Rails.root.join('tmp', "#{asset.file_name}.docx")
-      doc.save(filename.to_s)
-      data = IO.binread(filename.to_s)
-      File.delete(filename.to_s)
-      data
+      doc.stream
     end
 
     def generate_xlsx(asset, locale)
