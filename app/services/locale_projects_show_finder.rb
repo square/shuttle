@@ -118,7 +118,6 @@ class LocaleProjectsShowFinder
 
   def find_translations
     translations_in_es = Elasticsearch::Model.search(search_query, Translation).results
-
     translations = Translation
                        .where(id: translations_in_es.map(&:id))
                        .where('commits.revision': form[:commit])
@@ -127,6 +126,8 @@ class LocaleProjectsShowFinder
       translations = translations.order('keys.section_id, keys.index_in_section')
     elsif form[:commit]
       translations = translations.order('commits_keys.created_at, keys.original_key')
+    elsif form[:asset_id]
+      translations = translations.order('assets_keys.created_at, keys.original_key')
     elsif form[:group]
       translations = translations.joins({article: {article_groups: :group}}).where("groups.display_name = ?", form[:group])
       translations = translations.order('article_groups.index_in_group, keys.section_id, keys.index_in_section')
