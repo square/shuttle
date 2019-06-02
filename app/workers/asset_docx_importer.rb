@@ -21,7 +21,7 @@ class AssetDocxImporter
       paragraphs << {
         node: paragraph.node,
         text: paragraph.text,
-        background_color: paragraph.xpath('.//w:shd/@w:fill').first&.value || paragraph.xpath('.//w:highlight/@w:val').first&.value,
+        background_color: determine_background(paragraph),
         index: index
       }
     end
@@ -32,7 +32,7 @@ class AssetDocxImporter
           cells << {
             node: cell.node,
             text: cell.text,
-            background_color: cell.xpath('.//w:shd/@w:fill').first&.value || cell.xpath('.//w:highlight/@w:val').first&.value
+            background_color: determine_background(cell)
           }
         end
       end
@@ -48,6 +48,7 @@ class AssetDocxImporter
     end
 
     paragraphs.select! { |p| %w[yellow fefb00 ffff00 fdfc00].include?(p[:background_color]) }
+
     paragraphs.each do |p|
       process_paragraph(p, p[:index])
     end
@@ -60,6 +61,12 @@ class AssetDocxImporter
       content = open(file.url).read
       Docx::Document.open_buffer(content)
     end
+  end
+
+  def determine_background(obj)
+    fill = obj.xpath('.//w:shd/@w:fill').first&.value
+    highlight = obj.xpath('.//w:highlight/@w:val').first&.value
+    highlight || fill
   end
 
   def process_paragraph(paragraph, index)
