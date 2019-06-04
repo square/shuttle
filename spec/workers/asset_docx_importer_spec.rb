@@ -22,8 +22,8 @@ RSpec.describe AssetDocxImporter do
         :asset,
         targeted_rfc5646_locales: { 'fr' => true },
         project: @project,
-        file_name: 'word-sample2.docx',
-        file: File.new("#{Rails.root}/spec/fixtures/asset_files/word-sample2.docx")
+        file_name: 'word-sample3.docx',
+        file: File.new("#{Rails.root}/spec/fixtures/asset_files/word-sample3.docx")
       )
       AssetDocxImporter.new.import(@asset.id)
       @asset.reload
@@ -35,13 +35,13 @@ RSpec.describe AssetDocxImporter do
     end
 
     it 'creates the correct number of keys' do
-      expect(@asset.keys.count).to eq 24
-      expect(@asset.translations.count).to eq 48
+      expect(@asset.keys.count).to eq 16
+      expect(@asset.translations.count).to eq 32
     end
 
     it 'sets the proper key name' do
       hashed_value = Digest::SHA1.hexdigest(@asset.keys.first.source_copy)
-      expect(@asset.keys.first.original_key).to eq "#{@asset.file_name}-paragraph15-sentence0-p#{@project.id}-#{hashed_value}"
+      expect(@asset.keys.first.original_key).to eq "#{@asset.file_name}-paragraph8-sentence0-p#{@project.id}-#{hashed_value}"
     end
   end
 end

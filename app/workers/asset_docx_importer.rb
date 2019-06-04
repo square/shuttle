@@ -40,7 +40,7 @@ class AssetDocxImporter
 
     # Paragraphs contain all table cells, but tables cells don't contain all paragraphs
     paragraphs.each do |paragraph|
-      cell = cells.find { |c| c[:text] == paragraph[:text] }
+      cell = cells.find { |c| c[:text] == paragraph[:text] && paragraph[:node].xpath('@w14:paraId') == c[:node].xpath('.//@w14:paraId')}
       next unless cell
 
       paragraph[:background_color] = cell[:background_color] unless paragraph[:background_color]
