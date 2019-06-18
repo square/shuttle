@@ -88,7 +88,7 @@ private
         text_runs = paragraph.xpath('.//w:t')
         hyperlink_run = paragraph.xpath('.//w:r[w:rPr[w:rStyle[@w:val="Hyperlink.0"]] and ./w:t]/.//w:t').first
         run = hyperlink_run || text_runs.first
-        run.content = sentences.map(&:copy).join(' ')
+        run.content = sentences.sort_by { |t| t.key.original_key}.map(&:copy).join(' ')
         text_runs.each { |r| r.remove unless r == run }
       end
       doc.stream
