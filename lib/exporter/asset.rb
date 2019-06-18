@@ -76,28 +76,20 @@ private
         content = open(asset.file.url).read
         doc = Docx::Document.open_buffer(content)
       end
-      asset.translations.in_locale(locale).each do |translation|
-        para_info = translation.key.original_key.scan(/paragraph(\d+)-sentence(\d+)/).flatten
-        paragraph_index = para_info[0].to_i
 
-        paragraph = doc.paragraphs[paragraph_index]
+      groups = asset.translations.in_locale(locale).group_by do |t|
+        info = t.key.original_key.scan(/paragraph(\d+)/).flatten
+        info[0].to_i
+      end
+
+      groups.each do |key, sentences|
+        paragraph = doc.paragraphs[key]
+
         text_runs = paragraph.xpath('.//w:t')
         hyperlink_run = paragraph.xpath('.//w:r[w:rPr[w:rStyle[@w:val="Hyperlink.0"]] and ./w:t]/.//w:t').first
-
-        text_runs.each_with_index do |t, i|
-          if hyperlink_run
-            if hyperlink_run == t
-              t.content = translation.copy
-            else
-              t.remove
-            end
-          elsif i.zero?
-            t.content = translation.copy
-          else
-            t.remove
-          end
-        end
-
+        run = hyperlink_run || text_runs.first
+        run.content = sentences.map(&:copy).join(' ')
+        text_runs.each { |r| r.remove unless r == run }
       end
       doc.stream
     end
