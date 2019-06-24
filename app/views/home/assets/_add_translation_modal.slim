@@ -24,3 +24,10 @@
         = select_tag 'new_project_asset_id', options_for_select(projects.map { |p| [p.name, new_project_asset_path(p.to_param)] })
 
         = link_to 'REQUEST', 'javascript: void(0);', class: 'button primary', id: 'request_new_project_asset_button'
+- else
+  .row
+    .modal.seven.columns#add-asset-translation
+      a.close ×
+      h2 Translation Request
+      .modal-body
+        strong Sorry, you must have an Asset Project created before requesting a translation.

@@ -68,7 +68,7 @@ gem 'mustache'
 gem 'html_validation'
 gem 'diff-lcs'
 gem 'rubyXL', github: 'weshatheleopard/rubyXL'
-gem 'docx', github: 'visoft/docx'
+gem 'docx', '0.3.1', github: 'visoft/docx'
 
 # EXPORTING
 gem 'libarchive'

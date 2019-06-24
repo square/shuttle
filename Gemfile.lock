@@ -37,9 +37,9 @@ GIT
 
 GIT
   remote: https://github.com/visoft/docx.git
-  revision: c7c5c01ad08487b6d39aeaceb07f3ae2552745c5
+  revision: e01969d8cd2f740c6fcf1d2d13a0d70c085a3277
   specs:
-    docx (0.3.0)
+    docx (0.3.1)
       nokogiri (~> 1.8, >= 1.8.1)
       rubyzip (~> 1.2, >= 1.2.1)
 
@@ -498,7 +498,7 @@ DEPENDENCIES
   database_cleaner
   devise
   diff-lcs
-  docx!
+  docx (= 0.3.1)!
   dropzonejs-rails
   elasticsearch (< 6.0)
   elasticsearch-dsl

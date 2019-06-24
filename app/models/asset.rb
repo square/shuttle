@@ -15,7 +15,7 @@
 class Asset < ActiveRecord::Base
   belongs_to :project,    inverse_of: :assets
   belongs_to :user
-  has_many :assets_keys, inverse_of: :asset, dependent: :delete_all
+  has_many :assets_keys, inverse_of: :asset, dependent: :destroy
   has_many :keys, through: :assets_keys
   has_many :translations, through: :keys
 
