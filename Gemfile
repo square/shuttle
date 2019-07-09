@@ -81,9 +81,16 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-# source 'https://gems.contribsys.com' do
-#   gem 'sidekiq-pro', '= 3.4.5'
-# end
+if system('curl -i https://gems.vip.global.square/private > /dev/null') != false
+  source 'https://gems.vip.global.square/private' do
+    gem 'sidekiq-pro', '= 3.4.5'
+  end
+else
+  source 'https://gems.contribsys.com' do
+    gem 'sidekiq-pro', '= 3.4.5'
+  end
+end
+
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
