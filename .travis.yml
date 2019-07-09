@@ -16,10 +16,12 @@ rvm:
 cache: bundler
 env:
   - RAILS_ENV=test
+  - SIDEKIQ_SOURCE=https://gems.contribsys.com
 before_install:
   - psql -c 'create database travis_ci_test;' -U postgres
   - cp config/database.travis.yml config/database.yml
   - git --git-dir=spec/fixtures/repository.git init --bare
+  - bundle config gems.contribsys.com $BUNDLE_GEMS__CONTRIBSYS__COM
 script:
   - bundle exec rake db:test:prepare
   - bundle exec rake chewy:reset
