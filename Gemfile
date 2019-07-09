@@ -2,6 +2,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 if system('curl -s https://gems.vip.global.square > /dev/null') != false
   source 'https://gems.vip.global.square'
+  source 'https://rubygems.org'
 else
   source 'https://rubygems.org'
 end

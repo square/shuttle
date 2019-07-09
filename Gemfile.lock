@@ -53,6 +53,7 @@ GIT
 
 GEM
   remote: https://gems.vip.global.square/
+  remote: https://rubygems.org/
   remote: https://gems.vip.global.square/private/
   remote: https://rails-assets.org/
   specs:
