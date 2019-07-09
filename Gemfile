@@ -1,6 +1,5 @@
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-source 'https://gems.vip.global.square'
 source 'https://rubygems.org'
 
 ruby '2.4.6'
@@ -82,9 +81,9 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-source 'https://gems.vip.global.square/private' do
+# source 'https://gems.vip.global.square/private' do
   gem 'sidekiq-pro', '= 3.4.5'
-end
+# end
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
