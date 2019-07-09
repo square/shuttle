@@ -1,15 +1,15 @@
 @import "base/vars";
 @import "css3-mixins";
 
-// ----- RESPONSIVE
-
-// @include ipad-and-larger {
-//   .compact-only { display: none; }
-// }
-
-// @include iphone-landscape-and-smaller {
-//   .full-size-only { display: none; }
-// }
+@import url("https://rsms.me/inter/inter.css");
+*, html {
+  font-family: "Inter", sans-serif;
+}
+@supports (font-variation-settings: normal) {
+  html {
+    font-family: "Inter var", sans-serif;
+  }
+}
 
 // ----- LAYOUT
 
@@ -21,9 +21,8 @@ html {
 body {
   height: 100%;
   background-color: white;
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: $base-font-size;
-  line-height: 21px;
+  line-height: $base-line-height;
 }
 
 .content-container {
@@ -35,7 +34,7 @@ body {
 .header {
   h1 {
     display: inline-block;
-    color: $gray3;
+    color: $gray2;
     margin-top: 0px;
   }
 
@@ -51,7 +50,6 @@ body {
 
   h6 {
     color: $gray4;
-    text-transform: uppercase;
     margin-left: 30px;
     line-height: 10px;
     margin-top: 0px;
@@ -60,15 +58,13 @@ body {
 
 .border {
   border: 1px solid $gray5;
-  overflow-y: scroll;
 }
 
 hr.divider {
   border: 0;
   height: 1px;
   background-color: $gray5;
-  margin-top: 5px;
-  margin-bottom: 40px;
+  margin: 5px 0 10px;
 }
 
 .hide {

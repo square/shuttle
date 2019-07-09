@@ -9,20 +9,18 @@ addons:
 services:
   - postgresql
   - redis
+  - elasticsearch
 language: ruby
 rvm:
-  - 2.3.1
+  - 2.4.6
 cache: bundler
 env:
   - RAILS_ENV=test
 before_install:
-  - curl -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.2.1.deb && sudo dpkg -i --force-confnew elasticsearch-1.2.1.deb && sudo service elasticsearch restart
   - psql -c 'create database travis_ci_test;' -U postgres
   - cp config/database.travis.yml config/database.yml
   - git --git-dir=spec/fixtures/repository.git init --bare
 script:
   - bundle exec rake db:test:prepare
-  - bundle exec rake environment elasticsearch:import:model FORCE=y CLASS=Commit
-  - bundle exec rake environment elasticsearch:import:model FORCE=y CLASS=Key
-  - bundle exec rake environment elasticsearch:import:model FORCE=y CLASS=Translation
+  - bundle exec rake chewy:reset
   - bundle exec rspec

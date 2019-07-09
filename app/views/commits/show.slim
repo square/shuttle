@@ -24,7 +24,7 @@
       .nine.columns
 
         .control-group
-          = f.label 'SHA', class: 'control-label info'
+          = f.label 'SHA', class: 'control-label info revision'
           .controls
             = link_to @commit.revision, @commit.git_url
         .control-group
@@ -43,6 +43,16 @@
 
         br
 
+        .control-group
+          = f.label :priority, class: 'control-label'
+          .controls
+            - if current_user.admin?
+              = f.select :priority, t("models.commit.priority").to_a.map(&:reverse).unshift(['-', nil]), {}, class: 'styled'
+            - else
+              - if @commit.priority
+                = t("models.commit.priority")[@commit.priority]
+              - else
+                | -
         .control-group
           = f.label :due_date, class: 'control-label'
           .controls

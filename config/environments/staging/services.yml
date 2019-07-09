@@ -1,0 +1,5 @@
+# Will be used to determine the url of a commit
+github_enterprise_domain: "bitbucket-staging.sqcorp.co"
+
+# Will be used to determine the url of a commit
+stash_domain: "bitbucket-staging.sqcorp.co"

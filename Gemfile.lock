@@ -1,12 +1,4 @@
 GIT
-  remote: https://github.com/brandonweeks/rugged.git
-  revision: cdabe1e11ab85428c380df21cbd3117ca232a865
-  tag: v0.24.0-square0
-  submodules: true
-  specs:
-    rugged (0.24.0)
-
-GIT
   remote: https://github.com/mhfs/sidekiq-failures.git
   revision: ade3c0035e8b7df0821a71328fe31dc706226aeb
   specs:
@@ -22,6 +14,14 @@ GIT
       execjs (>= 1.2.9)
       sprockets (>= 2.0.3)
       tilt (>= 1.3.3)
+
+GIT
+  remote: https://github.com/squarit/rugged.git
+  revision: e521d4903a624f119e77c7e66cf24a34687f9b33
+  tag: v0.27.2-square0
+  submodules: true
+  specs:
+    rugged (0.27.2)
 
 GIT
   remote: https://github.com/thoughtbot/paperclip.git
@@ -52,8 +52,9 @@ GIT
       rubyzip (>= 1.1.6)
 
 GEM
-  remote: https://rubygems.org/
-  remote: https://gems.contribsys.com/
+  remote: https://gems.vip.global.square/
+  remote: https://gems.vip.global.square/private/
+  remote: https://rails-assets.org/
   specs:
     CFPropertyList (2.3.6)
     actionmailer (4.2.10)
@@ -101,6 +102,7 @@ GEM
     arel (6.0.4)
     autoprefixer-rails (7.2.4)
       execjs
+    awesome_print (1.8.0)
     aws-sdk (2.10.115)
       aws-sdk-resources (= 2.10.115)
     aws-sdk-core (2.10.115)
@@ -110,6 +112,7 @@ GEM
       aws-sdk-core (= 2.10.115)
     aws-sigv4 (1.0.2)
     bcrypt (3.1.11)
+    bcrypt_pbkdf (1.0.1)
     better_errors (2.4.0)
       coderay (>= 1.0.0)
       erubi (>= 1.0.0)
@@ -123,6 +126,7 @@ GEM
       sass (>= 3.5.2)
     builder (3.2.3)
     byebug (10.0.1)
+    camertron-eprun (1.1.1)
     capistrano (3.10.1)
       airbrussh (>= 1.0.0)
       i18n
@@ -147,7 +151,12 @@ GEM
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (>= 2.0, < 4.0)
+    chewy (5.0.0)
+      activesupport (>= 4.0)
+      elasticsearch (>= 2.0.0)
+      elasticsearch-dsl
     chronic (0.10.2)
+    cldr-plurals-runtime-rb (1.0.1)
     climate_control (0.2.0)
     cocaine (0.5.8)
       climate_control (>= 0.0.3, < 1.0)
@@ -172,21 +181,19 @@ GEM
       railties (>= 4.1.0, < 5.2)
       responders
       warden (~> 1.2.3)
+    devise_security_extension (0.9.2)
+      devise (>= 2.0.0)
+      rails (>= 3.1.1)
     diff-lcs (1.3)
     dropzonejs-rails (0.8.2)
       rails (> 3.1)
-    elasticsearch (5.0.4)
-      elasticsearch-api (= 5.0.4)
-      elasticsearch-transport (= 5.0.4)
-    elasticsearch-api (5.0.4)
+    elasticsearch (6.1.0)
+      elasticsearch-api (= 6.1.0)
+      elasticsearch-transport (= 6.1.0)
+    elasticsearch-api (6.1.0)
       multi_json
-    elasticsearch-dsl (0.1.5)
-    elasticsearch-model (5.0.2)
-      activesupport (> 3)
-      elasticsearch (~> 5)
-      hashie
-    elasticsearch-rails (5.0.2)
-    elasticsearch-transport (5.0.4)
+    elasticsearch-dsl (0.1.6)
+    elasticsearch-transport (6.1.0)
       faraday
       multi_json
     erubi (1.7.0)
@@ -223,7 +230,6 @@ GEM
       guard (~> 2.1)
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
-    hashie (3.5.7)
     html_validation (1.1.5)
     httparty (0.15.6)
       multi_xml (>= 0.5.2)
@@ -258,6 +264,8 @@ GEM
     lumberjack (1.0.13)
     mail (2.7.0)
       mini_mime (>= 0.1.1)
+    message_format (0.0.5)
+      twitter_cldr (~> 4.0)
     method_source (0.9.0)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
@@ -274,6 +282,7 @@ GEM
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (4.2.0)
+    newrelic_rpm (6.3.0.355)
     nokogiri (1.10.3)
       mini_portile2 (~> 2.4.0)
     notiffany (0.1.1)
@@ -316,6 +325,7 @@ GEM
       bundler (>= 1.3.0, < 2.0)
       railties (= 4.2.10)
       sprockets-rails
+    rails-assets-raven-js (3.20.1)
     rails-deprecated_sanitizer (1.0.3)
       activesupport (>= 4.2.0.alpha)
     rails-dom-testing (1.0.9)
@@ -331,10 +341,14 @@ GEM
       activesupport (= 4.2.10)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
-    rake (12.3.0)
+    rake (12.3.1)
     rb-fsevent (0.10.2)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
+    rbnacl (4.0.2)
+      ffi
+    rbnacl-libsodium (1.0.16)
+      rbnacl (>= 3.0.1)
     redcarpet (3.4.0)
     redis (3.3.5)
     redis-actionpack (5.0.2)
@@ -408,6 +422,8 @@ GEM
       sprockets (>= 2.8, < 4.0)
       sprockets-rails (>= 2.0, < 4.0)
       tilt (>= 1.1, < 3)
+    sentry-raven (2.7.1)
+      faraday (>= 0.7.6, < 1.0)
     sexp_processor (4.10.0)
     shellany (0.0.1)
     sidekiq (4.2.10)
@@ -457,6 +473,10 @@ GEM
       actionpack (>= 3.1)
       jquery-rails
       railties (>= 3.1)
+    twitter_cldr (4.4.4)
+      camertron-eprun
+      cldr-plurals-runtime-rb (~> 1.0)
+      tzinfo
     tzinfo (1.2.4)
       thread_safe (~> 0.1)
     uea-stemmer (0.10.3)
@@ -481,29 +501,30 @@ DEPENDENCIES
   active_record_union
   after-commit-on-action
   autoprefixer-rails
+  awesome_print
   aws-sdk (< 3)
+  bcrypt_pbkdf (< 2.0)
   better_errors
   binding_of_caller
   boolean
   bootstrap
+  bundler
   capistrano
   capistrano-bundler
   capistrano-rails
   capistrano-rvm
   capistrano-sidekiq
   capybara
+  chewy
   coffee-rails
   coffee-script
   configoro
   database_cleaner
   devise
+  devise_security_extension
   diff-lcs
   docx (= 0.3.1)!
   dropzonejs-rails
-  elasticsearch (< 6.0)
-  elasticsearch-dsl
-  elasticsearch-model
-  elasticsearch-rails
   execjs
   factory_bot_rails
   faker
@@ -518,7 +539,9 @@ DEPENDENCIES
   json
   kaminari
   libarchive
+  message_format (~> 0.0.5)
   mustache
+  newrelic_rpm
   nokogiri
   paperclip!
   parslet
@@ -529,7 +552,10 @@ DEPENDENCIES
   rack-attack
   rack-cache
   rails (= 4.2.10)
+  rails-assets-raven-js!
   rails-observers
+  rbnacl (< 5.0)
+  rbnacl-libsodium
   redcarpet
   redis-mutex
   redis-namespace
@@ -541,6 +567,7 @@ DEPENDENCIES
   rugged!
   safemode
   sass-rails
+  sentry-raven
   sidekiq-failures!
   sidekiq-pro (= 3.4.5)!
   similar_text
@@ -561,7 +588,7 @@ DEPENDENCIES
   yard
 
 RUBY VERSION
-   ruby 2.3.1p112
+   ruby 2.4.6p354
 
 BUNDLED WITH
-   1.16.1
+   1.17.3

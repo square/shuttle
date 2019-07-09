@@ -14,8 +14,10 @@
 
 # Contains landing pages appropriate for each of the User roles.
 
-class HomeController < ApplicationController
+require 'csv'
+require 'date'
 
+class HomeController < ApplicationController
   # Typical number of commits to show per page.
   PER_PAGE = 15
 
@@ -52,5 +54,101 @@ class HomeController < ApplicationController
     @groups = items_finder.find_groups
     @assets = items_finder.find_assets
     @presenter = HomeIndexPresenter.new(@commits, @articles, @groups, @assets, @form[:filter__locales])
+  end
+
+  def csv
+    # manually setting how many rows to download
+    params[:limit] = 1000
+    @form = HomeIndexForm.new(params, cookies)
+    type = params[:type]
+    items_finder = HomeIndexItemsFinder.new(current_user, @form)
+    @commits = items_finder.find_commits
+    @articles = items_finder.find_articles
+    @groups = items_finder.find_groups
+    @assets = items_finder.find_assets
+    @items = items_finder.public_send("find_#{type}s")
+    @presenter = HomeIndexPresenter.new(@commits, @articles, @groups, @assets, @form[:filter__locales])
+    csv_file = CSV.generate do |csv|
+      identifier = type == 'commit' ? 'sha' : 'name'
+      if identifier == 'sha'
+        csv << ['Project',
+                'SHA',
+                'Created',
+                'Due Date',
+                'Priority',
+                'New Strings',
+                'New Words',
+                'Review Strings',
+                'Review Words',
+                'Translate Link',
+                'Requester Email']
+        @items.each do |item|
+          project = Project.find item.project_id
+          display_created_date = "#{item.created_at.month}/#{item.created_at.day}/#{item.created_at.year}"
+          unless item.due_date.nil?
+            display_due_date = "#{item.due_date.month}/#{item.due_date.day}/#{item.due_date.year}"
+          end
+          strings_to_translate = @presenter.item_stat(item, :translations, :new)
+          strings_to_review = @presenter.item_stat(item, :translations, :pending)
+          words_to_translate = @presenter.item_stat(item, :words, :new)
+          words_to_review = @presenter.item_stat(item, :words, :pending)
+          commit_url = project_commit_url(item.project, item)
+          requester_email = item.user.email if item.user
+          csv << [project.name,
+                  commit_url,
+                  display_created_date,
+                  display_due_date,
+                  item.priority,
+                  strings_to_translate,
+                  words_to_review,
+                  strings_to_review,
+                  words_to_translate,
+                  project_commit_url(project, item),
+                  requester_email]
+        end
+      else
+        csv << ['Project',
+                'Name',
+                'Created',
+                'Due Date',
+                'Priority',
+                'Groups',
+                'Review Strings',
+                'Review Words',
+                'New Strings',
+                'New Words',
+                'Translate Link',
+                'Requester Email']
+        @items.each do |item|
+          project = Project.find item.project_id
+          display_created_date = "#{item.created_at.month}/#{item.created_at.day}/#{item.created_at.year}"
+          unless item.due_date.nil?
+            display_due_date = "#{item.due_date.month}/#{item.due_date.day}/#{item.due_date.year}"
+          end
+          groups = item.groups.count
+          strings_to_translate = @presenter.item_stat(item, :translations, :new)
+          strings_to_review = @presenter.item_stat(item, :translations, :pending)
+          words_to_translate = @presenter.item_stat(item, :words, :new)
+          words_to_review = @presenter.item_stat(item, :words, :pending)
+          article_link = api_v1_project_article_url(item.project.id, item.name)
+          requester_email = item.email
+          csv << [project.name,
+                  article_link,
+                  display_created_date,
+                  display_due_date,
+                  item.priority,
+                  groups,
+                  strings_to_translate,
+                  words_to_translate,
+                  strings_to_review,
+                  words_to_review,
+                  project_commit_url(project, item),
+                  requester_email]
+        end
+      end
+    end
+    send_data csv_file, type: 'text/plain',
+                        filename: "#{type}s.csv",
+                        disposition: 'attachment'
   end
 end

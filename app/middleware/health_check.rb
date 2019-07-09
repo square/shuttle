@@ -12,7 +12,7 @@ class HealthCheck
     if env['ORIGINAL_FULLPATH'] == '/_status'
       db = Project.connection.select_all('SELECT CURRENT_TIME') rescue nil
       redis = (Shuttle::Redis.get('s') || true) rescue nil
-      elasticsearch = Elasticsearch::Model.search({size: 1}, Translation).results.first rescue nil
+      elasticsearch = TranslationsIndex.limit(1).first rescue nil
       status = (db && redis && elasticsearch) ? 'OK' : 'error'
 
       json = {

@@ -54,6 +54,14 @@ class TranslationDiff
   # @return [Array<String>] The two strings being compared, formatted to
   #   highlight the differences.
   def diff(joiner="...")
+    if Shuttle::Configuration.features[:skip_levenshtein_distance_diff]
+      # see https://jira.sqcorp.co/browse/SHUTTLE-1138
+      return [
+        (@str1 && @str1.length > 100) ? (@str1[0...100] + '...') : @str1,
+        (@str2 && @str2.length > 100) ? (@str2[0...100] + '...') : @str2,
+      ]
+    end
+
     # Base cases
     return [@str1, @str2] unless @str1.present? || @str2.present?
     return @diff if @diff
@@ -83,6 +91,11 @@ class TranslationDiff
   #   visually align words that are matched according to minimal Levenshtein
   #   distance
   def aligned
+    if Shuttle::Configuration.features[:skip_levenshtein_distance_diff]
+      # see https://jira.sqcorp.co/browse/SHUTTLE-1138
+      return [@str1, @str2]
+    end
+
     @aligned ||= [chunks.map { |m| m.one }.join(" "), chunks.map { |m| m.two }.join(" ")]
   end
 

@@ -18,7 +18,6 @@ RSpec.describe HomeController do
   before :each do
     allow_any_instance_of(Article).to receive(:import!) # prevent auto import
 
-    reset_elastic_search
     @request.env['devise.mapping'] = Devise.mappings[:user]
     @user = FactoryBot.create(:user, :confirmed, role: 'monitor')
     sign_in @user
@@ -38,7 +37,8 @@ RSpec.describe HomeController do
     # red herring: loading commit
     FactoryBot.create(:commit, project: @project, loading: true)
 
-    regenerate_elastic_search_indexes
+    CommitsIndex.reset!
+    KeysIndex.reset!
   end
 
   context "[when 'remove duplicates' filter is selected]" do
@@ -56,7 +56,8 @@ RSpec.describe HomeController do
       commit1.keys << key2
       commit2.keys << key2
 
-      regenerate_elastic_search_indexes
+      CommitsIndex.reset!
+      KeysIndex.reset!
 
       get :index, { commits_filter__hide_duplicates: 'true' }
       expect(assigns(:commits).map(&:id)).to eq [commit3.id, commit2.id, @commit.id]
@@ -98,7 +99,7 @@ RSpec.describe HomeController do
       hidden_article = FactoryBot.create(:article, project: @project, hidden: true)
       hidden_group = FactoryBot.create(:group, name: 'hidden-group', project: @project, hidden: true)
 
-      get :index, { filter__status: 'hidden' }
+      get :index, { filter__status: 'hidden', sort__field: 'create' }
       expect(assigns(:articles).map(&:id)).to eq([hidden_article.id])
       expect(assigns(:groups).map(&:id)).to eq([hidden_group.id])
     end
@@ -108,7 +109,7 @@ RSpec.describe HomeController do
     it 'should return all translations in all projects' do
       commit1 = FactoryBot.create(:commit, project: @project, ready: false)
       commit2 = FactoryBot.create(:commit, project: @project)
-      regenerate_elastic_search_indexes
+      CommitsIndex.reset!
 
       get :index, { filter__status: 'all', commits_filter__project_id: 'all' }
       expect(assigns(:commits).map(&:id)).to eq([commit2.id, commit1.id, @commit.id])

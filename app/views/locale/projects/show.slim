@@ -29,21 +29,36 @@
     = button_tag 'Translate', id: 'translate-link', class: 'submit', type: 'button'
   h1
     => @project.name
-    - if @presenter.form[:article_id]
+    - if @presenter.form[:commit]&.present?
+      strong &nbsp;>&nbsp;
+      | Commit
+      strong &nbsp;>&nbsp;
+      small.monospace
+        = link_to @presenter.selected_commit.revision_prefix, project_commit_url(@project, @presenter.selected_commit)
+    - elsif @presenter.form[:article_id]&.present?
+      strong &nbsp;>&nbsp;
+      | Article
+      strong &nbsp;>&nbsp;
       small
-        = link_to @presenter.selected_article.name, api_v1_project_article_path(@project.id, @presenter.selected_article.name)
-    - elsif @presenter.form[:group]
+        = link_to truncate(@presenter.selected_article.name), api_v1_project_article_path(@project.id, @presenter.selected_article.name)
+    - elsif @presenter.form[:asset_id]&.present?
+      strong &nbsp;>&nbsp;
+      | Asset
+      strong &nbsp;>&nbsp;
       small
-        = @presenter.form[:group]
+        = link_to truncate(@presenter.selected_asset.name), project_asset_url(@project, @presenter.selected_asset)
+    - elsif @presenter.form[:group]&.present?
+      strong &nbsp;>&nbsp;
+      | Group
+      strong &nbsp;>&nbsp;
+      small
+        = link_to truncate(@presenter.selected_group.display_name), api_v1_project_group_url(@project.id, @presenter.selected_group.name)
 
-  h6
+  .subtitle
     strong
-      - last_commit = @project.commits.order('committed_at DESC').first
-      - if last_commit
+      - if @presenter.form[:commit]&.present?
         | Last imported&nbsp;
-        = "#{time_ago_in_words(last_commit.committed_at)} ago"
-        |  /
-        = "#{last_commit.revision_prefix}"
+        = "#{time_ago_in_words(@presenter.selected_commit.committed_at)} ago"
       - else
         | Never imported before
 
@@ -61,10 +76,10 @@ div
 
         - if @project.commit?
           = select_tag 'commit', options_for_select(@presenter.selectable_commits, @presenter.selected_commit.try!(:revision))
-        - elsif @presenter.form[:article_id]
+        - elsif @presenter.form[:article_id]&.present?
           = hidden_field_tag 'article_id', @presenter.selected_article.id
           = select_tag 'section_id', options_for_select(@presenter.selectable_sections, @presenter.selected_section.try!(:id))
-        - elsif @presenter.form[:group]
+        - elsif @presenter.form[:group]&.present?
           = hidden_field_tag 'group', @presenter.form[:group]
         - elsif @project.asset?
           = hidden_field_tag 'asset_id', @presenter.selected_asset.id

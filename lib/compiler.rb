@@ -60,15 +60,16 @@ class Compiler
 
     io = StringIO.new
     exporter = exporter.new(@commit)
+    exporter.override_encoding = options[:encoding]
     exporter.export io, *locales_for_export(*locales, options[:partial])
     io.rewind
 
     filename = locales.size == 1 ? locales.first.rfc5646 : 'manifest'
     return File.new(
         io,
-        exporter.class.character_encoding,
+        exporter.active_encoding,
         "#{filename}.#{exporter.class.file_extension}",
-        exporter.class.mime_type
+        exporter.mime_type
     )
   end
 

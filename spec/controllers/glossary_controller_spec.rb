@@ -17,8 +17,6 @@ require 'rails_helper'
 RSpec.describe GlossaryController do
   describe '#index' do
     before :each do
-      reset_elastic_search
-
       update_date = DateTime.new(2014, 1, 1)
       @user = FactoryBot.create(:user, :confirmed, role: 'translator')
       @start_date = (update_date - 1.day).strftime('%m/%d/%Y')
@@ -49,7 +47,7 @@ RSpec.describe GlossaryController do
         end
       end
 
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user

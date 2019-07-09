@@ -7,4 +7,4 @@ PIDFILE="tmp/elasticsearch.pid"
 ./script/elasticsearch-cleanup
 
 export HOSTNAME=localhost
-./vendor/shuttle-es/elasticsearch-1.2.1/bin/elasticsearch -p $PIDFILE
+./vendor/shuttle-es/elasticsearch-5.6.16/bin/elasticsearch -p $PIDFILE

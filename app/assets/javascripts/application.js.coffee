@@ -68,6 +68,8 @@
 #= require popper
 #= require bootstrap
 #=
+#= require raven-js
+#
 #= require_tree ../templates
 #= require_tree ./application
 

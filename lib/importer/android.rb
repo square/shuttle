@@ -53,8 +53,9 @@ module Importer
         end
 
         context = find_comment(tag).try!(:content)
+        content = has_cdata?(tag) ? tag.children[0].to_s : tag.content
         add_string "#{file.path}:#{tag['name']}",
-                            unescape(strip(tag.content)),
+                            unescape(strip(content)),
                             context:      clean_comment(context),
                             original_key: tag['name']
       end
@@ -141,6 +142,14 @@ module Importer
       end
 
       return result
+    end
+
+    def has_cdata?(tag)
+      tag.children.each do |child|
+          if child.to_s.include?('CDATA')
+            return true
+          end
+      end
     end
 
     def find_comment(tag)

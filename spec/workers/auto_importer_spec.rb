@@ -17,7 +17,7 @@ require 'rails_helper'
 RSpec.describe AutoImporter do
   describe "#perform" do
     context "[watched branches]" do
-      it "calls ProjectAutoImporter on the projects with watched_branches, removes the watched branch if it doesn't exist" do
+      it "calls ProjectAutoImporter on the projects with watched_branches, does not remove the watched branch if it doesn't exist" do
         project1 = FactoryBot.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)), repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
         project2 = FactoryBot.create(:project, watched_branches: [])
 
@@ -28,7 +28,7 @@ RSpec.describe AutoImporter do
 
         expect { AutoImporter.new.perform }.to_not raise_error
 
-        expect(project1.reload.watched_branches).to eql(%w(master))
+        expect(project1.reload.watched_branches).to eql(%w(master non_existent_branch))
         expect(project2.reload.watched_branches).to be_blank
       end
     end
@@ -47,12 +47,12 @@ RSpec.describe AutoImporter::ProjectAutoImporter do
   describe "#perform" do
     context "[watched branches]" do
       context "[rescue Git::CommitNotFoundError]" do
-        it "removes a watched branch if the branch doesn't exist anymore" do
+        it "does not remove a watched branch if the branch doesn't exist anymore" do
           project = FactoryBot.create(:project, skip_imports: (Importer::Base.implementations.map(&:ident) - %w(yaml)), repository_url: Rails.root.join('spec', 'fixtures', 'repository.git').to_s, watched_branches: %w(master non_existent_branch))
 
           expect(project.watched_branches).to eql(%w(master non_existent_branch))
           expect { AutoImporter::ProjectAutoImporter.new.perform(project.id) }.to_not raise_error
-          expect(project.reload.watched_branches).to eql(%w(master))
+          expect(project.reload.watched_branches).to eql(%w(master non_existent_branch))
         end
       end
     end

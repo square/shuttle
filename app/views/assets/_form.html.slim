@@ -44,7 +44,13 @@
         .control-group
           = f.label :priority, class: 'control-label'
           .controls
-            = @asset.priority || '-'
+            - if current_user.admin?
+              = f.select :priority, t("models.asset.priority").to_a.map(&:reverse).unshift(['-', nil]), {}, class: 'styled'
+            - else
+              - if @asset.priority
+                = t("models.asset.priority")[@asset.priority]
+              - else
+                | -
 
         .control-group
           = f.label :due_date, class: 'control-label'
@@ -94,7 +100,7 @@
             .qtip-tooltip#asset-description So that translators understand the context!
 
   .form-actions
-    = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
+    = f.submit class: 'primary', value: 'Save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
     button.default href=(@asset.persisted? ? project_asset_path(@project, @asset) : root_path) Cancel
 
 

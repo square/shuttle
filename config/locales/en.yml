@@ -166,10 +166,14 @@ en:
         header: Commits
       articles:
         header: Articles
+        groups: Groups
+        groups_cell: "%{pending_count} (%{linked_count})"
       assets:
         header: Assets
       groups:
         header: Article Groups
+        articles: Articles
+        articles_cell: "%{pending_count} (%{linked_count})"
     assets:
       project_not_found: Invalid project
       asset_not_found: Asset doesn't exist
@@ -302,6 +306,7 @@ en:
     Android: "{android}"
     Erb: "<%= ERb %>"
     Html: "<HTML>"
+    IntlMessageFormat: "{ICU Message}"
     MessageFormat: "Java MessageFormat [{0}]"
     Mustache: "{{Mustache}}"
     Printf: "printf() [%s]"
@@ -408,3 +413,8 @@ en:
       request_screenshot:
         subject: "[Shuttle] Requesting screenshots for commit %{sha}"
         success: "Successfully requested screenshots for commit %{sha}"
+    fencer_validation:
+      suspicious_translation_found:
+        subject:
+          production: "[ACTION REQUIRED] [Shuttle] Found suspicious source strings"
+          staging: "[NO ACTION REQUIRED] [Shuttle Staging] Found suspicious source strings"

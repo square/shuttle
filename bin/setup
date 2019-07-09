@@ -21,9 +21,7 @@ Dir.chdir APP_ROOT do
   system "bin/rake db:setup"
 
   puts "\n== Preparing ElasticSearch =="
-  system 'bin/rake', 'elasticsearch:import:model', 'FORCE=y', 'CLASS=Commit'
-  system 'bin/rake', 'elasticsearch:import:model', 'FORCE=y', 'CLASS=Key'
-  system 'bin/rake', 'elasticsearch:import:model', 'FORCE=y', 'CLASS=Translation'
+  system 'bin/rake', 'chewy:reset'
 
   puts "\n== Removing old logs and tempfiles =="
   system "rm -f log/*"

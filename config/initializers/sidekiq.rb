@@ -25,6 +25,7 @@ configure_sidekiq = -> do
   Sidekiq.configure_client do |config|
     config.redis = redis
   end
+
   Sidekiq.configure_server do |config|
     begin
       require 'sidekiq/pro/reliable_fetch'
@@ -32,6 +33,11 @@ configure_sidekiq = -> do
       # no sidekiq pro
     end
     config.redis = redis
+
+    require 'chewy_atomic'
+    config.server_middleware do |chain|
+      chain.add ChewyAtomic
+    end
   end
 end
 

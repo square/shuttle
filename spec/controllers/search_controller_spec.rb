@@ -17,8 +17,6 @@ require 'rails_helper'
 RSpec.describe SearchController do
   describe "#translations" do
     before :each do
-      reset_elastic_search
-
       update_date = DateTime.new(2014, 1, 1)
       @user = FactoryBot.create(:user, :confirmed, role: 'translator')
       @start_date = (update_date - 1.day).strftime('%m/%d/%Y')
@@ -42,7 +40,7 @@ RSpec.describe SearchController do
         end
       end
 
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
@@ -50,7 +48,7 @@ RSpec.describe SearchController do
 
     it "should filter by page" do
       FactoryBot.create_list :translation, 50
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :translations, page: '2'
       results = assigns(:results)
@@ -119,13 +117,12 @@ RSpec.describe SearchController do
 
   describe '#keys' do
     before :each do
-      reset_elastic_search
       @user    = FactoryBot.create(:user, :confirmed, role: 'translator')
       @project = FactoryBot.create(:project)
 
       5.times { |i| FactoryBot.create :key, project: @project, key: "t1_n#{i}" }
       5.times { |i| FactoryBot.create :key, project: @project, key: "t2_n#{i}" }
-      regenerate_elastic_search_indexes
+      KeysIndex.reset!
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
@@ -141,7 +138,7 @@ RSpec.describe SearchController do
 
     it "should exlcude hidden key" do
       FactoryBot.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
-      regenerate_elastic_search_indexes
+      KeysIndex.reset!
 
       get :keys, project_id: @project.id, format: 'json'
       expect(response.status).to eql(200)
@@ -151,9 +148,9 @@ RSpec.describe SearchController do
 
     it "should search for hidden key only" do
       FactoryBot.create(:key, project: @project, key: 'hide me', hidden_in_search: true)
-      regenerate_elastic_search_indexes
+      KeysIndex.reset!
 
-      get :keys, project_id: @project.id, hidden_in_search: '', format: 'json'
+      get :keys, project_id: @project.id, hidden_in_search: '1', format: 'json'
       expect(response.status).to eql(200)
       results = JSON.parse(response.body)
       expect(results.size).to eq(1)
@@ -210,8 +207,6 @@ RSpec.describe SearchController do
     let(:prefix3) { "abc111" }
 
     before :each do
-      reset_elastic_search
-
       @user     = FactoryBot.create(:user, :confirmed, role: "translator")
       @project1 = FactoryBot.create(:project)
       @project2 = FactoryBot.create(:project)
@@ -221,7 +216,7 @@ RSpec.describe SearchController do
       FactoryBot.create :commit, project: @project1, revision: finish_sha('abc111')
       FactoryBot.create :commit, project: @project2, revision: finish_sha('abc111')
 
-      regenerate_elastic_search_indexes
+      CommitsIndex.reset!
     end
 
     before :each do

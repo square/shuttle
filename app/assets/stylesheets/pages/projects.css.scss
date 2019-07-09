@@ -35,10 +35,9 @@ body.projects {
       tr {
         text-align: left;
         font-weight: bold;
-        text-transform: uppercase;
-
         th {
           padding: 15px;
+          min-width: 100px;
         }
       }
     }
@@ -87,7 +86,6 @@ body.projects {
   &#projects-new,
   &#projects-update {
     .eight.columns {
-      margin-top: -30px;
       padding: 30px;
       box-sizing: border-box;
     }

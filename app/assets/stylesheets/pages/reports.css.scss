@@ -1,0 +1,36 @@
+.day {
+    border: 1px solid rgba(128, 128, 128, 0.212);
+    border-radius: 4px;
+    padding: 10px; 
+    margin: 10px 0;
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .report-buttons {
+        display: flex;
+        display: flex;
+        justify-content: space-around;
+        a {
+            border: 1px solid;
+            border-radius: 3px;
+            padding: 5px 13px;
+            box-shadow: 3px 3px 0px rebeccapurple;
+            transition: 0.3s box-shadow;
+            &:hover {
+                box-shadow: 1px 1px 0px rebeccapurple;
+                text-decoration: none;
+            }
+            &:active {
+                box-shadow: inset 2px 2px 0 rebeccapurple;
+            }
+        }
+    }
+    .date-picker {
+        width: 380px;
+        margin: 10px auto 30px;
+        label {
+            margin-right: 10px;
+        }
+    }
+}

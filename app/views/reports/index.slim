@@ -1,0 +1,57 @@
+/ Copyright 2014 Square Inc.
+/
+/    Licensed under the Apache License, Version 2.0 (the "License");
+/    you may not use this file except in compliance with the License.
+/    You may obtain a copy of the License at
+/
+/        http://www.apache.org/licenses/LICENSE-2.0
+/
+/    Unless required by applicable law or agreed to in writing, software
+/    distributed under the License is distributed on an "AS IS" BASIS,
+/    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/    See the License for the specific language governing permissions and
+/    limitations under the License.
+
+- content_for :shuttle_title do
+  = "Reports - Shuttle"
+- content_for :file_name do
+  = 'views/reports/index'
+
+
+.header
+    h1 Reports based on job status
+
+
+.day
+    h2 =@today
+    div.report-buttons
+        a href="/reports/download/incoming/#{@today}" ↙️ Incoming jobs report
+        a href="/reports/download/pending/#{@today}" ⏳ Pending jobs report
+        a href="/reports/download/completed/#{@today}" ✓ Completed jobs report
+
+.day
+    h2 =@yesterday
+    div.report-buttons
+        a href="/reports/download/incoming/#{@yesterday}" ↙️ Incoming jobs report
+        a href="/reports/download/pending/#{@yesterday}" ⏳ Pending jobs report
+        a href="/reports/download/completed/#{@yesterday}" ✓ Completed jobs report
+
+.day
+    h2 Custom date in the past 30 days
+    .date-picker.center
+        label for="pickedDate" Pick a date and then a report type
+        input type="date" id="pickedDate" name="pickedDate" value="#{@today}" min="#{@today - 30}" max="#{@today}"
+    div.report-buttons.custom-dates
+        a href="#" data-type="incoming" ↙️ Incoming jobs report
+        a href="#" data-type="pending" ⏳ Pending jobs report
+        a href="#" data-type="completed" ✓ Completed jobs report
+
+javascript:
+    var buttons = document.querySelectorAll('.custom-dates a')
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].addEventListener('click', function(event) {
+            var date = document.getElementById('pickedDate').value;
+            var reportType = event.target.dataset.type;
+            window.location = '/reports/download/' + reportType + '/' + date;
+        });
+    }

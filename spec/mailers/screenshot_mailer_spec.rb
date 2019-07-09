@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require "spec_helper"
+require "rails_helper"
 
 RSpec.describe ScreenshotMailer do
   describe 'request_screenshot' do

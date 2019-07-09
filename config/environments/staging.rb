@@ -90,4 +90,10 @@ Shuttle::Application.configure do
   config.log_formatter                     = ::Logger::Formatter.new
 
   config.use_ssl = true
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings   = {
+      address: '127.0.0.1',
+      port:    25
+  }
 end

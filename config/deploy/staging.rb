@@ -1,13 +1,15 @@
 set :stage, :staging
 set :rails_env, :staging
 
-STAGING_BOXES = %w[user@shuttle-staging.example.com]
+DEV_WEB_BOXES    = (1..1).map { |i| "square@shuttle-web-dev-a-#{i.to_s.rjust(2, '0')}.sqcorp.co" }
+DEV_WORKER_BOXES = (1..1).map { |i| "square@shuttle-worker-dev-a-#{i.to_s.rjust(2, '0')}.sqcorp.co" }
 
-role :app, STAGING_BOXES
-role :web, STAGING_BOXES
-role :db, STAGING_BOXES.first
-role :sidekiq, STAGING_BOXES
-role :primary_cron, STAGING_BOXES.first
+role :app, DEV_WEB_BOXES + DEV_WORKER_BOXES
+role :web, DEV_WEB_BOXES
+role :db, DEV_WEB_BOXES.first
+role :sidekiq, DEV_WORKER_BOXES
+set :sidekiq_roles, [:sidekiq]
+role :primary_cron, DEV_WORKER_BOXES.first
 
 append :linked_files,
        'config/environments/staging/credentials.yml',

@@ -53,6 +53,12 @@ class LocaleProjectsShowPresenter
     @_selected_asset ||= @project.assets.find_by_id(form[:asset_id])
   end
 
+  # @return [Group, nil] selected Group if there is one
+
+  def selected_group
+    @_selected_group ||= @project.groups.where(display_name: form[:group]).first
+  end
+
   # @return [Array<Pair<String, String>>] an array of selectable options for Sections
 
   def selectable_sections

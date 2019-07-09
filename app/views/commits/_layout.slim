@@ -33,9 +33,11 @@
   h1
     | #{@commit.project.name}
     strong &nbsp;>&nbsp;
-    | Commit #{@commit.revision_prefix}
+    | Commit
+    strong &nbsp;>&nbsp;
+    | #{@commit.id}
 
-  h6
+  .subtitle
     strong
       - if @commit.loading?
         - if @commit.import_batch_status
@@ -43,11 +45,11 @@
         - else
           - current_status = "Hung (Loading, No Import Batch)"
       - elsif @commit.ready?
-        - current_status = 'Ready'
+        - current_status = 'Ready ☑️'
       - elsif @commit.import_errors.present?
         - current_status = 'Errored - Import Aborted'
       -else
-        - current_status = 'Translating'
+        - current_status = 'Translating ⏳'
       = "Currently #{current_status}"
       span.separator &nbsp;/&nbsp;
       = "Found #{@commit.keys.count} Keys"

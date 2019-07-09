@@ -70,7 +70,7 @@ class HomeIndexForm
   def set_pagination_variables
     vars[:page] = Integer(params[:page]) rescue 1
     vars[:offset] = (vars[:page] - 1) * HomeController::PER_PAGE
-    vars[:limit]  = HomeController::PER_PAGE
+    vars[:limit]  = @params[:limit] || HomeController::PER_PAGE
   end
 
   def set_filter__status
@@ -169,12 +169,12 @@ class HomeIndexForm
   def set_groups_filter__name
     vars[:groups_filter__name] = params[:groups_filter__name].presence
   end
-  
+
   def set_groups_filter__project_id
     vars[:groups_filter__project_id] = cookies[:home_index__groups_filter__project_id] =
     params[:groups_filter__project_id].to_s.presence || cookies[:home_index__groups_filter__project_id].to_s.presence || 'all'
   end
-  
+
   # ASSET SPECIFIC
 
   def set_assets_filter__name

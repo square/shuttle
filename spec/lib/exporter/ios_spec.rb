@@ -128,6 +128,48 @@ RSpec.describe Exporter::Ios do
     expect(entries).not_to include('/Resources/en-US.lproj/Some.xib')
   end
 
+  it "should output in UTF-8 encoding when requested" do
+    io = StringIO.new
+    exporter = Exporter::Ios.new(@commit)
+    exporter.override_encoding = 'utf-8'
+    exporter.export(io, @de)
+    io.rewind
+
+    entries = Hash.new
+    Archive.read_open_memory(io.string, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
+      while (entry = archive.next_header)
+        expect(entry).to be_regular
+        contents = archive.read_data
+        expect(contents.force_encoding('UTF-8')).to eq(contents)
+        entries[entry.pathname] = contents
+      end
+    end
+
+    expect(entries.size).to eql(2)
+
+    body = entries['Resources/de-DE.lproj/Localizable-en-US.strings']
+    expect(body).to include(<<-C)
+/* This is a normal string. */
+"I'm a string!" = "Ich bin ein String!";
+    C
+    expect(body).to include(<<-C)
+/* This is also a normal string. */
+"I'm also a string!" = "Ich bin auch ein String!";
+    C
+
+    body = entries['Resources/de-DE.lproj/More.strings']
+    expect(body).to include(<<-C)
+/* Saying hello. */
+"Hello, world!" = "Hallo, Welt!";
+    C
+    expect(body).to include(<<-C)
+/* Saying goodbye. */
+"Goodbye, cruel world." = "Auf Wiedersehen, grausamer Welt.";
+    C
+
+    expect(entries).not_to include('/Resources/en-US.lproj/Some.xib')
+  end
+
   describe ".valid?" do
     it "should return true for a valid tar-gz file" do
       smalltgz = "\x1F\x8B\b\b\xB1\x8E\xF8Q\x00\x03log.tar\x00\xED\x99\xCFO\xC20\x14\x80_'\xC6\x19/;\x19\x8F\xBDx\xF1\x80mi\xB7\xEBB\xF0hL\xDC\xC5\e\x121d\t?\x12\x1C\xF7\xFD\xE9\xB6\xF4I\x16\x10\x88\x89\e\"\xEFK\x9A\x0FX\xCB\xDE(\xAF\xEC\xD1\xF1lt\x0F5#\x84H\x8C\xE1\xD6J\xAB\xC4YH%\x96\xFE\x82K%\x93X\x8AD\x19\xCD\x85\x94\xC6$\xC0M\xDD\x819\x16\x1F\xC5`nC)\xF2\xC9\xCE~\x83\xE1$\x9F\xEE8\x8E\xD7\xB1\xF2\x910\xB6\xF3\xDF\xEE\xB7{Y?+f\xF3\xF7Z\xCEa?\x8FX\xEB\xED\xF3/\x95r\xF3o:\x89R\xB1\x8C\xED\xFCw\xB4Q\xC0E-\xD1\xACq\xE2\xF3\x0F\xE7\xD7\x17\x10\x00<\x0E\xDE\xF8S\xC6_8\xE2^\x83K\xDB\x94m\xDC6\xF7\xFC\xD9\rX\xF5\x88\x0E\x174\xF1[,\xF3\xBF\xD6\xEC\xDF\x97\xFFR\v\xA1\xD7\xF3_iI\xF9\xDF\x10\xAC\xBB\x18JX\xA6s\b\xDEp\xFB}\xD7\x10\xDB\x06A\xF5\xFD\x80\x96\x06\x82 \b\x828\x06\x98Wxu\xD80\b\x82\xF8\x83\xB8\xF5\x81\xA3St\xE9\xCD\xF0x\x80nU\xC6Dh\x8EN\xD1\xA57\xC3~\x01\xBA\x85\x0E\xD1\x11\x9A\xA3St\xE9\x8D\x8B\x16\xC3\xE2\x83\xE1\x99\x19V(\f\xAB\x10\xC6\xD1\xE9\x8F.\x99 N\x863\xAF\xC8\xFD\xFE?\xC0\xD6\xFA\x9F \x88\x7F\fk\xF5\xB2^\x17V\x05\xC1f\a\xDB^+\x8FK\xD8~\x13\x10\xF8?\vo*c9:E\x97\xDEt\#@\x10\x04\xD14\xCB\xFD\xBFQ^\xE4\xA3im\e\x80\xFB\xF6\xFF\x850\xEB\xFB\x7FF\xD3\xFE\x7F#\xDC\xB5\xED7\xE0\xD0A\x10\x04A\x10\x8D\xF3\t\n\xEE0\x8E\x00*\x00\x00"

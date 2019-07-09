@@ -1,0 +1,49 @@
+---
+ja:
+  workers:
+    translations_mass_copier:
+      from:
+        not_a_targeted_or_base_locale: ソースロケールは基本ロケールでも、プロジェクトのターゲットロケールのいずれもありません
+      from_and_to_cannot_be_equal: ソースおよびターゲットロケールが互いに等しくすることができない
+      invalid_rfc5646_locale: 無効な %{kind} ロケール
+      iso639s_doesnt_match: ソースとターゲットのロケールが同じ言語ファミリに含まれていない（彼らのISO639sが一致しない）
+      project_translations_adder_and_remover_batch_still_running: プロジェクト翻訳加算バッチがまだ実行されている。それが終了した後にしてみてください。
+      to:
+        cannot_copy_to_projects_base_locale: 基本ロケールを投影するコピーすることはできません
+        not_a_targeted_locale: ターゲットロケールは、プロジェクトのターゲットロケールのものではありません
+en-AU:
+  workers:
+    translations_mass_copier:
+      from:
+        not_a_targeted_or_base_locale: Source locale is neither the base locale nor one of the project target locales
+      from_and_to_cannot_be_equal: Source and target locales cannot be equal to each other
+      invalid_rfc5646_locale: Invalid %{kind} locale
+      iso639s_doesnt_match: Source and target locales are not in the same language family (their ISO639s do not match)
+      project_translations_adder_and_remover_batch_still_running: Project Translations Adder and Remover batch is still running. Try after it finishes.
+      to:
+        cannot_copy_to_projects_base_locale: Cannot copy to project base locale
+        not_a_targeted_locale: Target locale is not one of the project target locales
+en-GB:
+  workers:
+    translations_mass_copier:
+      from:
+        not_a_targeted_or_base_locale: Source locale is neither the base locale nor one of the project target locales
+      from_and_to_cannot_be_equal: Source and target locales cannot be equal to each other
+      invalid_rfc5646_locale: Invalid %{kind} locale
+      iso639s_doesnt_match: Source and target locales are not in the same language family (their ISO639s do not match)
+      project_translations_adder_and_remover_batch_still_running: Project Translations Adder And Remover batch is still running. Try after it finishes.
+      to:
+        cannot_copy_to_projects_base_locale: Cannot copy to project base locale
+        not_a_targeted_locale: Target locale is not one of the project target locales
+en-IN:
+  workers:
+    translations_mass_copier:
+      from:
+        not_a_targeted_or_base_locale: Source locale is neither the base locale nor one of the project target locales
+      from_and_to_cannot_be_equal: Source and target locales cannot be equal to each other
+      invalid_rfc5646_locale: Invalid %{kind} locale
+      iso639s_doesnt_match: Source and target locales are not in the same language family (their ISO639s do not match)
+      project_translations_adder_and_remover_batch_still_running: Project Translations Adder And Remover batch is still running. Try after it finishes.
+      to:
+        cannot_copy_to_projects_base_locale: Cannot copy to project base locale
+        not_a_targeted_locale: Target locale is not one of the project target locales

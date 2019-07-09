@@ -31,7 +31,13 @@
         .control-group
           = f.label :priority, class: 'control-label'
           .controls
-            = @article.priority || '-'
+            - if current_user.admin?
+              = f.select :priority, t("models.article.priority").to_a.map(&:reverse).unshift(['-', nil]), {}, class: 'styled'
+            - else
+              - if @article.priority
+                = t("models.article.priority")[@article.priority]
+              - else
+                | -
 
         .control-group
           = f.label :due_date, class: 'control-label'
@@ -74,5 +80,5 @@
               = text_area_tag "article[sections_hash[#{section_name}]]", section_source_copy, rows: 6
 
   .form-actions
-    = f.submit class: 'primary', value: 'save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
+    = f.submit class: 'primary', value: 'Save', data: { confirm: 'Are you sure?  Changes are irreversible.'}
     button.default href=(@article.persisted? ? api_v1_project_article_path(@project.id, @article.name_was) : root_path) Cancel

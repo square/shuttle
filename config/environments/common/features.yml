@@ -1,1 +1,6 @@
 enable_blank_string_auto_approval: true
+
+decomission_inactive_user_url: https://registry-office-accessible.global.square/api/v1/users/basic_info
+decomission_inactive_user_domain: squareup.com
+
+skip_levenshtein_distance_diff: true

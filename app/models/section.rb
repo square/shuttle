@@ -67,6 +67,8 @@ class Section < ActiveRecord::Base
   digest_field :name, scope: :for_name
   digest_field :source_copy, scope: :source_copy_matches
 
+  update_index('translations#translation') { translations.reload }
+
   validates :name, presence: true, uniqueness: { scope: :article_id }
   validates :source_copy, presence: true
   validates :article, presence: true, strict: true

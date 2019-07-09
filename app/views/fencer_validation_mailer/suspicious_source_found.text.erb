@@ -1,0 +1,12 @@
+Dear localization team,
+
+Shuttle found the following source strings are suspicious in translation request <%= @job_url %>.
+
+<% for @item in @formatted_keys_errors -%>
+  <%= @item.first %> Reason: <%= @item.second %>
+<% end -%>
+
+Please double check these source strings are correct. Contact requester <%= @author_name %> at <%= @author_email %> for correcting source strings if needed.
+
+Sincerely,
+The Shuttle Automated Mailer
