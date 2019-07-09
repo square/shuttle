@@ -1,5 +1,6 @@
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 source 'https://gems.vip.global.square'
+source 'https://rubygems.org'
 
 ruby '2.4.6'
 
@@ -59,7 +60,6 @@ gem 'execjs'
 gem 'safemode'
 gem 'pivot_table'
 gem 'sentry-raven'
-gem 'newrelic_rpm'
 
 # IMPORTING
 gem 'nokogiri'
