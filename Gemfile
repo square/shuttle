@@ -81,7 +81,7 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-source ENV['SIDEKIQ_SOURCE'] do
+source 'https://gems.vip.global.square/private' do
   gem 'sidekiq-pro', '= 3.4.5'
 end
 

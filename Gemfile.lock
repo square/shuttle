@@ -53,7 +53,7 @@ GIT
 
 GEM
   remote: https://rubygems.org/
-  remote: https://gems.vip.global.square/private/
+  remote: https://gems.contribsys.com/
   remote: https://rails-assets.org/
   specs:
     CFPropertyList (2.3.6)
