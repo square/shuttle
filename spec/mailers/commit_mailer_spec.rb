@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require "spec_helper"
+require "rails_helper"
 
 RSpec.describe CommitMailer do
   describe "#notify_submitter_of_import_errors" do

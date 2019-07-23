@@ -6,3 +6,6 @@ mkdir -p vendor
 cd vendor
 
 git clone --quiet --shared /mnt/nfs/git/sq/shuttle-es.git
+
+# ES 5.6.16 expects there is folder plugins.
+mkdir -p ./shuttle-es/elasticsearch-5.6.16/plugins

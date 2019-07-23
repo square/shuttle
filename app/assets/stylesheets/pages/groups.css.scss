@@ -1,0 +1,35 @@
+@import "base/vars";
+@import "css3-mixins";
+
+body.groups {
+  .control-group label {
+    padding-top: 0;
+    width: 170px;
+  }
+
+  &#groups-show, &#groups-issues {
+    .download-button {
+      margin-right: 10px;
+    }
+  }
+
+  &#groups-manifest {
+    .locale-manifest {
+      .locale {
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+      }
+
+      hr {
+        margin: 20px 0 30px 0;
+      }
+    }
+  }
+
+  .hide-btn, .show-btn {
+    width: 100px;
+    margin-left: 10px;
+  }
+}

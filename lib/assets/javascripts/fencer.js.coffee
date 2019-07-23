@@ -34,7 +34,7 @@ class root.Fencer
       when 'MessageFormat'
         fence_index = fence.match(/^\{(\d+)[,}]/)[1]
         new RegExp("\\{#{fence_index}(,[^}]+)?\\}")
-      when 'Erb', 'Html', 'Strftime'
+      when 'Erb', 'Html', 'Strftime', 'IntlMessageFormat'
         # these are all optional fences
         null
       else

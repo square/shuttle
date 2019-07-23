@@ -152,7 +152,7 @@ RSpec.describe TranslationsController do
         expect(response.status).to eql(200)
         expect(@translation.reload.copy).to eql('bye!')
         expect(@translation).to be_approved
-        expect(@translation.translator).to eql(@user)
+        expect(@translation.translator).to eql(translator)
         expect(@translation.reviewer).to eql(@user)
 
         expect(@translation.translation_changes.count).to eq(1)
@@ -163,6 +163,8 @@ RSpec.describe TranslationsController do
       end
 
       it "should automatically approve reviewer changes to an untranslated string" do
+        translator = @translation.translator
+
         patch :update,
               project_id: @translation.key.project.to_param,
               key_id: @translation.key.to_param,
@@ -173,7 +175,7 @@ RSpec.describe TranslationsController do
         expect(response.status).to eql(200)
         expect(@translation.reload.copy).to eql('bye!')
         expect(@translation).to be_approved
-        expect(@translation.translator).to eql(@user)
+        expect(@translation.translator).to eql(translator)
         expect(@translation.reviewer).to eql(@user)
 
         expect(@translation.translation_changes.count).to eq(1)
@@ -366,7 +368,6 @@ RSpec.describe TranslationsController do
     end
 
     before :each do
-      reset_elastic_search
       allow_any_instance_of(Locale).to receive(:fallbacks).and_return(
                                            %w(fr-CA fr en).map { |l| Locale.from_rfc5646 l }
                                        )
@@ -410,7 +411,7 @@ RSpec.describe TranslationsController do
     end
 
     it "should 1. respond with a Translation with matching locale and source copy" do
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :match,
           project_id: @project.to_param,
@@ -437,7 +438,7 @@ RSpec.describe TranslationsController do
 
       translation.update! modifier: @user
 
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :match,
           project_id: @project.to_param,
@@ -452,7 +453,7 @@ RSpec.describe TranslationsController do
 
     it "should 3. respond with the Translation of the 1st fallback locale with matching project/key and source copy" do
       @same_locale_sc.destroy
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :match,
           project_id: @project.to_param,
@@ -465,7 +466,7 @@ RSpec.describe TranslationsController do
 
     it "should 4. respond with the Translation of the 1st fallback locale with source copy" do
       [@same_locale_sc, @fallback1_sc].each(&:destroy)
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :match,
           project_id: @project.to_param,
@@ -478,7 +479,7 @@ RSpec.describe TranslationsController do
 
     it "should 5. respond with a 204" do
       [@same_locale_sc, @fallback1_sc, @fallback2_sc].each(&:destroy)
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :match,
           project_id: @project.to_param,
@@ -592,7 +593,6 @@ RSpec.describe TranslationsController do
     before :each do
       Translation.destroy_all
 
-      reset_elastic_search
       @translation = FactoryBot.create :translation,
                                         source_copy: 'foo bar 1',
                                         copy: 'something else',
@@ -611,7 +611,7 @@ RSpec.describe TranslationsController do
                          copy: 'something else',
                          source_rfc5646_locale: 'en',
                          rfc5646_locale: 'fr'
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -631,7 +631,7 @@ RSpec.describe TranslationsController do
                                        approved: true,
                                        source_rfc5646_locale: 'en',
                                        rfc5646_locale: 'fr-CA'
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       # fr is a fallback of fr-CA
       get :fuzzy_match,
@@ -661,7 +661,7 @@ RSpec.describe TranslationsController do
                          copy: 'something else',
                          source_rfc5646_locale: 'en',
                          rfc5646_locale: 'fr'
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -683,7 +683,7 @@ RSpec.describe TranslationsController do
                          source_rfc5646_locale: 'en',
                          rfc5646_locale: 'fr'
 
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -706,7 +706,7 @@ RSpec.describe TranslationsController do
                            rfc5646_locale: 'fr'
       end
 
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -729,7 +729,7 @@ RSpec.describe TranslationsController do
                            rfc5646_locale: 'fr'
       end
 
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       get :fuzzy_match,
           project_id: @translation.key.project.to_param,
@@ -749,7 +749,7 @@ RSpec.describe TranslationsController do
       end
 
       it "should truncate project name exceeds 30 chars" do
-        regenerate_elastic_search_indexes
+        TranslationsIndex.reset!
 
         get :fuzzy_match,
             project_id: @translation.key.project.to_param,
@@ -779,7 +779,7 @@ RSpec.describe TranslationsController do
       end
 
       it "should not show in search result" do
-        regenerate_elastic_search_indexes
+        TranslationsIndex.reset!
 
         get :fuzzy_match,
             project_id: @translation.key.project.to_param,
@@ -812,6 +812,7 @@ RSpec.describe TranslationsController do
             %w(fr es).each do |locale|
               FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: locale, source_copy: 'fake', copy: nil, approved: nil)
             end
+            key.reload
           end
 
           @commit1 = FactoryBot.create(:commit, project: @project)
@@ -885,6 +886,7 @@ RSpec.describe TranslationsController do
             %w(fr es).each do |locale|
               FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: locale, source_copy: 'fake', copy: nil, approved: nil)
             end
+            key.reload
           end
 
           @project.keys.each { |k| k.recalculate_ready! }

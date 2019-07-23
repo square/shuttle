@@ -78,4 +78,17 @@ class Group < ActiveRecord::Base
     self.save!
   end
 
+  # Inherited from ArticleOrCommitStats
+  include ArticleOrCommitStats
+  def translations_not_done(*locales)
+    articles.map { |article| article.translations_not_done(*locales) }.sum
+  end
+
+  def translations_done(*locales)
+    articles.map { |article| article.translations_done(*locales) }.sum
+  end
+
+  def translations_total(*locales)
+    articles.map { |article| article.translations_total(*locales) }.sum
+  end
 end

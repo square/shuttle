@@ -12,10 +12,6 @@
   .checkbox + .checkbox, input + .checkbox { margin-left: 15px; }
   input + input, input + select, select + input, select + select { margin-left: 15px; }
 
-  .main {
-
-  }
-
   .collapse {
     margin-top: 30px;
     margin-left: 40px;
@@ -60,9 +56,8 @@ table.table {
     tr {
       text-align: left;
       font-weight: bold;
-      text-transform: uppercase;
       th {
-        padding: 15px 10px;
+        padding: 14px 8px;
       }
     }
   }
@@ -75,7 +70,15 @@ table.table {
 
       td {
         padding: 10px;
+        vertical-align: middle;
       }
     }
   }
+}
+
+.header {
+  margin-bottom: 6px;
+}
+.header-buttons {
+  padding-bottom: 10px;
 }

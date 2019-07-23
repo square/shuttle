@@ -5,9 +5,5 @@ require 'pathname'
 APP_ROOT = Pathname.new File.expand_path('../../', __FILE__)
 
 Dir.chdir APP_ROOT do
-  system 'bin/rake', 'db:migrate', 'db:seed'
-
-  system({'FORCE' => 'y', 'CLASS' => 'Commit'}, 'bin/rake', 'environment', 'elasticsearch:import:model')
-  system({'FORCE' => 'y', 'CLASS' => 'Key'}, 'bin/rake', 'environment', 'elasticsearch:import:model')
-  system({'FORCE' => 'y', 'CLASS' => 'Translation'}, 'bin/rake', 'environment', 'elasticsearch:import:model')
+  system 'bin/rake', 'db:migrate', 'db:seed', 'chewy:reset'
 end

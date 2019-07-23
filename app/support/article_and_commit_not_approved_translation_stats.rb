@@ -63,7 +63,7 @@ class ArticleAndCommitNotApprovedTranslationStats
 
   def commit_translation_groups_with_stats
     query = Translation.not_base.not_approved.joins(:commits_keys)
-    query = query.where(commits_keys: { commit_id: @commits.map(&:id) } )
+    query = query.where(commits_keys: { commit_id: @commits.map(&:id) })
     query = query.where(translations: { rfc5646_locale: @locales.map(&:rfc5646) }) if @locales.present?
     query = query.group("commit_id, translated, rfc5646_locale")
     query.select("commit_id as item_id, translated, rfc5646_locale, COUNT(*) AS translations_count, SUM(words_count) AS words_count")

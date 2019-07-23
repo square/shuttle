@@ -68,6 +68,8 @@ module Importer
           result << "\r"
         elsif scanner.scan(/t/)
           result << "\t"
+        elsif scanner.scan(/\n/)
+          # join lines
         elsif (match = scanner.scan(/[0-9a-f]{4}/))
           result << Integer("0x#{match}").chr('utf-16')
         elsif (match = scanner.scan(/[0-7]{3}/))

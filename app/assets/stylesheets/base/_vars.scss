@@ -1,3 +1,6 @@
+$font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif,
+  "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+$monospace-font-family: 'SF Mono', 'Roboto Mono', Monaco, monospace;
 $base-font-size: 14px;
 $nav-font-size: 12px;
 $control-font-size: 14px;
@@ -11,7 +14,6 @@ $h4-size: 18px;
 $h5-size: 14px;
 $h6-size: 12px;
 
-
 $base-line-height: 21px;
 
 $legend-line-height: 28px;
@@ -23,7 +25,7 @@ $h4-line-height: 28px;
 $h5-line-height: 24px;
 $h6-line-height: 20px;
 
-$button-radius-size: 1px;
+$button-radius-size: 4px;
 $input-radius-size: 1px;
 $notification-radius-size: 4px;
 
@@ -31,6 +33,8 @@ $nav-height: 70px;
 $subnav-height: 40px;
 $input-size: 32px;
 $button-size: 32px;
+
+$medium-letter-spacing: 0.0365em;
 
 // ----- COLORS
 
@@ -41,8 +45,9 @@ $gray4: #b3b3b3;
 $gray5: #dfdfdf;
 $gray6: #f9f9f9;
 
+
 $off-blue: #def1f7;
-$dark-blue: #2884b4;
+$dark-blue: #2996cc;
 
 $navbar-background: #2b2b2b;
 $subnav-background: #373737;
@@ -68,7 +73,7 @@ $input-white: #fbfcfc;
 $input-white-text: #6e797f;
 $input-white-border: #d3d9de;
 
-$input-blue: #4296c2;
+$input-blue: $dark-blue;
 $input-blue-text: white;
 $input-blue-border: #3688b3;
 
@@ -92,10 +97,10 @@ $button-flag: #f5d68d;
 
 $columns: 16;
 
-$widescreen-size: 1200px;
+$widescreen-size: 1440px;
 $widescreen-column-width: $widescreen-size/$columns;
 
-$desktop-size: 960px;
+$desktop-size: 1200px;
 $desktop-column-width: $desktop-size/$columns;
 
 $ipad-size: 768px;

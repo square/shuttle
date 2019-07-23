@@ -35,6 +35,11 @@ RSpec.describe Importer::Strings do
       expect(@project.keys.for_key("/apple/en-US.lproj/example.strings:Something\nwith\tescapes\\").first.translations.base.first.copy).to eql("Something\nwith\tescapes\\")
     end
 
+    it "should properly joins multiple lines" do
+      importer = Importer::Strings.new(@commit.blobs.first, @commit)
+      expect(importer.send(:unescape, "first line, \\\ncontinue with the line")).to eq("first line, continue with the line")
+    end
+
     it "should still import strings that end with <DNL>" do
       expect(@project.keys.for_key('/apple/en-US.lproj/example.strings:quote.charlie.1').first.translations.find_by_rfc5646_locale('en-US').copy).to eql("I'm a patriot. You've gotta give me that.<DNL>")
     end

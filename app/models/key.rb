@@ -137,32 +137,11 @@ class Key < ActiveRecord::Base
   digest_field :key, scope: :for_key
   digest_field :source_copy, scope: :source_copy_matches
 
-  include Elasticsearch::Model
-  include Elasticsearch::Model::Callbacks
-  include IndexHelper
-  Key.index_name "shuttle_#{Rails.env}_keys"
-
-  settings analysis: {tokenizer: {key_tokenizer: {type: 'pattern', pattern: '[^A-Za-z0-9]'}},
-           analyzer: {key_analyzer: {type: 'custom', tokenizer: 'key_tokenizer', filter: 'lowercase'}}}
-
-  mapping do
-    indexes :original_key, type: 'multi_field', fields: {
-        original_key:       {type: 'string', analyzer: 'key_analyzer'},
-        original_key_exact: {type: 'string', index: :not_analyzed}
-    }
-    indexes :project_id, type: 'integer'
-    indexes :ready, type: 'boolean'
-    indexes :hidden_in_search,  type: 'boolean'
+  update_index('keys#key') do
+    self unless previous_changes.blank? && persisted?
   end
-
-  def regular_index_fields
-    %w(original_key project_id ready)
-  end
-
-  def special_index_fields
-    {
-      hidden_in_search: formatted_hidden_in_search
-    }
+  update_index('translations#translation') do
+    translations.reload unless previous_changes.blank?
   end
 
   validates :project,
@@ -220,39 +199,47 @@ class Key < ActiveRecord::Base
   # to create pending Translation requests for each string in the new locale.
 
   def add_pending_translations(model = nil)
-    locales = model && model.targeted_locales ? model.targeted_locales : targeted_locales
-    base = model && model.base_locale ? model.base_locale : base_locale
+    Chewy.strategy(:atomic) do
+      locales = model && model.targeted_locales ? model.targeted_locales : targeted_locales
+      base = model && model.base_locale ? model.base_locale : base_locale
 
-    translations.in_locale(base).find_or_create!(
-        source_copy:              source_copy,
-        copy:                     source_copy,
-        source_locale:            base,
-        locale:                   base,
-        approved:                 true,
-        preserve_reviewed_status: true,
-    )
-
-    locales.each do |locale|
-      next if skip_key?(locale)
-      t = translations.in_locale(locale).find_or_create!(
-        source_copy:          source_copy,
-        source_locale:        base_locale,
-        locale:               locale,
-      )
-
-      if is_auto_approved_string?(source_copy) || (article.present? && is_block_tag)
-        t.update!(
-          copy: source_copy,
-          approved: true,
-          translated: true,
+      translations.in_locale(base).find_or_create!(
+          source_copy:              source_copy,
+          copy:                     source_copy,
+          source_locale:            base,
+          locale:                   base,
+          approved:                 true,
           preserve_reviewed_status: true,
-        )
-      end
-
-      finder = FuzzyMatchTranslationsFinder.new(source_copy, t)
-      t.update(
-        tm_match: finder.top_fuzzy_match_percentage
       )
+
+      locales.each do |locale|
+        next if skip_key?(locale)
+
+        translation_updated = false
+        t = translations.in_locale(locale).find_or_create!(
+          source_copy:          source_copy,
+          source_locale:        base_locale,
+          locale:               locale,
+        )
+        translation_updated ||= t.previous_changes.present?
+
+        if is_auto_approved_string?(source_copy) || (article.present? && is_block_tag)
+          t.update!(
+            copy: source_copy,
+            approved: true,
+            translated: true,
+            preserve_reviewed_status: true,
+          )
+          translation_updated ||= t.previous_changes.present?
+        end
+
+        if translation_updated && !t.approved?
+          finder = FuzzyMatchTranslationsFinder.new(source_copy, t)
+          t.update(
+              tm_match: finder.top_fuzzy_match_percentage
+          )
+        end
+      end
     end
   end
 
@@ -263,9 +250,11 @@ class Key < ActiveRecord::Base
   # only pending Translations.
 
   def remove_excluded_pending_translations
-    translations.not_base.not_translated.where(approved: nil).find_each do |translation|
-      if skip_key?(translation.locale) || !targeted_locales.include?(translation.locale)
-        translation.destroy
+    Chewy.strategy(:atomic) do
+      translations.not_base.not_translated.where(approved: nil).find_each do |translation|
+        if skip_key?(translation.locale) || !targeted_locales.include?(translation.locale)
+          translation.destroy
+        end
       end
     end
   end
@@ -287,18 +276,12 @@ class Key < ActiveRecord::Base
   # @param [Commit, Project, Article] obj The object whose keys should be batch recalculated
 
   def self.batch_recalculate_ready!(obj)
-    not_ready_key_ids = obj.translations.in_locale(*obj.required_locales).not_approved.not_block_tag.select(:key_id).uniq.pluck(:key_id)
-    ready_key_ids = obj.keys.pluck(:id) - not_ready_key_ids
-    ready_key_ids.in_groups_of(500, false) { |group| Key.where(id: group).update_all(ready: true) }
-    not_ready_key_ids.in_groups_of(500, false) { |group| Key.where(id: group).update_all(ready: false) }
-
-    # Since update_all bypasses all callbacks, `ready` field for some Keys should be out of sync in ElasticSearch at this point.
-    # We need to update ElasticSearch with the new ready fields.
-    obj.keys.each { |key| key.update_elasticsearch_index }
-  end
-
-  def formatted_hidden_in_search
-    !!hidden_in_search
+    Chewy.strategy(:atomic) do
+      not_ready_key_ids = obj.translations.in_locale(*obj.required_locales).not_approved.not_block_tag.select(:key_id).uniq.pluck(:key_id)
+      ready_key_ids     = obj.keys.pluck(:id) - not_ready_key_ids
+      ready_key_ids.in_groups_of(500, false) { |group| Key.where(id: group).update_all(ready: true) }
+      not_ready_key_ids.in_groups_of(500, false) { |group| Key.where(id: group).update_all(ready: false) }
+    end
   end
 
   # checks if a string should be auto approved.

@@ -10,8 +10,9 @@ class SearchTranslationsForm
   # @param form hash of parameters to process
   def extract_translations_search_params(form)
     processed_params = form.deep_dup
-    processed_params[:project_id] = processed_params[:project_id].to_i
-    processed_params[:translator_id] = processed_params[:translator_id].to_i
+    processed_params[:project_id] = processed_params[:project_id].to_i if processed_params[:project_id].present?
+    processed_params[:translator_id] = processed_params[:translator_id].to_i if processed_params[:translator_id].present?
+    processed_params[:reviewer_id] = processed_params[:reviewer_id].to_i if processed_params[:reviewer_id].present?
 
     start_date    = Date.strptime(processed_params[:start_date], "%m/%d/%Y") rescue nil
     end_date      = Date.strptime(processed_params[:end_date], "%m/%d/%Y") rescue nil

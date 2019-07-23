@@ -336,8 +336,10 @@ class TranslationItem
         fenced_p.append htmlEscape(copy[copy_index...range[0]])
         copy_index = range[0]
       # consume the range and enclose it in a span
-      $('<span/>').addClass('fenced').text(copy[range[0]..range[1]]).appendTo fenced_p
-      copy_index = range[1] + 1
+      copy_trimmed = copy[range[0]..range[1]]
+      if copy_trimmed.length > 0
+        $('<span/>').addClass('fenced').text(copy_trimmed).appendTo fenced_p
+        copy_index = range[1] + 1
 
     # consume from the end of the last range to the end of the string
     if copy_index < copy.length

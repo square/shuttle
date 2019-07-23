@@ -18,11 +18,19 @@ every 30.minutes, roles: [:primary_cron] do
   runner 'AutoImporter.perform_once'
 end
 
+every 5.minutes, roles: [:primary_cron] do
+  runner 'SidekiqWorkerRestarter.perform_once'
+end
+
+every :day, at: '12:00 am', roles: [:primary_cron] do
+  runner 'InactiveUserDecommissioner.perform_once'
+end
+
 every :day, at: '12:00 am', roles: [:primary_cron] do
   rake 'metrics:update'
 end
 
-every 1.minute, roles: [:primary_cron] do
+every 5.minute, roles: [:primary_cron] do
   rake 'touchdown:update'
 end
 
@@ -30,10 +38,22 @@ every 1.hour, roles: [:primary_cron] do
   rake 'maintenance:cleanup_commits'
 end
 
-every :saturday, at: '1am', roles: [:app] do
+every :day, at: '1am', roles: [:app] do
   rake 'maintenance:cleanup_repos'
 end
 
 every :day, roles: [:primary_cron] do
   rake 'maintenance:reap_deleted_commits'
+end
+
+every :day, at: '2am', roles: [:app] do
+  rake 'reports:generate:incoming'
+end
+
+every :day, at: '3am', roles: [:app] do
+  rake 'reports:generate:pending'
+end
+
+every :day, at: '4am', roles: [:app] do
+  rake 'reports:generate:completed'
 end

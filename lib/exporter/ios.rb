@@ -23,8 +23,11 @@ module Exporter
   class Ios < Base
     include Multifile
 
+    def self.default_encoding() 'UTF-16LE' end
+
     def export_files(receiver, *locales)
       exporter = Exporter::Strings.new(@commit)
+      exporter.override_encoding = override_encoding
 
       locales.each do |locale|
         Translation.in_commit(@commit).includes(:key).
@@ -39,9 +42,11 @@ module Exporter
           next unless source.end_with?('.strings')
 
           stream = StringIO.new
-          # write the BOM
-          stream.putc 0xFF
-          stream.putc 0xFE
+          if active_encoding == 'UTF-16LE'
+            # write the BOM
+            stream.putc 0xFF
+            stream.putc 0xFE
+          end
           translations.sort_by { |t| t.key.key }.each do |translation|
             exporter.export_translation stream, translation
           end

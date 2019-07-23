@@ -405,4 +405,26 @@ class ProjectsController < ApplicationController
     project_params["targeted_rfc5646_locales"] = targeted_rfc5646_locales
     project_params
   end
+
+  def project_path_changed?(params)
+    # checks if only_paths have been modified
+    if @project.only_paths.sort != params['only_paths'].sort
+      return true
+    end
+
+    # checks if locales have been modified in key_locale_inclusions
+    if @project.key_locale_inclusions.keys.sort != params['key_locale_inclusions'].keys.sort
+      return true
+    end
+
+    # checks if filters in each locale have been modified
+    @project.key_locale_inclusions.each do |locale, filters|
+      if filters.sort != params['key_locale_inclusions'][locale].sort
+        return true
+      end
+    end
+
+    # neither only_paths, nor key_locale_inclusions has been modified.
+    return false;
+  end
 end

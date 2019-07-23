@@ -16,6 +16,9 @@ require 'rails_helper'
 RSpec.describe StashWebhookPinger do
   include Rails.application.routes.url_helpers
 
+  let(:http_response_code) { 204 }
+  let(:http_response) { Net::HTTPResponse.new(1.0, http_response_code, "OK") }
+
   before(:each) do
     allow(Kernel).to receive(:sleep)
     allow(HTTParty).to receive(:post)
@@ -36,7 +39,7 @@ RSpec.describe StashWebhookPinger do
         expect(HTTParty).to receive(:post).with(
                                 "#{url}/#{@commit.revision}",
                                 anything()
-                            ).exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times
+                            ).exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times.and_return(http_response)
         subject.perform(@commit.id)
       end
 
@@ -50,7 +53,7 @@ RSpec.describe StashWebhookPinger do
           expected_state = @commit.ready? ? 'SUCCESSFUL' : 'INPROGRESS'
           expect(commit_state).to eql(expected_state)
           @commit.update_column :ready, !@commit.ready
-        end.exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times
+        end.exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times.and_return(http_response)
         subject.perform(@commit.id)
       end
 
@@ -64,6 +67,20 @@ RSpec.describe StashWebhookPinger do
         @commit.project.update! repository_url: nil
         expect(HTTParty).not_to receive(:post)
         expect { subject.perform(@commit.id) }.to raise_error(Project::NotLinkedToAGitRepositoryError)
+      end
+
+      context "with failure http response code" do
+        let(:http_response_code) { 400 }
+
+        it "when http returns failure" do
+          url = "http://www.example.com"
+          @commit.project.stash_webhook_url = url
+          @commit.project.save!
+
+          expect(HTTParty).to receive(:post).and_return(http_response)
+
+          expect { subject.perform(@commit.id) }.to raise_error(RuntimeError, "[StashWebhookHelper] Failed to ping stash for commit #{@commit.id}, revision: #{@commit.revision}, code: #{http_response_code}")
+        end
       end
     end
 
@@ -84,7 +101,7 @@ RSpec.describe StashWebhookPinger do
                                     protocol: Shuttle::Configuration.default_url_options['protocol'] || 'http'),
             state: 'INPROGRESS',
             description: 'Currently loading',
-        }.to_json))
+        }.to_json)).exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times.and_return(http_response)
         @commit.save!
       end
     end
@@ -92,6 +109,8 @@ RSpec.describe StashWebhookPinger do
 
   context "on_update" do
     before(:each) do
+      expect(HTTParty).to receive(:post).exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times.and_return(http_response)
+
       @commit = FactoryBot.build(:commit, ready: false, loading: true)
       @url = "http://www.example.com"
       @commit.project.stash_webhook_url = @url
@@ -110,7 +129,7 @@ RSpec.describe StashWebhookPinger do
                                   protocol: Shuttle::Configuration.default_url_options['protocol'] || 'http'),
           state: 'INPROGRESS',
           description: 'Currently translating',
-      }.to_json))
+      }.to_json)).exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times.and_return(http_response)
 
       @commit.loading = false
       # force commit not to be ready
@@ -130,7 +149,7 @@ RSpec.describe StashWebhookPinger do
                                   protocol: Shuttle::Configuration.default_url_options['protocol'] || 'http'),
           state: 'SUCCESSFUL',
           description: 'Translations completed',
-      }.to_json))
+      }.to_json)).exactly(StashWebhookHelper::DEFAULT_NUM_TIMES).times.and_return(http_response)
       @commit.loading = false
       @commit.ready = true # redundant since CSR will do this anyway
       @commit.save!

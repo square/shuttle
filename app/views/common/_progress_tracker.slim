@@ -22,11 +22,22 @@ li.progress-bar
   - finished = (item.translations_not_done(locale) == 0)
   li.progress-bar
     dl
-      dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
-        = locale.rfc5646
-        small.lowercase = " (#{required ? 'required' : 'optional'})"
-        strong = (finished ? '100%' : "#{(item.fraction_done(locale) * 100).round(2)}%")
-      dd.bar-status
-        span class=(finished ? 'finished' : 'inprogress') style="width: #{(item.fraction_done(locale) * 100).round(2)}%;"
-      dd.text-status class=(required ? (finished ? 'text-success' : 'text-error') : nil)
-        = "#{item.translations_not_done(locale)} left (#{item.translations_total(locale)} total)"
+      - if current_user.translator?
+        a href=HomeIndexPresenter.new([],[],[],[],[locale]).translate_link_path(current_user, item)
+          dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+            = locale.rfc5646
+            small.lowercase = " (#{required ? 'required' : 'optional'})"
+            strong = (finished ? '100%' : "#{(item.fraction_done(locale) * 100).round(2)}%")
+          dd.bar-status
+            span class=(finished ? 'finished' : 'inprogress') style="width: #{(item.fraction_done(locale) * 100).round(2)}%;"
+          dd.text-status class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+            = "#{item.translations_not_done(locale)} left (#{item.translations_total(locale)} total)"
+      - else
+        dt class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+          = locale.rfc5646
+          small.lowercase = " (#{required ? 'required' : 'optional'})"
+          strong = (finished ? '100%' : "#{(item.fraction_done(locale) * 100).round(2)}%")
+        dd.bar-status
+          span class=(finished ? 'finished' : 'inprogress') style="width: #{(item.fraction_done(locale) * 100).round(2)}%;"
+        dd.text-status class=(required ? (finished ? 'text-success' : 'text-error') : nil)
+          = "#{item.translations_not_done(locale)} left (#{item.translations_total(locale)} total)"

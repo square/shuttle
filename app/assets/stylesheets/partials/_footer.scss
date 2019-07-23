@@ -15,25 +15,32 @@ footer {
   margin-top: -9em;
   height: 9em;
   overflow: hidden;
-  background-color: $navbar-background;
+  background: #DA4453;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to top, #89216B, #DA4453);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to top, #89216B, #DA4453); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+
   p {
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 1px;
     text-align: center;
     text-transform: uppercase;
-    color: #555555;
+    color: #fff;
     margin-top: 20px;
     a {
-      color: #555555;
+      color: #fff;
       text-decoration: underline;
+      &:hover {
+        color: #eee;
+      }
     }
     i {
-      color: darkred;
+      color: #fff;
     }
   }
 
   img {
-    opacity:0.2;
+    opacity: 0.2;
   }
 }

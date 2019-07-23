@@ -1,0 +1,4 @@
+---
+# disabling Sentry Raven logging by not setting DSN and secret key
+dsn:
+secret_key:

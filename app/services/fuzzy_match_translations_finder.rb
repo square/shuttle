@@ -14,9 +14,10 @@
 
 class FuzzyMatchTranslationsFinder
   attr_reader :translation
-  include Elasticsearch::DSL
 
-  MINIMUM_FUZZY_MATCH = 60
+  FUZZY_MATCH_MIN_SCORE = 60
+  FUZZY_MATCH_RESULT_SIZE = 5
+  ES_SEARCH_BATCH_SIZE = 5
 
   def initialize(query_filter, translation)
     @query_filter = query_filter
@@ -24,36 +25,25 @@ class FuzzyMatchTranslationsFinder
   end
 
   def search_query
-    limit = 5
-    query_filter = @query_filter
-    target_locales = translation.locale.fallbacks.map(&:rfc5646)
-    search {
-      query do
-        filtered do
-          query do
-            match 'source_copy' do
-              query query_filter
-              operator 'or'
-            end
-          end
-          filter do
-            bool do
-              must { term approved: 1 }
-              must { terms rfc5646_locale: target_locales }
-              must { term hidden_in_search: false }
-            end
-          end
-        end
-      end
+    query_params = []
+    query_params << { match: { source_copy: { query: @query_filter, operator: 'or' } } }
 
-      size limit
-    }.to_hash
+    filter_params = []
+    filter_params << { term: { approved: true } }
+    filter_params << { terms: { rfc5646_locale: translation.locale.fallbacks.map(&:rfc5646) } }
+    filter_params << { term: { hidden_in_search: false } }
+
+    query = TranslationsIndex.query(query_params).filter(filter_params)
+    query = query.limit(ES_SEARCH_BATCH_SIZE)
+
+    return query
   end
 
   def find_fuzzy_match
-    translations_in_es = Elasticsearch::Model.search(search_query, Translation).results
-    translations = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
-    SortingHelper.order_by_elasticsearch_result_order(translations, translations_in_es)
+    translations = search_query.load(scope: -> { includes(key: :project) }).objects
+    translations = translations.reject { |t| @query_filter.similar(t.source_copy) < FUZZY_MATCH_MIN_SCORE }
+    translations = translations.sort { |a, b| @query_filter.similar(b.source_copy) <=> @query_filter.similar(a.source_copy) }
+    translations.first(FUZZY_MATCH_RESULT_SIZE).map { |t| Translation.find(t.id) }
   end
 
   def top_fuzzy_match_percentage
@@ -62,7 +52,7 @@ class FuzzyMatchTranslationsFinder
       {
           match_percentage: @translation.source_copy.similar(tran.source_copy),
       }
-    end.reject { |t| t[:match_percentage] < MINIMUM_FUZZY_MATCH }
+    end.reject { |t| t[:match_percentage] < FUZZY_MATCH_MIN_SCORE }
     translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
     translations.any? ? translations.first[:match_percentage] : 0.0
   end

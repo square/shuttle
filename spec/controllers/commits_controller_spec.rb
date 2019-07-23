@@ -202,6 +202,24 @@ Ember.I18n.locales.translations.fr = {
         C
       end
 
+      it "should export a UTF-8 Strings file in one locale" do
+        get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'strings', encoding: 'utf-8'
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="fr.strings"')
+        expect(response.headers['Content-Type']).to eql('text/plain; charset=utf-8')
+        expect(response.body.encoding.to_s).to eql('UTF-8')
+
+        body = response.body
+        expect(body).to include(<<-C)
+/* Universal Greeting */
+"key1" = "Bonjour {name}! Avec anninas fromage {count} la bouches.";
+        C
+        expect(body).to include(<<-C)
+/* Shopping cart contents */
+"key2" = "Tu avec carté {count} itém has";
+        C
+      end
+
       it "should export a Java properties file in one locale" do
         get :manifest, project_id: @project.to_param, id: @commit.to_param, locale: 'fr', format: 'properties'
         expect(response.status).to eql(200)
@@ -215,11 +233,65 @@ key2=Tu avec carté {count} itém has
         C
       end
 
-      it "should export an iOS tarball manifest" do
+      it "should export an iOS tarball manifest in UTF-16LE" do
+        Commit.find(@commit.id).keys.update_all(source: 'foo/bar.strings')
+
         get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'ios'
         expect(response.status).to eql(200)
         expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.tar.gz"')
-        # check body?
+        expect(response.headers['Content-Type']).to eql('application/x-gzip; charset=utf-16le')
+        expect(response.body.encoding.to_s).to eql('UTF-16LE')
+
+        entries = Hash.new
+        Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
+          while (entry = archive.next_header)
+            contents = archive.read_data
+            expect(contents.bytes.to_a[0]).to eq(0xFF)
+            expect(contents.bytes.to_a[1]).to eq(0xFE)
+            entries[entry.pathname] = contents.force_encoding('UTF-16LE')
+          end
+        end
+        expect(entries.count).to eq(1)
+
+        body = entries['foo/bar.strings'].encode('UTF-8')
+        expect(body).to include(<<-C)
+/* Universal Greeting */
+"key1" = "Bonjour {name}! Avec anninas fromage {count} la bouches.";
+        C
+        expect(body).to include(<<-C)
+/* Shopping cart contents */
+"key2" = "Tu avec carté {count} itém has";
+        C
+      end
+
+      it "should export an iOS tarball manifest in UTF-8" do
+        Commit.find(@commit.id).keys.update_all(source: 'foo/bar.strings')
+
+        get :manifest, project_id: @project.to_param, id: @commit.to_param, format: 'ios', encoding: 'utf-8'
+        expect(response.status).to eql(200)
+        expect(response.headers['Content-Disposition']).to eql('attachment; filename="manifest.tar.gz"')
+        expect(response.headers['Content-Type']).to eql('application/x-gzip; charset=utf-8')
+        expect(response.body.encoding.to_s).to eql('UTF-8')
+
+        entries = Hash.new
+        Archive.read_open_memory(response.body, Archive::COMPRESSION_GZIP, Archive::FORMAT_TAR_GNUTAR) do |archive|
+          while (entry = archive.next_header)
+            contents = archive.read_data
+            expect(contents.force_encoding('UTF-8')).to eq(contents)
+            entries[entry.pathname] = contents
+          end
+        end
+        expect(entries.count).to eq(1)
+
+        body = entries['foo/bar.strings']
+        expect(body).to include(<<-C)
+/* Universal Greeting */
+"key1" = "Bonjour {name}! Avec anninas fromage {count} la bouches.";
+        C
+        expect(body).to include(<<-C)
+/* Shopping cart contents */
+"key2" = "Tu avec carté {count} itém has";
+        C
       end
 
       it "should export a Ruby file in one locale" do
@@ -529,8 +601,6 @@ de:
 
   describe '#search' do
     before :each do
-      reset_elastic_search
-
       @project = FactoryBot.create(:project,
                                     base_rfc5646_locale:      'en',
                                     targeted_rfc5646_locales: { 'en' => true, 'fr' => true, 'es' => false },
@@ -538,17 +608,15 @@ de:
 
       @commit = @project.commit!('HEAD', skip_import: true)
       other_commit = FactoryBot.create(:commit, project: @project)
-      other_commit.keys = [FactoryBot.create(:key, project: @project).tap(&:add_pending_translations)]
+      other_commit.update(keys: [FactoryBot.create(:key, project: @project).tap(&:add_pending_translations)])
       @keys = FactoryBot.create_list(:key, 51, project: @project, ready: false).sort_by(&:key)
       @keys.each &:add_pending_translations
-      @commit.keys = @keys
+      @commit.update(keys: @keys)
 
       @user = FactoryBot.create(:user, :activated)
 
       @request.env['devise.mapping'] = Devise.mappings[:user]
       sign_in @user
-
-      regenerate_elastic_search_indexes
     end
 
     it 'should return the first page of keys if page not specified' do
@@ -579,7 +647,9 @@ de:
     it 'filters by requested status' do
       approved_key = FactoryBot.create(:key, project: @project, key: 'approved_key', ready: true)
       @commit.keys = @keys << approved_key
-      regenerate_elastic_search_indexes
+      CommitsIndex.reset!
+      KeysIndex.reset!
+      TranslationsIndex.reset!
 
       get :search, project_id: @project.to_param, id: @commit.to_param, status: 'approved'
       expect(response.status).to eql 200
@@ -666,7 +736,7 @@ de:
       @request.env['devise.mapping'] = Devise.mappings[:user]
       @user = FactoryBot.create(:user, :confirmed, role: 'admin')
       sign_in @user
-      regenerate_elastic_search_indexes
+      CommitsIndex.reset!
     end
 
     it "should require a monitor" do
@@ -677,7 +747,6 @@ de:
     end
 
     it "should delete a commit" do
-      skip 'ElasticSearch flaky - deletion throws NotFound exception'
       delete :destroy, project_id: @commit.project.to_param, id: @commit.to_param, format: 'json'
       expect(response.status).to eql(204)
       expect { @commit.reload }.to raise_error(ActiveRecord::RecordNotFound)

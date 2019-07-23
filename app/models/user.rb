@@ -60,7 +60,7 @@ class User < ActiveRecord::Base
   ROLES = %w(monitor translator reviewer admin)
 
   devise :database_authenticatable, :registerable, :confirmable,
-         :recoverable, :rememberable, :trackable, :validatable, :lockable
+         :recoverable, :rememberable, :trackable, :validatable, :lockable, :expirable
 
   has_many :authored_translations, class_name: 'Translation', foreign_key: 'translator_id', inverse_of: :translator, dependent: :nullify
   has_many :reviewed_translations, class_name: 'Translation', foreign_key: 'reviewer_id', inverse_of: :reviewer, dependent: :nullify
@@ -107,6 +107,15 @@ class User < ActiveRecord::Base
   # @private Used by Devise.
   def active_for_authentication?() super && role? end
 
+  def self.reset_password_by_token(attributes={})
+    recoverable = super(attributes)
+
+    # re-enable expired account caused by inactivity
+    recoverable.update_last_activity! if recoverable.persisted?
+
+    recoverable
+  end
+
   # @return [String] The User's full name.
   def name() I18n.t 'models.user.name', first: first_name, last: last_name end
   # @return [String] An abbreviated name for the user.
@@ -115,6 +124,7 @@ class User < ActiveRecord::Base
 
   ROLES.each do |role|
     define_method(:"#{role}?") { self.role == role || self.role == 'admin' }
+    define_method(:"#{role}_only?") { self.role == role }
   end
 
   # @private

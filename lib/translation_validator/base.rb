@@ -1,4 +1,4 @@
-# Copyright 2016 Square Inc.
+# Copyright 2019 Square Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,12 +12,20 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-module SortingHelper
-  def self.order_by_elasticsearch_result_order(objects, objects_in_es)
-    ordered_ids = objects_in_es.map(&:id).map(&:to_i)
-    hash = objects.index_by(&:id)
-    ordered_objects = []
-    ordered_ids.each { |id| ordered_objects << hash[id] if hash[id] }
-    ordered_objects
+require 'abstract_class'
+
+# Container module for {Validator::Base} and its subclasses.
+
+module TranslationValidator
+  class Base
+    extended AbstractClass
+
+    def initialize(job)
+      @job = job
+    end
+
+    def run
+      raise NotImplementedError
+    end
   end
 end

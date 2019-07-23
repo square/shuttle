@@ -14,38 +14,26 @@
 
 class SearchCommitsFinder
   attr_reader :params
-  include Elasticsearch::DSL
 
   def initialize(params)
     @params = params
   end
 
   def search_query
-    sha = params[:sha]
-    project_id = params[:project_id].to_i
-    limit = params.fetch(:limit, 50)
+    query_params = []
 
-    search {
-      query do
-        filtered do
-          filter do
-            bool do
-              must { prefix revision: sha } if sha
-              must { term project_id: project_id } if project_id > 0
-              must { match_all }
-            end
-          end
-        end
-      end
+    query_params << { prefix: { revision: params[:sha] } } if params[:sha]
+    query_params << { term: { project_id: params[:project_id].to_i } } if params[:project_id].present?
+    query_params << { bool: { must: { match_all: {} } } }
 
-      size limit
-      sort { by :created_at, order: 'desc' }
-    }.to_hash
+    query = CommitsIndex.filter(query_params)
+    query = query.order(created_at: :desc)
+    query = query.limit(params.fetch(:limit, 50))
+
+    return query
   end
 
   def find_commits
-    commits_in_es = Elasticsearch::Model.search(search_query, Commit).results
-    commits = Commit.where(id: commits_in_es.map(&:id)).includes(:project)
-    SortingHelper.order_by_elasticsearch_result_order(commits, commits_in_es)
+    search_query.load(scope: -> { includes(:project) }).objects
   end
 end

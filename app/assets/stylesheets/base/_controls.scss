@@ -15,7 +15,6 @@
   font-weight: normal;
   letter-spacing: 1px;
   height: $input-size;
-  text-transform: uppercase;
   text-decoration: none !important;
   padding: 5px 20px;
 
@@ -25,7 +24,6 @@
 
   &:hover { 
     background: darken($bg-color, 5%);
-    color: $color !important;
     cursor: pointer; 
     text-decoration: none !important;
   }
@@ -52,6 +50,15 @@
     width: $input-size; 
     padding: 5px;
     text-align: center;
+  }
+
+  &.button--secondary {
+    background-color: white;
+    color: $dark-blue;
+    border-color: $dark-blue;
+    &:hover {
+      background: rgba(41, 150, 204, 0.1);
+    }
   }
 }
 
@@ -128,7 +135,6 @@ textarea {
 select {
   @include field-options;
   @include appearance(none);
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
   text-indent: 0.01px;
   text-overflow: '';
 

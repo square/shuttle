@@ -92,33 +92,8 @@ class Commit < ActiveRecord::Base
   alias_method :active_keys, :keys # called in ArticleOrCommitStats
   alias_method :active_issues, :issues # called in ArticleOrCommitIssuesPresenter
 
-  include Elasticsearch::Model
-  include Elasticsearch::Model::Callbacks
-  include IndexHelper
-  Commit.index_name "shuttle_#{Rails.env}_commits"
-
-  mapping do
-    indexes :project_id, type: 'integer'
-    indexes :user_id, type: 'integer'
-    indexes :priority, type: 'integer'
-    indexes :due_date, type: 'date'
-    indexes :created_at, type: 'date'
-    indexes :revision, index: :not_analyzed, type: 'string'
-    indexes :loading, type: 'boolean'
-    indexes :ready, type: 'boolean'
-    indexes :exported, type: 'boolean'
-    indexes :fingerprint, type: 'string'
-    indexes :duplicate, type: 'boolean'
-  end
-
-  def regular_index_fields
-    %w(project_id user_id priority due_date created_at revision ready exported loading fingerprint duplicate)
-  end
-
-  def special_index_fields
-    {
-      key_ids: commits_keys.pluck(:key_id)
-    }
+  update_index('commits#commit') do
+    self unless previous_changes.blank? && persisted?
   end
 
   validates :project,
@@ -200,10 +175,16 @@ class Commit < ActiveRecord::Base
   # approved_at to be the current time.
 
   def recalculate_ready!
+    already_ready = self.ready
     self.ready = successfully_loaded? && keys_are_ready? && !errored_during_import?
     self.approved_at = Time.current if self.ready && self.approved_at.nil?
-    index_elasticsearch_document
     save!
+
+    # records metric only when becoming ready
+    if !already_ready and self.ready and self.approved_at and self.created_at
+      ready_time = self.approved_at - self.created_at
+      CustomMetricHelper.record_project_ready_time(self.project.slug, ready_time)
+    end
   end
 
   # Returns `true` if all Translations applying to this commit have been

@@ -35,5 +35,9 @@ RSpec.describe Fencer::Android do
     it "should return false for a string that only contains any other character between { }" do
       expect(Fencer::Android.valid?("String with {{two}} {tokens}.")).to be_falsey
     end
+
+    it "should return true for a string that contains CDATA" do
+      expect(Fencer::Android.valid?("<![CDATA[<p>hello</p>]]>")).to be_truthy
+    end
   end
 end

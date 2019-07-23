@@ -59,7 +59,9 @@ class AssetImporter
 
       Key.batch_recalculate_ready!(asset)
       AssetRecalculator.new.perform(asset.id)
-      Translation.batch_refresh_elastic_search(asset)
+      TranslationsIndex.import! asset.reload.translations
+
+      PostLoadingChecker.launch(asset)
     end
   end
 end

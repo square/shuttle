@@ -18,7 +18,6 @@ RSpec.describe Locale::ProjectsController do
   describe "#show" do
     context "[status filtering]" do
       before :each do
-        reset_elastic_search
         @user    = FactoryBot.create(:user, :confirmed, role: 'translator', approved_rfc5646_locales: ['fr-CA'])
         @project = FactoryBot.create(:project, base_rfc5646_locale: 'en-US', targeted_rfc5646_locales: {'fr-CA' => true})
 
@@ -77,7 +76,6 @@ RSpec.describe Locale::ProjectsController do
                                          copy:                  nil,
                                          translated:            false,
                                          approved:              nil)
-        regenerate_elastic_search_indexes
 
         @request.env["devise.mapping"] = Devise.mappings[:user]
         sign_in @user
@@ -127,7 +125,7 @@ RSpec.describe Locale::ProjectsController do
         expect(response.status).to eql(200)
         translations = assigns(:translations)
         expect(translations.map { |t| t.key.key }).
-            to match_array([@approved.key.key, @new.key.key])
+            to match_array([@approved.key.key, @new.key.key, @rejected.key.key])
       end
 
       it "should filter with include_translated = true, include_approved = true" do
@@ -135,7 +133,7 @@ RSpec.describe Locale::ProjectsController do
         expect(response.status).to eql(200)
         translations = assigns(:translations)
         expect(translations.map { |t| t.key.key }).
-            to match_array([@translated.key.key, @approved.key.key, @rejected.key.key])
+            to match_array([@translated.key.key, @approved.key.key])
       end
 
       it "should filter with include_translated = true, include_approved = true, include_new = true" do
@@ -163,7 +161,6 @@ RSpec.describe Locale::ProjectsController do
         sign_in user
 
         allow_any_instance_of(Article).to receive(:import!) # prevent auto import
-        reset_elastic_search
 
         @project = FactoryBot.create(:project, repository_url: nil, job_type: :article)
         @article = FactoryBot.create(:article, project: @project)
@@ -179,14 +176,11 @@ RSpec.describe Locale::ProjectsController do
         @translation3 = FactoryBot.create(:translation, key: @key3, copy: nil, rfc5646_locale: 'fr')
         @translation4 = FactoryBot.create(:translation, key: @key4, copy: nil, rfc5646_locale: 'fr')
         @translation5 = FactoryBot.create(:translation, key: @key5, copy: nil, rfc5646_locale: 'fr')
-
-        regenerate_elastic_search_indexes
       end
 
       it "returns active keys in an article in the right order" do
         @section2.update! active: false     # inactive section
         @key3.update! index_in_section: nil # inactive key
-        regenerate_elastic_search_indexes
 
         get :show, id: @project.to_param, article_id: @article.id, locale_id: 'fr', include_new: 'true'
         expect(response.status).to eql(200)
@@ -199,10 +193,16 @@ RSpec.describe Locale::ProjectsController do
         expect(assigns(:translations).map(&:id)).to eql([@translation4.id])
       end
 
-      it "filters with include_block_tags" do
+      it "filters with include_block_tags = true" do
         get :show, id: @project.to_param, article_id: @article.id, section_id: @section2.id, locale_id: 'fr', include_new: 'true', include_block_tags: 'true'
         expect(response.status).to eql(200)
         expect(assigns(:translations).map(&:id)).to eql([@translation4.id, @translation5.id])
+      end
+
+      it "filters with include_block_tags = false" do
+        get :show, id: @project.to_param, article_id: @article.id, section_id: @section2.id, locale_id: 'fr', include_new: 'false', include_block_tags: 'false'
+        expect(response.status).to eql(200)
+        expect(assigns(:translations).map(&:id)).to eql([@translation4.id])
       end
     end
   end
