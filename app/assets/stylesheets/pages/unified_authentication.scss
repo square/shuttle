@@ -5,10 +5,14 @@
 $form-radius-size: 4px;
 
 body.unified-authentication, body.passwords {
-  background-image: image-url('login-background.jpg');
-  background-color: $gray3;
-  background-repeat: repeat-y;
-  background-size: cover;
+  // background-image: image-url('login-background.jpg');
+  // background-color: $gray3;
+  // background-repeat: repeat-y;
+  // background-size: cover;
+  background: #00F260;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to left, #0575E6, #00F260);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to left, #0575E6, #00F260); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
 
   #navbar-container {
     background-color: transparent;
@@ -31,7 +35,6 @@ body.unified-authentication, body.passwords {
 
         &>.ten.columns {
           background-color: $gray1;
-          @include opacity(0.9);
           color: white;
           font-weight: 300;
           text-align: center;
@@ -40,7 +43,7 @@ body.unified-authentication, body.passwords {
 
           h1 {
             font-size: 50px;
-            font-weight: 100;
+            font-weight: 200;
             line-height: 58px;
           }
 

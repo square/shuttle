@@ -17,77 +17,35 @@ class SearchTranslationsFinder
   PER_PAGE = 50
 
   attr_reader :form
-  include Elasticsearch::DSL
 
   def initialize(form)
     @form = form
   end
 
   def search_query
-    project_id = form[:project_id]
-    query_filter = form[:query]
-    field = form[:field]
-    translator_id = form[:translator_id]
-
-    start_date = form[:start_date]
-    end_date = form[:end_date]
-    if form[:target_locales].present? && form[:target_locales].size > 0
-      target_locales = form[:target_locales].first.rfc5646
-    end
-    hidden_keys = form[:hidden_keys] if form[:hidden_keys].present?
-
-    offset = (page - 1) * PER_PAGE
-    limit = PER_PAGE
-
-    search {
-      query do
-        filtered do
-          if query_filter.present?
-            query do
-              if field == 'searchable_source_copy'
-                match 'source_copy' do
-                  query query_filter
-                  operator 'or'
-                end
-              else
-                match 'copy' do
-                  query query_filter
-                  operator 'or'
-                end
-              end
-            end
-          end
-
-          filter do
-            bool do
-              must { term rfc5646_locale: target_locales } if target_locales
-              must { term project_id: project_id } if project_id && project_id > 0
-              must { term translator_id: translator_id } if translator_id && translator_id > 0
-              if start_date
-                must {
-                  range 'updated_at' do
-                    gte start_date
-                  end
-                }
-              end
-              if end_date
-                must {
-                  range 'updated_at' do
-                    lte end_date
-                  end
-                }
-              end
-
-              hidden_keys ? must { term hidden_in_search: true } : must { term hidden_in_search: false }
-            end
-          end
-        end
+    query_params = []
+    text_to_search = form[:query]
+    if text_to_search.present?
+      if form[:field] == 'searchable_source_copy'
+        query_params << { match: { source_copy: { query: text_to_search, operator: 'or' } } }
+      else
+        query_params << { match: { copy: { query: text_to_search, operator: 'or' } } }
       end
+    end
 
-      sort { by :id, order: 'desc' } unless query_filter.present?
-      size limit
-      from offset
-    }.to_hash
+    filter_params = []
+    filter_params << { term: { rfc5646_locale: form[:target_locales].first.rfc5646} } if form[:target_locales].present? && form[:target_locales].size > 0
+    filter_params << { term: { project_id: form[:project_id].to_i } } if form[:project_id].present?
+    filter_params << { term: { translator_id: form[:translator_id].to_i } } if form[:translator_id].present?
+    filter_params << { term: { reviewer_id: form[:reviewer_id].to_i } } if form[:reviewer_id].present?
+    filter_params << { range: { updated_at: { gte: form[:start_date] } } } if form[:start_date].present?
+    filter_params << { range: { updated_at: { lte: form[:end_date] } } } if form[:end_date].present?
+    filter_params << { term: { hidden_in_search: form[:hidden_keys] || false } }
+
+    query = TranslationsIndex.query(query_params).filter(filter_params)
+    query = query.order(id: :desc) if text_to_search.blank?
+    query = query.offset((page - 1) * PER_PAGE).limit(PER_PAGE)
+    return query
   end
 
   def page
@@ -95,9 +53,7 @@ class SearchTranslationsFinder
   end
 
   def find_translations
-    limit = PER_PAGE
-    translations_in_es = Elasticsearch::Model.search(search_query, Translation).results
-    translations = Translation.where(id: translations_in_es.map(&:id)).includes(key: :project)
-    PaginatableObjects.new(translations, translations_in_es, page, limit)
+    translations = search_query.load(scope: -> { includes(key: :project) })
+    return PaginatableObjects.new(translations, page, PER_PAGE)
   end
 end

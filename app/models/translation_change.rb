@@ -35,7 +35,7 @@ class TranslationChange < ActiveRecord::Base
   belongs_to :project
   belongs_to :article
   belongs_to :asset
-  has_many :edit_reasons
+  has_many :edit_reasons, dependent: :delete_all
   has_many :reasons, through: :edit_reasons
 
   serialize :diff, Hash
@@ -57,11 +57,10 @@ class TranslationChange < ActiveRecord::Base
   }
 
   def self.create_from_translation!(translation)
-    diff = translation.previous_changes.slice(*TRACKED_ATTRIBUTES)
-    TranslationChange.create(translation: translation, user: translation.modifier, diff: diff) if diff.present?
+    create_from_params!(translation, translation.updating_params || {})
   end
 
-  def self.create_from_params!(translation, params, is_edit)
+  def self.create_from_params!(translation, params)
     diff = translation.previous_changes.slice(*TRACKED_ATTRIBUTES)
     if diff.present?
       project_id = Project.joins(:slugs).where('slugs.slug = ?', params[:project_id]).pluck('projects.id').first
@@ -73,8 +72,8 @@ class TranslationChange < ActiveRecord::Base
         translation: translation,
         user: translation.modifier,
         diff: diff,
-        role: translation.modifier.role,
-        is_edit: is_edit,
+        role: translation.modifier&.role,
+        is_edit: params[:is_edit],
         tm_match: translation.tm_match,
         sha: commit,
         article_id: article_id,

@@ -43,10 +43,21 @@ RSpec.describe TranslationUpdateMediator do
       expect(@key.reload).to_not be_ready
     end
 
-    it "updates a single translation; approve translation if translator is a reviewer; key becomes ready" do
+    it "updates a single translation; approve not-translated string" do
       TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
       expect(@fr_translation.copy).to eql("test copy")
       expect(@fr_translation.translator).to eql(reviewer)
+      expect(@fr_translation.approved).to be_truthy
+      expect(@fr_translation.reviewer).to eql(reviewer)
+      expect(@key.reload).to be_ready
+    end
+
+    it "updates a single translation; approve translated string" do
+      @fr_translation.update(copy: 'this is old translation', translator: translator)
+
+      TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
+      expect(@fr_translation.copy).to eql("test copy")
+      expect(@fr_translation.translator).to eql(translator)
       expect(@fr_translation.approved).to be_truthy
       expect(@fr_translation.reviewer).to eql(reviewer)
       expect(@key.reload).to be_ready
@@ -141,13 +152,11 @@ RSpec.describe TranslationUpdateMediator do
       end
 
       it "sets the tm_match" do
-        reset_elastic_search
-
         # create a translation that will be used for lookup for tm_match
         FactoryBot.create(:translation, copy: "test", source_copy: 'test', approved: true, translated: true, rfc5646_locale: 'fr')
 
         # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
-        regenerate_elastic_search_indexes
+        TranslationsIndex.reset!
 
         TranslationUpdateMediator.new(@fr_translation, reviewer, @params).update!
 
@@ -224,6 +233,7 @@ RSpec.describe TranslationUpdateMediator do
       translation1 = FactoryBot.create(:translation, key: key, rfc5646_locale: 'fr')
       translation2 = FactoryBot.create(:translation, key: key, rfc5646_locale: 'fr-CA')
       translation3 = FactoryBot.create(:translation, key: key, rfc5646_locale: 'fr-FR')
+      key.reload
       expect(TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(translation1)).to eql(translation2 => la1, translation3 => la2)
     end
 
@@ -236,6 +246,7 @@ RSpec.describe TranslationUpdateMediator do
       translation1 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en-XX')
       translation2 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en')
       translation3 = FactoryBot.create(:translation, key: key, source_rfc5646_locale: 'en', rfc5646_locale: 'en-YY')
+      key.reload
       expect(TranslationUpdateMediator.multi_updateable_translations_to_locale_associations_hash(translation1)).to eql(translation3 => la2)
     end
   end
@@ -251,6 +262,7 @@ RSpec.describe TranslationUpdateMediator do
     it "returns the Translation objects corresponding to the user provided copyToLocales param; doesn't add an error if all are valid" do
       fr_CA_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
       fr_FR_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-FR')
+      @key.reload
       mediator = TranslationUpdateMediator.new(@fr_translation, translator, ActionController::Parameters.new( copyToLocales: %w(fr-CA fr-FR) ))
       expect(mediator.send(:translations_that_should_be_multi_updated)).to eql([fr_CA_translation, fr_FR_translation])
       expect(mediator.success?).to be_truthy
@@ -266,6 +278,7 @@ RSpec.describe TranslationUpdateMediator do
 
     it "adds an error to the mediator if one of the locales user wanted to copy to is not valid because there is no Translation in one of those locales" do
       fr_CA_translation = FactoryBot.create(:translation, key: @key, copy: nil, translator: nil, rfc5646_locale: 'fr-CA')
+      @key.reload
       mediator = TranslationUpdateMediator.new(@fr_translation, translator, ActionController::Parameters.new( copyToLocales: %w(fr-CA fr-FR)))
       mediator.send(:translations_that_should_be_multi_updated)
       expect(mediator.success?).to be_falsey

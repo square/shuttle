@@ -20,15 +20,33 @@ body.home {
   }
 
   .filter-bar {
-    input[type="submit"] { width: 125px; margin-left: 15px; }
-    select[name="filter__rfc5646_locales"] { width: 200px; }
-    select[name="filter__status"] { width: 200px; }
-    input[name="commits_filter__sha"], input[name="articles_filter__name"], input[name="groups_filter__name"] { width: 350px; }
-    select[name="commits_filter__project_id"], select[name="articles_filter__project_id"], select[name="groups_filter__project_id"] { width: 160px; }
+    input[type="submit"] {
+      width: 125px;
+      margin-left: 15px;
+    }
+    select[name="filter__rfc5646_locales"] {
+      width: 200px;
+    }
+    select[name="filter__status"] {
+      min-width: 200px;
+    }
+    input[name="commits_filter__sha"],
+    input[name="articles_filter__name"],
+    input[name="groups_filter__name"] {
+      width: 230px;
+    }
+    select[name="commits_filter__project_id"],
+    select[name="articles_filter__project_id"],
+    select[name="groups_filter__project_id"] {
+      min-width: 160px;
+      max-width: 300px;
+    }
 
     .twitter-typeahead {
       margin-left: 15px;
-      input + input { margin: 0px; }
+      input + input {
+        margin: 0px;
+      }
     }
 
     .advanced-filters-label {
@@ -45,7 +63,10 @@ body.home {
     tbody {
       tr {
         border-top: 3px white solid;
-        &:hover {cursor: pointer;}
+        transition: 0.3s background-color;
+        &:hover {
+          cursor: pointer;
+        }
 
         td {
           &.status-translating,
@@ -54,45 +75,95 @@ body.home {
             padding: 0;
             width: 5px;
           }
-          &.status-translating { background-color: $commit-red; }
-          &.status-loading { background-color: $commit-blue; }
-          &.status-ready { background-color: $commit-green; }
+          &.status-translating {
+            background-color: $commit-red;
+          }
+          &.status-loading {
+            background-color: $commit-blue;
+          }
+          &.status-ready {
+            background-color: $commit-green;
+          }
 
-          &.due-date { width: 110px;}
-          &.centered { text-align: center; }
+          &.due-date {
+            width: 110px;
+          }
+          &.centered {
+            text-align: center;
+          }
 
-          select { width: 100%; }
-          input[type="text"] { width: 110px; }
-          a { text-decoration: underline; }
-          .description { width: 280px; }
-          .translate-link { padding: 5px 10px; }
+          select {
+            width: 100%;
+          }
+          input[type="text"] {
+            width: 110px;
+          }
+          a {
+            text-decoration: underline;
+          }
+          .description {
+            text-align: center;
+            font-size: 10px;
+            line-height: 12px;
+            vertical-align: top;
+          }
+          .translate-link {
+            padding: 5px 10px;
+          }
         }
       }
     }
   }
 
-  .priority-0 { color: #E94239; font-weight: bold; }
-  .priority-1 { color: #E98C39; font-weight: bold; }
-  .priority-2 { color: #E9B039; font-weight: bold; }
-  .priority-3 { color: $input-green; font-weight: bold; }
+  .priority-0 {
+    color: #e94239;
+    font-weight: bold;
+  }
+  .priority-1 {
+    color: #e98c39;
+    font-weight: bold;
+  }
+  .priority-2 {
+    color: #e9b039;
+    font-weight: bold;
+  }
+  .priority-3 {
+    color: $input-green;
+    font-weight: bold;
+  }
 
   .pagination-links {
     width: 100%;
     font-size: 20px;
     margin: 10px 0px;
     .pagination {
-      display:-moz-box; /* Firefox */
-      display:-webkit-box; /* Safari and Chrome */
-      display:-ms-flexbox; /* Internet Explorer 10 */
-      display:box;
+      display: -moz-box; /* Firefox */
+      display: -webkit-box; /* Safari and Chrome */
+      display: -ms-flexbox; /* Internet Explorer 10 */
+      display: box;
     }
-    .switch-page { width: 198px; }
+    .switch-page {
+      width: 198px;
+    }
     .pages {
       @include flex;
       text-align: center;
-      .page + .page { margin-left: 8px; }
+      .page + .page {
+        margin-left: 8px;
+      }
     }
   }
 
-  .pagination-info { width: 100%; text-align: center; }
+  .pagination-info {
+    width: 100%;
+    text-align: center;
+  }
+
+  .csv-button {
+    margin-right: 10px;
+  }
+}
+.description-container {
+  padding: 0 !important; // yes, I'm doing this so I don't have to chase this down
+  width: 120px;
 }

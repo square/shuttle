@@ -26,7 +26,7 @@ tr.row_class
   td = item.project.name
 
   / Commit SHA or Article Name
-  td
+  td class=('revision-prefix' if item.is_a?(Commit))
     - if item.is_a?(Commit)
       = link_to item.revision_prefix, project_commit_url(item.project, item)
     - elsif item.is_a?(Article)
@@ -34,9 +34,9 @@ tr.row_class
     - elsif item.is_a?(Asset)
       = link_to truncate(item.name), project_asset_url(item.project, item)
     - elsif item.is_a?(Group)
-      = truncate(item.display_name)
+      = link_to truncate(item.display_name), api_v1_project_group_url(item.project.id, item.name)
   / Create Date
-  td.centered
+  td
     - if item.is_a?(Commit)
       = item.created_at.strftime('%m/%d/%Y')
     - elsif item.is_a?(Article)
@@ -47,7 +47,7 @@ tr.row_class
       = item.created_at.strftime('%m/%d/%Y')
 
   / Due Date
-  td.due-date.centered
+  td.due-date
     - if current_user.admin? or current_user.monitor?
       = form_for item, url: @presenter.update_item_path(item) do |f|
         = f.text_field  :due_date, value: (f.object.due_date.strftime('%m/%d/%Y') if !f.object.due_date.nil?), class: 'datepicker'
@@ -55,7 +55,7 @@ tr.row_class
       span = l(item.due_date, format: :mon_day_year)
 
   / Priority
-  td.centered
+  td
     - if current_user.admin?
       = form_for item, url: @presenter.update_item_path(item) do |f|
         = f.select :priority, t("models.#{item_type}.priority").to_a.map(&:reverse).unshift(['-', nil]), {}, class: 'styled'
@@ -67,11 +67,19 @@ tr.row_class
         | -
 
   / Description
-  td.centered
+  td.description-container
     div.description[data-full-description=@presenter.full_description(item)
       data-short-description=@presenter.short_description(item)
       data-sub-description=@presenter.sub_description(item)]
       = @presenter.short_description(item)
+
+  / group count in articles & article count in groups
+  - if item.is_a?(Article)
+    td
+      = t("controllers.home.articles.groups_cell", pending_count: item&.groups&.reject(&:ready)&.count, linked_count: item&.groups&.count)
+  - elsif item.is_a?(Group)
+    td
+      = t("controllers.home.groups.articles_cell", pending_count: item&.articles&.reject(&:ready)&.count, linked_count: item&.articles&.count)
 
   / Stats
   - if current_user.translator?

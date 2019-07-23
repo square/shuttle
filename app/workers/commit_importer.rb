@@ -41,6 +41,7 @@ class CommitImporter
 
     def on_success(_status, options)
       commit = Commit.find(options['commit_id'])
+      already_loaded = commit.loaded_at.present?
 
       # mark related blobs as parsed so that we don't parse them again
       mark_not_errored_blobs_as_parsed(commit)
@@ -59,8 +60,21 @@ class CommitImporter
       # finish loading
       commit.update!(loading: false, import_batch_id: nil)
 
+      # records metric only when never loaded before
+      if !already_loaded and commit.loaded_at and commit.created_at
+        loading_time = commit.loaded_at - commit.created_at
+        CustomMetricHelper.record_project_loading_time(commit.project.slug, loading_time)
+
+        active_translations = commit.active_translations.group_by { |t| t.rfc5646_locale }
+        locale_to_keys = active_translations.map { |locale, ts| [locale, ts.count] }.to_h
+        locale_to_words = active_translations.map { |locale, ts| [locale, ts.map(&:words_count).sum] }.to_h
+        CustomMetricHelper.record_project_statistics(commit.project.slug, commit.blobs.count, locale_to_keys, locale_to_words)
+      end
+
       # the readiness hooks were all disabled, so now we need to go through and calculate commit readiness and stats.
       CommitRecalculator.new.perform commit.id
+
+      PostLoadingChecker.launch(commit)
     end
 
     private

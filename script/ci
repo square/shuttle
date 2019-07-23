@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+export LC_CTYPE=en_US.UTF-8
+export LANG=en_US.UTF-8
+RUN_LIST=$(echo ${RUN_LIST} | tr "," " ")
+PIDFILE="tmp/elasticsearch.pid"
+
+function install_cmake() {
+  sudo yum install -y cmake
+}
+
+function install_tidy() {
+  sudo yum install -y tidy
+}
+
+function install_libarchive() {
+  sudo yum install -y libarchive-devel
+}
+
+function install_elasticsearch() {
+  ./script/install.d/elasticsearch
+}
+
+function start_elasticsearch() {
+  ./script/elasticsearch &
+
+  curl 'localhost:9200'
+  err=$?
+  while [ $err -ne 0 ]
+  do
+    echo 'Waiting for ElasticSearch to start'
+    sleep 1
+    curl 'localhost:9200'
+    err=$?
+  done
+}
+
+function stop_elasticsearch() {
+  if [ -f $PIDFILE ]; then
+    kill `cat $PIDFILE`
+    sleep 5
+  fi
+
+  ./script/elasticsearch-cleanup
+}
+
+function install_bundler_if_needed() {
+  echo "Checking for Bundler ..."
+  gem install bundler --conservative
+}
+
+function update_gems_if_needed() {
+  set -e  # exit if bundle install fails
+
+  echo "Installing gems..."
+  if [[ -n $KOCHIKU_ENV ]]; then
+    bundle_install_from_shared_cache shuttle
+  else
+    bundle check || bundle install
+  fi
+
+  set +e
+}
+
+function prepare_database() {
+  dropdb -h 127.0.0.1 shuttle_test || true
+  dropuser -h 127.0.0.1 shuttle || true
+  createuser -D -R -S -h 127.0.0.1 shuttle || true
+  createdb -h 127.0.0.1 -O shuttle shuttle_test
+#  psql -h 127.0.0.1 -U shuttle -f db/structure.sql shuttle_test
+  RAILS_ENV=test bundle exec rake db:migrate
+}
+
+function run_specs() {
+  bundle exec rspec ${RUN_LIST}
+}
+
+function run_jasmine() {
+  bundle exec rake guard:jasmine -t
+}
+
+function prepare() {
+  install_cmake
+  install_tidy
+  install_elasticsearch
+  install_libarchive
+  install_bundler_if_needed &&
+  update_gems_if_needed &&
+  prepare_database
+}
+
+prepare
+start_elasticsearch
+
+set -x
+case "${TEST_RUNNER}" in
+  jasmine)
+    run_jasmine
+  ;;
+
+  specs)
+    run_specs
+  ;;
+  *)
+    echo "unknown test runner: ${TEST_RUNNER}"
+    exit 127
+  ;;
+esac
+
+exit_status=$?
+stop_elasticsearch
+exit $exit_status

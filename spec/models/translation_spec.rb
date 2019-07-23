@@ -257,30 +257,6 @@ RSpec.describe Translation do
     end
   end
 
-  describe "#batch_refresh_elastic_search" do
-    it "refreshes the ElasticSearch index (section_active field in this test) of Article's Translations" do
-      allow_any_instance_of(Article).to receive(:import!) # prevent auto import
-      reset_elastic_search
-
-      article = FactoryBot.create(:article)
-      section = FactoryBot.create(:section, article: article, active: true)
-      key = FactoryBot.create(:key, section: section, index_in_section: 0, project: article.project)
-      translation = FactoryBot.create(:translation, key: key)
-
-      regenerate_elastic_search_indexes
-
-      expect(Elasticsearch::Model.search(section_active_query(true), Translation).results.first.id.to_i).to eql(translation.id)
-      expect(Elasticsearch::Model.search(section_active_query(false), Translation).results.first).to be_nil
-
-      section.update! active: false
-      Translation.batch_refresh_elastic_search(article)
-      regenerate_elastic_search_indexes
-
-      expect(Elasticsearch::Model.search(section_active_query(true), Translation).results.first).to be_nil
-      expect(Elasticsearch::Model.search(section_active_query(false), Translation).results.first.id.to_i).to eql(translation.id)
-    end
-  end
-
   describe "#shared?" do
     let(:article) { FactoryBot.create(:article) }
     let(:section) { FactoryBot.create(:section, article: article, active: true) }
@@ -310,6 +286,40 @@ RSpec.describe Translation do
 
     it 'included in to_json' do
       expect(JSON.parse(translation.to_json).include?('shared?')).to be_truthy
+    end
+  end
+
+  describe "#destroy" do
+    it "cleans all child objects properly" do
+      translation = FactoryBot.create(:translation)
+      translation_change = FactoryBot.create(:translation_change, translation: translation)
+      edit_reason = FactoryBot.create(:edit_reason, translation_change: translation_change)
+
+      expect(Translation.where(id: translation.id).count).to eq(1)
+      expect(TranslationChange.where(id: translation_change.id).count).to eq(1)
+      expect(EditReason.where(id: edit_reason.id).count).to eq(1)
+
+      translation.destroy
+
+      expect(Translation.where(id: translation.id).count).to eq(0)
+      expect(TranslationChange.where(id: translation_change.id).count).to eq(0)
+      expect(EditReason.where(id: edit_reason.id).count).to eq(0)
+    end
+  end
+
+  describe "#elastic_search" do
+    let!(:translation) { FactoryBot.create(:translation) }
+
+    it "should appear in both ES and DB after creation" do
+      expect(Translation.where(id: translation.id).count).to eq(1)
+      expect(TranslationsIndex.query(term: { id: translation.id }).count).to eq(1)
+    end
+
+    it "should disappear in both ES and DB after destroy" do
+      translation.destroy
+
+      expect(Translation.where(id: translation.id).count).to eq(0)
+      expect(TranslationsIndex.query(term: { id: translation.id }).count).to eq(0)
     end
   end
 

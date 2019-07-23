@@ -1,6 +1,7 @@
 brew 'cmake'
 brew 'libarchive'
 brew 'libgit2'
-brew 'postgresql'
+brew 'postgresql@9.4'
 brew 'qt'
 brew 'redis'
+brew 'elasticsearch@5.6'

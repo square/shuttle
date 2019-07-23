@@ -12,7 +12,11 @@ services:
     image: redis
 
   elasticsearch:
-    image: quay.io/trackmaven/elasticsearch:1.7
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.1
+    ports:
+    - 9200:9200
+    environment:
+    - xpack.security.enabled=false
 
   tests:
     build:
@@ -21,18 +25,14 @@ services:
         - BUNDLE_GEMS__CONTRIBSYS__COM
     links: &links
       - postgresql
-      - postgresql:postgresql.shuttle.local
       - redis
-      - redis:redis.shuttle.local
       - elasticsearch
-      - elasticsearch:elasticsearch.shuttle.local
     environment: &environment
       - RAILS_ENV=test
       - RACK_ENV=test
-      - SHUTTLE_DB_HOST=postgresql.shuttle.local
-      - SHUTTLE_REDIS_HOST=redis.shuttle.local
-      - SHUTTLE_ES_URL=elasticsearch.shuttle.local:9200
-      - SHUTTLE_MAIL_HOST=mail.shuttle.local
+      - SHUTTLE_DB_HOST=postgresql
+      - SHUTTLE_REDIS_HOST=redis
+      - SHUTTLE_ES_URL=elasticsearch:9200
 
 #  worker:
 #    build: .

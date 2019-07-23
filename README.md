@@ -83,35 +83,23 @@ Create and import your first project!
 
 ### Setting up your development environment without Docker
 
-Developing for Shuttle requires Ruby 2.3.1, PostgreSQL, Redis, Tidy, Sidekiq Pro
-ElasticSearch 1.7, and a modern version of libarchive. To run Shuttle for the
-first time:
+Developing for Shuttle requires Ruby 2.4.6, PostgreSQL 9.4, Redis, Tidy, Sidekiq
+Pro ElasticSearch 5.6, and a modern version of libarchive. To run Shuttle for
+the first time:
 
 1. Clone this project.
 
-2. Install Ruby 2.3.1. If you are using RVM, you can do so using the
+2. Install Ruby 2.4.6. If you are using RVM, you can do so using the
    `.ruby-version` file.
 
 3. Run `brew bundle` to install all dependencies available via Homebrew, which
    are specified in the `Brewfile`, or install them manually referencing the
    Brewfile.
 
-4. Since ElasticSearch 1.7 is required, you will have to download and install it
-   manually at https://www.elastic.co/downloads/past-releases/elasticsearch-1-7-6.
-
-   If you are already running a more modern version of ElasticSearch, you can
-   run this older version simultaneously on a different port (e.g. 9201) by
-   altering the `config/elasticsearch.yml` file in the ElasticSearch install
-   directory. If you do this, make sure you override the default ElasticSearch
-   URL when running Shuttle by either creating a
-   `config/environments/development/elasticsearch.yml` file (to override the
-   file under `config/environments/common`), or setting the `ELASTICSEARCH_URL`
-   instance variable.
-
-5. Buy Sidekiq Pro and place your private source URL in Gemfile as specified by
+4. Buy Sidekiq Pro and place your private source URL in Gemfile as specified by
    the Sidekiq Pro documentation.
 
-6. Create a PostgreSQL user called `shuttle`, and make it the owner of two
+5. Create a PostgreSQL user called `shuttle`, and make it the owner of two
    PostgreSQL databases, `shuttle_development` and `shuttle_test`:
 
    ``` sh
@@ -120,51 +108,45 @@ first time:
    createdb -O shuttle shuttle_test
    ```
 
-7. You will need to tell Bundler where the libarchive install directory is. If
+6. You will need to tell Bundler where the libarchive install directory is. If
    you installed libarchive using Homebrew, you can do this by running
 
    ``` sh
    bundle config build.libarchive --with-opt-dir=$(brew --prefix libarchive)
    ```
 
-8. Likewise, for Rugged, you will need to tell Bundler where the libgit2 install
+7. Likewise, for Rugged, you will need to tell Bundler where the libgit2 install
    directory is. If you installed libgit2 using Homebrew:
 
    ``` sh
    bundle config build.rugged --with-opt-dir=$(brew --prefix libgit2)
    ```
 
-9. Make sure that PostgreSQL, Redis, and ElasticSearch are running. If you
-   installed them via Homebrew, running `brew info postgresql` and
-   `brew info redis` will tell you how to run them. For ElasticSearch, read the
-   README in your install directory.
+8. Make sure that PostgreSQL, Redis, and ElasticSearch are running. If you
+   installed them via Homebrew, running `brew info postgresql@9.6`,
+   `brew info redis`, and `brew info elasticsearch` will tell you how to run
+   them.
 
-10. Install the `mailcatcher` gem, which is used to receive emails sent in
+9.  Install the `mailcatcher` gem, which is used to receive emails sent in
     development. (This gem is not a part of the Gemfile because it's typically
     installed as part of a global or system-wide gemset to be used with
     all projects.)
-11. Optionally, install the `foreman` gem, which runs all the processes
+
+10. Optionally, install the `foreman` gem, which runs all the processes
     necessary for development.
-12. Install all required gems by running `bundle install`.
-13. Run `rake db:migrate db:seed` to migrate and seed the database.
-14. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
-15. Initialize the ElasticSearch index for development by running
 
-    ``` sh
-    rake environment elasticsearch:import:model FORCE=y CLASS=Commit
-    rake environment elasticsearch:import:model FORCE=y CLASS=Key
-    rake environment elasticsearch:import:model FORCE=y CLASS=Translation
-    ```
+11. Install all required gems by running `bundle install`.
 
-16. Do the same for the test indexes:
+12. Run `rake db:migrate db:seed` to migrate and seed the database.
 
-    ``` sh
-    RAILS_ENV=test rake environment elasticsearch:import:model FORCE=y CLASS=Commit
-    RAILS_ENV=test rake environment elasticsearch:import:model FORCE=y CLASS=Key
-    RAILS_ENV=test rake environment elasticsearch:import:model FORCE=y CLASS=Translation
-    ```
+13. Run `RAILS_ENV=test rake db:migrate` to setup the test database.
 
-17. Verify that all specs pass with `rspec spec`.
+14. Initialize the ElasticSearch index for development by running
+    `rake chewy:reset`.
+
+15. Do the same for the test indexes: `RAILS_ENV=test rake chewy:reset`
+
+16. Verify that all specs pass with `rspec spec`.
 
 #### Starting the server
 
@@ -457,7 +439,7 @@ RSpec specs under the `spec` directory. Views and JavaScript files are not
 specced. Almost all unit tests use factories rather than mocks, putting them
 somewhat closer to integration tests.
 
-If you are using Docker, first run `docker-compose -f docker-compose.test.yml`
+If you are using Docker, first run `docker-compose -f docker-compose.test.yml build`
 to build the images. This only has to be done once, and each time you make a
 change to the source code. Run `docker-compose -f docker-compose.test.yml up` to
 start the environment, and

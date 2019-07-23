@@ -43,7 +43,7 @@
 }
 
 @include widescreen {
-  .container { width: $widescreen-size; }
+  .container { width: 95%; max-width: $widescreen-size; }
   .row { @include columns($widescreen-column-width); }
 }
 

@@ -1,7 +1,8 @@
-source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.3.1'
+source 'https://rubygems.org'
+
+ruby '2.4.6'
 
 # FRAMEWORK
 gem 'rails', '4.2.10'
@@ -15,6 +16,7 @@ gem 'rubyzip'
 
 # AUTHENTICATION
 gem 'devise'
+gem 'devise_security_extension'
 
 # MODELS
 gem 'pg', '< 1.0'
@@ -29,11 +31,8 @@ gem 'after-commit-on-action'
 gem 'postgres_ext'
 gem 'active_record_union'
 
-# ElASTICSEARCH
-gem 'elasticsearch', '< 6.0'
-gem 'elasticsearch-rails'
-gem 'elasticsearch-model'
-gem 'elasticsearch-dsl'
+# ELASTICSEARCH
+gem 'chewy'
 
 # VIEWS
 gem 'jquery-rails'
@@ -46,8 +45,9 @@ gem 'slim-rails'
 gem 'autoprefixer-rails'
 
 # UTILITIES
+gem 'bundler'
 gem 'json'
-gem 'rugged', github: 'brandonweeks/rugged', tag: 'v0.24.0-square0', submodules: true
+gem 'rugged', github: 'squarit/rugged', tag: 'v0.27.2-square0', submodules: true
 gem 'coffee-script'
 gem 'unicode_scanner'
 gem 'httparty'
@@ -59,6 +59,7 @@ gem 'aws-sdk', '< 3'
 gem 'execjs'
 gem 'safemode'
 gem 'pivot_table'
+gem 'sentry-raven'
 
 # IMPORTING
 gem 'nokogiri'
@@ -80,9 +81,10 @@ gem 'uea-stemmer'
 gem 'faker'
 
 # BACKGROUND JOBS
-source "https://gems.contribsys.com/" do
+source 'https://gems.contribsys.com' do
   gem 'sidekiq-pro', '= 3.4.5'
 end
+
 gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
 gem 'sinatra', require: nil
 gem 'whenever', require: nil
@@ -97,6 +99,14 @@ gem 'sass-rails'
 gem 'coffee-rails'
 gem 'uglifier'
 gem 'hogan_assets', github: 'rubenrails/hogan_assets', branch: 'fix_for_sprockets' # sprockets 3 compatibility
+gem 'awesome_print'
+
+source 'https://rails-assets.org' do
+  gem 'rails-assets-raven-js'
+end
+
+# METRICS
+gem 'newrelic_rpm'
 
 group :development do
   gem 'capistrano'
@@ -113,6 +123,13 @@ group :development do
   gem 'binding_of_caller'
 end
 
+group :dummy do
+  # needed for deployment
+  gem 'rbnacl', '< 5.0'
+  gem 'rbnacl-libsodium'
+  gem 'bcrypt_pbkdf', '< 2.0'
+end
+
 group :test do
   gem 'rspec-rails'
   gem 'factory_bot_rails'
@@ -121,3 +138,5 @@ group :test do
   gem 'database_cleaner'
   gem 'capybara'
 end
+
+gem "message_format", "~> 0.0.5"

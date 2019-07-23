@@ -52,6 +52,11 @@ div
             = select_tag 'translator_id', options_for_select(User.order('email ASC').map { |u| [u.name, u.id] }.unshift(['Anyone', nil]))
 
         .control-group
+          = label_tag 'reviewer_id', 'Reviewer', class: 'control-label'
+          .controls
+            = select_tag 'reviewer_id', options_for_select(User.order('email ASC').map {|u| [u.name, u.id]}.unshift(['Anyone', nil]))
+
+        .control-group
           = label_tag 'start_date', 'Start Date', class: 'control-label'
           .controls
             = text_field_tag 'start_date', '', class: 'datepicker'
@@ -60,6 +65,7 @@ div
           = label_tag 'end_date', 'End Date', class: 'control-label'
           .controls
             = text_field_tag 'end_date', '', class: 'datepicker'
+
         .control-group
           = label_tag 'hidden_keys', 'Hidden Translations', class: 'control-label'
           .controls

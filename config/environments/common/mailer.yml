@@ -1,2 +1,3 @@
-from: shuttle-engineers@example.com
-translators_list: translators@example.com
+from: shuttle-engineering@squareup.com
+localization_list: g11n@squareup.com
+translators_list: l10n@squareup.com

@@ -54,13 +54,16 @@ class AutoImporter
         begin
           project.commit! branch, other_fields: {description: "Automatically imported from the #{branch} branch"}
         rescue Git::CommitNotFoundError => err
-          branches_to_delete << branch # branch doesn't actually exist; remove from watched branches and ignore
+          # TODO: Disable removing watched branch. SHUTTLE-913
+          Rails.logger.warn("[AutoImporter] Watched branch #{branch} not found in project #{project.name}")
+          # branches_to_delete << branch # branch doesn't actually exist; remove from watched branches and ignore
         end
       end
       project.watched_branches = project.watched_branches - branches_to_delete
       project.save!
 
     rescue Timeout::Error => err
+      Raven.capture_exception err, extra: { project_id: project_id }
       self.class.perform_in 2.minutes, project_id
     end
 

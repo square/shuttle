@@ -49,7 +49,7 @@ class Translation < ActiveRecord::Base
   belongs_to :key, inverse_of: :translations
   belongs_to :translator, class_name: 'User', foreign_key: 'translator_id', inverse_of: :authored_translations
   belongs_to :reviewer, class_name: 'User', foreign_key: 'reviewer_id', inverse_of: :reviewed_translations
-  has_many :translation_changes, inverse_of: :translation, dependent: :delete_all
+  has_many :translation_changes, inverse_of: :translation, dependent: :destroy
   has_many :issues, inverse_of: :translation, dependent: :destroy
   has_many :commits_keys, primary_key: :key_id, foreign_key: :key_id
   has_many :assets_keys, primary_key: :key_id, foreign_key: :key_id
@@ -61,44 +61,8 @@ class Translation < ActiveRecord::Base
   locale_field :source_locale, from: :source_rfc5646_locale
   locale_field :locale
 
-  include Elasticsearch::Model
-  include Elasticsearch::Model::Callbacks
-  include IndexHelper
-  Translation.index_name "shuttle_#{Rails.env}_translations"
-
-  def regular_index_fields
-    %w(copy source_copy id translator_id rfc5646_locale created_at updated_at translated)
-  end
-  mapping do
-    indexes :copy, analyzer: 'snowball', type: 'string'
-    indexes :source_copy, analyzer: 'snowball', type: 'string'
-    indexes :id, type: 'integer', index: :not_analyzed
-    indexes :project_id, type: 'integer'
-    indexes :article_id, type: 'integer'
-    indexes :section_id, type: 'integer'
-    indexes :is_block_tag, type: 'boolean'
-    indexes :section_active, type: 'boolean'
-    indexes :index_in_section, type: 'integer'
-    indexes :translator_id, type: 'integer'
-    indexes :rfc5646_locale, type: 'string', index: :not_analyzed
-    indexes :created_at, type: 'date'
-    indexes :updated_at, type: 'date'
-    indexes :translated, type: 'boolean'
-    indexes :approved, type: 'integer'
-    indexes :hidden_in_search, type: 'boolean'
-  end
-
-  def special_index_fields
-    {
-      project_id: self.key.project_id,
-      article_id: self.key.section.try(:article_id),
-      section_id: self.key.section_id,
-      is_block_tag: self.key.is_block_tag,
-      section_active: self.key.section.try(:active),
-      index_in_section: self.key.index_in_section,
-      approved: if approved==true then 1 elsif approved==false then 0 else nil end,
-      hidden_in_search: self.key.formatted_hidden_in_search
-    }
+  update_index('translations#translation') do
+    self unless previous_changes.blank? && persisted?
   end
 
   validates :key,
@@ -130,6 +94,8 @@ class Translation < ActiveRecord::Base
   # @private
   # @return [User] The person who changed this Translation
   attr_accessor :modifier
+  # passing updating params to create TranslationChange
+  attr_accessor :updating_params
 
   # TODO: Fold this into DailyMetric?
   def self.total_words_per_project
@@ -270,20 +236,5 @@ class Translation < ActiveRecord::Base
     # because of non-ascii characters such as the following:
     # `   "べ<span class='sales-trends'>"[1..27].hash == "<span class='sales-trends'>".hash  ` returns false
     # `   "べ<span class='sales-trends'>"[1..27] == "<span class='sales-trends'>"   `          returns true
-  end
-
-  # TODO elasticsearch-rails doesn't have batch import, we should update this method once we find better solution
-  # Batch updates `obj`s Translations in elastic search.
-  # Expects `obj` to have a `keys` association.
-  # This is currently only run in ArticleImporter::Finisher.
-  #
-  # @param [Commit, Project, Article, Asset] obj The object whose translations should be batch refreshed in ElasticSearch
-
-  def self.batch_refresh_elastic_search(obj)
-    obj.keys.includes(:translations, :section).find_in_batches do |keys|
-      keys.map(&:translations).flatten.each do |translation|
-        translation.update_elasticsearch_index
-      end
-    end
   end
 end

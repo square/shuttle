@@ -153,11 +153,18 @@ Rails.application.routes.draw do
     end
   end
 
+  get 'reports' => 'reports#index', as: :reports
+  get 'reports/download/incoming/:date' => 'reports#incoming'
+  get 'reports/download/pending/:date' => 'reports#pending'
+  get 'reports/download/completed/:date' => 'reports#completed'
+
   # HOME PAGES
   get 'administrators' => 'home#administrators', as: :administrators
   get 'translators' => 'home#translators', as: :translators
   get 'reviewers' => 'home#reviewers', as: :reviewers
   root to: 'home#index'
+
+  get 'csv' => 'home#csv'
 
   require 'sidekiq/web'
   begin

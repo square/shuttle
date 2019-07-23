@@ -20,13 +20,13 @@ namespace :maintenance do
 
   desc "Cleans up commits that have been deleted from the repository"
   task reap_deleted_commits: :environment do
-    Commit.includes(:project).find_each do |c|
-      begin
-        c.commit!
-      rescue Git::CommitNotFoundError
-        c.destroy
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound
-        next
+    Chewy.strategy(:atomic) do
+      Commit.includes(:project).find_each do |c|
+        begin
+          c.commit!
+        rescue Git::CommitNotFoundError
+          c.destroy
+        end
       end
     end
   end

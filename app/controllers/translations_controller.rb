@@ -325,7 +325,6 @@ class TranslationsController < ApplicationController
 
   def change_hidden_in_search_to(state)
     @key.update!(hidden_in_search: state)
-    @translation.update_elasticsearch_index
   end
 
   def decorate_fuzzy_match(translations, source_copy)
@@ -337,7 +336,7 @@ class TranslationsController < ApplicationController
           rfc5646_locale: translation.rfc5646_locale,
           project_name: translation.key.project.name.truncate(30)
       }
-    end.reject { |t| t[:match_percentage] < FuzzyMatchTranslationsFinder::MINIMUM_FUZZY_MATCH }
+    end.reject { |t| t[:match_percentage] < FuzzyMatchTranslationsFinder::FUZZY_MATCH_MIN_SCORE }
     translations.sort! { |a, b| b[:match_percentage] <=> a[:match_percentage] }
   end
 end

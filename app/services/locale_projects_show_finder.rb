@@ -15,7 +15,6 @@ require 'paginatable_objects'
 
 class LocaleProjectsShowFinder
   attr_reader :form
-  include Elasticsearch::DSL
   PER_PAGE = 50
 
 
@@ -24,92 +23,39 @@ class LocaleProjectsShowFinder
   end
 
   def search_query
-    include_translated = form[:include_translated]
-    include_approved = form[:include_approved]
-    include_new = form[:include_new]
-    include_block_tags = form[:include_block_tags]
-
-    current_page = page
-    query_filter = form[:query_filter]
-    translation_ids_in_commit = form[:translation_ids_in_commit]
-    article_id = form[:article_id]
-    section_id = form[:section_id]
-    translation_ids_in_assest = form[:translation_ids_in_assest]
-    locale = form[:locale]
-    project_id = form[:project_id]
-    project = form[:project]
-    filter_source = form[:filter_source]
-
-    search {
-      query do
-        filtered do
-          if query_filter.present?
-            if filter_source == 'source'
-              query do
-                match 'source_copy' do
-                  query query_filter
-                  operator 'and'
-                end
-              end
-            elsif filter_source == 'translated'
-              query do
-                match 'copy' do
-                  query query_filter
-                  operator 'and'
-                end
-              end
-            end
-          end
-
-          filter do
-            bool do
-              must { term project_id: project_id }
-              must { term rfc5646_locale: locale.rfc5646 } if locale
-              must { ids values: translation_ids_in_commit } if translation_ids_in_commit
-              must { term article_id: article_id } if article_id.present?
-              must { ids values: translation_ids_in_assest } if translation_ids_in_assest
-              must { term section_id: section_id } if section_id.present?
-              must { term section_active: true } if project.article? # active sections
-              must { exists field: :index_in_section } if project.article? # active keys in sections
-              must_not { term is_block_tag: true } if project.article? && !include_block_tags
-
-              if include_translated && include_approved && include_new
-                #include everything
-              elsif include_translated && include_approved
-                must { term translated: 1 }
-              elsif include_translated && include_new
-                should { missing field: 'approved', existence: true, null_value: true }
-                should { term approved: 0 }
-              elsif include_approved && include_new
-                should { term approved: 1 }
-                should { term translated: 0 }
-              elsif include_approved
-                must { term approved: 1 }
-              elsif include_new
-                should { term translated: 0 }
-                should { term approved: 0 }
-              elsif include_translated
-                must { missing field: 'approved', existence: true, null_value: true }
-                must { term translated: 1 }
-              else
-                # include nothing
-                throw :include_nothing
-              end
-            end
-          end
-        end
+    query_params = []
+    text_to_search = form[:query_filter]
+    if text_to_search.present?
+      if form[:filter_source] == 'source'
+        query_params << { match: { source_copy: {query: text_to_search, operator: 'and' } } }
+      elsif form[:filter_source] == 'translated'
+        query_params << { match: { copy: {query: text_to_search, operator: 'and'} } }
       end
+    end
 
-      if project.article?
-        sort do
-          by :section_id, order: 'asc'
-          by :index_in_section, order: 'asc'
-        end
-      end
+    filter_params = []
+    filter_params << { term: { project_id: form[:project_id] } }
+    filter_params << { term: { rfc5646_locale: form[:locale].rfc5646 } } if form[:locale]
+    filter_params << { ids: { values: form[:translation_ids_in_commit] } } if form[:translation_ids_in_commit]
+    filter_params << { term: { article_id: form[:article_id] } } if form[:article_id].present?
+    filter_params << { ids: { values: form[:translation_ids_in_assest] } } if form[:translation_ids_in_assest]
+    filter_params << { term: { section_id: form[:section_id] } } if form[:section_id].present?
+    filter_params << { term: { section_active: true } } if form[:project].article?
+    filter_params << { exists: { field: :index_in_section } } if form[:project].article?
+    filter_params << { bool: { must_not: { term: { is_block_tag: true  } } } } if form[:project].article? && !form[:include_block_tags]
 
-      from (current_page - 1) * PER_PAGE
-      size PER_PAGE
-    }.to_hash
+    state_params = []
+    state_params << TranslationsIndex::TRANSLATION_STATE_APPROVED if form[:include_approved]
+    state_params << TranslationsIndex::TRANSLATION_STATE_TRANSLATED if form[:include_translated]
+    state_params << TranslationsIndex::TRANSLATION_STATE_NEW if form[:include_new]
+    state_params << TranslationsIndex::TRANSLATION_STATE_REJECTED if form[:include_new]
+    filter_params << { terms: { translation_state: state_params } } unless state_params.empty?
+
+    query = TranslationsIndex.query(query_params).filter(filter_params)
+    query = query.order(section_id: :asc, index_in_section: :asc) if form[:project].article?
+    query = query.offset((page-1) * PER_PAGE).limit(PER_PAGE)
+
+    return query
   end
 
   def page
@@ -117,23 +63,18 @@ class LocaleProjectsShowFinder
   end
 
   def find_translations
-    translations_in_es = Elasticsearch::Model.search(search_query, Translation).results
-    translations = Translation
-                       .where(id: translations_in_es.map(&:id))
-                       .where('commits.revision': form[:commit])
-                       .includes({key: [:project, :commits, :assets, :translations, :section, {article: :project}]}, :locale_associations, :translation_changes)
+    include_tables = [{ key: [:project, :assets, :translations, :section, { article: [:project, article_groups: :group] }] }, :locale_associations, :translation_changes]
+
+    scope = -> { includes(include_tables) }
     if form[:article_id]
-      translations = translations.order('keys.section_id, keys.index_in_section')
+      scope = -> { includes(include_tables).order('keys.section_id, keys.index_in_section') }
     elsif form[:commit]
-      translations = translations.order('commits_keys.created_at, keys.original_key')
-    elsif form[:asset_id]
-      translations = translations.order('assets_keys.created_at, keys.original_key')
+      scope = -> { includes(include_tables).order('translations.created_at') }
     elsif form[:group]
-      translations = translations.joins({article: {article_groups: :group}}).where("groups.display_name = ?", form[:group])
-      translations = translations.order('article_groups.index_in_group, keys.section_id, keys.index_in_section')
+      scope = -> { includes(include_tables).order('article_groups.index_in_group, keys.section_id, keys.index_in_section') }
     end
 
-    # Don't sort the keys since they are sorted in the line above
-    PaginatableObjects.new(translations, translations_in_es, page, PER_PAGE, false)
+    translations = search_query.load(scope: scope)
+    return PaginatableObjects.new(translations, page, PER_PAGE)
   end
 end

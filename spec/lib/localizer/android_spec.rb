@@ -38,7 +38,8 @@ RSpec.describe Localizer::Android do
         '/java/basic-hdpi/strings.xml:attributed_array[0]' => 'Hallo',
         '/java/basic-hdpi/strings.xml:attributed_array[1]' => 'Welt',
         '/java/basic-hdpi/strings.xml:plural[one]'         => 'Welt',
-        '/java/basic-hdpi/strings.xml:plural[other]'       => 'Welten'
+        '/java/basic-hdpi/strings.xml:plural[other]'       => 'Welten',
+        '/java/basic-hdpi/strings.xml:cdata'               => '<![CDATA[<test>Hallo</test>]]>'
     }.each do |key, value|
       key_obj = FactoryBot.create(:key, key: key, project: @project, source: '/java/basic-hdpi/strings.xml')
       FactoryBot.create :translation, key: key_obj, copy: value, source_locale: @en, locale: @de
@@ -75,6 +76,7 @@ RSpec.describe Localizer::Android do
 	<item>Hello</item>
 	<item formatted="false">World</item>
   </string-array>
+  <string name="cdata"><![CDATA[<test>Hello</test>]]></string>
 </resources>
     XML
     output_file = Localizer::File.new
@@ -110,6 +112,7 @@ RSpec.describe Localizer::Android do
 	<item>Hallo</item>
 	<item formatted="false">Welt</item>
   </string-array>
+  <string name="cdata"><![CDATA[<test>Hallo</test>]]></string>
 </resources>
     XML
   end

@@ -1,0 +1,3 @@
+---
+# disabling Sentry Raven logging by not setting a DSN
+dsn:

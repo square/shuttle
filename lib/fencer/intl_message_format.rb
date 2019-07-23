@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'message_format'
+
 module Fencer
 
   # Fences out Message Format tags using the intl-messageformat syntax.
@@ -21,52 +23,66 @@ module Fencer
   module IntlMessageFormat
     extend self
 
-    UNESCAPED_LEFT_BRACE = /(^.?|[^\\][^\\]){/
-    UNESCAPED_RIGHT_BRACE = /(^.?|[^\\][^\\])}/
+    ESCAPED_BRACE = /\\([{}])/
 
     def fence(string)
-      scanner = UnicodeScanner.new(string)
-
-      tokens  = Hash.new { |hsh, k| hsh[k] = [] }
-      until scanner.eos?
-        match = scanner.scan_until(UNESCAPED_LEFT_BRACE)
-        break unless match
-
-        start = scanner.pos - 1         # less the brace
-        token = scanner.scan_until(UNESCAPED_RIGHT_BRACE)
-        next unless token
-
-        stop          = scanner.pos - 1 # ranges are inclusive
-        tokens['{' + token] << (start..stop)
+      begin
+        tokenize(::MessageFormat::Parser.parse(sanitize(string)))
+      rescue
+        {}
       end
-
-      return tokens
     end
 
-    # Scan string to ensure that left braces are paired with right braces
-    # and that left braces are closed before encountering another left brace.
     def valid?(string)
-      scanner = UnicodeScanner.new(string)
-
-      first_left_brace_match = scanner.scan_until(UNESCAPED_LEFT_BRACE)
-      return true unless first_left_brace_match
-
-      until scanner.eos?
-        # Make sure there's a right brace to match with the left one.
-        right_brace_match = scanner.scan_until(UNESCAPED_RIGHT_BRACE)
-        return false unless right_brace_match
-
-        right_brace_index = scanner.pos
-        scanner.unscan # Reset to last time we saw a left brace.
-
-        # If there are no more left braces, we're good.
-        left_brace_match = scanner.scan_until(UNESCAPED_LEFT_BRACE)
-        return true unless left_brace_match
-
-        # Make sure the next right brace happens before the next left brace.
-        left_brace_index = scanner.pos
-        return false if left_brace_index < right_brace_index
+      begin
+        ::MessageFormat::Parser.parse(sanitize(string))
+        true
+      rescue
+        false
       end
+    end
+
+    private
+
+    def tokenize(segments, prefix: nil)
+      # takes in the parsed structure from message_format and tokenize recursively all parameters in the string
+      # {name} => {":name" => [-1..0]}
+      # {num, plural , =0 {nothing!} one {one!}} => "{":number|plural|=0" => [-1..0], ":number|plural|one" => [-1..0]}"
+      tokens = {}
+
+      segments.each do |segment|
+        next unless segment.instance_of?(Array)
+        if segment.last.instance_of?(Hash)
+          # select, plural, selectordinal
+          *data, format = segment
+          format.each do |k, v|
+            key = generate_key(prefix, [*data, k])
+
+            if v.length == 1 && v[0].instance_of?(String)
+              # option is plain string
+              tokens[key] = (tokens[key] || []).push(-1..0)
+            else
+              tokens.merge!(tokenize(v, prefix: key))
+            end
+          end
+        else
+          # simple argument, number, date, time type
+          key = generate_key(prefix, segment)
+          tokens[key] = (tokens[key] || []).push(-1..0)
+        end
+      end
+
+      tokens
+    end
+
+    def generate_key(prefix, args)
+      "#{prefix}:#{args.join('|')}"
+    end
+
+    def sanitize(string)
+      # intl-message-format uses blackslash for escaping which is not consitent with ICU standard
+      # replace blackslash with single quote so that message_format lib can parse it properly
+      string.gsub(ESCAPED_BRACE, '\'\1\'')
     end
   end
 end

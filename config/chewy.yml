@@ -1,0 +1,7 @@
+---
+development:
+  host: <%= ENV.fetch('SHUTTLE_ES_URL', 'localhost:9200') %>
+  prefix: shuttle_development
+test:
+  host: <%= ENV.fetch('SHUTTLE_ES_URL', 'localhost:9200') %>
+  prefix: shuttle_test

@@ -16,7 +16,6 @@ require 'paginatable_objects'
 class HomeIndexItemsFinder
 
   attr_reader :user, :form
-  include Elasticsearch::DSL
 
   def initialize(user, form)
     @user = user
@@ -24,91 +23,58 @@ class HomeIndexItemsFinder
   end
 
   def search_query
-    # FILTERS AND SORTING
-    status            = form[:filter__status]
-    locales           = form[:filter__locales]
-    sort_field        = form[:sort__field]
-    sort_direction    = form[:sort__direction]
-    sha               = form[:commits_filter__sha]
-    project_id        = form[:commits_filter__project_id]
-    hide_exported     = form[:commits_filter__hide_exported]
-    hide_autoimported = form[:commits_filter__hide_autoimported]
-    show_only_mine    = form[:commits_filter__show_only_mine]
-    hide_duplicates   = form[:commits_filter__hide_duplicates]
+    commits = CommitsIndex.filter(bool: {must: [
+                                                   form[:commits_filter__sha] ? {prefix: {revision: form[:commits_filter__sha]}} : nil,
+                                                   form[:commits_filter__project_id] == 'all' ? nil : {term: {project_id: form[:commits_filter__project_id]}},
+                                                   form[:commits_filter__hide_exported] ? {term: {exported: false}} : nil,
+                                                   form[:commits_filter__hide_autoimported] ? {exists: {field: :user_id}} : nil,
+                                                   form[:commits_filter__show_only_mine] ? {term: {user_id: 1}} : nil,
+                                                   {term: {loading: false}},
+                                                   form[:commits_filter__hide_duplicates] ? {term: {duplicate: :false}} : nil,
+                                                   (case form[:filter__status]
+                                                      when 'uncompleted'
+                                                        if form[:filter__locales].present?
+                                                          {terms: {key_ids: uncompleted_key_ids_in_locales}}
+                                                        else
+                                                          {term: {ready: false}}
+                                                        end
+                                                      when 'completed'
+                                                        {term: {ready: true}}
+                                                      when 'hidden'
+                                                        # Do nothing as Commit has no such state. We have this to line up with Article since
+                                                        # Commit and Article share the same frontend template.
+                                                        nil
+                                                      when 'all'
+                                                        nil
+                                                   end)
+                                               ].compact}).
+        offset(form[:offset]).limit(form[:limit])
 
-    # PAGINATION
-    offset = form[:offset]
-    limit  = form[:limit]
-
-    # UNCOMPLETED IN SPECIFIC LOCALES
-    if locales.present? && (status == 'uncompleted')
-      uncompleted_key_ids_in_locales = uncompleted_key_ids_in_locales()
-    end
-
-    search {
-      query do
-        filtered do
-          filter do
-            bool do
-              must { prefix revision: sha } if sha
-              must { term project_id: project_id } unless project_id == 'all'
-              must { term exported: false } if hide_exported
-              must { exists field: :user_id } if hide_autoimported
-              must { term user_id: 1 } if show_only_mine
-              must { term loading: false }
-              must { term duplicate: false } if hide_duplicates
-
-              case status
-              when 'uncompleted'
-                locales.present? ? must { terms key_ids: uncompleted_key_ids_in_locales } : must { term ready: false }
-              when 'completed'
-                must { term ready: true }
-              when 'hidden'
-                # Do nothing as Commit has no such state. We have this to line up with Article since
-                # Commit and Article share the same frontend template.
-                must { match_all }
-              when 'all'
-                must { match_all }
+    commits = case form[:sort__field]
+                when 'due'
+                  commits.order(due_date:   (form[:sort__direction].nil? ? 'asc' : form[:sort__direction]),
+                                priority:   'asc',
+                                created_at: 'desc')
+                when 'create'
+                  commits.order(created_at: (form[:sort__direction].nil? ? 'desc' : form[:sort__direction]),
+                                priority:   'asc',
+                                due_date:   'asc')
+                else
+                  commits.order(priority:   (form[:sort__direction].nil? ? 'asc' : form[:sort__direction]),
+                                due_date:   'asc',
+                                created_at: 'desc')
               end
-            end
-          end
-        end
-      end
 
-      from offset
-      size limit
-      sort do
-        case sort_field
-        when 'due'
-          by :due_date, order: sort_direction.nil? ? 'asc' : sort_direction
-          by :priority, order: 'asc'
-          by :created_at, order: 'desc'
-        when 'create'
-          by :created_at, order: sort_direction.nil? ? 'desc' : sort_direction
-          by :priority, order: 'asc'
-          by :due_date, order: 'asc'
-        else
-          by :priority, order: sort_direction.nil? ? 'asc' : sort_direction
-          by :due_date, order: 'asc'
-          by :created_at, order: 'desc'
-        end
-      end
-    }.to_hash
+    return commits
   end
 
   def find_commits
-    #Search
-    commits_in_es = Elasticsearch::Model.search(search_query, Commit).results
-
-    # LOAD
-    commits = Commit
-                  .where(id: commits_in_es.map(&:id))
-                  .includes(:user, project: :slugs)
-    PaginatableObjects.new(commits, commits_in_es, form[:page], form[:limit])
+    commits = search_query.load(scope: -> { includes(:user, project: :slugs) })
+    PaginatableObjects.new(commits, form[:page], form[:limit])
   end
 
   def find_articles
-    articles = Article.includes(:project).showing
+    articles = Article.includes(:project, :groups).showing
 
     # filter by name
     articles = articles.for_name(form[:articles_filter__name]) if form[:articles_filter__name]
@@ -136,7 +102,7 @@ class HomeIndexItemsFinder
       when 'due'
         "due_date #{direction || 'asc'}"
       when 'create'
-        "created_at #{direction || 'desc'}"
+        "last_import_requested_at #{direction || 'desc'}"
       when 'priority'
         "priority #{direction || 'asc'}"
     end
@@ -188,7 +154,7 @@ class HomeIndexItemsFinder
   end
 
   def find_groups
-    groups = Group.includes(:project).showing.joins(:articles)
+    groups = Group.includes(:project, :articles).showing.joins(:articles)
 
     # filter by name
     groups = groups.where("groups.display_name like '%#{form[:groups_filter__name]}%'") if form[:groups_filter__name]
@@ -214,11 +180,11 @@ class HomeIndexItemsFinder
     direction = %w(asc desc).include?(form[:sort__direction]) ? form[:sort__direction] : nil
     order_by = case form[:sort__field]
                when 'due'
-                 "due_date #{direction || 'asc'}"
+                 "groups.due_date #{direction || 'asc'}"
                when 'create'
-                 "created_at #{direction || 'desc'}"
+                 "groups.created_at #{direction || 'desc'}"
                when 'priority'
-                 "priority #{direction || 'asc'}"
+                 "groups.priority #{direction || 'asc'}"
                end
     groups = groups.order(order_by) if order_by
 

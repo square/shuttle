@@ -140,6 +140,9 @@ use one or both of them.
 
 ### Downloading manifest files
 
+If you're using the Shuttle Gem, it adds the `rake shuttle:complete[git_sha]`
+and `rake shuttle:preview[git_sha]` commands.
+
 For localization libraries that store their translated strings in one file (this
 is most libraries, including Rails i18n, Ember.js, and others), you can download
 a manifest file. This file will contain solely translated strings for one or
@@ -171,7 +174,6 @@ The value of `:format` will depend on the localization library you are using:
 
 | Library                             | `:format`    | Notes                                                                                                   |
 |:------------------------------------|:-------------|:--------------------------------------------------------------------------------------------------------|
-| Android                             | `android`    | Will be a gzipped tarball that can be extracted into your project root.                                 |
 | Rails i18n (YAML)                   | `yaml`       | All locales will be merged into one file unless the `locale` query parameter is specified.              |
 | Ember.js                            | `js`         | All locales will be merged into one file unless the `locale` query parameter is specified.              |
 | Ember.js (dependency-injected)      | `jsm`        | Similar to Ember.js, but places translations under a `module.exports` object. Locale must be specified. |
@@ -192,6 +194,9 @@ A normal response status is 200 OK. If the commit is not fully localized and
 `partial` is not set,the response status is 404 Not Found. If the value of
 `:format` is not recognized, the response status will be 406 Not Acceptable. If
 `locale` is required and not provided, the response status is 400 Bad Request.
+
+For Android developers, follow the **Downloading localized files** 
+section and copy the localized `res` folders into your repo's `res` folder.
 
 ### Downloading localized files
 

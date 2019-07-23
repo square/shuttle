@@ -14,37 +14,30 @@
 
 class MatchTranslationsFinder
   attr_reader :translation
-  include Elasticsearch::DSL
 
   def initialize(translation)
     @translation = translation
   end
 
   def search_query(rfc5646, source_copy)
-    search {
-      query do
-        filtered do
-          filter do
-            bool do
-              must { term approved: 1 }
-              must { term rfc5646_locale: rfc5646 }
-              must { term source_copy: source_copy }
-            end
-          end
-        end
-      end
-      sort { by :created_at, order: 'desc' }
-      size 1
-    }.to_hash
+    filter_params = []
+    filter_params << { term: { approved: true } }
+    filter_params << { term: { rfc5646_locale: rfc5646 } }
+    filter_params << { term: { source_copy: source_copy } }
+
+    query = TranslationsIndex.filter(filter_params)
+    query = query.order(created_at: :desc)
+    query = query.limit(1)
+
+    return query
   end
 
   def find_first_match_translation
     source_copy = translation.source_copy
     translation.locale.fallbacks.each do |fallback|
-      query = search_query(fallback.rfc5646, source_copy)
-      first_matched_translation = Elasticsearch::Model.search(query, Translation).results.first
-      return first_matched_translation.to_hash["_source"] if first_matched_translation
+      first_matched_translation = search_query(fallback.rfc5646, source_copy).load.objects.first
+      return first_matched_translation if first_matched_translation
     end
-    nil
+    return nil
   end
 end

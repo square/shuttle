@@ -23,6 +23,7 @@ module API
   module V1
     class GroupsController < ApplicationController
       respond_to :json, only: [:index, :create, :update, :destroy]
+      respond_to :html, only: [:show]
 
       skip_before_filter :authenticate_user!,        if: :api_request?
       skip_before_action :verify_authenticity_token, if: :api_request?

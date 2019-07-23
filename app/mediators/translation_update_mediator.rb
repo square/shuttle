@@ -45,13 +45,11 @@ class TranslationUpdateMediator < BasicMediator
     copy_to_translations = translations_that_should_be_multi_updated
     return if failure?
 
-    ActiveRecord::Base.observers.disable :translation_observer do
-      Translation.transaction do
-        copy_to_translations.each do |translation|
-          update_single_translation!(translation)
-        end
-        update_single_translation!(@primary_translation)
+    Translation.transaction do
+      copy_to_translations.each do |translation|
+        update_single_translation!(translation)
       end
+      update_single_translation!(@primary_translation)
     end
 
     check_and_invoke_article_pinger
@@ -141,7 +139,11 @@ class TranslationUpdateMediator < BasicMediator
     if (translation.copy || "").empty? && !@params[:blank_string].parse_bool
       untranslate(translation)
     else
-      translation.translator = @user if translation.copy != translation.copy_was
+      if translation.copy != translation.copy_was
+        if translation.translator.nil? || @user.translator_only?
+          translation.translator = @user
+        end
+      end
       if @user.reviewer?
         translation.reviewer = @user
         translation.review_date = Time.now
@@ -150,8 +152,8 @@ class TranslationUpdateMediator < BasicMediator
       end
     end
 
+    translation.updating_params = @params.merge(is_edit: is_edit) # for creating TranslationChange
     translation.save!
-    TranslationChange.create_from_params!(translation, @params, is_edit)
   end
 
   # Untranslates a translation, but doesn't call `save`.

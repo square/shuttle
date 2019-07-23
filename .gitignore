@@ -5,3 +5,6 @@
 tmp/**
 public/system/**
 .idea/**
+.byebug_history
+pg_data/
+.vscode/

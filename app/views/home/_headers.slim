@@ -63,6 +63,14 @@ tr
 
   th Description
 
+  / group count in articles & article count in groups
+  - if item_type == 'article'
+    th
+      = t("controllers.home.articles.groups")
+  - elsif item_type == 'group'
+    th
+      = t("controllers.home.groups.articles")
+
   - if current_user.translator?
     th Translate
     th Review

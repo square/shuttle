@@ -8,6 +8,7 @@ require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'sidekiq/testing'
 require 'paperclip/matchers'
+require 'chewy/rspec'
 Dir[Rails.root.join('spec/spec_support/**/*.rb')].each { |f| require f }
 
 
@@ -88,8 +89,17 @@ RSpec.configure do |config|
     DatabaseCleaner.strategy = :deletion
     DatabaseCleaner.clean_with :truncation
   end
+
   config.around(:each) do |example|
-    DatabaseCleaner.cleaning { example.run }
+    DatabaseCleaner.start
+    example.run
+
+    # Delete the table relationship individually.
+    models = [AssetsKey, ArticleGroup, BlobsCommit, TranslationChange]
+    models.each { |model| model.all.destroy_all }
+
+    DatabaseCleaner.clean
+    [CommitsIndex, KeysIndex, TranslationsIndex].each { |index| index.reset! }
   end
 
   # Paperclip
@@ -115,22 +125,7 @@ RSpec.configure do |config|
   end
 
   # ElasticSearch
-  config.before(:suite) { reset_elastic_search }
-end
-
-def reset_elastic_search
-  ActiveRecord::Base.subclasses.each do |model|
-    next unless model.respond_to?(:__elasticsearch__)
-    model.__elasticsearch__.create_index! force: true
-    model.import(force: true)
-    model.__elasticsearch__.client.indices.flush(index: model.__elasticsearch__.index_name, force: true)
-  end
-end
-
-def regenerate_elastic_search_indexes
-  ActiveRecord::Base.subclasses.each do |model|
-    next unless model.respond_to?(:__elasticsearch__)
-    model.import(refresh: true)
-    model.__elasticsearch__.client.indices.flush(index: model.__elasticsearch__.index_name, force: true)
+  config.before(:suite) do
+    Chewy::strategy :urgent
   end
 end

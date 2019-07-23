@@ -377,7 +377,11 @@ RSpec.describe Article do
       allow(article).to receive(:import!) # prevent the import because we want to create the related keys manually
       article.save!
 
-      article.import_batch.jobs { regenerate_elastic_search_indexes }
+      article.import_batch.jobs do
+        CommitsIndex.reset!
+        KeysIndex.reset!
+        TranslationsIndex.reset!
+      end
       bid = article.import_batch_id
       article.import_batch # this should re-use the existing batch
       expect(article.import_batch_id).to eql(bid)

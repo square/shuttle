@@ -6,19 +6,55 @@
 
   box-shadow: inset 0 4px 5px darken($navbar-background, 10%);
   background-color: darken($navbar-background, 5%);
-  color: $gray3;
+  color: $gray4;
+  .fa {
+    display: none;
+  }
 
   &.clickable:hover {
     box-shadow: inset 0 4px 5px darken($navbar-background, 15%);
     background-color: darken($navbar-background, 10%);
     cursor: pointer;
 
-    &.worker-status-idle { i { color: $input-green; } }
-    &.worker-status-busy { i { color: darken($input-orange, 20%) !important; } }
-    &.worker-status-swamped { i { color: $input-red !important; } }
+    &.worker-status-idle {
+      i {
+        color: $input-green;
+      }
+    }
+    &.worker-status-busy {
+      i {
+        color: darken($input-orange, 20%) !important;
+      }
+    }
+    &.worker-status-swamped {
+      i {
+        color: $input-red !important;
+      }
+    }
   }
 
-  &.worker-status-idle { i { color: darken($input-green, 10%); } }
-  &.worker-status-busy { i { color: darken($input-orange, 30%) !important; } } 
-  &.worker-status-swamped { i { color: darken($input-red, 10%) !important; } }
+  &.worker-status-idle {
+    i {
+      color: darken($input-green, 10%);
+      &.fa-check {
+        display: inline-block;
+      }
+    }
+  }
+  &.worker-status-busy {
+    i {
+      color: darken($input-orange, 30%) !important;
+      &.fa-refresh {
+        display: inline-block;
+      }
+    }
+  }
+  &.worker-status-swamped {
+    i {
+      color: darken($input-red, 10%) !important;
+      &.fa-cloud {
+        display: inline-block;
+      }
+    }
+  }
 }

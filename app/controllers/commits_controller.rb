@@ -126,14 +126,16 @@ class CommitsController < ApplicationController
   # | `id`         | The SHA of a Commit.   |
 
   def search
+    pending_locales = @commit.translations.where('approved IS NOT TRUE').group(:rfc5646_locale).count.keys
     @locales = @project.locale_requirements.inject({}) do |hsh, (locale, required)|
       hsh[locale.rfc5646] = {
         required: required,
         targeted: true,
-        finished: @commit.translations.where('approved IS NOT TRUE AND rfc5646_locale = ?', locale.rfc5646).first.nil?
+        finished: !pending_locales.include?(locale.rfc5646)
       }
       hsh
     end
+
     @keys = CommitsSearchKeysFinder.new(params, @commit).find_keys
     @keys_presenter = CommitsSearchPresenter.new(params[:locales], current_user.translator?, @project, @commit)
   end
@@ -177,6 +179,7 @@ class CommitsController < ApplicationController
     flash[:alert] = t('controllers.commits.create.project_not_linked_error', revision: params[:commit][:revision].strip)
     redirect_to root_url
   rescue Timeout::Error
+    Raven.capture_exception err, extra: { project_id: project_id, sha: sha }
     flash[:alert] = t('controllers.commits.create.timeout', revision: revision)
     redirect_to root_url
   end
@@ -300,7 +303,8 @@ class CommitsController < ApplicationController
   end
 
   def reindex
-    Translation.batch_refresh_elastic_search @commit
+    CommitsIndex.import! @commit
+    TranslationsIndex.import! @commit.translations
     flash[:success] = t('controllers.commits.reindex.success')
     respond_with @commit, location: project_commit_url(@project, @commit)
   end
@@ -345,7 +349,8 @@ class CommitsController < ApplicationController
     compiler = Compiler.new(@commit)
     file     = compiler.manifest(request.format,
                                  locale:  params[:locale].presence,
-                                 partial: params[:partial].parse_bool)
+                                 partial: params[:partial].parse_bool,
+                                 encoding: params[:encoding])
 
     response.charset                   = file.encoding
     response.headers['X-Git-Revision'] = @commit.revision

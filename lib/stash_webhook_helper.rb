@@ -23,14 +23,30 @@ class StashWebhookHelper
     num_pings = opts[:num_times] || DEFAULT_NUM_TIMES
 
     if ping_stash_webhook?(commit)
-      # Pretty awful but there's no way we can verify that Stash decided to ignore us
-      # Other projects do it this way as well
       num_pings.times do
-        HTTParty.post(webhook_url(commit), {timeout: 5,
-                                            body: webhook_post_parameters(commit, opts),
-                                            headers: webhook_header_parameters,
-                                            basic_auth: webhook_auth_parameters})
+        params = {
+          timeout: 5,
+          body: webhook_post_parameters(commit, opts),
+          headers: webhook_header_parameters,
+          basic_auth: webhook_auth_parameters
+        }
+        response = HTTParty.post(webhook_url(commit), params)
+
+        # fails with retry on failure.
+        unless response.code.between? 200, 299
+          message = "[StashWebhookHelper] Failed to ping stash for commit #{commit.id}, revision: #{commit.revision}, code: #{response.code}"
+          details = "#{current_commit_state(commit)} - #{response.inspect}"
+          Rails.logger.warn("#{message} - #{details}")
+          raise message
+        end
+
         Kernel.sleep(DEFAULT_WAIT_TIME)
+      end
+
+      # record metric only when the commit is ready
+      if commit.ready and commit.approved_at
+        ping_stash_time = Time.current - commit.approved_at
+        CustomMetricHelper.record_project_ping_stash_time(commit.project.slug, ping_stash_time)
       end
     end
   end

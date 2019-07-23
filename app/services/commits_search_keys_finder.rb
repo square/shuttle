@@ -16,7 +16,6 @@ require 'paginatable_objects'
 class CommitsSearchKeysFinder
 
   attr_reader :commit, :form
-  include Elasticsearch::DSL
 
   # The number of records to return by default.
   PER_PAGE = 50
@@ -27,39 +26,18 @@ class CommitsSearchKeysFinder
   end
 
   def search_query
-    query_filter = form[:filter]
-    status = form[:status]
-    key_ids = commit.keys.pluck(:id)
-    current_page = page
+    query_params = []
+    query_params << { match: { original_key: { query: form[:filter], operator: 'and'} } } if form[:filter].present?
 
-    search {
-      query do
-        filtered do
-          if query_filter.present?
-            query do
-              match 'original_key' do
-                query query_filter
-                operator 'and'
-              end
-            end
-          end
-          filter do
-            bool do
-              must { ids values: key_ids }
-              case status
-              when 'approved'
-                must { term ready: 1 }
-              when 'pending'
-                must { term ready: 0 }
-              end
-            end
-          end
-        end
-      end
-      sort { by :original_key_exact, order: 'asc', ignore_unmapped: true } unless query_filter
-      from (current_page - 1) * PER_PAGE
-      size PER_PAGE
-    }.to_hash
+    filter_params = []
+    filter_params << { ids: { values: commit.keys.pluck(:id) } }
+    filter_params << { term: { ready: true } } if form[:status] == 'approved'
+    filter_params << { term: { ready: false } } if form[:status] == 'pending'
+
+    query = KeysIndex.query(query_params).filter(filter_params).offset((page - 1) * PER_PAGE).limit(PER_PAGE)
+    query = query.order(original_key_exact: { order: :asc }) unless form[:filter]
+
+    return query
   end
 
   def page
@@ -67,14 +45,7 @@ class CommitsSearchKeysFinder
   end
 
   def find_keys
-    keys_in_es = Elasticsearch::Model.search(search_query, Key).results
-
-    keys = Key.where(id: keys_in_es.map(&:id))
-              .where('commits_keys.commit_id': commit.id)
-              .includes(:translations, :commits_keys)
-              .order('commits_keys.created_at asc, original_key asc')
-
-    # Don't sort the keys since they are sorted in the line above
-    PaginatableObjects.new(keys, keys_in_es, page, PER_PAGE, false)
+    keys = search_query.load(scope: -> { includes(:translations, :commits_keys) })
+    return PaginatableObjects.new(keys, page, PER_PAGE)
   end
 end

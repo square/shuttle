@@ -208,7 +208,7 @@ RSpec.describe Key do
       FactoryBot.create :translation, key: key1, rfc5646_locale: 'fr', approved: true, source_copy: 'yes', copy: 'oui'
 
       # finding the fuzzy match for a translation requires elasticsearch, update the index since we just created a translation
-      regenerate_elastic_search_indexes
+      TranslationsIndex.reset!
 
       # this is a new key
       key2    = FactoryBot.create(:key, project: project, source_copy: 'yes')
@@ -409,6 +409,8 @@ RSpec.describe Key do
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: key
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: excluded, copy: nil
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'fr', key: excluded, copy: nil
+      key.reload
+      excluded.reload
 
       key.remove_excluded_pending_translations
       excluded.remove_excluded_pending_translations
@@ -428,6 +430,8 @@ RSpec.describe Key do
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: included, copy: nil
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: excluded, copy: nil
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'fr', key: excluded, copy: "hello!"
+      included.reload
+      excluded.reload
 
       included.remove_excluded_pending_translations
       excluded.remove_excluded_pending_translations
@@ -447,6 +451,8 @@ RSpec.describe Key do
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: key, copy: nil
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'de', key: excluded, copy: nil
       FactoryBot.create :translation, source_rfc5646_locale: 'en-US', rfc5646_locale: 'fr', key: excluded, copy: "hello!"
+      key.reload
+      excluded.reload
 
       key.remove_excluded_pending_translations
       excluded.remove_excluded_pending_translations
@@ -606,6 +612,23 @@ RSpec.describe Key do
       Key.batch_recalculate_ready!(asset)
       expect(@key1.reload).to be_ready
       expect(@key2.reload).to_not be_ready
+    end
+  end
+
+  describe "#elastic_search" do
+    let!(:project) { FactoryBot.create(:project, targeted_rfc5646_locales: {'fr' => true}, base_rfc5646_locale: 'en') }
+    let!(:key) { FactoryBot.create(:key, project: project) }
+
+    it "should appear in both ES and DB after creation" do
+      expect(Key.where(id: key.id).count).to eq(1)
+      expect(KeysIndex.query(term: { id: key.id }).count).to eq(1)
+    end
+
+    it "should disappear in both ES and DB after destroy" do
+      key.destroy
+
+      expect(Key.where(id: key.id).count).to eq(0)
+      expect(KeysIndex.query(term: { id: key.id }).count).to eq(0)
     end
   end
 end

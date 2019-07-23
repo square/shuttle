@@ -48,6 +48,14 @@ RSpec.describe LocaleProjectsShowPresenter do
     end
   end
 
+  describe "#selected_group" do
+    it "returns the selected Group if there is one" do
+      group = FactoryBot.create(:group, name: "hello", display_name: 'test display name')
+      presenter = LocaleProjectsShowPresenter.new(group.project, @user, { group: group.display_name })
+      expect(presenter.selected_group).to eql(group)
+    end
+  end
+
   describe "#selectable_sections" do
     before :each do
       @project = FactoryBot.create(:project)

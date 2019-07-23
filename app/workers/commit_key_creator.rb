@@ -55,6 +55,7 @@ class CommitKeyCreator
   def self.update_key_associations(keys, commit)
     keys.reject! { |key| skip_key?(key, commit) }
     keys.map(&:id).uniq.each { |k| commit.commits_keys.where(key_id: k).find_or_create! }
+    CommitsIndex.import!(commit.id)
   end
 
   include SidekiqLocking

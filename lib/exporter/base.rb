@@ -30,6 +30,8 @@ module Exporter
   class Base
     extend AbstractClass
 
+    attr_accessor :override_encoding
+
     # Prepares an exporter for use with a Commit.
     #
     # @param [Commit] commit A Commit whose Translations will be exported.
@@ -75,9 +77,9 @@ module Exporter
 
     # @return [String] The MIME type of this exporter's output format.
 
-    def self.mime_type
-      mime = request_mime.to_s
-      mime << "; charset=#{character_encoding.downcase}" unless character_encoding == 'UTF-8'
+    def mime_type
+      mime = self.class.request_mime.to_s
+      mime += "; charset=#{active_encoding.downcase}" unless active_encoding == 'UTF-8'
       mime
     end
 
@@ -89,11 +91,19 @@ module Exporter
     def self.ident() to_s.demodulize.underscore end
 
     # @return [String] The character encoding the output is in.
-    def self.character_encoding() 'UTF-8' end
+    def self.default_encoding() 'UTF-8' end
 
     # @return [true, false] Whether this exporter is capable of exporting
     #   multiple locales in a single file (default true).
     def self.multilingual?() true end
+
+    def active_encoding
+      if override_encoding&.upcase == 'UTF-8'
+        override_encoding
+      else
+        self.class.default_encoding
+      end
+    end
 
     # Locates an exporter subclass from its unique identifier.
     #
@@ -215,6 +225,7 @@ module Exporter
           # or an array index (previous if did run)
           this_object[last] = translation.copy
         rescue => err
+          Raven.capture_exception err, extra: { translation_id: translation.id }
           raise if Rails.env.test?
         end
       end

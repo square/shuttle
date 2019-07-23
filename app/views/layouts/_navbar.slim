@@ -28,6 +28,8 @@ nav.navbar.navbar-dark
         - if current_user.translator?
           = nav_link "Locale Associations", "locale_associations", locale_associations_url
           = nav_link "Glossary", "glossary", glossary_url
+        
+        = nav_link "Reports", "reports", reports_url
 
         li.nav-link.dropdown
           a.dropdown-toggle href="#" data-toggle="dropdown"
@@ -38,7 +40,7 @@ nav.navbar.navbar-dark
             = nav_dropdown_link "Project Translation Report", "stats", "project_translation_report", stats_project_translation_report_url
             = nav_dropdown_link "Incoming New Words Report", "stats", "incoming_new_words_report", stats_incoming_new_words_report_url
             = nav_dropdown_link "Translator Report", "stats", "translator_report", stats_translator_report_url
-            = nav_dropdown_link "Backlog Report", "stats", "backlog_report", stats_backlog_report_url
+            /= nav_dropdown_link "Backlog Report", "stats", "backlog_report", stats_backlog_report_url
             = nav_dropdown_link "Quality Report", "stats", "quality_report", stats_quality_report_url
 
         - if current_user.admin?
@@ -57,5 +59,7 @@ nav.navbar.navbar-dark
 
         - if current_user.monitor?
           li.nav-link.worker-status class=("clickable" if current_user.admin?)
-            = fa_icon "circle"
+            = fa_icon "check"
+            = fa_icon "refresh"
+            = fa_icon "cloud"
             | &nbsp;Workers

@@ -487,4 +487,21 @@ RSpec.describe Commit do
       end
     end
   end
+
+  describe "#elastic_search" do
+    let!(:project) { FactoryBot.create(:project, repository_url: "https://github.com/example/my-project.git") }
+    let!(:commit) { FactoryBot.create(:commit, revision: 'abc123', project: project) }
+
+    it "should appear in both ES and DB after creation" do
+      expect(Commit.where(id: commit.id).count).to eq(1)
+      expect(CommitsIndex.query(term: { id: commit.id }).count).to eq(1)
+    end
+
+    it "should disappear in both ES and DB after destroy" do
+      commit.destroy
+
+      expect(Commit.where(id: commit.id).count).to eq(0)
+      expect(CommitsIndex.query(term: { id: commit.id }).count).to eq(0)
+    end
+  end
 end

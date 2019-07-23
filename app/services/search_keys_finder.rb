@@ -23,44 +23,29 @@ class SearchKeysFinder
   end
 
   def search_query
-    query_filter = @params[:filter]
-    status       = @params[:status]
-    offset       = @params[:offset].to_i
-    project_id   = @params[:project_id]
-    limit        = @params.fetch(:limit, PER_PAGE)
-    not_elastic  = @params[:not_elastic_search]
-    hidden_keys  = @params[:hidden_in_search]
-
-    search {
-      query do
-        filtered do
-          if query_filter.present? && !not_elastic
-            query do
-              match 'original_key' do
-                query query_filter
-                operator 'and'
-              end
-            end
-          end
-          filter do
-            bool do
-              must { term original_key_exact: query_filter } if query_filter && not_elastic
-              must { term project_id: project_id }
-              must { term ready: status } unless status.blank?
-              hidden_keys ? must { term hidden_in_search: true } : must { term hidden_in_search: false }
-            end
-          end
-        end
+    query_params = []
+    text_to_search = @params[:filter]
+    if text_to_search.present?
+      if !@params[:not_elastic_search]
+        query_params << { match: { original_key: { query: text_to_search, operator: 'and' } } }
+      else
+        query_params << { term: { original_key_exact: text_to_search } }
       end
-      sort { by :original_key, order: 'asc' } unless query_filter.present?
-      from offset
-      size limit
-    }.to_hash
+    end
+
+    filter_params = []
+    filter_params << { term: { project_id: @params[:project_id].to_i } } if @params[:project_id].present?
+    filter_params << { term: { ready: @params[:status].to_b } } if @params[:status].present?
+    filter_params << { term: { hidden_in_search: @params[:hidden_in_search].to_b } }
+
+    query = KeysIndex.query(query_params).filter(filter_params)
+    query = query.order(original_key_exact: :asc) if @params[:filter].blank?
+    query = query.offset(@params[:offset].to_i).limit(@params.fetch(:limit, PER_PAGE))
+
+    return query
   end
 
   def find_keys
-    keys_in_es = Elasticsearch::Model.search(search_query, Key).results
-    keys = Key.where(id: keys_in_es.map(&:id)).includes(:translations, :project)
-    SortingHelper.order_by_elasticsearch_result_order(keys, keys_in_es)
+    search_query.load(scope: -> { includes(:translations, :project) }).objects
   end
 end
