@@ -5,8 +5,6 @@ ENV APP_HOME /app
 RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
-COPY square_primary_certificate_authority_g2.crt /usr/local/share/ca-certificates/
-COPY square_service_authority_g2.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 # RUN printf "deb http://archive.debian.org/debian/ jessie main\ndeb-src http://archive.debian.org/debian/ jessie main\ndeb http://security.debian.org jessie/updates main\ndeb-src http://security.debian.org jessie/updates main" > /etc/apt/sources.list
